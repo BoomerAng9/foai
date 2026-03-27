@@ -14,9 +14,11 @@ from fastapi import FastAPI, Query
 from pydantic import BaseModel
 
 import state_emitter as se
+from luc_middleware import luc_gate
 
 AGENT_NAME = "Edu_Ang"
 DEPT = "PMO-LAUNCH"
+LUC_ACCOUNT = os.getenv("LUC_ACCOUNT", "cti-default")
 
 MONEY_ENGINE_URL = os.getenv(
     "MONEY_ENGINE_URL",
@@ -142,7 +144,10 @@ async def record_enrollment(record: EnrollmentRecord):
     })
     await _heartbeat("active", f"recording_enrollment:{record.sku}")
 
-    await se.task_progress(AGENT_NAME, DEPT, task_id, 40, "Writing enrollment to Firestore")
+    await se.task_progress(AGENT_NAME, DEPT, task_id, 30, "LUC gate check: swarm_cycles")
+    await luc_gate(LUC_ACCOUNT, "swarm_cycles", 1, AGENT_NAME, task_id)
+
+    await se.task_progress(AGENT_NAME, DEPT, task_id, 50, "Writing enrollment to Firestore")
     from google.cloud import firestore
     db = firestore.Client(project="foai-aims")
     now = datetime.now(timezone.utc).isoformat()

@@ -14,9 +14,11 @@ from fastapi import FastAPI, Query
 from google.cloud import firestore
 
 import state_emitter as se
+from luc_middleware import luc_gate
 
 AGENT_NAME = "Biz_Ang"
 DEPT = "PMO-LAUNCH"
+LUC_ACCOUNT = os.getenv("LUC_ACCOUNT", "cti-default")
 
 MONEY_ENGINE_URL = os.getenv(
     "MONEY_ENGINE_URL",
@@ -75,6 +77,9 @@ async def growth_dashboard(tenant_id: str = Query(default=DEFAULT_TENANT)):
         "steps": ["query_enrollments", "query_open_seats", "query_campaigns", "aggregate"],
     })
     await _heartbeat("active", "building_dashboard")
+
+    await se.task_progress(AGENT_NAME, DEPT, task_id, 10, "LUC gate check: swarm_cycles")
+    await luc_gate(LUC_ACCOUNT, "swarm_cycles", 1, AGENT_NAME, task_id)
 
     db = firestore.Client(project="foai-aims")
 
@@ -174,6 +179,9 @@ async def pipeline_detail(
         "steps": ["query_firestore", "filter_institution", "format_results"],
     })
     await _heartbeat("active", "building_pipeline")
+
+    await se.task_progress(AGENT_NAME, DEPT, task_id, 20, "LUC gate check: swarm_cycles")
+    await luc_gate(LUC_ACCOUNT, "swarm_cycles", 1, AGENT_NAME, task_id)
 
     await se.task_progress(AGENT_NAME, DEPT, task_id, 40, "Querying Firestore openSeats")
     db = firestore.Client(project="foai-aims")
