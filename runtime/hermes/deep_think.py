@@ -1,20 +1,23 @@
-"""Deep Think evaluation engine — Gemini-powered agent performance analysis.
+"""Deep Think evaluation engine — OpenRouter-powered agent performance analysis.
 
 Runs weekly. Pulls agent status from Money Engine, evaluates performance
-via Gemini, stores results in Firestore, and posts improvement directives.
+via OpenRouter (Gemini 2.0 Flash default), stores results in Firestore,
+and posts improvement directives.
 """
 
+import json
+import os
 from datetime import datetime, timezone
 
-import google.generativeai as genai
 import httpx
 from google.cloud import firestore
+from openai import OpenAI
 
 from config import (
     DEFAULT_TENANT,
     GCP_PROJECT,
     MONEY_ENGINE_URL,
-    get_secret,
+    OPENROUTER_MODEL,
 )
 
 AGENTS_TO_EVALUATE = [
@@ -53,6 +56,18 @@ Respond in valid JSON with this structure:
 
 def _get_db() -> firestore.Client:
     return firestore.Client(project=GCP_PROJECT)
+
+
+def _get_openrouter_client() -> OpenAI:
+    """Create OpenAI client pointed at OpenRouter.
+
+    OPENROUTER_API_KEY is injected by Cloud Run --set-secrets.
+    """
+    api_key = os.environ["OPENROUTER_API_KEY"]
+    return OpenAI(
+        base_url="https://openrouter.ai/api/v1",
+        api_key=api_key,
+    )
 
 
 async def fetch_agent_statuses(tenant_id: str) -> list[dict]:
@@ -120,7 +135,7 @@ async def run_evaluation(tenant_id: str = DEFAULT_TENANT) -> dict:
     """Execute a full Deep Think evaluation cycle.
 
     1. Fetch agent statuses + business metrics
-    2. Send to Gemini for analysis
+    2. Send to OpenRouter (Gemini 2.0 Flash) for analysis
     3. Store evaluation in Firestore
     4. Post directives back to Money Engine /agent/status
     """
@@ -136,24 +151,24 @@ async def run_evaluation(tenant_id: str = DEFAULT_TENANT) -> dict:
         "evaluated_at": datetime.now(timezone.utc).isoformat(),
     }
 
-    # Configure Gemini
-    api_key = get_secret("gemini-api-key")
-    genai.configure(api_key=api_key)
-    model = genai.GenerativeModel("gemini-2.0-flash")
-
-    # Run Deep Think
+    # Call OpenRouter via OpenAI-compatible client
+    client = _get_openrouter_client()
     prompt = EVALUATION_PROMPT.format(agent_data=agent_data)
-    response = model.generate_content(prompt)
 
-    # Parse response — Gemini returns text, extract JSON
-    raw_text = response.text
+    completion = client.chat.completions.create(
+        model=OPENROUTER_MODEL,
+        messages=[{"role": "user", "content": prompt}],
+        response_format={"type": "json_object"},
+    )
+
+    raw_text = completion.choices[0].message.content
+
     # Strip markdown code fences if present
     if "```json" in raw_text:
         raw_text = raw_text.split("```json")[1].split("```")[0]
     elif "```" in raw_text:
         raw_text = raw_text.split("```")[1].split("```")[0]
 
-    import json
     evaluation = json.loads(raw_text.strip())
 
     # Store in Firestore: hermes/{tenant_id}/evaluations/{id}
@@ -168,13 +183,14 @@ async def run_evaluation(tenant_id: str = DEFAULT_TENANT) -> dict:
     eval_ref.set({
         "input_data": agent_data,
         "evaluation": evaluation,
+        "model": OPENROUTER_MODEL,
         "created_at": now,
     })
 
     # Post improvement directives back to Money Engine /agent/status
-    async with httpx.AsyncClient(timeout=10.0) as client:
+    async with httpx.AsyncClient(timeout=10.0) as http:
         for ev in evaluation.get("evaluations", []):
-            await client.post(
+            await http.post(
                 f"{MONEY_ENGINE_URL}/agent/status",
                 json={
                     "name": ev["agent_name"],

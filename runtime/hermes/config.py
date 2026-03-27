@@ -20,6 +20,8 @@ OPENCLAW_URL = os.getenv(
     "https://openclaw-service-939270059361.us-central1.run.app",
 )
 
+OPENROUTER_MODEL = os.getenv("OPENROUTER_MODEL", "google/gemini-2.5-flash")
+
 PORT = int(os.getenv("PORT", "8080"))
 
 _sm_client: secretmanager.SecretManagerServiceClient | None = None
