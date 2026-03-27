@@ -1,0 +1,6 @@
+.secrets/
+__pycache__/
+*.pyc
+audit_log.jsonl
+node_modules/
+.env
