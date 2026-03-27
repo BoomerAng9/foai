@@ -1,10 +1,14 @@
 """GuardAng (NemoClaw) middleware — all routes pass through tenant enforcement."""
 
 import httpx
-from fastapi import HTTPException, Request
+from fastapi import Request
 from starlette.middleware.base import BaseHTTPMiddleware
+from starlette.responses import JSONResponse
 
 from config import GUARDANG_URL
+
+# Routes that bypass GuardAng entirely
+WHITELIST = {"/health", "/docs", "/openapi.json", "/redoc"}
 
 
 class GuardAngMiddleware(BaseHTTPMiddleware):
@@ -12,10 +16,15 @@ class GuardAngMiddleware(BaseHTTPMiddleware):
 
     Sends tenant_id and route info to NemoClaw for policy enforcement.
     Fail-closed: if GuardAng is unreachable, the request is denied.
+    Whitelisted paths skip validation entirely.
     """
 
     async def dispatch(self, request: Request, call_next):
-        # Extract tenant_id from query, body, or default
+        # Skip GuardAng for whitelisted paths
+        if request.url.path in WHITELIST:
+            return await call_next(request)
+
+        # All security checks BEFORE call_next
         tenant_id = request.query_params.get("tenant_id", "cti")
 
         payload = {
@@ -30,16 +39,14 @@ class GuardAngMiddleware(BaseHTTPMiddleware):
                     f"{GUARDANG_URL}/validate", json=payload
                 )
             if resp.status_code != 200:
-                raise HTTPException(
+                return JSONResponse(
                     status_code=403,
-                    detail=f"GuardAng denied: {resp.text}",
+                    content={"detail": f"GuardAng denied: {resp.text}"},
                 )
         except httpx.ConnectError:
-            # Fail closed — if GuardAng is down, deny everything
-            raise HTTPException(
+            return JSONResponse(
                 status_code=503,
-                detail="GuardAng unreachable — fail closed",
+                content={"detail": "GuardAng unreachable — fail closed"},
             )
 
-        response = await call_next(request)
-        return response
+        return await call_next(request)
