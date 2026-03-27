@@ -1,17 +1,22 @@
 """Biz_Ang — SaaS client growth tracking Boomer_Ang.
 
-Reads enrollment and open seat data from Firestore to generate
-growth dashboards and pipeline metrics.
-Reports heartbeat via /agent/status on Money Engine.
+Reads enrollment and open seat data from Firestore for growth dashboards.
+Dept: PMO-LAUNCH (deployment/biz dev). Emits events to Live Look In State Engine.
 """
 
 import os
+import time
 from contextlib import asynccontextmanager
 from datetime import datetime, timezone
 
 import httpx
 from fastapi import FastAPI, Query
 from google.cloud import firestore
+
+import state_emitter as se
+
+AGENT_NAME = "Biz_Ang"
+DEPT = "PMO-LAUNCH"
 
 MONEY_ENGINE_URL = os.getenv(
     "MONEY_ENGINE_URL",
@@ -27,7 +32,7 @@ async def _heartbeat(status: str = "online", task: str = "idle"):
             await client.post(
                 f"{MONEY_ENGINE_URL}/agent/status",
                 json={
-                    "name": "Biz_Ang",
+                    "name": AGENT_NAME,
                     "status": status,
                     "current_task": task,
                     "tenant_id": DEFAULT_TENANT,
@@ -40,30 +45,41 @@ async def _heartbeat(status: str = "online", task: str = "idle"):
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     await _heartbeat("online", "startup_complete")
+    await se.agent_online(AGENT_NAME, DEPT, "SaaS client growth tracking & pipeline analytics")
     yield
+    await se.agent_break(AGENT_NAME, DEPT)
+    await se.close()
     await _heartbeat("offline", "shutting_down")
 
 
 app = FastAPI(
     title="Biz_Ang",
     description="SaaS client growth tracking — Boomer_Ang deployed by ACHEEVY.",
-    version="0.1.0",
+    version="0.2.0",
     lifespan=lifespan,
 )
 
 
 @app.get("/health")
 async def health():
-    return {"status": "ok", "service": "biz-ang", "agent": "Biz_Ang", "version": "0.1.0"}
+    return {"status": "ok", "service": "biz-ang", "agent": AGENT_NAME, "version": "0.2.0"}
 
 
 @app.get("/dashboard")
 async def growth_dashboard(tenant_id: str = Query(default=DEFAULT_TENANT)):
     """Aggregate enrollment revenue and open seat pipeline metrics."""
+    t0 = time.monotonic()
+    task_id = await se.task_assigned(AGENT_NAME, DEPT, "Build growth dashboard", "high")
+    await se.task_started(AGENT_NAME, DEPT, task_id, {
+        "plan": "Aggregate enrollments, open seats, and campaigns into growth dashboard",
+        "steps": ["query_enrollments", "query_open_seats", "query_campaigns", "aggregate"],
+    })
     await _heartbeat("active", "building_dashboard")
+
     db = firestore.Client(project="foai-aims")
 
     # Enrollment metrics
+    await se.task_progress(AGENT_NAME, DEPT, task_id, 20, "Querying enrollment data")
     enrollment_docs = (
         db.collection("enrollments")
         .document(tenant_id)
@@ -80,6 +96,7 @@ async def growth_dashboard(tenant_id: str = Query(default=DEFAULT_TENANT)):
         enrollment_count += 1
 
     # Open seat pipeline
+    await se.task_progress(AGENT_NAME, DEPT, task_id, 45, "Querying open seat pipeline")
     seat_docs = (
         db.collection("openSeats")
         .document(tenant_id)
@@ -99,6 +116,7 @@ async def growth_dashboard(tenant_id: str = Query(default=DEFAULT_TENANT)):
         institutions.add(data.get("institution", "unknown"))
 
     # Campaign performance
+    await se.task_progress(AGENT_NAME, DEPT, task_id, 70, "Querying campaign performance")
     campaign_docs = (
         db.collection("campaigns")
         .document(tenant_id)
@@ -113,6 +131,7 @@ async def growth_dashboard(tenant_id: str = Query(default=DEFAULT_TENANT)):
         total_clicks += data.get("clicks", 0)
         total_conversions += data.get("conversions", 0)
 
+    await se.task_progress(AGENT_NAME, DEPT, task_id, 90, "Aggregating dashboard metrics")
     now = datetime.now(timezone.utc).isoformat()
     dashboard = {
         "generated_at": now,
@@ -135,7 +154,10 @@ async def growth_dashboard(tenant_id: str = Query(default=DEFAULT_TENANT)):
         },
     }
 
+    duration = int((time.monotonic() - t0) * 1000)
+    await se.task_completed(AGENT_NAME, DEPT, task_id, 88, "B+", duration)
     await _heartbeat("active", "dashboard_generated")
+    await se.agent_break(AGENT_NAME, DEPT, task_id)
     return dashboard
 
 
@@ -145,9 +167,16 @@ async def pipeline_detail(
     institution: str | None = Query(default=None),
 ):
     """Detailed open seat pipeline by institution."""
+    t0 = time.monotonic()
+    task_id = await se.task_assigned(AGENT_NAME, DEPT, f"Pipeline detail: {institution or 'all'}", "medium")
+    await se.task_started(AGENT_NAME, DEPT, task_id, {
+        "plan": f"Query open seat pipeline detail for {institution or 'all institutions'}",
+        "steps": ["query_firestore", "filter_institution", "format_results"],
+    })
     await _heartbeat("active", "building_pipeline")
-    db = firestore.Client(project="foai-aims")
 
+    await se.task_progress(AGENT_NAME, DEPT, task_id, 40, "Querying Firestore openSeats")
+    db = firestore.Client(project="foai-aims")
     query = (
         db.collection("openSeats")
         .document(tenant_id)
@@ -164,6 +193,9 @@ async def pipeline_detail(
         data["id"] = doc.id
         results.append(data)
 
+    duration = int((time.monotonic() - t0) * 1000)
+    await se.task_completed(AGENT_NAME, DEPT, task_id, 90, "A", duration)
+    await se.agent_break(AGENT_NAME, DEPT, task_id)
     return {"tenant_id": tenant_id, "institution_filter": institution, "seats": results}
 
 

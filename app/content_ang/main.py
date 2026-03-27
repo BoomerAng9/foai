@@ -1,10 +1,11 @@
 """Content_Ang — foai.cloud SEO content generation Boomer_Ang.
 
 Generates SEO content via OpenRouter minimax/minimax-m2.7.
-Reports heartbeat via /agent/status on Money Engine.
+Dept: PMO-ECHO (engineering/content). Emits events to Live Look In State Engine.
 """
 
 import os
+import time
 from contextlib import asynccontextmanager
 from datetime import datetime, timezone
 
@@ -13,6 +14,11 @@ from fastapi import FastAPI, Query
 from google.cloud import firestore
 from openai import OpenAI
 from pydantic import BaseModel
+
+import state_emitter as se
+
+AGENT_NAME = "Content_Ang"
+DEPT = "PMO-ECHO"
 
 MONEY_ENGINE_URL = os.getenv(
     "MONEY_ENGINE_URL",
@@ -36,7 +42,7 @@ async def _heartbeat(status: str = "online", task: str = "idle"):
             await client.post(
                 f"{MONEY_ENGINE_URL}/agent/status",
                 json={
-                    "name": "Content_Ang",
+                    "name": AGENT_NAME,
                     "status": status,
                     "current_task": task,
                     "tenant_id": DEFAULT_TENANT,
@@ -49,14 +55,17 @@ async def _heartbeat(status: str = "online", task: str = "idle"):
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     await _heartbeat("online", "startup_complete")
+    await se.agent_online(AGENT_NAME, DEPT, "SEO content generation via OpenRouter LLM")
     yield
+    await se.agent_break(AGENT_NAME, DEPT)
+    await se.close()
     await _heartbeat("offline", "shutting_down")
 
 
 app = FastAPI(
     title="Content_Ang",
     description="foai.cloud SEO content generation — Boomer_Ang deployed by ACHEEVY.",
-    version="0.1.0",
+    version="0.2.0",
     lifespan=lifespan,
 )
 
@@ -79,14 +88,23 @@ class ContentResponse(BaseModel):
 
 @app.get("/health")
 async def health():
-    return {"status": "ok", "service": "content-ang", "agent": "Content_Ang", "version": "0.1.0"}
+    return {"status": "ok", "service": "content-ang", "agent": AGENT_NAME, "version": "0.2.0"}
 
 
 @app.post("/generate", response_model=ContentResponse, status_code=201)
 async def generate_content(req: ContentRequest):
     """Generate SEO content via OpenRouter."""
+    t0 = time.monotonic()
+    task_id = await se.task_assigned(AGENT_NAME, DEPT, f"Generate {req.content_type}: {req.topic}", "high")
+    await se.task_started(AGENT_NAME, DEPT, task_id, {
+        "plan": f"Generate SEO {req.content_type} about '{req.topic}' for foai.cloud",
+        "steps": ["build_prompt", "call_openrouter", "store_content", "confirm"],
+        "model": OPENROUTER_MODEL,
+        "keywords": req.keywords,
+    })
     await _heartbeat("active", f"generating:{req.content_type}:{req.topic}")
 
+    await se.task_progress(AGENT_NAME, DEPT, task_id, 20, "Building SEO prompt with keywords")
     prompt = (
         f"Write a high-quality SEO {req.content_type} for foai.cloud about: {req.topic}\n"
         f"Target keywords: {', '.join(req.keywords)}\n"
@@ -97,6 +115,7 @@ async def generate_content(req: ContentRequest):
         "- Call to action referencing ai-managed-solutions.cloud\n"
     )
 
+    await se.task_progress(AGENT_NAME, DEPT, task_id, 40, f"Calling OpenRouter ({OPENROUTER_MODEL})")
     llm = _get_llm()
     completion = llm.chat.completions.create(
         model=OPENROUTER_MODEL,
@@ -104,6 +123,7 @@ async def generate_content(req: ContentRequest):
     )
     content = completion.choices[0].message.content
 
+    await se.task_progress(AGENT_NAME, DEPT, task_id, 80, "Storing content in Firestore")
     db = firestore.Client(project="foai-aims")
     now = datetime.now(timezone.utc).isoformat()
     doc_ref = (
@@ -121,7 +141,10 @@ async def generate_content(req: ContentRequest):
         "created_at": now,
     })
 
+    duration = int((time.monotonic() - t0) * 1000)
+    await se.task_completed(AGENT_NAME, DEPT, task_id, 92, "A", duration)
     await _heartbeat("active", "content_generated")
+    await se.agent_break(AGENT_NAME, DEPT, task_id)
     return ContentResponse(
         id=doc_ref.id,
         topic=req.topic,
@@ -138,6 +161,14 @@ async def list_content(
     limit: int = Query(default=20, le=100),
 ):
     """List generated content from Firestore."""
+    t0 = time.monotonic()
+    task_id = await se.task_assigned(AGENT_NAME, DEPT, "List generated content", "low")
+    await se.task_started(AGENT_NAME, DEPT, task_id, {
+        "plan": "Query Firestore for generated content items",
+        "steps": ["query_firestore", "format_results"],
+    })
+
+    await se.task_progress(AGENT_NAME, DEPT, task_id, 50, "Querying Firestore content collection")
     db = firestore.Client(project="foai-aims")
     docs = (
         db.collection("content")
@@ -152,6 +183,10 @@ async def list_content(
         data = doc.to_dict()
         data["id"] = doc.id
         results.append(data)
+
+    duration = int((time.monotonic() - t0) * 1000)
+    await se.task_completed(AGENT_NAME, DEPT, task_id, 90, "A", duration)
+    await se.agent_break(AGENT_NAME, DEPT, task_id)
     return results
 
 
