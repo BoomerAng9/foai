@@ -1,0 +1,15 @@
+[submodule "docs/grammar"]
+	path = docs/grammar
+	url = https://github.com/BoomerAng9/GRAMMAR
+[submodule "runtime/hermes/docs/ch-docs"]
+	path = runtime/hermes/docs/ch-docs
+	url = https://github.com/BoomerAng9/CH-Docs
+[submodule "aims-tools/luc-source"]
+	path = aims-tools/luc-source
+	url = https://github.com/BoomerAng9/LUC-Locale-Universal-Calculator
+[submodule "app/locale"]
+	path = app/locale
+	url = https://github.com/BoomerAng9/Locale-by-ACHIEVEMOR-2
+[submodule "aims-tools/aims-core"]
+	path = aims-tools/aims-core
+	url = https://github.com/BoomerAng9/AIMS
