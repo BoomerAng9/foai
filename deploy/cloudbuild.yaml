@@ -1,0 +1,31 @@
+steps:
+  - name: "gcr.io/cloud-builders/docker"
+    args:
+      - "build"
+      - "-t"
+      - "us-central1-docker.pkg.dev/foai-aims/money-engine/api:$COMMIT_SHA"
+      - "./api"
+
+  - name: "gcr.io/cloud-builders/docker"
+    args:
+      - "push"
+      - "us-central1-docker.pkg.dev/foai-aims/money-engine/api:$COMMIT_SHA"
+
+  - name: "gcr.io/google.com/cloudsdktool/cloud-sdk"
+    entrypoint: gcloud
+    args:
+      - "run"
+      - "deploy"
+      - "money-engine"
+      - "--image"
+      - "us-central1-docker.pkg.dev/foai-aims/money-engine/api:$COMMIT_SHA"
+      - "--region"
+      - "us-central1"
+      - "--platform"
+      - "managed"
+      - "--allow-unauthenticated"
+      - "--set-env-vars"
+      - "GCP_PROJECT=foai-aims,DEFAULT_TENANT=cti,GUARDANG_URL=https://nemoclaw-service-939270059361.us-central1.run.app"
+
+images:
+  - "us-central1-docker.pkg.dev/foai-aims/money-engine/api:$COMMIT_SHA"
