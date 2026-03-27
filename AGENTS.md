@@ -51,7 +51,7 @@ Deployed by ACHEEVY only. Report directly to ACHEEVY — never to Chicken Hawk.
 |--------|----------|--------|----------|
 | **RuntimeAng** | OpenClaw | LIVE | `https://openclaw-service-939270059361.us-central1.run.app` |
 | **GuardAng** | NemoClaw | LIVE | `https://nemoclaw-service-939270059361.us-central1.run.app` |
-| **LearnAng** | Hermes | PENDING | — |
+| **LearnAng** | Hermes | LIVE | `https://hermes-agent-939270059361.us-central1.run.app` |
 
 ## LilHawks — Task Workers
 

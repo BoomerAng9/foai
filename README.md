@@ -8,14 +8,14 @@ AI-Managed Solutions for businesses. Powered by autonomous agent hierarchies, en
 |---------|--------|----------|
 | **OpenClaw** | RuntimeAng | https://openclaw-service-939270059361.us-central1.run.app |
 | **NemoClaw** | GuardAng | https://nemoclaw-service-939270059361.us-central1.run.app |
+| **Money Engine** | API | https://money-engine-api-939270059361.us-central1.run.app |
+| **Hermes** | LearnAng | https://hermes-agent-939270059361.us-central1.run.app |
 
 ## Pending
 
 | Service | Engine | Status |
 |---------|--------|--------|
-| **Hermes** | LearnAng | Pending deployment |
 | **Boomer_Angs** | Edu, Scout, Content, Ops, Biz | Awaiting ACHEEVY deployment |
-| **Money Engine** | Revenue tracking & reporting | Awaiting Phase 1 |
 
 ## Core Hubs
 
