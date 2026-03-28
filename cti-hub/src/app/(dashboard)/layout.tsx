@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import {
   Activity,
+  FolderOpen,
   LayoutDashboard,
   Users,
   Shield,
@@ -200,11 +201,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   }, [user, organizations, loading, pathname]);
 
   const navItems = [
-    { name: 'Console', href: '/chat/librechat', icon: MessageSquare },
-    { name: 'Live', href: '/live', icon: Activity },
+    { name: 'Chat w/ ACHEEVY', href: '/chat/librechat', icon: MessageSquare },
+    { name: 'Operations Floor', href: '/live', icon: Activity },
+    { name: 'My Projects', href: '/projects', icon: FolderOpen },
     { name: 'Enrollments', href: '/enrollments', icon: TrendingUp },
     { name: 'Open Seats', href: '/open-seats', icon: Search },
-    { name: 'Team', href: '/team', icon: Shield },
+    { name: 'My Squad', href: '/team', icon: Shield },
     { name: 'Account', href: '/settings', icon: Users },
     { name: 'Billing', href: '/pricing', icon: LayoutDashboard },
   ];

@@ -14,6 +14,7 @@
 
 import { recallAll } from '@/lib/memory/recall';
 import { addMessage, memorizeConversationTurn } from '@/lib/memory/store';
+import { checkMIMGate } from './mim-gate';
 
 const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY || process.env.OPENROUTER_KEY;
 const LUC_URL = process.env.LUC_URL || 'http://localhost:8081';
@@ -90,6 +91,22 @@ export async function acheevyRespond(
   cost_estimate: number;
   memories_recalled: number;
 }> {
+  // 0. MIM governance gate — check before anything else
+  const mim = checkMIMGate(userMessage);
+  if (!mim.allowed) {
+    const blockedResponse = `${mim.reason}\n\n${mim.redirect || 'Let me know how I can help differently.'}`;
+    await addMessage(conversationId, userId, 'user', userMessage);
+    await addMessage(conversationId, userId, 'acheevy', blockedResponse, 'ACHEEVY', { mim_blocked: true, policy: mim.policy });
+    return {
+      content: blockedResponse,
+      model: 'mim-gate',
+      tokens_in: 0,
+      tokens_out: 0,
+      cost_estimate: 0,
+      memories_recalled: 0,
+    };
+  }
+
   // 1. Recall relevant memory
   let memoryContext = 'No prior memory available.';
   let memoriesRecalled = 0;
