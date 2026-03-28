@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@/lib/insforge';
 import { getAdminAuth } from '@/lib/firebase-admin';
+import { isAllowedEmail } from '@/lib/allowlist';
 
 /**
  * POST /api/auth/provision
@@ -19,6 +20,11 @@ export async function POST(request: NextRequest) {
     const { firebaseUid, displayName, email } = await request.json();
     if (!firebaseUid) {
       return NextResponse.json({ error: 'firebaseUid required' }, { status: 400 });
+    }
+
+    // Server-side allowlist enforcement
+    if (!isAllowedEmail(email)) {
+      return NextResponse.json({ error: 'Unauthorized email' }, { status: 403 });
     }
 
     // Verify the caller is actually this user via the session cookie

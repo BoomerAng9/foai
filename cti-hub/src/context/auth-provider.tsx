@@ -8,8 +8,9 @@ import {
   useState,
   type ReactNode,
 } from 'react';
-import { onAuthStateChanged, type User } from 'firebase/auth';
+import { onAuthStateChanged, signOut as firebaseSignOut, type User } from 'firebase/auth';
 import { getFirebaseAuth } from '@/lib/firebase';
+import { isAllowedEmail } from '@/lib/allowlist';
 import {
   authService,
   paywallService,
@@ -29,6 +30,7 @@ export interface AuthContextType {
   organization: Organization | null;
   organizations: Organization[];
   loading: boolean;
+  denied: boolean;  // true if user logged in but not on allowlist
 
   signUp: (email: string, password: string, displayName?: string) => Promise<void>;
   signIn: (email: string, password: string) => Promise<void>;
@@ -77,6 +79,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [organizations, setOrganizations] = useState<Organization[]>([]);
   const [organization, setOrganization] = useState<Organization | null>(null);
   const [loading, setLoading] = useState(true);
+  const [denied, setDenied] = useState(false);
 
   const provisionWorkspace = useCallback(async (userId: string, displayName: string) => {
     const workspaceName = `${displayName || 'My'} Workspace`;
@@ -121,6 +124,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setLoading(true);
       try {
         if (firebaseUser) {
+          // Allowlist check — deny unauthorized emails immediately
+          if (!isAllowedEmail(firebaseUser.email)) {
+            setDenied(true);
+            setUser(null);
+            await firebaseSignOut(getFirebaseAuth());
+            await fetch('/api/auth/session', { method: 'DELETE' });
+            setLoading(false);
+            return;
+          }
+
+          setDenied(false);
           setUser(firebaseUser);
 
           // Auth loop: persist session cookie + provision in Neon
@@ -210,7 +224,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     <AuthContext.Provider
       value={{
         user, profile, subscription, tierLimits,
-        organization, organizations, loading,
+        organization, organizations, loading, denied,
         signUp, signIn, signInWithOAuth, signOut,
         createOrg, switchOrg,
         canAccess, isFeatureGated, trackUsage,

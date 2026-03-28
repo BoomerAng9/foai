@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef } from 'react';
+import { useAuth } from '@/hooks/useAuth';
 import {
   Send,
   Loader2,
@@ -39,6 +40,26 @@ type PipelineStep = 'idle' | 'scraping' | 'cleaning' | 'exporting' | 'done';
 // ─── Main App ───────────────────────────────────────────────
 
 export default function CTIHub() {
+  const { user, loading } = useAuth();
+
+  // Show loading spinner while auth resolves
+  if (loading) {
+    return (
+      <div className="flex h-screen items-center justify-center bg-[#0a0a0f]">
+        <div className="w-8 h-8 border-4 border-[#00A3FF] border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  // Middleware handles redirect, but this is a client-side fallback
+  if (!user) {
+    return (
+      <div className="flex h-screen items-center justify-center bg-[#0a0a0f]">
+        <p className="text-slate-500 text-sm">Redirecting to login...</p>
+      </div>
+    );
+  }
+
   // Scrape state
   const [urls, setUrls] = useState<string[]>(['']);
   const [engine, setEngine] = useState<'firecrawl' | 'apify' | 'both'>('firecrawl');
