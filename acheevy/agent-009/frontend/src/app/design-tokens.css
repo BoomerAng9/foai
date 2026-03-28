@@ -1,0 +1,500 @@
+/* ============================================================
+   AGENTIC — Design System Tokens
+   ============================================================
+   Three-layer token architecture:
+     Layer 1  →  Primitives (raw palette, scale values)
+     Layer 2  →  Semantic    (meaning-based mappings)
+     Layer 3  →  Component   (component-specific overrides)
+
+   Based on:
+     - AGENTIC UI Design System (Figma source of truth)
+     - IBM Plex Sans typography
+     - Departure Mono labels
+     - Neutral palette with purple accents
+   ============================================================ */
+
+/* ─── LAYER 1 · PRIMITIVE TOKENS ─────────────────────────── */
+
+:root {
+    /* ── Brand Palette ─────────────────────────── */
+    --acheevy-gold-50:  #fdf8e8;
+    --acheevy-gold-100: #f9efc8;
+    --acheevy-gold-200: #f0d784;
+    --acheevy-gold-300: #e5c44e;
+    --acheevy-gold-400: #d4af37;
+    --acheevy-gold-500: #c9a42e;
+    --acheevy-gold-600: #b7912a;
+    --acheevy-gold-700: #9a7623;
+    --acheevy-gold-800: #7d5e1c;
+    --acheevy-gold-900: #5a4315;
+
+    --acheevy-amber-400: #d4881f;
+    --acheevy-amber-500: #c97c1a;
+    --acheevy-amber-600: #b56e15;
+    --acheevy-amber-700: #934f10;
+
+    --acheevy-flame-400: #ff6b35;
+    --acheevy-flame-500: #e85d2a;
+
+    --acheevy-emerald-400: #39ff14;
+    --acheevy-emerald-500: #2ee00f;
+    --acheevy-emerald-600: #22b00b;
+
+    /* ── Neutral Palette (warm-tinted darks) ──── */
+    --neutral-0:   #ffffff;
+    --neutral-50:  #fafaf9;
+    --neutral-100: #f5f5f4;
+    --neutral-200: #e7e5e4;
+    --neutral-300: #d6d3d1;
+    --neutral-400: #a8a29e;
+    --neutral-500: #78716c;
+    --neutral-600: #57534e;
+    --neutral-700: #44403c;
+    --neutral-800: #292524;
+    --neutral-850: #1f1e1c;
+    --neutral-900: #1c1917;
+    --neutral-950: #0c0a09;
+
+    /* ── Surface Palette (light theme first per AGENTIC) ────── */
+    --surface-base:    #ffffff;
+    --surface-raised:  #ffffff;
+    --surface-overlay:  #f7f7f7;
+    --surface-elevated: #f5f5f5;
+    --surface-glass:    rgba(0, 0, 0, 0.02);
+    --surface-glass-hover: rgba(0, 0, 0, 0.04);
+
+    /* ── Status Colors ────────────────────────── */
+    --status-success:   var(--agentic-success);
+    --status-warning:   var(--agentic-warning);
+    --status-error:     var(--agentic-error);
+    --status-info:      var(--agentic-purple-200);
+
+    /* ── Agent State Colors ───────────────────── */
+    --agent-idle:       var(--neutral-500);
+    --agent-thinking:   var(--agentic-text-secondary);
+    --agent-executing:  var(--agentic-success);
+    --agent-streaming:  var(--agentic-text-primary);
+    --agent-complete:   var(--status-success);
+    --agent-error:      var(--status-error);
+
+    /* ── Typography Scale (Major Third 1.250) ── */
+    --font-size-2xs:  0.625rem;  /* 10px */
+    --font-size-xs:   0.75rem;   /* 12px */
+    --font-size-sm:   0.875rem;  /* 14px */
+    --font-size-base: 1rem;      /* 16px */
+    --font-size-lg:   1.125rem;  /* 18px */
+    --font-size-xl:   1.25rem;   /* 20px */
+    --font-size-2xl:  1.5rem;    /* 24px */
+    --font-size-3xl:  1.875rem;  /* 30px */
+    --font-size-4xl:  2.25rem;   /* 36px */
+
+    --line-height-tight:  1.25;
+    --line-height-normal: 1.5;
+    --line-height-relaxed: 1.75;
+
+    --font-weight-normal:   400;
+    --font-weight-medium:   500;
+    --font-weight-semibold: 600;
+    --font-weight-bold:     700;
+
+    --letter-spacing-tight: -0.025em;
+    --letter-spacing-normal: 0em;
+    --letter-spacing-wide:   0.025em;
+    --letter-spacing-wider:  0.05em;
+
+    /* ── Spacing Scale (4px base) ──────────────── */
+    --space-0:   0;
+    --space-px:  1px;
+    --space-0_5: 0.125rem;  /* 2px  */
+    --space-1:   0.25rem;   /* 4px  */
+    --space-1_5: 0.375rem;  /* 6px  */
+    --space-2:   0.5rem;    /* 8px  */
+    --space-3:   0.75rem;   /* 12px */
+    --space-4:   1rem;       /* 16px */
+    --space-5:   1.25rem;   /* 20px */
+    --space-6:   1.5rem;    /* 24px */
+    --space-8:   2rem;       /* 32px */
+    --space-10:  2.5rem;    /* 40px */
+    --space-12:  3rem;       /* 48px */
+    --space-16:  4rem;       /* 64px */
+    --space-20:  5rem;       /* 80px */
+    --space-24:  6rem;       /* 96px */
+
+    /* ── Border Radii ──────────────────────────── */
+    --radius-none: 0;
+    --radius-sm:   0.375rem;  /* 6px  */
+    --radius-md:   0.5rem;    /* 8px  */
+    --radius-lg:   0.75rem;   /* 12px */
+    --radius-xl:   1rem;      /* 16px */
+    --radius-2xl:  1.25rem;   /* 20px */
+    --radius-3xl:  1.5rem;    /* 24px */
+    --radius-full: 9999px;
+
+    /* ── Shadows / Elevation ───────────────────── */
+    --shadow-xs:   0 1px 2px rgba(0, 0, 0, 0.05);
+    --shadow-sm:   0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
+    --shadow-md:   0 4px 6px rgba(0, 0, 0, 0.1), 0 2px 4px rgba(0, 0, 0, 0.06);
+    --shadow-lg:   0 10px 15px rgba(0, 0, 0, 0.1), 0 4px 6px rgba(0, 0, 0, 0.05);
+    --shadow-xl:   0 20px 25px rgba(0, 0, 0, 0.1), 0 8px 10px rgba(0, 0, 0, 0.04);
+    --shadow-2xl:  0 25px 50px rgba(0, 0, 0, 0.25);
+    --shadow-inner: inset 0 2px 4px rgba(0, 0, 0, 0.06);
+
+    /* Brand glow shadows */
+    --shadow-glow-gold:    0 0 20px rgba(212, 175, 55, 0.15),  0 0 60px rgba(212, 175, 55, 0.05);
+    --shadow-glow-gold-lg: 0 0 40px rgba(212, 175, 55, 0.2),   0 0 100px rgba(212, 175, 55, 0.08);
+    --shadow-glow-amber:   0 0 20px rgba(212, 136, 31, 0.15),  0 0 60px rgba(212, 136, 31, 0.05);
+    --shadow-glow-emerald: 0 0 20px rgba(57, 255, 20, 0.12),   0 0 60px rgba(57, 255, 20, 0.04);
+    --shadow-glow-error:   0 0 20px rgba(239, 68, 68, 0.15),   0 0 60px rgba(239, 68, 68, 0.05);
+
+    /* ── Transitions ───────────────────────────── */
+    --duration-instant:  0ms;
+    --duration-fast:     100ms;
+    --duration-normal:   200ms;
+    --duration-moderate: 300ms;
+    --duration-slow:     500ms;
+    --duration-slower:   700ms;
+
+    --ease-default:  cubic-bezier(0.4, 0, 0.2, 1);
+    --ease-in:       cubic-bezier(0.4, 0, 1, 1);
+    --ease-out:      cubic-bezier(0, 0, 0.2, 1);
+    --ease-in-out:   cubic-bezier(0.4, 0, 0.2, 1);
+    --ease-bounce:   cubic-bezier(0.34, 1.56, 0.64, 1);
+    --ease-spring:   cubic-bezier(0.175, 0.885, 0.32, 1.275);
+
+    /* ── Z-Index Scale ─────────────────────────── */
+    --z-base:      0;
+    --z-dropdown:  10;
+    --z-sticky:    20;
+    --z-fixed:     30;
+    --z-overlay:   40;
+    --z-modal:     50;
+    --z-popover:   60;
+    --z-toast:     70;
+    --z-tooltip:   80;
+    --z-command:   90;
+
+    /* ── Blur / Backdrop ───────────────────────── */
+    --blur-sm:  4px;
+    --blur-md:  8px;
+    --blur-lg:  16px;
+    --blur-xl:  24px;
+    --blur-2xl: 40px;
+}
+
+
+/* ─── LAYER 2 · SEMANTIC TOKENS ──────────────────────────── */
+
+/* Dark theme (legacy compatibility) */
+:root,
+.dark {
+    /* ── Text ─────────────────────────────────── */
+    --text-primary:    var(--agentic-text-primary);
+    --text-secondary:  var(--agentic-text-secondary);
+    --text-tertiary:   var(--agentic-text-tertiary);
+    --text-disabled:   var(--neutral-400);
+    --text-inverse:    var(--neutral-0);
+    --text-brand:      var(--agentic-text-primary);
+    --text-link:       var(--agentic-text-secondary);
+    --text-on-brand:   var(--neutral-0);
+
+    /* ── Backgrounds ──────────────────────────── */
+    --bg-base:         var(--surface-base);
+    --bg-raised:       var(--surface-raised);
+    --bg-overlay:      var(--surface-overlay);
+    --bg-elevated:     var(--surface-elevated);
+    --bg-glass:        var(--surface-glass);
+    --bg-glass-hover:  var(--surface-glass-hover);
+    --bg-brand:        var(--agentic-purple-200);
+    --bg-brand-hover:  var(--agentic-purple-200);
+    --bg-brand-subtle: rgba(226, 221, 253, 0.08);
+    --bg-brand-muted:  rgba(226, 221, 253, 0.12);
+
+    /* ── Borders ──────────────────────────────── */
+    --border-default:   var(--agentic-border);
+    --border-subtle:    #f0f0f0;
+    --border-strong:    #d0d0d0;
+    --border-brand:     var(--agentic-border);
+    --border-brand-strong: #d0d0d0;
+    --border-focus:     var(--agentic-text-primary);
+    --border-error:     var(--status-error);
+
+    /* ── Interactive States ────────────────────── */
+    --interactive-hover:  rgba(0, 0, 0, 0.04);
+    --interactive-active: rgba(0, 0, 0, 0.08);
+    --interactive-focus-ring: 0 0 0 2px var(--surface-base), 0 0 0 4px var(--agentic-text-primary);
+
+    /* ── Scrollbar ────────────────────────────── */
+    --scrollbar-track: transparent;
+    --scrollbar-thumb: rgba(0, 0, 0, 0.12);
+    --scrollbar-thumb-hover: rgba(0, 0, 0, 0.25);
+}
+
+/* Light theme (AGENTIC primary per Figma) */
+.light {
+    --text-primary:    var(--agentic-text-primary);
+    --text-secondary:  var(--agentic-text-secondary);
+    --text-tertiary:   var(--agentic-text-tertiary);
+    --text-disabled:   var(--neutral-400);
+    --text-inverse:    var(--neutral-0);
+    --text-brand:      var(--agentic-purple-800);
+    --text-link:       var(--agentic-text-secondary);
+    --text-on-brand:   var(--neutral-0);
+
+    --bg-base:         var(--agentic-white);
+    --bg-raised:       var(--agentic-white);
+    --bg-overlay:      var(--agentic-subtle);
+    --bg-elevated:     var(--agentic-subtle);
+    --bg-glass:        rgba(0, 0, 0, 0.02);
+    --bg-glass-hover:  rgba(0, 0, 0, 0.04);
+    --bg-brand:        var(--agentic-purple-200);
+    --bg-brand-hover:  rgba(226, 221, 253, 0.8);
+    --bg-brand-subtle: rgba(226, 221, 253, 0.08);
+    --bg-brand-muted:  rgba(226, 221, 253, 0.12);
+
+    --border-default:   var(--agentic-border);
+    --border-subtle:    #f0f0f0;
+    --border-strong:    #d0d0d0;
+    --border-brand:     var(--agentic-border);
+    --border-brand-strong: #d0d0d0;
+    --border-focus:     var(--agentic-text-primary);
+    --border-error:     var(--status-error);
+
+    --interactive-hover:  rgba(0, 0, 0, 0.04);
+    --interactive-active: rgba(0, 0, 0, 0.08);
+    --interactive-focus-ring: 0 0 0 2px var(--agentic-white), 0 0 0 4px var(--agentic-text-primary);
+
+    --scrollbar-track: transparent;
+    --scrollbar-thumb: rgba(0, 0, 0, 0.12);
+    --scrollbar-thumb-hover: rgba(0, 0, 0, 0.25);
+}
+
+
+/* ─── LAYER 3 · COMPONENT TOKENS ────────────────────────── */
+
+:root,
+.dark {
+    /* ── Chat Bubble ──────────────────────────── */
+    --chat-user-bg:        var(--agentic-subtle);
+    --chat-user-border:    var(--agentic-border);
+    --chat-agent-bg:       transparent;
+    --chat-agent-border:   transparent;
+    --chat-system-bg:      rgba(226, 221, 253, 0.08);
+    --chat-system-border:  var(--agentic-border);
+
+    /* ── Input Field ──────────────────────────── */
+    --input-bg:            var(--agentic-white);
+    --input-border:        var(--agentic-border);
+    --input-border-focus:  var(--agentic-text-primary);
+    --input-placeholder:   var(--agentic-text-tertiary);
+    --input-ring:          rgba(25, 25, 25, 0.08);
+
+    /* ── Sidebar ──────────────────────────────── */
+    --sidebar-bg:          var(--agentic-white);
+    --sidebar-border:      var(--agentic-border);
+    --sidebar-item-hover:  var(--agentic-subtle);
+    --sidebar-item-active: rgba(226, 221, 253, 0.15);
+    --sidebar-item-active-border: var(--agentic-text-primary);
+
+    /* ── Tool Execution Card ──────────────────── */
+    --tool-bg:             rgba(0, 0, 0, 0.02);
+    --tool-border:         var(--agentic-border);
+    --tool-header-bg:      var(--agentic-subtle);
+    --tool-active-border:  var(--agentic-text-primary);
+    --tool-complete-border: var(--status-success);
+    --tool-error-border:   var(--status-error);
+
+    /* ── Code Block ───────────────────────────── */
+    --code-bg:             var(--agentic-subtle);
+    --code-border:         var(--agentic-border);
+    --code-header-bg:      rgba(0, 0, 0, 0.04);
+    --code-line-highlight: rgba(25, 25, 25, 0.04);
+
+    /* ── Badge / Status ───────────────────────── */
+    --badge-default-bg:    var(--agentic-subtle);
+    --badge-default-text:  var(--agentic-text-secondary);
+    --badge-brand-bg:      rgba(226, 221, 253, 0.15);
+    --badge-brand-text:    var(--agentic-purple-800);
+    --badge-success-bg:    rgba(34, 176, 11, 0.1);
+    --badge-success-text:  var(--status-success);
+    --badge-warning-bg:    rgba(255, 136, 0, 0.1);
+    --badge-warning-text:  var(--status-warning);
+    --badge-error-bg:      rgba(255, 68, 68, 0.1);
+    --badge-error-text:    var(--status-error);
+
+    /* ── Thinking / Streaming ─────────────────── */
+    --thinking-dot-color:  var(--agentic-text-secondary);
+    --thinking-glow:       0 0 8px rgba(25, 25, 25, 0.1);
+    --streaming-cursor:    var(--agentic-text-primary);
+    --streaming-highlight: rgba(25, 25, 25, 0.04);
+
+    /* ── Sandbox / Terminal ────────────────────── */
+    --sandbox-bg:          var(--agentic-white);
+    --sandbox-border:      var(--agentic-border);
+    --sandbox-header-bg:   var(--agentic-subtle);
+    --sandbox-status-dot:  var(--agent-idle);
+
+    /* ── Modal / Dialog ───────────────────────── */
+    --dialog-bg:           var(--agentic-subtle);
+    --dialog-border:       var(--agentic-border);
+    --dialog-backdrop:     rgba(0, 0, 0, 0.4);
+    --dialog-shadow:       0 25px 50px rgba(0, 0, 0, 0.15);
+
+    /* ── Tooltip ──────────────────────────────── */
+    --tooltip-bg:          var(--agentic-text-primary);
+    --tooltip-border:      var(--agentic-border);
+    --tooltip-text:        var(--agentic-white);
+
+    /* ── Progress ─────────────────────────────── */
+    --progress-track:      var(--agentic-border);
+    --progress-fill:       var(--agentic-text-primary);
+    --progress-fill-active: var(--agentic-success);
+}
+
+.light {
+    --chat-user-bg:        var(--agentic-subtle);
+    --chat-user-border:    var(--agentic-border);
+    --chat-agent-bg:       transparent;
+    --chat-agent-border:   transparent;
+    --chat-system-bg:      rgba(226, 221, 253, 0.08);
+    --chat-system-border:  var(--agentic-border);
+
+    --input-bg:            var(--agentic-white);
+    --input-border:        var(--agentic-border);
+    --input-border-focus:  var(--agentic-text-primary);
+    --input-placeholder:   var(--agentic-text-tertiary);
+    --input-ring:          rgba(25, 25, 25, 0.08);
+
+    --sidebar-bg:          var(--agentic-white);
+    --sidebar-border:      var(--agentic-border);
+
+    --tool-bg:             var(--agentic-subtle);
+    --tool-border:         var(--agentic-border);
+    --tool-header-bg:      rgba(0, 0, 0, 0.04);
+    --tool-active-border:  var(--agentic-text-primary);
+
+    --code-bg:             var(--agentic-subtle);
+    --code-border:         var(--agentic-border);
+    --code-header-bg:      rgba(0, 0, 0, 0.04);
+    --code-line-highlight: rgba(25, 25, 25, 0.04);
+
+    --dialog-bg:           var(--agentic-white);
+    --dialog-border:       var(--agentic-border);
+    --dialog-backdrop:     rgba(0, 0, 0, 0.4);
+}
+
+
+/* ─── AGENTIC ANIMATIONS ──────────────────────────────────── */
+
+/* Pulse ring for active agent states */
+@keyframes agent-pulse {
+    0%, 100% { opacity: 0.6; transform: scale(1); }
+    50% { opacity: 0; transform: scale(1.8); }
+}
+
+/* Thinking shimmer */
+@keyframes agent-shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+}
+
+/* Streaming cursor blink */
+@keyframes cursor-blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+}
+
+/* Tool execution spinner */
+@keyframes tool-spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Slide up entrance */
+@keyframes slide-up-fade {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Scale in entrance */
+@keyframes scale-in-fade {
+    from { opacity: 0; transform: scale(0.95); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+/* Status dot pulse */
+@keyframes status-pulse {
+    0%, 100% { opacity: 1; box-shadow: 0 0 0 0 currentColor; }
+    50% { opacity: 0.8; box-shadow: 0 0 0 4px transparent; }
+}
+
+/* Gold gradient shimmer for loading states */
+@keyframes gold-shimmer {
+    0% { background-position: -100% 0; }
+    100% { background-position: 200% 0; }
+}
+
+
+/* ─── UTILITY CLASSES ─────────────────────────────────────── */
+
+/* Agent status indicator */
+.agent-status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: var(--radius-full);
+    transition: background-color var(--duration-normal) var(--ease-default);
+}
+.agent-status-dot--idle      { background-color: var(--agent-idle); }
+.agent-status-dot--thinking  { background-color: var(--agent-thinking); animation: status-pulse 2s ease-in-out infinite; }
+.agent-status-dot--executing { background-color: var(--agent-executing); animation: status-pulse 1.5s ease-in-out infinite; }
+.agent-status-dot--streaming { background-color: var(--agent-streaming); animation: status-pulse 1s ease-in-out infinite; }
+.agent-status-dot--complete  { background-color: var(--agent-complete); }
+.agent-status-dot--error     { background-color: var(--agent-error); }
+
+/* Glass morphism surface */
+.glass-surface {
+    background: var(--bg-glass);
+    -webkit-backdrop-filter: blur(var(--blur-lg));
+    backdrop-filter: blur(var(--blur-lg));
+    border: 1px solid var(--border-default);
+}
+
+.glass-surface:hover {
+    background: var(--bg-glass-hover);
+}
+
+/* Brand gradient text */
+.text-gradient-brand {
+    background: linear-gradient(135deg, var(--acheevy-gold-300), var(--acheevy-amber-400));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* Brand gradient background */
+.bg-gradient-brand {
+    background: linear-gradient(135deg, var(--acheevy-gold-400), var(--acheevy-amber-400));
+}
+
+/* Gold shimmer loading bar */
+.shimmer-gold {
+    background: linear-gradient(
+        90deg,
+        var(--bg-brand-subtle) 0%,
+        var(--acheevy-gold-400) 50%,
+        var(--bg-brand-subtle) 100%
+    );
+    background-size: 200% 100%;
+    animation: gold-shimmer 2s ease-in-out infinite;
+}
+
+/* Agentic focus ring — replaces default browser outline */
+.focus-ring-brand:focus-visible {
+    outline: none;
+    box-shadow: var(--interactive-focus-ring);
+}
+
+/* Entrance animations */
+.animate-slide-up    { animation: slide-up-fade var(--duration-moderate) var(--ease-out) forwards; }
+.animate-scale-in    { animation: scale-in-fade var(--duration-moderate) var(--ease-spring) forwards; }
+.animate-agent-pulse { animation: agent-pulse 2s ease-in-out infinite; }
+.animate-cursor-blink { animation: cursor-blink 1s step-end infinite; }

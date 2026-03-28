@@ -48,8 +48,8 @@ export default function PricingPage() {
       <div className="text-center space-y-4">
         <h1 className="text-4xl font-black text-slate-900 tracking-tight">Select your Fuel Grade</h1>
         <p className="text-slate-500 max-w-2xl mx-auto font-medium">
-          Scale your research capabilities with GRAMMAR&apos;s agentic infrastructure. 
-          Governed, neutralized, and optimized for enterprise-grade action.
+          Scale your workforce solutions with CTI HUB&apos;s AI-managed infrastructure.
+          MindEdge enrollments, Open Seat contracting, and autonomous agent operations.
         </p>
       </div>
 

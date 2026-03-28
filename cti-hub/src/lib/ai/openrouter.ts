@@ -23,24 +23,38 @@ interface OpenRouterResponse {
   };
 }
 
+const LUC_URL = process.env.LUC_URL || 'http://localhost:8081';
+
 function getOpenRouterHeaders() {
-  const apiKey = process.env.OPENROUTER_KEY || process.env.OPENAI_API_KEY;
+  const apiKey = process.env.OPENROUTER_API_KEY || process.env.OPENROUTER_KEY || process.env.OPENAI_API_KEY;
   if (!apiKey) {
-    throw new Error('OpenRouter is not configured. Set OPENROUTER_KEY.');
+    throw new Error('OpenRouter is not configured. Set OPENROUTER_API_KEY.');
   }
 
   return {
     Authorization: `Bearer ${apiKey}`,
     'Content-Type': 'application/json',
-    'HTTP-Referer': process.env.DOMAIN_CLIENT || 'http://localhost:3080',
-    'X-OpenRouter-Title': 'GRAMMAR',
+    'HTTP-Referer': process.env.DOMAIN_CLIENT || 'http://localhost:3000',
+    'X-OpenRouter-Title': 'CTI HUB',
   };
 }
 
 export function getOpenRouterModel(inputMode: 'text' | 'voice' = 'text') {
-  const textModel = process.env.OPENROUTER_TEXT_MODEL || 'openai/gpt-4o-mini';
+  const textModel = process.env.OPENROUTER_TEXT_MODEL || 'deepseek/deepseek-v3.2';
   const voiceModel = process.env.OPENROUTER_VOICE_MODEL || textModel;
   return inputMode === 'voice' ? voiceModel : textModel;
+}
+
+async function lucRecordUsage(service: string, model: string, tokensIn: number, tokensOut: number) {
+  try {
+    await fetch(`${LUC_URL}/record/llm`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ service, model, tokens_in: tokensIn, tokens_out: tokensOut }),
+    });
+  } catch {
+    // LUC unavailable — skip metering silently
+  }
 }
 
 export async function createOpenRouterChatCompletion(input: {
@@ -48,6 +62,7 @@ export async function createOpenRouterChatCompletion(input: {
   model?: string;
   inputMode?: 'text' | 'voice';
   userId?: string;
+  service?: string;
 }) {
   const model = input.model || getOpenRouterModel(input.inputMode || 'text');
   const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
@@ -58,7 +73,6 @@ export async function createOpenRouterChatCompletion(input: {
       messages: input.messages,
       temperature: 0.4,
       user: input.userId,
-      session_id: `grammar-${input.inputMode || 'text'}-chat`,
     }),
   });
 
@@ -70,6 +84,16 @@ export async function createOpenRouterChatCompletion(input: {
   const content = payload.choices?.[0]?.message?.content?.trim();
   if (!content) {
     throw new Error('OpenRouter returned an empty response.');
+  }
+
+  // Record usage in LUC
+  if (payload.usage) {
+    await lucRecordUsage(
+      input.service || 'cti-hub',
+      payload.model || model,
+      payload.usage.prompt_tokens || 0,
+      payload.usage.completion_tokens || 0,
+    );
   }
 
   return {

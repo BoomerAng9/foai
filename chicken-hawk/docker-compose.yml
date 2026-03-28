@@ -1,0 +1,244 @@
+# =============================================================================
+# Chicken Hawk — Lil_Hawk Fleet (VPS-2)
+# Deploy with: docker compose up -d
+# =============================================================================
+
+version: "3.9"
+
+networks:
+  hawk-net:
+    driver: bridge
+    internal: false   # Allow outbound; inter-service traffic stays on the bridge
+
+volumes:
+  pgdata:
+  n8n-data:
+  copaw-data:
+  sandbox-workspace:
+
+services:
+
+  # ---------------------------------------------------------------------------
+  # PostgreSQL — Shared database for all Lil_Hawks
+  # ---------------------------------------------------------------------------
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-chickenhawk}
+      POSTGRES_USER: ${POSTGRES_USER:-chickenhawk}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - hawk-net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-chickenhawk}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ---------------------------------------------------------------------------
+  # Lil_Deep_Hawk — DeerFlow 2.0 SuperAgent
+  # Decomposes complex missions into Squads of Lil_Hawks
+  # ---------------------------------------------------------------------------
+  deep-hawk:
+    image: ghcr.io/chickenhawk/deerflow:latest
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-chickenhawk}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-chickenhawk}
+      LLM_PROVIDER: ${LLM_PROVIDER:-openai}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      TRAE_HAWK_URL: ${TRAE_HAWK_URL:-http://trae-hawk:7001}
+      CODING_HAWK_URL: ${CODING_HAWK_URL:-http://coding-hawk:7002}
+      AGENT_HAWK_URL: ${AGENT_HAWK_URL:-http://agent-hawk:7003}
+      FLOW_HAWK_URL: ${FLOW_HAWK_URL:-http://flow-hawk:5678}
+      SAND_HAWK_URL: ${SAND_HAWK_URL:-http://sand-hawk:7005}
+      MEMORY_HAWK_URL: ${MEMORY_HAWK_URL:-http://memory-hawk:7006}
+      GRAPH_HAWK_URL: ${GRAPH_HAWK_URL:-http://graph-hawk:7007}
+      BACK_HAWK_URL: ${BACK_HAWK_URL:-http://back-hawk:7008}
+    ports:
+      - "7010:7010"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - hawk-net
+
+  # ---------------------------------------------------------------------------
+  # Lil_Graph_Hawk — LangGraph stateful, conditional workflows
+  # ---------------------------------------------------------------------------
+  graph-hawk:
+    image: ghcr.io/chickenhawk/langgraph-hawk:latest
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-chickenhawk}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-chickenhawk}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+    ports:
+      - "7007:7007"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - hawk-net
+
+  # ---------------------------------------------------------------------------
+  # Lil_TRAE_Hawk — TRAE Agent heavy coding / repo-wide refactors
+  # ---------------------------------------------------------------------------
+  trae-hawk:
+    image: ghcr.io/chickenhawk/trae-hawk:latest
+    restart: unless-stopped
+    environment:
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      SAND_HAWK_URL: ${SAND_HAWK_URL:-http://sand-hawk:7005}
+    ports:
+      - "7001:7001"
+    networks:
+      - hawk-net
+
+  # ---------------------------------------------------------------------------
+  # Lil_Coding_Hawk — OpenCode plan-first, approval-gated feature work
+  # ---------------------------------------------------------------------------
+  coding-hawk:
+    image: ghcr.io/chickenhawk/opencode-hawk:latest
+    restart: unless-stopped
+    environment:
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      SAND_HAWK_URL: ${SAND_HAWK_URL:-http://sand-hawk:7005}
+      APPROVAL_REQUIRED: "true"
+    ports:
+      - "7002:7002"
+    networks:
+      - hawk-net
+
+  # ---------------------------------------------------------------------------
+  # Lil_Agent_Hawk — Agent Zero OS-level, browser, and multi-CLI workflows
+  # ---------------------------------------------------------------------------
+  agent-hawk:
+    image: ghcr.io/chickenhawk/agent-zero-hawk:latest
+    restart: unless-stopped
+    environment:
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      SAND_HAWK_URL: ${SAND_HAWK_URL:-http://sand-hawk:7005}
+    ports:
+      - "7003:7003"
+    networks:
+      - hawk-net
+
+  # ---------------------------------------------------------------------------
+  # Lil_Flow_Hawk — n8n SaaS/CRM/email/payment automations
+  # ---------------------------------------------------------------------------
+  flow-hawk:
+    image: n8nio/n8n:latest
+    restart: unless-stopped
+    environment:
+      DB_TYPE: postgresdb
+      DB_POSTGRESDB_HOST: postgres
+      DB_POSTGRESDB_PORT: 5432
+      DB_POSTGRESDB_DATABASE: ${POSTGRES_DB:-chickenhawk}
+      DB_POSTGRESDB_USER: ${POSTGRES_USER:-chickenhawk}
+      DB_POSTGRESDB_PASSWORD: ${POSTGRES_PASSWORD}
+      N8N_BASIC_AUTH_ACTIVE: ${N8N_BASIC_AUTH_ACTIVE:-true}
+      N8N_BASIC_AUTH_USER: ${N8N_BASIC_AUTH_USER:-admin}
+      N8N_BASIC_AUTH_PASSWORD: ${N8N_BASIC_AUTH_PASSWORD:?N8N_BASIC_AUTH_PASSWORD is required}
+      N8N_ENCRYPTION_KEY: ${N8N_ENCRYPTION_KEY:?N8N_ENCRYPTION_KEY is required}
+      WEBHOOK_URL: http://flow-hawk:5678
+    volumes:
+      - n8n-data:/home/node/.n8n
+    ports:
+      - "5678:5678"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - hawk-net
+
+  # ---------------------------------------------------------------------------
+  # Lil_Sand_Hawk — OpenSandbox safe, containerized code execution
+  # ---------------------------------------------------------------------------
+  sand-hawk:
+    image: ghcr.io/chickenhawk/opensandbox-hawk:latest
+    restart: unless-stopped
+    environment:
+      MAX_EXECUTION_TIME_SECONDS: "60"
+      ALLOWED_LANGUAGES: "python,javascript,typescript,bash,go,rust"
+    volumes:
+      - sandbox-workspace:/workspace
+    ports:
+      - "7005:7005"
+    networks:
+      - hawk-net
+    # Security: drop all Linux capabilities, no privilege escalation
+    cap_drop:
+      - ALL
+    cap_add:
+      - CHOWN
+      - DAC_OVERRIDE
+      - SETGID
+      - SETUID
+    security_opt:
+      - no-new-privileges:true
+    read_only: false
+
+  # ---------------------------------------------------------------------------
+  # Lil_Memory_Hawk — CoPaw / ReMe long-term RAG-style memory
+  # ---------------------------------------------------------------------------
+  memory-hawk:
+    image: ghcr.io/chickenhawk/copaw-hawk:latest
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-chickenhawk}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-chickenhawk}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      COPAW_API_KEY: ${COPAW_API_KEY:-}
+    volumes:
+      - copaw-data:/data
+    ports:
+      - "7006:7006"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - hawk-net
+
+  # ---------------------------------------------------------------------------
+  # Lil_Back_Hawk — InsForge LLM-native backend (auth, DB, APIs)
+  # ---------------------------------------------------------------------------
+  back-hawk:
+    image: ghcr.io/chickenhawk/insforge-hawk:latest
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-chickenhawk}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-chickenhawk}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      INSFORGE_API_KEY: ${INSFORGE_API_KEY:-}
+    ports:
+      - "7008:7008"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - hawk-net
+
+  # ---------------------------------------------------------------------------
+  # Lil_Viz_Hawk — SimStudio visual workflow monitoring
+  # ---------------------------------------------------------------------------
+  viz-hawk:
+    image: ghcr.io/chickenhawk/simstudio-hawk:latest
+    restart: unless-stopped
+    environment:
+      DEEP_HAWK_URL: http://deep-hawk:7010
+      GRAPH_HAWK_URL: http://graph-hawk:7007
+      TRAE_HAWK_URL: http://trae-hawk:7001
+      CODING_HAWK_URL: http://coding-hawk:7002
+      AGENT_HAWK_URL: http://agent-hawk:7003
+      FLOW_HAWK_URL: http://flow-hawk:5678
+      SAND_HAWK_URL: http://sand-hawk:7005
+      MEMORY_HAWK_URL: http://memory-hawk:7006
+      BACK_HAWK_URL: http://back-hawk:7008
+    ports:
+      - "7009:7009"
+    networks:
+      - hawk-net

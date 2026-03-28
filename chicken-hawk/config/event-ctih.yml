@@ -1,0 +1,111 @@
+# Coastal Talent and Innovation Hack-A-Thon
+# Marketing Automation Configuration for Lil_Flow_Hawk (n8n)
+
+event:
+  name: "Coastal Talent and Innovation Hack-A-Thon"
+  shortCode: "CTIH"
+  website: "https://foai.cloud/event/"
+  registration: "https://foai.cloud/event/register.html"
+  sponsors: "https://foai.cloud/event/sponsors.html"
+
+lead_capture:
+  sources:
+    - name: "foai.cloud landing page"
+      utm_source: "foai-cloud"
+      endpoint: "/api/event/register"
+    - name: "acheevy.digital banner"
+      utm_source: "acheevy-digital"
+      endpoint: "/api/event/register"
+    - name: "social media campaigns"
+      utm_source: "social"
+      endpoint: "/api/event/register"
+    - name: "email campaigns"
+      utm_source: "email"
+      endpoint: "/api/event/register"
+
+email_sequences:
+  attendee_nurture:
+    trigger: "registration_complete"
+    steps:
+      - delay: "0m"
+        template: "welcome_registration"
+        subject: "\U0001F389 You're in! Welcome to CTIH Hack-A-Thon"
+      - delay: "2d"
+        template: "meet_the_tracks"
+        subject: "Explore Your Track \u2014 AI, Web3, Social Impact, or Creative Tech?"
+      - delay: "5d"
+        template: "speaker_spotlight"
+        subject: "Meet Our Keynote Speakers \U0001F3A4"
+      - delay: "7d"
+        template: "team_formation"
+        subject: "Find Your Dream Team Before the Hack Begins"
+      - delay: "1d_before_event"
+        template: "event_eve"
+        subject: "Tomorrow's the Day! Here's Everything You Need"
+      - delay: "0d_event_start"
+        template: "event_kickoff"
+        subject: "\U0001F680 CTIH is LIVE \u2014 Let's Hack!"
+  
+  sponsor_nurture:
+    trigger: "sponsor_inquiry_received"
+    steps:
+      - delay: "0m"
+        template: "sponsor_inquiry_received"
+        subject: "Thanks for Your Interest in Sponsoring CTIH!"
+      - delay: "1d"
+        template: "sponsor_deck"
+        subject: "Your CTIH Sponsorship Deck & ROI Breakdown"
+      - delay: "3d"
+        template: "sponsor_followup"
+        subject: "Quick Question About Your CTIH Sponsorship Goals"
+      - delay: "7d"
+        template: "sponsor_urgency"
+        subject: "Only {{remaining_slots}} Sponsor Slots Remaining"
+
+  virtual_attendee:
+    trigger: "virtual_ticket_purchased"
+    steps:
+      - delay: "0m"
+        template: "virtual_welcome"
+        subject: "Your Virtual Access is Confirmed! \U0001F5A5\uFE0F"
+      - delay: "3d"
+        template: "virtual_platform_guide"
+        subject: "Getting Ready \u2014 Your Virtual Event Platform Guide"
+      - delay: "1d_before_event"
+        template: "virtual_access_link"
+        subject: "Your Livestream Link is Ready \U0001F517"
+
+social_media:
+  platforms:
+    - twitter
+    - linkedin
+    - instagram
+  campaigns:
+    - name: "early_bird_launch"
+      duration: "14d"
+      posts_per_day: 2
+      hashtags: ["#CTIH2026", "#HackAThon", "#CoastalTalent", "#InnovationHack", "#foaicloud"]
+    - name: "speaker_announcements"
+      duration: "21d"
+      posts_per_day: 1
+      hashtags: ["#CTIH2026", "#TechSpeakers"]
+    - name: "countdown"
+      duration: "7d"
+      posts_per_day: 3
+      hashtags: ["#CTIH2026", "#CountdownToHack"]
+
+analytics:
+  tracking:
+    - utm_source
+    - utm_medium
+    - utm_campaign
+    - utm_content
+  kpis:
+    - total_registrations
+    - conversion_rate
+    - sponsor_inquiries
+    - revenue_target: 50000
+    - attendee_target: 500
+  reporting:
+    frequency: "daily"
+    channels: ["email", "dashboard"]

@@ -1,0 +1,44 @@
+# Tailscale ACL template for Chicken Hawk
+# Import this file into your Tailscale admin console under Access Controls.
+# Replace <TAILNET> with your actual tailnet name (e.g. my-org.github).
+
+{
+  // Allow all devices on the tailnet to reach each other by default.
+  // Tighten rules below as needed.
+  "acls": [
+    // Gateway VPS-1 → Fleet VPS-2
+    {
+      "action": "accept",
+      "src": ["tag:gateway"],
+      "dst": ["tag:fleet:*"]
+    },
+    // ClawX clients → Gateway only
+    {
+      "action": "accept",
+      "src": ["tag:client"],
+      "dst": ["tag:gateway:8000", "tag:gateway:3001"]
+    },
+    // Deny everything else
+    {
+      "action": "deny",
+      "src": ["*"],
+      "dst": ["*:*"]
+    }
+  ],
+
+  "tagOwners": {
+    "tag:gateway": ["autogroup:admin"],
+    "tag:fleet":   ["autogroup:admin"],
+    "tag:client":  ["autogroup:member"]
+  },
+
+  // SSH access restricted to admin group only
+  "ssh": [
+    {
+      "action": "accept",
+      "src":    ["autogroup:admin"],
+      "dst":    ["autogroup:self"],
+      "users":  ["autogroup:nonroot", "root"]
+    }
+  ]
+}

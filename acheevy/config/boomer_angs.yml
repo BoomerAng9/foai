@@ -1,0 +1,98 @@
+# Boomer_Ang fleet configuration
+# ACHEEVY dispatches strategic work to Boomer_Angs through PMO departments.
+# Each Boomer_Ang is a specialist operator within the ACHIEVEMOR org.
+#
+# Naming convention: {Skill}_Ang — prefix always relates to function.
+# Visual: Aussie boomerang — wood-grain body, 3 circuit-board windows, LED edge dots.
+
+angs:
+  API_Ang:
+    description: "Backend APIs, service integrations, endpoint design"
+    glyph: "A"
+    department: PMO-ECHO
+    specialty: "API & Integration"
+    glow_color: "#FF8C00"
+    health_path: /health
+    run_path: /run
+    timeout_seconds: 120
+
+  UI_Ang:
+    description: "Frontend systems, UI components, responsive design"
+    glyph: "U"
+    department: PMO-ECHO
+    specialty: "Frontend Systems"
+    glow_color: "#00E5FF"
+    health_path: /health
+    run_path: /run
+    timeout_seconds: 120
+
+  SME_Ang:
+    description: "Subject matter expertise, domain knowledge, research"
+    glyph: "S"
+    department: PMO-ECHO
+    specialty: "Subject Matter"
+    glow_color: "#4169E1"
+    health_path: /health
+    run_path: /run
+    timeout_seconds: 90
+
+  Flow_Ang:
+    description: "Workflow orchestration, process automation, n8n flows"
+    glyph: "F"
+    department: PMO-ECHO
+    specialty: "Workflow Management"
+    glow_color: "#8A2BE2"
+    health_path: /health
+    run_path: /run
+    timeout_seconds: 90
+
+  Design_Ang:
+    description: "UI/UX design systems, visual identity, brand consistency"
+    glyph: "X"
+    department: PMO-ECHO
+    specialty: "UI/UX Design"
+    glow_color: "#FF1493"
+    health_path: /health
+    run_path: /run
+    timeout_seconds: 90
+
+  Crypt_Ang:
+    description: "Authentication, encryption, security audits, compliance"
+    glyph: "C"
+    department: PMO-SHIELD
+    specialty: "Auth & Encryption"
+    glow_color: "#FF3CAC"
+    health_path: /health
+    run_path: /run
+    timeout_seconds: 120
+
+  Data_Ang:
+    description: "Data pipelines, ETL, analytics, ML model integration"
+    glyph: "D"
+    department: PMO-PULSE
+    specialty: "Pipeline & ETL"
+    glow_color: "#7CFF01"
+    health_path: /health
+    run_path: /run
+    timeout_seconds: 120
+
+  Deploy_Ang:
+    description: "CI/CD pipelines, infrastructure, Docker, cloud deployment"
+    glyph: "P"
+    department: PMO-LAUNCH
+    specialty: "CI/CD & Infra"
+    glow_color: "#FFD600"
+    health_path: /health
+    run_path: /run
+    timeout_seconds: 180
+
+  QA_Ang:
+    description: "Testing, quality assurance, code review, audit gates"
+    glyph: "Q"
+    department: PMO-LENS
+    specialty: "Testing & Audit"
+    glow_color: "#A78BFA"
+    health_path: /health
+    run_path: /run
+    timeout_seconds: 90
+    is_review_gate: true

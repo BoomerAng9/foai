@@ -1,0 +1,65 @@
+services:
+  acheevy-agent:
+    build: 
+      context: ./backend/ACHEEVY_agent
+    restart: unless-stopped
+    ports:
+      - "8001:8000"
+    environment:
+      - BOOMER_ROLE=Orchestrator
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.acheevy-agent.rule=Host(`agent.acheevy.digital`)"
+    networks:
+      - acheevy-net
+
+  acheevy-researcher:
+    build: 
+      context: ./backend/ACHEEVY_researcher
+    restart: unless-stopped
+    ports:
+      - "8002:8000"
+    environment:
+      - BOOMER_ROLE=Researcher
+    networks:
+      - acheevy-net
+
+  acheevy-ground:
+    build: 
+      context: ./backend/ACHEEVY_ground
+    restart: unless-stopped
+    ports:
+      - "8003:8000"
+    environment:
+      - BOOMER_ROLE=CommonGround
+    networks:
+      - acheevy-net
+
+  acheevy-commons:
+    build: 
+      context: ./backend/ACHEEVY_commons
+    restart: unless-stopped
+    ports:
+      - "8004:8000"
+    environment:
+      - BOOMER_ROLE=Commons
+    networks:
+      - acheevy-net
+
+  # This is the frontend landing page server
+  acheevy-frontend:
+    image: nginx:alpine
+    restart: unless-stopped
+    volumes:
+      - ./frontend:/usr/share/nginx/html:ro
+    ports:
+      - "8080:80"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.acheevy-frontend.rule=Host(`acheevy.digital`, `www.acheevy.digital`)"
+    networks:
+      - acheevy-net
+
+networks:
+  acheevy-net:
+    driver: bridge

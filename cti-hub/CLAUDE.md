@@ -1,30 +1,32 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+CTI HUB — the public product shell for the FOAI-AIMS ecosystem.
 
-**grammar** — A software project.
+## What This Is
 
-## Project Rules
+CTI HUB is the Coastal Talent & Innovation command surface. It is the product.
+GRAMMAR is NOT this app — GRAMMAR is an internal technical language engine that may serve CTI HUB if needed.
 
-@.ai/rules/*.md
+## Stack
 
-## Architecture Decisions & Memory
+- **Framework**: Next.js 15 (App Router)
+- **Auth**: Firebase Auth (client SDK on browser, Admin SDK on server)
+- **Database**: Neon Postgres via `postgres.js` (server-side only via `DATABASE_URL`)
+- **Backend**: 11 Python/FastAPI Cloud Run services in GCP `foai-aims`
+- **LLM**: OpenRouter
+- **Payments**: Stripe
 
-- `.ai/decisions/` — ADRs with full context and rationale (@.ai/decisions/README.md)
-- `.ai/changelog/` — Monthly change logs with context, reasoning, and impact
-- `.ai/skills/` — Portable skill definitions; run `npx @siliconoid/agentkit sync` to generate platform adapters
-- `.ai/memory/` — Shared memory files (debugging patterns, known issues, refactoring log)
-- `.specs/` — PRD、设计、Epic、Story — 通过 /spec 管理 (@.specs/README.md)
+## Key Paths
 
-### Memory Commands
+- `src/app/page.tsx` — Public landing page
+- `src/app/(dashboard)/` — Authenticated dashboard (sidebar + canvas + talk dock)
+- `src/app/api/auth/provision/route.ts` — Firebase-to-Neon user provisioning
+- `src/context/auth-provider.tsx` — Auth state + provision loop
+- `src/lib/firebase.ts` — Client SDK singleton
+- `src/lib/firebase-admin.ts` — Server SDK singleton
 
-| Command | Purpose |
-|---------|---------|
-| `/adr` | Record an architecture decision |
-| `/devlog` | Append a changelog entry |
-| `/wrap-up` | End-of-task: update all memory files at once |
-| `/spec` | 管理 PRD、设计、版本快照和追踪矩阵 |
+## Rules
 
-## 交互语言
-
-所有 AI 回复、代码注释、commit message 和文档一律使用 **中文**。
+- All responses, comments, and commits in English
+- Revenue-first: if it doesn't serve launch, it doesn't ship
+- No GRAMMAR features unless they directly support a CTI HUB business flow

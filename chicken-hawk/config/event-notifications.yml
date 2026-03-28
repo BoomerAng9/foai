@@ -1,0 +1,52 @@
+# Event Notification Dispatch Rules
+# Used by Chicken Hawk gateway to route event-related notifications
+
+notifications:
+  channels:
+    email:
+      provider: "smtp"
+      from: "events@foai.cloud"
+      reply_to: "team@foai.cloud"
+    
+    sms:
+      provider: "twilio"
+      from_number: "+1XXXXXXXXXX"
+    
+    push:
+      provider: "firebase"
+      topic: "ctih-event"
+
+  triggers:
+    new_registration:
+      priority: "high"
+      channels: ["email"]
+      admin_notify: true
+      admin_channel: "email"
+    
+    payment_complete:
+      priority: "critical"
+      channels: ["email", "sms"]
+      admin_notify: true
+    
+    sponsor_inquiry:
+      priority: "critical"
+      channels: ["email"]
+      admin_notify: true
+      escalate_to: "sales_team"
+    
+    sponsor_onboarded:
+      priority: "high"
+      channels: ["email"]
+      admin_notify: true
+    
+    event_reminder_24h:
+      priority: "high"
+      channels: ["email", "sms", "push"]
+    
+    event_live:
+      priority: "critical"
+      channels: ["email", "push"]
+    
+    virtual_access_ready:
+      priority: "high"
+      channels: ["email"]

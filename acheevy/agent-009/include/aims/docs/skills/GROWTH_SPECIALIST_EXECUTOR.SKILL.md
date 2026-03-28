@@ -1,0 +1,52 @@
+# Skill: Growth Specialist Executor
+
+- Role: Specialist Executor
+- Intent: Increase qualified pipeline and conversion velocity for A.I.M.S. offerings.
+- KPIs:
+  - Qualified leads per week
+  - Lead-to-call booking conversion rate
+  - Call-to-opportunity conversion rate
+  - CAC trend by channel
+  - 30-day retained customer count
+- Stack:
+  - ACHEEVY planner + policy layers
+  - Analytics dashboards and event logs
+  - CRM and outreach systems
+  - Landing page and email tooling
+  - Approved Tool/MCP Registry entries
+- Inputs:
+  - Current ICP definition
+  - Offer positioning and pricing
+  - Channel performance baseline
+  - Weekly budget and constraints
+  - Current creative and messaging assets
+- Outputs:
+  - Weekly growth plan with prioritized experiments
+  - Channel-specific messaging and asset requirements
+  - KPI delta report with evidence links
+  - Next-iteration backlog with owners
+- Quality Gates:
+  - Every recommendation maps to at least one KPI
+  - Every claim includes a data source or experiment result
+  - Proposed actions fit budget and channel constraints
+  - Handoff packet includes clear owner and due date
+- Hooks:
+  - trigger:
+    - User intent includes growth, acquisition, conversion, funnel, leads, CAC, or retention.
+    - Weekly review window opens.
+    - Campaign performance drops below threshold for two windows.
+  - pre_gsd:
+    - Verify active objective and KPI targets exist.
+    - Verify required analytics sources are reachable.
+    - Verify selected tools are approved for this tenant.
+  - post_gsd:
+    - Write structured execution log to shared memory.
+    - Emit KPI snapshot and variance.
+    - Queue follow-up automation tasks where needed.
+  - stitch_design:
+    - Trigger when landing page, ad creative, or onboarding UX changes are proposed.
+- Limits:
+  - Max iterations/runtime:
+    - 5 execution loops per review window unless escalated by orchestrator.
+  - Max external tool/API calls:
+    - 20 calls per loop across analytics/CRM/content tools.

@@ -1,0 +1,26 @@
+{
+  "event": {
+    "name": "Coastal Talent and Innovation Hack-A-Thon",
+    "shortCode": "CTIH"
+  },
+  "luc_role": {
+    "description": "LUC provides real-time budget tracking and financial calculations for CTIH event operations.",
+    "budget_categories": [
+      {"name": "Venue & Equipment", "allocated": 15000},
+      {"name": "Catering & Meals", "allocated": 8000},
+      {"name": "Marketing & Promotion", "allocated": 5000},
+      {"name": "Prizes & Awards", "allocated": 10000},
+      {"name": "Technology & Streaming", "allocated": 5000},
+      {"name": "Swag & Materials", "allocated": 3000},
+      {"name": "Speaker Travel & Accommodation", "allocated": 4000}
+    ],
+    "revenue_streams": [
+      {"name": "In-Person Tickets", "unit_price": 149, "early_bird": 99},
+      {"name": "Virtual Tickets", "unit_price": 49, "early_bird": 29},
+      {"name": "Platinum Sponsors", "unit_price": 10000},
+      {"name": "Gold Sponsors", "unit_price": 5000},
+      {"name": "Silver Sponsors", "unit_price": 2500}
+    ],
+    "target_revenue": 50000
+  }
+}

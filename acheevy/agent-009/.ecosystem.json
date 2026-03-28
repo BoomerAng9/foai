@@ -1,0 +1,35 @@
+{
+  "node": "agent-acheevy-009",
+  "role": "agent",
+  "network": "boomerang9-ecosystem",
+  "version": "1.0.0",
+  "description": "ACHEEVY AI Agent — Python backend for intelligent task execution, chat, and sandbox operations",
+  "provides": [
+    { "name": "agent-api", "path": "src/", "description": "REST API for agent invocation and task management" },
+    { "name": "chat-server", "path": "src/", "description": "Real-time chat server with streaming" },
+    { "name": "sandbox-runtime", "path": "docker/", "description": "Isolated sandbox for code execution" },
+    { "name": "mcp-bridge", "path": "src/", "description": "MCP tool bridge for multi-tool orchestration" }
+  ],
+  "consumes": [
+    { "node": "aims", "capability": "luc-engine", "endpoint": "/api/aims/luc" },
+    { "node": "grammar", "capability": "chat-api", "endpoint": "/api/chat/v1" },
+    { "node": "chicken-hawk", "capability": "gateway", "endpoint": "https://gateway.acheevy.digital" }
+  ],
+  "connections": {
+    "aims": { "type": "serves", "purpose": "Provides AI agent capabilities to AIMS platform" },
+    "grammar": { "type": "delegates-chat", "purpose": "Routes chat messages through GRAMMAR for persistence" },
+    "chicken-hawk": { "type": "registered-with", "purpose": "Gateway routes /api/agent/* here" },
+    "acheevy-whisper-build": { "type": "streams-to", "purpose": "WebSocket streaming for voice interface" },
+    "destinations-ai": { "type": "serves", "purpose": "Agent handles travel queries from vertical" },
+    "estatemind-ai": { "type": "serves", "purpose": "Agent handles real estate queries from vertical" },
+    "myclaw": { "type": "orchestrated-by", "purpose": "Docker compose and deployment" }
+  },
+  "file_index": {
+    "entrypoints": ["src/", "start.sh"],
+    "config": ["pyproject.toml", "e2b.Dockerfile", "setting_mcp.json"],
+    "apps": ["apps/"],
+    "frontend": ["frontend/"],
+    "tests": ["tests/", "test_chat_server.py"],
+    "docker": ["docker/", "deploy/"]
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "$schema": "aims-ecosystem-node/v1",
+  "nodeId": "acheevy-digital",
+  "repo": "BoomerAng9/acheevy.digital",
+  "tier": 1,
+  "role": "brand-portal",
+  "label": "ACHEEVY.digital — Official ACHEEVY Domain",
+  "description": "Builds ACHEEVY capabilities officially. Has its own domain (acheevy.digital). Public-facing ACHEEVY brand, onboarding, showcase. Routes through AIMS for registry and orchestration.",
+  "provides": ["acheevy-brand", "public-onboarding", "acheevy-showcase"],
+  "consumes": ["aims-frontend", "acheevy-chat", "aiplugs-system"],
+  "endpoints": {
+    "website": "https://acheevy.digital"
+  },
+  "hub": "BoomerAng9/AIMS",
+  "peers": [
+    "BoomerAng9/AIMS",
+    "BoomerAng9/myclaw",
+    "BoomerAng9/Agent-ACHEEVY-009"
+  ],
+  "chatIcon": {
+    "asset": "assets/acheevy-helmet.png",
+    "rule": "ACHEEVY Helmet is the ONLY primary chat avatar."
+  }
+}

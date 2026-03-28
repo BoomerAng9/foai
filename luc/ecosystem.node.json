@@ -1,0 +1,29 @@
+{
+  "$schema": "aims-ecosystem-node/v1",
+  "nodeId": "luc",
+  "repo": "BoomerAng9/LUC-Locale-Universal-Calculator",
+  "tier": 2,
+  "role": "service",
+  "label": "LUC — Locale Universal Calculator",
+  "description": "Multi-locale financial calculator engine. Currency conversion, cost-of-living, K1 taxation (North America), Zakat/VAT (Saudi/MENA). Foundation built from Flip Secrets real estate calculator. Gates all billable actions via canExecute(). This is the authoritative LUC implementation — AIMS/luc/ and AIMS/aims-tools/luc/ are adapters that call this engine.",
+  "provides": ["luc-engine", "currency-conversion", "cost-of-living", "financial-calc", "billing-gate", "k1-taxation", "zakat-vat"],
+  "consumes": ["aims-backend", "destinations-data"],
+  "endpoints": {},
+  "hub": "BoomerAng9/AIMS",
+  "peers": [
+    "BoomerAng9/AIMS",
+    "BoomerAng9/the-perform-platform",
+    "BoomerAng9/Locale-by-ACHIEVEMOR-2",
+    "BoomerAng9/destinations-ai"
+  ],
+  "chatIcon": {
+    "asset": "assets/acheevy-helmet.png",
+    "rule": "ACHEEVY Helmet is the ONLY primary chat avatar. LUC calculation UIs show ACHEEVY as narrator with financial/calculator icon badges."
+  },
+  "context": {
+    "authoritative": "This repo is the single authoritative home for LUC logic. No duplicate brains.",
+    "flipSecrets": "LUC foundation was built from the Flip Secrets real estate calculator at aims-tools/luc/presets/real-estate-flip/",
+    "billingGate": "Every billable action across the entire ecosystem passes canExecute() in LUC first.",
+    "localeV2Relationship": "Locale-by-ACHIEVEMOR-2 is the consumer frontend for LUC. LUC is the engine, Locale v2 is the UI."
+  }
+}

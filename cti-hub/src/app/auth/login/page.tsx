@@ -4,7 +4,7 @@ import { Suspense, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { authService } from '@/lib/auth-paywall';
 import { ArrowRight, Github, Eye, EyeOff } from 'lucide-react';
-import Image from 'next/image';
+// CTI HUB login
 
 function LoginPageContent() {
   const router = useRouter();
@@ -55,23 +55,16 @@ function LoginPageContent() {
       <div className="hidden lg:flex lg:w-[480px] bg-white border-r border-[#E5E7EB] flex-col justify-between p-12">
         <div>
           <div className="flex items-center gap-3 mb-16">
-            <Image 
-              src="/grammar-logo.svg" 
-              alt="GRAMMAR Logo" 
-              width={140} 
-              height={40} 
-              className="w-auto h-8 object-contain"
-              priority
-            />
+            <div className="w-10 h-10 rounded-xl bg-[#00A3FF] flex items-center justify-center text-white text-lg font-black">C</div>
+            <span className="text-2xl font-bold tracking-tight text-slate-900">CTI HUB</span>
           </div>
 
           <h1 className="text-3xl font-bold leading-tight mb-4 text-slate-900 font-sans tracking-tight">
-            Ordinary language in.<br />technical language out.
+            AI-Managed Solutions<br />for Education.
           </h1>
           <p className="text-slate-500 text-sm leading-relaxed max-w-sm font-medium">
-            GRAMMAR is the execution engine for translating natural intent into governed technical context.
-            GRAMMAR is the execution engine for translating natural intent into governed technical context. 
-            Start chatting to route prompts through ACHEEVY and shape output your team can ship.
+            MindEdge enrollments, Open Seat contracting, and workforce development —
+            managed by autonomous AI agents through one command surface.
           </p>
         </div>
 
@@ -81,9 +74,9 @@ function LoginPageContent() {
             <span>All systems operational</span>
           </div>
           <div className="flex items-center gap-3 text-xs text-slate-400 font-mono">
-            <span>ACHIEVEMOR Platform</span>
+            <span>CTI HUB</span>
             <span>&middot;</span>
-            <span>v0.1.0</span>
+            <span>FOAI-AIMS</span>
           </div>
         </div>
       </div>
@@ -91,24 +84,17 @@ function LoginPageContent() {
       {/* Right: Auth Form */}
       <div className="flex-1 flex items-center justify-center p-8">
         <div className="w-full max-w-md">
-          {/* Mobile brand (hidden on lg) */}
           <div className="lg:hidden flex items-center gap-3 mb-10">
-            <Image 
-              src="/grammar-logo.svg" 
-              alt="GRAMMAR Logo" 
-              width={140} 
-              height={40} 
-              className="w-auto h-8 object-contain"
-              priority
-            />
+            <div className="w-8 h-8 rounded-lg bg-[#00A3FF] flex items-center justify-center text-white text-sm font-black">C</div>
+            <span className="text-lg font-bold tracking-tight text-slate-900">CTI HUB</span>
           </div>
 
           <h2 className="text-2xl font-bold text-slate-900 mb-1 tracking-tight">
-            {mode === 'signin' ? 'Welcome back' : 'Create your account'}
+            {mode === 'signin' ? 'Welcome back' : 'Create your CTI HUB account'}
           </h2>
           <p className="text-sm text-slate-500 mb-8 font-medium">
             {mode === 'signin'
-              ? 'Sign in to access your GRAMMAR workspace.'
+              ? 'Sign in to access your workspace.'
               : 'Start with the free tier. Upgrade anytime.'}
           </p>
 

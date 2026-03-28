@@ -1,0 +1,11 @@
+Total messages: 58 (Errors: 8, Warnings: 3)
+Returning 8 messages for level "error"
+
+[ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://localhost:1420/@fs/C:/Users/rishj/OneDrive/Desktop/A.I.M.S/ii-agent/frontend/src/components/acheevy-agent.tsx?t=1772777363070:0
+[ERROR] [vite] Failed to reload /@fs/C:\Users\rishj\OneDrive\Desktop\A.I.M.S\ii-agent\frontend\src\components\acheevy-agent.tsx. This could be due to syntax errors or importing non-existent modules. (see errors above) @ http://localhost:1420/@vite/client:881
+[ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://localhost:1420/@fs/C:/Users/rishj/OneDrive/Desktop/A.I.M.S/ii-agent/frontend/src/components/acheevy-agent.tsx?t=1772777363562:0
+[ERROR] [vite] Failed to reload /@fs/C:\Users\rishj\OneDrive\Desktop\A.I.M.S\ii-agent\frontend\src\components\acheevy-agent.tsx. This could be due to syntax errors or importing non-existent modules. (see errors above) @ http://localhost:1420/@vite/client:881
+[ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://localhost:1420/@fs/C:/Users/rishj/OneDrive/Desktop/A.I.M.S/ii-agent/frontend/src/components/acheevy-agent.tsx?t=1772777391523:0
+[ERROR] [vite] Failed to reload /@fs/C:\Users\rishj\OneDrive\Desktop\A.I.M.S\ii-agent\frontend\src\components\acheevy-agent.tsx. This could be due to syntax errors or importing non-existent modules. (see errors above) @ http://localhost:1420/@vite/client:881
+[ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://localhost:1420/@fs/C:/Users/rishj/OneDrive/Desktop/A.I.M.S/ii-agent/frontend/src/components/acheevy-agent.tsx?t=1772777560864:0
+[ERROR] [vite] Failed to reload /@fs/C:\Users\rishj\OneDrive\Desktop\A.I.M.S\ii-agent\frontend\src\components\acheevy-agent.tsx. This could be due to syntax errors or importing non-existent modules. (see errors above) @ http://localhost:1420/@vite/client:881

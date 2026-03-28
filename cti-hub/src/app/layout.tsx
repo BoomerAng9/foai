@@ -4,7 +4,6 @@ import "./globals.css";
 import { AuthProvider } from "@/hooks/useAuth";
 import { WhiteLabelProvider } from "@/hooks/useWhiteLabel";
 
-
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
   variable: "--font-geist-sans",
@@ -17,9 +16,9 @@ const geistMono = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "GRAMMAR — Plain Language to Technical Prompts",
-  description: "GRAMMAR converts everyday language into structured technical prompts. Say it in plain English — get back a prompt you can paste into ChatGPT, Claude, or Gemini.",
-  keywords: ["GRAMMAR", "ACHEEVY", "prompt engineering", "AI prompts", "language conversion"],
+  title: "CTI HUB — AI-Managed Solutions",
+  description: "Coastal Talent & Innovation command center. MindEdge enrollments, Open Seat contracting, and AI-managed workforce solutions.",
+  keywords: ["CTI", "AI-Managed Solutions", "MindEdge", "Open Seat", "FOAI"],
 };
 
 export default function RootLayout({

@@ -1,0 +1,30 @@
+{
+  "$schema": "aims-ecosystem-node/v1",
+  "nodeId": "chicken-hawk",
+  "repo": "BoomerAng9/Chicken-Hawk",
+  "tier": 1,
+  "role": "coordinator",
+  "label": "Chicken Hawk — Coordinator & Safety",
+  "description": "Master execution agent embodied as OpenClaw. Chicken Hawk = OpenClaw = NemoClaw = MyClaw runtime identity. Dispatches Lil_Hawks, enforces SOP, runs gateway system. Second in agent hierarchy after ACHEEVY.",
+  "provides": ["coordinator-dispatch", "safety-enforcement", "sop-compliance", "market-intel", "gateway-runtime"],
+  "consumes": ["aims-backend", "grammar-engine", "destinations-data", "agent-framework"],
+  "endpoints": {},
+  "hub": "BoomerAng9/AIMS",
+  "peers": [
+    "BoomerAng9/AIMS",
+    "BoomerAng9/myclaw",
+    "BoomerAng9/Agent-ACHEEVY-009",
+    "BoomerAng9/GRAMMAR",
+    "BoomerAng9/destinations-ai"
+  ],
+  "agentRole": {
+    "hierarchy": "ACHEEVY > Chicken Hawk > Boomer_Angs > Lil_Hawks",
+    "position": "tier1-coordinator",
+    "maxParallelHawks": 6,
+    "evidenceRequired": true
+  },
+  "chatIcon": {
+    "asset": "assets/acheevy-helmet.png",
+    "rule": "ACHEEVY Helmet is the ONLY primary chat avatar."
+  }
+}

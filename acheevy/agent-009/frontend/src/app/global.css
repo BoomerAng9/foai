@@ -1,0 +1,414 @@
+@import 'tailwindcss';
+
+/* AGENTIC Design System — Token Foundation */
+@import './design-tokens.css';
+@import './typography.css';
+@import './satoshi.css';
+@import './github-markdown.css';
+@import './animations.css';
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+    /* ── Primary AGENTIC Colors (light theme default) ── */
+    --color-white: #ffffff;
+    --color-subtle: #f7f7f7;
+    --color-border: #e5e5e5;
+    --color-text-primary: #191919;
+    --color-text-secondary: #707070;
+    --color-text-tertiary: #999999;
+    --color-purple-light: #e2ddfd;
+    --color-purple-dark: #20092b;
+    --color-success: #22b00b;
+    --color-error: #ff4444;
+    --color-warning: #ff8800;
+
+    /* ── Legacy Tailwind Aliases (maintained for compatibility) ── */
+    --color-mist: #d5dce0;
+    --color-sky-blue: var(--color-text-primary);
+    --color-sky-blue-2: var(--color-text-secondary);
+    --color-sky-blue-3: var(--color-warning);
+    --color-sky-blue-4: var(--color-text-primary);
+    --color-violet: var(--color-purple-light);
+    --color-pewter: var(--color-text-secondary);
+    --color-slate: var(--color-text-secondary);
+    --color-charcoal: white;
+    --color-charcoal-light: var(--color-subtle);
+    --color-charcoal-surface: var(--color-subtle);
+    --color-sidebar-border: var(--color-border);
+    --color-black: var(--color-text-primary);
+    --color-yellow: var(--color-purple-light);
+    --color-green: var(--color-success);
+    --color-grey: var(--color-border);
+    --color-grey-2: var(--color-text-tertiary);
+    --color-grey-3: var(--color-subtle);
+    --color-firefly: white;
+    --color-red: var(--color-error);
+    --color-red-2: #f54260;
+    --shadow-btn: 0 4px 6px rgba(0, 0, 0, 0.1), 0 2px 4px rgba(0, 0, 0, 0.06);
+
+    /* A.I.M.S Brand Colors — now backed by AGENTIC system */
+    --color-acheevy-purple: var(--color-purple-light);
+    --color-acheevy-purple-deep: var(--color-error);
+    --color-acheevy-cyan: var(--color-text-primary);
+    --color-acheevy-cyan-bright: var(--color-text-secondary);
+    --color-acheevy-emerald: var(--color-success);
+    --color-acheevy-amber: var(--color-warning);
+    --color-acheevy-pink: #ec4899;
+    --color-acheevy-indigo: var(--color-purple-light);
+    --color-acheevy-surface: rgba(0, 0, 0, 0.02);
+    --color-acheevy-border: var(--color-border);
+    --shadow-acheevy: 0 0 8px rgba(25, 25, 25, 0.08);
+    --shadow-acheevy-lg: 0 0 16px rgba(25, 25, 25, 0.12);
+}
+
+@keyframes breathing-fill {
+    0%,
+    100% {
+        background-color: theme(--color-firefly);
+    }
+    50% {
+        background-color: theme(--color-firefly / 0.6);
+    }
+}
+
+@keyframes breathing-fill-dark {
+    0%,
+    100% {
+        background-color: theme(--color-sky-blue);
+    }
+    50% {
+        background-color: theme(--color-sky-blue / 0.6);
+    }
+}
+
+.animate-breathing-fill {
+    animation: breathing-fill 2s ease-in-out infinite;
+}
+
+.dark .animate-breathing-fill {
+    animation: breathing-fill-dark 2s ease-in-out infinite;
+}
+
+@layer base {
+    html {
+        @apply h-full overscroll-none;
+    }
+    body {
+        font-family:
+            -apple-system,
+            BlinkMacSystemFont,
+            Segoe UI Variable Display,
+            Segoe UI,
+            Helvetica,
+            Apple Color Emoji,
+            Arial,
+            sans-serif,
+            Segoe UI Emoji,
+            Segoe UI Symbol;
+        background-color: white;
+        color: var(--agentic-text-primary);
+    }
+    html.dark body {
+        background-color: var(--bg-base);
+        background-image: radial-gradient(ellipse at 20% 0%, rgba(25, 25, 25, 0.03) 0%, transparent 50%),
+                          radial-gradient(ellipse at 80% 100%, rgba(25, 25, 25, 0.02) 0%, transparent 50%);
+    }
+    html.light body {
+        @apply bg-white text-black;
+    }
+
+    html.light .monaco-editor {
+        --vscode-editorGutter-background: #e5e7eb !important;
+        --vscode-editor-background: #e5e7eb !important;
+        --vscode-editorStickyScroll-background: #e5e7eb !important;
+    }
+
+    /* Allow text selection in message content and code blocks */
+    .markdown-body,
+    .markdown-body *,
+    pre,
+    pre *,
+    code,
+    code *,
+    .select-text,
+    .select-text * {
+        @apply select-text;
+    }
+
+    .markdown-body pre > code {
+        @apply !whitespace-break-spaces md:whitespace-pre;
+    }
+
+    .markdown-body table {
+        @apply !w-[calc(100vw-72px)] md:w-full;
+    }
+
+    .markdown-body a {
+        @apply break-all;
+    }
+
+    /* Keep UI elements non-selectable */
+    button,
+    nav,
+    .sidebar,
+    .toolbar {
+        @apply select-none;
+    }
+
+    .bg-blue-gradient {
+        background: #bae9f4;
+        background: linear-gradient(
+            90deg,
+            rgba(120, 200, 210, 1) 0%,
+            rgba(186, 233, 244, 1) 50%
+        );
+    }
+
+    .bg-black-gradient {
+        background: linear-gradient(
+            180deg,
+            rgba(24, 30, 28, 0.8) 0%,
+            rgba(24, 30, 28, 0) 40%,
+            rgba(24, 30, 28, 0) 70%,
+            rgba(24, 30, 28, 0.8) 100%
+        );
+    }
+
+    .bg-white-gradient {
+        background: linear-gradient(
+            180deg,
+            rgba(255, 255, 255, 0.8) 0%,
+            rgba(255, 255, 255, 0) 40%,
+            rgba(255, 255, 255, 0) 70%,
+            rgba(255, 255, 255, 0.8) 100%
+        );
+    }
+
+    html.dark .bg-white-gradient {
+        background: linear-gradient(
+            180deg,
+            rgba(24, 30, 28, 0.8) 0%,
+            rgba(24, 30, 28, 0) 40%,
+            rgba(24, 30, 28, 0) 70%,
+            rgba(24, 30, 28, 0.8) 100%
+        );
+    }
+
+    .terminal {
+        @apply h-full p-4;
+    }
+
+    .terminal .xterm-viewport {
+        @apply !h-[325px];
+    }
+
+    .animate-spin {
+        animation-duration: 800ms !important;
+    }
+
+    .xterm-screen {
+        @apply !w-full !h-full;
+    }
+
+    .xterm-rows div {
+        @apply !w-full;
+    }
+
+    [data-slide-id] {
+        width: 100% !important;
+    }
+}
+
+div[data-code-block-container] {
+    @apply w-full max-w-[calc(100vw-24px)];
+}
+
+.conversation > div {
+    @apply !h-[calc(100dvh-197px)] md:!h-[calc(100dvh-201px)] px-3 md:px-4;
+}
+
+.conversation.with-files > div {
+    @apply !h-[calc(100dvh-272px)] md:!h-[calc(100dvh-281px)];
+}
+
+.conversation.share-conversation > div {
+    @apply !h-full;
+}
+
+.katex-display {
+    @apply max-w-[calc(100vw-24px)] overflow-x-auto overflow-y-hidden;
+}
+
+div[data-streamdown='table-wrapper'] {
+    @apply w-full max-w-[calc(100vw-24px)];
+}
+
+div[data-code-block-container='true'],
+.code-block {
+    @apply max-w-[calc(100vw-24px)] !overflow-auto;
+}
+
+div[data-code-block-container='true'],
+.code-block pre {
+    @apply !bg-[var(--bg-base)]/10 dark:!bg-[var(--text-brand)]/10 !border-none !overflow-auto;
+}
+
+div[data-code-block-container='true'] pre {
+    @apply !bg-transparent !border-none;
+}
+
+div[data-code-block-container='true'] div[data-streamdown='code-block'] {
+    @apply !border-none md:!max-w-[calc(100vw-300px)];
+}
+
+table[data-streamdown='table'] {
+    @apply !border-none;
+}
+
+table[data-streamdown='table'] tr {
+    @apply !border-neutral-200 dark:!border-white/30;
+}
+
+table[data-streamdown='table'] tbody tr:last-child {
+    @apply !border-none;
+}
+
+hr[data-streamdown='horizontal-rule'] {
+    @apply !border-neutral-200 dark:!border-white/30;
+}
+
+ol[data-streamdown='ordered-list'] {
+    @apply list-decimal;
+}
+
+div[data-streamdown='mermaid-block'] {
+    @apply !bg-[var(--bg-base)]/10 dark:!bg-[var(--text-brand)]/10 !border-none;
+}
+
+div[data-streamdown='mermaid-block'] .messageText,
+div[data-streamdown='mermaid-block'] #arrowhead path {
+    @apply !fill-black dark:!fill-white;
+}
+
+div[data-streamdown='mermaid-block'] .loopText,
+div[data-streamdown='mermaid-block'] .loopText tspan {
+    @apply !fill-black dark:!fill-white;
+}
+
+div[data-streamdown='mermaid-block'] .messageLine0,
+.messageLine1,
+.flowchart-link {
+    @apply !stroke-black dark:!stroke-white;
+}
+
+/* ========== AGENTIC Brand Utilities (backed by design tokens) ========== */
+
+/* Brand gradient backgrounds */
+.acheevy-bg-gradient {
+    background: linear-gradient(135deg, rgba(226, 221, 253, 0.08), rgba(25, 25, 25, 0.02), rgba(25, 25, 25, 0.01));
+}
+
+html.dark .acheevy-bg-gradient {
+    background: linear-gradient(135deg, rgba(226, 221, 253, 0.04), rgba(25, 25, 25, 0.04), rgba(25, 25, 25, 0.02));
+}
+
+/* Brand sidebar styling */
+html.dark .acheevy-sidebar {
+    background: white !important;
+    border-right: 1px solid var(--agentic-border) !important;
+}
+
+/* Brand card with subtle gradient border */
+.acheevy-card {
+    position: relative;
+    background: white;
+    border: 1px solid var(--agentic-border);
+    border-radius: 8px;
+    transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.acheevy-card:hover {
+    border-color: #d0d0d0;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08), 0 2px 6px rgba(0, 0, 0, 0.06);
+}
+
+/* Brand primary button */
+.acheevy-btn-primary {
+    background: var(--agentic-purple-800) !important;
+    color: white !important;
+    border: none !important;
+    box-shadow: 0 2px 8px rgba(32, 9, 43, 0.15);
+    transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.acheevy-btn-primary:hover {
+    background: var(--agentic-purple-800) !important;
+    box-shadow: 0 4px 12px rgba(32, 9, 43, 0.25);
+    transform: translateY(-1px);
+}
+
+/* Brand secondary button */
+.acheevy-btn-secondary {
+    background: rgba(226, 221, 253, 0.15) !important;
+    color: var(--agentic-purple-800) !important;
+    border: 1px solid var(--agentic-border) !important;
+    transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.acheevy-btn-secondary:hover {
+    background: rgba(226, 221, 253, 0.25) !important;
+    border-color: #d0d0d0 !important;
+}
+
+/* Brand input focus */
+html.dark input:focus,
+html.dark textarea:focus {
+    border-color: var(--agentic-text-primary) !important;
+    box-shadow: 0 0 0 3px rgba(25, 25, 25, 0.08) !important;
+}
+
+/* Brand scrollbar */
+html.dark ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+html.dark ::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+html.dark ::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.12);
+    border-radius: 3px;
+}
+
+html.dark ::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 0, 0, 0.25);
+}
+
+/* Brand header border gradient */
+.acheevy-header-border {
+    border-bottom: 1px solid transparent;
+    border-image: linear-gradient(90deg, transparent, var(--agentic-border), rgba(25, 25, 25, 0.08), transparent) 1;
+}
+
+/* Subtle noise texture overlay for depth */
+html.dark .acheevy-texture::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0.01;
+    pointer-events: none;
+    z-index: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+}
+
+/* Purple gradient utility (AGENTIC brand) */
+.bg-gradient-purple {
+    background: linear-gradient(135deg, var(--agentic-purple-200), var(--agentic-purple-800));
+    color: white;
+}

@@ -1,0 +1,143 @@
+# PMO Department Structure
+# ACHEEVY governs through five PMO departments.
+# Each department has a lead Boomer_Ang and may leverage Lil_Hawks via Chicken Hawk.
+
+departments:
+  PMO-ECHO:
+    name: "Engineering"
+    description: "Build, integrate, and design — the core production department"
+    lead: API_Ang
+    members:
+      - API_Ang
+      - UI_Ang
+      - SME_Ang
+      - Flow_Ang
+      - Design_Ang
+    lil_hawks:
+      - Lil_TRAE_Hawk
+      - Lil_Coding_Hawk
+      - Lil_Agent_Hawk
+      - Lil_Flow_Hawk
+      - Lil_Viz_Hawk
+      - Lil_Blend_Hawk
+      - Lil_Sand_Hawk
+    color: "#DBEAFE"
+    triggers:
+      - build
+      - develop
+      - create
+      - design
+      - code
+      - implement
+      - frontend
+      - backend
+      - API
+      - integrate
+
+  PMO-SHIELD:
+    name: "Security"
+    description: "Authentication, encryption, compliance, and threat mitigation"
+    lead: Crypt_Ang
+    members:
+      - Crypt_Ang
+    lil_hawks:
+      - Lil_Vuln_Hawk
+    color: "#FEE2E2"
+    triggers:
+      - security
+      - auth
+      - encrypt
+      - vulnerability
+      - compliance
+      - OWASP
+      - credentials
+      - secrets
+      - penetration
+      - audit
+
+  PMO-PULSE:
+    name: "Data Ops"
+    description: "Data pipelines, analytics, ML integration, and knowledge management"
+    lead: Data_Ang
+    members:
+      - Data_Ang
+    lil_hawks:
+      - Lil_Crawl_Hawk
+      - Lil_Memory_Hawk
+      - Lil_Graph_Hawk
+      - Lil_Deep_Hawk
+    color: "#D1FAE5"
+    triggers:
+      - data
+      - analytics
+      - pipeline
+      - ETL
+      - scrape
+      - crawl
+      - memory
+      - RAG
+      - knowledge
+      - ML
+      - machine learning
+
+  PMO-LAUNCH:
+    name: "Deployment"
+    description: "CI/CD, infrastructure, Docker, cloud, and release management"
+    lead: Deploy_Ang
+    members:
+      - Deploy_Ang
+    lil_hawks:
+      - Lil_Back_Hawk
+    color: "#FFF7ED"
+    triggers:
+      - deploy
+      - infrastructure
+      - Docker
+      - CI/CD
+      - release
+      - hosting
+      - VPS
+      - cloud
+      - Kubernetes
+      - Nginx
+
+  PMO-LENS:
+    name: "QA / Review"
+    description: "Testing, quality assurance, code review, and audit gates"
+    lead: QA_Ang
+    members:
+      - QA_Ang
+    color: "#F0FDF4"
+    triggers:
+      - test
+      - QA
+      - quality
+      - review
+      - audit
+      - lint
+      - coverage
+      - validation
+
+# Special Rooms (not PMO departments but part of the org)
+special_rooms:
+  break-room:
+    name: "Break Room"
+    description: "Agents rest here between tasks"
+    color: "#FEF9C3"
+
+  hawk-nest:
+    name: "Hawk Nest"
+    description: "Chicken Hawk's command center — all Lil_Hawks report here"
+    occupant: Chicken_Hawk
+    color: "#FEF3C7"
+
+  hr-dept:
+    name: "HR Department"
+    description: "Oversees agent onboarding, KPIs, and workforce health"
+    color: "#FCE7F3"
+
+  ceo-office:
+    name: "CEO Office"
+    description: "ACHEEVY's office — the nerve center of the org"
+    occupant: ACHEEVY
+    color: "#FFF7ED"

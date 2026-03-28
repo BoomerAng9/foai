@@ -1,0 +1,66 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --hawk-gold: #C8A84E;
+  --hawk-gold-dark: #8B7635;
+  --hawk-surface: #1A1A2E;
+  --hawk-surface-light: #16213E;
+  --hawk-accent: #E94560;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  background: var(--hawk-surface);
+  color: #EAEAEA;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--hawk-surface);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--hawk-gold-dark);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--hawk-gold);
+}
+
+/* Glass card effect */
+.glass-card {
+  background: rgba(26, 26, 46, 0.8);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(200, 168, 78, 0.2);
+  border-radius: 12px;
+}
+
+/* Pulse animation for active agents */
+@keyframes hawk-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+.hawk-pulse {
+  animation: hawk-pulse 2s ease-in-out infinite;
+}
+
+/* Glow effect */
+@keyframes hawk-glow {
+  0%, 100% { box-shadow: 0 0 5px rgba(200, 168, 78, 0.3); }
+  50% { box-shadow: 0 0 20px rgba(200, 168, 78, 0.6); }
+}
+.hawk-glow {
+  animation: hawk-glow 3s ease-in-out infinite;
+}

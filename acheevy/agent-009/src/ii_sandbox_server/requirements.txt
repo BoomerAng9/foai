@@ -1,0 +1,16 @@
+# II Sandbox Server Requirements
+fastapi
+uvicorn[standard]
+pydantic
+pydantic-settings
+sqlalchemy[asyncio]
+aiosqlite
+asyncpg
+redis[hiredis]
+httpx
+aiodocker
+e2b-code-interpreter==1.2.0b5
+alembic
+python-dotenv
+python-magic
+python-multipart

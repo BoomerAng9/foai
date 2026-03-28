@@ -1,0 +1,112 @@
+{
+  "node": "acheevy-digital",
+  "role": "executive",
+  "network": "boomerang9-ecosystem",
+  "version": "1.0.0",
+  "description": "ACHEEVY — Digital CEO of the ACHIEVEMOR platform. Governs the entire digital workforce through PMO departments, Boomer_Ang operators, and the Chicken Hawk execution tier. Also serves as the public landing site.",
+
+  "hierarchy": {
+    "position": "CEO",
+    "chain": "User > ACHEEVY > PMO > Boomer_Ang > Chicken Hawk > Lil_Hawk",
+    "governance": "PCP-scored, review-gated, evidence-driven"
+  },
+
+  "provides": [
+    "executive-dispatch",
+    "pmo-governance",
+    "pcp-scoring",
+    "intent-classification",
+    "workforce-oversight",
+    "strategic-planning",
+    "org-okrs",
+    "agent-kpis",
+    { "name": "landing-pages", "path": "index.html", "description": "Public landing and marketing pages" },
+    { "name": "marketing-site", "path": "/", "description": "Brand presence and user acquisition" }
+  ],
+
+  "consumes": [
+    {
+      "node": "chicken-hawk",
+      "role": "gateway",
+      "url": "http://chicken-hawk:8000",
+      "purpose": "Tactical execution — routes to Lil_Hawk fleet"
+    },
+    {
+      "node": "aims",
+      "role": "platform",
+      "url": "http://aims:8080",
+      "purpose": "Core platform — UI, skills registry, user-facing app"
+    },
+    {
+      "node": "agent-acheevy-009",
+      "role": "brain",
+      "url": "http://agent-acheevy:8000",
+      "purpose": "ACHEEVY reasoning engine — deep thinking, strategy"
+    },
+    {
+      "node": "grammar",
+      "role": "quality",
+      "url": "http://grammar:3003",
+      "purpose": "Content quality, grammar, tone, brand voice"
+    },
+    {
+      "node": "destinations-ai",
+      "role": "research",
+      "url": "http://destinations:3001",
+      "purpose": "Travel and destination intelligence"
+    },
+    {
+      "node": "acheevy-whisper-build",
+      "role": "voice",
+      "url": "http://whisper:5173",
+      "purpose": "Voice-to-text for intent capture"
+    }
+  ],
+
+  "connections": [
+    {
+      "from": "acheevy-digital",
+      "to": "chicken-hawk",
+      "type": "dispatch",
+      "purpose": "ACHEEVY dispatches tactical work to Chicken Hawk gateway for Lil_Hawk execution"
+    },
+    {
+      "from": "acheevy-digital",
+      "to": "aims",
+      "type": "integration",
+      "purpose": "ACHEEVY is the executive layer above the AIMS platform shell"
+    },
+    {
+      "from": "acheevy-digital",
+      "to": "agent-acheevy-009",
+      "type": "reasoning",
+      "purpose": "ACHEEVY's brain — strategic reasoning and decision-making"
+    },
+    {
+      "from": "acheevy-digital",
+      "to": "myclaw",
+      "type": "referenced-by",
+      "purpose": "Deployment orchestration"
+    }
+  ],
+
+  "pmo_departments": ["PMO-ECHO", "PMO-SHIELD", "PMO-PULSE", "PMO-LAUNCH", "PMO-LENS"],
+
+  "workforce": {
+    "boomer_angs": ["API_Ang", "UI_Ang", "SME_Ang", "Flow_Ang", "Design_Ang", "Crypt_Ang", "Data_Ang", "Deploy_Ang", "QA_Ang"],
+    "lil_hawks": ["Lil_TRAE_Hawk", "Lil_Coding_Hawk", "Lil_Agent_Hawk", "Lil_Flow_Hawk", "Lil_Sand_Hawk", "Lil_Memory_Hawk", "Lil_Graph_Hawk", "Lil_Back_Hawk", "Lil_Viz_Hawk", "Lil_Blend_Hawk", "Lil_Deep_Hawk"],
+    "executives": ["ACHEEVY", "Chicken_Hawk"]
+  },
+
+  "config_files": {
+    "system_prompt": "system-prompt/acheevy.md",
+    "boomer_angs": "config/boomer_angs.yml",
+    "pmo_departments": "config/pmo-departments.yml"
+  },
+
+  "file_index": {
+    "entrypoints": ["index.html"],
+    "config": ["acheevy.conf", "docker-compose.yml", "deploy.ps1"],
+    "backend": ["backend/"]
+  }
+}

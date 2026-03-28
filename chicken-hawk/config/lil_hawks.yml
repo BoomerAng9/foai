@@ -1,0 +1,84 @@
+# Lil_Hawk fleet endpoint configuration
+# The gateway reads Lil_Hawk URLs from environment variables.
+# This file serves as a reference and can be used for local overrides.
+
+hawks:
+  Lil_TRAE_Hawk:
+    description: "Heavy coding and repo-wide refactors (TRAE Agent)"
+    internal_port: 7001
+    health_path: /health
+    run_path: /run
+    timeout_seconds: 120
+
+  Lil_Coding_Hawk:
+    description: "Plan-first, approval-gated feature work (OpenCode)"
+    internal_port: 7002
+    health_path: /health
+    run_path: /run
+    timeout_seconds: 120
+    requires_approval: true
+
+  Lil_Agent_Hawk:
+    description: "OS-level, browser, and multi-CLI workflows (Agent Zero)"
+    internal_port: 7003
+    health_path: /health
+    run_path: /run
+    timeout_seconds: 90
+
+  Lil_Flow_Hawk:
+    description: "SaaS/CRM/email/payment automations (n8n)"
+    internal_port: 5678
+    health_path: /healthz
+    run_path: /webhook/chickenhawk
+    timeout_seconds: 60
+
+  Lil_Sand_Hawk:
+    description: "Safe, containerized code execution (OpenSandbox)"
+    internal_port: 7005
+    health_path: /health
+    run_path: /run
+    timeout_seconds: 60
+    sandboxed: true
+
+  Lil_Memory_Hawk:
+    description: "Long-term RAG-style memory (CoPaw / ReMe)"
+    internal_port: 7006
+    health_path: /health
+    run_path: /run
+    timeout_seconds: 30
+
+  Lil_Graph_Hawk:
+    description: "Stateful, conditional workflows (LangGraph)"
+    internal_port: 7007
+    health_path: /health
+    run_path: /run
+    timeout_seconds: 120
+
+  Lil_Back_Hawk:
+    description: "LLM-native backend (auth, DB, APIs) (InsForge)"
+    internal_port: 7008
+    health_path: /health
+    run_path: /run
+    timeout_seconds: 90
+
+  Lil_Viz_Hawk:
+    description: "Visual workflow monitoring (SimStudio)"
+    internal_port: 7009
+    health_path: /health
+    run_path: /query
+    timeout_seconds: 30
+
+  Lil_Blend_Hawk:
+    description: "Blender 3D subject matter expert — modeling, rendering, animation, scene composition"
+    internal_port: 7011
+    health_path: /health
+    run_path: /run
+    timeout_seconds: 180
+
+  Lil_Deep_Hawk:
+    description: "SuperAgent: decomposes missions into Squads (DeerFlow 2.0)"
+    internal_port: 7010
+    health_path: /health
+    run_path: /run
+    timeout_seconds: 300
+    is_super_agent: true

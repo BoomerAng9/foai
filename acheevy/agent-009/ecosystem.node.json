@@ -1,0 +1,23 @@
+{
+  "$schema": "aims-ecosystem-node/v1",
+  "nodeId": "agent-acheevy-009",
+  "repo": "BoomerAng9/Agent-ACHEEVY-009",
+  "tier": 2,
+  "role": "agent-runtime",
+  "label": "Agent ACHEEVY-009 — Boomer_Ang Runtime",
+  "description": "Autonomous AI agent framework. Python-based (pyproject.toml + uv). E2B sandbox, Playwright MCP, chat server, production backend. Powers Boomer_Ang agent execution layer.",
+  "provides": ["agent-framework", "boomer-ang-runtime", "autonomous-tasks", "sandbox-execution"],
+  "consumes": ["aims-backend", "acheevy-chat", "grammar-engine", "whisper-stt"],
+  "endpoints": {},
+  "hub": "BoomerAng9/AIMS",
+  "peers": [
+    "BoomerAng9/AIMS",
+    "BoomerAng9/Chicken-Hawk",
+    "BoomerAng9/GRAMMAR",
+    "BoomerAng9/acheevy-whisper-build"
+  ],
+  "chatIcon": {
+    "asset": "assets/acheevy-helmet.png",
+    "rule": "ACHEEVY Helmet is the ONLY primary chat avatar."
+  }
+}

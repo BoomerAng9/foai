@@ -1,0 +1,61 @@
+name: CI — Build & Push Images
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+env:
+  PROJECT_ID: ai-managed-services
+  REGION: us-central1
+  REPO: aims-docker
+
+jobs:
+  deploy:
+    name: Build & Push to Artifact Registry
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - id: auth
+        name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Verify GCP Auth
+        continue-on-error: true
+        run: |
+          echo "=== Active account ==="
+          gcloud auth list
+          echo "=== Project ==="
+          gcloud config get-value project
+          echo "=== Cloud Build API ==="
+          gcloud services list --enabled --filter="name:cloudbuild" --project=${{ env.PROJECT_ID }} || echo "WARNING: Could not list services (may be a permissions issue)"
+
+      - name: Submit to Cloud Build
+        env:
+          SHORT_SHA: ${{ github.sha }}
+        run: |
+          set -x
+          SHORT_SHA_SHORT=${SHORT_SHA:0:7}
+          echo "Submitting with SHORT_SHA=$SHORT_SHA_SHORT"
+          gcloud builds submit \
+            --config=cloudbuild.yaml \
+            --project=${{ env.PROJECT_ID }} \
+            --substitutions=_SHORT_SHA=$SHORT_SHA_SHORT,_REGION=us-central1,_REPO=aims-docker \
+            --verbosity=debug 2>&1 || {
+              echo "::error::Cloud Build submission failed with exit code $?"
+              exit 1
+            }

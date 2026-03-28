@@ -1,0 +1,82 @@
+{
+  "node": "chicken-hawk",
+  "role": "gateway",
+  "network": "boomerang9-ecosystem",
+  "version": "1.1.0",
+  "description": "API gateway, Lil_Hawks fleet, and Hawk3D — 3D agent visualization for the sovereign AI operations layer",
+  "provides": [
+    { "name": "gateway", "path": "gateway/", "description": "Reverse proxy and API gateway" },
+    { "name": "rate-limiting", "path": "config/", "description": "Rate limiting and throttle config" },
+    { "name": "auth-proxy", "path": "gateway/", "description": "JWT validation and auth forwarding" },
+    { "name": "service-routing", "path": "config/", "description": "Service discovery and routing rules" },
+    { "name": "hawk3d", "path": "hawk3d/", "description": "3D real-time visualization of Lil_Hawks fleet (Next.js + Three.js)" },
+    { "name": "lil-hawks-fleet", "path": "hawk3d/src/store/hawkStore.ts", "description": "10-agent specialist fleet definitions and state" },
+    { "name": "agent-monitoring", "path": "hawk3d/src/lib/gatewayClient.ts", "description": "Real-time agent status polling and WebSocket monitoring" },
+    { "name": "3d-visualization", "path": "hawk3d/src/components/scene/", "description": "3D office rooms, agent avatars, VPS topology, gateway hub" }
+  ],
+  "consumes": [
+    { "node": "aims", "capability": "api-backend", "endpoint": "aims:8080" },
+    { "node": "agent-acheevy-009", "capability": "agent-api", "endpoint": "agent-acheevy-009:8000" },
+    { "node": "grammar", "capability": "chat-api", "endpoint": "grammar:3003" },
+    { "node": "destinations-ai", "capability": "api", "endpoint": "destinations-ai:3001" },
+    { "node": "acheevy-whisper-build", "capability": "whisper-ui", "endpoint": "acheevy-whisper-build:5173" }
+  ],
+  "connections": {
+    "aims": { "type": "proxies", "purpose": "Forward /api/aims/* to AIMS backend" },
+    "agent-acheevy-009": { "type": "proxies+monitors", "purpose": "Forward /api/agent/* and visualize agent status in Hawk3D" },
+    "grammar": { "type": "proxies", "purpose": "Forward /api/chat/* to GRAMMAR" },
+    "destinations-ai": { "type": "proxies", "purpose": "Forward /api/destinations/* to Destinations AI" },
+    "acheevy-whisper-build": { "type": "integrates", "purpose": "Voice commands to Lil_Hawks via Whisper STT" },
+    "myclaw": { "type": "orchestrated-by", "purpose": "Launched via myclaw docker-compose" }
+  },
+  "hawk3d": {
+    "description": "Claw3D-inspired 3D agent visualization for the Chicken-Hawk ecosystem",
+    "stack": ["next.js-14", "react-three-fiber", "three.js", "zustand", "tailwindcss"],
+    "port": 3000,
+    "features": [
+      "11 Lil_Hawks animated agent avatars",
+      "13 themed rooms (desk, gym, lab, deploy-bay, review, flow, sandbox, memory-vault, graph, deep-ops, lounge, gateway, blend-studio)",
+      "Real-time activity feed",
+      "VPS topology visualization (VPS-1 Gateway + VPS-2 Fleet + Tailscale)",
+      "Governance chain HUD (User > ACHEEVY > Boomer_Ang > Chicken Hawk > Squad > Lil_Hawks)",
+      "Janitor sweep session cleanup",
+      "Setup wizard for first-time configuration",
+      "Agent detail panel with stats and quick actions",
+      "Simulation mode for demos"
+    ],
+    "lil_hawks": [
+      { "name": "Lil_TRAE_Hawk", "backend": "TRAE Agent", "role": "Heavy Coding & Refactors" },
+      { "name": "Lil_Coding_Hawk", "backend": "OpenCode", "role": "Plan-First Feature Work" },
+      { "name": "Lil_Agent_Hawk", "backend": "Agent Zero", "role": "OS/Browser/CLI Workflows" },
+      { "name": "Lil_Flow_Hawk", "backend": "n8n", "role": "SaaS/CRM Automation" },
+      { "name": "Lil_Sand_Hawk", "backend": "OpenSandbox", "role": "Safe Code Execution" },
+      { "name": "Lil_Memory_Hawk", "backend": "CoPaw/ReMe", "role": "RAG Memory" },
+      { "name": "Lil_Graph_Hawk", "backend": "LangGraph", "role": "Stateful Workflows" },
+      { "name": "Lil_Back_Hawk", "backend": "InsForge", "role": "LLM-Native Backends" },
+      { "name": "Lil_Viz_Hawk", "backend": "SimStudio", "role": "Visual Monitoring" },
+      { "name": "Lil_Blend_Hawk", "backend": "Blender 3D", "role": "3D Modeling & Rendering SME" },
+      { "name": "Lil_Deep_Hawk", "backend": "DeerFlow 2.0", "role": "SuperAgent with Squads" }
+    ],
+    "rooms": {
+      "desk": "Coding Desks",
+      "gym": "Skill Gym",
+      "lab": "Research Lab",
+      "deploy-bay": "Deploy Bay",
+      "review-room": "PR Review Room",
+      "flow-room": "Flow Automation",
+      "sandbox": "Sandbox Zone",
+      "memory-vault": "Memory Vault",
+      "graph-room": "Graph Workshop",
+      "deep-ops": "Deep Ops Center",
+      "lounge": "Hawk Lounge",
+      "gateway": "Gateway Hub",
+      "blend-studio": "Blend Studio"
+    }
+  },
+  "file_index": {
+    "entrypoints": ["gateway/", "docker-compose.yml", "hawk3d/"],
+    "config": [".env.example", "config/", "hawk3d/.env.example"],
+    "scripts": ["scripts/"],
+    "hawk3d": ["hawk3d/src/app/page.tsx", "hawk3d/src/store/hawkStore.ts", "hawk3d/src/components/scene/Hawk3DScene.tsx"]
+  }
+}

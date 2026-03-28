@@ -1,0 +1,69 @@
+# =============================================================================
+# Chicken Hawk — Gateway Stack (VPS-1)
+# Deploy with: docker compose -f docker-compose.gateway.yml up -d
+# =============================================================================
+
+version: "3.9"
+
+networks:
+  gateway-net:
+    driver: bridge
+
+services:
+
+  # ---------------------------------------------------------------------------
+  # Chicken Hawk Gateway — orchestrator / intent router
+  # ---------------------------------------------------------------------------
+  gateway:
+    build:
+      context: ./gateway
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    environment:
+      GATEWAY_HOST: ${GATEWAY_HOST:-0.0.0.0}
+      GATEWAY_PORT: ${GATEWAY_PORT:-8000}
+      GATEWAY_SECRET: ${GATEWAY_SECRET:?GATEWAY_SECRET is required}
+      LLM_PROVIDER: ${LLM_PROVIDER:-openai}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      OLLAMA_BASE_URL: ${OLLAMA_BASE_URL:-}
+      TRAE_HAWK_URL: ${TRAE_HAWK_URL:?TRAE_HAWK_URL is required}
+      CODING_HAWK_URL: ${CODING_HAWK_URL:?CODING_HAWK_URL is required}
+      AGENT_HAWK_URL: ${AGENT_HAWK_URL:?AGENT_HAWK_URL is required}
+      FLOW_HAWK_URL: ${FLOW_HAWK_URL:?FLOW_HAWK_URL is required}
+      SAND_HAWK_URL: ${SAND_HAWK_URL:?SAND_HAWK_URL is required}
+      MEMORY_HAWK_URL: ${MEMORY_HAWK_URL:?MEMORY_HAWK_URL is required}
+      GRAPH_HAWK_URL: ${GRAPH_HAWK_URL:?GRAPH_HAWK_URL is required}
+      BACK_HAWK_URL: ${BACK_HAWK_URL:?BACK_HAWK_URL is required}
+      VIZ_HAWK_URL: ${VIZ_HAWK_URL:?VIZ_HAWK_URL is required}
+      DEEP_HAWK_URL: ${DEEP_HAWK_URL:?DEEP_HAWK_URL is required}
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+      TRACE_ENABLED: ${TRACE_ENABLED:-true}
+    ports:
+      - "${GATEWAY_PORT:-8000}:8000"
+    networks:
+      - gateway-net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  # ---------------------------------------------------------------------------
+  # SimStudio — Visual mission control UI (also on VPS-1 for operator access)
+  # ---------------------------------------------------------------------------
+  simstudio:
+    image: ghcr.io/chickenhawk/simstudio-hawk:latest
+    restart: unless-stopped
+    environment:
+      GATEWAY_URL: http://gateway:8000
+      DEEP_HAWK_URL: ${DEEP_HAWK_URL:-}
+      GRAPH_HAWK_URL: ${GRAPH_HAWK_URL:-}
+      VIZ_HAWK_URL: ${VIZ_HAWK_URL:-}
+    ports:
+      - "${SIMSTUDIO_PORT:-3001}:3001"
+    depends_on:
+      - gateway
+    networks:
+      - gateway-net
