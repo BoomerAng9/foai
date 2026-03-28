@@ -10,11 +10,53 @@ Redesign the Chat w/ ACHEEVY interface to production-grade quality with: a `+` a
 
 ## Design Decisions
 
-- Tier selector lives inside the `+` menu, not the input bar. Once selected, it persists for the session. The input bar shows a read-only tier indicator.
+- Tier selector lives inside the `+` menu, not the input bar. Once selected, it persists for the session. The input bar shows a read-only tier indicator. Only available to users with a subscription — pay-per-use users get the default path.
 - LUC popup appears before every job execution with ACCEPT / ADJUST / STOP. After the 3rd estimate in a session, an auto-accept toggle is revealed.
-- LUC estimates always run on a free model (MiniMax M2.5 or equivalent). The estimate itself costs the user nothing.
+- LUC estimates ALWAYS run on a free model. No exceptions, even for LFG tier estimation. The estimate itself costs the user nothing.
 - Users never see model names, tool names, or agent names. Cost breakdowns use plain language ("AI analysis & response", "Web research", "Summary & formatting").
 - "The Deploy Platform" branding appears subtly in the input bar status line.
+- LUC popup shows BOTH token impact AND dollar cost so users overstand the true cost of what they're requesting.
+
+## Revenue & Access Model
+
+### Two entry points — subscription or pay-per-use:
+
+**Subscription users:**
+- Full cost breakdown in real-time during execution
+- Full Purchase Order with line items after execution
+- Tier selector available (can toggle Premium / Bucket List / LFG)
+- Needs Analysis (Guide Me) and Manage It modes both available
+- 5 use cases delivered with every aiPLUG (can prompt for more using free model, no charge)
+
+**Pay-per-use users (no subscription):**
+- See total cost only — no breakdown
+- Simple receipt of purchase (not a full Purchase Order)
+- Surcharge added on top of actual API costs (OpenRouter + other services) — this is the revenue margin
+- Default execution path only (no tier toggle)
+- 5 use cases delivered with every aiPLUG
+
+**No account:**
+- Simple receipt of purchase
+- No cost breakdown
+- No execution history
+
+**Dev stage:** All costs covered internally. Fees are simulated but never prompt payment to anyone. Payment integration comes later.
+
+## Process Gating — RFP to BAMARAM
+
+Every job follows the RFP → BAMARAM pipeline:
+- Charter (customer-facing artifact) — what the user sees
+- Ledger (internal audit artifact) — full cost basis, margins, model names, routing logic
+- Model names, markup percentages, internal rates, and partner deals are NEVER in the Charter
+- Purchase Order goes to: ledger, logs, and user account
+
+## aiPLUG Delivery
+
+Every aiPLUG ships with:
+- **Needs Analysis summary** (if Guide Me path was used) — this is as important as the Plug itself
+- **5 Use Case summary** — auto-generated, delivered with the aiPLUG
+- User can prompt for additional use cases (uses free model, no token charge)
+- BAMARAM seal on completion
 
 ## Execution Tiers
 
@@ -68,11 +110,19 @@ Popover opens from the `+` button. Seven sources in three groups:
 
 ### Backend API
 LUC needs its own backend service with these endpoints:
-- `POST /api/luc/estimate` — Takes task description, tier, and context. Returns cost breakdown with service names (user-friendly, not model names), estimated tokens, and total cost. Always uses a free model for estimation.
-- `POST /api/luc/accept` — User accepted the estimate. Begins execution.
+- `POST /api/luc/estimate` — Takes task description, tier, and context. Returns both token impact AND dollar cost. Always uses a free model for estimation — never paid. Service names are user-friendly (no model names). For pay-per-use users, returns total only. For subscribers, returns full breakdown.
+- `POST /api/luc/accept` — User accepted the estimate. Begins execution. Creates a job entry in the ledger.
 - `POST /api/luc/adjust` — User wants to change parameters (tier, scope). Returns new estimate.
-- `POST /api/luc/stop` — User cancelled. No execution, no charge.
-- `GET /api/luc/receipt/:jobId` — Returns actual cost breakdown after execution with estimate vs actual comparison.
+- `POST /api/luc/stop` — User cancelled. No execution, no charge. Logged in ledger as cancelled.
+- `GET /api/luc/receipt/:jobId` — Returns Purchase Order for subscribers (full breakdown with token + dollar costs) or simple receipt for pay-per-use users (total only). Model names never included in either format.
+
+### Dual-Artifact System (Charter/Ledger)
+Every LUC job produces two artifacts:
+- **Charter** (customer-facing) — sent to user account. Shows services used, token counts, and costs in plain language. No model names, no margins, no internal rates.
+- **Ledger** (internal audit) — logs actual model names, API costs, routing decisions, margins, and surcharges. Never exposed to users. Used for internal auditing and revenue tracking.
+
+### Pay-Per-Use Surcharge
+For users without a subscription, a surcharge is applied on top of actual API costs (OpenRouter + Brave + Firecrawl + any other service). This surcharge is the revenue margin. The user sees only the final total — never the base cost or surcharge breakdown separately.
 
 ### Frontend Component: LUC Popup
 - Modal overlay that appears before every job execution
@@ -84,8 +134,9 @@ LUC needs its own backend service with these endpoints:
 
 ### Frontend Component: LUC Receipt
 - Collapsible section attached to every ACHEEVY response
-- Collapsed: shows "COST BREAKDOWN" label, total cost, and estimate variance (e.g., "15% under estimate" in green)
-- Expanded: shows per-service cost breakdown (same user-friendly labels as estimate)
+- **Subscriber view (expanded):** "COST BREAKDOWN" label, per-service breakdown (tokens + dollars), estimate vs actual variance, full Purchase Order
+- **Pay-per-use view (collapsed):** Total cost only, no breakdown. Simple receipt.
+- **No account view:** Total cost, receipt format, no history saved
 
 ## Real Streaming (SSE)
 
