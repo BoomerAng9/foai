@@ -17,7 +17,7 @@ export async function POST(request: NextRequest) {
   try {
     const userId = await getUserId(request);
     const body = await request.json();
-    const { message, conversation_id } = body;
+    const { message, conversation_id, model } = body;
 
     if (!message || typeof message !== 'string') {
       return NextResponse.json({ error: 'message required' }, { status: 400 });
@@ -32,7 +32,7 @@ export async function POST(request: NextRequest) {
     let history: Array<{ role: 'user' | 'assistant' | 'system'; content: string }> = [];
     if (convId) {
       const msgs = await getMessages(convId);
-      history = msgs.map((m: { role: string; content: string }) => ({
+      history = (msgs as Array<{ role: string; content: string }>).map((m) => ({
         role: m.role === 'acheevy' ? 'assistant' as const : m.role as 'user' | 'system',
         content: m.content,
       }));
@@ -43,6 +43,7 @@ export async function POST(request: NextRequest) {
       convId || 'temp',
       message,
       history,
+      model,
     );
 
     return NextResponse.json({

@@ -20,7 +20,7 @@ OPENCLAW_URL = os.getenv(
     "https://openclaw-service-939270059361.us-central1.run.app",
 )
 
-OPENROUTER_MODEL = os.getenv("OPENROUTER_MODEL", "google/gemini-2.5-flash")
+OPENROUTER_MODEL = os.getenv("OPENROUTER_MODEL", "minimax/minimax-m2.7")
 
 PORT = int(os.getenv("PORT", "8080"))
 

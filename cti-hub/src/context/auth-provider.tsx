@@ -8,7 +8,7 @@ import {
   useState,
   type ReactNode,
 } from 'react';
-import { onAuthStateChanged, signOut as firebaseSignOut, type User } from 'firebase/auth';
+import { onAuthStateChanged, getRedirectResult, signOut as firebaseSignOut, type User } from 'firebase/auth';
 import { getFirebaseAuth } from '@/lib/firebase';
 import { isAllowedEmail } from '@/lib/allowlist';
 import {
@@ -120,6 +120,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // Firebase onAuthStateChanged listener — THE auth loop
   useEffect(() => {
     const auth = getFirebaseAuth();
+
+    // Handle redirect result (from signInWithRedirect fallback)
+    getRedirectResult(auth).catch(() => {});
+
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       setLoading(true);
       try {
@@ -138,10 +142,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           }
 
           setDenied(false);
-          setUser(firebaseUser);
 
-          // Auth loop: persist session cookie + provision in Neon
+          // Auth loop: persist session cookie FIRST (before setting user state)
+          // This ensures the cookie exists before any redirect triggers
           await provisionFirebaseUser(firebaseUser);
+
+          // NOW set user state — this triggers the login page redirect
+          setUser(firebaseUser);
 
           // Hydrate profile, subscription, orgs, tier limits
           await hydrateProfile(firebaseUser);

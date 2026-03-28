@@ -1,25 +1,14 @@
 'use client';
 
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { Wifi, WifiOff, Zap, Clock, Activity, Coins, Server, Users } from 'lucide-react';
+import { Wifi, WifiOff, Activity } from 'lucide-react';
 
 const STATE_ENGINE_URL = 'wss://live-look-in-state-939270059361.us-central1.run.app/ws';
 const STATE_HTTP_URL = 'https://live-look-in-state-939270059361.us-central1.run.app/state';
 const LUC_METRICS_URL = process.env.NEXT_PUBLIC_LUC_URL || '';
 
-interface AgentState {
-  name: string;
-  status: string;
-  currentTask?: string;
-  lastUpdated?: string;
-}
-
-interface ServiceState {
-  url: string;
-  status: string;
-  http_code: number | null;
-}
-
+interface AgentState { name: string; status: string; currentTask?: string; }
+interface ServiceState { url: string; status: string; http_code: number | null; }
 interface WorldState {
   agents: Record<string, AgentState>;
   services: Record<string, ServiceState>;
@@ -27,88 +16,43 @@ interface WorldState {
   jobs_log: Array<{ agent: string; task: string; status: string; timestamp: string }>;
   last_poll: string | null;
 }
-
 interface LucMetrics {
-  total_spend_usd: number;
-  daily_spend_usd: number;
-  daily_budget_usd: number;
-  daily_remaining_usd: number;
-  total_events: number;
-  total_tokens_in: number;
-  total_tokens_out: number;
-  cost_by_model: Record<string, number>;
-  cost_by_service: Record<string, number>;
+  total_spend_usd: number; daily_spend_usd: number; daily_budget_usd: number;
+  daily_remaining_usd: number; total_events: number;
+  total_tokens_in: number; total_tokens_out: number;
+  cost_by_model: Record<string, number>; cost_by_service: Record<string, number>;
 }
 
-const STATUS_COLORS: Record<string, string> = {
-  healthy: '#22c55e', online: '#22c55e', active: '#3b82f6', monitoring: '#3b82f6',
-  directive_received: '#f59e0b', unhealthy: '#ef4444', unreachable: '#ef4444',
-  offline: '#6b7280', no_data: '#6b7280',
+const STATUS_MAP: Record<string, { color: string; label: string }> = {
+  healthy: { color: 'bg-signal-live', label: 'LIVE' },
+  online: { color: 'bg-signal-live', label: 'LIVE' },
+  active: { color: 'bg-signal-info', label: 'ACTIVE' },
+  monitoring: { color: 'bg-signal-info', label: 'WATCH' },
+  directive_received: { color: 'bg-signal-warn', label: 'RECV' },
+  unhealthy: { color: 'bg-signal-error', label: 'DOWN' },
+  unreachable: { color: 'bg-signal-error', label: 'FAIL' },
+  offline: { color: 'bg-fg-ghost', label: 'OFF' },
 };
 
-function statusColor(s: string) { return STATUS_COLORS[s] || '#6b7280'; }
+function statusInfo(s: string) { return STATUS_MAP[s] || { color: 'bg-fg-ghost', label: s.toUpperCase() }; }
 
-// PMO Office Structure — real organizational hierarchy
 const PMO_OFFICES = [
-  {
-    id: 'TECH-PMO', name: 'Technology', supervisor: 'CTO_Ang',
-    managers: ['Architecture_Ang', 'Engineering_Ang', 'Infrastructure_Ang'],
-    hawks: ['Lil_TRAE_Hawk', 'Lil_Coding_Hawk', 'Lil_Back_Hawk'],
-    color: '#3b82f6',
-  },
-  {
-    id: 'FIN-PMO', name: 'Finance', supervisor: 'CFO_Ang',
-    managers: ['Receivables_Ang', 'Bookkeeping_Ang', 'Pricing_Ang'],
-    hawks: [],
-    color: '#22c55e',
-  },
-  {
-    id: 'OPS-PMO', name: 'Operations', supervisor: 'COO_Ang',
-    managers: ['Workflow_Ang', 'Capacity_Ang', 'Quality_Ang'],
-    hawks: ['Lil_Flow_Hawk', 'Lil_Agent_Hawk'],
-    color: '#f59e0b',
-  },
-  {
-    id: 'MKT-PMO', name: 'Marketing', supervisor: 'CMO_Ang',
-    managers: ['Growth_Ang', 'Campaign_Ang', 'Partnerships_Ang'],
-    hawks: ['Lil_Deep_Hawk'],
-    color: '#ec4899',
-  },
-  {
-    id: 'DSN-PMO', name: 'Design', supervisor: 'CDO_Ang',
-    managers: ['UX_Ang', 'Brand_Ang', 'Interface_Ang'],
-    hawks: ['Lil_Viz_Hawk', 'Lil_Blend_Hawk'],
-    color: '#a855f7',
-  },
-  {
-    id: 'PRD-PMO', name: 'Product & Publications', supervisor: 'CPO_Ang',
-    managers: ['Product_Ang', 'Publications_Ang', 'Documentation_Ang'],
-    hawks: [],
-    color: '#06b6d4',
-  },
-  {
-    id: 'HR-PMO', name: 'Human Resources', supervisor: 'Betty-Ann_Ang',
-    managers: ['Aria_Ang', 'Rumi_Ang', 'Eamon_Ang'],
-    hawks: [],
-    color: '#f97316',
-  },
-  {
-    id: 'DT-PMO', name: 'Digital Transformation', supervisor: 'Astra_Ang',
-    managers: ['Atlas_Ang', 'Blueprint_Ang', 'Sentinel_Ang'],
-    hawks: ['Lil_Sand_Hawk', 'Lil_Memory_Hawk', 'Lil_Graph_Hawk'],
-    color: '#8b5cf6',
-    bench: ['Ledger_Ang', 'Proof_Ang'],
-  },
+  { id: 'TECH', name: 'Technology', super: 'CTO_Ang', managers: ['Architecture_Ang', 'Engineering_Ang', 'Infrastructure_Ang'], hawks: ['TRAE', 'Coding', 'Back'] },
+  { id: 'FIN', name: 'Finance', super: 'CFO_Ang', managers: ['Receivables_Ang', 'Bookkeeping_Ang', 'Pricing_Ang'], hawks: [] },
+  { id: 'OPS', name: 'Operations', super: 'COO_Ang', managers: ['Workflow_Ang', 'Capacity_Ang', 'Quality_Ang'], hawks: ['Flow', 'Agent'] },
+  { id: 'MKT', name: 'Marketing', super: 'CMO_Ang', managers: ['Growth_Ang', 'Campaign_Ang', 'Partnerships_Ang'], hawks: ['Deep'] },
+  { id: 'DSN', name: 'Design', super: 'CDO_Ang', managers: ['UX_Ang', 'Brand_Ang', 'Interface_Ang'], hawks: ['Viz', 'Blend'] },
+  { id: 'PRD', name: 'Product', super: 'CPO_Ang', managers: ['Product_Ang', 'Publications_Ang', 'Documentation_Ang'], hawks: [] },
+  { id: 'HR', name: 'Human Resources', super: 'Betty-Ann_Ang', managers: ['Aria_Ang', 'Rumi_Ang', 'Eamon_Ang'], hawks: [] },
+  { id: 'DT', name: 'Digital Transform', super: 'Astra_Ang', managers: ['Atlas_Ang', 'Blueprint_Ang', 'Sentinel_Ang'], hawks: ['Sand', 'Memory', 'Graph'] },
 ];
-
-const COMMAND = { name: 'Command', members: ['ACHEEVY', 'Chicken Hawk'], color: '#00A3FF' };
 
 export default function OperationsFloor() {
   const [state, setState] = useState<WorldState | null>(null);
   const [lucMetrics, setLucMetrics] = useState<LucMetrics | null>(null);
   const [connected, setConnected] = useState(false);
   const wsRef = useRef<WebSocket | null>(null);
-  const reconnectRef = useRef<ReturnType<typeof setTimeout>>();
+  const reconnectRef = useRef<ReturnType<typeof setTimeout>>(undefined);
 
   const connect = useCallback(() => {
     try {
@@ -124,11 +68,8 @@ export default function OperationsFloor() {
   useEffect(() => {
     fetch(STATE_HTTP_URL).then(r => r.json()).then(d => setState(d)).catch(() => {});
     connect();
-    // Poll LUC metrics
     const lucInterval = setInterval(() => {
-      if (LUC_METRICS_URL) {
-        fetch(`${LUC_METRICS_URL}/metrics`).then(r => r.json()).then(d => setLucMetrics(d)).catch(() => {});
-      }
+      if (LUC_METRICS_URL) fetch(`${LUC_METRICS_URL}/metrics`).then(r => r.json()).then(d => setLucMetrics(d)).catch(() => {});
     }, 10000);
     return () => { clearTimeout(reconnectRef.current); wsRef.current?.close(); clearInterval(lucInterval); };
   }, [connect]);
@@ -140,241 +81,190 @@ export default function OperationsFloor() {
   const healthyCount = Object.values(services).filter(s => s.status === 'healthy').length;
   const totalServices = Object.keys(services).length;
 
-  function getAgentStatus(name: string): string {
-    return agents[name]?.status || 'idle';
-  }
-
-  function getAgentTask(name: string): string {
-    return agents[name]?.currentTask || 'Standing by';
-  }
+  function getStatus(name: string) { return agents[name]?.status || 'idle'; }
+  function getTask(name: string) { return agents[name]?.currentTask || '—'; }
 
   return (
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <div className="w-12 h-12 rounded-2xl bg-[#00A3FF]/10 flex items-center justify-center text-[#00A3FF]">
-            <Activity className="w-6 h-6" />
+        <div>
+          <div className="flex items-center gap-3 mb-1">
+            <Activity className="w-5 h-5 text-fg-tertiary" />
+            <h1 className="text-2xl font-light tracking-tight">
+              Operations <span className="font-bold">Floor</span>
+            </h1>
           </div>
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight">Operations Floor</h1>
-            <p className="text-sm text-slate-500">Real-time agent fleet, services, and cost tracking</p>
-          </div>
+          <p className="label-mono">Real-time fleet monitoring</p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
           {connected ? (
-            <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-emerald-50 border border-emerald-200">
-              <Wifi className="w-3.5 h-3.5 text-emerald-600" />
-              <span className="text-xs font-bold text-emerald-700">LIVE</span>
+            <div className="flex items-center gap-2 px-3 py-1.5 border border-signal-live">
+              <Wifi className="w-3.5 h-3.5 text-signal-live" />
+              <span className="font-mono text-[10px] font-bold text-signal-live">CONNECTED</span>
             </div>
           ) : (
-            <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-red-50 border border-red-200">
-              <WifiOff className="w-3.5 h-3.5 text-red-500" />
-              <span className="text-xs font-bold text-red-600">RECONNECTING</span>
+            <div className="flex items-center gap-2 px-3 py-1.5 border border-signal-error">
+              <WifiOff className="w-3.5 h-3.5 text-signal-error" />
+              <span className="font-mono text-[10px] font-bold text-signal-error">RECONNECTING</span>
             </div>
           )}
         </div>
       </div>
 
-      {/* Top Metrics Row */}
-      <div className="grid grid-cols-6 gap-3">
+      {/* Metrics Strip */}
+      <div className="grid grid-cols-6 gap-px bg-border">
         {[
           { label: 'Revenue', value: `$${metrics.total_revenue.toFixed(2)}` },
           { label: 'Enrollments', value: metrics.enrollment_count },
           { label: 'Open Seats', value: metrics.open_seats_tracked },
           { label: 'Fleet', value: `${healthyCount}/${totalServices}` },
-          { label: 'Tokens Today', value: lucMetrics ? (lucMetrics.total_tokens_in + lucMetrics.total_tokens_out).toLocaleString() : '—' },
-          { label: 'Spend Today', value: lucMetrics ? `$${lucMetrics.daily_spend_usd.toFixed(4)}` : '—' },
+          { label: 'Tokens', value: lucMetrics ? (lucMetrics.total_tokens_in + lucMetrics.total_tokens_out).toLocaleString() : '—' },
+          { label: 'Spend', value: lucMetrics ? `$${lucMetrics.daily_spend_usd.toFixed(4)}` : '—' },
         ].map(m => (
-          <div key={m.label} className="bg-white border border-slate-200 rounded-xl p-3 text-center">
-            <p className="text-lg font-bold text-slate-900">{m.value}</p>
-            <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">{m.label}</p>
+          <div key={m.label} className="bg-bg-surface p-4 text-center">
+            <p className="text-lg font-mono font-bold">{m.value}</p>
+            <p className="label-mono mt-1">{m.label}</p>
           </div>
         ))}
       </div>
 
-      {/* Floor Plan */}
-      <div className="grid grid-cols-3 gap-4">
+      {/* Command + PMO Grid */}
+      <div className="grid grid-cols-3 gap-px bg-border">
         {/* Command Center */}
-        <div className="bg-white border-2 border-[#00A3FF]/20 rounded-xl p-4">
-          <div className="flex items-center gap-2 mb-3">
-            <div className="w-2 h-2 rounded-full animate-pulse" style={{ backgroundColor: COMMAND.color }} />
-            <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: COMMAND.color }}>Command</span>
-          </div>
-          <div className="space-y-2">
-            {COMMAND.members.map(name => {
-              const status = getAgentStatus(name);
-              return (
-                <div key={name} className="flex items-center gap-2 p-2 rounded-lg bg-slate-50">
-                  <div className="w-6 h-6 rounded-lg bg-slate-900 text-white flex items-center justify-center text-[8px] font-black">
-                    {name === 'ACHEEVY' ? 'A' : name === 'Chicken Hawk' ? 'CH' : 'H'}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-[11px] font-bold text-slate-900 truncate">{name}</p>
-                    <p className="text-[9px] text-slate-500 truncate">{getAgentTask(name)}</p>
-                  </div>
-                  <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: statusColor(status) }} />
-                </div>
-              );
-            })}
-          </div>
+        <div className="bg-bg-surface p-5">
+          <p className="label-mono mb-3">Command</p>
+          {['ACHEEVY', 'Chicken Hawk'].map(name => {
+            const s = statusInfo(getStatus(name));
+            return (
+              <div key={name} className="flex items-center gap-3 py-2 border-b border-border last:border-0">
+                <span className={`led ${s.color}`} />
+                <span className="font-mono text-xs font-bold flex-1">{name}</span>
+                <span className="font-mono text-[10px] text-fg-tertiary">{s.label}</span>
+              </div>
+            );
+          })}
         </div>
 
         {/* PMO Offices */}
         {PMO_OFFICES.map(office => (
-          <div key={office.id} className="bg-white border border-slate-200 rounded-xl p-4">
-            <div className="flex items-center gap-2 mb-3">
-              <div className="w-2 h-2 rounded-full" style={{ backgroundColor: office.color }} />
-              <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: office.color }}>{office.name}</span>
-              <span className="text-[9px] text-slate-400 ml-auto">{office.id}</span>
+          <div key={office.id} className="bg-bg-surface p-5">
+            <div className="flex items-center justify-between mb-3">
+              <p className="label-mono">{office.name}</p>
+              <span className="font-mono text-[9px] text-fg-ghost">{office.id}</span>
             </div>
 
             {/* Supervisor */}
-            <div className="flex items-center gap-2 p-2 rounded-lg bg-slate-50 border border-slate-100 mb-2">
-              <div className="w-5 h-5 rounded bg-slate-900 text-white flex items-center justify-center text-[7px] font-black shrink-0">S</div>
-              <div className="flex-1 min-w-0">
-                <p className="text-[10px] font-bold text-slate-900 truncate">{office.supervisor}</p>
-                <p className="text-[8px] text-slate-500">Supervisor</p>
-              </div>
-              <div className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: statusColor(getAgentStatus(office.supervisor)) }} />
+            <div className="flex items-center gap-2 py-1.5 mb-2 border-b border-border">
+              <span className={`led ${statusInfo(getStatus(office.super)).color}`} />
+              <span className="font-mono text-[11px] font-bold flex-1">{office.super}</span>
+              <span className="font-mono text-[9px] text-fg-ghost">SUP</span>
             </div>
 
             {/* Managers */}
-            <div className="space-y-1 mb-2">
-              {office.managers.map(name => {
-                const status = getAgentStatus(name);
-                const isActive = status === 'active' || status === 'monitoring';
-                return (
-                  <div key={name} className={`flex items-center gap-2 p-1.5 rounded-lg transition-all ${isActive ? 'bg-blue-50 border border-blue-100' : 'hover:bg-slate-50'}`}>
-                    <span className="text-[10px]">🪃</span>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-[10px] font-bold text-slate-800 truncate">{name}</p>
-                      {isActive && <p className="text-[8px] text-blue-600 truncate">{getAgentTask(name)}</p>}
-                    </div>
-                    <div className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: statusColor(status) }} />
-                  </div>
-                );
-              })}
-            </div>
-
-            {/* Bench (DT-PMO only) */}
-            {'bench' in office && (office as typeof office & { bench: string[] }).bench?.length > 0 && (
-              <div className="border-t border-slate-100 pt-1.5 mb-2">
-                <div className="flex flex-wrap gap-1">
-                  {(office as typeof office & { bench: string[] }).bench.map((name: string) => (
-                    <span key={name} className="text-[8px] px-1.5 py-0.5 rounded bg-purple-50 text-purple-600 font-mono">{name}</span>
-                  ))}
+            {office.managers.map(name => {
+              const s = statusInfo(getStatus(name));
+              const task = getTask(name);
+              return (
+                <div key={name} className="flex items-center gap-2 py-1 group">
+                  <span className={`led ${s.color}`} />
+                  <span className="font-mono text-[10px] text-fg-secondary flex-1 truncate group-hover:text-fg transition-colors">
+                    {name}
+                  </span>
+                  {task !== '—' && (
+                    <span className="font-mono text-[9px] text-signal-info truncate max-w-[80px]">{task}</span>
+                  )}
                 </div>
-              </div>
-            )}
+              );
+            })}
 
             {/* Hawks */}
             {office.hawks.length > 0 && (
-              <div className="border-t border-slate-100 pt-1.5">
-                <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest mb-1">Hawks</p>
-                <div className="flex flex-wrap gap-1">
-                  {office.hawks.map(hawk => (
-                    <span key={hawk} className="text-[8px] px-1.5 py-0.5 rounded bg-slate-100 text-slate-500 font-mono">
-                      {hawk.replace('Lil_', '').replace('_Hawk', '')}
-                    </span>
-                  ))}
-                </div>
+              <div className="flex gap-1.5 mt-2 pt-2 border-t border-border">
+                {office.hawks.map(h => (
+                  <span key={h} className="font-mono text-[9px] text-fg-ghost px-1.5 py-0.5 border border-border">
+                    {h}
+                  </span>
+                ))}
               </div>
             )}
           </div>
         ))}
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
-        {/* Services */}
-        <div>
-          <h2 className="text-sm font-bold text-slate-400 uppercase tracking-widest mb-3 flex items-center gap-2">
-            <Server className="w-3.5 h-3.5" /> Services ({totalServices})
-          </h2>
-          <div className="bg-white border border-slate-200 rounded-xl divide-y divide-slate-100 overflow-hidden">
-            {Object.entries(services).map(([name, svc]) => (
-              <div key={name} className="flex items-center gap-3 px-4 py-2.5">
-                <div className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: statusColor(svc.status) }} />
-                <span className="text-xs font-bold text-slate-800 flex-1">{name}</span>
-                <span className="text-[9px] font-bold uppercase px-1.5 py-0.5 rounded"
-                  style={{ backgroundColor: statusColor(svc.status) + '15', color: statusColor(svc.status) }}>
-                  {svc.status}
-                </span>
-              </div>
-            ))}
-            {totalServices === 0 && <p className="text-xs text-slate-400 text-center py-6">Waiting for data...</p>}
+      {/* Services + Activity */}
+      <div className="grid grid-cols-2 gap-px bg-border">
+        <div className="bg-bg-surface p-5">
+          <p className="label-mono mb-3">Services ({totalServices})</p>
+          <div className="space-y-0">
+            {Object.entries(services).map(([name, svc]) => {
+              const s = statusInfo(svc.status);
+              return (
+                <div key={name} className="flex items-center gap-3 py-2 border-b border-border last:border-0">
+                  <span className={`led ${s.color}`} />
+                  <span className="text-xs font-medium flex-1">{name}</span>
+                  <span className="font-mono text-[10px] text-fg-tertiary">{s.label}</span>
+                </div>
+              );
+            })}
+            {totalServices === 0 && <p className="label-mono py-6 text-center">Waiting for data</p>}
           </div>
         </div>
 
-        {/* Jobs Log */}
-        <div>
-          <h2 className="text-sm font-bold text-slate-400 uppercase tracking-widest mb-3 flex items-center gap-2">
-            <Zap className="w-3.5 h-3.5" /> Recent Activity
-          </h2>
-          <div className="bg-white border border-slate-200 rounded-xl overflow-hidden">
-            {jobsLog.length > 0 ? (
-              <div className="divide-y divide-slate-100 max-h-72 overflow-y-auto">
-                {jobsLog.slice(-15).reverse().map((job, i) => (
-                  <div key={i} className="px-4 py-2.5 flex items-center gap-3">
-                    <span className="text-[10px]">🪃</span>
-                    <span className="text-[10px] font-bold text-slate-800 w-20 shrink-0 truncate">{job.agent}</span>
-                    <span className="text-[10px] text-slate-500 flex-1 truncate">{job.task}</span>
-                    <span className="text-[9px] text-slate-400 font-mono flex items-center gap-1 shrink-0">
-                      <Clock className="w-2.5 h-2.5" />
-                      {new Date(job.timestamp).toLocaleTimeString()}
-                    </span>
-                  </div>
-                ))}
+        <div className="bg-bg-surface p-5">
+          <p className="label-mono mb-3">Recent Activity</p>
+          <div className="space-y-0 max-h-72 overflow-y-auto">
+            {jobsLog.slice(-15).reverse().map((job, i) => (
+              <div key={i} className="flex items-center gap-3 py-2 border-b border-border last:border-0">
+                <span className="font-mono text-[10px] font-bold w-20 shrink-0 truncate">{job.agent}</span>
+                <span className="text-[11px] text-fg-secondary flex-1 truncate">{job.task}</span>
+                <span className="font-mono text-[9px] text-fg-ghost shrink-0">
+                  {new Date(job.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                </span>
               </div>
-            ) : (
-              <p className="text-xs text-slate-400 text-center py-6">No activity yet</p>
-            )}
+            ))}
+            {jobsLog.length === 0 && <p className="label-mono py-6 text-center">No activity</p>}
           </div>
         </div>
       </div>
 
-      {/* LUC Cost Breakdown */}
+      {/* Cost Breakdown */}
       {lucMetrics && (
-        <div>
-          <h2 className="text-sm font-bold text-slate-400 uppercase tracking-widest mb-3 flex items-center gap-2">
-            <Coins className="w-3.5 h-3.5" /> Cost Breakdown
-          </h2>
-          <div className="grid grid-cols-2 gap-4">
-            <div className="bg-white border border-slate-200 rounded-xl p-4">
-              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3">By Service</p>
-              <div className="space-y-2">
-                {Object.entries(lucMetrics.cost_by_service).map(([svc, cost]) => (
-                  <div key={svc} className="flex items-center justify-between">
-                    <span className="text-xs text-slate-600">{svc}</span>
-                    <span className="text-xs font-mono font-bold text-slate-900">${cost.toFixed(4)}</span>
-                  </div>
-                ))}
-                {Object.keys(lucMetrics.cost_by_service).length === 0 && (
-                  <p className="text-[10px] text-slate-400">No usage recorded</p>
-                )}
+        <div className="grid grid-cols-2 gap-px bg-border">
+          <div className="bg-bg-surface p-5">
+            <p className="label-mono mb-3">Cost by Service</p>
+            {Object.entries(lucMetrics.cost_by_service).map(([svc, cost]) => (
+              <div key={svc} className="flex items-center justify-between py-1.5">
+                <span className="text-xs text-fg-secondary">{svc}</span>
+                <span className="font-mono text-xs font-bold">${cost.toFixed(4)}</span>
               </div>
-            </div>
-            <div className="bg-white border border-slate-200 rounded-xl p-4">
-              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3">Budget</p>
-              <div className="space-y-3">
-                <div>
-                  <div className="flex justify-between text-[10px] mb-1">
-                    <span className="text-slate-500">Daily spend</span>
-                    <span className="font-bold text-slate-900">${lucMetrics.daily_spend_usd.toFixed(4)}</span>
-                  </div>
-                  <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
-                    <div className="h-full rounded-full transition-all"
-                      style={{
-                        width: `${Math.min((lucMetrics.daily_spend_usd / lucMetrics.daily_budget_usd) * 100, 100)}%`,
-                        backgroundColor: lucMetrics.daily_spend_usd > lucMetrics.daily_budget_usd * 0.8 ? '#ef4444' : '#22c55e',
-                      }} />
-                  </div>
-                  <p className="text-[9px] text-slate-400 mt-1">${lucMetrics.daily_remaining_usd.toFixed(4)} remaining of ${lucMetrics.daily_budget_usd.toFixed(2)} budget</p>
+            ))}
+            {Object.keys(lucMetrics.cost_by_service).length === 0 && (
+              <p className="label-mono py-4 text-center">No usage</p>
+            )}
+          </div>
+          <div className="bg-bg-surface p-5">
+            <p className="label-mono mb-3">Budget</p>
+            <div className="space-y-3">
+              <div>
+                <div className="flex justify-between font-mono text-[11px] mb-1.5">
+                  <span className="text-fg-secondary">Daily spend</span>
+                  <span className="font-bold">${lucMetrics.daily_spend_usd.toFixed(4)}</span>
                 </div>
-                <div className="flex justify-between text-[10px]">
-                  <span className="text-slate-500">Total events</span>
-                  <span className="font-bold text-slate-900">{lucMetrics.total_events}</span>
+                <div className="h-1.5 bg-bg-elevated overflow-hidden">
+                  <div className="h-full transition-all"
+                    style={{
+                      width: `${Math.min((lucMetrics.daily_spend_usd / lucMetrics.daily_budget_usd) * 100, 100)}%`,
+                      background: lucMetrics.daily_spend_usd > lucMetrics.daily_budget_usd * 0.8 ? 'var(--signal-error)' : 'var(--signal-live)',
+                    }} />
                 </div>
+                <p className="font-mono text-[10px] text-fg-ghost mt-1">
+                  ${lucMetrics.daily_remaining_usd.toFixed(4)} remaining of ${lucMetrics.daily_budget_usd.toFixed(2)}
+                </p>
+              </div>
+              <div className="flex justify-between font-mono text-[11px]">
+                <span className="text-fg-secondary">Total events</span>
+                <span className="font-bold">{lucMetrics.total_events}</span>
               </div>
             </div>
           </div>

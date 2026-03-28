@@ -14,8 +14,11 @@
 
 const FAL_API_KEY = process.env.FAL_API_KEY;
 const KIE_API_KEY = process.env.KIE_AI_API_KEY;
+const GOOGLE_KEY = process.env.GOOGLE_KEY;
 const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY || process.env.OPENROUTER_KEY;
 const LUC_URL = process.env.LUC_URL || 'http://localhost:8081';
+
+export type VideoEngine = 'seedance' | 'veo';
 
 export interface ShotPlan {
   scene_number: number;
@@ -173,15 +176,89 @@ export async function checkShotStatus(generationId: string): Promise<{
   return { status: data.status === 'IN_PROGRESS' ? 'processing' : 'pending' };
 }
 
+// ─── Step 2b: Shot Generation (Veo 3.1 via Gemini API) ─────
+
+export async function generateShotVeo(
+  shot: ShotPlan,
+): Promise<{ generation_id: string; status: string }> {
+  if (!GOOGLE_KEY) throw new Error('GOOGLE_KEY not configured for Veo');
+
+  const prompt = `${shot.description}. Camera: ${shot.camera}. Mood: ${shot.mood}. Duration: ${shot.duration_seconds}s.`;
+
+  // Veo 3.1 via Gemini generativelanguage API
+  const res = await fetch(
+    `https://generativelanguage.googleapis.com/v1beta/models/veo-3.1:generateVideo?key=${GOOGLE_KEY}`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        prompt,
+        config: {
+          aspectRatio: '16:9',
+          durationSeconds: Math.min(shot.duration_seconds, 8),
+        },
+      }),
+    },
+  );
+
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error?.message || 'Veo generation failed');
+
+  return {
+    generation_id: data.name || data.operationId || `veo-${Date.now()}`,
+    status: 'queued',
+  };
+}
+
+// ─── Step 2c: Check Veo Status ──────────────────────────────
+
+export async function checkVeoStatus(operationName: string): Promise<{
+  status: 'pending' | 'processing' | 'done' | 'failed';
+  video_url?: string;
+}> {
+  if (!GOOGLE_KEY) throw new Error('GOOGLE_KEY not configured');
+
+  const res = await fetch(
+    `https://generativelanguage.googleapis.com/v1beta/${operationName}?key=${GOOGLE_KEY}`,
+  );
+  const data = await res.json();
+
+  if (data.done && data.response?.generatedVideos?.[0]?.video?.uri) {
+    return {
+      status: 'done',
+      video_url: data.response.generatedVideos[0].video.uri,
+    };
+  }
+
+  if (data.error) return { status: 'failed' };
+
+  return { status: 'processing' };
+}
+
+// ─── Universal Shot Generator ───────────────────────────────
+
+export async function generateShotUniversal(
+  shot: ShotPlan,
+  engine: VideoEngine = 'seedance',
+  referenceUrl?: string,
+): Promise<{ generation_id: string; status: string; engine: VideoEngine }> {
+  if (engine === 'veo') {
+    const result = await generateShotVeo(shot);
+    return { ...result, engine: 'veo' };
+  }
+  const result = await generateShot(shot, referenceUrl);
+  return { ...result, engine: 'seedance' };
+}
+
 // ─── Step 4: Estimate Cost ───────────────────────────────────
 
-export function estimateVideoCost(shots: ShotPlan[]): {
+export function estimateVideoCost(shots: ShotPlan[], engine: VideoEngine = 'seedance'): {
   total_seconds: number;
   estimated_cost: number;
   cost_per_shot: number[];
 } {
-  // Seedance 2.0 Fast tier: ~$0.022/sec via fal.ai
-  const COST_PER_SECOND = 0.022;
+  // Seedance 2.0: ~$0.022/sec, Veo 3.1: ~$0.035/sec (estimated)
+  const COST_PER_SECOND = engine === 'veo' ? 0.035 : 0.022;
 
   const costPerShot = shots.map(s => s.duration_seconds * COST_PER_SECOND);
   const totalSeconds = shots.reduce((sum, s) => sum + s.duration_seconds, 0);

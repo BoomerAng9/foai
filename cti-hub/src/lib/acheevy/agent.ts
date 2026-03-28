@@ -83,6 +83,7 @@ export async function acheevyRespond(
   conversationId: string,
   userMessage: string,
   conversationHistory: ConversationMessage[],
+  modelOverride?: string,
 ): Promise<{
   content: string;
   model: string;
@@ -132,8 +133,8 @@ export async function acheevyRespond(
     { role: 'user', content: userMessage },
   ];
 
-  // 4. Pick model via LUC
-  const model = await pickModel('chat');
+  // 4. Pick model via LUC (or use client-selected model)
+  const model = modelOverride || await pickModel('chat');
 
   // 5. Call OpenRouter
   if (!OPENROUTER_API_KEY) {
