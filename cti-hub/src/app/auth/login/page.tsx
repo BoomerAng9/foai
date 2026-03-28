@@ -82,8 +82,13 @@ export default function LoginPage() {
           </button>
         </div>
 
-        {/* Footer */}
-        <p className="text-center text-[10px] text-slate-600 mt-6">
+        {/* Access Key Link */}
+        <p className="text-center text-xs text-slate-500 mt-6">
+          Have an access key?{' '}
+          <a href="/auth/redeem" className="text-[#00A3FF] font-bold hover:underline">Redeem here</a>
+        </p>
+
+        <p className="text-center text-[10px] text-slate-600 mt-3">
           CTI HUB &mdash; FOAI-AIMS Ecosystem &mdash; Authorized personnel only
         </p>
       </div>

@@ -5,8 +5,10 @@ import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import {
+  Activity,
   LayoutDashboard,
   Users,
+  Shield,
   MessageSquare,
   LogOut,
   ChevronRight,
@@ -199,8 +201,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   const navItems = [
     { name: 'Console', href: '/chat/librechat', icon: MessageSquare },
+    { name: 'Live', href: '/live', icon: Activity },
     { name: 'Enrollments', href: '/enrollments', icon: TrendingUp },
     { name: 'Open Seats', href: '/open-seats', icon: Search },
+    { name: 'Team', href: '/team', icon: Shield },
     { name: 'Account', href: '/settings', icon: Users },
     { name: 'Billing', href: '/pricing', icon: LayoutDashboard },
   ];

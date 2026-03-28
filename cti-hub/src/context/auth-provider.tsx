@@ -124,8 +124,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setLoading(true);
       try {
         if (firebaseUser) {
-          // Allowlist check — deny unauthorized emails immediately
-          if (!isAllowedEmail(firebaseUser.email)) {
+          // Access check — owners pass instantly, team members checked against DB
+          const verifyRes = await fetch(`/api/access-keys/verify?email=${encodeURIComponent(firebaseUser.email || '')}`);
+          const verifyData = await verifyRes.json().catch(() => ({ allowed: false }));
+
+          if (!verifyData.allowed) {
             setDenied(true);
             setUser(null);
             await firebaseSignOut(getFirebaseAuth());
