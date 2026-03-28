@@ -89,19 +89,20 @@ Every aiPLUG ships with:
 Popover opens from the `+` button. Seven sources in three groups:
 
 ### Group 1: Files
-- **Add files or photos** — Opens OS file picker. Accepted: images, PDFs, text, CSV, JSON, MD, DOC/DOCX, XLS/XLSX. Max 5 files. Files upload to R2/GCS and are sent as multimodal content to vision-capable models.
+- **Add files or photos** — Opens OS file picker. Accepted: images, PDFs, text, CSV, JSON, MD, DOC/DOCX, XLS/XLSX. Max 10 files. Files upload to R2/GCS and are sent as multimodal content to vision-capable models.
 - **Take a screenshot** — Uses `navigator.mediaDevices.getDisplayMedia()` to capture screen. Converts to image attachment.
 
 ### Group 2: Integrations
 - **Google Drive** — Opens Google Picker API modal (requires OAuth consent). User browses and selects files. Selected files are downloaded and attached.
+- **Import / Migrate** — Import projects, conversations, or subscription data from other platforms (OpenAI, Claude, Polymarket, etc.). Clone their existing work into The Deploy Platform.
 - **GitHub** — Opens a repo/file browser using GitHub API (already authenticated as BoomerAng9). User selects files or code snippets.
 
 ### Group 3: Intelligence
 - **Skills** — Opens submenu of registered prompt templates from the skills registry. Selecting a skill injects its template into the conversation context.
 - **Deep Research** — Opens submenu with three options:
   - **Search** — Find sources and answers (Brave AI + Firecrawl Search under the hood)
-  - **Crawl** — Extract content from an entire site (Firecrawl Crawl)
-  - **Extract** — Pull structured data from a page (Firecrawl Agent)
+  - **Crawl** — Extract content from an entire site (Firecrawl Crawl, apify, acheevy, chicken hawk)
+  - **Extract** — Pull structured data from a page (Firecrawl Crawl, apify, acheevy, chicken hawk)
 
 ### Group 4: Execution Tier
 - **Premium / Bucket List / LFG** — Session-persistent tier selector. Active tier shows checkmark. Changing tier updates the read-only indicator in the input bar.
@@ -116,10 +117,11 @@ LUC needs its own backend service with these endpoints:
 - `POST /api/luc/stop` — User cancelled. No execution, no charge. Logged in ledger as cancelled.
 - `GET /api/luc/receipt/:jobId` — Returns Purchase Order for subscribers (full breakdown with token + dollar costs) or simple receipt for pay-per-use users (total only). Model names never included in either format.
 
-### Dual-Artifact System (Charter/Ledger)
-Every LUC job produces two artifacts:
+### Triple-Artifact System (Charter / Ledger / Web3)
+Every LUC job produces three artifacts:
 - **Charter** (customer-facing) — sent to user account. Shows services used, token counts, and costs in plain language. No model names, no margins, no internal rates.
 - **Ledger** (internal audit) — logs actual model names, API costs, routing decisions, margins, and surcharges. Never exposed to users. Used for internal auditing and revenue tracking.
+- **Web3 Ledger** (coming soon) — immutable proof-of-deployment. Blockchain-ready hash of the Charter + Ledger pair. Will support BAMARAM certification tokens.
 
 ### Pay-Per-Use Surcharge
 For users without a subscription, a surcharge is applied on top of actual API costs (OpenRouter + Brave + Firecrawl + any other service). This surcharge is the revenue margin. The user sees only the final total — never the base cost or surcharge breakdown separately.
