@@ -80,7 +80,7 @@ export default function LandingPage() {
           <a href="#features" className="btn-bracket">Features</a>
           <a href="#capabilities" className="btn-bracket">Capabilities</a>
           <Link href="/auth/login" className="btn-bracket">Sign In</Link>
-          <Link href="/chat/librechat" className="btn-solid h-9 text-[10px]">
+          <Link href="/chat" className="btn-solid h-9 text-[10px]">
             START TALKING <ArrowRight className="w-3 h-3 ml-1" />
           </Link>
         </div>
@@ -107,7 +107,7 @@ export default function LandingPage() {
         </div>
 
         <div className="absolute top-8 right-8 flex gap-4">
-          <Link href="/chat/librechat" className="btn-bracket">Launch App</Link>
+          <Link href="/chat" className="btn-bracket">Launch App</Link>
           <a href="#features" className="btn-bracket">Learn More</a>
         </div>
 
@@ -138,7 +138,7 @@ export default function LandingPage() {
           </p>
 
           <div className="flex items-center justify-center gap-4">
-            <Link href="/chat/librechat" className="btn-solid h-12 px-8 text-xs gap-2">
+            <Link href="/chat" className="btn-solid h-12 px-8 text-xs gap-2">
               <Mic className="w-4 h-4" /> PROMPT IT
             </Link>
             <Link href="/auth/login" className="btn-ghost h-12 px-8 text-xs">
@@ -182,7 +182,7 @@ export default function LandingPage() {
                   </li>
                 ))}
               </ul>
-              <Link href="/chat/librechat" className="btn-solid h-10 text-[10px] inline-flex gap-2">
+              <Link href="/chat" className="btn-solid h-10 text-[10px] inline-flex gap-2">
                 START AUTONOMOUS CHAT <ArrowRight className="w-3 h-3" />
               </Link>
             </div>
@@ -205,7 +205,7 @@ export default function LandingPage() {
                   </li>
                 ))}
               </ul>
-              <Link href="/chat/librechat" className="btn-ghost h-10 text-[10px] inline-flex gap-2">
+              <Link href="/chat" className="btn-ghost h-10 text-[10px] inline-flex gap-2">
                 OPEN CHARTER WIZARD <ArrowRight className="w-3 h-3" />
               </Link>
             </div>
@@ -254,7 +254,7 @@ export default function LandingPage() {
             Start a conversation.<br />
             <span className="font-bold">Ship something real.</span>
           </h2>
-          <Link href="/chat/librechat" className="btn-solid h-12 px-10 text-xs inline-flex gap-2">
+          <Link href="/chat" className="btn-solid h-12 px-10 text-xs inline-flex gap-2">
             OPEN DEPLOY <ArrowRight className="w-4 h-4" />
           </Link>
         </div>

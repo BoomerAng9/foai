@@ -181,8 +181,11 @@ export async function acheevyRespond(
     await memorizeConversationTurn(userId, conversationId, userMessage, content);
   } catch {}
 
-  // Estimate cost (rough — LUC has exact numbers)
-  const costEstimate = (tokensIn / 1_000_000) * 0.27 + (tokensOut / 1_000_000) * 0.42;
+  // Estimate cost from OpenRouter generation data, fallback to model lookup
+  const generationCost = completion.usage?.total_cost;
+  const costEstimate = generationCost != null
+    ? generationCost
+    : (tokensIn / 1_000_000) * 0.30 + (tokensOut / 1_000_000) * 1.20; // MiniMax M2.7 default rates
 
   return {
     content,

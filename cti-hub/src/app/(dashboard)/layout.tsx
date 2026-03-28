@@ -21,7 +21,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { AuthPromptTimer } from '@/components/auth/AuthPromptTimer';
 
 const NAV = [
-  { name: 'HOME', href: '/chat/librechat', icon: MessageSquare },
+  { name: 'HOME', href: '/chat', icon: MessageSquare },
   { name: 'WORKFLOWS', href: '/projects', icon: FolderOpen },
   { name: 'EXECUTIONS', href: '/live', icon: Activity },
   { name: 'PLUG BIN', href: '/create', icon: Video },

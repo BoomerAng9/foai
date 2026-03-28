@@ -19,13 +19,13 @@ export default function AuthCallbackPage() {
         });
 
         if (response.ok) {
-          router.replace('/chat/librechat');
+          router.replace('/chat');
           return;
         }
       }
 
       // Fallback: redirect after timeout
-      setTimeout(() => router.replace('/chat/librechat'), 3000);
+      setTimeout(() => router.replace('/chat'), 3000);
     });
 
     return () => unsubscribe();

@@ -54,7 +54,7 @@ export default function SettingsPage() {
         <p className="label-mono mb-3">Quick actions</p>
         <div className="space-y-px">
           {[
-            { label: 'OPEN CHAT', desc: 'Talk to ACHEEVY', href: '/chat/librechat', icon: MessageSquare },
+            { label: 'OPEN CHAT', desc: 'Talk to ACHEEVY', href: '/chat', icon: MessageSquare },
             { label: 'MANAGE BILLING', desc: 'Update plan and payment', href: '/pricing', icon: CreditCard },
             ...(isOwner ? [{ label: 'OPERATIONS', desc: 'Fleet monitoring', href: '/live', icon: Shield }] : []),
           ].map(action => (
