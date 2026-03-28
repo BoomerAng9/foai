@@ -7,6 +7,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import {
   Activity,
   FolderOpen,
+  Video,
   LayoutDashboard,
   Users,
   Shield,
@@ -204,6 +205,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     { name: 'Chat w/ ACHEEVY', href: '/chat/librechat', icon: MessageSquare },
     { name: 'Operations Floor', href: '/live', icon: Activity },
     { name: 'My Projects', href: '/projects', icon: FolderOpen },
+    { name: 'Create', href: '/create', icon: Video },
     { name: 'Enrollments', href: '/enrollments', icon: TrendingUp },
     { name: 'Open Seats', href: '/open-seats', icon: Search },
     { name: 'My Squad', href: '/team', icon: Shield },
