@@ -25,7 +25,7 @@ export function AuthPromptTimer() {
     <div className="fixed inset-0 z-[100] bg-slate-900/45 backdrop-blur-sm p-4 flex items-center justify-center">
       <div className="w-full max-w-md rounded-3xl bg-white border border-slate-200 shadow-2xl overflow-hidden">
         <div className="p-6 space-y-4">
-          <p className="text-[11px] font-bold uppercase tracking-widest text-slate-400">CTI HUB</p>
+          <p className="text-[11px] font-bold uppercase tracking-widest text-slate-400">The Deploy Platform</p>
           <h3 className="text-2xl font-bold text-slate-900">Sign in to access your workspace</h3>
           <p className="text-sm text-slate-600 leading-relaxed">
             Create an account to manage enrollments, track open seats, and run AI-managed operations.

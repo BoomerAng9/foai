@@ -217,8 +217,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       <aside className="w-60 bg-white border-r border-[#E5E7EB] flex flex-col z-20">
         <div className="p-5">
           <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-            <div className="w-8 h-8 rounded-lg bg-[#00A3FF] flex items-center justify-center text-white text-sm font-black">C</div>
-            <span className="text-lg font-bold tracking-tight">CTI HUB</span>
+            <div className="w-8 h-8 rounded-lg bg-[#00A3FF] flex items-center justify-center text-white text-sm font-black">D</div>
+            <span className="text-lg font-bold tracking-tight">Deploy</span>
           </Link>
         </div>
 
@@ -264,7 +264,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       <main className="flex-1 flex flex-col relative overflow-hidden">
         <header className="h-14 bg-white border-b border-[#E5E7EB] flex items-center justify-between px-6 z-10 shrink-0">
           <div className="flex items-center gap-2 text-sm">
-            <span className="text-slate-400">CTI HUB</span>
+            <span className="text-slate-400">The Deploy Platform</span>
             <ChevronRight className="w-3.5 h-3.5 text-slate-300" />
             <span className="text-slate-900 font-semibold">
               {navItems.find(item => pathname.startsWith(item.href))?.name || 'Dashboard'}

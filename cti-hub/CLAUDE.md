@@ -1,32 +1,53 @@
 # CLAUDE.md
 
-CTI HUB — the public product shell for the FOAI-AIMS ecosystem.
+**The Deploy Platform** — Your production studio with a conversational interface.
 
 ## What This Is
 
-CTI HUB is the Coastal Talent & Innovation command surface. It is the product.
-GRAMMAR is NOT this app — GRAMMAR is an internal technical language engine that may serve CTI HUB if needed.
+The Deploy Platform is the user-facing product of the FOAI-AIMS ecosystem.
+Users interact with ACHEEVY (Digital CEO) and Chicken Hawk (tactical operator).
+Internal tooling, model names, and integrations are never exposed to users.
 
 ## Stack
 
 - **Framework**: Next.js 15 (App Router)
-- **Auth**: Firebase Auth (client SDK on browser, Admin SDK on server)
-- **Database**: Neon Postgres via `postgres.js` (server-side only via `DATABASE_URL`)
-- **Backend**: 11 Python/FastAPI Cloud Run services in GCP `foai-aims`
-- **LLM**: OpenRouter
+- **Auth**: Firebase Auth (Google OAuth + invitation-based access keys)
+- **Database**: Neon Postgres via postgres.js (server-side only)
+- **Backend**: Cloud Run services in GCP foai-aims
+- **LLM**: OpenRouter (model selection via LUC router)
+- **Memory**: Gemini Embeddings + pgvector for semantic recall
+- **Video**: Seedance 2.0 (flagship) via fal.ai/Kie AI
+- **Scraping**: Firecrawl + Apify
+- **Forms**: Paperform + Stepper
 - **Payments**: Stripe
 
-## Key Paths
+## User-Facing Names
 
-- `src/app/page.tsx` — Public landing page
-- `src/app/(dashboard)/` — Authenticated dashboard (sidebar + canvas + talk dock)
-- `src/app/api/auth/provision/route.ts` — Firebase-to-Neon user provisioning
-- `src/context/auth-provider.tsx` — Auth state + provision loop
-- `src/lib/firebase.ts` — Client SDK singleton
-- `src/lib/firebase-admin.ts` — Server SDK singleton
+| Internal | User Sees |
+|----------|-----------|
+| The app | The Deploy Platform |
+| Chat input | Chat w/ ACHEEVY |
+| Team page | My Squad |
+| Live Look In | Operations Floor |
+| Workspace Jobs | My Projects |
+| Scrape/Clean/Export | Research / Organize / Deliver |
+| Access Keys | Invitations |
+
+## IP Protection
+
+NEVER expose in user-facing text:
+- Model names (DeepSeek, Gemini, GPT, Qwen, MiniMax)
+- Tool names (Firecrawl, Apify, OpenRouter, fal.ai)
+- Internal service names (NemoClaw, OpenClaw, Hermes)
+- LUC routing logic
+- API endpoints or infrastructure details
+
+Users see: agent names, quality scores, token counts, costs. That's it.
 
 ## Rules
 
-- All responses, comments, and commits in English
-- Revenue-first: if it doesn't serve launch, it doesn't ship
-- No GRAMMAR features unless they directly support a CTI HUB business flow
+- All user-facing text in English
+- Revenue-first: if it doesn't serve the product, it doesn't ship
+- Memory persistence is mandatory: users never lose conversations or data
+- Cost transparency: show tokens and cost per operation
+- MIM governance: block IP violations, redirect don't refuse

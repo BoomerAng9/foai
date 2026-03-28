@@ -35,7 +35,7 @@ function getOpenRouterHeaders() {
     Authorization: `Bearer ${apiKey}`,
     'Content-Type': 'application/json',
     'HTTP-Referer': process.env.DOMAIN_CLIENT || 'http://localhost:3000',
-    'X-OpenRouter-Title': 'CTI HUB',
+    'X-OpenRouter-Title': 'The Deploy Platform',
   };
 }
 
@@ -89,7 +89,7 @@ export async function createOpenRouterChatCompletion(input: {
   // Record usage in LUC
   if (payload.usage) {
     await lucRecordUsage(
-      input.service || 'cti-hub',
+      input.service || 'deploy-platform',
       payload.model || model,
       payload.usage.prompt_tokens || 0,
       payload.usage.completion_tokens || 0,

@@ -93,7 +93,7 @@ export default function TeamPage() {
         </div>
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Team Access</h1>
-          <p className="text-sm text-slate-500">Generate access keys, manage who can use CTI HUB.</p>
+          <p className="text-sm text-slate-500">Generate access keys, manage who can use The Deploy Platform.</p>
         </div>
       </div>
 

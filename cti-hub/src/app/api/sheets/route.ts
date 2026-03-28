@@ -74,7 +74,7 @@ export async function POST(request: NextRequest) {
 
     // Create new spreadsheet if no ID provided
     if (!spreadsheet_id) {
-      spreadsheet_id = await createSpreadsheet(title || `CTI HUB Export — ${new Date().toLocaleDateString()}`);
+      spreadsheet_id = await createSpreadsheet(title || `The Deploy Platform Export — ${new Date().toLocaleDateString()}`);
     }
 
     const result = await appendToSheet(spreadsheet_id, sheet_name || 'Data', columns, rows);

@@ -16,9 +16,9 @@ const geistMono = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "CTI HUB — AI-Managed Solutions",
-  description: "Coastal Talent & Innovation command center. MindEdge enrollments, Open Seat contracting, and AI-managed workforce solutions.",
-  keywords: ["CTI", "AI-Managed Solutions", "MindEdge", "Open Seat", "FOAI"],
+  title: "The Deploy Platform — AI-Managed Operations",
+  description: "Your production studio with a conversational interface. Research, build, and deploy with autonomous AI agents.",
+  keywords: ["Deploy Platform", "AI Operations", "ACHEEVY", "ACHIEVEMOR"],
 };
 
 export default function RootLayout({

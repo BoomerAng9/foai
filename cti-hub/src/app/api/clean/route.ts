@@ -33,7 +33,7 @@ async function recordUsage(model: string, tokensIn: number, tokensOut: number) {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        service: 'cti-hub-clean',
+        service: 'deploy-clean',
         model,
         tokens_in: tokensIn,
         tokens_out: tokensOut,
@@ -75,7 +75,7 @@ ${raw_data.slice(0, 30000)}`;
       headers: {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${OPENROUTER_API_KEY}`,
-        'X-OpenRouter-Title': 'CTI HUB',
+        'X-OpenRouter-Title': 'The Deploy Platform',
       },
       body: JSON.stringify({
         model,

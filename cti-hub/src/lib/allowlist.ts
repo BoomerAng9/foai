@@ -1,5 +1,5 @@
 /**
- * Access Key System — owner controls who can use CTI HUB.
+ * Access Key System — owner controls who can use The Deploy Platform.
  *
  * ACHEEVY generates access keys. Team members redeem them at /auth/redeem.
  * Redeemed keys link a Firebase email to the system.

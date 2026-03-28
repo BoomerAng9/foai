@@ -17,7 +17,7 @@ export default function AgentConsole() {
     {
       id: '1',
       role: 'agent',
-      content: 'CTI HUB Agent Console ready. I can help with MindEdge enrollments, Open Seat searches, and fleet operations. What would you like to do?',
+      content: 'The Deploy Platform Agent Console ready. I can help with MindEdge enrollments, Open Seat searches, and fleet operations. What would you like to do?',
       timestamp: new Date().toLocaleTimeString(),
     },
   ]);

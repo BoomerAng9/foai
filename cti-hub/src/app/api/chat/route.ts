@@ -8,7 +8,7 @@ interface ChatMessage {
   content: string;
 }
 
-const SYSTEM_PROMPT = `You are the CTI HUB agent console. You help users with:
+const SYSTEM_PROMPT = `You are the The Deploy Platform agent console. You help users with:
 - MindEdge enrollment tracking and affiliate link management
 - Open Seat university course scraping and contracting
 - Agent fleet status and operations

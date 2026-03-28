@@ -10,8 +10,8 @@ interface BrandConfig {
 }
 
 const config: BrandConfig = {
-  systemName: 'CTI HUB',
-  tagline: 'AI-Managed Solutions',
+  systemName: 'The Deploy Platform',
+  tagline: 'AI-Managed Operations',
   primaryColor: '#00A3FF',
   accentColor: '#A855F7',
 };

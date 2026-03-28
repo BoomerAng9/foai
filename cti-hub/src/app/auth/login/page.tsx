@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { authService } from '@/lib/auth-paywall';
 import { useAuth } from '@/hooks/useAuth';
-import { Shield, LogIn } from 'lucide-react';
+import { Shield } from 'lucide-react';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -17,7 +17,6 @@ export default function LoginPage() {
     setLoading(true);
     try {
       await authService.signInWithOAuth('google');
-      // onAuthStateChanged handles the rest — allowlist check + redirect
       router.replace('/');
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Sign in failed');
@@ -29,31 +28,22 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#0a0a0f]">
       <div className="w-full max-w-sm">
-        {/* Logo */}
         <div className="flex items-center justify-center gap-3 mb-10">
-          <div className="w-12 h-12 rounded-2xl bg-[#00A3FF] flex items-center justify-center text-white text-xl font-black shadow-lg shadow-[#00A3FF]/30">
-            C
-          </div>
-          <span className="text-2xl font-bold text-white tracking-tight">CTI HUB</span>
+          <div className="w-12 h-12 rounded-2xl bg-[#00A3FF] flex items-center justify-center text-white text-xl font-black shadow-lg shadow-[#00A3FF]/30">D</div>
+          <span className="text-2xl font-bold text-white tracking-tight">Deploy</span>
         </div>
 
-        {/* Denied State */}
         {denied && (
           <div className="mb-6 p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-center">
             <Shield className="w-6 h-6 text-red-400 mx-auto mb-2" />
             <p className="text-sm text-red-400 font-bold">Access Denied</p>
-            <p className="text-xs text-red-400/70 mt-1">Your account is not authorized for CTI HUB.</p>
+            <p className="text-xs text-red-400/70 mt-1">Your account is not authorized. Need an invitation? Contact your administrator.</p>
           </div>
         )}
 
-        {/* Card */}
         <div className="bg-[#111118] border border-white/[0.06] rounded-2xl p-8">
-          <h2 className="text-lg font-bold text-white text-center mb-2">
-            Owner Access Only
-          </h2>
-          <p className="text-xs text-slate-500 text-center mb-8">
-            Sign in with your authorized Google account.
-          </p>
+          <h2 className="text-lg font-bold text-white text-center mb-2">Authorized Access</h2>
+          <p className="text-xs text-slate-500 text-center mb-8">Sign in with your authorized Google account.</p>
 
           {error && (
             <div className="mb-4 p-3 rounded-lg bg-red-500/10 border border-red-500/20">
@@ -61,11 +51,8 @@ export default function LoginPage() {
             </div>
           )}
 
-          <button
-            onClick={handleGoogleSignIn}
-            disabled={loading}
-            className="w-full h-12 rounded-xl bg-white text-slate-900 text-sm font-bold hover:bg-slate-100 transition-all flex items-center justify-center gap-3 disabled:opacity-50 shadow-lg"
-          >
+          <button onClick={handleGoogleSignIn} disabled={loading}
+            className="w-full h-12 rounded-xl bg-white text-slate-900 text-sm font-bold hover:bg-slate-100 transition-all flex items-center justify-center gap-3 disabled:opacity-50 shadow-lg">
             {loading ? (
               <div className="w-5 h-5 border-2 border-slate-400 border-t-transparent rounded-full animate-spin" />
             ) : (
@@ -82,15 +69,11 @@ export default function LoginPage() {
           </button>
         </div>
 
-        {/* Access Key Link */}
         <p className="text-center text-xs text-slate-500 mt-6">
-          Have an access key?{' '}
+          Have an invitation?{' '}
           <a href="/auth/redeem" className="text-[#00A3FF] font-bold hover:underline">Redeem here</a>
         </p>
-
-        <p className="text-center text-[10px] text-slate-600 mt-3">
-          CTI HUB &mdash; FOAI-AIMS Ecosystem &mdash; Authorized personnel only
-        </p>
+        <p className="text-center text-[10px] text-slate-600 mt-3">The Deploy Platform &mdash; Authorized personnel only</p>
       </div>
     </div>
   );
