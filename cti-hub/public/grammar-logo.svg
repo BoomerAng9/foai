@@ -1,0 +1,11 @@
+<svg width="470" height="150" viewBox="0 0 470 150" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="grammarLogoTitle grammarLogoDesc">
+  <title id="grammarLogoTitle">Grammar logo</title>
+  <desc id="grammarLogoDesc">The word Grammar in script with decorative dots.</desc>
+  <g fill="#243449">
+    <circle cx="14" cy="74" r="5"/>
+    <circle cx="30" cy="74" r="5"/>
+    <circle cx="440" cy="74" r="5"/>
+    <circle cx="456" cy="74" r="5"/>
+  </g>
+  <text x="44" y="104" fill="#243449" font-size="108" font-family="Caveat, 'Brush Script MT', cursive" font-weight="700" letter-spacing="1">Grammar</text>
+</svg>

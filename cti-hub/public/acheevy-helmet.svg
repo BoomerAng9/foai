@@ -1,0 +1,17 @@
+<svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <path d="M10 29C10 16.2975 20.2975 6 33 6H34C46.7025 6 57 16.2975 57 29V34C57 47.2548 46.2548 58 33 58H31C19.402 58 10 48.598 10 37V29Z" fill="#0F172A"/>
+  <path d="M17 28C17 19.7157 23.7157 13 32 13C40.2843 13 47 19.7157 47 28V31H17V28Z" fill="#132445"/>
+  <rect x="15" y="24" width="34" height="16" rx="8" fill="url(#visor)"/>
+  <path d="M20 42C20 37.5817 23.5817 34 28 34H36C40.4183 34 44 37.5817 44 42V45C44 49.4183 40.4183 53 36 53H28C23.5817 53 20 49.4183 20 45V42Z" fill="#101B31"/>
+  <path d="M28 39H36V48C36 50.2091 34.2091 52 32 52C29.7909 52 28 50.2091 28 48V39Z" fill="#F59E0B"/>
+  <path d="M8 28H15V36H8C6.89543 36 6 35.1046 6 34V30C6 28.8954 6.89543 28 8 28Z" fill="#0B1220"/>
+  <path d="M49 28H56C57.1046 28 58 28.8954 58 30V34C58 35.1046 57.1046 36 56 36H49V28Z" fill="#FACC15"/>
+  <path d="M23 21C23 19.8954 23.8954 19 25 19H39C40.1046 19 41 19.8954 41 21V22H23V21Z" fill="#CBD5E1" fill-opacity="0.5"/>
+  <defs>
+    <linearGradient id="visor" x1="15" y1="32" x2="49" y2="32" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FBBF24"/>
+      <stop offset="0.5" stop-color="#F59E0B"/>
+      <stop offset="1" stop-color="#B45309"/>
+    </linearGradient>
+  </defs>
+</svg>

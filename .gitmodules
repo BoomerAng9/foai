@@ -1,6 +1,3 @@
-[submodule "docs/grammar"]
-	path = docs/grammar
-	url = https://github.com/BoomerAng9/GRAMMAR
 [submodule "runtime/hermes/docs/ch-docs"]
 	path = runtime/hermes/docs/ch-docs
 	url = https://github.com/BoomerAng9/CH-Docs

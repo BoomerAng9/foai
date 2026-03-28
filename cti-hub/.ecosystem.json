@@ -1,0 +1,32 @@
+{
+  "node": "grammar",
+  "role": "service",
+  "network": "boomerang9-ecosystem",
+  "version": "1.0.0",
+  "description": "GRAMMAR — Chat UI, LibreChat bridge, and Remotion video engine for content generation",
+  "provides": [
+    { "name": "chat-api", "path": "src/", "description": "Chat API endpoints for conversation management" },
+    { "name": "chat-ui", "path": "src/", "description": "Embeddable chat interface component" },
+    { "name": "video-engine", "path": "remotion-videos/", "description": "Remotion-based video generation engine" },
+    { "name": "librechat-bridge", "path": "src/", "description": "LibreChat integration for multi-model chat" }
+  ],
+  "consumes": [
+    { "node": "agent-acheevy-009", "capability": "agent-api", "endpoint": "/api/agent/v1/chat" },
+    { "node": "aims", "capability": "ai-plugs", "endpoint": "/api/aims/plugs" },
+    { "node": "chicken-hawk", "capability": "gateway", "endpoint": "https://gateway.acheevy.digital" }
+  ],
+  "connections": {
+    "agent-acheevy-009": { "type": "invokes", "purpose": "Routes intelligent queries to AI agent" },
+    "aims": { "type": "embedded-in", "purpose": "Chat UI embedded in AIMS platform via iframe/API" },
+    "chicken-hawk": { "type": "registered-with", "purpose": "Gateway routes /api/chat/* here" },
+    "myclaw": { "type": "orchestrated-by", "purpose": "Docker compose and deployment" }
+  },
+  "file_index": {
+    "entrypoints": ["src/"],
+    "config": ["next.config.mjs", "tsconfig.json", "package.json", "librechat.yaml.prod"],
+    "video": ["remotion-videos/"],
+    "scripts": ["scripts/"],
+    "sql": ["sql/"],
+    "tests": ["tests/"]
+  }
+}

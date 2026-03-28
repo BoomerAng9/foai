@@ -1,0 +1,22 @@
+{
+  "$schema": "aims-ecosystem-node/v1",
+  "nodeId": "grammar",
+  "repo": "BoomerAng9/GRAMMAR",
+  "tier": 2,
+  "role": "service",
+  "label": "GRAMMAR — NLP & Chat Engine",
+  "description": "Next.js frontend + LibreChat-based backend. Natural language processing, grammar analysis, text intelligence, Remotion video generation. MongoDB-backed.",
+  "provides": ["grammar-engine", "nlp-processing", "text-analysis", "librechat-integration", "remotion-videos"],
+  "consumes": ["aims-backend"],
+  "endpoints": {},
+  "hub": "BoomerAng9/AIMS",
+  "peers": [
+    "BoomerAng9/AIMS",
+    "BoomerAng9/Chicken-Hawk",
+    "BoomerAng9/Agent-ACHEEVY-009"
+  ],
+  "chatIcon": {
+    "asset": "public/acheevy-helmet.png",
+    "rule": "ACHEEVY Helmet is the ONLY primary chat avatar."
+  }
+}

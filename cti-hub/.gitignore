@@ -1,0 +1,51 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+node_modules/
+.pnp
+.pnp.js
+.yarn/install-state.gz
+
+# artifacts
+.agent/
+.agents/
+.ai/
+.augment/
+.claude/
+.codex/
+.cursor/
+.gemini/
+.qoder/
+.qwen/
+.roo/
+.trae/
+.windsurf/
+.next/
+out/
+build/
+dist/
+
+
+# misc
+.DS_Store
+*.pem
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# local env files
+.env
+.env.*
+.env*.local
+!.env.example
+MASTER_SECRETS.md
+ACHEEVY_MASTER_CREDENTIALS.md
+
+# vercel
+.vercel
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
