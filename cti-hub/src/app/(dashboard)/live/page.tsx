@@ -48,16 +48,60 @@ const STATUS_COLORS: Record<string, string> = {
 
 function statusColor(s: string) { return STATUS_COLORS[s] || '#6b7280'; }
 
-// PMO Department layout
-const DEPARTMENTS = [
-  { id: 'PMO-ECHO', name: 'Engineering', agents: ['API_Ang', 'UI_Ang', 'SME_Ang', 'Flow_Ang', 'Design_Ang', 'Content_Ang'], hawks: ['Lil_TRAE_Hawk', 'Lil_Coding_Hawk', 'Lil_Viz_Hawk', 'Lil_Blend_Hawk'], color: '#3b82f6' },
-  { id: 'PMO-PULSE', name: 'Data Ops', agents: ['Data_Ang', 'Scout_Ang'], hawks: ['Lil_Agent_Hawk', 'Lil_Deep_Hawk'], color: '#22c55e' },
-  { id: 'PMO-LAUNCH', name: 'Deployment', agents: ['Deploy_Ang', 'Edu_Ang', 'Biz_Ang'], hawks: ['Lil_Flow_Hawk', 'Lil_Back_Hawk'], color: '#f59e0b' },
-  { id: 'PMO-LENS', name: 'QA & Review', agents: ['QA_Ang'], hawks: ['Lil_Deep_Hawk'], color: '#a855f7' },
-  { id: 'PMO-SHIELD', name: 'Security', agents: ['Crypt_Ang'], hawks: ['Lil_Sand_Hawk'], color: '#ef4444' },
+// PMO Office Structure — real organizational hierarchy
+const PMO_OFFICES = [
+  {
+    id: 'TECH-PMO', name: 'Technology', supervisor: 'CTO_Ang',
+    managers: ['Architecture_Ang', 'Engineering_Ang', 'Infrastructure_Ang'],
+    hawks: ['Lil_TRAE_Hawk', 'Lil_Coding_Hawk', 'Lil_Back_Hawk'],
+    color: '#3b82f6',
+  },
+  {
+    id: 'FIN-PMO', name: 'Finance', supervisor: 'CFO_Ang',
+    managers: ['Receivables_Ang', 'Bookkeeping_Ang', 'Pricing_Ang'],
+    hawks: [],
+    color: '#22c55e',
+  },
+  {
+    id: 'OPS-PMO', name: 'Operations', supervisor: 'COO_Ang',
+    managers: ['Workflow_Ang', 'Capacity_Ang', 'Quality_Ang'],
+    hawks: ['Lil_Flow_Hawk', 'Lil_Agent_Hawk'],
+    color: '#f59e0b',
+  },
+  {
+    id: 'MKT-PMO', name: 'Marketing', supervisor: 'CMO_Ang',
+    managers: ['Growth_Ang', 'Campaign_Ang', 'Partnerships_Ang'],
+    hawks: ['Lil_Deep_Hawk'],
+    color: '#ec4899',
+  },
+  {
+    id: 'DSN-PMO', name: 'Design', supervisor: 'CDO_Ang',
+    managers: ['UX_Ang', 'Brand_Ang', 'Interface_Ang'],
+    hawks: ['Lil_Viz_Hawk', 'Lil_Blend_Hawk'],
+    color: '#a855f7',
+  },
+  {
+    id: 'PRD-PMO', name: 'Product & Publications', supervisor: 'CPO_Ang',
+    managers: ['Product_Ang', 'Publications_Ang', 'Documentation_Ang'],
+    hawks: [],
+    color: '#06b6d4',
+  },
+  {
+    id: 'HR-PMO', name: 'Human Resources', supervisor: 'Betty-Ann_Ang',
+    managers: ['Aria_Ang', 'Rumi_Ang', 'Eamon_Ang'],
+    hawks: [],
+    color: '#f97316',
+  },
+  {
+    id: 'DT-PMO', name: 'Digital Transformation', supervisor: 'Astra_Ang',
+    managers: ['Atlas_Ang', 'Blueprint_Ang', 'Sentinel_Ang'],
+    hawks: ['Lil_Sand_Hawk', 'Lil_Memory_Hawk', 'Lil_Graph_Hawk'],
+    color: '#8b5cf6',
+    bench: ['Ledger_Ang', 'Proof_Ang'],
+  },
 ];
 
-const COMMAND = { name: 'Command', members: ['ACHEEVY', 'Chicken Hawk', 'Hermes'], color: '#00A3FF' };
+const COMMAND = { name: 'Command', members: ['ACHEEVY', 'Chicken Hawk'], color: '#00A3FF' };
 
 export default function OperationsFloor() {
   const [state, setState] = useState<WorldState | null>(null);
@@ -176,18 +220,28 @@ export default function OperationsFloor() {
           </div>
         </div>
 
-        {/* PMO Departments */}
-        {DEPARTMENTS.map(dept => (
-          <div key={dept.id} className="bg-white border border-slate-200 rounded-xl p-4">
+        {/* PMO Offices */}
+        {PMO_OFFICES.map(office => (
+          <div key={office.id} className="bg-white border border-slate-200 rounded-xl p-4">
             <div className="flex items-center gap-2 mb-3">
-              <div className="w-2 h-2 rounded-full" style={{ backgroundColor: dept.color }} />
-              <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: dept.color }}>{dept.name}</span>
-              <span className="text-[9px] text-slate-400 ml-auto">{dept.id}</span>
+              <div className="w-2 h-2 rounded-full" style={{ backgroundColor: office.color }} />
+              <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: office.color }}>{office.name}</span>
+              <span className="text-[9px] text-slate-400 ml-auto">{office.id}</span>
             </div>
 
-            {/* Boomer_Angs */}
-            <div className="space-y-1.5 mb-3">
-              {dept.agents.map(name => {
+            {/* Supervisor */}
+            <div className="flex items-center gap-2 p-2 rounded-lg bg-slate-50 border border-slate-100 mb-2">
+              <div className="w-5 h-5 rounded bg-slate-900 text-white flex items-center justify-center text-[7px] font-black shrink-0">S</div>
+              <div className="flex-1 min-w-0">
+                <p className="text-[10px] font-bold text-slate-900 truncate">{office.supervisor}</p>
+                <p className="text-[8px] text-slate-500">Supervisor</p>
+              </div>
+              <div className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: statusColor(getAgentStatus(office.supervisor)) }} />
+            </div>
+
+            {/* Managers */}
+            <div className="space-y-1 mb-2">
+              {office.managers.map(name => {
                 const status = getAgentStatus(name);
                 const isActive = status === 'active' || status === 'monitoring';
                 return (
@@ -203,12 +257,23 @@ export default function OperationsFloor() {
               })}
             </div>
 
-            {/* Lil_Hawks */}
-            {dept.hawks.length > 0 && (
-              <div className="border-t border-slate-100 pt-2">
+            {/* Bench (DT-PMO only) */}
+            {'bench' in office && (office as typeof office & { bench: string[] }).bench?.length > 0 && (
+              <div className="border-t border-slate-100 pt-1.5 mb-2">
+                <div className="flex flex-wrap gap-1">
+                  {(office as typeof office & { bench: string[] }).bench.map((name: string) => (
+                    <span key={name} className="text-[8px] px-1.5 py-0.5 rounded bg-purple-50 text-purple-600 font-mono">{name}</span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Hawks */}
+            {office.hawks.length > 0 && (
+              <div className="border-t border-slate-100 pt-1.5">
                 <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest mb-1">Hawks</p>
                 <div className="flex flex-wrap gap-1">
-                  {dept.hawks.map(hawk => (
+                  {office.hawks.map(hawk => (
                     <span key={hawk} className="text-[8px] px-1.5 py-0.5 rounded bg-slate-100 text-slate-500 font-mono">
                       {hawk.replace('Lil_', '').replace('_Hawk', '')}
                     </span>
