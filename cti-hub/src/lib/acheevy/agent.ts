@@ -65,7 +65,7 @@ async function pickModel(task: string = 'chat'): Promise<string> {
     });
     if (res.ok) return (await res.json()).model;
   } catch {}
-  return 'deepseek/deepseek-v3.2';
+  return 'minimax/minimax-m2.7';
 }
 
 async function recordUsage(model: string, tokensIn: number, tokensOut: number) {

@@ -52,7 +52,8 @@ interface ModelOption {
 }
 
 const MODELS: ModelOption[] = [
-  { id: 'deepseek/deepseek-v3.2',       name: 'DeepSeek V3.2',      provider: 'DeepSeek',    price_in: 0.27,  price_out: 0.42,  context: '128K', tag: 'DEFAULT' },
+  { id: 'minimax/minimax-m2.7',           name: 'MiniMax M2.7',       provider: 'MiniMax',     price_in: 0.50,  price_out: 2.20,  context: '1M',   tag: 'DEFAULT' },
+  { id: 'deepseek/deepseek-v3.2',       name: 'DeepSeek V3.2',      provider: 'DeepSeek',    price_in: 0.27,  price_out: 0.42,  context: '128K' },
   { id: 'openai/gpt-4.1',               name: 'GPT-4.1',            provider: 'OpenAI',      price_in: 2.00,  price_out: 8.00,  context: '1M' },
   { id: 'openai/gpt-4.1-mini',          name: 'GPT-4.1 Mini',       provider: 'OpenAI',      price_in: 0.40,  price_out: 1.60,  context: '1M',   tag: 'FAST' },
   { id: 'openai/gpt-4.1-nano',          name: 'GPT-4.1 Nano',       provider: 'OpenAI',      price_in: 0.10,  price_out: 0.40,  context: '1M',   tag: 'CHEAP' },
