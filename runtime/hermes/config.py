@@ -4,6 +4,8 @@ import os
 
 from google.cloud import secretmanager
 
+VERSION = "0.5.0"
+
 GCP_PROJECT = os.getenv("GCP_PROJECT", "foai-aims")
 DEFAULT_TENANT = os.getenv("DEFAULT_TENANT", "cti")
 
@@ -20,9 +22,23 @@ OPENCLAW_URL = os.getenv(
     "https://openclaw-service-939270059361.us-central1.run.app",
 )
 
-OPENROUTER_MODEL = os.getenv("OPENROUTER_MODEL", "minimax/minimax-m2.7")
+# Multi-model evaluation panel — consensus scoring across providers
+EVAL_MODELS: list[str] = [
+    m.strip()
+    for m in os.getenv(
+        "EVAL_MODELS",
+        "google/gemini-2.0-flash-001,minimax/minimax-m2.7,deepseek/deepseek-chat-v3-0324",
+    ).split(",")
+]
+
+# Legacy single-model fallback
+OPENROUTER_MODEL = os.getenv("OPENROUTER_MODEL", EVAL_MODELS[0])
 
 PORT = int(os.getenv("PORT", "8080"))
+
+# Structured logging
+LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO")
+LOG_FORMAT = os.getenv("LOG_FORMAT", "json")
 
 _sm_client: secretmanager.SecretManagerServiceClient | None = None
 
