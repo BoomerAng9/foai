@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { Send, CornerDownLeft, ArrowDown, Paperclip, X, FileText, Image as ImageIcon, Sparkles } from 'lucide-react';
+import { Send, CornerDownLeft, ArrowDown, X, FileText, Image as ImageIcon, Sparkles } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { ChatSidebar } from '@/components/chat/ChatSidebar';
 import { MessageBubble } from '@/components/chat/MessageBubble';
@@ -10,6 +10,7 @@ import type { Message, Attachment, Conversation, TierId } from '@/lib/chat/types
 import { TIERS } from '@/lib/chat/types';
 import { LucPopup } from '@/components/chat/LucPopup';
 import type { LucEstimate } from '@/lib/luc/types';
+import { AttachmentMenu } from '@/components/chat/AttachmentMenu';
 
 const STARTERS = [
   'Research my competitors and build a brief',
@@ -277,6 +278,39 @@ export default function ChatWithACHEEVY() {
     e.target.style.height = Math.min(e.target.scrollHeight, 160) + 'px';
   }
 
+  async function handleScreenshot() {
+    try {
+      const stream = await navigator.mediaDevices.getDisplayMedia({ video: true });
+      const track = stream.getVideoTracks()[0];
+      const canvas = document.createElement('canvas');
+      const video = document.createElement('video');
+      video.srcObject = stream;
+      await video.play();
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      canvas.getContext('2d')?.drawImage(video, 0, 0);
+      track.stop();
+      const dataUrl = canvas.toDataURL('image/png');
+      const blob = await (await fetch(dataUrl)).blob();
+      setAttachments(prev => [...prev, {
+        name: `screenshot-${Date.now()}.png`,
+        type: 'image/png',
+        size: blob.size,
+        url: dataUrl,
+      }]);
+    } catch {}
+  }
+
+  function handleDeepResearch(mode: 'search' | 'crawl' | 'extract') {
+    const prefixes: Record<string, string> = {
+      search: '[Deep Research: Search] ',
+      crawl: '[Deep Research: Crawl] ',
+      extract: '[Deep Research: Extract] ',
+    };
+    setInput(prev => prefixes[mode] + prev);
+    inputRef.current?.focus();
+  }
+
   const isEmpty = messages.length === 0;
 
   return (
@@ -382,13 +416,14 @@ export default function ChatWithACHEEVY() {
                 onChange={handleFileSelect}
                 className="hidden"
               />
-              <button
-                onClick={() => fileInputRef.current?.click()}
-                className="btn-solid h-[44px] w-[44px] px-0 shrink-0 flex items-center justify-center"
-                title="Attach files (max 10)"
-              >
-                <Paperclip className="w-4 h-4" />
-              </button>
+              <AttachmentMenu
+                onFileSelect={() => fileInputRef.current?.click()}
+                onScreenshot={handleScreenshot}
+                onDeepResearch={handleDeepResearch}
+                activeTier={activeTier}
+                onTierChange={setActiveTier}
+                isSubscriber={true}
+              />
 
               <div className="flex-1 relative">
                 <textarea
