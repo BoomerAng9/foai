@@ -7,11 +7,13 @@ import {
 import type { TierId } from '@/lib/chat/types';
 import { TIERS } from '@/lib/chat/types';
 import { DeepResearchMenu } from './DeepResearchMenu';
+import { SkillsMenu } from './SkillsMenu';
 
 interface AttachmentMenuProps {
   onFileSelect: () => void;
   onScreenshot: () => void;
   onDeepResearch: (mode: 'search' | 'crawl' | 'extract') => void;
+  onSkillSelect: (prompt: string) => void;
   activeTier: TierId;
   onTierChange: (tier: TierId) => void;
   isSubscriber: boolean;
@@ -30,12 +32,14 @@ export function AttachmentMenu({
   onFileSelect,
   onScreenshot,
   onDeepResearch,
+  onSkillSelect,
   activeTier,
   onTierChange,
   isSubscriber,
 }: AttachmentMenuProps) {
   const [open, setOpen] = useState(false);
   const [showResearch, setShowResearch] = useState(false);
+  const [showSkills, setShowSkills] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -43,6 +47,7 @@ export function AttachmentMenu({
       if (ref.current && !ref.current.contains(e.target as Node)) {
         setOpen(false);
         setShowResearch(false);
+        setShowSkills(false);
       }
     }
     document.addEventListener('mousedown', handleClick);
@@ -53,6 +58,7 @@ export function AttachmentMenu({
     action();
     setOpen(false);
     setShowResearch(false);
+    setShowSkills(false);
   }
 
   const menuItems: MenuItem[] = [
@@ -90,7 +96,7 @@ export function AttachmentMenu({
       icon: <BookOpen className="w-4 h-4 text-fg-tertiary" />,
       label: 'Skills',
       hasSubmenu: true,
-      comingSoon: true,
+      onClick: () => { setShowSkills(!showSkills); setShowResearch(false); },
     },
     {
       icon: <Search className="w-4 h-4 text-signal-info" />,
@@ -103,7 +109,7 @@ export function AttachmentMenu({
   return (
     <div ref={ref} className="relative">
       <button
-        onClick={() => { setOpen(!open); setShowResearch(false); }}
+        onClick={() => { setOpen(!open); setShowResearch(false); setShowSkills(false); }}
         className="btn-solid h-[44px] w-[44px] px-0 shrink-0 flex items-center justify-center text-lg font-light"
         title="Add content"
       >
@@ -120,7 +126,7 @@ export function AttachmentMenu({
                   disabled={item.comingSoon}
                   className={`w-full flex items-center justify-between px-4 py-2.5 text-left transition-colors ${
                     item.comingSoon ? 'opacity-40 cursor-not-allowed' : 'hover:bg-bg-elevated'
-                  } ${item.label === 'Deep Research' && showResearch ? 'bg-bg-elevated' : ''}`}
+                  } ${(item.label === 'Deep Research' && showResearch) || (item.label === 'Skills' && showSkills) ? 'bg-bg-elevated' : ''}`}
                 >
                   <div className="flex items-center gap-3">
                     {item.icon}
@@ -163,6 +169,15 @@ export function AttachmentMenu({
                 onDeepResearch(mode);
                 setOpen(false);
                 setShowResearch(false);
+              }}
+            />
+          )}
+          {showSkills && (
+            <SkillsMenu
+              onSelect={(prompt) => {
+                onSkillSelect(prompt);
+                setOpen(false);
+                setShowSkills(false);
               }}
             />
           )}

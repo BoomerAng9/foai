@@ -301,6 +301,10 @@ export default function ChatWithACHEEVY() {
     } catch {}
   }
 
+  function handleSkillSelect(prompt: string) {
+    handleSend(prompt);
+  }
+
   function handleDeepResearch(mode: 'search' | 'crawl' | 'extract') {
     const prefixes: Record<string, string> = {
       search: '[Deep Research: Search] ',
@@ -420,6 +424,7 @@ export default function ChatWithACHEEVY() {
                 onFileSelect={() => fileInputRef.current?.click()}
                 onScreenshot={handleScreenshot}
                 onDeepResearch={handleDeepResearch}
+                onSkillSelect={handleSkillSelect}
                 activeTier={activeTier}
                 onTierChange={setActiveTier}
                 isSubscriber={true}
