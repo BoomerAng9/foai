@@ -8,6 +8,8 @@ import { MessageBubble } from '@/components/chat/MessageBubble';
 import { RolodexVerb } from '@/components/chat/RolodexVerb';
 import type { Message, Attachment, Conversation, TierId } from '@/lib/chat/types';
 import { TIERS } from '@/lib/chat/types';
+import { LucPopup } from '@/components/chat/LucPopup';
+import type { LucEstimate } from '@/lib/luc/types';
 
 const STARTERS = [
   'Research my competitors and build a brief',
@@ -39,6 +41,11 @@ export default function ChatWithACHEEVY() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [activeTier, setActiveTier] = useState<TierId>('premium');
   const [attachments, setAttachments] = useState<Attachment[]>([]);
+  const [lucEstimate, setLucEstimate] = useState<LucEstimate | null>(null);
+  const [lucPendingMsg, setLucPendingMsg] = useState<string | null>(null);
+  const [lucPendingAttachments, setLucPendingAttachments] = useState<Attachment[]>([]);
+  const [estimateCount, setEstimateCount] = useState(0);
+  const [autoAccept, setAutoAccept] = useState(false);
 
   const currentTier = TIERS.find(t => t.id === activeTier) || TIERS[0];
 
@@ -103,14 +110,8 @@ export default function ChatWithACHEEVY() {
     setAttachments(prev => prev.filter(a => a.name !== name));
   }
 
-  async function handleSend(text?: string) {
-    const msg = text || input.trim();
-    if (!msg || sending) return;
-    const currentAttachments = [...attachments];
-    setInput('');
-    setAttachments([]);
+  async function executeSend(msg: string, currentAttachments: Attachment[]) {
     setSending(true);
-    if (inputRef.current) inputRef.current.style.height = 'auto';
 
     const tempUserMsg: Message = {
       id: `u-${Date.now()}`,
@@ -198,6 +199,63 @@ export default function ChatWithACHEEVY() {
       setSending(false);
       inputRef.current?.focus();
     }
+  }
+
+  async function handleSend(text?: string) {
+    const msg = text || input.trim();
+    if (!msg || sending) return;
+    const currentAttachments = [...attachments];
+    setInput('');
+    setAttachments([]);
+    if (inputRef.current) inputRef.current.style.height = 'auto';
+
+    // Get LUC estimate
+    try {
+      const estRes = await fetch('/api/luc/estimate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          message: msg,
+          tier: activeTier,
+          attachments: currentAttachments.map(a => ({ name: a.name, type: a.type })),
+        }),
+      });
+      const estData = await estRes.json();
+
+      if (estData.estimate) {
+        setEstimateCount(prev => prev + 1);
+
+        if (!autoAccept) {
+          setLucEstimate(estData.estimate);
+          setLucPendingMsg(msg);
+          setLucPendingAttachments(currentAttachments);
+          return;
+        }
+      }
+    } catch {}
+
+    await executeSend(msg, currentAttachments);
+  }
+
+  function handleLucAccept() {
+    const msg = lucPendingMsg;
+    const atts = lucPendingAttachments;
+    setLucEstimate(null);
+    setLucPendingMsg(null);
+    setLucPendingAttachments([]);
+    if (msg) executeSend(msg, atts);
+  }
+
+  function handleLucAdjust() {
+    setLucEstimate(null);
+    setLucPendingMsg(null);
+    setLucPendingAttachments([]);
+  }
+
+  function handleLucStop() {
+    setLucEstimate(null);
+    setLucPendingMsg(null);
+    setLucPendingAttachments([]);
   }
 
   function startNewConversation() {
@@ -371,6 +429,18 @@ export default function ChatWithACHEEVY() {
           </div>
         </div>
       </div>
+
+      {lucEstimate && (
+        <LucPopup
+          estimate={lucEstimate}
+          estimateCount={estimateCount}
+          onAccept={handleLucAccept}
+          onAdjust={handleLucAdjust}
+          onStop={handleLucStop}
+          onAutoAcceptChange={setAutoAccept}
+          autoAcceptEnabled={autoAccept}
+        />
+      )}
     </div>
   );
 }
