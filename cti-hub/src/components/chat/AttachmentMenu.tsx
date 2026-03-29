@@ -8,12 +8,14 @@ import type { TierId } from '@/lib/chat/types';
 import { TIERS } from '@/lib/chat/types';
 import { DeepResearchMenu } from './DeepResearchMenu';
 import { SkillsMenu } from './SkillsMenu';
+import type { Skill } from '@/lib/skills/registry';
 
 interface AttachmentMenuProps {
   onFileSelect: () => void;
   onScreenshot: () => void;
   onDeepResearch: (mode: 'search' | 'crawl' | 'extract') => void;
-  onSkillSelect: (prompt: string) => void;
+  onSkillSelect: (skill: Skill) => void;
+  activeSkillId: string | null;
   activeTier: TierId;
   onTierChange: (tier: TierId) => void;
   isSubscriber: boolean;
@@ -33,6 +35,7 @@ export function AttachmentMenu({
   onScreenshot,
   onDeepResearch,
   onSkillSelect,
+  activeSkillId,
   activeTier,
   onTierChange,
   isSubscriber,
@@ -174,11 +177,12 @@ export function AttachmentMenu({
           )}
           {showSkills && (
             <SkillsMenu
-              onSelect={(prompt) => {
-                onSkillSelect(prompt);
+              onSelect={(skill) => {
+                onSkillSelect(skill);
                 setOpen(false);
                 setShowSkills(false);
               }}
+              activeSkillId={activeSkillId}
             />
           )}
         </div>
