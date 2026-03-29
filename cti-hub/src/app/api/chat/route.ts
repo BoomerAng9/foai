@@ -17,7 +17,7 @@ export async function POST(request: NextRequest) {
   try {
     const userId = await getUserId(request);
     const body = await request.json();
-    const { message, conversation_id, model } = body;
+    const { message, conversation_id, model, skill_context } = body;
 
     if (!message || typeof message !== 'string') {
       return NextResponse.json({ error: 'message required' }, { status: 400 });
@@ -38,10 +38,15 @@ export async function POST(request: NextRequest) {
       }));
     }
 
+    // If skill context is provided, prepend it to the message as system-level context
+    const enrichedMessage = skill_context
+      ? `[SKILL CONTEXT - Apply this framework to your response]\n${skill_context}\n\n[USER MESSAGE]\n${message}`
+      : message;
+
     const result = await acheevyRespondStream(
       userId || 'anonymous',
       convId || 'temp',
-      message,
+      enrichedMessage,
       history,
       model,
     );

@@ -11,6 +11,7 @@ import { TIERS } from '@/lib/chat/types';
 import { LucPopup } from '@/components/chat/LucPopup';
 import type { LucEstimate } from '@/lib/luc/types';
 import { AttachmentMenu } from '@/components/chat/AttachmentMenu';
+import type { Skill } from '@/lib/skills/registry';
 
 const STARTERS = [
   'Research my competitors and build a brief',
@@ -47,6 +48,7 @@ export default function ChatWithACHEEVY() {
   const [lucPendingAttachments, setLucPendingAttachments] = useState<Attachment[]>([]);
   const [estimateCount, setEstimateCount] = useState(0);
   const [autoAccept, setAutoAccept] = useState(false);
+  const [activeSkill, setActiveSkill] = useState<Skill | null>(null);
 
   const currentTier = TIERS.find(t => t.id === activeTier) || TIERS[0];
 
@@ -140,6 +142,7 @@ export default function ChatWithACHEEVY() {
           message: msg,
           conversation_id: activeConvId,
           attachments: currentAttachments.map(a => ({ name: a.name, type: a.type, size: a.size })),
+          skill_context: activeSkill?.systemContext || undefined,
         }),
       });
 
@@ -301,8 +304,17 @@ export default function ChatWithACHEEVY() {
     } catch {}
   }
 
-  function handleSkillSelect(prompt: string) {
-    handleSend(prompt);
+  function handleSkillSelect(skill: Skill) {
+    if (!skill.id) {
+      setActiveSkill(null);
+      return;
+    }
+    setActiveSkill(skill);
+    // Pre-fill with example prompt if input is empty
+    if (!input.trim()) {
+      setInput(skill.example);
+      inputRef.current?.focus();
+    }
   }
 
   function handleDeepResearch(mode: 'search' | 'crawl' | 'extract') {
@@ -425,6 +437,7 @@ export default function ChatWithACHEEVY() {
                 onScreenshot={handleScreenshot}
                 onDeepResearch={handleDeepResearch}
                 onSkillSelect={handleSkillSelect}
+                activeSkillId={activeSkill?.id || null}
                 activeTier={activeTier}
                 onTierChange={setActiveTier}
                 isSubscriber={true}
@@ -461,6 +474,12 @@ export default function ChatWithACHEEVY() {
                 <span className="font-semibold uppercase tracking-wider">{currentTier.name}</span>
                 <span className="text-fg-ghost">|</span>
                 <span className="text-fg-ghost">LUC active</span>
+                {activeSkill && (
+                  <>
+                    <span className="text-fg-ghost">|</span>
+                    <span className="text-signal-info font-semibold">{activeSkill.alias}</span>
+                  </>
+                )}
               </div>
               <p className="font-mono text-[9px] text-fg-ghost">
                 The Deploy Platform
