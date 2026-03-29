@@ -51,18 +51,25 @@ export default function OperationsFloor() {
   const [state, setState] = useState<WorldState | null>(null);
   const [lucMetrics, setLucMetrics] = useState<LucMetrics | null>(null);
   const [connected, setConnected] = useState(false);
+  const [offline, setOffline] = useState(false);
   const wsRef = useRef<WebSocket | null>(null);
   const reconnectRef = useRef<ReturnType<typeof setTimeout>>(undefined);
+  const retriesRef = useRef(0);
+  const MAX_RETRIES = 3;
 
   const connect = useCallback(() => {
+    if (retriesRef.current >= MAX_RETRIES) {
+      setOffline(true);
+      return;
+    }
     try {
       const ws = new WebSocket(STATE_ENGINE_URL);
       wsRef.current = ws;
-      ws.onopen = () => setConnected(true);
+      ws.onopen = () => { setConnected(true); retriesRef.current = 0; setOffline(false); };
       ws.onmessage = (e) => { const msg = JSON.parse(e.data); if (msg.type === 'full' || msg.type === 'diff') setState(msg.data); };
-      ws.onclose = () => { setConnected(false); reconnectRef.current = setTimeout(connect, 3000); };
+      ws.onclose = () => { setConnected(false); retriesRef.current++; if (retriesRef.current < MAX_RETRIES) { reconnectRef.current = setTimeout(connect, 3000); } else { setOffline(true); } };
       ws.onerror = () => ws.close();
-    } catch { reconnectRef.current = setTimeout(connect, 3000); }
+    } catch { retriesRef.current++; if (retriesRef.current < MAX_RETRIES) { reconnectRef.current = setTimeout(connect, 3000); } else { setOffline(true); } }
   }, []);
 
   useEffect(() => {
@@ -104,9 +111,9 @@ export default function OperationsFloor() {
               <span className="font-mono text-[10px] font-bold text-signal-live">CONNECTED</span>
             </div>
           ) : (
-            <div className="flex items-center gap-2 px-3 py-1.5 border border-signal-error">
-              <WifiOff className="w-3.5 h-3.5 text-signal-error" />
-              <span className="font-mono text-[10px] font-bold text-signal-error">RECONNECTING</span>
+            <div className={`flex items-center gap-2 px-3 py-1.5 border ${offline ? 'border-fg-ghost' : 'border-signal-error'}`}>
+              <WifiOff className={`w-3.5 h-3.5 ${offline ? 'text-fg-ghost' : 'text-signal-error'}`} />
+              <span className={`font-mono text-[10px] font-bold ${offline ? 'text-fg-ghost' : 'text-signal-error'}`}>{offline ? 'OFFLINE' : 'RECONNECTING'}</span>
             </div>
           )}
         </div>
