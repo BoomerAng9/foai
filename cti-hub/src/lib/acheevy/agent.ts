@@ -65,7 +65,7 @@ async function pickModel(task: string = 'chat'): Promise<string> {
     });
     if (res.ok) return (await res.json()).model;
   } catch {}
-  return 'deepseek/deepseek-v3.2';
+  return 'minimax/minimax-m2.7';
 }
 
 async function recordUsage(model: string, tokensIn: number, tokensOut: number) {
@@ -83,6 +83,7 @@ export async function acheevyRespond(
   conversationId: string,
   userMessage: string,
   conversationHistory: ConversationMessage[],
+  modelOverride?: string,
 ): Promise<{
   content: string;
   model: string;
@@ -132,8 +133,8 @@ export async function acheevyRespond(
     { role: 'user', content: userMessage },
   ];
 
-  // 4. Pick model via LUC
-  const model = await pickModel('chat');
+  // 4. Pick model via LUC (or use client-selected model)
+  const model = modelOverride || await pickModel('chat');
 
   // 5. Call OpenRouter
   if (!OPENROUTER_API_KEY) {
@@ -180,8 +181,11 @@ export async function acheevyRespond(
     await memorizeConversationTurn(userId, conversationId, userMessage, content);
   } catch {}
 
-  // Estimate cost (rough — LUC has exact numbers)
-  const costEstimate = (tokensIn / 1_000_000) * 0.27 + (tokensOut / 1_000_000) * 0.42;
+  // Estimate cost from OpenRouter generation data, fallback to model lookup
+  const generationCost = completion.usage?.total_cost;
+  const costEstimate = generationCost != null
+    ? generationCost
+    : (tokensIn / 1_000_000) * 0.30 + (tokensOut / 1_000_000) * 1.20; // MiniMax M2.7 default rates
 
   return {
     content,
@@ -191,4 +195,210 @@ export async function acheevyRespond(
     cost_estimate: Math.round(costEstimate * 1_000_000) / 1_000_000,
     memories_recalled: memoriesRecalled,
   };
+}
+
+export async function acheevyRespondStream(
+  userId: string,
+  conversationId: string,
+  userMessage: string,
+  conversationHistory: ConversationMessage[],
+  modelOverride?: string,
+): Promise<{ stream: ReadableStream<Uint8Array>; model: string; memories_recalled: number }> {
+  const enc = new TextEncoder();
+
+  // 0. MIM governance gate
+  const mim = checkMIMGate(userMessage);
+  if (!mim.allowed) {
+    const blockedResponse = `${mim.reason}\n\n${mim.redirect || 'Let me know how I can help differently.'}`;
+    // Fire-and-forget storage
+    addMessage(conversationId, userId, 'user', userMessage).catch(() => {});
+    addMessage(conversationId, userId, 'acheevy', blockedResponse, 'ACHEEVY', {
+      mim_blocked: true,
+      policy: mim.policy,
+    }).catch(() => {});
+
+    const syntheticStream = new ReadableStream<Uint8Array>({
+      start(controller) {
+        controller.enqueue(
+          enc.encode(`data: ${JSON.stringify({ content: blockedResponse, done: false })}\n\n`),
+        );
+        controller.enqueue(
+          enc.encode(
+            `data: ${JSON.stringify({
+              content: '',
+              done: true,
+              usage: { tokens_in: 0, tokens_out: 0, cost: 0, memories_recalled: 0 },
+            })}\n\n`,
+          ),
+        );
+        controller.close();
+      },
+    });
+
+    return { stream: syntheticStream, model: 'mim-gate', memories_recalled: 0 };
+  }
+
+  // 1. Recall relevant memory
+  let memoryContext = 'No prior memory available.';
+  let memoriesRecalled = 0;
+  try {
+    const memories = await recallAll(userId, userMessage, 5);
+    if (memories.length > 0) {
+      memoriesRecalled = memories.length;
+      memoryContext = memories
+        .map((m, i) => `[Memory ${i + 1}] ${m.content.slice(0, 300)}`)
+        .join('\n');
+    }
+  } catch {}
+
+  // 2. Build system prompt with memory
+  const systemPrompt = ACHEEVY_SYSTEM_PROMPT
+    .replace('{memory_context}', memoryContext)
+    .replace('{source_context}', 'None active in this session.');
+
+  // 3. Build message chain
+  const messages: ConversationMessage[] = [
+    { role: 'system', content: systemPrompt },
+    ...conversationHistory.slice(-20),
+    { role: 'user', content: userMessage },
+  ];
+
+  // 4. Pick model via LUC (or use client-selected model)
+  const model = modelOverride || await pickModel('chat');
+
+  // 5. Store user message in Neon (fire-and-forget)
+  addMessage(conversationId, userId, 'user', userMessage).catch(() => {});
+
+  // 6. Call OpenRouter with stream: true
+  if (!OPENROUTER_API_KEY) {
+    throw new Error('No LLM API key configured');
+  }
+
+  const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${OPENROUTER_API_KEY}`,
+      'X-OpenRouter-Title': 'The Deploy Platform',
+    },
+    body: JSON.stringify({
+      model,
+      messages,
+      temperature: 0.6,
+      max_tokens: 2000,
+      stream: true,
+    }),
+  });
+
+  if (!res.ok || !res.body) {
+    const errBody = await res.text().catch(() => 'unknown error');
+    throw new Error(`ACHEEVY stream failed: ${errBody}`);
+  }
+
+  const upstreamReader = res.body.getReader();
+  const decoder = new TextDecoder();
+  const finalMemoriesRecalled = memoriesRecalled;
+
+  const stream = new ReadableStream<Uint8Array>({
+    async start(controller) {
+      let buffer = '';
+      let fullContent = '';
+      let tokensIn = 0;
+      let tokensOut = 0;
+      let resolvedModel = model;
+
+      try {
+        while (true) {
+          const { done, value } = await upstreamReader.read();
+          if (done) break;
+
+          buffer += decoder.decode(value, { stream: true });
+          const lines = buffer.split('\n');
+          // Keep the last incomplete line in the buffer
+          buffer = lines.pop() ?? '';
+
+          for (const line of lines) {
+            const trimmed = line.trim();
+            if (!trimmed || !trimmed.startsWith('data:')) continue;
+
+            const data = trimmed.slice(5).trim();
+            if (data === '[DONE]') {
+              // All chunks received — emit final SSE chunk with usage
+              const generationCost =
+                (tokensIn / 1_000_000) * 0.30 + (tokensOut / 1_000_000) * 1.20;
+              const cost = Math.round(generationCost * 1_000_000) / 1_000_000;
+
+              controller.enqueue(
+                enc.encode(
+                  `data: ${JSON.stringify({
+                    content: '',
+                    done: true,
+                    usage: {
+                      tokens_in: tokensIn,
+                      tokens_out: tokensOut,
+                      cost,
+                      memories_recalled: finalMemoriesRecalled,
+                    },
+                  })}\n\n`,
+                ),
+              );
+              controller.close();
+
+              // Fire-and-forget post-stream work
+              const capturedContent = fullContent;
+              const capturedModel = resolvedModel;
+              const capturedTokensIn = tokensIn;
+              const capturedTokensOut = tokensOut;
+              ;(async () => {
+                try {
+                  await addMessage(conversationId, userId, 'acheevy', capturedContent, 'ACHEEVY', {
+                    model: capturedModel,
+                    tokens_in: capturedTokensIn,
+                    tokens_out: capturedTokensOut,
+                  });
+                } catch {}
+                try {
+                  await memorizeConversationTurn(userId, conversationId, userMessage, capturedContent);
+                } catch {}
+                await recordUsage(capturedModel, capturedTokensIn, capturedTokensOut);
+              })();
+              return;
+            }
+
+            try {
+              const parsed = JSON.parse(data);
+              // Capture resolved model name if provided
+              if (parsed.model) resolvedModel = parsed.model;
+              // Capture usage if provided in the chunk
+              if (parsed.usage) {
+                tokensIn = parsed.usage.prompt_tokens || tokensIn;
+                tokensOut = parsed.usage.completion_tokens || tokensOut;
+              }
+              const token: string = parsed.choices?.[0]?.delta?.content ?? '';
+              if (token) {
+                fullContent += token;
+                controller.enqueue(
+                  enc.encode(`data: ${JSON.stringify({ content: token, done: false })}\n\n`),
+                );
+              }
+            } catch {
+              // Non-JSON SSE line — skip
+            }
+          }
+        }
+
+        // If the upstream closed without a [DONE] line, close gracefully
+        if (!controller.desiredSize === null) {
+          controller.close();
+        }
+      } catch (err) {
+        controller.error(err);
+      }
+    },
+    cancel() {
+      upstreamReader.cancel().catch(() => {});
+    },
+  });
+
+  return { stream, model, memories_recalled: memoriesRecalled };
 }

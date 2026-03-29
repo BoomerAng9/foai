@@ -3,7 +3,36 @@
     "allow": [
       "Bash(for dir:*)",
       "Bash(do touch:*)",
-      "Bash(done)"
+      "Bash(done)",
+      "Bash(gcloud run:*)",
+      "Bash(for agent:*)",
+      "Bash(do cp:*)",
+      "Bash(cd:*)",
+      "Bash(npm ls:*)",
+      "Bash(npm run:*)",
+      "Bash(for f:*)",
+      "Bash(do sed:*)",
+      "Bash(rsync -a --exclude='.git' C:/Users/rishj/foai/docs/grammar/ C:/Users/rishj/foai/cti-hub/)",
+      "Bash(ls:*)",
+      "Bash(rm -rf src/core_runtime src/execution_branches src/workflow_spine src/lib/research src/lib/ai/glm.ts src/lib/luc.ts src_old)",
+      "Bash(rm -rf src/app/\\\\\\(dashboard\\\\\\)/research src/app/\\\\\\(dashboard\\\\\\)/memory src/app/\\\\\\(dashboard\\\\\\)/policies src/app/\\\\\\(dashboard\\\\\\)/logs src/app/\\\\\\(dashboard\\\\\\)/manager src/app/\\\\\\(dashboard\\\\\\)/board src/app/\\\\\\(dashboard\\\\\\)/agents src/app/\\\\\\(dashboard\\\\\\)/chat/acheevy src/app/runtime src/app/onboarding)",
+      "Bash(rm -rf src/app/api/research src/app/api/runtime src/app/api/agents src/app/api/admin src/app/api/data src/app/api/paywall src/app/api/voice)",
+      "Bash(rm -rf .kilocode .specs .ai docs \"Official Docs\" .windsurfrules .ecosystem.json ecosystem.node.json event skills-lock.json stitch_dashboard.html stitch_dashboard_raw.html grammar_deploy.zip openapi.json librechat.yaml.prod LibreChat_package.json nginx_grammar.conf nginx_grammar_http.conf install_mongo.sh register_guest.sh fetch_ssh.py run_ssh.py upload_ssh.py apply-gold-theme.ps1 apply-gold-theme-recursive.ps1 aims-ssl-setup.sh remotion-videos tests GEMINI.md)",
+      "mcp__plugin_firebase_firebase__firebase_get_sdk_config",
+      "mcp__plugin_firebase_firebase__firebase_update_environment",
+      "mcp__plugin_firebase_firebase__firebase_get_environment",
+      "mcp__plugin_firebase_firebase__firebase_list_projects",
+      "Bash(npx kill-port:*)",
+      "Bash(lsof -ti:3000)",
+      "Bash(xargs kill:*)",
+      "Bash(fuser -k 3000/tcp)",
+      "Bash(taskkill:*)",
+      "Bash(gh repo:*)",
+      "Bash(gh api:*)",
+      "WebSearch",
+      "Bash(gcloud secrets:*)",
+      "Bash(while read:*)",
+      "Bash(claude mcp:*)"
     ]
   }
 }

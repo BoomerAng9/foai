@@ -1,189 +1,272 @@
 'use client';
 
-import { useState } from 'react';
-import { useAuth } from '@/hooks/useAuth';
-import {
-  Send, Loader2, Trash2, Globe, Table, Mic, Camera, Plus, X,
-  FileSpreadsheet, Zap, ChevronRight,
-} from 'lucide-react';
+import Link from 'next/link';
+import { ArrowRight, Terminal, Mic, Zap, Shield, Brain } from 'lucide-react';
+import { useState, useEffect } from 'react';
 
-interface ScrapeResult { source: string; url: string; title: string; content: string; metadata: Record<string, unknown>; scraped_at: string; }
-interface CleanedData { columns: string[]; rows: Record<string, unknown>[]; }
-type PipelineStep = 'idle' | 'scraping' | 'cleaning' | 'exporting' | 'done';
+function CornerBracket({ position }: { position: 'tl' | 'tr' | 'bl' | 'br' }) {
+  const rotation = { tl: 0, tr: 90, bl: -90, br: 180 }[position];
+  const pos = {
+    tl: 'top-6 left-6',
+    tr: 'top-6 right-6',
+    bl: 'bottom-6 left-6',
+    br: 'bottom-6 right-6',
+  }[position];
+  return (
+    <svg className={`absolute ${pos} w-5 h-5 text-fg-ghost`} style={{ transform: `rotate(${rotation}deg)` }} viewBox="0 0 20 20" fill="none">
+      <path d="M0 0v20M0 0h20" stroke="currentColor" strokeWidth="1" />
+    </svg>
+  );
+}
 
-export default function DeployPlatform() {
-  const { user, loading } = useAuth();
+function Crosshair() {
+  return (
+    <svg className="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 800 600" fill="none" preserveAspectRatio="xMidYMid meet">
+      <circle cx="400" cy="300" r="200" stroke="#E0E0E0" strokeWidth="0.5" opacity="0.3" />
+      <circle cx="400" cy="300" r="120" stroke="#E0E0E0" strokeWidth="0.5" opacity="0.2" />
+      <circle cx="400" cy="300" r="40" stroke="#E0E0E0" strokeWidth="0.5" opacity="0.15" />
+      <line x1="400" y1="50" x2="400" y2="550" stroke="#E0E0E0" strokeWidth="0.5" opacity="0.15" />
+      <line x1="150" y1="300" x2="650" y2="300" stroke="#E0E0E0" strokeWidth="0.5" opacity="0.15" />
+    </svg>
+  );
+}
 
-  const [urls, setUrls] = useState<string[]>(['']);
-  const [engine, setEngine] = useState<'firecrawl' | 'apify' | 'both'>('firecrawl');
-  const [scrapeResults, setScrapeResults] = useState<ScrapeResult[]>([]);
-  const [columns, setColumns] = useState('institution, course_name, seats_remaining, price, start_date, contact_email');
-  const [cleanContext, setCleanContext] = useState('University course listings with open enrollment seats in Savannah, GA area');
-  const [cleanedData, setCleanedData] = useState<CleanedData | null>(null);
-  const [sheetUrl, setSheetUrl] = useState<string | null>(null);
-  const [sheetTitle, setSheetTitle] = useState('Deploy Export');
-  const [step, setStep] = useState<PipelineStep>('idle');
-  const [errors, setErrors] = useState<string[]>([]);
-  const [talkInput, setTalkInput] = useState('');
+function TypewriterText({ text, delay = 0 }: { text: string; delay?: number }) {
+  const [displayed, setDisplayed] = useState('');
+  const [started, setStarted] = useState(false);
 
-  if (loading) return <div className="flex h-screen items-center justify-center bg-[#0a0a0f]"><div className="w-8 h-8 border-4 border-[#00A3FF] border-t-transparent rounded-full animate-spin" /></div>;
-  if (!user) return <div className="flex h-screen items-center justify-center bg-[#0a0a0f]"><p className="text-slate-500 text-sm">Redirecting...</p></div>;
+  useEffect(() => {
+    const timer = setTimeout(() => setStarted(true), delay);
+    return () => clearTimeout(timer);
+  }, [delay]);
 
-  async function runScrape() {
-    const validUrls = urls.filter(u => u.trim());
-    if (validUrls.length === 0) return;
-    setStep('scraping'); setErrors([]); setScrapeResults([]); setCleanedData(null); setSheetUrl(null);
-    try {
-      const res = await fetch('/api/scrape', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ urls: validUrls, engine }) });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error);
-      setScrapeResults(data.results || []);
-      if (data.errors?.length > 0) setErrors(data.errors.map((e: { url: string; error: string }) => `${e.url}: ${e.error}`));
-    } catch (err: unknown) { setErrors([err instanceof Error ? err.message : 'Research failed']); }
-    setStep('idle');
-  }
-
-  async function runClean() {
-    if (scrapeResults.length === 0) return;
-    setStep('cleaning'); setCleanedData(null);
-    const rawText = scrapeResults.map(r => `--- ${r.title} (${r.url}) ---\n${r.content}`).join('\n\n');
-    const colArray = columns.split(',').map(c => c.trim()).filter(Boolean);
-    try {
-      const res = await fetch('/api/clean', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ raw_data: rawText, columns: colArray, context: cleanContext }) });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error);
-      setCleanedData({ columns: data.columns, rows: data.rows });
-    } catch (err: unknown) { setErrors(prev => [...prev, err instanceof Error ? err.message : 'Organize failed']); }
-    setStep('idle');
-  }
-
-  async function exportToSheets() {
-    if (!cleanedData) return;
-    setStep('exporting');
-    try {
-      const res = await fetch('/api/sheets', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ title: sheetTitle, columns: cleanedData.columns, rows: cleanedData.rows }) });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error);
-      setSheetUrl(data.spreadsheetUrl); setStep('done');
-    } catch (err: unknown) { setErrors(prev => [...prev, err instanceof Error ? err.message : 'Deliver failed']); setStep('idle'); }
-  }
+  useEffect(() => {
+    if (!started) return;
+    let i = 0;
+    const interval = setInterval(() => {
+      if (i < text.length) {
+        setDisplayed(text.slice(0, i + 1));
+        i++;
+      } else {
+        clearInterval(interval);
+      }
+    }, 40);
+    return () => clearInterval(interval);
+  }, [started, text]);
 
   return (
-    <div className="flex h-screen bg-[#0a0a0f] text-white font-sans overflow-hidden">
-      <aside className="w-72 bg-[#111118] border-r border-white/[0.06] flex flex-col">
-        <div className="p-5 border-b border-white/[0.06]">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-[#00A3FF] flex items-center justify-center text-sm font-black">D</div>
-            <span className="text-lg font-bold tracking-tight">Deploy</span>
+    <span>
+      {displayed}
+      {displayed.length < text.length && started && (
+        <span className="inline-block w-2 h-5 bg-fg ml-0.5 align-text-bottom animate-cursor-blink" />
+      )}
+    </span>
+  );
+}
+
+export default function LandingPage() {
+  return (
+    <div className="min-h-screen bg-bg text-fg font-sans">
+      {/* Navigation */}
+      <nav className="h-14 flex items-center justify-between px-8 border-b border-border bg-bg-surface">
+        <div className="flex items-center gap-2.5">
+          <div className="w-7 h-7 bg-accent flex items-center justify-center">
+            <Terminal className="w-3.5 h-3.5 text-bg" />
           </div>
-          <p className="text-[10px] text-slate-500 mt-1 font-bold uppercase tracking-widest">Research &middot; Organize &middot; Deliver</p>
+          <span className="font-mono text-xs font-bold tracking-wider uppercase">The Deploy Platform</span>
         </div>
-        <div className="flex-1 p-4 space-y-4 overflow-y-auto">
+
+        <div className="flex items-center gap-6">
+          <a href="#features" className="btn-bracket">Features</a>
+          <a href="#capabilities" className="btn-bracket">Capabilities</a>
+          <Link href="/auth/login" className="btn-bracket">Sign In</Link>
+          <Link href="/chat" className="btn-solid h-9 text-[10px]">
+            START TALKING <ArrowRight className="w-3 h-3 ml-1" />
+          </Link>
+        </div>
+      </nav>
+
+      {/* Hero */}
+      <section className="relative min-h-[90vh] flex items-end justify-center pb-24 overflow-hidden logo-watermark-center">
+        <Crosshair />
+        <CornerBracket position="tl" />
+        <CornerBracket position="tr" />
+        <CornerBracket position="bl" />
+        <CornerBracket position="br" />
+
+        {/* Top metadata */}
+        <div className="absolute top-8 left-8 space-y-3">
           <div>
-            <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 block">Target URLs</label>
-            {urls.map((url, i) => (
-              <div key={i} className="flex gap-2 mb-2">
-                <input type="url" value={url} onChange={(e) => { const next = [...urls]; next[i] = e.target.value; setUrls(next); }}
-                  placeholder="https://..." className="flex-1 h-9 px-3 rounded-lg bg-white/[0.05] border border-white/[0.08] text-sm focus:outline-none focus:border-[#00A3FF]/50 placeholder:text-slate-600" />
-                {urls.length > 1 && <button onClick={() => setUrls(urls.filter((_, j) => j !== i))} className="text-slate-600 hover:text-red-400"><X className="w-4 h-4" /></button>}
+            <p className="font-mono text-[10px] text-fg-ghost uppercase tracking-widest">Built by</p>
+            <p className="font-mono text-[11px] text-fg-secondary font-medium">ACHIEVEMOR</p>
+          </div>
+          <div>
+            <p className="font-mono text-[10px] text-fg-ghost uppercase tracking-widest">Version</p>
+            <p className="font-mono text-[11px] text-fg-secondary font-medium">2.0</p>
+          </div>
+        </div>
+
+        <div className="absolute top-8 right-8 flex gap-4">
+          <Link href="/chat" className="btn-bracket">Launch App</Link>
+          <a href="#features" className="btn-bracket">Learn More</a>
+        </div>
+
+        {/* Hero Video Container — Remotion Player slot */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[480px] h-[270px] border border-border bg-bg-surface flex items-center justify-center">
+          <div className="text-center">
+            <div className="w-12 h-12 mx-auto mb-3 border border-border flex items-center justify-center">
+              <div className="w-0 h-0 border-l-[8px] border-l-fg border-t-[5px] border-t-transparent border-b-[5px] border-b-transparent ml-1" />
+            </div>
+            <p className="font-mono text-[10px] text-fg-ghost uppercase tracking-widest">Platform Demo</p>
+          </div>
+        </div>
+
+        {/* Center content */}
+        <div className="relative z-10 text-center max-w-2xl mx-auto px-8">
+          <p className="font-mono text-[11px] text-fg-tertiary uppercase tracking-[0.3em] mb-6">
+            <TypewriterText text="~$ NPM LAUNCH THE-DEPLOY-PLATFORM" delay={300} />
+          </p>
+
+          <h1 className="text-5xl font-light tracking-tight mb-4 leading-[1.1]">
+            Think It. Prompt It.<br />
+            <span className="font-bold">Let ACHEEVY Manage It.</span>
+          </h1>
+
+          <p className="text-fg-secondary text-base leading-relaxed mb-10 max-w-lg mx-auto">
+            AI-native application factory for autonomous deployment,
+            governance, and delivery.
+          </p>
+
+          <div className="flex items-center justify-center gap-4">
+            <Link href="/chat" className="btn-solid h-12 px-8 text-xs gap-2">
+              <Mic className="w-4 h-4" /> PROMPT IT
+            </Link>
+            <Link href="/auth/login" className="btn-ghost h-12 px-8 text-xs">
+              SIGN IN
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Features */}
+      <section id="features" className="py-24 px-8 border-t border-border">
+        <div className="max-w-5xl mx-auto">
+          <div className="mb-16">
+            <p className="label-mono mb-3">The future of AI platforms</p>
+            <h2 className="text-3xl font-light tracking-tight">
+              AI that <span className="font-bold">manages solutions.</span>
+            </h2>
+            <p className="text-fg-secondary text-sm mt-3 max-w-lg">
+              Not another chatbot. An autonomous operations platform that researches, builds,
+              deploys, and monitors — with human-in-the-loop governance at every gate.
+            </p>
+          </div>
+
+          {/* Two Paths */}
+          <div className="grid grid-cols-2 gap-px bg-border">
+            {/* Manage It */}
+            <div className="bg-bg-surface p-10">
+              <div className="w-10 h-10 border border-border flex items-center justify-center mb-6">
+                <Zap className="w-5 h-5 text-fg-secondary" />
+              </div>
+              <h3 className="text-xl font-bold tracking-tight mb-2">Manage It</h3>
+              <p className="label-mono mb-4">Fully autonomous execution</p>
+              <p className="text-fg-secondary text-sm leading-relaxed mb-6">
+                State your goal and Deploy handles everything: planning, quoting,
+                building, and shipping. Uses ACHEEVY protocol for intelligent orchestration.
+              </p>
+              <ul className="space-y-2 mb-8">
+                {['Confidence-gated execution', 'Human approval for critical decisions', 'Full audit trail'].map(item => (
+                  <li key={item} className="flex items-center gap-2 text-sm text-fg-secondary">
+                    <span className="led led-live" /> {item}
+                  </li>
+                ))}
+              </ul>
+              <Link href="/chat" className="btn-solid h-10 text-[10px] inline-flex gap-2">
+                START AUTONOMOUS CHAT <ArrowRight className="w-3 h-3" />
+              </Link>
+            </div>
+
+            {/* Guide Me */}
+            <div className="bg-bg-surface p-10">
+              <div className="w-10 h-10 border border-border flex items-center justify-center mb-6">
+                <Brain className="w-5 h-5 text-fg-secondary" />
+              </div>
+              <h3 className="text-xl font-bold tracking-tight mb-2">Guide Me</h3>
+              <p className="label-mono mb-4">Step-by-step workflow creation</p>
+              <p className="text-fg-secondary text-sm leading-relaxed mb-6">
+                Wizard-guided workflow creation with chat assistance. ACHEEVY runs
+                a needs analysis consultation, then delegates to the team.
+              </p>
+              <ul className="space-y-2 mb-8">
+                {['Tool warehouse integration', 'Real-time token estimation', 'Preview before execution'].map(item => (
+                  <li key={item} className="flex items-center gap-2 text-sm text-fg-secondary">
+                    <span className="led bg-signal-info" /> {item}
+                  </li>
+                ))}
+              </ul>
+              <Link href="/chat" className="btn-ghost h-10 text-[10px] inline-flex gap-2">
+                OPEN CHARTER WIZARD <ArrowRight className="w-3 h-3" />
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Capabilities */}
+      <section id="capabilities" className="py-24 px-8 border-t border-border bg-bg-surface">
+        <div className="max-w-5xl mx-auto">
+          <div className="mb-16">
+            <p className="label-mono mb-3">Under the hood</p>
+            <h2 className="text-3xl font-light tracking-tight">
+              Autonomous. <span className="font-bold">Governed. Transparent.</span>
+            </h2>
+          </div>
+
+          <div className="grid grid-cols-2 gap-6">
+            {[
+              { label: 'AGENT FLEET', value: '8 PMO offices, 24+ specialized agents routing your work' },
+              { label: 'MEMORY', value: 'Semantic recall across all conversations. Nothing is forgotten' },
+              { label: 'COST TRACKING', value: 'Every token counted, every dollar tracked. Full transparency' },
+              { label: 'DEPLOYMENTS', value: 'From conversation to live Cloud Run URL. No devops required' },
+              { label: 'RESEARCH', value: 'Web scraping, data extraction, synthesis — automated' },
+              { label: 'GOVERNANCE', value: 'MIM-governed context. IP protection. Human-in-the-loop gates' },
+            ].map((cap, i) => (
+              <div key={i} className="flex items-start gap-4 p-6 border border-border hover:border-fg-ghost transition-colors">
+                <Shield className="w-4 h-4 text-fg-tertiary mt-0.5 shrink-0" />
+                <div>
+                  <p className="font-mono text-[11px] font-bold tracking-wider mb-1.5">{cap.label}</p>
+                  <p className="text-fg-secondary text-sm leading-relaxed">{cap.value}</p>
+                </div>
               </div>
             ))}
-            <button onClick={() => setUrls([...urls, ''])} className="flex items-center gap-1 text-[11px] text-[#00A3FF] font-bold hover:underline"><Plus className="w-3 h-3" /> Add URL</button>
-          </div>
-          <div>
-            <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 block">Engine</label>
-            <div className="flex gap-2">
-              {(['firecrawl', 'apify', 'both'] as const).map(e => (
-                <button key={e} onClick={() => setEngine(e)} className={`flex-1 py-2 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all ${engine === e ? 'bg-[#00A3FF] text-white' : 'bg-white/[0.05] text-slate-400 hover:text-white'}`}>{e}</button>
-              ))}
-            </div>
-          </div>
-          <div>
-            <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 block">Data Columns</label>
-            <textarea value={columns} onChange={(e) => setColumns(e.target.value)} rows={3} className="w-full px-3 py-2 rounded-lg bg-white/[0.05] border border-white/[0.08] text-xs font-mono focus:outline-none focus:border-[#00A3FF]/50 resize-none" />
-          </div>
-          <div>
-            <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 block">Context</label>
-            <textarea value={cleanContext} onChange={(e) => setCleanContext(e.target.value)} rows={2} className="w-full px-3 py-2 rounded-lg bg-white/[0.05] border border-white/[0.08] text-xs focus:outline-none focus:border-[#00A3FF]/50 resize-none" />
-          </div>
-          <div>
-            <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 block">Deliverable Title</label>
-            <input value={sheetTitle} onChange={(e) => setSheetTitle(e.target.value)} className="w-full h-9 px-3 rounded-lg bg-white/[0.05] border border-white/[0.08] text-sm focus:outline-none focus:border-[#00A3FF]/50" />
           </div>
         </div>
-        <div className="p-4 border-t border-white/[0.06] space-y-2">
-          <button onClick={runScrape} disabled={step !== 'idle' || urls.every(u => !u.trim())} className="w-full h-10 rounded-xl bg-[#00A3FF] text-sm font-bold hover:bg-[#0089D9] transition-all disabled:opacity-30 flex items-center justify-center gap-2 shadow-lg shadow-[#00A3FF]/20">
-            {step === 'scraping' ? <Loader2 className="w-4 h-4 animate-spin" /> : <Globe className="w-4 h-4" />} {step === 'scraping' ? 'Researching...' : 'Research'}
-          </button>
-          <button onClick={runClean} disabled={step !== 'idle' || scrapeResults.length === 0} className="w-full h-10 rounded-xl bg-[#A855F7] text-sm font-bold hover:bg-[#9333EA] transition-all disabled:opacity-30 flex items-center justify-center gap-2 shadow-lg shadow-[#A855F7]/20">
-            {step === 'cleaning' ? <Loader2 className="w-4 h-4 animate-spin" /> : <Table className="w-4 h-4" />} {step === 'cleaning' ? 'Organizing...' : 'Organize'}
-          </button>
-          <button onClick={exportToSheets} disabled={step !== 'idle' || !cleanedData} className="w-full h-10 rounded-xl bg-emerald-600 text-sm font-bold hover:bg-emerald-500 transition-all disabled:opacity-30 flex items-center justify-center gap-2 shadow-lg shadow-emerald-600/20">
-            {step === 'exporting' ? <Loader2 className="w-4 h-4 animate-spin" /> : <FileSpreadsheet className="w-4 h-4" />} {step === 'exporting' ? 'Delivering...' : 'Deliver'}
-          </button>
+      </section>
+
+      {/* CTA */}
+      <section className="py-32 px-8 border-t border-border text-center relative overflow-hidden crosshair-bg">
+        <div className="relative z-10">
+          <p className="font-mono text-[11px] text-fg-tertiary uppercase tracking-[0.3em] mb-6">
+            Ready to deploy?
+          </p>
+          <h2 className="text-4xl font-light tracking-tight mb-8">
+            Start a conversation.<br />
+            <span className="font-bold">Ship something real.</span>
+          </h2>
+          <Link href="/chat" className="btn-solid h-12 px-10 text-xs inline-flex gap-2">
+            OPEN DEPLOY <ArrowRight className="w-4 h-4" />
+          </Link>
         </div>
-      </aside>
+      </section>
 
-      <main className="flex-1 flex flex-col overflow-hidden">
-        <header className="h-12 border-b border-white/[0.06] flex items-center justify-between px-6 shrink-0">
-          <div className="flex items-center gap-2 text-sm">
-            <span className="text-slate-500">The Deploy Platform</span>
-            <ChevronRight className="w-3.5 h-3.5 text-slate-600" />
-            <span className="text-white font-semibold">
-              {step === 'scraping' ? 'Researching...' : step === 'cleaning' ? 'Organizing...' : step === 'exporting' ? 'Delivering...' :
-               cleanedData ? `${cleanedData.rows.length} rows ready` : scrapeResults.length > 0 ? `${scrapeResults.length} pages gathered` : 'Ready'}
-            </span>
-          </div>
-          <div className="flex items-center gap-3">
-            {sheetUrl && <a href={sheetUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 px-4 py-1.5 rounded-lg bg-emerald-600/20 text-emerald-400 text-xs font-bold"><FileSpreadsheet className="w-3.5 h-3.5" /> Open Deliverable</a>}
-            {(scrapeResults.length > 0 || cleanedData) && <button onClick={() => { setScrapeResults([]); setCleanedData(null); setSheetUrl(null); setErrors([]); }} className="text-slate-500 hover:text-red-400"><Trash2 className="w-4 h-4" /></button>}
-          </div>
-        </header>
-
-        <div className="flex-1 overflow-auto p-6">
-          {errors.length > 0 && <div className="mb-4 p-4 rounded-xl bg-red-500/10 border border-red-500/20">{errors.map((e, i) => <p key={i} className="text-xs text-red-400 font-mono">{e}</p>)}</div>}
-
-          {scrapeResults.length === 0 && !cleanedData && step === 'idle' && (
-            <div className="flex flex-col items-center justify-center h-full text-center">
-              <div className="w-20 h-20 rounded-3xl bg-white/[0.03] border border-white/[0.06] flex items-center justify-center mb-6"><Zap className="w-10 h-10 text-[#00A3FF]/40" /></div>
-              <h2 className="text-xl font-bold text-slate-300 mb-2">Add URLs and hit Research</h2>
-              <p className="text-sm text-slate-600 max-w-md">Research gathers the data. Organize structures it. Deliver exports your finished asset.</p>
-            </div>
-          )}
-
-          {scrapeResults.length > 0 && !cleanedData && (
-            <div className="space-y-4">
-              <h3 className="text-sm font-bold text-slate-400 uppercase tracking-widest">Raw Data ({scrapeResults.length} pages)</h3>
-              {scrapeResults.map((r, i) => (
-                <div key={i} className="p-4 rounded-xl bg-white/[0.03] border border-white/[0.06]">
-                  <p className="text-sm font-bold text-white">{r.title}</p>
-                  <p className="text-[10px] text-slate-500 font-mono mb-2">{r.url}</p>
-                  <pre className="text-xs text-slate-400 whitespace-pre-wrap max-h-40 overflow-y-auto font-mono">{r.content.slice(0, 2000)}{r.content.length > 2000 ? '...' : ''}</pre>
-                </div>
-              ))}
-            </div>
-          )}
-
-          {cleanedData && (
-            <div>
-              <h3 className="text-sm font-bold text-slate-400 uppercase tracking-widest mb-4">Organized ({cleanedData.rows.length} rows)</h3>
-              <div className="overflow-x-auto rounded-xl border border-white/[0.06]">
-                <table className="w-full text-sm">
-                  <thead><tr className="bg-white/[0.03]">{cleanedData.columns.map(col => <th key={col} className="px-4 py-3 text-left text-[10px] font-bold text-slate-400 uppercase tracking-wider border-b border-white/[0.06]">{col}</th>)}</tr></thead>
-                  <tbody>{cleanedData.rows.map((row, i) => <tr key={i} className="border-b border-white/[0.04] hover:bg-white/[0.02]">{cleanedData.columns.map(col => <td key={col} className="px-4 py-3 text-xs text-slate-300 font-mono">{row[col] != null ? String(row[col]) : <span className="text-slate-600">—</span>}</td>)}</tr>)}</tbody>
-                </table>
-              </div>
-            </div>
-          )}
-        </div>
-
-        <div className="h-16 border-t border-white/[0.06] bg-[#111118] px-4 flex items-center gap-3 shrink-0">
-          <button type="button" title="Voice" className="w-9 h-9 rounded-xl bg-white/[0.05] text-slate-500 flex items-center justify-center hover:text-[#00A3FF] hover:bg-white/[0.08] transition-all"><Mic className="w-4 h-4" /></button>
-          <button type="button" title="Vision" className="w-9 h-9 rounded-xl bg-white/[0.05] text-slate-500 flex items-center justify-center hover:text-[#A855F7] hover:bg-white/[0.08] transition-all"><Camera className="w-4 h-4" /></button>
-          <input type="text" value={talkInput} onChange={(e) => setTalkInput(e.target.value)} placeholder="Chat w/ ACHEEVY..." className="flex-1 h-10 px-4 rounded-xl bg-white/[0.05] border border-white/[0.08] text-sm focus:outline-none focus:border-[#00A3FF]/50 placeholder:text-slate-600" />
-          <button type="button" title="Send" disabled={!talkInput.trim()} className="w-9 h-9 rounded-xl bg-[#00A3FF] text-white flex items-center justify-center hover:bg-[#0089D9] transition-all disabled:opacity-30"><Send className="w-4 h-4" /></button>
-        </div>
-      </main>
+      {/* Footer */}
+      <footer className="h-14 flex items-center justify-between px-8 border-t border-border">
+        <span className="font-mono text-[10px] text-fg-ghost uppercase tracking-widest">
+          The Deploy Platform &middot; ACHIEVEMOR
+        </span>
+        <span className="font-mono text-[10px] text-fg-ghost">&copy; 2026</span>
+      </footer>
     </div>
   );
 }

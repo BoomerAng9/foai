@@ -2,6 +2,9 @@
 const nextConfig = {
   compress: true,
   poweredByHeader: false,
+  turbopack: {
+    root: '.',
+  },
   async headers() {
     return [
       {

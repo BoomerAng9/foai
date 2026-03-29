@@ -6,6 +6,8 @@ import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   signInWithPopup,
+  signInWithRedirect,
+  getRedirectResult,
   signOut as firebaseSignOut,
   GoogleAuthProvider,
   GithubAuthProvider,
@@ -130,7 +132,22 @@ export const authService = {
   async signInWithOAuth(provider: 'google' | 'github') {
     const auth = getFirebaseAuth();
     const authProvider = provider === 'google' ? new GoogleAuthProvider() : new GithubAuthProvider();
-    const { user } = await signInWithPopup(auth, authProvider);
+
+    // Try popup first, fall back to redirect
+    let user: User;
+    try {
+      const result = await signInWithPopup(auth, authProvider);
+      user = result.user;
+    } catch (popupError: unknown) {
+      const code = (popupError as { code?: string })?.code;
+      // If popup blocked or internal error, use redirect flow
+      if (code === 'auth/popup-blocked' || code === 'auth/internal-error' || code === 'auth/popup-closed-by-user') {
+        await signInWithRedirect(auth, authProvider);
+        return { user: null }; // redirect happens, onAuthStateChanged handles the rest
+      }
+      throw popupError;
+    }
+
     const idToken = await user.getIdToken();
 
     // Provision if first login

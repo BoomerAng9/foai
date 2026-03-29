@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { authService } from '@/lib/auth-paywall';
 import { useAuth } from '@/hooks/useAuth';
@@ -8,20 +8,30 @@ import { Shield } from 'lucide-react';
 
 export default function LoginPage() {
   const router = useRouter();
-  const { denied } = useAuth();
-  const [loading, setLoading] = useState(false);
+  const { user, denied, loading: authLoading } = useAuth();
+  const [signingIn, setSigningIn] = useState(false);
   const [error, setError] = useState('');
+
+  // Redirect to home once auth resolves and cookie is set
+  // Use window.location for full page reload so middleware picks up the new cookie
+  useEffect(() => {
+    if (!authLoading && user) {
+      setTimeout(() => {
+        window.location.href = '/';
+      }, 500);
+    }
+  }, [user, authLoading]);
 
   async function handleGoogleSignIn() {
     setError('');
-    setLoading(true);
+    setSigningIn(true);
     try {
       await authService.signInWithOAuth('google');
-      router.replace('/');
+      // Don't redirect here — onAuthStateChanged will set the cookie,
+      // then the useAuth check above handles the redirect
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Sign in failed');
-    } finally {
-      setLoading(false);
+      setSigningIn(false);
     }
   }
 
@@ -51,9 +61,9 @@ export default function LoginPage() {
             </div>
           )}
 
-          <button onClick={handleGoogleSignIn} disabled={loading}
+          <button onClick={handleGoogleSignIn} disabled={signingIn}
             className="w-full h-12 rounded-xl bg-white text-slate-900 text-sm font-bold hover:bg-slate-100 transition-all flex items-center justify-center gap-3 disabled:opacity-50 shadow-lg">
-            {loading ? (
+            {signingIn ? (
               <div className="w-5 h-5 border-2 border-slate-400 border-t-transparent rounded-full animate-spin" />
             ) : (
               <>

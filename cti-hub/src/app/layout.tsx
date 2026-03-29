@@ -16,8 +16,8 @@ const geistMono = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "The Deploy Platform — AI-Managed Operations",
-  description: "Your production studio with a conversational interface. Research, build, and deploy with autonomous AI agents.",
+  title: "The Deploy Platform",
+  description: "Think it. Say it. Let's build it.",
   keywords: ["Deploy Platform", "AI Operations", "ACHEEVY", "ACHIEVEMOR"],
 };
 
