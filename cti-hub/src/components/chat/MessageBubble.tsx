@@ -2,6 +2,7 @@
 
 import { FileText, Image as ImageIcon } from 'lucide-react';
 import { CopyButton } from './CopyButton';
+import { LucReceipt } from './LucReceipt';
 import type { Message } from '@/lib/chat/types';
 
 function TypingIndicator() {
@@ -59,19 +60,7 @@ export function MessageBubble({ msg }: { msg: Message }) {
       </div>
 
       {msg.metadata && !msg.streaming && msg.role === 'acheevy' && (
-        <div className="flex items-center gap-4 mt-2 pt-2 border-t border-border">
-          <span className="font-mono text-[10px] text-fg-ghost">
-            {((msg.metadata.tokens_in || 0) + (msg.metadata.tokens_out || 0)).toLocaleString()} tokens
-          </span>
-          <span className="font-mono text-[10px] text-fg-ghost">
-            ${(msg.metadata.cost || 0).toFixed(4)}
-          </span>
-          {(msg.metadata.memories_recalled || 0) > 0 && (
-            <span className="font-mono text-[10px] text-signal-info">
-              {msg.metadata.memories_recalled} memories recalled
-            </span>
-          )}
-        </div>
+        <LucReceipt metadata={msg.metadata} />
       )}
     </div>
   );
