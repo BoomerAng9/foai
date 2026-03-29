@@ -20,7 +20,7 @@ export function RolodexVerb() {
   }, []);
 
   return (
-    <span className="inline-block relative overflow-hidden h-[1.2em] align-bottom" style={{ minWidth: '180px' }}>
+    <span className="inline-block relative overflow-hidden h-[1.2em] align-bottom ml-1" style={{ minWidth: '120px' }}>
       <span
         className="inline-block font-bold transition-all duration-300 ease-in-out"
         style={{
