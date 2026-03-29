@@ -10,7 +10,7 @@ from fastapi import FastAPI
 
 from config import PORT, VERSION
 from logging_config import setup_logging
-from routers import compare, evaluate, history, trends
+from routers import compare, evaluate, history, memory_routes, trends
 from scheduler import start_scheduler, stop_scheduler
 
 setup_logging()
@@ -27,7 +27,8 @@ app = FastAPI(
     title="Hermes LearnAng",
     description=(
         "Deep Think evaluation engine V0.5 — multi-model consensus scoring, "
-        "trend tracking, and daily + weekly agent performance analysis for FOAI-AIMS."
+        "RAG-based memory, trend tracking, and daily + weekly agent performance "
+        "analysis for FOAI-AIMS."
     ),
     version=VERSION,
     lifespan=lifespan,
@@ -37,6 +38,7 @@ app.include_router(evaluate.router)
 app.include_router(history.router)
 app.include_router(trends.router)
 app.include_router(compare.router)
+app.include_router(memory_routes.router)
 
 
 @app.get("/health")
