@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAdminAuth } from '@/lib/firebase-admin';
-import { acheevyRespond } from '@/lib/acheevy/agent';
+import { acheevyRespondStream } from '@/lib/acheevy/agent';
 import { createConversation, getMessages } from '@/lib/memory/store';
 
 async function getUserId(request: NextRequest): Promise<string | null> {
@@ -38,7 +38,7 @@ export async function POST(request: NextRequest) {
       }));
     }
 
-    const result = await acheevyRespond(
+    const result = await acheevyRespondStream(
       userId || 'anonymous',
       convId || 'temp',
       message,
@@ -46,14 +46,12 @@ export async function POST(request: NextRequest) {
       model,
     );
 
-    return NextResponse.json({
-      reply: result.content,
-      conversation_id: convId,
-      usage: {
-        tokens_in: result.tokens_in,
-        tokens_out: result.tokens_out,
-        cost: result.cost_estimate,
-        memories_recalled: result.memories_recalled,
+    return new Response(result.stream, {
+      headers: {
+        'Content-Type': 'text/event-stream',
+        'Cache-Control': 'no-cache',
+        Connection: 'keep-alive',
+        'X-Conversation-Id': convId || '',
       },
     });
   } catch (error: unknown) {
