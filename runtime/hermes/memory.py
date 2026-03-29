@@ -1,52 +1,88 @@
-"""RAG-based memory for Hermes LearnAng — semantic retrieval of past evaluations.
+"""Hermes memory bridge — delegates to shared aims-memory (pgvector).
 
-Embeds evaluation summaries via OpenRouter (Gemini embeddings) and stores
-vectors in Firestore. Before each new evaluation, retrieves the most
-semantically relevant past evaluations to inform the analysis.
+Wraps the org-wide MemoryClient for Hermes-specific evaluation storage
+and recall. Falls back to standalone mode if aims-memory DB is unavailable.
 """
 
-import json
+import sys
 import os
 
-import httpx
-import structlog
-from google.cloud import firestore
+# Add aims-memory to path
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "..", "aims-memory"))
 
-from config import GCP_PROJECT
+import structlog
+
+from aims_memory.agent_mixin import AgentMemoryMixin
 
 logger = structlog.get_logger("hermes.memory")
 
-EMBEDDING_MODEL = os.getenv("EMBEDDING_MODEL", "google/text-embedding-004")
-MEMORY_COLLECTION = "hermes_memory"
-TOP_K = int(os.getenv("HERMES_MEMORY_TOP_K", "5"))
+# Hermes mixin — engine tier, no dept
+_mixin: AgentMemoryMixin | None = None
 
 
-def _get_db() -> firestore.Client:
-    return firestore.Client(project=GCP_PROJECT)
-
-
-async def generate_embedding(text: str) -> list[float]:
-    """Generate an embedding vector via OpenRouter's embeddings endpoint."""
-    api_key = os.environ["OPENROUTER_API_KEY"]
-    async with httpx.AsyncClient(timeout=30.0) as client:
-        resp = await client.post(
-            "https://openrouter.ai/api/v1/embeddings",
-            headers={"Authorization": f"Bearer {api_key}"},
-            json={"model": EMBEDDING_MODEL, "input": text},
+def get_mixin(tenant_id: str = "cti") -> AgentMemoryMixin:
+    global _mixin
+    if _mixin is None or _mixin.tenant_id != tenant_id:
+        _mixin = AgentMemoryMixin(
+            agent_name="Hermes",
+            agent_tier="engine",
+            dept=None,
+            tenant_id=tenant_id,
         )
-        resp.raise_for_status()
-        data = resp.json()
-        return data["data"][0]["embedding"]
+    return _mixin
 
 
-def _cosine_similarity(a: list[float], b: list[float]) -> float:
-    """Compute cosine similarity between two vectors."""
-    dot = sum(x * y for x, y in zip(a, b))
-    norm_a = sum(x * x for x in a) ** 0.5
-    norm_b = sum(x * x for x in b) ** 0.5
-    if norm_a == 0 or norm_b == 0:
-        return 0.0
-    return dot / (norm_a * norm_b)
+async def store_evaluation_memory(
+    tenant_id: str,
+    evaluation_id: str,
+    evaluation: dict,
+    input_data: dict,
+    eval_type: str,
+    created_at: str,
+) -> None:
+    """Embed and store an evaluation in org-wide memory."""
+    mixin = get_mixin(tenant_id)
+    content = _build_memory_text(evaluation, input_data)
+    try:
+        await mixin.memory.store(
+            content=content,
+            memory_type="evaluation",
+            summary=f"Ecosystem score: {evaluation.get('ecosystem_score')} ({eval_type})",
+            source_id=evaluation_id,
+            metadata={
+                "ecosystem_score": evaluation.get("ecosystem_score"),
+                "eval_type": eval_type,
+                "models_used": evaluation.get("models_used", 1),
+                "created_at": created_at,
+            },
+        )
+        logger.info("memory_stored", evaluation_id=evaluation_id)
+    except Exception:
+        logger.exception("memory_store_failed", evaluation_id=evaluation_id)
+
+
+async def recall_relevant_evaluations(
+    tenant_id: str, query_text: str, top_k: int = 5
+) -> list[dict]:
+    """Retrieve semantically relevant past evaluations from org memory."""
+    mixin = get_mixin(tenant_id)
+    try:
+        results = await mixin.memory.recall(
+            query_text, top_k=top_k, memory_type="evaluation"
+        )
+        logger.info("memory_recalled", count=len(results))
+        return results
+    except Exception:
+        logger.exception("memory_recall_failed")
+        return []
+
+
+def format_memory_context(memories: list[dict]) -> str:
+    """Format recalled memories into a prompt-ready context block."""
+    if not memories:
+        return ""
+    mixin = get_mixin()
+    return mixin.memory.format_context(memories)
 
 
 def _build_memory_text(evaluation: dict, input_data: dict) -> str:
@@ -75,117 +111,3 @@ def _build_memory_text(evaluation: dict, input_data: dict) -> str:
         parts.append(f"Total cost: ${costs['total_cost_usd']:.2f}")
 
     return "\n".join(parts)
-
-
-async def store_evaluation_memory(
-    tenant_id: str,
-    evaluation_id: str,
-    evaluation: dict,
-    input_data: dict,
-    eval_type: str,
-    created_at: str,
-) -> None:
-    """Embed and store an evaluation in the memory collection."""
-    memory_text = _build_memory_text(evaluation, input_data)
-
-    try:
-        embedding = await generate_embedding(memory_text)
-    except Exception:
-        logger.exception("embedding_generation_failed", evaluation_id=evaluation_id)
-        return
-
-    db = _get_db()
-    mem_ref = (
-        db.collection(MEMORY_COLLECTION)
-        .document(tenant_id)
-        .collection("vectors")
-        .document(evaluation_id)
-    )
-    mem_ref.set({
-        "evaluation_id": evaluation_id,
-        "text": memory_text,
-        "embedding": embedding,
-        "ecosystem_score": evaluation.get("ecosystem_score"),
-        "eval_type": eval_type,
-        "created_at": created_at,
-    })
-
-    logger.info(
-        "memory_stored",
-        evaluation_id=evaluation_id,
-        text_length=len(memory_text),
-        vector_dim=len(embedding),
-    )
-
-
-async def recall_relevant_evaluations(
-    tenant_id: str, query_text: str, top_k: int = TOP_K
-) -> list[dict]:
-    """Retrieve the most semantically relevant past evaluations.
-
-    Embeds the query text, then compares against all stored evaluation
-    embeddings using cosine similarity. Returns the top-k matches.
-    """
-    try:
-        query_embedding = await generate_embedding(query_text)
-    except Exception:
-        logger.exception("query_embedding_failed")
-        return []
-
-    db = _get_db()
-    docs = (
-        db.collection(MEMORY_COLLECTION)
-        .document(tenant_id)
-        .collection("vectors")
-        .stream()
-    )
-
-    scored = []
-    for doc in docs:
-        data = doc.to_dict()
-        stored_embedding = data.get("embedding", [])
-        if not stored_embedding:
-            continue
-        sim = _cosine_similarity(query_embedding, stored_embedding)
-        scored.append({
-            "evaluation_id": data.get("evaluation_id", doc.id),
-            "text": data.get("text", ""),
-            "ecosystem_score": data.get("ecosystem_score"),
-            "eval_type": data.get("eval_type"),
-            "created_at": data.get("created_at", ""),
-            "similarity": round(sim, 4),
-        })
-
-    scored.sort(key=lambda x: x["similarity"], reverse=True)
-    results = scored[:top_k]
-
-    logger.info(
-        "memory_recalled",
-        tenant_id=tenant_id,
-        candidates=len(scored),
-        returned=len(results),
-        top_similarity=results[0]["similarity"] if results else 0,
-    )
-
-    return results
-
-
-def format_memory_context(memories: list[dict]) -> str:
-    """Format recalled memories into a prompt-ready context block."""
-    if not memories:
-        return ""
-
-    lines = ["## Relevant Past Evaluations (from memory)\n"]
-    for i, mem in enumerate(memories, 1):
-        lines.append(
-            f"### Memory {i} (similarity: {mem['similarity']}, "
-            f"date: {mem['created_at']}, type: {mem['eval_type']})\n"
-        )
-        lines.append(mem["text"])
-        lines.append("")
-
-    lines.append(
-        "Use these past evaluations to identify patterns, track improvement "
-        "on previous directives, and provide historically-informed analysis.\n"
-    )
-    return "\n".join(lines)

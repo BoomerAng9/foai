@@ -16,9 +16,11 @@ from openai import OpenAI
 from pydantic import BaseModel
 
 import state_emitter as se
+from memory_hooks import MemoryHooks
 
 AGENT_NAME = "Content_Ang"
 DEPT = "PMO-ECHO"
+memory = MemoryHooks(AGENT_NAME, "boomer_ang", DEPT)
 
 MONEY_ENGINE_URL = os.getenv(
     "MONEY_ENGINE_URL",
@@ -96,6 +98,16 @@ async def generate_content(req: ContentRequest):
     """Generate SEO content via OpenRouter."""
     t0 = time.monotonic()
     task_id = await se.task_assigned(AGENT_NAME, DEPT, f"Generate {req.content_type}: {req.topic}", "high")
+
+    plan_id, mem_context = await memory.before_task(
+        task_id=task_id, title=f"Generate {req.content_type}: {req.topic}",
+        role="SEO content creator for foai.cloud",
+        mission=f"Generate high-quality SEO {req.content_type} about '{req.topic}'",
+        vision="Authoritative, keyword-rich content driving organic traffic",
+        objective=f"Publish optimized {req.content_type} targeting: {', '.join(req.keywords)}",
+        steps=["build_prompt", "recall_past_content", "call_openrouter", "store_content", "confirm"],
+    )
+
     await se.task_started(AGENT_NAME, DEPT, task_id, {
         "plan": f"Generate SEO {req.content_type} about '{req.topic}' for foai.cloud",
         "steps": ["build_prompt", "call_openrouter", "store_content", "confirm"],
@@ -143,6 +155,10 @@ async def generate_content(req: ContentRequest):
 
     duration = int((time.monotonic() - t0) * 1000)
     await se.task_completed(AGENT_NAME, DEPT, task_id, 92, "A", duration)
+    await memory.after_task(
+        plan_id, task_id, 92, "A", duration,
+        f"Generated {req.content_type} about '{req.topic}' with keywords: {', '.join(req.keywords)}",
+    )
     await _heartbeat("active", "content_generated")
     await se.agent_break(AGENT_NAME, DEPT, task_id)
     return ContentResponse(

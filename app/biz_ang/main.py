@@ -15,9 +15,11 @@ from google.cloud import firestore
 
 import state_emitter as se
 from luc_middleware import luc_gate
+from memory_hooks import MemoryHooks
 
 AGENT_NAME = "Biz_Ang"
 DEPT = "PMO-LAUNCH"
+memory = MemoryHooks(AGENT_NAME, "boomer_ang", DEPT)
 LUC_ACCOUNT = os.getenv("LUC_ACCOUNT", "cti-default")
 
 MONEY_ENGINE_URL = os.getenv(
@@ -72,6 +74,16 @@ async def growth_dashboard(tenant_id: str = Query(default=DEFAULT_TENANT)):
     """Aggregate enrollment revenue and open seat pipeline metrics."""
     t0 = time.monotonic()
     task_id = await se.task_assigned(AGENT_NAME, DEPT, "Build growth dashboard", "high")
+
+    plan_id, _ = await memory.before_task(
+        task_id=task_id, title="Build growth dashboard",
+        role="SaaS growth analyst",
+        mission="Aggregate enrollments, open seats, and campaigns into growth dashboard",
+        vision="Real-time visibility into all revenue streams and pipeline health",
+        objective="Produce comprehensive dashboard with enrollment, pipeline, and campaign metrics",
+        steps=["query_enrollments", "query_open_seats", "query_campaigns", "aggregate"],
+    )
+
     await se.task_started(AGENT_NAME, DEPT, task_id, {
         "plan": "Aggregate enrollments, open seats, and campaigns into growth dashboard",
         "steps": ["query_enrollments", "query_open_seats", "query_campaigns", "aggregate"],
@@ -161,6 +173,10 @@ async def growth_dashboard(tenant_id: str = Query(default=DEFAULT_TENANT)):
 
     duration = int((time.monotonic() - t0) * 1000)
     await se.task_completed(AGENT_NAME, DEPT, task_id, 88, "B+", duration)
+    await memory.after_task(
+        plan_id, task_id, 88, "B+", duration,
+        f"Dashboard: {enrollment_count} enrollments, ${total_revenue:.2f} revenue, {total_seats} open seats",
+    )
     await _heartbeat("active", "dashboard_generated")
     await se.agent_break(AGENT_NAME, DEPT, task_id)
     return dashboard
