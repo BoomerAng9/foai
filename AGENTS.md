@@ -16,7 +16,7 @@ ACHEEVY (Boss)
 └── Infrastructure Engines
     ├── RuntimeAng (OpenClaw) — LIVE
     ├── GuardAng (NemoClaw) — LIVE
-    └── LearnAng (Hermes) — PENDING
+    └── LearnAng (Hermes) — LIVE V0.5
 ```
 
 ## ACHEEVY — Boss

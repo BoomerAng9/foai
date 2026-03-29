@@ -1,55 +1,77 @@
-"""Weekly scheduler for Deep Think evaluation loops.
+"""Scheduler for Deep Think evaluation loops — daily + weekly.
 
-Uses APScheduler to trigger evaluations every Sunday at 02:00 UTC.
+Daily: Lightweight single-model check at 06:00 UTC.
+Weekly: Full multi-model consensus evaluation every Sunday at 02:00 UTC.
 """
 
 import asyncio
-import logging
 
+import structlog
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.cron import CronTrigger
 
 from config import DEFAULT_TENANT
 from deep_think import run_evaluation
 
-logger = logging.getLogger("hermes.scheduler")
+logger = structlog.get_logger("hermes.scheduler")
 
 _scheduler: BackgroundScheduler | None = None
 
 
-def _run_weekly_evaluation():
+def _run_eval(eval_type: str, multi_model: bool):
     """Sync wrapper to run the async evaluation in the scheduler thread."""
-    logger.info("Weekly Deep Think evaluation starting")
+    logger.info("scheduled_evaluation_starting", eval_type=eval_type)
     loop = asyncio.new_event_loop()
     try:
-        result = loop.run_until_complete(run_evaluation(DEFAULT_TENANT))
+        result = loop.run_until_complete(
+            run_evaluation(DEFAULT_TENANT, eval_type=eval_type, multi_model=multi_model)
+        )
         logger.info(
-            "Weekly evaluation complete: ecosystem_score=%s, id=%s",
-            result.get("ecosystem_score"),
-            result.get("evaluation_id"),
+            "scheduled_evaluation_complete",
+            eval_type=eval_type,
+            ecosystem_score=result.get("ecosystem_score"),
+            models_used=result.get("models_used"),
+            eval_id=result.get("evaluation_id"),
         )
     except Exception:
-        logger.exception("Weekly evaluation failed")
+        logger.exception("scheduled_evaluation_failed", eval_type=eval_type)
     finally:
         loop.close()
 
 
 def start_scheduler():
-    """Start the weekly Deep Think scheduler."""
+    """Start the daily + weekly Deep Think schedulers."""
     global _scheduler
     if _scheduler is not None:
         return
 
     _scheduler = BackgroundScheduler()
+
+    # Weekly full multi-model consensus — Sunday 02:00 UTC
     _scheduler.add_job(
-        _run_weekly_evaluation,
+        _run_eval,
+        args=["weekly", True],
         trigger=CronTrigger(day_of_week="sun", hour=2, minute=0),
         id="weekly_deep_think",
-        name="Weekly Deep Think Evaluation",
+        name="Weekly Deep Think — Multi-Model Consensus",
         replace_existing=True,
     )
+
+    # Daily lightweight single-model check — 06:00 UTC
+    _scheduler.add_job(
+        _run_eval,
+        args=["daily", False],
+        trigger=CronTrigger(hour=6, minute=0),
+        id="daily_deep_think",
+        name="Daily Deep Think — Single-Model Check",
+        replace_existing=True,
+    )
+
     _scheduler.start()
-    logger.info("Hermes scheduler started — weekly Deep Think every Sunday 02:00 UTC")
+    logger.info(
+        "scheduler_started",
+        jobs=["weekly_deep_think (Sun 02:00 UTC)", "daily_deep_think (06:00 UTC)"],
+    )
 
 
 def stop_scheduler():
@@ -58,4 +80,4 @@ def stop_scheduler():
     if _scheduler is not None:
         _scheduler.shutdown(wait=False)
         _scheduler = None
-        logger.info("Hermes scheduler stopped")
+        logger.info("scheduler_stopped")
