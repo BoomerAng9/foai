@@ -16,9 +16,11 @@ from fastapi import FastAPI
 from google.cloud import firestore
 
 import state_emitter as se
+from memory_hooks import MemoryHooks
 
 AGENT_NAME = "Ops_Ang"
 DEPT = "PMO-LENS"
+memory = MemoryHooks(AGENT_NAME, "boomer_ang", DEPT)
 
 MONEY_ENGINE_URL = os.getenv(
     "MONEY_ENGINE_URL",
@@ -63,6 +65,16 @@ async def poll_health():
     t0 = time.monotonic()
 
     task_id = await se.task_assigned(AGENT_NAME, DEPT, "Fleet health check", "medium")
+
+    plan_id, _ = await memory.before_task(
+        task_id=task_id, title="Fleet health check",
+        role="Infrastructure health monitor",
+        mission=f"Poll /health on {len(SERVICES)} infrastructure services",
+        vision="100% fleet uptime with instant incident detection",
+        objective=f"Check health of all {len(SERVICES)} services, report status",
+        steps=["poll_endpoints", "aggregate_results", "write_firestore", "report"],
+    )
+
     await se.task_started(AGENT_NAME, DEPT, task_id, {
         "plan": f"Poll /health on {len(SERVICES)} infrastructure services",
         "steps": ["poll_endpoints", "aggregate_results", "write_firestore", "report"],
@@ -120,6 +132,10 @@ async def poll_health():
     score = int((healthy / total) * 100) if total > 0 else 0
     grade = "A" if score >= 90 else "B" if score >= 70 else "C" if score >= 50 else "F"
     await se.task_completed(AGENT_NAME, DEPT, task_id, score, grade, duration)
+    await memory.after_task(
+        plan_id, task_id, score, grade, duration,
+        f"Health check: {healthy}/{total} healthy services",
+    )
     await _heartbeat("monitoring", f"health_check:{healthy}/{total}_healthy")
     _last_task_id = task_id
     await se.agent_break(AGENT_NAME, DEPT, task_id)

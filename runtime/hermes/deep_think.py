@@ -1,8 +1,9 @@
-"""Deep Think evaluation engine V0.5 — Multi-model consensus scoring.
+"""Deep Think evaluation engine V0.5 — Multi-model consensus + RAG memory.
 
 Runs daily (lightweight) and weekly (full). Pulls agent status from Money Engine,
-evaluates performance via multiple OpenRouter models for consensus scoring,
-stores results in Firestore with trend data, and posts improvement directives.
+retrieves semantically relevant past evaluations via RAG memory, evaluates
+performance via multiple OpenRouter models for consensus scoring, stores results
+in Firestore with trend data and memory embeddings, and posts improvement directives.
 """
 
 import json
@@ -22,6 +23,7 @@ from config import (
     MONEY_ENGINE_URL,
     OPENROUTER_MODEL,
 )
+from memory import format_memory_context, recall_relevant_evaluations, store_evaluation_memory
 
 logger = structlog.get_logger("hermes.deep_think")
 
@@ -35,10 +37,13 @@ AGENTS_TO_EVALUATE = [
 
 EVALUATION_PROMPT = """You are Hermes, the LearnAng evaluation engine for the FOAI-AIMS ecosystem.
 
+{memory_context}
+
 Analyze the following agent performance data and produce:
 1. A performance score (0-100) for each agent
 2. One specific improvement directive per agent (actionable, measurable)
 3. An overall ecosystem health score (0-100)
+4. If past evaluations are provided above, reference whether previous directives were followed and if scores improved or declined
 
 Agent data:
 {agent_data}
@@ -51,10 +56,11 @@ Respond in valid JSON with this structure:
       "agent_name": "<name>",
       "score": <int>,
       "directive": "<improvement directive>",
-      "reasoning": "<brief reasoning>"
+      "reasoning": "<brief reasoning>",
+      "prior_directive_followed": <true|false|null>
     }}
   ],
-  "summary": "<one paragraph overall assessment>"
+  "summary": "<one paragraph overall assessment referencing historical trends if available>"
 }}
 """
 
@@ -290,7 +296,13 @@ async def run_evaluation(
         "evaluated_at": datetime.now(timezone.utc).isoformat(),
     }
 
-    prompt = EVALUATION_PROMPT.format(agent_data=agent_data)
+    # RAG memory — retrieve relevant past evaluations
+    query_text = json.dumps(agent_data, default=str)
+    memories = await recall_relevant_evaluations(tenant_id, query_text)
+    memory_context = format_memory_context(memories)
+    log.info("memory_retrieved", memories_count=len(memories))
+
+    prompt = EVALUATION_PROMPT.format(agent_data=agent_data, memory_context=memory_context)
     client = _get_openrouter_client()
 
     # Multi-model consensus or single-model evaluation
@@ -343,6 +355,16 @@ async def run_evaluation(
 
     # Store trend snapshot
     await _store_trend_snapshot(db, tenant_id, evaluation, eval_type)
+
+    # Store in RAG memory for future retrieval
+    await store_evaluation_memory(
+        tenant_id=tenant_id,
+        evaluation_id=eval_ref.id,
+        evaluation=evaluation,
+        input_data=agent_data,
+        eval_type=eval_type,
+        created_at=now,
+    )
 
     # Post improvement directives back to Money Engine
     directives_posted = 0
