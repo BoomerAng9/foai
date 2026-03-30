@@ -87,7 +87,7 @@ After all videos (or skip): redirect to `/chat`
 
 ## 3. Remotion Walkthrough Videos
 
-6 standalone videos, each up to 25 seconds. Built with Remotion. Dark theme matching the platform. Bold text overlays, animated screen captures, pointer annotations.
+7 standalone videos, each up to 25 seconds (~3 min total). Built with Remotion. Dark theme matching the platform. Bold text overlays, animated screen captures, pointer annotations.
 
 ### Video 1: What is The Deploy Platform (25s)
 
@@ -135,7 +135,18 @@ After all videos (or skip): redirect to `/chat`
 - Text: "Full transparency. Every token counted."
 - Text: "You control the budget"
 
-### Video 6: Give Us Feedback (25s)
+### Video 6: Full Capabilities (25s)
+
+- Text: "From solo creator to full organization"
+- Animated example 1: "Build a music engineer with full agentic capabilities"
+  - Waveform visualization, mixing board UI, ACHEEVY routing to specialized agents
+- Animated example 2: "Run a 10-person agentic organization"
+  - Org chart materializes: ACHEEVY at top, delegation arrows fan out
+  - Agent nodes light up: Chicken Hawk (ops), Scout_Ang (research), Edu_Ang (training), Money Engine (finance)
+  - Text: "ACHEEVY delegates. Agents execute. You approve."
+- Text: "One conversation. Unlimited scale."
+
+### Video 7: Give Us Feedback (25s)
 
 - Text: "This is a beta"
 - Text: "Push the boundaries"
@@ -188,7 +199,8 @@ Sidebar shows different nav items based on role:
 - `src/components/video/walkthrough/Scene3Chat.tsx`
 - `src/components/video/walkthrough/Scene4ImageGen.tsx`
 - `src/components/video/walkthrough/Scene5LUC.tsx`
-- `src/components/video/walkthrough/Scene6Feedback.tsx`
+- `src/components/video/walkthrough/Scene6Capabilities.tsx`
+- `src/components/video/walkthrough/Scene7Feedback.tsx`
 - `src/components/video/walkthrough/WalkthroughRoot.tsx` — Remotion root
 - `sql/005-access-keys.sql` — access keys table if not exists
 
