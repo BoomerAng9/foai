@@ -20,7 +20,7 @@ function formatFileSize(bytes: number) {
 }
 
 export default function ChatWithACHEEVY() {
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -275,6 +275,11 @@ export default function ChatWithACHEEVY() {
   async function handleSend(text?: string, skipEstimate?: boolean) {
     const msg = text || input.trim();
     if (!msg || sending) return;
+    if (!user || authLoading) {
+      // Auth not ready — wait and retry
+      setTimeout(() => handleSend(text, skipEstimate), 1000);
+      return;
+    }
     const currentAttachments = [...attachments];
     setInput('');
     setAttachments([]);
@@ -475,7 +480,7 @@ export default function ChatWithACHEEVY() {
                         setManageItInput('');
                       }
                     }}
-                    disabled={!manageItInput.trim() || sending}
+                    disabled={!manageItInput.trim() || sending || !user || authLoading}
                     className="btn-solid self-start cursor-pointer"
                   >
                     Prompt It
