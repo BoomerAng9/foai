@@ -9,9 +9,7 @@ export default function LandingPage() {
 
   return (
     <div className="min-h-screen bg-bg text-fg font-sans">
-      {/* Google Fonts for brand typography */}
-      {/* eslint-disable-next-line @next/next/no-page-custom-font */}
-      <link href="https://fonts.googleapis.com/css2?family=Permanent+Marker&display=swap" rel="stylesheet" />
+      {/* Permanent Marker font loaded via globals.css @font-face */}
       {/* Navigation */}
       <nav className="h-14 flex items-center justify-between px-4 md:px-8 border-b border-border bg-bg-surface relative">
         <div className="flex items-center gap-2.5">

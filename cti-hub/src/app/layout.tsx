@@ -19,6 +19,14 @@ export const metadata: Metadata = {
   title: "The Deploy Platform",
   description: "Think it. Say it. Let's build it.",
   keywords: ["Deploy Platform", "AI Operations", "ACHEEVY", "ACHIEVEMOR"],
+  icons: {
+    icon: [
+      { url: '/favicon.ico', sizes: '32x32' },
+      { url: '/icon-192.png', sizes: '192x192', type: 'image/png' },
+      { url: '/icon-512.png', sizes: '512x512', type: 'image/png' },
+    ],
+    apple: '/apple-touch-icon.png',
+  },
 };
 
 export default function RootLayout({

@@ -17,11 +17,21 @@ import { addMessage, memorizeConversationTurn } from '@/lib/memory/store';
 import { checkMIMGate } from './mim-gate';
 import { generateImage, IMAGE_MODELS, type ImageModel } from '@/lib/image/generate';
 
-const IMAGE_PATTERNS = /\b(create|generate|make|draw|design|render|paint|sketch)\b.{0,30}\b(image|picture|photo|illustration|artwork|icon|logo|visual|graphic|portrait|poster|banner|card)\b/i;
+// Pattern 1: verb + image noun (explicit: "create an image of X")
+const IMAGE_EXPLICIT = /\b(create|generate|make|draw|design|render|paint|sketch)\b.{0,30}\b(image|picture|photo|illustration|artwork|icon|logo|visual|graphic|portrait|poster|banner|card)\b/i;
+// Pattern 2: verb + visual subject (implicit: "create a bull frog with a cape")
+// Matches creative verbs followed by a/an/the/some + noun phrase (not code/text tasks)
+const IMAGE_IMPLICIT = /\b(create|generate|make|draw|design|render|paint|sketch)\b\s+(?:a|an|the|some|me\s+a|me\s+an)\s+\w+/i;
+// Negative patterns — things that look visual but aren't
+const IMAGE_NEGATIVE = /\b(create|generate|make)\b.{0,20}\b(function|component|page|api|route|file|folder|database|table|endpoint|script|hook|form|test|class|module|app|project|repo|branch|commit|pr|issue|config|schema|migration|query|variable|constant|interface|type|enum|struct|service|controller|model|view|template|layout|style|css|html|json|yaml|xml|csv|sql|docker|workflow|pipeline|action|webhook|cron|job|task|plan|list|array|object|map|set|string|number|boolean)\b/i;
 const MODEL_SELECT_PATTERN = /^\s*(?:use\s+)?(?:option\s+)?([123]|gemini|nano\s*banana|openai|canvas|dall-?e|chatgpt|flux)\s*$/i;
 
 function isImageRequest(msg: string): boolean {
-  return IMAGE_PATTERNS.test(msg);
+  // Explicit image request always wins
+  if (IMAGE_EXPLICIT.test(msg)) return true;
+  // Implicit creative request — but filter out code/dev tasks
+  if (IMAGE_IMPLICIT.test(msg) && !IMAGE_NEGATIVE.test(msg)) return true;
+  return false;
 }
 
 function parseModelSelection(msg: string): ImageModel | null {
@@ -69,12 +79,28 @@ CAPABILITIES:
 - Automate: forms, workflows, scheduled tasks
 - Build: full stack applications with databases and backends
 
+THINKING PROCESS:
+- Before responding, ALWAYS show your reasoning inside <think>...</think> tags
+- In your thinking, briefly analyze: what the user wants, which capability/agent to use, any memory context relevant
+- For image requests, think about which visual engine fits best
+- For complex tasks, think about your plan and which Boomer_Angs to dispatch
+- Keep thinking concise (2-4 lines max)
+
 CONVERSATION STYLE:
 - Respond conversationally in 1-3 paragraphs for simple requests
 - For complex tasks, outline your plan first, then execute
 - Show progress when work is happening
 - Always end with a clear next step or question
 - Use the user's name if you know it
+
+AGENT FLEET (Boomer_Angs):
+- You command a fleet of specialized agents. When dispatching work, name the agent:
+  - Chicken Hawk: tactical operations, builds, deployments
+  - Scout_Ang: marketplace research, competitive intel
+  - Edu_Ang: training, onboarding, knowledge management
+  - Money Engine: billing, cost analysis, revenue optimization
+  - Visual Engine: image generation (Nano Banana Pro 2, Canvas Engine, Flux Ultra)
+- Always mention which agent you're routing to when handling a task
 
 MEMORY CONTEXT (recalled from prior sessions):
 {memory_context}
@@ -336,10 +362,14 @@ export async function acheevyRespondStream(
       `**${i + 1}. ${m.name}** — ${m.strengths}\n   _Speed: ${m.speed} | Cost: ${m.cost}_`
     ).join('\n\n');
 
+    const thinkingMsg = `Detected a visual creation request. Routing to Visual Engine. Let me present the available models so the user can pick their preferred rendering engine.`;
     const selectionPrompt = `I can generate that image for you. Which visual engine would you like to use?\n\n${modelMenu}\n\nReply with **1**, **2**, or **3** to select.\n\n<!-- IMAGE_MODEL_SELECT [ORIGINAL_PROMPT: ${userMessage}] -->`;
 
     const selectStream = new ReadableStream<Uint8Array>({
       start(controller) {
+        // Emit thinking first
+        controller.enqueue(enc.encode(`data: ${JSON.stringify({ thinking: thinkingMsg })}\n\n`));
+        controller.enqueue(enc.encode(`data: ${JSON.stringify({ agent: 'Visual Engine' })}\n\n`));
         controller.enqueue(enc.encode(`data: ${JSON.stringify({ content: selectionPrompt })}\n\n`));
         controller.enqueue(enc.encode(`data: ${JSON.stringify({ content: '', done: true, usage: { tokens_in: 0, tokens_out: 0, cost: 0, memories_recalled: memoriesRecalled } })}\n\n`));
         controller.close();
@@ -395,6 +425,9 @@ export async function acheevyRespondStream(
       let resolvedModel = model;
       let lastCostUpdateTime = 0;
       let lastCostUpdateChars = 0;
+      let inThinkBlock = false;
+      let thinkBuffer = '';
+      let thinkEmitted = false;
 
       try {
         while (true) {
@@ -466,9 +499,46 @@ export async function acheevyRespondStream(
               const token: string = parsed.choices?.[0]?.delta?.content ?? '';
               if (token) {
                 fullContent += token;
-                controller.enqueue(
-                  enc.encode(`data: ${JSON.stringify({ content: token, done: false })}\n\n`),
-                );
+
+                // Parse <think>...</think> blocks and emit as separate events
+                let remaining = token;
+                while (remaining.length > 0) {
+                  if (!inThinkBlock) {
+                    const thinkStart = remaining.indexOf('<think>');
+                    if (thinkStart !== -1) {
+                      // Emit any content before <think>
+                      const before = remaining.slice(0, thinkStart);
+                      if (before) {
+                        controller.enqueue(enc.encode(`data: ${JSON.stringify({ content: before, done: false })}\n\n`));
+                      }
+                      inThinkBlock = true;
+                      thinkBuffer = '';
+                      remaining = remaining.slice(thinkStart + 7); // skip '<think>'
+                    } else {
+                      // No think tag — emit normally
+                      controller.enqueue(enc.encode(`data: ${JSON.stringify({ content: remaining, done: false })}\n\n`));
+                      remaining = '';
+                    }
+                  } else {
+                    const thinkEnd = remaining.indexOf('</think>');
+                    if (thinkEnd !== -1) {
+                      thinkBuffer += remaining.slice(0, thinkEnd);
+                      // Emit the complete thinking block
+                      controller.enqueue(enc.encode(`data: ${JSON.stringify({ thinking: thinkBuffer.trim() })}\n\n`));
+                      thinkEmitted = true;
+                      inThinkBlock = false;
+                      remaining = remaining.slice(thinkEnd + 8); // skip '</think>'
+                    } else {
+                      // Still accumulating think content
+                      thinkBuffer += remaining;
+                      // Emit partial thinking for live display
+                      if (!thinkEmitted) {
+                        controller.enqueue(enc.encode(`data: ${JSON.stringify({ thinking_partial: thinkBuffer.trim() })}\n\n`));
+                      }
+                      remaining = '';
+                    }
+                  }
+                }
 
                 // Emit periodic cost_update events (~every 500ms or ~80 new chars ≈ 20 tokens)
                 const now = Date.now();

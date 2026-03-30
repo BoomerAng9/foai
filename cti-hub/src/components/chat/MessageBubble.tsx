@@ -1,6 +1,6 @@
 'use client';
 
-import { FileText, Image as ImageIcon } from 'lucide-react';
+import { FileText, Image as ImageIcon, Brain, Bot } from 'lucide-react';
 import { CopyButton } from './CopyButton';
 import { LucReceipt } from './LucReceipt';
 import type { Message } from '@/lib/chat/types';
@@ -15,6 +15,30 @@ function TypingIndicator() {
           style={{ animation: 'typing-dot 1.4s infinite', animationDelay: `${i * 0.2}s` }}
         />
       ))}
+    </div>
+  );
+}
+
+function ThinkingBlock({ text, streaming }: { text: string; streaming?: boolean }) {
+  return (
+    <div className="mb-3 border-l-2 border-amber-500/40 pl-3 py-1.5">
+      <div className="flex items-center gap-1.5 mb-1">
+        <Brain className="w-3 h-3 text-amber-500" />
+        <span className="text-[10px] font-mono uppercase tracking-wider text-amber-500/80">Reasoning</span>
+        {streaming && (
+          <span className="w-1.5 h-1.5 bg-amber-500 rounded-full animate-pulse" />
+        )}
+      </div>
+      <p className="text-xs text-fg-tertiary italic leading-relaxed">{text}</p>
+    </div>
+  );
+}
+
+function AgentBadge({ agent }: { agent: string }) {
+  return (
+    <div className="inline-flex items-center gap-1.5 px-2 py-0.5 mb-2 bg-accent/10 border border-accent/20 text-[10px] font-mono uppercase tracking-wider text-accent">
+      <Bot className="w-3 h-3" />
+      <span>Routed to {agent}</span>
     </div>
   );
 }
@@ -72,6 +96,16 @@ export function MessageBubble({ msg }: { msg: Message }) {
             </div>
           ))}
         </div>
+      )}
+
+      {/* Thinking / Reasoning block */}
+      {msg.thinking && msg.role === 'acheevy' && (
+        <ThinkingBlock text={msg.thinking} streaming={msg.streaming && !msg.content} />
+      )}
+
+      {/* Agent routing badge */}
+      {msg.activeAgent && msg.role === 'acheevy' && (
+        <AgentBadge agent={msg.activeAgent} />
       )}
 
       <div className={`text-sm leading-relaxed whitespace-pre-wrap ${
