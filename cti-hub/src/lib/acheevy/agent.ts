@@ -15,6 +15,37 @@
 import { recallAll } from '@/lib/memory/recall';
 import { addMessage, memorizeConversationTurn } from '@/lib/memory/store';
 import { checkMIMGate } from './mim-gate';
+import { generateImage, IMAGE_MODELS, type ImageModel } from '@/lib/image/generate';
+
+const IMAGE_PATTERNS = /\b(create|generate|make|draw|design|render|paint|sketch)\b.{0,30}\b(image|picture|photo|illustration|artwork|icon|logo|visual|graphic|portrait|poster|banner|card)\b/i;
+const MODEL_SELECT_PATTERN = /^\s*(?:use\s+)?(?:option\s+)?([123]|gemini|nano\s*banana|openai|canvas|dall-?e|chatgpt|flux)\s*$/i;
+
+function isImageRequest(msg: string): boolean {
+  return IMAGE_PATTERNS.test(msg);
+}
+
+function parseModelSelection(msg: string): ImageModel | null {
+  const match = msg.match(MODEL_SELECT_PATTERN);
+  if (!match) return null;
+  const choice = match[1].toLowerCase().trim();
+  if (choice === '1' || choice.includes('gemini') || choice.includes('nano') || choice.includes('banana')) return 'gemini';
+  if (choice === '2' || choice.includes('openai') || choice.includes('canvas') || choice.includes('dall') || choice.includes('chatgpt')) return 'openai';
+  if (choice === '3' || choice.includes('flux')) return 'flux';
+  return null;
+}
+
+function isPendingImageSelection(history: ConversationMessage[]): { pending: boolean; prompt: string } {
+  // Check if the last ACHEEVY message was a model selection prompt
+  for (let i = history.length - 1; i >= 0; i--) {
+    if (history[i].role === 'assistant' && history[i].content.includes('IMAGE_MODEL_SELECT')) {
+      // Extract the original prompt from the selection message
+      const promptMatch = history[i].content.match(/\[ORIGINAL_PROMPT: (.*?)\]/);
+      return { pending: true, prompt: promptMatch?.[1] || '' };
+    }
+    if (history[i].role === 'user') break;
+  }
+  return { pending: false, prompt: '' };
+}
 
 const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY || process.env.OPENROUTER_KEY;
 const LUC_URL = process.env.LUC_URL || 'http://localhost:8081';
@@ -269,6 +300,57 @@ export async function acheevyRespondStream(
   // 5. Store user message in Neon (fire-and-forget)
   addMessage(conversationId, userId, 'user', userMessage).catch(() => {});
 
+  // 5.5 Check if user is selecting an image model from a previous prompt
+  const pendingImage = isPendingImageSelection(conversationHistory);
+  const selectedModel = pendingImage.pending ? parseModelSelection(userMessage) : null;
+
+  if (pendingImage.pending && selectedModel) {
+    const originalPrompt = pendingImage.prompt;
+    const modelInfo = IMAGE_MODELS.find(m => m.id === selectedModel);
+    const imageStream = new ReadableStream<Uint8Array>({
+      async start(controller) {
+        try {
+          controller.enqueue(enc.encode(`data: ${JSON.stringify({ content: `Using **${modelInfo?.name || selectedModel}** to generate your image. One moment...\n\n` })}\n\n`));
+
+          const result = await generateImage(originalPrompt, { model: selectedModel });
+          const imageMarkdown = `![Generated Image](data:${result.mime_type};base64,${result.image_base64})`;
+
+          controller.enqueue(enc.encode(`data: ${JSON.stringify({ content: `Here's what I created:\n\n${imageMarkdown}` })}\n\n`));
+          controller.enqueue(enc.encode(`data: ${JSON.stringify({ content: '', done: true, usage: { tokens_in: 0, tokens_out: 0, cost: 0.005, memories_recalled: memoriesRecalled } })}\n\n`));
+
+          addMessage(conversationId, userId, 'acheevy', `Using ${modelInfo?.name}...\n\nHere's what I created:\n\n${imageMarkdown}`, 'ACHEEVY', { type: 'image_generation', model: result.model }).catch(() => {});
+        } catch (err) {
+          const errMsg = err instanceof Error ? err.message : 'Image generation failed';
+          controller.enqueue(enc.encode(`data: ${JSON.stringify({ content: `Generation failed: ${errMsg}\n\nTry a different model or rephrase your description.` })}\n\n`));
+          controller.enqueue(enc.encode(`data: ${JSON.stringify({ content: '', done: true, usage: { tokens_in: 0, tokens_out: 0, cost: 0, memories_recalled: 0 } })}\n\n`));
+        }
+        controller.close();
+      },
+    });
+    return { stream: imageStream, model: 'image-gen', memories_recalled: memoriesRecalled };
+  }
+
+  // 5.6 Detect new image generation requests — present model options
+  if (isImageRequest(userMessage)) {
+    const modelMenu = IMAGE_MODELS.map((m, i) =>
+      `**${i + 1}. ${m.name}** — ${m.strengths}\n   _Speed: ${m.speed} | Cost: ${m.cost}_`
+    ).join('\n\n');
+
+    const selectionPrompt = `I can generate that image for you. Which visual engine would you like to use?\n\n${modelMenu}\n\nReply with **1**, **2**, or **3** to select.\n\n<!-- IMAGE_MODEL_SELECT [ORIGINAL_PROMPT: ${userMessage}] -->`;
+
+    const selectStream = new ReadableStream<Uint8Array>({
+      start(controller) {
+        controller.enqueue(enc.encode(`data: ${JSON.stringify({ content: selectionPrompt })}\n\n`));
+        controller.enqueue(enc.encode(`data: ${JSON.stringify({ content: '', done: true, usage: { tokens_in: 0, tokens_out: 0, cost: 0, memories_recalled: memoriesRecalled } })}\n\n`));
+        controller.close();
+
+        addMessage(conversationId, userId, 'acheevy', selectionPrompt, 'ACHEEVY', { type: 'image_model_select' }).catch(() => {});
+      },
+    });
+
+    return { stream: selectStream, model: 'model-selector', memories_recalled: memoriesRecalled };
+  }
+
   // 6. Call OpenRouter with stream: true
   if (!OPENROUTER_API_KEY) {
     throw new Error('No LLM API key configured');
@@ -299,6 +381,11 @@ export async function acheevyRespondStream(
   const decoder = new TextDecoder();
   const finalMemoriesRecalled = memoriesRecalled;
 
+  // Estimate input tokens from the message chain (rough: ~4 chars per token)
+  const estimatedInputTokens = Math.ceil(
+    messages.reduce((sum, m) => sum + m.content.length, 0) / 4
+  );
+
   const stream = new ReadableStream<Uint8Array>({
     async start(controller) {
       let buffer = '';
@@ -306,6 +393,8 @@ export async function acheevyRespondStream(
       let tokensIn = 0;
       let tokensOut = 0;
       let resolvedModel = model;
+      let lastCostUpdateTime = 0;
+      let lastCostUpdateChars = 0;
 
       try {
         while (true) {
@@ -380,6 +469,29 @@ export async function acheevyRespondStream(
                 controller.enqueue(
                   enc.encode(`data: ${JSON.stringify({ content: token, done: false })}\n\n`),
                 );
+
+                // Emit periodic cost_update events (~every 500ms or ~80 new chars ≈ 20 tokens)
+                const now = Date.now();
+                const charsSinceUpdate = fullContent.length - lastCostUpdateChars;
+                if (now - lastCostUpdateTime >= 500 || charsSinceUpdate >= 80) {
+                  lastCostUpdateTime = now;
+                  lastCostUpdateChars = fullContent.length;
+                  const runningTokensIn = tokensIn || estimatedInputTokens;
+                  const runningTokensOut = tokensOut || Math.ceil(fullContent.length / 4);
+                  const runningCost =
+                    (runningTokensIn / 1_000_000) * 0.30 + (runningTokensOut / 1_000_000) * 1.20;
+                  controller.enqueue(
+                    enc.encode(
+                      `data: ${JSON.stringify({
+                        cost_update: {
+                          tokens_in: runningTokensIn,
+                          tokens_out: runningTokensOut,
+                          cost: Math.round(runningCost * 1_000_000) / 1_000_000,
+                        },
+                      })}\n\n`,
+                    ),
+                  );
+                }
               }
             } catch {
               // Non-JSON SSE line — skip

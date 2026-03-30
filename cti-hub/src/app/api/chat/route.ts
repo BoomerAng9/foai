@@ -24,8 +24,8 @@ export async function POST(request: NextRequest) {
     }
 
     let convId = conversation_id;
-    if (!convId && userId) {
-      const conv = await createConversation(userId, message.slice(0, 60));
+    if (!convId) {
+      const conv = await createConversation(userId || 'anonymous', message.slice(0, 60));
       convId = conv?.id;
     }
 

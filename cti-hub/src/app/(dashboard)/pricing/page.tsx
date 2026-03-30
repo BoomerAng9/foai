@@ -46,7 +46,7 @@ export default function PricingPage() {
   return (
     <div className="max-w-6xl mx-auto space-y-12 animate-in fade-in duration-700">
       <div className="text-center space-y-4">
-        <h1 className="text-4xl font-black text-slate-900 tracking-tight">Select your Fuel Grade</h1>
+        <h1 className="text-2xl sm:text-3xl md:text-4xl font-black text-slate-900 tracking-tight">Select your Fuel Grade</h1>
         <p className="text-slate-500 max-w-2xl mx-auto font-medium">
           Scale your workforce solutions with The Deploy Platform&apos;s AI-managed infrastructure.
           MindEdge enrollments, Open Seat contracting, and autonomous agent operations.
@@ -117,10 +117,10 @@ export default function PricingPage() {
       </div>
 
       {/* Trust & Governance Section */}
-      <div className="bg-[#0F172A] rounded-[3rem] p-12 text-white overflow-hidden relative group">
+      <div className="bg-[#0F172A] rounded-[1.5rem] md:rounded-[3rem] p-6 md:p-12 text-white overflow-hidden relative group">
         <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-[#00A3FF] blur-[150px] opacity-10 group-hover:opacity-20 transition-opacity duration-1000" />
         
-        <div className="relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+        <div className="relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-12 items-center">
           <div className="space-y-8">
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10">
               <Shield className="w-4 h-4 text-[#00A3FF]" />

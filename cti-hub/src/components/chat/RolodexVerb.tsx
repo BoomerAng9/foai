@@ -6,16 +6,16 @@ const VERBS = ['Deploy', 'Manage', 'Ship', 'Build', 'Launch', 'Create', 'Deliver
 
 export function RolodexVerb() {
   const [index, setIndex] = useState(0);
-  const [animating, setAnimating] = useState(false);
+  const [visible, setVisible] = useState(true);
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setAnimating(true);
+      setVisible(false);
       setTimeout(() => {
         setIndex(prev => (prev + 1) % VERBS.length);
-        setAnimating(false);
-      }, 300);
-    }, 5000);
+        setVisible(true);
+      }, 250);
+    }, 4000);
     return () => clearInterval(interval);
   }, []);
 
@@ -24,8 +24,8 @@ export function RolodexVerb() {
       <span
         className="inline-block font-bold transition-all duration-300 ease-in-out"
         style={{
-          transform: animating ? 'translateY(-100%)' : 'translateY(0)',
-          opacity: animating ? 0 : 1,
+          transform: visible ? 'translateY(0)' : 'translateY(-100%)',
+          opacity: visible ? 1 : 0,
         }}
       >
         {VERBS[index]}
