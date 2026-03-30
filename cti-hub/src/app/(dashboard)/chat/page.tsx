@@ -40,6 +40,8 @@ export default function ChatWithACHEEVY() {
   const [lucPendingMsg, setLucPendingMsg] = useState<string | null>(null);
   const [lucPendingAttachments, setLucPendingAttachments] = useState<Attachment[]>([]);
   const [estimateCount, setEstimateCount] = useState(0);
+  const [budgetRemaining, setBudgetRemaining] = useState<number | null>(null);
+  const [budgetStarting, setBudgetStarting] = useState<number>(20);
   const [autoAccept, setAutoAccept] = useState(false);
   const [activeSkill, setActiveSkill] = useState<Skill | null>(null);
   const [streamingCost, setStreamingCost] = useState<{ tokens_in: number; tokens_out: number; cost: number } | null>(null);
@@ -51,6 +53,10 @@ export default function ChatWithACHEEVY() {
     fetch('/api/conversations')
       .then(r => r.json())
       .then(d => setConversations(d.conversations || []))
+      .catch(() => {});
+    fetch('/api/budget')
+      .then(r => r.json())
+      .then(d => { setBudgetRemaining(d.remaining); setBudgetStarting(d.starting); })
       .catch(() => {});
   }, []);
 
@@ -200,6 +206,10 @@ export default function ChatWithACHEEVY() {
               if (data.usage) {
                 setSessionTokens(prev => prev + (data.usage.tokens_in || 0) + (data.usage.tokens_out || 0));
                 setSessionCost(prev => prev + (data.usage.cost || 0));
+              }
+              if (data.budget) {
+                setBudgetRemaining(data.budget.remaining);
+                setBudgetStarting(data.budget.starting);
               }
             } else if (data.cost_update) {
               setStreamingCost(data.cost_update);
@@ -556,7 +566,14 @@ export default function ChatWithACHEEVY() {
                 <span className="led" style={{ background: currentTier.color }} />
                 <span className="font-semibold uppercase tracking-wider">{currentTier.name}</span>
                 <span className="text-fg-ghost">|</span>
-                <span className="text-fg-ghost">LUC active</span>
+                <span className={`font-semibold ${
+                  budgetRemaining === null ? 'text-fg-ghost' :
+                  budgetRemaining > 10 ? 'text-signal-success' :
+                  budgetRemaining > 3 ? 'text-signal-warning' :
+                  'text-signal-error'
+                }`}>
+                  LUC {budgetRemaining !== null ? `$${budgetRemaining.toFixed(2)}` : 'active'}
+                </span>
                 {streamingCost && (
                   <>
                     <span className="text-fg-ghost">|</span>

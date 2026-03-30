@@ -1,21 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getAdminAuth } from '@/lib/firebase-admin';
+import { requireAuth } from '@/lib/auth-guard';
 import { acheevyRespondStream } from '@/lib/acheevy/agent';
 import { createConversation, getMessages } from '@/lib/memory/store';
-
-async function getUserId(request: NextRequest): Promise<string | null> {
-  const token = request.cookies.get('firebase-auth-token')?.value;
-  if (!token) return null;
-  try {
-    const auth = getAdminAuth();
-    const decoded = await auth.verifyIdToken(token);
-    return decoded.uid;
-  } catch { return null; }
-}
+import { rateLimit } from '@/lib/rate-limit-simple';
 
 export async function POST(request: NextRequest) {
   try {
-    const userId = await getUserId(request);
+    const auth = await requireAuth(request);
+    if (!auth.ok) return auth.response;
+    const userId = auth.userId;
     const body = await request.json();
     const { message, conversation_id, model, skill_context } = body;
 
@@ -23,9 +16,17 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'message required' }, { status: 400 });
     }
 
+    if (message.length > 10000) {
+      return NextResponse.json({ error: 'Message too long (max 10,000 characters)', code: 'VALIDATION_ERROR' }, { status: 400 });
+    }
+
+    if (!rateLimit(userId, 30, 60000)) {
+      return NextResponse.json({ error: 'Too many requests. Please slow down.', code: 'RATE_LIMITED' }, { status: 429 });
+    }
+
     let convId = conversation_id;
     if (!convId) {
-      const conv = await createConversation(userId || 'anonymous', message.slice(0, 60));
+      const conv = await createConversation(userId, message.slice(0, 60));
       convId = conv?.id;
     }
 
@@ -44,7 +45,7 @@ export async function POST(request: NextRequest) {
       : message;
 
     const result = await acheevyRespondStream(
-      userId || 'anonymous',
+      userId,
       convId || 'temp',
       enrichedMessage,
       history,

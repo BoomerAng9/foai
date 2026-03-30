@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { requireAuth } from '@/lib/auth-guard';
 
 const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY;
 const LUC_URL = process.env.LUC_URL || 'http://localhost:8081';
@@ -45,9 +46,17 @@ async function recordUsage(model: string, tokensIn: number, tokensOut: number) {
 }
 
 export async function POST(request: NextRequest) {
+  const auth = await requireAuth(request);
+  if (!auth.ok) return auth.response;
+
   try {
     if (!OPENROUTER_API_KEY) {
       return NextResponse.json({ error: 'OPENROUTER_API_KEY not configured' }, { status: 503 });
+    }
+
+    const contentLength = parseInt(request.headers.get('content-length') || '0', 10);
+    if (contentLength > 100 * 1024) {
+      return NextResponse.json({ error: 'Payload too large (max 100KB)', code: 'VALIDATION_ERROR' }, { status: 400 });
     }
 
     const { raw_data, columns, context, quality } = (await request.json()) as CleanRequest;

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { requireAuth } from '@/lib/auth-guard';
 
 const FIRECRAWL_API_KEY = process.env.FIRECRAWL_API_KEY;
 const APIFY_API_TOKEN = process.env.APIFY_API_TOKEN;
@@ -98,6 +99,9 @@ async function scrapeWithApify(url: string): Promise<ScrapeResult> {
 }
 
 export async function POST(request: NextRequest) {
+  const auth = await requireAuth(request);
+  if (!auth.ok) return auth.response;
+
   try {
     const { urls, engine, mode } = await request.json() as {
       urls: string[];
@@ -109,10 +113,21 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'urls array required' }, { status: 400 });
     }
 
+    if (urls.length > 5) {
+      return NextResponse.json({ error: 'Too many URLs (max 5)', code: 'VALIDATION_ERROR' }, { status: 400 });
+    }
+
+    const urlPattern = /^https?:\/\/.+/i;
+    for (const u of urls) {
+      if (typeof u !== 'string' || !urlPattern.test(u)) {
+        return NextResponse.json({ error: `Invalid URL: "${u}". Must start with http:// or https://`, code: 'VALIDATION_ERROR' }, { status: 400 });
+      }
+    }
+
     const results: ScrapeResult[] = [];
     const errors: Array<{ url: string; error: string }> = [];
 
-    for (const url of urls.slice(0, 20)) {
+    for (const url of urls) {
       try {
         if (mode === 'crawl' && FIRECRAWL_API_KEY) {
           const crawled = await crawlWithFirecrawl(url);

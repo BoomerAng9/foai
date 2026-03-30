@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { getAdminAuth } from '@/lib/firebase-admin';
 
 const COOKIE_NAME = 'firebase-auth-token';
 const COOKIE_MAX_AGE_SECONDS = 60 * 60 * 24 * 7;
@@ -17,6 +18,15 @@ export async function POST(request: NextRequest) {
 
     if (!accessToken) {
       return NextResponse.json({ error: 'accessToken is required.' }, { status: 400 });
+    }
+
+    // Verify the token is a valid Firebase ID token before persisting it
+    try {
+      const adminAuth = getAdminAuth();
+      await adminAuth.verifyIdToken(accessToken);
+    } catch (err) {
+      console.error('[Session] Token verification failed:', err instanceof Error ? err.message : err);
+      return NextResponse.json({ error: 'Invalid Firebase token.' }, { status: 401 });
     }
 
     const response = buildCookieResponse();

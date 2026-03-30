@@ -37,8 +37,7 @@ export async function POST(request: NextRequest) {
           return NextResponse.json({ error: 'Token UID mismatch' }, { status: 403 });
         }
       } catch {
-        // Token verification failed — allow provision anyway for first-login race condition
-        // The session cookie may not be set yet on the very first call
+        return NextResponse.json({ error: 'Invalid or expired session token' }, { status: 401 });
       }
     }
 

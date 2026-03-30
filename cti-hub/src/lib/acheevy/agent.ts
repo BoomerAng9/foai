@@ -16,6 +16,7 @@ import { recallAll } from '@/lib/memory/recall';
 import { addMessage, memorizeConversationTurn } from '@/lib/memory/store';
 import { checkMIMGate } from './mim-gate';
 import { generateImage, IMAGE_MODELS, type ImageModel } from '@/lib/image/generate';
+import { checkBudget, deductCost, getBudget, BudgetExhaustedError } from '@/lib/budget';
 
 // Pattern 1: verb + image noun (explicit: "create an image of X")
 const IMAGE_EXPLICIT = /\b(create|generate|make|draw|design|render|paint|sketch)\b.{0,30}\b(image|picture|photo|illustration|artwork|icon|logo|visual|graphic|portrait|poster|banner|card)\b/i;
@@ -176,7 +177,7 @@ export async function acheevyRespond(
         .map((m, i) => `[Memory ${i + 1}] ${m.content.slice(0, 300)}`)
         .join('\n');
     }
-  } catch {}
+  } catch (err) { console.error('[Agent] Memory recall failed:', err instanceof Error ? err.message : err); }
 
   // 2. Build system prompt with memory
   const systemPrompt = ACHEEVY_SYSTEM_PROMPT
@@ -236,7 +237,7 @@ export async function acheevyRespond(
   // 8. Auto-memorize this turn for future recall
   try {
     await memorizeConversationTurn(userId, conversationId, userMessage, content);
-  } catch {}
+  } catch (err) { console.error('[Agent] Memorize turn failed:', err instanceof Error ? err.message : err); }
 
   // Estimate cost from OpenRouter generation data, fallback to model lookup
   const generationCost = completion.usage?.total_cost;
@@ -263,7 +264,24 @@ export async function acheevyRespondStream(
 ): Promise<{ stream: ReadableStream<Uint8Array>; model: string; memories_recalled: number }> {
   const enc = new TextEncoder();
 
-  // 0. MIM governance gate
+  // 0a. Budget gate — check before any paid work
+  try {
+    await checkBudget();
+  } catch (err) {
+    if (err instanceof BudgetExhaustedError) {
+      const budgetMsg = err.message;
+      const budgetStream = new ReadableStream<Uint8Array>({
+        start(controller) {
+          controller.enqueue(enc.encode(`data: ${JSON.stringify({ content: budgetMsg })}\n\n`));
+          controller.enqueue(enc.encode(`data: ${JSON.stringify({ content: '', done: true, usage: { tokens_in: 0, tokens_out: 0, cost: 0, memories_recalled: 0 } })}\n\n`));
+          controller.close();
+        },
+      });
+      return { stream: budgetStream, model: 'budget-gate', memories_recalled: 0 };
+    }
+  }
+
+  // 0b. MIM governance gate
   const mim = checkMIMGate(userMessage);
   if (!mim.allowed) {
     const blockedResponse = `${mim.reason}\n\n${mim.redirect || 'Let me know how I can help differently.'}`;
@@ -306,7 +324,7 @@ export async function acheevyRespondStream(
         .map((m, i) => `[Memory ${i + 1}] ${m.content.slice(0, 300)}`)
         .join('\n');
     }
-  } catch {}
+  } catch (err) { console.error('[Agent] Memory recall failed:', err instanceof Error ? err.message : err); }
 
   // 2. Build system prompt with memory
   const systemPrompt = ACHEEVY_SYSTEM_PROMPT
@@ -450,6 +468,9 @@ export async function acheevyRespondStream(
                 (tokensIn / 1_000_000) * 0.30 + (tokensOut / 1_000_000) * 1.20;
               const cost = Math.round(generationCost * 1_000_000) / 1_000_000;
 
+              // Fetch current budget for the done event
+              const budget = await getBudget().catch(() => ({ starting: 20, remaining: 20, exhausted: false }));
+
               controller.enqueue(
                 enc.encode(
                   `data: ${JSON.stringify({
@@ -460,6 +481,11 @@ export async function acheevyRespondStream(
                       tokens_out: tokensOut,
                       cost,
                       memories_recalled: finalMemoriesRecalled,
+                    },
+                    budget: {
+                      starting: budget.starting,
+                      remaining: budget.remaining,
+                      exhausted: budget.exhausted,
                     },
                   })}\n\n`,
                 ),
@@ -478,11 +504,14 @@ export async function acheevyRespondStream(
                     tokens_in: capturedTokensIn,
                     tokens_out: capturedTokensOut,
                   });
-                } catch {}
+                } catch (err) { console.error('[Agent] Message store failed:', err instanceof Error ? err.message : err); }
                 try {
                   await memorizeConversationTurn(userId, conversationId, userMessage, capturedContent);
-                } catch {}
+                } catch (err) { console.error('[Agent] Memory store failed:', err instanceof Error ? err.message : err); }
                 await recordUsage(capturedModel, capturedTokensIn, capturedTokensOut);
+                // Deduct from platform budget
+                const chatCost = (capturedTokensIn / 1_000_000) * 0.30 + (capturedTokensOut / 1_000_000) * 1.20;
+                await deductCost(userId, 'chat', chatCost).catch(err => console.error('[Budget] Deduction failed:', err instanceof Error ? err.message : err));
               })();
               return;
             }
