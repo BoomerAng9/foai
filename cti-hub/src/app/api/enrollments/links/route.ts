@@ -34,7 +34,7 @@ export async function POST(request: NextRequest) {
     if (!res.ok) {
       const text = await res.text();
       return NextResponse.json(
-        { error: 'Upstream error', detail: text },
+        { error: 'Upstream service error' },
         { status: res.status },
       );
     }
@@ -43,7 +43,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(data);
   } catch (err) {
     return NextResponse.json(
-      { error: 'Failed to reach edu-ang service', detail: String(err) },
+      { error: 'Failed to reach upstream service' },
       { status: 502 },
     );
   }

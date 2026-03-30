@@ -604,10 +604,8 @@ export async function acheevyRespondStream(
           }
         }
 
-        // If the upstream closed without a [DONE] line, close gracefully
-        if (!controller.desiredSize === null) {
-          controller.close();
-        }
+        // Stream ended without [DONE] — close gracefully
+        controller.close();
       } catch (err) {
         controller.error(err);
       }
