@@ -17,7 +17,7 @@ export default function LoginPage() {
   useEffect(() => {
     if (!authLoading && user) {
       setTimeout(() => {
-        window.location.href = '/';
+        window.location.href = '/chat';
       }, 500);
     }
   }, [user, authLoading]);

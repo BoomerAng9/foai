@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { useRouter } from 'next/navigation';
 import { Send, CornerDownLeft, ArrowDown, X, FileText, Image as ImageIcon } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { ChatSidebar } from '@/components/chat/ChatSidebar';
@@ -21,8 +20,7 @@ function formatFileSize(bytes: number) {
 }
 
 export default function ChatWithACHEEVY() {
-  const { user, loading: authLoading } = useAuth();
-  const router = useRouter();
+  const { user } = useAuth();
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -52,13 +50,6 @@ export default function ChatWithACHEEVY() {
   const [manageItInput, setManageItInput] = useState('');
 
   const currentTier = TIERS.find(t => t.id === activeTier) || TIERS[0];
-
-  // Redirect to login if not authenticated
-  useEffect(() => {
-    if (!authLoading && !user) {
-      router.replace('/auth/login');
-    }
-  }, [user, authLoading, router]);
 
   useEffect(() => {
     if (!user) return; // Don't fetch until authed
