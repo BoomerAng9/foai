@@ -23,6 +23,10 @@ export function MessageBubble({ msg }: { msg: Message }) {
   return (
     <div className="group animate-fade-in">
       <div className="flex items-center gap-2 mb-2">
+        {msg.role === 'acheevy' && (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src="/acheevy-helmet.png" alt="" className="w-5 h-5 object-contain" />
+        )}
         <span className="label-mono">
           {msg.role === 'user' ? 'YOU' : 'ACHEEVY'}
         </span>

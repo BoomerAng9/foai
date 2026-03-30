@@ -54,7 +54,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   return (
     <div className="flex h-screen bg-bg text-fg font-sans overflow-hidden logo-watermark">
-      <AuthPromptTimer />
+      {/* AuthPromptTimer removed — CTI Hub is owner-operated */}
 
       {/* Sidebar */}
       <aside className="w-56 bg-bg-surface border-r border-border flex flex-col">

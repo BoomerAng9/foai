@@ -5,9 +5,23 @@
  */
 import { initializeApp, getApps, cert, type App } from 'firebase-admin/app';
 import { getAuth, type Auth } from 'firebase-admin/auth';
+import { readFileSync, existsSync } from 'fs';
 
 let _app: App | null = null;
 let _auth: Auth | null = null;
+
+function loadServiceAccount(): Record<string, string> | null {
+  // Try env var first
+  const envKey = process.env.FIREBASE_SERVICE_ACCOUNT_KEY;
+  if (envKey) return JSON.parse(envKey);
+
+  // Try key file (for Docker deployments where env_file can't handle JSON)
+  const keyPaths = ['/app/firebase-sa-key.json', './firebase-sa-key.json'];
+  for (const p of keyPaths) {
+    if (existsSync(p)) return JSON.parse(readFileSync(p, 'utf-8'));
+  }
+  return null;
+}
 
 function ensureApp(): App {
   if (_app) return _app;
@@ -17,9 +31,9 @@ function ensureApp(): App {
     return _app;
   }
 
-  const serviceAccountJson = process.env.FIREBASE_SERVICE_ACCOUNT_KEY;
-  if (serviceAccountJson) {
-    _app = initializeApp({ credential: cert(JSON.parse(serviceAccountJson)) });
+  const sa = loadServiceAccount();
+  if (sa) {
+    _app = initializeApp({ credential: cert(sa) });
   } else {
     // GCP Cloud Run provides default credentials automatically
     _app = initializeApp();

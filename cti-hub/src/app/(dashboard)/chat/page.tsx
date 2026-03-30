@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { Send, CornerDownLeft, ArrowDown, X, FileText, Image as ImageIcon, Sparkles } from 'lucide-react';
+import { Send, CornerDownLeft, ArrowDown, X, FileText, Image as ImageIcon } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { ChatSidebar } from '@/components/chat/ChatSidebar';
 import { MessageBubble } from '@/components/chat/MessageBubble';
@@ -12,13 +12,6 @@ import { LucPopup } from '@/components/chat/LucPopup';
 import type { LucEstimate } from '@/lib/luc/types';
 import { AttachmentMenu } from '@/components/chat/AttachmentMenu';
 import type { Skill } from '@/lib/skills/registry';
-
-const STARTERS = [
-  'Research my competitors and build a brief',
-  'Draft a project plan for my next launch',
-  'Analyze this data and find insights',
-  'Help me write a proposal for a client',
-];
 
 function formatFileSize(bytes: number) {
   if (bytes < 1024) return bytes + ' B';
@@ -49,6 +42,8 @@ export default function ChatWithACHEEVY() {
   const [estimateCount, setEstimateCount] = useState(0);
   const [autoAccept, setAutoAccept] = useState(false);
   const [activeSkill, setActiveSkill] = useState<Skill | null>(null);
+  const [streamingCost, setStreamingCost] = useState<{ tokens_in: number; tokens_out: number; cost: number } | null>(null);
+  const [manageItInput, setManageItInput] = useState('');
 
   const currentTier = TIERS.find(t => t.id === activeTier) || TIERS[0];
 
@@ -72,10 +67,21 @@ export default function ChatWithACHEEVY() {
   useEffect(() => {
     if (scrollRef.current) {
       const el = scrollRef.current;
-      const isNearBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 100;
+      const isNearBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 300;
       if (isNearBottom) el.scrollTop = el.scrollHeight;
     }
   }, [messages]);
+
+  // Force scroll during active streaming so user stays at the bottom
+  const isStreaming = messages.some(m => m.streaming);
+  useEffect(() => {
+    if (!isStreaming || !scrollRef.current) return;
+    const el = scrollRef.current;
+    const interval = setInterval(() => {
+      el.scrollTo({ top: el.scrollHeight, behavior: 'auto' });
+    }, 80);
+    return () => clearInterval(interval);
+  }, [isStreaming]);
 
   useEffect(() => {
     const el = scrollRef.current;
@@ -180,6 +186,7 @@ export default function ChatWithACHEEVY() {
           try {
             const data = JSON.parse(line.slice(6));
             if (data.done) {
+              setStreamingCost(null);
               setMessages(prev => prev.map(m =>
                 m.id === streamId ? { ...m, streaming: false, metadata: data.usage } : m
               ));
@@ -187,6 +194,8 @@ export default function ChatWithACHEEVY() {
                 setSessionTokens(prev => prev + (data.usage.tokens_in || 0) + (data.usage.tokens_out || 0));
                 setSessionCost(prev => prev + (data.usage.cost || 0));
               }
+            } else if (data.cost_update) {
+              setStreamingCost(data.cost_update);
             } else if (data.content) {
               setMessages(prev => prev.map(m =>
                 m.id === streamId ? { ...m, content: m.content + data.content } : m
@@ -196,16 +205,18 @@ export default function ChatWithACHEEVY() {
         }
       }
     } catch {
+      setStreamingCost(null);
       setMessages(prev => prev.map(m =>
         m.id === streamId ? { ...m, content: 'Connection error. Try again.', streaming: false } : m
       ));
     } finally {
       setSending(false);
+      setStreamingCost(null);
       inputRef.current?.focus();
     }
   }
 
-  async function handleSend(text?: string) {
+  async function handleSend(text?: string, skipEstimate?: boolean) {
     const msg = text || input.trim();
     if (!msg || sending) return;
     const currentAttachments = [...attachments];
@@ -213,30 +224,31 @@ export default function ChatWithACHEEVY() {
     setAttachments([]);
     if (inputRef.current) inputRef.current.style.height = 'auto';
 
-    // Get LUC estimate
-    try {
-      const estRes = await fetch('/api/luc/estimate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          message: msg,
-          tier: activeTier,
-          attachments: currentAttachments.map(a => ({ name: a.name, type: a.type })),
-        }),
-      });
-      const estData = await estRes.json();
+    // Skip LUC estimate for starter buttons, auto-accept mode, or when explicitly skipped
+    const shouldEstimate = !skipEstimate && !autoAccept && messages.length > 0;
 
-      if (estData.estimate) {
-        setEstimateCount(prev => prev + 1);
+    if (shouldEstimate) {
+      try {
+        const estRes = await fetch('/api/luc/estimate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            message: msg,
+            tier: activeTier,
+            attachments: currentAttachments.map(a => ({ name: a.name, type: a.type })),
+          }),
+        });
+        const estData = await estRes.json();
 
-        if (!autoAccept) {
+        if (estData.estimate) {
+          setEstimateCount(prev => prev + 1);
           setLucEstimate(estData.estimate);
           setLucPendingMsg(msg);
           setLucPendingAttachments(currentAttachments);
           return;
         }
-      }
-    } catch {}
+      } catch {}
+    }
 
     await executeSend(msg, currentAttachments);
   }
@@ -352,33 +364,72 @@ export default function ChatWithACHEEVY() {
 
         <div ref={scrollRef} className="flex-1 overflow-y-auto">
           {isEmpty ? (
-            <div className="flex flex-col items-center justify-center h-full px-8">
+            <div className="flex flex-col items-center px-8 py-10">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src="/acheevy-plug.png"
                 alt="ACHEEVY"
-                className="w-48 h-48 object-contain mb-6 animate-materialize"
+                className="w-36 h-36 object-contain mb-4 animate-materialize"
                 style={{ filter: 'drop-shadow(0 8px 24px rgba(0,0,0,0.15))' }}
               />
-              <h1 className="text-3xl font-light tracking-tight mb-2">
+              <h1 className="text-2xl font-light tracking-tight mb-1">
                 Chat w/ <span className="font-bold">ACHEEVY</span>
               </h1>
-              <p className="text-fg-secondary text-sm max-w-md text-center mb-10 leading-relaxed">
+              <p className="text-fg-secondary text-sm text-center mb-6">
                 What will we <RolodexVerb /> today?
               </p>
-              <div className="grid grid-cols-2 gap-3 max-w-lg w-full">
-                {STARTERS.map((s, i) => (
+
+              <div className="grid grid-cols-2 gap-4 max-w-2xl w-full">
+                {/* LEFT — Autonomous path */}
+                <div className="border border-border bg-bg-surface p-6 flex flex-col gap-4">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src="/icon-manage-it.png" alt="" className="w-10 h-10 object-contain" />
+                  <div>
+                    <span className="label-mono text-accent">Let ACHEEVY Manage It</span>
+                  </div>
+                  <p className="text-xs text-fg-secondary leading-relaxed">
+                    For quick, autonomous deployments. Provide a prompt and let ACHEEVY handle the orchestration. (2-5 minutes)
+                  </p>
+                  <textarea
+                    value={manageItInput}
+                    onChange={(e) => setManageItInput(e.target.value)}
+                    placeholder="Describe what you want to deploy..."
+                    rows={3}
+                    className="input-field min-h-[80px] max-h-[120px] resize-none py-3 text-sm"
+                  />
                   <button
-                    key={i}
-                    onClick={() => handleSend(s)}
-                    className="text-left p-4 border border-border bg-bg-surface hover:border-fg-ghost transition-colors group"
+                    onClick={() => {
+                      if (manageItInput.trim()) {
+                        handleSend(manageItInput.trim(), true);
+                        setManageItInput('');
+                      }
+                    }}
+                    disabled={!manageItInput.trim() || sending}
+                    className="btn-solid self-start cursor-pointer"
                   >
-                    <div className="flex items-start gap-3">
-                      <Sparkles className="w-3.5 h-3.5 text-fg-ghost mt-0.5 shrink-0 group-hover:text-fg-secondary transition-colors" />
-                      <span className="text-sm text-fg-secondary group-hover:text-fg transition-colors leading-snug">{s}</span>
-                    </div>
+                    Prompt It
                   </button>
-                ))}
+                </div>
+
+                {/* RIGHT — Interactive path */}
+                <div className="border border-border bg-bg-surface p-6 flex flex-col gap-4">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src="/icon-guide-me.png" alt="" className="w-10 h-16 object-contain object-left" />
+                  <div>
+                    <span className="label-mono text-accent">Let ACHEEVY Guide Me</span>
+                  </div>
+                  <p className="text-xs text-fg-secondary leading-relaxed">
+                    For interactive deployments. Work with ACHEEVY through a Q&amp;A session to define and deploy your solution. (4-10 minutes)
+                  </p>
+                  <div className="flex-1" />
+                  <button
+                    onClick={() => handleSend('[Charter Wizard] Help me define my deployment step by step', true)}
+                    disabled={sending}
+                    className="btn-solid self-start cursor-pointer"
+                  >
+                    Let&apos;s Begin
+                  </button>
+                </div>
               </div>
             </div>
           ) : (
@@ -460,9 +511,9 @@ export default function ChatWithACHEEVY() {
                 </div>
               </div>
               <button
-                onClick={() => handleSend()}
+                onClick={() => handleSend(undefined, false)}
                 disabled={!input.trim() || sending}
-                className="btn-solid h-[44px] w-[44px] px-0 shrink-0"
+                className="btn-solid h-[44px] w-[44px] px-0 shrink-0 cursor-pointer"
               >
                 <Send className="w-4 h-4" />
               </button>
@@ -474,6 +525,14 @@ export default function ChatWithACHEEVY() {
                 <span className="font-semibold uppercase tracking-wider">{currentTier.name}</span>
                 <span className="text-fg-ghost">|</span>
                 <span className="text-fg-ghost">LUC active</span>
+                {streamingCost && (
+                  <>
+                    <span className="text-fg-ghost">|</span>
+                    <span className="text-signal-info">
+                      ▸ ${streamingCost.cost < 0.0001 ? streamingCost.cost.toExponential(1) : streamingCost.cost.toFixed(4)} | {(streamingCost.tokens_in + streamingCost.tokens_out).toLocaleString()} tokens
+                    </span>
+                  </>
+                )}
                 {activeSkill && (
                   <>
                     <span className="text-fg-ghost">|</span>

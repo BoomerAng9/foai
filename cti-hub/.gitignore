@@ -49,3 +49,4 @@ ACHEEVY_MASTER_CREDENTIALS.md
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+firebase-sa-key.json

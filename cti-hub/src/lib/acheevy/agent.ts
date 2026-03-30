@@ -299,6 +299,11 @@ export async function acheevyRespondStream(
   const decoder = new TextDecoder();
   const finalMemoriesRecalled = memoriesRecalled;
 
+  // Estimate input tokens from the message chain (rough: ~4 chars per token)
+  const estimatedInputTokens = Math.ceil(
+    messages.reduce((sum, m) => sum + m.content.length, 0) / 4
+  );
+
   const stream = new ReadableStream<Uint8Array>({
     async start(controller) {
       let buffer = '';
@@ -306,6 +311,8 @@ export async function acheevyRespondStream(
       let tokensIn = 0;
       let tokensOut = 0;
       let resolvedModel = model;
+      let lastCostUpdateTime = 0;
+      let lastCostUpdateChars = 0;
 
       try {
         while (true) {
@@ -380,6 +387,29 @@ export async function acheevyRespondStream(
                 controller.enqueue(
                   enc.encode(`data: ${JSON.stringify({ content: token, done: false })}\n\n`),
                 );
+
+                // Emit periodic cost_update events (~every 500ms or ~80 new chars ≈ 20 tokens)
+                const now = Date.now();
+                const charsSinceUpdate = fullContent.length - lastCostUpdateChars;
+                if (now - lastCostUpdateTime >= 500 || charsSinceUpdate >= 80) {
+                  lastCostUpdateTime = now;
+                  lastCostUpdateChars = fullContent.length;
+                  const runningTokensIn = tokensIn || estimatedInputTokens;
+                  const runningTokensOut = tokensOut || Math.ceil(fullContent.length / 4);
+                  const runningCost =
+                    (runningTokensIn / 1_000_000) * 0.30 + (runningTokensOut / 1_000_000) * 1.20;
+                  controller.enqueue(
+                    enc.encode(
+                      `data: ${JSON.stringify({
+                        cost_update: {
+                          tokens_in: runningTokensIn,
+                          tokens_out: runningTokensOut,
+                          cost: Math.round(runningCost * 1_000_000) / 1_000_000,
+                        },
+                      })}\n\n`,
+                    ),
+                  );
+                }
               }
             } catch {
               // Non-JSON SSE line — skip

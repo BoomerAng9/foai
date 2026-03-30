@@ -1,72 +1,14 @@
 'use client';
 
 import Link from 'next/link';
-import { ArrowRight, Terminal, Mic, Zap, Shield, Brain } from 'lucide-react';
-import { useState, useEffect } from 'react';
-
-function CornerBracket({ position }: { position: 'tl' | 'tr' | 'bl' | 'br' }) {
-  const rotation = { tl: 0, tr: 90, bl: -90, br: 180 }[position];
-  const pos = {
-    tl: 'top-6 left-6',
-    tr: 'top-6 right-6',
-    bl: 'bottom-6 left-6',
-    br: 'bottom-6 right-6',
-  }[position];
-  return (
-    <svg className={`absolute ${pos} w-5 h-5 text-fg-ghost`} style={{ transform: `rotate(${rotation}deg)` }} viewBox="0 0 20 20" fill="none">
-      <path d="M0 0v20M0 0h20" stroke="currentColor" strokeWidth="1" />
-    </svg>
-  );
-}
-
-function Crosshair() {
-  return (
-    <svg className="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 800 600" fill="none" preserveAspectRatio="xMidYMid meet">
-      <circle cx="400" cy="300" r="200" stroke="#E0E0E0" strokeWidth="0.5" opacity="0.3" />
-      <circle cx="400" cy="300" r="120" stroke="#E0E0E0" strokeWidth="0.5" opacity="0.2" />
-      <circle cx="400" cy="300" r="40" stroke="#E0E0E0" strokeWidth="0.5" opacity="0.15" />
-      <line x1="400" y1="50" x2="400" y2="550" stroke="#E0E0E0" strokeWidth="0.5" opacity="0.15" />
-      <line x1="150" y1="300" x2="650" y2="300" stroke="#E0E0E0" strokeWidth="0.5" opacity="0.15" />
-    </svg>
-  );
-}
-
-function TypewriterText({ text, delay = 0 }: { text: string; delay?: number }) {
-  const [displayed, setDisplayed] = useState('');
-  const [started, setStarted] = useState(false);
-
-  useEffect(() => {
-    const timer = setTimeout(() => setStarted(true), delay);
-    return () => clearTimeout(timer);
-  }, [delay]);
-
-  useEffect(() => {
-    if (!started) return;
-    let i = 0;
-    const interval = setInterval(() => {
-      if (i < text.length) {
-        setDisplayed(text.slice(0, i + 1));
-        i++;
-      } else {
-        clearInterval(interval);
-      }
-    }, 40);
-    return () => clearInterval(interval);
-  }, [started, text]);
-
-  return (
-    <span>
-      {displayed}
-      {displayed.length < text.length && started && (
-        <span className="inline-block w-2 h-5 bg-fg ml-0.5 align-text-bottom animate-cursor-blink" />
-      )}
-    </span>
-  );
-}
+import { ArrowRight, Terminal, Zap, Shield, Brain } from 'lucide-react';
 
 export default function LandingPage() {
   return (
     <div className="min-h-screen bg-bg text-fg font-sans">
+      {/* Google Fonts for brand typography */}
+      {/* eslint-disable-next-line @next/next/no-page-custom-font */}
+      <link href="https://fonts.googleapis.com/css2?family=Permanent+Marker&family=Doto:wght@700;900&display=swap" rel="stylesheet" />
       {/* Navigation */}
       <nav className="h-14 flex items-center justify-between px-8 border-b border-border bg-bg-surface">
         <div className="flex items-center gap-2.5">
@@ -79,6 +21,7 @@ export default function LandingPage() {
         <div className="flex items-center gap-6">
           <a href="#features" className="btn-bracket">Features</a>
           <a href="#capabilities" className="btn-bracket">Capabilities</a>
+          <Link href="/about" className="btn-bracket">About</Link>
           <Link href="/auth/login" className="btn-bracket">Sign In</Link>
           <Link href="/chat" className="btn-solid h-9 text-[10px]">
             START TALKING <ArrowRight className="w-3 h-3 ml-1" />
@@ -87,64 +30,58 @@ export default function LandingPage() {
       </nav>
 
       {/* Hero */}
-      <section className="relative min-h-[90vh] flex items-end justify-center pb-24 overflow-hidden logo-watermark-center">
-        <Crosshair />
-        <CornerBracket position="tl" />
-        <CornerBracket position="tr" />
-        <CornerBracket position="bl" />
-        <CornerBracket position="br" />
+      <section className="relative min-h-[90vh] flex items-center justify-center overflow-hidden">
+        {/* Subtle radial glow behind logo */}
+        <div className="absolute top-[15%] left-1/2 -translate-x-1/2 w-[600px] h-[600px] rounded-full opacity-[0.06]"
+          style={{ background: 'radial-gradient(circle, #E8A020 0%, transparent 70%)' }} />
 
-        {/* Top metadata */}
-        <div className="absolute top-8 left-8 space-y-3">
-          <div>
-            <p className="font-mono text-[10px] text-fg-ghost uppercase tracking-widest">Built by</p>
-            <p className="font-mono text-[11px] text-fg-secondary font-medium">ACHIEVEMOR</p>
-          </div>
-          <div>
-            <p className="font-mono text-[10px] text-fg-ghost uppercase tracking-widest">Version</p>
-            <p className="font-mono text-[11px] text-fg-secondary font-medium">2.0</p>
-          </div>
-        </div>
+        <div className="relative z-10 text-center max-w-3xl mx-auto px-8">
+          {/* Deploy Logo */}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/deploy-logo.png"
+            alt="Deploy"
+            className="w-32 h-32 mx-auto mb-8 object-contain animate-materialize"
+            style={{ filter: 'drop-shadow(0 4px 30px rgba(232,160,32,0.3))' }}
+          />
 
-        <div className="absolute top-8 right-8 flex gap-4">
-          <Link href="/chat" className="btn-bracket">Launch App</Link>
-          <a href="#features" className="btn-bracket">Learn More</a>
-        </div>
-
-        {/* Hero Video Container — Remotion Player slot */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[480px] h-[270px] border border-border bg-bg-surface flex items-center justify-center">
-          <div className="text-center">
-            <div className="w-12 h-12 mx-auto mb-3 border border-border flex items-center justify-center">
-              <div className="w-0 h-0 border-l-[8px] border-l-fg border-t-[5px] border-t-transparent border-b-[5px] border-b-transparent ml-1" />
-            </div>
-            <p className="font-mono text-[10px] text-fg-ghost uppercase tracking-widest">Platform Demo</p>
-          </div>
-        </div>
-
-        {/* Center content */}
-        <div className="relative z-10 text-center max-w-2xl mx-auto px-8">
-          <p className="font-mono text-[11px] text-fg-tertiary uppercase tracking-[0.3em] mb-6">
-            <TypewriterText text="~$ NPM LAUNCH THE-DEPLOY-PLATFORM" delay={300} />
-          </p>
-
-          <h1 className="text-5xl font-light tracking-tight mb-4 leading-[1.1]">
-            Think It. Prompt It.<br />
-            <span className="font-bold">Let ACHEEVY Manage It.</span>
+          {/* Title */}
+          <h1 className="text-6xl font-black tracking-tight mb-2 leading-[1.05]">
+            <span className="text-fg" style={{ fontFamily: "'Doto', monospace", fontWeight: 900 }}>THE </span>
+            <span style={{ color: '#E8A020', fontFamily: "'Permanent Marker', cursive" }}>DEPLOY</span>
+            <span className="text-fg" style={{ fontFamily: "'Doto', monospace", fontWeight: 900 }}> PLATFORM</span>
           </h1>
 
-          <p className="text-fg-secondary text-base leading-relaxed mb-10 max-w-lg mx-auto">
+          {/* Tagline */}
+          <p className="text-2xl font-light tracking-wide mt-6 mb-2 text-fg-secondary">
+            Think It. Prompt It.
+          </p>
+          <p className="text-2xl font-bold tracking-wide mb-8">
+            Let ACHEEVY Manage It.
+          </p>
+
+          {/* Subtitle */}
+          <p className="text-fg-tertiary text-sm leading-relaxed mb-12 max-w-lg mx-auto">
             AI-native application factory for autonomous deployment,
             governance, and delivery.
           </p>
 
+          {/* CTAs */}
           <div className="flex items-center justify-center gap-4">
-            <Link href="/chat" className="btn-solid h-12 px-8 text-xs gap-2">
-              <Mic className="w-4 h-4" /> PROMPT IT
+            <Link href="/chat" className="h-12 px-8 text-sm font-bold tracking-wide inline-flex items-center justify-center gap-2 transition-all"
+              style={{ background: '#E8A020', color: '#000', borderRadius: '6px', boxShadow: '0 0 30px rgba(232,160,32,0.2)' }}>
+              Get Started <ArrowRight className="w-4 h-4" />
             </Link>
-            <Link href="/auth/login" className="btn-ghost h-12 px-8 text-xs">
-              SIGN IN
-            </Link>
+            <a href="#features" className="h-12 px-8 text-sm font-medium tracking-wide inline-flex items-center justify-center border border-border hover:border-fg-ghost transition-colors"
+              style={{ borderRadius: '6px' }}>
+              Learn More
+            </a>
           </div>
+
+          {/* Built by */}
+          <p className="font-mono text-[10px] text-fg-ghost uppercase tracking-[0.3em] mt-16">
+            Built by ACHIEVEMOR
+          </p>
         </div>
       </section>
 
