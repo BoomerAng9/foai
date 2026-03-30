@@ -164,19 +164,20 @@ export default function AboutPage() {
               </h2>
               <div className="space-y-4 text-fg-secondary leading-relaxed">
                 <p>
-                  ACHEEVY is the orchestrator — the Digital CEO who receives your intent,
-                  plans the work, dispatches the team, monitors execution, and delivers the
-                  finished product. Every conversation starts with ACHEEVY.
+                  ACHEEVY is the Digital CEO. You describe your problem, ACHEEVY figures out
+                  what needs to happen, who needs to do it, and makes sure it gets done right.
+                  No forms. No workflows. No babysitting. The solution shows up — auditable,
+                  compliant, and ready to deploy.
                 </p>
                 <p>
-                  ACHEEVY doesn&apos;t do the manual work. Instead, it coordinates a fleet of
-                  specialized agents, each with their own expertise: research, coding,
-                  content, operations, education, and business development.
+                  Behind the curtain, ACHEEVY runs a full team of AI specialists: researchers,
+                  engineers, operators, creatives, business developers. Each one purpose-built
+                  for their job. You never manage them. You never see the wiring. You just say
+                  what you want. The plug appears.
                 </p>
                 <p>
-                  With persistent memory across sessions, ACHEEVY remembers your projects,
-                  preferences, and past decisions. It adapts to your communication style
-                  and gets better the more you use it.
+                  ACHEEVY remembers your projects, your preferences, and how you work. Every
+                  session picks up where the last one left off.
                 </p>
               </div>
             </div>
