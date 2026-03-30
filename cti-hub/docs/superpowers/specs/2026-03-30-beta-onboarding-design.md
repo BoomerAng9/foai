@@ -79,15 +79,15 @@ On successful signup:
 
 Page: `/auth/welcome`
 
-Shows 6 Remotion videos in sequence (autoplay next, or user can skip). Each up to 25 seconds.
+Shows 9 videos in sequence (autoplay next, or user can skip). Each up to 25 seconds.
 
 After all videos (or skip): redirect to `/chat`
 
 ---
 
-## 3. Remotion Walkthrough Videos
+## 3. Walkthrough Videos
 
-7 standalone videos, each up to 25 seconds (~3 min total). Built with Remotion. Dark theme matching the platform. Bold text overlays, animated screen captures, pointer annotations.
+9 videos, each up to 25 seconds (~3:45 total). Videos 1-5 and 7-9 built with Remotion (UI demos). Videos 6A-6C generated with NotebookLM Ultra API (vision/value pieces). Dark theme matching the platform.
 
 ### Video 1: What is The Deploy Platform (25s)
 
@@ -135,16 +135,31 @@ After all videos (or skip): redirect to `/chat`
 - Text: "Full transparency. Every token counted."
 - Text: "You control the budget"
 
-### Video 6: Full Capabilities (25s)
+### Video 6A: Find Your 1,000 People (25s) — NotebookLM Ultra (cinematic)
 
-- Text: "From solo creator to full organization"
-- Animated example 1: "Build a music engineer with full agentic capabilities"
-  - Waveform visualization, mixing board UI, ACHEEVY routing to specialized agents
-- Animated example 2: "Run a 10-person agentic organization"
-  - Org chart materializes: ACHEEVY at top, delegation arrows fan out
-  - Agent nodes light up: Chicken Hawk (ops), Scout_Ang (research), Edu_Ang (training), Money Engine (finance)
-  - Text: "ACHEEVY delegates. Agents execute. You approve."
-- Text: "One conversation. Unlimited scale."
+Anchored in the "1,000 People Framework" image.
+
+- The 1,000 People Framework sketch animates in (hand-drawn style)
+- Text: "Who are your 1,000 people?"
+- ACHEEVY chat example: "Research the market for indie music producers who need AI mastering"
+- Scout_Ang returns results — audience size, pain points, willingness to pay
+- Text: "ACHEEVY finds your market. You validate it."
+
+### Video 6B: Build What They'll Pay For (25s) — NotebookLM Ultra (cinematic)
+
+- Text: "What will they pay $50-$100/year for?"
+- Sample Plug 1: **AI Music Engineer** — "Master my track" → ACHEEVY routes to Suno/audio pipeline → polished output
+- Sample Plug 2: **Content Machine** — "Write my newsletter + social posts for this week" → research → draft → schedule
+- Sample Plug 3: **Lead Gen Agent** — "Find 50 prospects in [niche] and draft DMs" → Scout_Ang → outreach drafts
+- Text: "Simple product. Real value. Built in one conversation."
+
+### Video 6C: Scale to a Full Agentic Org (25s) — NotebookLM Ultra (cinematic)
+
+- Text: "From solo plug to 10-person operation"
+- Org chart builds: ACHEEVY delegates to Chicken Hawk (ops), Scout_Ang (research), Edu_Ang (training), Money Engine (revenue)
+- Each agent lights up handling a task simultaneously
+- Text: "One CEO. Unlimited agents. Zero overhead."
+- Text: "Deploy manages it all."
 
 ### Video 7: Give Us Feedback (25s)
 
@@ -199,10 +214,20 @@ Sidebar shows different nav items based on role:
 - `src/components/video/walkthrough/Scene3Chat.tsx`
 - `src/components/video/walkthrough/Scene4ImageGen.tsx`
 - `src/components/video/walkthrough/Scene5LUC.tsx`
-- `src/components/video/walkthrough/Scene6Capabilities.tsx`
+- `src/components/video/walkthrough/Scene6aMarket.tsx` — NotebookLM Ultra cinematic
+- `src/components/video/walkthrough/Scene6bBuild.tsx` — NotebookLM Ultra cinematic
+- `src/components/video/walkthrough/Scene6cScale.tsx` — NotebookLM Ultra cinematic
 - `src/components/video/walkthrough/Scene7Feedback.tsx`
 - `src/components/video/walkthrough/WalkthroughRoot.tsx` — Remotion root
 - `sql/005-access-keys.sql` — access keys table if not exists
+
+### Assets
+- `public/1000-people-framework.png` — source: iCloudPhotos/Photos/IMG_0729.PNG
+
+### Sample plug templates (pre-built for beta testers to try)
+- AI Music Engineer — prompt template that routes to audio/music generation
+- Content Machine — newsletter + social post generator
+- Lead Gen Agent — prospect finder + DM drafter
 
 ### Modified files
 - `src/app/(dashboard)/layout.tsx` — role-based nav filtering
