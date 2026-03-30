@@ -203,6 +203,15 @@ export default function ChatWithACHEEVY() {
               }
             } else if (data.cost_update) {
               setStreamingCost(data.cost_update);
+            } else if (data.thinking || data.thinking_partial) {
+              const thinkText = data.thinking || data.thinking_partial;
+              setMessages(prev => prev.map(m =>
+                m.id === streamId ? { ...m, thinking: thinkText } : m
+              ));
+            } else if (data.agent) {
+              setMessages(prev => prev.map(m =>
+                m.id === streamId ? { ...m, activeAgent: data.agent } : m
+              ));
             } else if (data.content) {
               setMessages(prev => prev.map(m =>
                 m.id === streamId ? { ...m, content: m.content + data.content } : m

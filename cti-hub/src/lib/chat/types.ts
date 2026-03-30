@@ -20,6 +20,8 @@ export interface Message {
   metadata?: MessageMetadata;
   created_at: string;
   streaming?: boolean;
+  thinking?: string;
+  activeAgent?: string;
 }
 
 export interface Conversation {
