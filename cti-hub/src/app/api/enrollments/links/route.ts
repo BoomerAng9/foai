@@ -1,27 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getAdminAuth } from '@/lib/firebase-admin';
+import { requireAuth } from '@/lib/auth-guard';
 
 const EDU_ANG_BASE = 'https://edu-ang-939270059361.us-central1.run.app';
-
-async function getCallerId(request: NextRequest): Promise<string | null> {
-  const token = request.cookies.get('firebase-auth-token')?.value;
-  if (!token) return null;
-  try {
-    const auth = getAdminAuth();
-    const decoded = await auth.verifyIdToken(token);
-    return decoded.uid;
-  } catch {
-    return null;
-  }
-}
 
 /**
  * POST /api/enrollments/links — Create a new affiliate link
  * Body: { category, base_url, sku, course_name }
  */
 export async function POST(request: NextRequest) {
-  const userId = await getCallerId(request);
-  if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  const auth = await requireAuth(request);
+  if (!auth.ok) return auth.response;
+  if (auth.role !== 'owner') {
+    return NextResponse.json({ error: 'Owner access required', code: 'OWNER_ONLY' }, { status: 403 });
+  }
 
   const body = await request.json();
   const { category, base_url, sku, course_name } = body;
