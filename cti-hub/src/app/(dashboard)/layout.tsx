@@ -22,16 +22,23 @@ import {
 import { useAuth } from '@/hooks/useAuth';
 import { AuthPromptTimer } from '@/components/auth/AuthPromptTimer';
 
-const NAV = [
+interface NavItem {
+  name: string;
+  href: string;
+  icon: typeof MessageSquare;
+  ownerOnly?: boolean;
+}
+
+const NAV: NavItem[] = [
   { name: 'HOME', href: '/chat', icon: MessageSquare },
   { name: 'WORKFLOWS', href: '/projects', icon: FolderOpen },
-  { name: 'EXECUTIONS', href: '/live', icon: Activity },
-  { name: 'PLUG BIN', href: '/plug-bin', icon: Video },
-  { name: 'MARKETPLACE', href: '/open-seats', icon: Search },
-  { name: 'ENROLLMENTS', href: '/enrollments', icon: TrendingUp },
-  { name: 'SQUAD', href: '/team', icon: Shield },
+  { name: 'EXECUTIONS', href: '/live', icon: Activity, ownerOnly: true },
+  { name: 'PLUG BIN', href: '/plug-bin', icon: Video, ownerOnly: true },
+  { name: 'MARKETPLACE', href: '/open-seats', icon: Search, ownerOnly: true },
+  { name: 'ENROLLMENTS', href: '/enrollments', icon: TrendingUp, ownerOnly: true },
+  { name: 'SQUAD', href: '/team', icon: Shield, ownerOnly: true },
   { name: 'ACCOUNT', href: '/settings', icon: User },
-  { name: 'BILLING', href: '/pricing', icon: CreditCard },
+  { name: 'BILLING', href: '/pricing', icon: CreditCard, ownerOnly: true },
 ];
 
 function CornerBracket({ position }: { position: 'tl' | 'tr' | 'bl' | 'br' }) {
@@ -51,7 +58,9 @@ function CornerBracket({ position }: { position: 'tl' | 'tr' | 'bl' | 'br' }) {
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const { profile, organization, signOut } = useAuth();
+  const { user, profile, organization, signOut } = useAuth();
+  const isOwnerUser = user?.email === 'bpo@achievemor.io' || user?.email === 'jarrett.risher@gmail.com';
+  const visibleNav = NAV.filter(item => !item.ownerOnly || isOwnerUser);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [sidebarHovered, setSidebarHovered] = useState(false);
@@ -117,7 +126,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
         {/* Navigation */}
         <nav className="flex-1 py-4 px-3 md:px-1.5 lg:px-3 space-y-0.5 overflow-y-auto">
-          {NAV.map((item) => {
+          {visibleNav.map((item) => {
             const active = pathname === item.href || pathname.startsWith(item.href + '/');
             return (
               <Link

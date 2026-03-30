@@ -30,15 +30,23 @@ export async function POST(request: NextRequest) {
   if (!sql) return NextResponse.json({ error: 'Database unavailable' }, { status: 503 });
 
   const body = await request.json().catch(() => ({}));
-  const label = body.label || 'Unnamed';
-  const key = generateAccessKey();
+  const label = body.label || 'Beta Test Invite';
+  const count = Math.min(Math.max(body.count || 1, 1), 50); // 1-50 keys at a time
 
-  await sql`
-    INSERT INTO access_keys (key, label, created_by, created_at, is_active)
-    VALUES (${key}, ${label}, ${email}, NOW(), true)
-  `;
+  const keys: string[] = [];
+  for (let i = 0; i < count; i++) {
+    const key = generateAccessKey();
+    await sql`
+      INSERT INTO access_keys (key, label, created_by, created_at, is_active)
+      VALUES (${key}, ${label}, ${email}, NOW(), true)
+    `;
+    keys.push(key);
+  }
 
-  return NextResponse.json({ key, label });
+  const baseUrl = request.headers.get('origin') || 'https://cti.foai.cloud';
+  const links = keys.map(k => ({ key: k, url: `${baseUrl}/auth/redeem?key=${k}` }));
+
+  return NextResponse.json({ keys: links, label, count });
 }
 
 export async function GET(request: NextRequest) {
