@@ -1,16 +1,19 @@
-"""Hermes LearnAng — Deep Think evaluation engine for FOAI-AIMS.
+"""Hermes LearnAng V0.5 — Deep Think evaluation engine for FOAI-AIMS.
 
-Weekly Gemini-powered agent performance analysis.
-Stores results in Firestore, posts directives to Money Engine.
+Multi-model consensus scoring, daily + weekly evaluations,
+trend tracking, CFO_Ang cost integration, structured logging.
 """
 
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 
-from config import PORT
-from routers import evaluate, history
+from config import PORT, VERSION
+from logging_config import setup_logging
+from routers import compare, evaluate, history, hr_pmo, memory_routes, trends
 from scheduler import start_scheduler, stop_scheduler
+
+setup_logging()
 
 
 @asynccontextmanager
@@ -22,13 +25,21 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(
     title="Hermes LearnAng",
-    description="Deep Think evaluation engine — weekly Gemini-powered agent performance analysis for FOAI-AIMS.",
-    version="0.1.0",
+    description=(
+        "Deep Think evaluation engine V0.5 — multi-model consensus scoring, "
+        "RAG-based memory, trend tracking, and daily + weekly agent performance "
+        "analysis for FOAI-AIMS."
+    ),
+    version=VERSION,
     lifespan=lifespan,
 )
 
 app.include_router(evaluate.router)
 app.include_router(history.router)
+app.include_router(trends.router)
+app.include_router(compare.router)
+app.include_router(memory_routes.router)
+app.include_router(hr_pmo.router)
 
 
 @app.get("/health")
@@ -37,7 +48,7 @@ async def health():
         "status": "ok",
         "service": "hermes-agent",
         "engine": "LearnAng",
-        "version": "0.1.0",
+        "version": VERSION,
     }
 
 

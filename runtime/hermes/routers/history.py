@@ -12,6 +12,8 @@ router = APIRouter(prefix="/history", tags=["Evaluation History"])
 class EvaluationSummary(BaseModel):
     evaluation_id: str
     ecosystem_score: int | None
+    eval_type: str
+    models_used: int
     created_at: str
     agents_evaluated: int
 
@@ -40,6 +42,8 @@ async def recent_evaluations(
             EvaluationSummary(
                 evaluation_id=doc.id,
                 ecosystem_score=ev.get("ecosystem_score"),
+                eval_type=data.get("eval_type", "unknown"),
+                models_used=data.get("models_used", 1),
                 created_at=data.get("created_at", ""),
                 agents_evaluated=len(ev.get("evaluations", [])),
             )

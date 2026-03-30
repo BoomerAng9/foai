@@ -21,6 +21,7 @@ import structlog
 from tenacity import retry, stop_after_attempt, wait_exponential
 
 from config import LLMProvider, Settings
+from memory_bridge import after_route, before_route
 
 logger = structlog.get_logger(__name__)
 
@@ -119,12 +120,26 @@ class Router:
         )
         log.info("routing_decision")
 
+        # Memory: draft project plan + recall context before dispatch
+        plan_id, _ = await before_route(decision.trace_id, message, decision.hawk)
+
         url = self._settings.hawk_endpoints[decision.hawk]
         content = await self._dispatch(url, message, decision.trace_id)
         reviewed_content = await self._review_gate(content, decision)
 
         elapsed = (time.monotonic() - start) * 1000
         log.info("response_delivered", elapsed_ms=round(elapsed, 1))
+
+        # Memory: complete plan + store routing outcome
+        await after_route(
+            plan_id=plan_id,
+            trace_id=decision.trace_id,
+            hawk_name=decision.hawk,
+            message=message,
+            elapsed_ms=round(elapsed, 1),
+            reviewed=True,
+            confidence=decision.confidence,
+        )
 
         return HawkResponse(
             hawk=decision.hawk,

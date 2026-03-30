@@ -20,11 +20,16 @@ export function RolodexVerb() {
   }, []);
 
   return (
-    <span
-      className="font-bold transition-opacity duration-200"
-      style={{ opacity: visible ? 1 : 0 }}
-    >
-      {VERBS[index]}
+    <span className="inline-block relative overflow-hidden h-[1.2em] align-bottom">
+      <span
+        className="inline-block font-bold transition-all duration-300 ease-in-out"
+        style={{
+          transform: visible ? 'translateY(0)' : 'translateY(-100%)',
+          opacity: visible ? 1 : 0,
+        }}
+      >
+        {VERBS[index]}
+      </span>
     </span>
   );
 }

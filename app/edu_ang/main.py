@@ -15,9 +15,11 @@ from pydantic import BaseModel
 
 import state_emitter as se
 from luc_middleware import luc_gate
+from memory_hooks import MemoryHooks
 
 AGENT_NAME = "Edu_Ang"
 DEPT = "PMO-LAUNCH"
+memory = MemoryHooks(AGENT_NAME, "boomer_ang", DEPT)
 LUC_ACCOUNT = os.getenv("LUC_ACCOUNT", "cti-default")
 
 MONEY_ENGINE_URL = os.getenv(
@@ -88,6 +90,16 @@ async def get_links(category: str, tenant_id: str = Query(default=DEFAULT_TENANT
     """Proxy to Money Engine GET /links/{category}."""
     t0 = time.monotonic()
     task_id = await se.task_assigned(AGENT_NAME, DEPT, f"Fetch links: {category}", "low")
+
+    plan_id, _ = await memory.before_task(
+        task_id=task_id, title=f"Fetch links: {category}",
+        role="MindEdge enrollment operator",
+        mission=f"Retrieve active affiliate links for category '{category}'",
+        vision="Accurate, up-to-date affiliate links served instantly",
+        objective=f"Return all active MindEdge links for '{category}'",
+        steps=["call_money_engine", "return_tagged_links"],
+    )
+
     await se.task_started(AGENT_NAME, DEPT, task_id, {
         "plan": f"Retrieve active MindEdge links for category '{category}'",
         "steps": ["call_money_engine", "return_tagged_links"],
@@ -104,6 +116,7 @@ async def get_links(category: str, tenant_id: str = Query(default=DEFAULT_TENANT
 
     duration = int((time.monotonic() - t0) * 1000)
     await se.task_completed(AGENT_NAME, DEPT, task_id, 90, "A", duration)
+    await memory.after_task(plan_id, task_id, 90, "A", duration, f"Fetched links for {category}")
     await se.agent_break(AGENT_NAME, DEPT, task_id)
     return result
 
@@ -138,6 +151,16 @@ async def record_enrollment(record: EnrollmentRecord):
     """Record an enrollment conversion in Firestore."""
     t0 = time.monotonic()
     task_id = await se.task_assigned(AGENT_NAME, DEPT, f"Record enrollment: {record.sku}", "medium")
+
+    plan_id, _ = await memory.before_task(
+        task_id=task_id, title=f"Record enrollment: {record.sku}",
+        role="MindEdge enrollment operator",
+        mission=f"Record enrollment conversion for SKU '{record.sku}'",
+        vision="Every enrollment tracked with revenue attribution",
+        objective=f"Persist enrollment for SKU '{record.sku}' at ${record.revenue}",
+        steps=["validate_record", "luc_gate_check", "write_firestore", "confirm_enrollment"],
+    )
+
     await se.task_started(AGENT_NAME, DEPT, task_id, {
         "plan": f"Record MindEdge enrollment for SKU '{record.sku}', revenue ${record.revenue}",
         "steps": ["validate_record", "write_firestore", "confirm_enrollment"],
@@ -167,6 +190,10 @@ async def record_enrollment(record: EnrollmentRecord):
 
     duration = int((time.monotonic() - t0) * 1000)
     await se.task_completed(AGENT_NAME, DEPT, task_id, 95, "A", duration)
+    await memory.after_task(
+        plan_id, task_id, 95, "A", duration,
+        f"Enrolled SKU {record.sku}, revenue ${record.revenue}, source {record.source_utm}",
+    )
     await _heartbeat("active", "enrollment_recorded")
     await se.agent_break(AGENT_NAME, DEPT, task_id)
     return {"id": doc_ref.id, "timestamp": now}

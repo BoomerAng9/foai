@@ -161,10 +161,17 @@ export default function ChatWithACHEEVY() {
         ]);
       }
 
-      if (!res.ok || !res.body) {
-        const errData = await res.json().catch(() => ({ error: 'Stream failed' }));
+      const contentType = res.headers.get('Content-Type') || '';
+
+      if (!res.ok || !res.body || !contentType.includes('text/event-stream')) {
+        // Non-stream response (error JSON or missing body)
+        let errorMsg = 'Connection error.';
+        try {
+          const errData = await res.json();
+          errorMsg = errData.error || errorMsg;
+        } catch {}
         setMessages(prev => prev.map(m =>
-          m.id === streamId ? { ...m, content: errData.error || 'Connection error.', streaming: false } : m
+          m.id === streamId ? { ...m, content: errorMsg, streaming: false } : m
         ));
         return;
       }
@@ -204,10 +211,11 @@ export default function ChatWithACHEEVY() {
           } catch {}
         }
       }
-    } catch {
+    } catch (err) {
+      const errorMsg = err instanceof Error ? err.message : 'Connection error. Try again.';
       setStreamingCost(null);
       setMessages(prev => prev.map(m =>
-        m.id === streamId ? { ...m, content: 'Connection error. Try again.', streaming: false } : m
+        m.id === streamId ? { ...m, content: errorMsg, streaming: false } : m
       ));
     } finally {
       setSending(false);

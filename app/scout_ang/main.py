@@ -14,9 +14,11 @@ from google.cloud import firestore
 from pydantic import BaseModel
 
 import state_emitter as se
+from memory_hooks import MemoryHooks
 
 AGENT_NAME = "Scout_Ang"
 DEPT = "PMO-PULSE"
+memory = MemoryHooks(AGENT_NAME, "boomer_ang", DEPT)
 
 MONEY_ENGINE_URL = os.getenv(
     "MONEY_ENGINE_URL",
@@ -76,6 +78,16 @@ async def trigger_scrape(req: ScrapeRequest):
     t0 = time.monotonic()
     target = req.institution or "all_institutions"
     task_id = await se.task_assigned(AGENT_NAME, DEPT, f"Scrape: {target}", "high")
+
+    plan_id, _ = await memory.before_task(
+        task_id=task_id, title=f"Scrape: {target}",
+        role="Open Seat data sourcing specialist",
+        mission=f"Launch Firecrawl scan for open university seats at {target}",
+        vision="Comprehensive, fresh open seat data for all target institutions",
+        objective=f"Queue scrape jobs for {target} and return job status",
+        steps=["validate_target", "call_money_engine_scrape", "queue_jobs"],
+    )
+
     await se.task_started(AGENT_NAME, DEPT, task_id, {
         "plan": f"Launch Firecrawl scan for open seats at {target}",
         "steps": ["validate_target", "call_money_engine_scrape", "queue_jobs"],
@@ -93,6 +105,7 @@ async def trigger_scrape(req: ScrapeRequest):
     await se.task_progress(AGENT_NAME, DEPT, task_id, 80, "Scrape jobs queued successfully")
     duration = int((time.monotonic() - t0) * 1000)
     await se.task_completed(AGENT_NAME, DEPT, task_id, 85, "B+", duration)
+    await memory.after_task(plan_id, task_id, 85, "B+", duration, f"Scrape queued for {target}")
     await _heartbeat("active", "scrape_queued")
     await se.agent_break(AGENT_NAME, DEPT, task_id)
     return result
