@@ -127,11 +127,11 @@ export default function EnrollmentsPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <div className="flex items-center gap-3 mb-1">
             <TrendingUp className="w-5 h-5 text-fg-tertiary" />
-            <h1 className="text-2xl font-light tracking-tight">
+            <h1 className="text-xl sm:text-2xl font-light tracking-tight">
               MindEdge <span className="font-bold">Enrollments</span>
             </h1>
           </div>
@@ -162,7 +162,7 @@ export default function EnrollmentsPage() {
       )}
 
       {/* Revenue Summary Cards */}
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="border border-border bg-bg-surface px-5 py-4">
           <div className="flex items-center gap-2 mb-2">
             <DollarSign className="w-3.5 h-3.5 text-fg-tertiary" />
@@ -203,9 +203,9 @@ export default function EnrollmentsPage() {
             </p>
           </div>
         ) : (
-          <div className="border border-border bg-bg-surface">
+          <div className="border border-border bg-bg-surface overflow-x-auto">
             {/* Header row */}
-            <div className="grid grid-cols-[1fr_1fr_100px_80px_auto] gap-4 px-5 py-3 border-b border-border">
+            <div className="grid grid-cols-[1fr_1fr_100px_80px_auto] gap-4 px-5 py-3 border-b border-border min-w-[600px]">
               {['Course', 'URL', 'SKU', 'Status', ''].map(h => (
                 <span key={h} className="label-mono">{h}</span>
               ))}
@@ -215,7 +215,7 @@ export default function EnrollmentsPage() {
             {links.map((link, i) => (
               <div
                 key={link.id || `link-${i}`}
-                className="grid grid-cols-[1fr_1fr_100px_80px_auto] gap-4 px-5 py-3.5 border-b border-border last:border-0 hover:bg-bg-elevated transition-colors items-center"
+                className="grid grid-cols-[1fr_1fr_100px_80px_auto] gap-4 px-5 py-3.5 border-b border-border last:border-0 hover:bg-bg-elevated transition-colors items-center min-w-[600px]"
               >
                 <div className="min-w-0">
                   <p className="text-sm font-medium truncate">{link.course_name}</p>
@@ -272,9 +272,9 @@ export default function EnrollmentsPage() {
             </p>
           </div>
         ) : (
-          <div className="border border-border bg-bg-surface">
+          <div className="border border-border bg-bg-surface overflow-x-auto">
             {/* Header row */}
-            <div className="grid grid-cols-[1fr_100px_100px_1fr_auto] gap-4 px-5 py-3 border-b border-border">
+            <div className="grid grid-cols-[1fr_100px_100px_1fr_auto] gap-4 px-5 py-3 border-b border-border min-w-[600px]">
               {['Course', 'SKU', 'Revenue', 'Source', 'Date'].map(h => (
                 <span key={h} className="label-mono">{h}</span>
               ))}
@@ -284,7 +284,7 @@ export default function EnrollmentsPage() {
             {enrollments.map((enrollment, i) => (
               <div
                 key={enrollment.id || `enroll-${i}`}
-                className="grid grid-cols-[1fr_100px_100px_1fr_auto] gap-4 px-5 py-3.5 border-b border-border last:border-0 hover:bg-bg-elevated transition-colors items-center"
+                className="grid grid-cols-[1fr_100px_100px_1fr_auto] gap-4 px-5 py-3.5 border-b border-border last:border-0 hover:bg-bg-elevated transition-colors items-center min-w-[600px]"
               >
                 <p className="text-sm font-medium truncate">{enrollment.course}</p>
                 <span className="font-mono text-xs">{enrollment.sku}</span>

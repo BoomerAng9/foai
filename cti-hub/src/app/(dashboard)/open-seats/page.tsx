@@ -167,11 +167,11 @@ export default function MarketplacePage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <div className="flex items-center gap-3 mb-1">
             <Search className="w-5 h-5 text-fg-tertiary" />
-            <h1 className="text-2xl font-light tracking-tight">
+            <h1 className="text-xl sm:text-2xl font-light tracking-tight">
               <span className="font-bold">Marketplace</span>
             </h1>
           </div>
@@ -205,7 +205,7 @@ export default function MarketplacePage() {
       )}
 
       {/* Summary cards */}
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="border border-border bg-bg-surface px-5 py-4">
           <div className="flex items-center gap-2 mb-2">
             <BookOpen className="w-3.5 h-3.5 text-fg-tertiary" />

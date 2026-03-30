@@ -44,11 +44,11 @@ export default function MyProjects() {
   return (
     <div className="space-y-10">
       {/* Page header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <div className="flex items-center gap-3 mb-1">
             <FolderOpen className="w-5 h-5 text-fg-tertiary" />
-            <h1 className="text-2xl font-light tracking-tight">
+            <h1 className="text-xl sm:text-2xl font-light tracking-tight">
               My <span className="font-bold">Projects</span>
             </h1>
           </div>
@@ -88,9 +88,9 @@ export default function MyProjects() {
             <p className="font-mono text-xs text-fg-tertiary">No projects yet. Start a conversation to create your first.</p>
           </div>
         ) : (
-          <div className="border border-border bg-bg-surface">
+          <div className="border border-border bg-bg-surface overflow-x-auto">
             {/* Header row */}
-            <div className="grid grid-cols-[auto_1fr_80px_80px_80px_auto] gap-4 px-5 py-3 border-b border-border">
+            <div className="grid grid-cols-[auto_1fr_80px_80px_80px_auto] gap-4 px-5 py-3 border-b border-border min-w-[600px]">
               {['', 'Project', 'Status', 'Tokens', 'Cost', ''].map(h => (
                 <span key={h} className="label-mono">{h}</span>
               ))}
@@ -103,7 +103,7 @@ export default function MyProjects() {
               const sheetUrl = (job.output as Record<string, string>)?.spreadsheetUrl;
 
               return (
-                <div key={job.id} className="grid grid-cols-[auto_1fr_80px_80px_80px_auto] gap-4 px-5 py-3.5 border-b border-border last:border-0 hover:bg-bg-elevated transition-colors items-center">
+                <div key={job.id} className="grid grid-cols-[auto_1fr_80px_80px_80px_auto] gap-4 px-5 py-3.5 border-b border-border last:border-0 hover:bg-bg-elevated transition-colors items-center min-w-[600px]">
                   <Icon className="w-4 h-4 text-fg-tertiary" />
                   <div className="min-w-0">
                     <p className="text-sm font-medium truncate">

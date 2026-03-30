@@ -19,6 +19,26 @@ function TypingIndicator() {
   );
 }
 
+function renderContent(content: string) {
+  // Split on markdown image pattern ![alt](src)
+  const parts = content.split(/(!\[.*?\]\(.*?\))/g);
+  return parts.map((part, i) => {
+    const imgMatch = part.match(/^!\[(.*?)\]\((.*?)\)$/);
+    if (imgMatch) {
+      return (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          key={i}
+          src={imgMatch[2]}
+          alt={imgMatch[1]}
+          className="max-w-full max-h-[400px] object-contain my-3 border border-border"
+        />
+      );
+    }
+    return <span key={i}>{part}</span>;
+  });
+}
+
 export function MessageBubble({ msg }: { msg: Message }) {
   return (
     <div className="group animate-fade-in">
@@ -57,7 +77,7 @@ export function MessageBubble({ msg }: { msg: Message }) {
       <div className={`text-sm leading-relaxed whitespace-pre-wrap ${
         msg.role === 'user' ? 'text-fg' : 'text-fg-secondary'
       }`}>
-        {msg.content}
+        {renderContent(msg.content)}
         {msg.streaming && msg.content && (
           <span className="inline-block w-1.5 h-4 bg-fg ml-0.5 align-text-bottom animate-cursor-blink" />
         )}

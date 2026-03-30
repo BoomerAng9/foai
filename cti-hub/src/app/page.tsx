@@ -1,16 +1,19 @@
 'use client';
 
+import { useState } from 'react';
 import Link from 'next/link';
-import { ArrowRight, Terminal, Zap, Shield, Brain } from 'lucide-react';
+import { ArrowRight, Terminal, Shield, Menu, X } from 'lucide-react';
 
 export default function LandingPage() {
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
+
   return (
     <div className="min-h-screen bg-bg text-fg font-sans">
       {/* Google Fonts for brand typography */}
       {/* eslint-disable-next-line @next/next/no-page-custom-font */}
-      <link href="https://fonts.googleapis.com/css2?family=Permanent+Marker&family=Doto:wght@700;900&display=swap" rel="stylesheet" />
+      <link href="https://fonts.googleapis.com/css2?family=Permanent+Marker&display=swap" rel="stylesheet" />
       {/* Navigation */}
-      <nav className="h-14 flex items-center justify-between px-8 border-b border-border bg-bg-surface">
+      <nav className="h-14 flex items-center justify-between px-4 md:px-8 border-b border-border bg-bg-surface relative">
         <div className="flex items-center gap-2.5">
           <div className="w-7 h-7 bg-accent flex items-center justify-center">
             <Terminal className="w-3.5 h-3.5 text-bg" />
@@ -18,7 +21,8 @@ export default function LandingPage() {
           <span className="font-mono text-xs font-bold tracking-wider uppercase">The Deploy Platform</span>
         </div>
 
-        <div className="flex items-center gap-6">
+        {/* Desktop nav */}
+        <div className="hidden md:flex items-center gap-6">
           <a href="#features" className="btn-bracket">Features</a>
           <a href="#capabilities" className="btn-bracket">Capabilities</a>
           <Link href="/about" className="btn-bracket">About</Link>
@@ -27,6 +31,30 @@ export default function LandingPage() {
             START TALKING <ArrowRight className="w-3 h-3 ml-1" />
           </Link>
         </div>
+
+        {/* Mobile hamburger */}
+        <button
+          onClick={() => setMobileNavOpen(!mobileNavOpen)}
+          className="md:hidden text-fg-secondary hover:text-fg"
+          aria-label="Toggle menu"
+        >
+          {mobileNavOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+        </button>
+
+        {/* Mobile nav dropdown */}
+        {mobileNavOpen && (
+          <div className="absolute top-14 left-0 right-0 bg-bg-surface border-b border-border z-50 md:hidden">
+            <div className="flex flex-col p-4 space-y-3">
+              <a href="#features" onClick={() => setMobileNavOpen(false)} className="btn-bracket">Features</a>
+              <a href="#capabilities" onClick={() => setMobileNavOpen(false)} className="btn-bracket">Capabilities</a>
+              <Link href="/about" onClick={() => setMobileNavOpen(false)} className="btn-bracket">About</Link>
+              <Link href="/auth/login" onClick={() => setMobileNavOpen(false)} className="btn-bracket">Sign In</Link>
+              <Link href="/chat" onClick={() => setMobileNavOpen(false)} className="btn-solid h-9 text-[10px] inline-flex w-fit">
+                START TALKING <ArrowRight className="w-3 h-3 ml-1" />
+              </Link>
+            </div>
+          </div>
+        )}
       </nav>
 
       {/* Hero */}
@@ -35,28 +63,28 @@ export default function LandingPage() {
         <div className="absolute top-[15%] left-1/2 -translate-x-1/2 w-[600px] h-[600px] rounded-full opacity-[0.06]"
           style={{ background: 'radial-gradient(circle, #E8A020 0%, transparent 70%)' }} />
 
-        <div className="relative z-10 text-center max-w-3xl mx-auto px-8">
-          {/* Deploy Logo */}
+        <div className="relative z-10 text-center max-w-3xl mx-auto px-4 sm:px-8">
+          {/* ACHEEVY Hero */}
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            src="/deploy-logo.png"
-            alt="Deploy"
-            className="w-32 h-32 mx-auto mb-8 object-contain animate-materialize"
-            style={{ filter: 'drop-shadow(0 4px 30px rgba(232,160,32,0.3))' }}
+            src="/acheevy-deploy-hero.svg"
+            alt="ACHEEVY at the Deploy desk"
+            className="w-80 h-auto sm:w-[480px] mx-auto mb-6 object-contain animate-materialize"
+            style={{ filter: 'drop-shadow(0 8px 40px rgba(232,160,32,0.25))' }}
           />
 
           {/* Title */}
-          <h1 className="text-6xl font-black tracking-tight mb-2 leading-[1.05]">
-            <span className="text-fg" style={{ fontFamily: "'Doto', monospace", fontWeight: 900 }}>THE </span>
+          <h1 className="text-3xl sm:text-4xl md:text-6xl font-black tracking-tight mb-2 leading-[1.05]">
+            <span className="text-fg">THE </span>
             <span style={{ color: '#E8A020', fontFamily: "'Permanent Marker', cursive" }}>DEPLOY</span>
-            <span className="text-fg" style={{ fontFamily: "'Doto', monospace", fontWeight: 900 }}> PLATFORM</span>
+            <span className="text-fg"> PLATFORM</span>
           </h1>
 
           {/* Tagline */}
-          <p className="text-2xl font-light tracking-wide mt-6 mb-2 text-fg-secondary">
+          <p className="text-lg sm:text-xl md:text-2xl font-light tracking-wide mt-6 mb-2 text-fg-secondary">
             Think It. Prompt It.
           </p>
-          <p className="text-2xl font-bold tracking-wide mb-8">
+          <p className="text-lg sm:text-xl md:text-2xl font-bold tracking-wide mb-8">
             Let ACHEEVY Manage It.
           </p>
 
@@ -86,7 +114,7 @@ export default function LandingPage() {
       </section>
 
       {/* Features */}
-      <section id="features" className="py-24 px-8 border-t border-border">
+      <section id="features" className="py-12 md:py-24 px-4 md:px-8 border-t border-border">
         <div className="max-w-5xl mx-auto">
           <div className="mb-16">
             <p className="label-mono mb-3">The future of AI platforms</p>
@@ -100,50 +128,56 @@ export default function LandingPage() {
           </div>
 
           {/* Two Paths */}
-          <div className="grid grid-cols-2 gap-px bg-border">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-px bg-border">
             {/* Manage It */}
-            <div className="bg-bg-surface p-10">
-              <div className="w-10 h-10 border border-border flex items-center justify-center mb-6">
-                <Zap className="w-5 h-5 text-fg-secondary" />
-              </div>
-              <h3 className="text-xl font-bold tracking-tight mb-2">Manage It</h3>
-              <p className="label-mono mb-4">Fully autonomous execution</p>
+            <div className="bg-bg-surface p-6 md:p-10">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/icon-manage-it.png" alt="" className="w-12 h-12 object-contain mb-6" />
+              <h3 className="text-xl font-bold tracking-tight mb-2">
+                Let ACHEEVY <span style={{ color: '#E8A020' }}>Manage It</span>
+              </h3>
+              <p className="label-mono mb-4">2-5 minutes</p>
               <p className="text-fg-secondary text-sm leading-relaxed mb-6">
-                State your goal and Deploy handles everything: planning, quoting,
-                building, and shipping. Uses ACHEEVY protocol for intelligent orchestration.
+                Give ACHEEVY a single prompt describing what you want. The system takes over:
+                analyzing your request, selecting the right tier, mapping the architecture,
+                generating use cases, and kicking off the 10-stage build pipeline. You watch
+                progress in real time on the pipeline tracker.
               </p>
               <ul className="space-y-2 mb-8">
-                {['Confidence-gated execution', 'Human approval for critical decisions', 'Full audit trail'].map(item => (
+                {['Fully autonomous execution', 'Confidence-gated decisions', 'Human approval at critical gates', 'Full audit trail via ICAR/ACP'].map(item => (
                   <li key={item} className="flex items-center gap-2 text-sm text-fg-secondary">
                     <span className="led led-live" /> {item}
                   </li>
                 ))}
               </ul>
               <Link href="/chat" className="btn-solid h-10 text-[10px] inline-flex gap-2">
-                START AUTONOMOUS CHAT <ArrowRight className="w-3 h-3" />
+                GET STARTED <ArrowRight className="w-3 h-3" />
               </Link>
             </div>
 
             {/* Guide Me */}
-            <div className="bg-bg-surface p-10">
-              <div className="w-10 h-10 border border-border flex items-center justify-center mb-6">
-                <Brain className="w-5 h-5 text-fg-secondary" />
-              </div>
-              <h3 className="text-xl font-bold tracking-tight mb-2">Guide Me</h3>
-              <p className="label-mono mb-4">Step-by-step workflow creation</p>
+            <div className="bg-bg-surface p-6 md:p-10">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/icon-guide-me.png" alt="" className="w-12 h-20 object-contain object-left mb-6" />
+              <h3 className="text-xl font-bold tracking-tight mb-2">
+                Let ACHEEVY <span style={{ color: '#E8A020' }}>Guide Me</span>
+              </h3>
+              <p className="label-mono mb-4">4-10 minutes</p>
               <p className="text-fg-secondary text-sm leading-relaxed mb-6">
-                Wizard-guided workflow creation with chat assistance. ACHEEVY runs
-                a needs analysis consultation, then delegates to the team.
+                ACHEEVY walks you through a structured consultation: Share Your Idea,
+                Clarity &amp; Risk, Audience Resonance, and Expert Lens. The output is a
+                validated Assessment Ledger with use cases, risk analysis, and a tier
+                recommendation — then the pipeline builds it.
               </p>
               <ul className="space-y-2 mb-8">
-                {['Tool warehouse integration', 'Real-time token estimation', 'Preview before execution'].map(item => (
+                {['4-phase needs analysis', 'Use case validation', 'Risk assessment built in', 'Fewer change orders during build'].map(item => (
                   <li key={item} className="flex items-center gap-2 text-sm text-fg-secondary">
                     <span className="led bg-signal-info" /> {item}
                   </li>
                 ))}
               </ul>
               <Link href="/chat" className="btn-ghost h-10 text-[10px] inline-flex gap-2">
-                OPEN CHARTER WIZARD <ArrowRight className="w-3 h-3" />
+                LET&apos;S BEGIN <ArrowRight className="w-3 h-3" />
               </Link>
             </div>
           </div>
@@ -151,7 +185,7 @@ export default function LandingPage() {
       </section>
 
       {/* Capabilities */}
-      <section id="capabilities" className="py-24 px-8 border-t border-border bg-bg-surface">
+      <section id="capabilities" className="py-12 md:py-24 px-4 md:px-8 border-t border-border bg-bg-surface">
         <div className="max-w-5xl mx-auto">
           <div className="mb-16">
             <p className="label-mono mb-3">Under the hood</p>
@@ -160,7 +194,7 @@ export default function LandingPage() {
             </h2>
           </div>
 
-          <div className="grid grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
             {[
               { label: 'AGENT FLEET', value: '8 PMO offices, 24+ specialized agents routing your work' },
               { label: 'MEMORY', value: 'Semantic recall across all conversations. Nothing is forgotten' },
@@ -182,12 +216,12 @@ export default function LandingPage() {
       </section>
 
       {/* CTA */}
-      <section className="py-32 px-8 border-t border-border text-center relative overflow-hidden crosshair-bg">
+      <section className="py-16 md:py-32 px-4 md:px-8 border-t border-border text-center relative overflow-hidden crosshair-bg">
         <div className="relative z-10">
           <p className="font-mono text-[11px] text-fg-tertiary uppercase tracking-[0.3em] mb-6">
             Ready to deploy?
           </p>
-          <h2 className="text-4xl font-light tracking-tight mb-8">
+          <h2 className="text-2xl md:text-4xl font-light tracking-tight mb-8">
             Start a conversation.<br />
             <span className="font-bold">Ship something real.</span>
           </h2>
@@ -198,7 +232,7 @@ export default function LandingPage() {
       </section>
 
       {/* Footer */}
-      <footer className="h-14 flex items-center justify-between px-8 border-t border-border">
+      <footer className="h-14 flex items-center justify-between px-4 md:px-8 border-t border-border">
         <span className="font-mono text-[10px] text-fg-ghost uppercase tracking-widest">
           The Deploy Platform &middot; ACHIEVEMOR
         </span>

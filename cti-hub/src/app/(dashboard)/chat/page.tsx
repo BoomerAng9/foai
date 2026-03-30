@@ -342,19 +342,30 @@ export default function ChatWithACHEEVY() {
   const isEmpty = messages.length === 0;
 
   return (
-    <div className="flex h-[calc(100vh-7rem)] -m-6">
+    <div className="flex h-[calc(100vh-7rem)] -m-3 sm:-m-4 md:-m-6">
+      {/* Chat sidebar - slide-in on mobile */}
       {sidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black/50 z-30 md:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+      <div className={`
+        fixed inset-y-0 left-0 z-40 md:relative md:z-auto
+        transition-transform duration-200 ease-in-out
+        ${sidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0 md:hidden'}
+      `}>
         <ChatSidebar
           conversations={conversations}
           activeConvId={activeConvId}
           sessionTokens={sessionTokens}
           sessionCost={sessionCost}
           onSelectConversation={setActiveConvId}
-          onNewConversation={startNewConversation}
+          onNewConversation={() => { startNewConversation(); setSidebarOpen(false); }}
         />
-      )}
+      </div>
 
-      <div className="flex-1 flex flex-col relative bg-bg">
+      <div className="flex-1 flex flex-col relative bg-bg min-w-0">
         <button
           onClick={() => setSidebarOpen(!sidebarOpen)}
           className="absolute top-4 left-4 z-10 btn-bracket text-[10px]"
@@ -364,22 +375,22 @@ export default function ChatWithACHEEVY() {
 
         <div ref={scrollRef} className="flex-1 overflow-y-auto">
           {isEmpty ? (
-            <div className="flex flex-col items-center px-8 py-10">
+            <div className="flex flex-col items-center px-4 sm:px-6 md:px-8 py-6 md:py-10">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
-                src="/acheevy-plug.png"
+                src="/acheevy-chat-hero.png"
                 alt="ACHEEVY"
-                className="w-36 h-36 object-contain mb-4 animate-materialize"
-                style={{ filter: 'drop-shadow(0 8px 24px rgba(0,0,0,0.15))' }}
+                className="w-32 h-32 sm:w-44 sm:h-44 object-contain mb-4 animate-materialize"
+                style={{ filter: 'drop-shadow(0 8px 24px rgba(232,160,32,0.2))' }}
               />
-              <h1 className="text-2xl font-light tracking-tight mb-1">
+              <h1 className="text-xl sm:text-2xl font-light tracking-tight mb-1">
                 Chat w/ <span className="font-bold">ACHEEVY</span>
               </h1>
               <p className="text-fg-secondary text-sm text-center mb-6">
                 What will we <RolodexVerb /> today?
               </p>
 
-              <div className="grid grid-cols-2 gap-4 max-w-2xl w-full">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-2xl w-full">
                 {/* LEFT — Autonomous path */}
                 <div className="border border-border bg-bg-surface p-6 flex flex-col gap-4">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -433,7 +444,7 @@ export default function ChatWithACHEEVY() {
               </div>
             </div>
           ) : (
-            <div className="max-w-3xl mx-auto py-8 px-6 space-y-6">
+            <div className="max-w-3xl mx-auto py-4 px-3 sm:py-6 sm:px-4 md:py-8 md:px-6 space-y-6">
               {messages.map(msg => (
                 <MessageBubble key={msg.id} msg={msg} />
               ))}
@@ -450,7 +461,7 @@ export default function ChatWithACHEEVY() {
           </button>
         )}
 
-        <div className="border-t border-border bg-bg-surface p-4">
+        <div className="border-t border-border bg-bg-surface p-2 sm:p-3 md:p-4">
           <div className="max-w-3xl mx-auto">
             {attachments.length > 0 && (
               <div className="flex flex-wrap gap-2 mb-3">
@@ -474,7 +485,7 @@ export default function ChatWithACHEEVY() {
               </div>
             )}
 
-            <div className="flex items-end gap-3">
+            <div className="flex items-end gap-2 sm:gap-3">
               <input
                 ref={fileInputRef}
                 type="file"

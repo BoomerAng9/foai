@@ -1,34 +1,57 @@
+'use client';
+
+import { useState } from 'react';
 import Link from 'next/link';
-import { ArrowRight, Terminal, Zap, Brain, Shield, Users, Monitor, Package } from 'lucide-react';
+import { ArrowRight, Terminal, Zap, Brain, Shield, Users, Monitor, Package, Menu, X } from 'lucide-react';
 
 export default function AboutPage() {
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
+
   return (
     <div className="min-h-screen bg-bg text-fg font-sans">
       {/* eslint-disable-next-line @next/next/no-page-custom-font */}
       <link href="https://fonts.googleapis.com/css2?family=Permanent+Marker&family=Doto:wght@700;900&display=swap" rel="stylesheet" />
 
       {/* Navigation */}
-      <nav className="h-14 flex items-center justify-between px-8 border-b border-border bg-bg-surface">
+      <nav className="h-14 flex items-center justify-between px-4 md:px-8 border-b border-border bg-bg-surface relative">
         <Link href="/" className="flex items-center gap-2.5">
           <div className="w-7 h-7 bg-accent flex items-center justify-center">
             <Terminal className="w-3.5 h-3.5 text-bg" />
           </div>
           <span className="font-mono text-xs font-bold tracking-wider uppercase">The Deploy Platform</span>
         </Link>
-        <div className="flex items-center gap-6">
+        <div className="hidden md:flex items-center gap-6">
           <Link href="/#features" className="btn-bracket">Features</Link>
           <Link href="/about" className="btn-bracket">About</Link>
           <Link href="/chat" className="btn-solid h-9 text-[10px]">
             GET STARTED <ArrowRight className="w-3 h-3 ml-1" />
           </Link>
         </div>
+        <button
+          onClick={() => setMobileNavOpen(!mobileNavOpen)}
+          className="md:hidden text-fg-secondary hover:text-fg"
+          aria-label="Toggle menu"
+        >
+          {mobileNavOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+        </button>
+        {mobileNavOpen && (
+          <div className="absolute top-14 left-0 right-0 bg-bg-surface border-b border-border z-50 md:hidden">
+            <div className="flex flex-col p-4 space-y-3">
+              <Link href="/#features" onClick={() => setMobileNavOpen(false)} className="btn-bracket">Features</Link>
+              <Link href="/about" onClick={() => setMobileNavOpen(false)} className="btn-bracket">About</Link>
+              <Link href="/chat" onClick={() => setMobileNavOpen(false)} className="btn-solid h-9 text-[10px] inline-flex w-fit">
+                GET STARTED <ArrowRight className="w-3 h-3 ml-1" />
+              </Link>
+            </div>
+          </div>
+        )}
       </nav>
 
       {/* Hero */}
-      <section className="py-24 px-8 border-b border-border">
+      <section className="py-12 md:py-24 px-4 md:px-8 border-b border-border">
         <div className="max-w-4xl mx-auto text-center">
           <p className="label-mono mb-4">About The Deploy Platform</p>
-          <h1 className="text-5xl font-black tracking-tight mb-6 leading-[1.1]">
+          <h1 className="text-3xl md:text-5xl font-black tracking-tight mb-6 leading-[1.1]">
             AI that{' '}
             <span style={{ color: '#E8A020', fontFamily: "'Permanent Marker', cursive" }}>manages</span>{' '}
             solutions.
@@ -41,13 +64,12 @@ export default function AboutPage() {
       </section>
 
       {/* aiPLUGs */}
-      <section className="py-20 px-8 border-b border-border">
+      <section className="py-12 md:py-20 px-4 md:px-8 border-b border-border">
         <div className="max-w-5xl mx-auto">
-          <div className="grid grid-cols-[1fr_1.5fr] gap-16 items-center">
+          <div className="grid grid-cols-1 md:grid-cols-[1fr_1.5fr] gap-8 md:gap-16 items-center">
             <div>
-              <div className="w-14 h-14 border border-border flex items-center justify-center mb-6">
-                <Package className="w-7 h-7 text-fg-secondary" />
-              </div>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/acheevy-deploy-hero.svg" alt="ACHEEVY" className="w-40 h-40 object-contain mb-4" />
               <h2 className="text-3xl font-bold tracking-tight mb-4">
                 ai<span style={{ color: '#E8A020' }}>PLUG</span>s
               </h2>
@@ -73,18 +95,18 @@ export default function AboutPage() {
       </section>
 
       {/* Two Paths */}
-      <section className="py-20 px-8 border-b border-border bg-bg-surface">
+      <section className="py-12 md:py-20 px-4 md:px-8 border-b border-border bg-bg-surface">
         <div className="max-w-5xl mx-auto">
-          <div className="mb-14">
+          <div className="mb-8 md:mb-14">
             <p className="label-mono mb-3">Two ways to build</p>
-            <h2 className="text-3xl font-bold tracking-tight">
+            <h2 className="text-2xl md:text-3xl font-bold tracking-tight">
               Choose your speed.
             </h2>
           </div>
 
-          <div className="grid grid-cols-2 gap-px bg-border">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-px bg-border">
             {/* Manage It */}
-            <div className="bg-bg p-10">
+            <div className="bg-bg p-6 md:p-10">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src="/icon-manage-it.png" alt="" className="w-12 h-12 object-contain mb-6" />
               <h3 className="text-xl font-bold tracking-tight mb-2">
@@ -107,7 +129,7 @@ export default function AboutPage() {
             </div>
 
             {/* Guide Me */}
-            <div className="bg-bg p-10">
+            <div className="bg-bg p-6 md:p-10">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src="/icon-guide-me.png" alt="" className="w-12 h-20 object-contain object-left mb-6" />
               <h3 className="text-xl font-bold tracking-tight mb-2">
@@ -133,9 +155,9 @@ export default function AboutPage() {
       </section>
 
       {/* ACHEEVY */}
-      <section className="py-20 px-8 border-b border-border">
+      <section className="py-12 md:py-20 px-4 md:px-8 border-b border-border">
         <div className="max-w-5xl mx-auto">
-          <div className="grid grid-cols-[1.5fr_1fr] gap-16 items-start">
+          <div className="grid grid-cols-1 md:grid-cols-[1.5fr_1fr] gap-8 md:gap-16 items-start">
             <div>
               <p className="label-mono mb-3">The Digital CEO</p>
               <h2 className="text-3xl font-bold tracking-tight mb-6">
@@ -173,9 +195,9 @@ export default function AboutPage() {
       </section>
 
       {/* Boomer_Angs */}
-      <section className="py-20 px-8 border-b border-border bg-bg-surface">
+      <section className="py-12 md:py-20 px-4 md:px-8 border-b border-border bg-bg-surface">
         <div className="max-w-5xl mx-auto">
-          <div className="mb-14">
+          <div className="mb-8 md:mb-14">
             <p className="label-mono mb-3">The Agent Fleet</p>
             <h2 className="text-3xl font-bold tracking-tight">
               Boomer_Angs
@@ -186,7 +208,7 @@ export default function AboutPage() {
             </p>
           </div>
 
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {[
               { name: 'Scout_Ang', role: 'Research & Discovery', desc: 'Web scraping, data gathering, market research, open seat scanning across institutions.' },
               { name: 'Content_Ang', role: 'Content & Creative', desc: 'Writing, proposals, presentations, marketing copy, documentation, and creative deliverables.' },
@@ -209,9 +231,9 @@ export default function AboutPage() {
       </section>
 
       {/* Chicken Hawk & Lil_Hawks */}
-      <section className="py-20 px-8 border-b border-border">
+      <section className="py-12 md:py-20 px-4 md:px-8 border-b border-border">
         <div className="max-w-5xl mx-auto">
-          <div className="grid grid-cols-2 gap-16">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-16">
             <div>
               <div className="w-10 h-10 border border-border flex items-center justify-center mb-6">
                 <Shield className="w-5 h-5 text-fg-secondary" />
@@ -259,9 +281,9 @@ export default function AboutPage() {
       </section>
 
       {/* PMO Office */}
-      <section className="py-20 px-8 border-b border-border bg-bg-surface">
+      <section className="py-12 md:py-20 px-4 md:px-8 border-b border-border bg-bg-surface">
         <div className="max-w-5xl mx-auto">
-          <div className="grid grid-cols-[1fr_1.5fr] gap-16 items-start">
+          <div className="grid grid-cols-1 md:grid-cols-[1fr_1.5fr] gap-8 md:gap-16 items-start">
             <div>
               <div className="w-14 h-14 border border-border flex items-center justify-center mb-6">
                 <Monitor className="w-7 h-7 text-fg-secondary" />
@@ -294,9 +316,9 @@ export default function AboutPage() {
       </section>
 
       {/* CTA */}
-      <section className="py-24 px-8 text-center">
+      <section className="py-12 md:py-24 px-4 md:px-8 text-center">
         <p className="label-mono mb-4">Ready?</p>
-        <h2 className="text-4xl font-bold tracking-tight mb-8">
+        <h2 className="text-2xl md:text-4xl font-bold tracking-tight mb-8">
           Start building with ACHEEVY.
         </h2>
         <Link href="/chat" className="h-12 px-8 text-sm font-bold tracking-wide inline-flex items-center justify-center gap-2 transition-all"
@@ -306,7 +328,7 @@ export default function AboutPage() {
       </section>
 
       {/* Footer */}
-      <footer className="h-14 flex items-center justify-between px-8 border-t border-border">
+      <footer className="h-14 flex items-center justify-between px-4 md:px-8 border-t border-border">
         <span className="font-mono text-[10px] text-fg-ghost uppercase tracking-widest">
           The Deploy Platform &middot; ACHIEVEMOR
         </span>
