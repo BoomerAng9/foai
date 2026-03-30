@@ -54,10 +54,10 @@ export async function POST(request: NextRequest) {
   `;
 
   await sql`
-    INSERT INTO allowed_users (email, display_name, access_key, granted_at, is_active)
-    VALUES (${email}, ${displayName}, ${key}, NOW(), true)
+    INSERT INTO allowed_users (email, display_name, access_key, granted_at, is_active, role)
+    VALUES (${email}, ${displayName}, ${key}, NOW(), true, 'beta-tester')
     ON CONFLICT (email) DO UPDATE SET
-      access_key = ${key}, display_name = ${displayName}, is_active = true, granted_at = NOW()
+      access_key = ${key}, display_name = ${displayName}, is_active = true, granted_at = NOW(), role = 'beta-tester'
   `;
 
   return NextResponse.json({ ok: true, email, label: accessKey.label });

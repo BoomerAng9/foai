@@ -1,23 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getAdminAuth } from '@/lib/firebase-admin';
+import { requireAuth } from '@/lib/auth-guard';
 import { planNarrative, generateShot, estimateVideoCost } from '@/lib/video/pipeline';
-
-async function getUserId(request: NextRequest): Promise<string | null> {
-  const token = request.cookies.get('firebase-auth-token')?.value;
-  if (!token) return null;
-  try { return (await getAdminAuth().verifyIdToken(token)).uid; } catch { return null; }
-}
 
 export async function POST(request: NextRequest) {
   try {
-    const userId = await getUserId(request);
-    if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    const auth = await requireAuth(request);
+    if (!auth.ok) return auth.response;
 
     const { brief, duration, action } = await request.json();
 
     // Step 1: Plan narrative
     if (action === 'plan' || !action) {
       if (!brief) return NextResponse.json({ error: 'brief required' }, { status: 400 });
+
+      if (typeof brief === 'string' && brief.length > 5000) {
+        return NextResponse.json({ error: 'Brief too long (max 5,000 characters)', code: 'VALIDATION_ERROR' }, { status: 400 });
+      }
 
       const shots = await planNarrative(brief, duration || 30);
       const cost = estimateVideoCost(shots);

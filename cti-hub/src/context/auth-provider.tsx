@@ -8,7 +8,7 @@ import {
   useState,
   type ReactNode,
 } from 'react';
-import { onAuthStateChanged, getRedirectResult, signOut as firebaseSignOut, type User } from 'firebase/auth';
+import { onAuthStateChanged, getRedirectResult, signOut as firebaseSignOut, type User, type ConfirmationResult } from 'firebase/auth';
 import { getFirebaseAuth } from '@/lib/firebase';
 import { isAllowedEmail } from '@/lib/allowlist';
 import {
@@ -35,6 +35,8 @@ export interface AuthContextType {
   signUp: (email: string, password: string, displayName?: string) => Promise<void>;
   signIn: (email: string, password: string) => Promise<void>;
   signInWithOAuth: (provider: 'google' | 'github') => Promise<void>;
+  sendPhoneOtp: (phone: string, recaptchaId: string) => Promise<ConfirmationResult>;
+  confirmPhoneOtp: (result: ConfirmationResult, otp: string) => Promise<void>;
   signOut: () => Promise<void>;
 
   createOrg: (name: string) => Promise<void>;
@@ -185,6 +187,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await authService.signInWithOAuth(provider);
   }
 
+  async function sendPhoneOtp(phone: string, recaptchaId: string): Promise<ConfirmationResult> {
+    return authService.sendPhoneOtp(phone, recaptchaId);
+  }
+
+  async function confirmPhoneOtp(result: ConfirmationResult, otp: string) {
+    await authService.confirmPhoneOtp(result, otp);
+  }
+
   async function signOut() {
     await authService.signOut();
     setUser(null);
@@ -235,7 +245,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       value={{
         user, profile, subscription, tierLimits,
         organization, organizations, loading, denied,
-        signUp, signIn, signInWithOAuth, signOut,
+        signUp, signIn, signInWithOAuth, sendPhoneOtp, confirmPhoneOtp, signOut,
         createOrg, switchOrg,
         canAccess, isFeatureGated, trackUsage,
       }}

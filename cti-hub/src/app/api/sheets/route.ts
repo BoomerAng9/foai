@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { requireAuth } from '@/lib/auth-guard';
 
 const GOOGLE_KEY = process.env.GOOGLE_KEY;
 
@@ -59,6 +60,9 @@ async function appendToSheet(
 }
 
 export async function POST(request: NextRequest) {
+  const auth = await requireAuth(request);
+  if (!auth.ok) return auth.response;
+
   try {
     if (!GOOGLE_KEY) {
       return NextResponse.json({ error: 'GOOGLE_KEY not configured' }, { status: 503 });
@@ -70,6 +74,10 @@ export async function POST(request: NextRequest) {
 
     if (!columns || !rows || rows.length === 0) {
       return NextResponse.json({ error: 'columns and rows required' }, { status: 400 });
+    }
+
+    if (rows.length > 1000) {
+      return NextResponse.json({ error: 'Too many rows (max 1,000)', code: 'VALIDATION_ERROR' }, { status: 400 });
     }
 
     // Create new spreadsheet if no ID provided

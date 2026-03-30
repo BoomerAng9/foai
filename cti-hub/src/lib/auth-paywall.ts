@@ -9,9 +9,12 @@ import {
   signInWithRedirect,
   getRedirectResult,
   signOut as firebaseSignOut,
+  signInWithPhoneNumber,
+  RecaptchaVerifier,
   GoogleAuthProvider,
   GithubAuthProvider,
   onAuthStateChanged,
+  type ConfirmationResult,
   type User,
 } from 'firebase/auth';
 import { getFirebaseAuth } from '@/lib/firebase';
@@ -158,6 +161,34 @@ export const authService = {
         firebaseUid: user.uid,
         displayName: user.displayName || user.email?.split('@')[0],
         email: user.email,
+      }),
+    });
+
+    await syncServerSessionCookie(idToken);
+    return { user };
+  },
+
+  async sendPhoneOtp(phoneNumber: string, recaptchaContainerId: string): Promise<ConfirmationResult> {
+    const auth = getFirebaseAuth();
+    const recaptchaVerifier = new RecaptchaVerifier(auth, recaptchaContainerId, {
+      size: 'invisible',
+    });
+    const confirmationResult = await signInWithPhoneNumber(auth, phoneNumber, recaptchaVerifier);
+    return confirmationResult;
+  },
+
+  async confirmPhoneOtp(confirmationResult: ConfirmationResult, otp: string) {
+    const result = await confirmationResult.confirm(otp);
+    const user = result.user;
+    const idToken = await user.getIdToken();
+
+    await fetch('/api/auth/provision', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        firebaseUid: user.uid,
+        displayName: user.phoneNumber || 'Phone User',
+        email: user.phoneNumber || '',
       }),
     });
 

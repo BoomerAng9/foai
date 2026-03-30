@@ -37,18 +37,17 @@ export async function GET(request: NextRequest) {
     });
 
     if (!res.ok) {
-      const text = await res.text();
       return NextResponse.json(
-        { error: 'Scout service error', detail: text },
+        { error: 'External service temporarily unavailable' },
         { status: res.status }
       );
     }
 
     const data = await res.json();
     return NextResponse.json(data);
-  } catch (err) {
+  } catch {
     return NextResponse.json(
-      { error: 'Failed to reach Scout service', detail: String(err) },
+      { error: 'External service temporarily unavailable' },
       { status: 502 }
     );
   }
@@ -76,18 +75,17 @@ export async function POST(request: NextRequest) {
     });
 
     if (!res.ok) {
-      const text = await res.text();
       return NextResponse.json(
-        { error: 'Scrape trigger failed', detail: text },
+        { error: 'External service temporarily unavailable' },
         { status: res.status }
       );
     }
 
     const data = await res.json();
     return NextResponse.json(data);
-  } catch (err) {
+  } catch {
     return NextResponse.json(
-      { error: 'Failed to reach Scout service', detail: String(err) },
+      { error: 'External service temporarily unavailable' },
       { status: 502 }
     );
   }

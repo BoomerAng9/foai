@@ -1,10 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { requireAuth } from '@/lib/auth-guard';
 import { sql } from '@/lib/insforge';
 
 export async function GET(request: NextRequest) {
+  const auth = await requireAuth(request);
+  if (!auth.ok) return auth.response;
+
   if (!sql) return NextResponse.json({ error: 'Database unavailable' }, { status: 503 });
   const userId = request.nextUrl.searchParams.get('userId');
   if (!userId) return NextResponse.json({ error: 'userId required' }, { status: 400 });
+
+  // Only allow users to view their own profile, unless they are an owner
+  if (auth.userId !== userId && auth.role !== 'owner') {
+    return NextResponse.json({ error: 'Access denied' }, { status: 403 });
+  }
 
   const [profiles, subs] = await Promise.all([
     sql`SELECT * FROM profiles WHERE user_id = ${userId} LIMIT 1`,
@@ -15,9 +24,17 @@ export async function GET(request: NextRequest) {
 }
 
 export async function PATCH(request: NextRequest) {
+  const auth = await requireAuth(request);
+  if (!auth.ok) return auth.response;
+
   if (!sql) return NextResponse.json({ error: 'Database unavailable' }, { status: 503 });
   const { userId, updates } = await request.json();
   if (!userId) return NextResponse.json({ error: 'userId required' }, { status: 400 });
+
+  // Only allow users to update their own profile, unless they are an owner
+  if (auth.userId !== userId && auth.role !== 'owner') {
+    return NextResponse.json({ error: 'Access denied' }, { status: 403 });
+  }
 
   const setClauses: string[] = [];
   const values: Record<string, unknown> = {};

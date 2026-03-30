@@ -40,7 +40,11 @@ export default function ChatWithACHEEVY() {
   const [lucPendingMsg, setLucPendingMsg] = useState<string | null>(null);
   const [lucPendingAttachments, setLucPendingAttachments] = useState<Attachment[]>([]);
   const [estimateCount, setEstimateCount] = useState(0);
+  const [budgetRemaining, setBudgetRemaining] = useState<number | null>(null);
+  const [budgetStarting, setBudgetStarting] = useState<number>(20);
   const [autoAccept, setAutoAccept] = useState(false);
+  const [voiceEnabled, setVoiceEnabled] = useState(false);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
   const [activeSkill, setActiveSkill] = useState<Skill | null>(null);
   const [streamingCost, setStreamingCost] = useState<{ tokens_in: number; tokens_out: number; cost: number } | null>(null);
   const [manageItInput, setManageItInput] = useState('');
@@ -51,6 +55,10 @@ export default function ChatWithACHEEVY() {
     fetch('/api/conversations')
       .then(r => r.json())
       .then(d => setConversations(d.conversations || []))
+      .catch(() => {});
+    fetch('/api/budget')
+      .then(r => r.json())
+      .then(d => { setBudgetRemaining(d.remaining); setBudgetStarting(d.starting); })
       .catch(() => {});
   }, []);
 
@@ -200,6 +208,40 @@ export default function ChatWithACHEEVY() {
               if (data.usage) {
                 setSessionTokens(prev => prev + (data.usage.tokens_in || 0) + (data.usage.tokens_out || 0));
                 setSessionCost(prev => prev + (data.usage.cost || 0));
+              }
+              if (data.budget) {
+                setBudgetRemaining(data.budget.remaining);
+                setBudgetStarting(data.budget.starting);
+              }
+              // Auto-voice: read ACHEEVY's response aloud
+              if (voiceEnabled) {
+                const lastMsg = messages.find(m => m.id === streamId);
+                // Get the full content from the final message state
+                setMessages(prev => {
+                  const achMsg = prev.find(m => m.id === streamId);
+                  if (achMsg?.content) {
+                    // Strip markdown images and HTML comments, limit to 500 chars for TTS
+                    const cleanText = achMsg.content
+                      .replace(/!\[.*?\]\(.*?\)/g, '')
+                      .replace(/<!--[\s\S]*?-->/g, '')
+                      .replace(/\*\*/g, '')
+                      .slice(0, 500);
+                    if (cleanText.trim()) {
+                      fetch('/api/voice/synthesize', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ text: cleanText }),
+                      }).then(r => r.json()).then(d => {
+                        if (d.audio) {
+                          const audio = new Audio(d.audio);
+                          audioRef.current = audio;
+                          audio.play().catch(() => {});
+                        }
+                      }).catch(() => {});
+                    }
+                  }
+                  return prev;
+                });
               }
             } else if (data.cost_update) {
               setStreamingCost(data.cost_update);
@@ -556,7 +598,14 @@ export default function ChatWithACHEEVY() {
                 <span className="led" style={{ background: currentTier.color }} />
                 <span className="font-semibold uppercase tracking-wider">{currentTier.name}</span>
                 <span className="text-fg-ghost">|</span>
-                <span className="text-fg-ghost">LUC active</span>
+                <span className={`font-semibold ${
+                  budgetRemaining === null ? 'text-fg-ghost' :
+                  budgetRemaining > 10 ? 'text-signal-success' :
+                  budgetRemaining > 3 ? 'text-signal-warning' :
+                  'text-signal-error'
+                }`}>
+                  LUC {budgetRemaining !== null ? `$${budgetRemaining.toFixed(2)}` : 'active'}
+                </span>
                 {streamingCost && (
                   <>
                     <span className="text-fg-ghost">|</span>
@@ -572,9 +621,24 @@ export default function ChatWithACHEEVY() {
                   </>
                 )}
               </div>
-              <p className="font-mono text-[9px] text-fg-ghost">
-                The Deploy Platform
-              </p>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => {
+                    if (voiceEnabled && audioRef.current) {
+                      audioRef.current.pause();
+                      audioRef.current = null;
+                    }
+                    setVoiceEnabled(!voiceEnabled);
+                  }}
+                  className={`font-mono text-[9px] transition-colors ${voiceEnabled ? 'text-accent font-bold' : 'text-fg-ghost hover:text-fg-secondary'}`}
+                  title={voiceEnabled ? 'Voice reply ON' : 'Voice reply OFF'}
+                >
+                  {voiceEnabled ? 'VOICE ON' : 'VOICE OFF'}
+                </button>
+                <p className="font-mono text-[9px] text-fg-ghost">
+                  The Deploy Platform
+                </p>
+              </div>
             </div>
           </div>
         </div>
