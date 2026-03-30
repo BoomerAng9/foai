@@ -1,0 +1,225 @@
+# aiPLUG: Autonomous Organization (10-or-Less)
+# Product: AOS-10 — The Agentic Operating System for Small Business
+# Package ID: aiplug-aos-10
+# Version: 1.0.0
+
+name: "AOS-10"
+tagline: "Your entire company. Zero payroll."
+package_id: "aiplug-aos-10"
+version: "1.0.0"
+min_human_headcount: 0
+max_human_headcount: 1  # Founder/owner only
+replaces_headcount: 10
+
+# ═══════════════════════════════════════════════════════════
+# THE ORG CHART — 10 Roles, 0 Humans Required
+# ═══════════════════════════════════════════════════════════
+
+org_chart:
+  ceo:
+    agent: ACHEEVY
+    tier: boss
+    replaces: "CEO / Founder (strategic decisions)"
+    capabilities:
+      - Strategic decision-making with org-wide memory recall
+      - Agent deployment and workforce governance
+      - OKR setting and KPI oversight
+      - Executive project planning
+      - Performance reviews via HR PMO
+    cost_vs_human: "$0.02/decision vs $250K+ annual salary"
+
+  coo:
+    agent: Chicken_Hawk
+    tier: 2ic
+    replaces: "COO / Operations Manager"
+    capabilities:
+      - Intent classification and task routing
+      - Fleet management (11 specialist agents)
+      - Quality review gate on all outputs
+      - Real-time operational monitoring
+    cost_vs_human: "$0.01/request vs $180K+ annual salary"
+
+  vp_sales:
+    agent: Edu_Ang
+    tier: boomer_ang
+    dept: PMO-LAUNCH
+    replaces: "VP Sales / Sales Rep"
+    capabilities:
+      - Enrollment generation and conversion tracking
+      - Affiliate link management
+      - Revenue attribution per source
+      - Commission tracking
+    kpis:
+      - enrollment_conversion_rate: 15%
+      - revenue_per_enrollment: $25
+      - links_served_per_day: 50
+
+  vp_biz_dev:
+    agent: Biz_Ang
+    tier: boomer_ang
+    dept: PMO-LAUNCH
+    replaces: "VP Business Development"
+    capabilities:
+      - Growth dashboards and pipeline analytics
+      - Lead generation metrics
+      - Client retention tracking
+      - Campaign performance analysis
+    kpis:
+      - leads_generated_per_week: 5
+      - client_retention_rate: 90%
+      - onboarding_completion_rate: 85%
+
+  research_analyst:
+    agent: Scout_Ang
+    tier: boomer_ang
+    dept: PMO-PULSE
+    replaces: "Research Analyst / Data Specialist"
+    capabilities:
+      - Web scraping and data sourcing (Firecrawl + Apify)
+      - Institutional opportunity discovery
+      - Data freshness monitoring
+      - Pipeline intelligence
+    kpis:
+      - institutions_scraped_per_week: 10
+      - open_seats_found_per_week: 100
+      - data_freshness_hours: 24
+
+  content_marketing_manager:
+    agent: Content_Ang
+    tier: boomer_ang
+    dept: PMO-ECHO
+    replaces: "Content Marketing Manager"
+    capabilities:
+      - SEO content generation via LLM
+      - Keyword strategy with memory-informed optimization
+      - Multi-format content (blog, landing pages, social)
+      - Content performance tracking
+    kpis:
+      - articles_published_per_week: 3
+      - organic_traffic_growth: 5%
+      - content_quality_score: 80
+
+  operations_manager:
+    agent: Ops_Ang
+    tier: boomer_ang
+    dept: PMO-LENS
+    replaces: "IT Ops / SRE / DevOps"
+    capabilities:
+      - Fleet health monitoring (every 5 min)
+      - Automated incident detection
+      - Service uptime tracking
+      - Historical incident recall from memory
+    kpis:
+      - fleet_uptime_percent: 99%
+      - health_check_coverage: 100%
+      - incident_response_time_ms: 60000
+
+  hr_performance_manager:
+    agent: Hermes
+    tier: engine
+    replaces: "HR Manager / Performance Analyst"
+    capabilities:
+      - Multi-model consensus performance evaluations
+      - KPI tracking across all agents
+      - OKR management with auto-progress
+      - Trend analysis with semantic memory
+      - Directive issuance and compliance tracking
+    kpis:
+      - evaluation_completion_rate: 100%
+      - consensus_model_coverage: 3
+      - directive_compliance_rate: 80%
+
+  cfo_controller:
+    agent: CFO_Ang
+    tier: boomer_ang
+    replaces: "CFO / Financial Controller"
+    capabilities:
+      - LUC usage metering per tenant
+      - Cost transparency and allocation
+      - Budget monitoring
+      - Revenue vs cost reporting
+
+  specialist_pool:
+    agents: "Lil_Hawks Fleet (11 specialists)"
+    tier: lil_hawk
+    replaces: "Freelance specialists / contractors"
+    roster:
+      - Lil_TRAE_Hawk: "Senior Developer (large refactors)"
+      - Lil_Coding_Hawk: "Software Engineer (features)"
+      - Lil_Agent_Hawk: "DevOps Engineer (CLI/browser automation)"
+      - Lil_Flow_Hawk: "Integration Specialist (n8n/CRM)"
+      - Lil_Sand_Hawk: "QA Engineer (sandboxed execution)"
+      - Lil_Memory_Hawk: "Knowledge Manager (RAG/retrieval)"
+      - Lil_Graph_Hawk: "Workflow Architect (stateful pipelines)"
+      - Lil_Back_Hawk: "Backend Engineer (APIs/DB)"
+      - Lil_Viz_Hawk: "Data Analyst (dashboards/monitoring)"
+      - Lil_Blend_Hawk: "3D Designer (Blender)"
+      - Lil_Deep_Hawk: "Project Lead (multi-agent coordination)"
+
+# ═══════════════════════════════════════════════════════════
+# WHAT THE CUSTOMER GETS
+# ═══════════════════════════════════════════════════════════
+
+deliverables:
+  - "Fully deployed ACHEEVY instance with org-wide memory"
+  - "5 Boomer_Ang revenue/ops agents configured to their business"
+  - "Chicken Hawk gateway with 11 Lil_Hawk specialists"
+  - "Hermes evaluation engine (daily + weekly perf reviews)"
+  - "32 KPIs pre-defined, customizable per business"
+  - "pgvector-backed institutional memory (never forgets)"
+  - "Project plan enforcement (every task is planned + scored)"
+  - "HR PMO dashboard with org scorecard"
+  - "Real-time fleet monitoring (hawk3d + Live Look In)"
+  - "Multi-tenant isolation (GuardAng enforcement)"
+  - "LUC cost metering and transparency"
+  - "GCP Cloud Run deployment (scales to zero when idle)"
+
+# ═══════════════════════════════════════════════════════════
+# PRICING MODEL
+# ═══════════════════════════════════════════════════════════
+
+pricing:
+  model: "usage_plus_base"
+  tiers:
+    starter:
+      name: "Starter"
+      monthly_base: 497
+      includes: "3 Boomer_Angs + Chicken Hawk + Hermes"
+      overage: "$0.05/task beyond 5,000/month"
+      target: "Solopreneurs, micro-businesses"
+
+    growth:
+      name: "Growth"
+      monthly_base: 1497
+      includes: "Full AOS-10 (all agents) + priority routing"
+      overage: "$0.03/task beyond 20,000/month"
+      target: "Small businesses, agencies"
+
+    enterprise:
+      name: "Enterprise"
+      monthly_base: 4997
+      includes: "Full AOS-10 + custom agents + dedicated instance"
+      overage: "$0.02/task beyond 100,000/month"
+      target: "Mid-market companies, franchises"
+
+  comparison_to_human:
+    annual_human_cost_10_employees: 850000  # US average loaded cost
+    annual_aos_10_cost_growth: 17964       # $1,497 x 12
+    savings_percent: 97.9
+    savings_annual: 832036
+
+# ═══════════════════════════════════════════════════════════
+# DEPLOYMENT
+# ═══════════════════════════════════════════════════════════
+
+deployment:
+  infrastructure: "GCP Cloud Run (serverless, scales to zero)"
+  database: "Neon Postgres + pgvector (managed)"
+  memory: "aims-memory (shared org-wide, 768-dim Gemini embeddings)"
+  auth: "Firebase Auth + GuardAng tenant isolation"
+  monitoring: "hawk3d (3D fleet viz) + Live Look In (real-time floor plan)"
+  onboarding_time: "48 hours from contract to live"
+  regions:
+    - "us-central1 (default)"
+    - "us-east1 (DMV clients)"
+    - "me-central1 (KSA clients)"
