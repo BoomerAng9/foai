@@ -7,6 +7,8 @@ import {
   spring,
   interpolate,
   AbsoluteFill,
+  Img,
+  staticFile,
 } from 'remotion';
 
 export const Scene7Feedback: React.FC = () => {
@@ -128,7 +130,7 @@ export const Scene7Feedback: React.FC = () => {
         </div>
       )}
 
-      {/* Thank you + logo */}
+      {/* Thank you + mascot */}
       {frame >= 650 && (
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
           <div
@@ -142,20 +144,15 @@ export const Scene7Feedback: React.FC = () => {
           >
             Thank you for testing
           </div>
-          <div
+          <Img
+            src={staticFile('acheevy-mascot.png')}
             style={{
+              width: 120,
+              height: 'auto',
               transform: `scale(${logoScale})`,
-              width: 60,
-              height: 60,
-              borderRadius: 14,
-              backgroundColor: '#E8A020',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
+              filter: 'drop-shadow(0 0 20px rgba(232, 160, 32, 0.4))',
             }}
-          >
-            <span style={{ fontSize: 30, color: '#0A0A0A', fontWeight: 700 }}>&gt;_</span>
-          </div>
+          />
         </div>
       )}
     </AbsoluteFill>

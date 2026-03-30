@@ -20,7 +20,8 @@ CREATE TABLE IF NOT EXISTS public.allowed_users (
   display_name TEXT,
   access_key TEXT REFERENCES access_keys(key),
   granted_at TIMESTAMPTZ DEFAULT NOW(),
-  is_active BOOLEAN DEFAULT true
+  is_active BOOLEAN DEFAULT true,
+  role TEXT DEFAULT 'member'
 );
 
 -- User workspaces: per-user scrape jobs, cleaned data, exports

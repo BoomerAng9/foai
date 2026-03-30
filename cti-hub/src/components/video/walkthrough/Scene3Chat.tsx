@@ -5,6 +5,8 @@ import {
   useCurrentFrame,
   interpolate,
   AbsoluteFill,
+  Img,
+  staticFile,
 } from 'remotion';
 
 export const Scene3Chat: React.FC = () => {
@@ -64,9 +66,21 @@ export const Scene3Chat: React.FC = () => {
           position: 'relative',
         }}
       >
-        {/* Title */}
-        <div style={{ fontSize: 28, color: '#666', marginBottom: 30, textAlign: 'center' }}>
-          How would you like to work?
+        {/* ACHEEVY Avatar + Title */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 16, marginBottom: 30 }}>
+          <Img
+            src={staticFile('acheevy-helmet.png')}
+            style={{
+              width: 56,
+              height: 56,
+              borderRadius: '50%',
+              border: '2px solid #E8A020',
+              boxShadow: '0 0 15px rgba(232, 160, 32, 0.3)',
+            }}
+          />
+          <div style={{ fontSize: 28, color: '#666' }}>
+            How would you like to work?
+          </div>
         </div>
 
         {/* Cards row */}

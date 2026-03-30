@@ -57,7 +57,7 @@ export default function WelcomePage() {
       <div
         style={{
           width: '100%',
-          maxWidth: 900,
+          maxWidth: 1200,
           borderRadius: 16,
           overflow: 'hidden',
           border: '1px solid #222',

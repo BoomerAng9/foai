@@ -22,11 +22,11 @@ export async function GET(request: NextRequest) {
 
   // Check allowed_users table
   const rows = await sql`
-    SELECT email, is_active FROM allowed_users WHERE email = ${email.toLowerCase()} LIMIT 1
+    SELECT email, is_active, role FROM allowed_users WHERE email = ${email.toLowerCase()} LIMIT 1
   `;
 
   if (rows.length > 0 && rows[0].is_active) {
-    return NextResponse.json({ allowed: true, role: 'member' });
+    return NextResponse.json({ allowed: true, role: rows[0].role || 'member' });
   }
 
   return NextResponse.json({ allowed: false });

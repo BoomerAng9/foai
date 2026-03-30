@@ -7,11 +7,17 @@ import {
   spring,
   interpolate,
   AbsoluteFill,
+  Img,
+  staticFile,
 } from 'remotion';
 
 export const Scene2Acheevy: React.FC = () => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
+
+  // Frame 0-60: Hero image materializes
+  const logoScale = spring({ frame, fps, config: { damping: 12, stiffness: 80 } });
+  const logoOpacity = interpolate(frame, [0, 30], [0, 1], { extrapolateRight: 'clamp' });
 
   // Frame 0-100: Title slides in
   const titleX = interpolate(frame, [0, 60], [-400, 0], { extrapolateRight: 'clamp' });
@@ -52,6 +58,19 @@ export const Scene2Acheevy: React.FC = () => {
         fontFamily: '"SF Mono", "Fira Code", "Cascadia Code", monospace',
       }}
     >
+      {/* ACHEEVY Hero Image */}
+      <Img
+        src={staticFile('acheevy-deploy-hero.svg')}
+        style={{
+          width: 360,
+          height: 'auto',
+          opacity: logoOpacity,
+          transform: `scale(${logoScale})`,
+          marginBottom: 24,
+          filter: 'drop-shadow(0 0 30px rgba(232, 160, 32, 0.4))',
+        }}
+      />
+
       {/* Title */}
       <div
         style={{

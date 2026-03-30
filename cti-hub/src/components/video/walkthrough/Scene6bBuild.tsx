@@ -7,6 +7,8 @@ import {
   spring,
   interpolate,
   AbsoluteFill,
+  Img,
+  staticFile,
 } from 'remotion';
 
 const ACCENT = '#E8A020';
@@ -105,6 +107,31 @@ export const Scene6bBuild: React.FC = () => {
           background: 'radial-gradient(ellipse at 50% 30%, rgba(232,160,32,0.04) 0%, transparent 70%)',
         }}
       />
+
+      {/* ACHEEVY presenter avatar */}
+      <div
+        style={{
+          position: 'absolute',
+          top: inShrinkPhase ? 120 : '30%',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          opacity: titleOpacity,
+          zIndex: 2,
+          transition: 'top 0.5s ease',
+        }}
+      >
+        <Img
+          src={staticFile('favicon-source.png')}
+          style={{
+            width: inShrinkPhase ? 64 : 120,
+            height: 'auto',
+            borderRadius: '50%',
+            border: '2px solid rgba(232,160,32,0.5)',
+            boxShadow: '0 0 20px rgba(232,160,32,0.3)',
+            transition: 'width 0.5s ease',
+          }}
+        />
+      </div>
 
       {/* Title */}
       <div
