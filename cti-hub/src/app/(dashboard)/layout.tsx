@@ -217,12 +217,16 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </header>
 
         {/* Content */}
-        <div className="flex-1 overflow-auto p-3 sm:p-4 md:p-6 relative">
-          <CornerBracket position="tl" />
-          <CornerBracket position="tr" />
-          <CornerBracket position="bl" />
-          <CornerBracket position="br" />
-          <div className="animate-materialize">
+        <div className={`flex-1 overflow-auto relative ${pathname === '/chat' ? '' : 'p-3 sm:p-4 md:p-6'}`}>
+          {pathname !== '/chat' && (
+            <>
+              <CornerBracket position="tl" />
+              <CornerBracket position="tr" />
+              <CornerBracket position="bl" />
+              <CornerBracket position="br" />
+            </>
+          )}
+          <div className={pathname === '/chat' ? 'h-full' : 'animate-materialize'}>
             {children}
           </div>
         </div>

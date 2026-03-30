@@ -33,7 +33,7 @@ export default function ChatWithACHEEVY() {
   const [sessionTokens, setSessionTokens] = useState(0);
   const [sessionCost, setSessionCost] = useState(0);
   const [showScrollBtn, setShowScrollBtn] = useState(false);
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [activeTier, setActiveTier] = useState<TierId>('premium');
   const [attachments, setAttachments] = useState<Attachment[]>([]);
   const [lucEstimate, setLucEstimate] = useState<LucEstimate | null>(null);
@@ -241,8 +241,10 @@ export default function ChatWithACHEEVY() {
     setAttachments([]);
     if (inputRef.current) inputRef.current.style.height = 'auto';
 
-    // Skip LUC estimate for starter buttons, auto-accept mode, or when explicitly skipped
-    const shouldEstimate = !skipEstimate && !autoAccept && messages.length > 0;
+    // LUC estimate only for job initiations (deploy, build, pipeline, launch, ship)
+    // Regular chat, image model selections, and short replies skip the gate
+    const isJobRequest = /\b(deploy|build|launch|ship|execute|run pipeline|start pipeline|provision|spin up|create.*app|create.*service|create.*api)\b/i.test(msg);
+    const shouldEstimate = !skipEstimate && !autoAccept && isJobRequest && messages.length > 0;
 
     if (shouldEstimate) {
       try {
@@ -359,7 +361,7 @@ export default function ChatWithACHEEVY() {
   const isEmpty = messages.length === 0;
 
   return (
-    <div className="flex h-[calc(100vh-7rem)] -m-3 sm:-m-4 md:-m-6">
+    <div className="flex h-full">
       {/* Chat sidebar - slide-in on mobile */}
       {sidebarOpen && (
         <div
@@ -368,9 +370,9 @@ export default function ChatWithACHEEVY() {
         />
       )}
       <div className={`
-        fixed inset-y-0 left-0 z-40 md:relative md:z-auto
+        fixed inset-y-0 left-0 z-30 md:relative md:z-auto
         transition-transform duration-200 ease-in-out
-        ${sidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0 md:hidden'}
+        ${sidebarOpen ? 'translate-x-0' : '-translate-x-full hidden'}
       `}>
         <ChatSidebar
           conversations={conversations}
@@ -383,16 +385,18 @@ export default function ChatWithACHEEVY() {
       </div>
 
       <div className="flex-1 flex flex-col relative bg-bg min-w-0">
-        <button
-          onClick={() => setSidebarOpen(!sidebarOpen)}
-          className="absolute top-4 left-4 z-10 btn-bracket text-[10px]"
-        >
-          {sidebarOpen ? 'HIDE' : 'THREADS'}
-        </button>
+        <div className="flex items-center px-2 sm:px-4 py-1 shrink-0">
+          <button
+            onClick={() => setSidebarOpen(!sidebarOpen)}
+            className="btn-bracket text-[10px]"
+          >
+            {sidebarOpen ? 'HIDE' : 'THREADS'}
+          </button>
+        </div>
 
         <div ref={scrollRef} className="flex-1 overflow-y-auto">
           {isEmpty ? (
-            <div className="flex flex-col items-center px-4 sm:px-6 md:px-8 py-6 md:py-10">
+            <div className="flex flex-col items-center px-4 sm:px-6 md:px-8 py-4 md:py-8">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src="/acheevy-chat-hero.png"

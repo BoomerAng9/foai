@@ -62,8 +62,8 @@ async function generateWithGemini(prompt: string): Promise<ImageGenResult> {
 
   const genAI = new GoogleGenerativeAI(GOOGLE_KEY);
 
-  // Try current Gemini models with image generation support
-  const modelNames = ['gemini-2.0-flash-exp-image-generation', 'gemini-2.0-flash', 'gemini-1.5-flash'];
+  // Latest Gemini image generation models (March 2026)
+  const modelNames = ['gemini-3.1-flash-image-preview', 'gemini-3-pro-image-preview'];
   let lastError: Error | null = null;
 
   for (const modelName of modelNames) {
