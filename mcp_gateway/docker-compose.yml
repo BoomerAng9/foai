@@ -1,0 +1,16 @@
+services:
+  mcp:
+    build: .
+    restart: unless-stopped
+    environment:
+      - PORT=8090
+      - MCP_DEV_API_KEY=foai_enterprise_owner_dev
+      - CHICKEN_HAWK_URL=http://host.docker.internal:8080
+      - ACHEEVY_URL=http://host.docker.internal:8081
+      - CTI_HUB_URL=https://cti.foai.cloud
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.mcp-gateway.rule=Host(`mcp.foai.cloud`)"
+      - "traefik.http.routers.mcp-gateway.entrypoints=websecure"
+      - "traefik.http.routers.mcp-gateway.tls.certresolver=letsencrypt"
+      - "traefik.http.services.mcp-gateway.loadbalancer.server.port=8090"

@@ -49,11 +49,16 @@ function renderContent(content: string) {
   return parts.map((part, i) => {
     const imgMatch = part.match(/^!\[(.*?)\]\((.*?)\)$/);
     if (imgMatch) {
+      const src = imgMatch[2];
+      // Only allow data: and https:/http: URLs to prevent XSS via javascript: or other schemes
+      if (!src.startsWith('data:') && !src.startsWith('https://') && !src.startsWith('http://')) {
+        return <span key={i}>{part}</span>;
+      }
       return (
         // eslint-disable-next-line @next/next/no-img-element
         <img
           key={i}
-          src={imgMatch[2]}
+          src={src}
           alt={imgMatch[1]}
           className="max-w-full max-h-[400px] object-contain my-3 border border-border"
         />

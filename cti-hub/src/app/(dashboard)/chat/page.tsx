@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
 import { Send, CornerDownLeft, ArrowDown, X, FileText, Image as ImageIcon } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { ChatSidebar } from '@/components/chat/ChatSidebar';
@@ -20,7 +21,8 @@ function formatFileSize(bytes: number) {
 }
 
 export default function ChatWithACHEEVY() {
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
+  const router = useRouter();
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -51,7 +53,15 @@ export default function ChatWithACHEEVY() {
 
   const currentTier = TIERS.find(t => t.id === activeTier) || TIERS[0];
 
+  // Redirect to login if not authenticated
   useEffect(() => {
+    if (!authLoading && !user) {
+      router.replace('/auth/login');
+    }
+  }, [user, authLoading, router]);
+
+  useEffect(() => {
+    if (!user) return; // Don't fetch until authed
     fetch('/api/conversations')
       .then(r => r.ok ? r.json() : null)
       .then(d => { if (d?.conversations) setConversations(d.conversations); })
@@ -60,7 +70,7 @@ export default function ChatWithACHEEVY() {
       .then(r => r.ok ? r.json() : null)
       .then(d => { if (d?.remaining != null) { setBudgetRemaining(d.remaining); setBudgetStarting(d.starting); } })
       .catch(() => {});
-  }, []);
+  }, [user]);
 
   const loadMessages = useCallback(async (convId: string) => {
     const res = await fetch(`/api/conversations?id=${convId}`);

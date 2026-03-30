@@ -14,5 +14,14 @@ export function rateLimit(userId: string, maxRequests: number = 30, windowMs: nu
   }
 
   entry.count++;
+
+  // Periodic cleanup of expired entries
+  if (store.size > 1000) {
+    const now2 = Date.now();
+    for (const [key, entry] of store) {
+      if (now2 > entry.resetAt) store.delete(key);
+    }
+  }
+
   return true; // allowed
 }

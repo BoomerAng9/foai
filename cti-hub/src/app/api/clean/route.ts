@@ -54,12 +54,12 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'OPENROUTER_API_KEY not configured' }, { status: 503 });
     }
 
-    const contentLength = parseInt(request.headers.get('content-length') || '0', 10);
-    if (contentLength > 100 * 1024) {
+    const body = await request.text();
+    if (body.length > 100 * 1024) {
       return NextResponse.json({ error: 'Payload too large (max 100KB)', code: 'VALIDATION_ERROR' }, { status: 400 });
     }
 
-    const { raw_data, columns, context, quality } = (await request.json()) as CleanRequest;
+    const { raw_data, columns, context, quality } = JSON.parse(body) as CleanRequest;
 
     if (!raw_data || !columns || columns.length === 0) {
       return NextResponse.json({ error: 'raw_data and columns[] required' }, { status: 400 });

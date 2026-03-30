@@ -58,16 +58,20 @@ export async function deductCost(
   if (!sql || cost <= 0) return getBudget();
 
   try {
-    // Atomic deduction
+    // Atomic deduction — only succeeds if sufficient balance remains
     const rows = await sql`
       UPDATE platform_budget
-      SET remaining_balance = GREATEST(remaining_balance - ${cost}, 0),
+      SET remaining_balance = remaining_balance - ${cost},
           is_exhausted = (remaining_balance - ${cost}) <= 0
-      WHERE id = ${BUDGET_ID}
+      WHERE id = ${BUDGET_ID} AND remaining_balance >= ${cost}
       RETURNING starting_balance, remaining_balance, is_exhausted
     `;
 
-    const newBalance = rows.length > 0 ? Number(rows[0].remaining_balance) : 0;
+    if (rows.length === 0) {
+      throw new BudgetExhaustedError();
+    }
+
+    const newBalance = Number(rows[0].remaining_balance);
 
     // Record in ledger
     await sql`

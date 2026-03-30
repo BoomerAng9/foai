@@ -1,10 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@/lib/insforge';
+import { requireAuth } from '@/lib/auth-guard';
 
 export async function GET(request: NextRequest) {
+  const auth = await requireAuth(request);
+  if (!auth.ok) return auth.response;
+
   if (!sql) return NextResponse.json({ organizations: [] });
   const userId = request.nextUrl.searchParams.get('userId');
   if (!userId) return NextResponse.json({ error: 'userId required' }, { status: 400 });
+
+  // Verify the requesting user matches the userId param
+  if (auth.userId !== userId) {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+  }
 
   const rows = await sql`
     SELECT o.* FROM organizations o
@@ -17,9 +26,17 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
+  const auth = await requireAuth(request);
+  if (!auth.ok) return auth.response;
+
   if (!sql) return NextResponse.json({ error: 'Database unavailable' }, { status: 503 });
   const { userId, name } = await request.json();
   if (!userId || !name) return NextResponse.json({ error: 'userId and name required' }, { status: 400 });
+
+  // Verify auth.userId matches the userId in the body
+  if (auth.userId !== userId) {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+  }
 
   const slug = name.toLowerCase().replace(/[^a-z0-9]/g, '-');
 

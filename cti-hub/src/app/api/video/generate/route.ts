@@ -7,7 +7,7 @@ export async function POST(request: NextRequest) {
     const auth = await requireAuth(request);
     if (!auth.ok) return auth.response;
 
-    const { brief, duration, action } = await request.json();
+    const { brief, duration, action, shots, reference_url, shot } = await request.json();
 
     // Step 1: Plan narrative
     if (action === 'plan' || !action) {
@@ -29,7 +29,6 @@ export async function POST(request: NextRequest) {
 
     // Step 2: Generate shots
     if (action === 'generate') {
-      const { shots, reference_url } = await request.json();
       if (!shots || !Array.isArray(shots)) return NextResponse.json({ error: 'shots array required' }, { status: 400 });
 
       const results = [];
@@ -51,7 +50,6 @@ export async function POST(request: NextRequest) {
 
     // Step 3: Regenerate single shot
     if (action === 'regenerate') {
-      const { shot, reference_url } = await request.json();
       if (!shot) return NextResponse.json({ error: 'shot required' }, { status: 400 });
 
       const result = await generateShot(shot, reference_url);

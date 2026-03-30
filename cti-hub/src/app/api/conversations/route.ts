@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth-guard';
+import { sql } from '@/lib/insforge';
 import { createConversation, getConversations, getMessages, addMessage, archiveConversation } from '@/lib/memory/store';
 
 export async function GET(request: NextRequest) {
@@ -9,6 +10,13 @@ export async function GET(request: NextRequest) {
   const conversationId = request.nextUrl.searchParams.get('id');
 
   if (conversationId) {
+    // Before fetching messages, verify this conversation belongs to the user
+    if (sql) {
+      const convCheck = await sql`SELECT id FROM conversations WHERE id = ${conversationId} AND user_id = ${auth.userId} LIMIT 1`;
+      if (convCheck.length === 0) {
+        return NextResponse.json({ error: 'Conversation not found' }, { status: 404 });
+      }
+    }
     const messages = await getMessages(conversationId);
     return NextResponse.json({ messages });
   }

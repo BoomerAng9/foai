@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth-guard';
 
-const EDU_ANG_BASE = 'https://edu-ang-939270059361.us-central1.run.app';
+const EDU_ANG_BASE = process.env.EDU_ANG_URL || 'https://edu-ang-939270059361.us-central1.run.app';
 
 /**
  * GET /api/enrollments — Fetch affiliate links for the default category (mindedge)

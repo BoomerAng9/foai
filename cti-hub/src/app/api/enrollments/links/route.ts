@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth-guard';
 
-const EDU_ANG_BASE = 'https://edu-ang-939270059361.us-central1.run.app';
+const EDU_ANG_BASE = process.env.EDU_ANG_URL || 'https://edu-ang-939270059361.us-central1.run.app';
 
 /**
  * POST /api/enrollments/links — Create a new affiliate link
@@ -34,7 +34,7 @@ export async function POST(request: NextRequest) {
     if (!res.ok) {
       const text = await res.text();
       return NextResponse.json(
-        { error: 'Upstream error', detail: text },
+        { error: 'Upstream service error' },
         { status: res.status },
       );
     }
@@ -43,7 +43,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(data);
   } catch (err) {
     return NextResponse.json(
-      { error: 'Failed to reach edu-ang service', detail: String(err) },
+      { error: 'Failed to reach upstream service' },
       { status: 502 },
     );
   }
