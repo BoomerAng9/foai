@@ -52,7 +52,8 @@ const AuthContext = createContext<AuthContextType | null>(null);
 // ─── Provision Bridge ─────────────────────────────────────
 
 async function provisionFirebaseUser(firebaseUser: User): Promise<void> {
-  const idToken = await firebaseUser.getIdToken();
+  // Force refresh to get a fresh token (tokens expire after 1 hour)
+  const idToken = await firebaseUser.getIdToken(true);
 
   await fetch('/api/auth/session', {
     method: 'POST',
@@ -171,6 +172,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     return () => unsubscribe();
   }, [hydrateProfile]);
+
+  // Refresh session token every 50 minutes to prevent expiry
+  useEffect(() => {
+    if (!user) return;
+    const interval = setInterval(async () => {
+      try {
+        const freshToken = await user.getIdToken(true);
+        await fetch('/api/auth/session', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ accessToken: freshToken }),
+        });
+      } catch (err) {
+        console.error('[Auth] Token refresh failed:', err instanceof Error ? err.message : err);
+      }
+    }, 50 * 60 * 1000); // 50 minutes
+    return () => clearInterval(interval);
+  }, [user]);
 
   // ─── Auth Actions ─────────────────────────────────────────
 

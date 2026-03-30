@@ -172,11 +172,14 @@ export default function ChatWithACHEEVY() {
       const contentType = res.headers.get('Content-Type') || '';
 
       if (!res.ok || !res.body || !contentType.includes('text/event-stream')) {
-        // Non-stream response (error JSON or missing body)
-        let errorMsg = 'Connection error.';
+        let errorMsg = 'Connection error. Please try again.';
         try {
           const errData = await res.json();
-          errorMsg = errData.error || errorMsg;
+          if (res.status === 401) {
+            errorMsg = 'Session expired. Please refresh the page and sign in again.';
+          } else {
+            errorMsg = errData.error || errorMsg;
+          }
         } catch {}
         setMessages(prev => prev.map(m =>
           m.id === streamId ? { ...m, content: errorMsg, streaming: false } : m
