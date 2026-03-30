@@ -53,12 +53,12 @@ export default function ChatWithACHEEVY() {
 
   useEffect(() => {
     fetch('/api/conversations')
-      .then(r => r.json())
-      .then(d => setConversations(d.conversations || []))
+      .then(r => r.ok ? r.json() : null)
+      .then(d => { if (d?.conversations) setConversations(d.conversations); })
       .catch(() => {});
     fetch('/api/budget')
-      .then(r => r.json())
-      .then(d => { setBudgetRemaining(d.remaining); setBudgetStarting(d.starting); })
+      .then(r => r.ok ? r.json() : null)
+      .then(d => { if (d?.remaining != null) { setBudgetRemaining(d.remaining); setBudgetStarting(d.starting); } })
       .catch(() => {});
   }, []);
 
@@ -172,11 +172,14 @@ export default function ChatWithACHEEVY() {
       const contentType = res.headers.get('Content-Type') || '';
 
       if (!res.ok || !res.body || !contentType.includes('text/event-stream')) {
-        // Non-stream response (error JSON or missing body)
-        let errorMsg = 'Connection error.';
+        let errorMsg = 'Connection error. Please try again.';
         try {
           const errData = await res.json();
-          errorMsg = errData.error || errorMsg;
+          if (res.status === 401) {
+            errorMsg = 'Session expired. Please refresh the page and sign in again.';
+          } else {
+            errorMsg = errData.error || errorMsg;
+          }
         } catch {}
         setMessages(prev => prev.map(m =>
           m.id === streamId ? { ...m, content: errorMsg, streaming: false } : m
@@ -187,6 +190,7 @@ export default function ChatWithACHEEVY() {
       const reader = res.body.getReader();
       const decoder = new TextDecoder();
       let buffer = '';
+      let fullVoiceText = '';
 
       while (true) {
         const { done, value } = await reader.read();
@@ -213,35 +217,27 @@ export default function ChatWithACHEEVY() {
                 setBudgetRemaining(data.budget.remaining);
                 setBudgetStarting(data.budget.starting);
               }
-              // Auto-voice: read ACHEEVY's response aloud
-              if (voiceEnabled) {
-                const lastMsg = messages.find(m => m.id === streamId);
-                // Get the full content from the final message state
-                setMessages(prev => {
-                  const achMsg = prev.find(m => m.id === streamId);
-                  if (achMsg?.content) {
-                    // Strip markdown images and HTML comments, limit to 500 chars for TTS
-                    const cleanText = achMsg.content
-                      .replace(/!\[.*?\]\(.*?\)/g, '')
-                      .replace(/<!--[\s\S]*?-->/g, '')
-                      .replace(/\*\*/g, '')
-                      .slice(0, 500);
-                    if (cleanText.trim()) {
-                      fetch('/api/voice/synthesize', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ text: cleanText }),
-                      }).then(r => r.json()).then(d => {
-                        if (d.audio) {
-                          const audio = new Audio(d.audio);
-                          audioRef.current = audio;
-                          audio.play().catch(() => {});
-                        }
-                      }).catch(() => {});
+              // Auto-voice: read ACHEEVY's response aloud (deferred to avoid side-effects in state updater)
+              if (voiceEnabled && fullVoiceText) {
+                const cleanText = fullVoiceText
+                  .replace(/!\[.*?\]\(.*?\)/g, '')
+                  .replace(/<!--[\s\S]*?-->/g, '')
+                  .replace(/\*\*/g, '')
+                  .slice(0, 500)
+                  .trim();
+                if (cleanText) {
+                  fetch('/api/voice/synthesize', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ text: cleanText }),
+                  }).then(r => r.json()).then(d => {
+                    if (d.audio) {
+                      const audio = new Audio(d.audio);
+                      audioRef.current = audio;
+                      audio.play().catch(() => {});
                     }
-                  }
-                  return prev;
-                });
+                  }).catch(() => {});
+                }
               }
             } else if (data.cost_update) {
               setStreamingCost(data.cost_update);
@@ -255,6 +251,7 @@ export default function ChatWithACHEEVY() {
                 m.id === streamId ? { ...m, activeAgent: data.agent } : m
               ));
             } else if (data.content) {
+              fullVoiceText += data.content;
               setMessages(prev => prev.map(m =>
                 m.id === streamId ? { ...m, content: m.content + data.content } : m
               ));

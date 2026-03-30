@@ -7,6 +7,8 @@ import {
   spring,
   interpolate,
   AbsoluteFill,
+  Img,
+  staticFile,
 } from 'remotion';
 
 const ACCENT = '#E8A020';
@@ -118,23 +120,39 @@ export const Scene6aMarket: React.FC = () => {
             right: 0,
           }}
         >
-          {/* Title with sketch aesthetic */}
+          {/* Framework sketch image */}
           <div
             style={{
               opacity: titleOpacity,
               transform: `scale(${titleProgress}) rotate(${titleRotate}deg)`,
-              fontSize: 52,
-              color: ACCENT,
-              fontWeight: 700,
-              textAlign: 'center',
-              border: '3px dashed rgba(232,160,32,0.6)',
-              borderRadius: 12,
-              padding: '16px 40px',
-              textShadow: `0 0 30px rgba(232,160,32,0.3)`,
-              marginBottom: 40,
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              marginBottom: 30,
             }}
           >
-            The 1,000 People Framework
+            <Img
+              src={staticFile('1000-people-framework.png')}
+              style={{
+                width: 500,
+                height: 'auto',
+                borderRadius: 12,
+                border: '2px solid rgba(232,160,32,0.4)',
+                boxShadow: '0 0 30px rgba(232,160,32,0.2)',
+                marginBottom: 12,
+              }}
+            />
+            <div
+              style={{
+                fontSize: 42,
+                color: ACCENT,
+                fontWeight: 700,
+                textAlign: 'center',
+                textShadow: `0 0 30px rgba(232,160,32,0.3)`,
+              }}
+            >
+              The 1,000 People Framework
+            </div>
           </div>
 
           {/* Question cards */}
@@ -234,6 +252,15 @@ export const Scene6aMarket: React.FC = () => {
                 gap: 10,
               }}
             >
+              <Img
+                src={staticFile('favicon-source.png')}
+                style={{
+                  width: 32,
+                  height: 32,
+                  borderRadius: '50%',
+                  border: '1px solid rgba(232,160,32,0.5)',
+                }}
+              />
               <div
                 style={{
                   width: 10,

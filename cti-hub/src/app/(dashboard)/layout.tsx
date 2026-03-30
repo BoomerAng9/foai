@@ -209,13 +209,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             >
               <Menu className="w-5 h-5" />
             </button>
-            <span className="text-fg-tertiary hidden sm:inline">~$</span>
-            <span className="text-fg-secondary hidden sm:inline">deploy</span>
-            <span className="text-fg-ghost hidden sm:inline">/</span>
             <span className="text-fg font-semibold">
-              {NAV.find(item => pathname.startsWith(item.href))?.name || 'DASHBOARD'}
+              {pathname === '/chat' || pathname.startsWith('/chat/')
+                ? 'Chat w/ ACHEEVY'
+                : NAV.find(item => pathname.startsWith(item.href))?.name || 'DASHBOARD'}
             </span>
-            <span className="w-2 h-4 bg-fg animate-cursor-blink ml-1 hidden sm:inline-block" />
           </div>
 
           <div className="flex items-center gap-4">

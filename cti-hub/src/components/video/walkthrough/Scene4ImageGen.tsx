@@ -7,6 +7,8 @@ import {
   spring,
   interpolate,
   AbsoluteFill,
+  Img,
+  staticFile,
 } from 'remotion';
 
 export const Scene4ImageGen: React.FC = () => {
@@ -79,12 +81,15 @@ export const Scene4ImageGen: React.FC = () => {
           </div>
         </div>
 
-        {/* Reasoning block */}
+        {/* Reasoning block with ACHEEVY avatar */}
         {frame >= 150 && (
           <div
             style={{
               opacity: reasonOpacity,
               transform: `translateY(${reasonY}px)`,
+              display: 'flex',
+              alignItems: 'center',
+              gap: 14,
               backgroundColor: '#111',
               border: '1px solid #E8A020',
               borderRadius: 12,
@@ -92,9 +97,21 @@ export const Scene4ImageGen: React.FC = () => {
               marginBottom: 20,
             }}
           >
-            <div style={{ fontSize: 14, color: '#E8A020', marginBottom: 4 }}>REASONING</div>
-            <div style={{ fontSize: 20, color: '#CCCCCC' }}>
-              Routing to Visual Engine{routingDots}
+            <Img
+              src={staticFile('acheevy-helmet.png')}
+              style={{
+                width: 44,
+                height: 44,
+                borderRadius: '50%',
+                border: '2px solid #E8A020',
+                flexShrink: 0,
+              }}
+            />
+            <div>
+              <div style={{ fontSize: 14, color: '#E8A020', marginBottom: 4 }}>REASONING</div>
+              <div style={{ fontSize: 20, color: '#CCCCCC' }}>
+                Routing to Visual Engine{routingDots}
+              </div>
             </div>
           </div>
         )}

@@ -7,6 +7,8 @@ import {
   spring,
   interpolate,
   AbsoluteFill,
+  Img,
+  staticFile,
 } from 'remotion';
 
 export const Scene5LUC: React.FC = () => {
@@ -56,24 +58,36 @@ export const Scene5LUC: React.FC = () => {
         fontFamily: '"SF Mono", "Fira Code", "Cascadia Code", monospace',
       }}
     >
-      {/* LUC Badge */}
-      <div
-        style={{
-          transform: `scale(${badgeScale * badgePulse})`,
-          width: 140,
-          height: 140,
-          borderRadius: '50%',
-          border: '3px solid #E8A020',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          marginBottom: 40,
-          boxShadow: `0 0 ${20 + 10 * Math.sin(frame * 0.1)}px rgba(232, 160, 32, 0.3)`,
-        }}
-      >
-        <div style={{ textAlign: 'center' }}>
-          <div style={{ fontSize: 36, color: '#E8A020', fontWeight: 700 }}>LUC</div>
-          <div style={{ fontSize: 12, color: '#999' }}>UNITS</div>
+      {/* LUC Badge with ACHEEVY avatar */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 20, marginBottom: 40 }}>
+        <Img
+          src={staticFile('acheevy-helmet.png')}
+          style={{
+            width: 52,
+            height: 52,
+            borderRadius: '50%',
+            border: '2px solid #E8A020',
+            opacity: interpolate(frame, [0, 60], [0, 1], { extrapolateRight: 'clamp' }),
+            boxShadow: '0 0 12px rgba(232, 160, 32, 0.3)',
+          }}
+        />
+        <div
+          style={{
+            transform: `scale(${badgeScale * badgePulse})`,
+            width: 140,
+            height: 140,
+            borderRadius: '50%',
+            border: '3px solid #E8A020',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            boxShadow: `0 0 ${20 + 10 * Math.sin(frame * 0.1)}px rgba(232, 160, 32, 0.3)`,
+          }}
+        >
+          <div style={{ textAlign: 'center' }}>
+            <div style={{ fontSize: 36, color: '#E8A020', fontWeight: 700 }}>LUC</div>
+            <div style={{ fontSize: 12, color: '#999' }}>UNITS</div>
+          </div>
         </div>
       </div>
 

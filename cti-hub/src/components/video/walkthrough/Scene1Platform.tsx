@@ -7,6 +7,8 @@ import {
   spring,
   interpolate,
   AbsoluteFill,
+  Img,
+  staticFile,
 } from 'remotion';
 
 export const Scene1Platform: React.FC = () => {
@@ -45,25 +47,44 @@ export const Scene1Platform: React.FC = () => {
         fontFamily: '"SF Mono", "Fira Code", "Cascadia Code", monospace',
       }}
     >
-      {/* Terminal icon / logo */}
+      {/* Hero character + logo */}
       <div
         style={{
           transform: `scale(${logoScale})`,
           opacity: logoOpacity,
-          width: 120,
-          height: 120,
-          borderRadius: 24,
-          backgroundColor: '#E8A020',
           display: 'flex',
+          flexDirection: 'column',
           alignItems: 'center',
-          justifyContent: 'center',
           marginBottom: 40,
-          boxShadow: frame >= 600
-            ? `0 0 ${30 + glowIntensity * 40}px rgba(232, 160, 32, ${0.3 + glowIntensity * 0.4})`
-            : '0 0 30px rgba(232, 160, 32, 0.3)',
         }}
       >
-        <span style={{ fontSize: 60, color: '#0A0A0A', fontWeight: 700 }}>&gt;_</span>
+        <Img
+          src={staticFile('acheevy-deploy-hero.svg')}
+          style={{
+            width: 280,
+            height: 'auto',
+            marginBottom: 16,
+            filter: frame >= 600
+              ? `drop-shadow(0 0 ${20 + glowIntensity * 30}px rgba(232, 160, 32, ${0.4 + glowIntensity * 0.4}))`
+              : 'drop-shadow(0 0 20px rgba(232, 160, 32, 0.3))',
+          }}
+        />
+        <div
+          style={{
+            width: 80,
+            height: 80,
+            borderRadius: 18,
+            backgroundColor: '#E8A020',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            boxShadow: frame >= 600
+              ? `0 0 ${30 + glowIntensity * 40}px rgba(232, 160, 32, ${0.3 + glowIntensity * 0.4})`
+              : '0 0 30px rgba(232, 160, 32, 0.3)',
+          }}
+        >
+          <span style={{ fontSize: 40, color: '#0A0A0A', fontWeight: 700 }}>&gt;_</span>
+        </div>
       </div>
 
       {/* Tagline */}

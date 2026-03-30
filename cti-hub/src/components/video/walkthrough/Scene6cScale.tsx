@@ -7,6 +7,8 @@ import {
   spring,
   interpolate,
   AbsoluteFill,
+  Img,
+  staticFile,
 } from 'remotion';
 
 const ACCENT = '#E8A020';
@@ -116,31 +118,29 @@ export const Scene6cScale: React.FC = () => {
         From Solo Plug to Full Organization
       </div>
 
-      {/* ACHEEVY central node */}
+      {/* ACHEEVY squad image (replaces circle node) */}
       {frame >= 100 && (
         <div
           style={{
             position: 'absolute',
-            left: centerX - 55,
-            top: acheevyY - 55,
+            left: centerX - 100,
+            top: acheevyY - 70,
             opacity: acheevyOpacity,
             transform: `scale(${acheevySpring * (frame >= 500 ? acheevyPulse : 1)})`,
+            textAlign: 'center',
           }}
         >
-          <div
+          <Img
+            src={staticFile('acheevy-chat-hero.png')}
             style={{
-              width: 110,
-              height: 110,
-              borderRadius: '50%',
-              background: `radial-gradient(circle, ${ACCENT}, #C47A10)`,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
+              width: 200,
+              height: 'auto',
+              borderRadius: 16,
+              border: '2px solid rgba(232,160,32,0.5)',
               boxShadow: `0 0 ${30 + simultaneousGlow * 40}px rgba(232,160,32,${0.3 + simultaneousGlow * 0.4})`,
             }}
-          >
-            <span style={{ fontSize: 14, fontWeight: 800, color: '#0A0A0A', letterSpacing: 0.5 }}>ACHEEVY</span>
-          </div>
+          />
+          <div style={{ fontSize: 14, fontWeight: 800, color: ACCENT, marginTop: 6, letterSpacing: 0.5 }}>ACHEEVY</div>
         </div>
       )}
 
