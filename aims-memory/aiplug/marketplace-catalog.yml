@@ -1,0 +1,587 @@
+# PlugMeIn Marketplace — 25 aiPLUG Apps
+# Plug-and-play business automation. Deploy in 48 hours. No excuses.
+# Pricing follows the 1,000 People Framework: clear problem, direct reach, will they pay.
+# ═══════════════════════════════════════════════════════════════════════════
+
+catalog_version: "1.0.0"
+marketplace: "plugmein.cloud"
+default_currency: "USD"
+
+# ─────────────────────────────────────────────────────────────
+# CATEGORY 1: REVENUE & SALES (Plugs 1-5)
+# ─────────────────────────────────────────────────────────────
+
+plugs:
+
+  # ── 1 ──────────────────────────────────────────────────────
+  - plug_id: "plug-lead-engine"
+    name: "Lead Engine"
+    tagline: "Inbound leads on autopilot."
+    price_monthly: 49
+    category: "Revenue & Sales"
+    icon: "🎯"
+    agents:
+      - Biz_Ang
+      - Scout_Ang
+    what_it_does:
+      - Scrapes target directories, LinkedIn, and industry listings for qualified leads
+      - Scores leads by fit (budget, authority, need, timing)
+      - Pushes scored leads to your CRM or Google Sheet daily
+      - Tracks conversion rates and cost-per-lead automatically
+    who_needs_it: "Freelancers, agencies, and consultants who spend 10+ hrs/week finding clients"
+    thousand_people: "Solo consultants billing $100K+ who lose 25% of revenue to prospecting downtime"
+    revenue_model: "Base $49/mo + $0.05/lead beyond 500/month"
+    deploy_time: "24 hours"
+
+  # ── 2 ──────────────────────────────────────────────────────
+  - plug_id: "plug-proposal-writer"
+    name: "Proposal Writer"
+    tagline: "Win bids while you sleep."
+    price_monthly: 49
+    category: "Revenue & Sales"
+    icon: "📝"
+    agents:
+      - Content_Ang
+      - Biz_Ang
+    what_it_does:
+      - Generates customized proposals from intake form or brief
+      - Pulls past winning proposals from memory for style and structure
+      - Auto-formats with your branding, pricing tables, and scope
+      - Tracks win rate per proposal type and client segment
+    who_needs_it: "Gov contractors, agencies, and service firms writing 5+ proposals/month"
+    thousand_people: "8(a) and HUBZone contractors in DMV responding to SAM.gov opportunities"
+    revenue_model: "Base $49/mo + $2/proposal beyond 20/month"
+    deploy_time: "24 hours"
+
+  # ── 3 ──────────────────────────────────────────────────────
+  - plug_id: "plug-affiliate-tracker"
+    name: "Affiliate Tracker"
+    tagline: "Every click. Every commission. Tracked."
+    price_monthly: 49
+    category: "Revenue & Sales"
+    icon: "🔗"
+    agents:
+      - Edu_Ang
+      - Biz_Ang
+    what_it_does:
+      - Generates and manages affiliate links per partner/channel
+      - Tracks clicks, conversions, and revenue attribution in real-time
+      - Auto-calculates commissions per affiliate agreement
+      - Monthly payout reports with exportable CSVs
+    who_needs_it: "Course creators, SaaS founders, and e-commerce brands running affiliate programs"
+    thousand_people: "Online course creators on Teachable/Kajabi earning $50K+/yr from affiliates"
+    revenue_model: "Base $49/mo + $0.01/tracked event beyond 10,000/month"
+    deploy_time: "24 hours"
+
+  # ── 4 ──────────────────────────────────────────────────────
+  - plug_id: "plug-booking-autopilot"
+    name: "Booking Autopilot"
+    tagline: "Guests booked. Calendar filled. Zero phone calls."
+    price_monthly: 97
+    category: "Revenue & Sales"
+    icon: "🏖️"
+    agents:
+      - Edu_Ang
+      - Ops_Ang
+      - Content_Ang
+    what_it_does:
+      - Auto-responds to booking inquiries within 60 seconds
+      - Dynamic pricing suggestions based on season, demand, and competitor rates
+      - Guest communication from inquiry through checkout
+      - Review request automation post-stay
+    who_needs_it: "Vacation rental owners and property managers with 3+ units"
+    thousand_people: "Airbnb/VRBO hosts on the Grand Strand and Hilton Head managing 3-20 properties"
+    revenue_model: "Base $97/mo + $5/booking beyond 50/month"
+    deploy_time: "48 hours"
+
+  # ── 5 ──────────────────────────────────────────────────────
+  - plug_id: "plug-sales-followup"
+    name: "Sales Follow-Up"
+    tagline: "No lead left behind."
+    price_monthly: 49
+    category: "Revenue & Sales"
+    icon: "📞"
+    agents:
+      - Biz_Ang
+      - Content_Ang
+    what_it_does:
+      - Monitors your pipeline for stale leads (configurable thresholds)
+      - Drafts personalized follow-up emails based on prior interaction history
+      - Sequences multi-touch cadences (email 1, 2, 3 with spacing)
+      - Reports on response rates and pipeline velocity
+    who_needs_it: "Sales teams of 1-3 people who let deals die from lack of follow-up"
+    thousand_people: "Real estate agents and insurance brokers losing $50K+/yr to forgotten leads"
+    revenue_model: "Base $49/mo + $0.10/follow-up beyond 500/month"
+    deploy_time: "24 hours"
+
+# ─────────────────────────────────────────────────────────────
+# CATEGORY 2: CONTENT & MARKETING (Plugs 6-10)
+# ─────────────────────────────────────────────────────────────
+
+  # ── 6 ──────────────────────────────────────────────────────
+  - plug_id: "plug-seo-engine"
+    name: "SEO Content Engine"
+    tagline: "Rank without a marketing team."
+    price_monthly: 97
+    category: "Content & Marketing"
+    icon: "🔍"
+    agents:
+      - Content_Ang
+      - Scout_Ang
+    what_it_does:
+      - Keyword research and content gap analysis weekly
+      - Generates 3 SEO-optimized blog posts per week
+      - Internal linking strategy based on existing content
+      - Tracks rankings, organic traffic, and content performance
+    who_needs_it: "Any business spending $0 on content because they can't afford a writer"
+    thousand_people: "Local service businesses (plumbers, dentists, lawyers) in cities with 50K-500K population"
+    revenue_model: "Base $97/mo + $5/article beyond 12/month"
+    deploy_time: "24 hours"
+
+  # ── 7 ──────────────────────────────────────────────────────
+  - plug_id: "plug-social-scheduler"
+    name: "Social Scheduler"
+    tagline: "Post daily. Sound human. Never log in."
+    price_monthly: 49
+    category: "Content & Marketing"
+    icon: "📱"
+    agents:
+      - Content_Ang
+    what_it_does:
+      - Generates daily social media posts tailored to each platform
+      - Maintains brand voice via memory of past content and engagement
+      - Schedules posts at optimal engagement times
+      - Weekly engagement report with top-performing content analysis
+    who_needs_it: "Small businesses posting inconsistently or not at all on social media"
+    thousand_people: "Restaurant and retail owners in Coastal Carolina who know they should post but don't"
+    revenue_model: "Base $49/mo + $1/post beyond 60/month"
+    deploy_time: "24 hours"
+
+  # ── 8 ──────────────────────────────────────────────────────
+  - plug_id: "plug-newsletter-pilot"
+    name: "Newsletter Pilot"
+    tagline: "Weekly newsletter. Zero writing."
+    price_monthly: 49
+    category: "Content & Marketing"
+    icon: "✉️"
+    agents:
+      - Content_Ang
+      - Scout_Ang
+    what_it_does:
+      - Curates industry news and trends relevant to your audience
+      - Writes newsletter copy in your brand voice
+      - A/B tests subject lines and tracks open/click rates
+      - Grows subscriber list with lead magnet suggestions
+    who_needs_it: "Businesses with an email list they never email"
+    thousand_people: "Coaches, consultants, and SaaS founders with 500-10K email subscribers collecting dust"
+    revenue_model: "Base $49/mo + $0.01/subscriber beyond 5,000"
+    deploy_time: "24 hours"
+
+  # ── 9 ──────────────────────────────────────────────────────
+  - plug_id: "plug-review-manager"
+    name: "Review Manager"
+    tagline: "5-star reputation on autopilot."
+    price_monthly: 49
+    category: "Content & Marketing"
+    icon: "⭐"
+    agents:
+      - Content_Ang
+      - Ops_Ang
+    what_it_does:
+      - Monitors Google, Yelp, and industry review sites 24/7
+      - Drafts professional responses to all reviews (positive and negative)
+      - Sends review request sequences to recent customers
+      - Weekly reputation scorecard with sentiment trends
+    who_needs_it: "Local businesses where reviews directly impact revenue"
+    thousand_people: "Restaurants, hotels, and medical practices in tourist markets with 50+ reviews"
+    revenue_model: "Base $49/mo + $0.50/review response beyond 100/month"
+    deploy_time: "24 hours"
+
+  # ── 10 ─────────────────────────────────────────────────────
+  - plug_id: "plug-listing-optimizer"
+    name: "Listing Optimizer"
+    tagline: "Every listing. Perfect copy. Maximum clicks."
+    price_monthly: 49
+    category: "Content & Marketing"
+    icon: "🏠"
+    agents:
+      - Content_Ang
+      - Scout_Ang
+    what_it_does:
+      - Rewrites property/product listings with conversion-optimized copy
+      - Pulls comparable listings for competitive positioning
+      - Generates descriptions for multiple platforms (MLS, Zillow, Airbnb, eBay)
+      - Tracks views and engagement per listing version
+    who_needs_it: "Real estate agents, e-commerce sellers, and rental managers"
+    thousand_people: "Real estate agents in Myrtle Beach, Charleston, and Savannah listing 5+ properties/month"
+    revenue_model: "Base $49/mo + $3/listing beyond 20/month"
+    deploy_time: "24 hours"
+
+# ─────────────────────────────────────────────────────────────
+# CATEGORY 3: OPERATIONS & ADMIN (Plugs 11-15)
+# ─────────────────────────────────────────────────────────────
+
+  # ── 11 ─────────────────────────────────────────────────────
+  - plug_id: "plug-inbox-zero"
+    name: "Inbox Zero"
+    tagline: "Triage. Draft. Done."
+    price_monthly: 49
+    category: "Operations & Admin"
+    icon: "📧"
+    agents:
+      - Ops_Ang
+      - Content_Ang
+    what_it_does:
+      - Classifies incoming emails by priority and category
+      - Drafts replies for routine emails (scheduling, info requests, confirmations)
+      - Flags urgent items for human review
+      - Daily inbox summary with action items
+    who_needs_it: "Founders drowning in 100+ emails/day"
+    thousand_people: "Agency owners and consultants spending 2+ hrs/day on email instead of billable work"
+    revenue_model: "Base $49/mo + $0.02/email beyond 3,000/month"
+    deploy_time: "24 hours"
+
+  # ── 12 ─────────────────────────────────────────────────────
+  - plug_id: "plug-compliance-guard"
+    name: "Compliance Guard"
+    tagline: "Stay compliant. Stay funded."
+    price_monthly: 97
+    category: "Operations & Admin"
+    icon: "🛡️"
+    agents:
+      - Ops_Ang
+      - Scout_Ang
+      - Content_Ang
+    what_it_does:
+      - Tracks regulatory deadlines (SAM.gov, state licenses, insurance renewals)
+      - Generates compliance documents from templates with current data
+      - Monitors regulatory changes relevant to your industry
+      - Audit trail with timestamped records in org memory
+    who_needs_it: "Gov contractors and regulated businesses that risk losing contracts over missed filings"
+    thousand_people: "8(a) and HUBZone certified businesses in the DMV that must maintain compliance to win contracts"
+    revenue_model: "Base $97/mo + $10/document beyond 10/month"
+    deploy_time: "48 hours"
+
+  # ── 13 ─────────────────────────────────────────────────────
+  - plug_id: "plug-invoice-chaser"
+    name: "Invoice Chaser"
+    tagline: "Get paid. On time. Every time."
+    price_monthly: 49
+    category: "Operations & Admin"
+    icon: "💰"
+    agents:
+      - CFO_Ang
+      - Biz_Ang
+    what_it_does:
+      - Tracks all outstanding invoices and payment status
+      - Sends automated payment reminders at configurable intervals
+      - Escalation sequences for overdue accounts
+      - Cash flow dashboard with aging report
+    who_needs_it: "Service businesses with net-30/60 clients who pay late"
+    thousand_people: "Freelancers and small agencies owed $10K+ in overdue invoices right now"
+    revenue_model: "Base $49/mo + $1/invoice tracked beyond 100/month"
+    deploy_time: "24 hours"
+
+  # ── 14 ─────────────────────────────────────────────────────
+  - plug_id: "plug-hr-autopilot"
+    name: "HR Autopilot"
+    tagline: "Hire, onboard, evaluate. No HR department."
+    price_monthly: 97
+    category: "Operations & Admin"
+    icon: "👥"
+    agents:
+      - Hermes
+      - Content_Ang
+      - Ops_Ang
+    what_it_does:
+      - Posts job listings across multiple platforms from a single brief
+      - Screens resumes against role requirements and ranks candidates
+      - Generates onboarding checklists and welcome packets
+      - Runs quarterly performance evaluations with KPI tracking
+    who_needs_it: "Growing businesses with 5-10 employees and no dedicated HR"
+    thousand_people: "Landscaping, HVAC, and trades companies adding 2-5 hires/year without an HR process"
+    revenue_model: "Base $97/mo + $25/hire processed beyond 2/month"
+    deploy_time: "48 hours"
+
+  # ── 15 ─────────────────────────────────────────────────────
+  - plug_id: "plug-meeting-brain"
+    name: "Meeting Brain"
+    tagline: "Every meeting. Summarized. Action items tracked."
+    price_monthly: 49
+    category: "Operations & Admin"
+    icon: "🧠"
+    agents:
+      - Ops_Ang
+      - Content_Ang
+    what_it_does:
+      - Transcribes and summarizes meetings from audio/video uploads
+      - Extracts action items with assignees and deadlines
+      - Tracks action item completion across meetings
+      - Searchable meeting memory — find any decision from any meeting
+    who_needs_it: "Teams where decisions get lost and action items are forgotten"
+    thousand_people: "Remote-first agencies and consulting firms running 10+ meetings/week"
+    revenue_model: "Base $49/mo + $2/meeting beyond 20/month"
+    deploy_time: "24 hours"
+
+# ─────────────────────────────────────────────────────────────
+# CATEGORY 4: RESEARCH & INTELLIGENCE (Plugs 16-20)
+# ─────────────────────────────────────────────────────────────
+
+  # ── 16 ─────────────────────────────────────────────────────
+  - plug_id: "plug-market-scout"
+    name: "Market Scout"
+    tagline: "Know your market before your competitors do."
+    price_monthly: 49
+    category: "Research & Intelligence"
+    icon: "🔭"
+    agents:
+      - Scout_Ang
+      - Biz_Ang
+    what_it_does:
+      - Monitors competitor websites, pricing, and product changes weekly
+      - Tracks industry news and regulatory shifts
+      - Identifies market gaps and emerging opportunities
+      - Weekly intelligence brief delivered to your inbox
+    who_needs_it: "Businesses making strategic decisions without market data"
+    thousand_people: "E-commerce brands and SaaS startups in crowded markets spending $0 on competitive intel"
+    revenue_model: "Base $49/mo + $5/report beyond 8/month"
+    deploy_time: "24 hours"
+
+  # ── 17 ─────────────────────────────────────────────────────
+  - plug_id: "plug-grant-finder"
+    name: "Grant Finder"
+    tagline: "Free money. Found for you."
+    price_monthly: 97
+    category: "Research & Intelligence"
+    icon: "🏛️"
+    agents:
+      - Scout_Ang
+      - Content_Ang
+      - Biz_Ang
+    what_it_does:
+      - Scans grants.gov, SAM.gov, and state databases for matching opportunities
+      - Filters by eligibility, amount, and deadline
+      - Drafts grant application narratives from your business profile
+      - Tracks application status and upcoming deadlines
+    who_needs_it: "Nonprofits, EdTech companies, and small businesses eligible for grants they never apply for"
+    thousand_people: "Nonprofits and WOSB/SDVOSB firms in the DMV leaving $100K+ in grants on the table annually"
+    revenue_model: "Base $97/mo + $15/application drafted beyond 3/month"
+    deploy_time: "48 hours"
+
+  # ── 18 ─────────────────────────────────────────────────────
+  - plug_id: "plug-price-watcher"
+    name: "Price Watcher"
+    tagline: "Never get undercut. Never overprice."
+    price_monthly: 49
+    category: "Research & Intelligence"
+    icon: "📊"
+    agents:
+      - Scout_Ang
+      - Biz_Ang
+    what_it_does:
+      - Monitors competitor pricing across specified products/services
+      - Alerts on price changes with recommended response actions
+      - Historical pricing trends and seasonal patterns
+      - Dynamic pricing suggestions based on market position
+    who_needs_it: "Retail, e-commerce, and service businesses competing on price"
+    thousand_people: "Marine dealers, boat rental operators, and charter businesses on the coast adjusting prices seasonally"
+    revenue_model: "Base $49/mo + $0.05/product tracked beyond 200"
+    deploy_time: "24 hours"
+
+  # ── 19 ─────────────────────────────────────────────────────
+  - plug_id: "plug-talent-sourcer"
+    name: "Talent Sourcer"
+    tagline: "Find candidates before you post the job."
+    price_monthly: 49
+    category: "Research & Intelligence"
+    icon: "🎯"
+    agents:
+      - Scout_Ang
+      - Content_Ang
+    what_it_does:
+      - Scrapes LinkedIn, Indeed, and niche job boards for passive candidates
+      - Matches candidates to role requirements using semantic scoring
+      - Drafts personalized outreach messages per candidate
+      - Tracks response rates and pipeline by role
+    who_needs_it: "Companies paying $15K+ per recruiter placement"
+    thousand_people: "Staffing-dependent businesses (healthcare, trades, hospitality) with 3+ open roles"
+    revenue_model: "Base $49/mo + $5/candidate profile beyond 50/month"
+    deploy_time: "24 hours"
+
+  # ── 20 ─────────────────────────────────────────────────────
+  - plug_id: "plug-legislative-radar"
+    name: "Legislative Radar"
+    tagline: "Track bills. Know impacts. Act first."
+    price_monthly: 97
+    category: "Research & Intelligence"
+    icon: "⚖️"
+    agents:
+      - Scout_Ang
+      - Content_Ang
+      - Biz_Ang
+    what_it_does:
+      - Monitors federal and state legislation by keyword and committee
+      - Summarizes bill impacts on your industry in plain English
+      - Generates position papers and public comment drafts
+      - Tracks stakeholder positions and voting patterns
+    who_needs_it: "Lobbying firms, trade associations, and regulated industries"
+    thousand_people: "Policy shops and trade associations in the DMV tracking 50+ bills per session"
+    revenue_model: "Base $97/mo + $10/bill tracked beyond 20"
+    deploy_time: "48 hours"
+
+# ─────────────────────────────────────────────────────────────
+# CATEGORY 5: VERTICAL SOLUTIONS (Plugs 21-25)
+# ─────────────────────────────────────────────────────────────
+
+  # ── 21 ─────────────────────────────────────────────────────
+  - plug_id: "plug-enrollment-engine"
+    name: "Enrollment Engine"
+    tagline: "Fill seats. Track revenue. Automate enrollment."
+    price_monthly: 97
+    category: "Vertical Solutions"
+    icon: "🎓"
+    agents:
+      - Edu_Ang
+      - Content_Ang
+      - Biz_Ang
+    what_it_does:
+      - Automates student/member enrollment from inquiry to conversion
+      - Affiliate link tracking with revenue attribution per source
+      - Enrollment dashboard with conversion funnels
+      - Automated follow-up sequences for incomplete enrollments
+    who_needs_it: "Online education, bootcamps, membership orgs, and training companies"
+    thousand_people: "Online course creators and bootcamps on MindEdge, Coursera, or self-hosted LMS with 100+ enrollments/month"
+    revenue_model: "Base $97/mo + $2/enrollment beyond 100/month"
+    deploy_time: "48 hours"
+
+  # ── 22 ─────────────────────────────────────────────────────
+  - plug_id: "plug-patient-flow"
+    name: "Patient Flow"
+    tagline: "Schedule. Remind. Follow up. Repeat."
+    price_monthly: 97
+    category: "Vertical Solutions"
+    icon: "🏥"
+    agents:
+      - Ops_Ang
+      - Content_Ang
+      - Biz_Ang
+    what_it_does:
+      - Patient appointment scheduling with smart slot optimization
+      - Automated reminders (24hr, 2hr) to reduce no-shows
+      - Post-visit follow-up and satisfaction surveys
+      - Billing follow-up sequences for outstanding balances
+    who_needs_it: "Medical, dental, and therapy practices losing revenue to no-shows and slow billing"
+    thousand_people: "Independent medical practices (1-5 providers) in Coastal Carolina with 15%+ no-show rates"
+    revenue_model: "Base $97/mo + $1/appointment beyond 200/month"
+    deploy_time: "48 hours"
+
+  # ── 23 ─────────────────────────────────────────────────────
+  - plug_id: "plug-fleet-monitor"
+    name: "Fleet Monitor"
+    tagline: "Every service. Every server. Watched 24/7."
+    price_monthly: 97
+    category: "Vertical Solutions"
+    icon: "📡"
+    agents:
+      - Ops_Ang
+      - Scout_Ang
+    what_it_does:
+      - Monitors endpoints, APIs, and services every 5 minutes
+      - Automated incident detection with severity classification
+      - Incident response playbooks triggered on failure patterns
+      - Uptime reports and SLA tracking with historical trends
+    who_needs_it: "SaaS companies and IT shops without a dedicated SRE team"
+    thousand_people: "Bootstrapped SaaS founders running production with 0 ops staff and praying nothing breaks at 2am"
+    revenue_model: "Base $97/mo + $2/endpoint beyond 25"
+    deploy_time: "24 hours"
+
+  # ── 24 ─────────────────────────────────────────────────────
+  - plug_id: "plug-property-manager"
+    name: "Property Manager"
+    tagline: "Manage properties. Not headaches."
+    price_monthly: 197
+    category: "Vertical Solutions"
+    icon: "🏢"
+    agents:
+      - Ops_Ang
+      - Biz_Ang
+      - Content_Ang
+      - CFO_Ang
+    what_it_does:
+      - Tenant communication and maintenance request triage
+      - Rent collection tracking with automated late notices
+      - Listing creation and vacancy marketing across platforms
+      - Monthly owner reports with income/expense breakdown
+    who_needs_it: "Landlords and property managers with 5-50 units and no office staff"
+    thousand_people: "Independent landlords in Myrtle Beach, Charleston, and Savannah managing 5-50 rental units"
+    revenue_model: "Base $197/mo + $10/unit beyond 20"
+    deploy_time: "48 hours"
+
+  # ── 25 ─────────────────────────────────────────────────────
+  - plug_id: "plug-bid-plug"
+    name: "BID PLUG"
+    tagline: "Find contracts. Write bids. Win work."
+    price_monthly: 49
+    category: "Vertical Solutions"
+    icon: "🏗️"
+    agents:
+      - Scout_Ang
+      - Content_Ang
+      - Biz_Ang
+    what_it_does:
+      - Scans SAM.gov, state procurement portals, and private bid boards daily
+      - Filters opportunities by NAICS code, set-aside type, and contract value
+      - Generates bid/proposal drafts with compliance checklists
+      - Tracks bid status, win rates, and pipeline value
+    who_needs_it: "Small gov contractors and subcontractors who miss opportunities because they can't monitor everything"
+    thousand_people: "8(a), HUBZone, and WOSB contractors in the DMV bidding on $50K-$500K contracts"
+    revenue_model: "Base $49/mo + $10/bid drafted beyond 5/month"
+    deploy_time: "24 hours"
+
+# ═══════════════════════════════════════════════════════════════
+# MARKETPLACE SUMMARY
+# ═══════════════════════════════════════════════════════════════
+
+summary:
+  total_plugs: 25
+  price_range: "$49 - $197/month"
+  categories:
+    - name: "Revenue & Sales"
+      count: 5
+      plugs: ["Lead Engine", "Proposal Writer", "Affiliate Tracker", "Booking Autopilot", "Sales Follow-Up"]
+    - name: "Content & Marketing"
+      count: 5
+      plugs: ["SEO Content Engine", "Social Scheduler", "Newsletter Pilot", "Review Manager", "Listing Optimizer"]
+    - name: "Operations & Admin"
+      count: 5
+      plugs: ["Inbox Zero", "Compliance Guard", "Invoice Chaser", "HR Autopilot", "Meeting Brain"]
+    - name: "Research & Intelligence"
+      count: 5
+      plugs: ["Market Scout", "Grant Finder", "Price Watcher", "Talent Sourcer", "Legislative Radar"]
+    - name: "Vertical Solutions"
+      count: 5
+      plugs: ["Enrollment Engine", "Patient Flow", "Fleet Monitor", "Property Manager", "BID PLUG"]
+
+  upsell_path: "Individual plug -> Bundle (3 plugs, 20% off) -> Full AOS-10 ($1,497/mo)"
+
+  deploy_guarantee: "48 hours or free first month"
+
+  agents_powering_marketplace:
+    - agent: Scout_Ang
+      appears_in: 12
+    - agent: Content_Ang
+      appears_in: 17
+    - agent: Biz_Ang
+      appears_in: 13
+    - agent: Ops_Ang
+      appears_in: 9
+    - agent: Edu_Ang
+      appears_in: 3
+    - agent: CFO_Ang
+      appears_in: 2
+    - agent: Hermes
+      appears_in: 1
+
+# ═══════════════════════════════════════════════════════════════
+# FOAI-AIMS | plugmein.cloud | ai-managed-solutions.cloud
+# ═══════════════════════════════════════════════════════════════
