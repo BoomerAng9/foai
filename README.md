@@ -1,4 +1,4 @@
-# FOAI-AIMS Ecosystem — CTI Nerve Center
+# FOAI-AIMS Ecosystem — CTI Hub/THE DEPLOY PLATFORM
 
 AI-Managed Solutions for businesses. Powered by autonomous agent hierarchies, enforced tenant isolation, and a revenue-first mandate.
 
