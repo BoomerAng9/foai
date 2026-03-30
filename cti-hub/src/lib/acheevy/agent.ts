@@ -114,7 +114,9 @@ interface ConversationMessage {
   content: string;
 }
 
-async function pickModel(task: string = 'chat'): Promise<string> {
+// Model routing: Mercury 2 for fast/short tasks, Nemotron free for simple chat, MiniMax for quality
+async function pickModel(task: string = 'chat', messageLength: number = 0): Promise<string> {
+  // Try LUC router first
   try {
     const res = await fetch(`${LUC_URL}/pick`, {
       method: 'POST',
@@ -123,6 +125,10 @@ async function pickModel(task: string = 'chat'): Promise<string> {
     });
     if (res.ok) return (await res.json()).model;
   } catch {}
+
+  // Smart fallback: short messages → Mercury 2 (fast), medium → Nemotron (free), long → MiniMax (quality)
+  if (task === 'fast' || messageLength < 100) return 'inception/mercury-2';
+  if (task === 'chat' && messageLength < 500) return 'nvidia/nemotron-3-super-120b-a12b:free';
   return 'minimax/minimax-m2.7';
 }
 
@@ -192,7 +198,7 @@ export async function acheevyRespond(
   ];
 
   // 4. Pick model via LUC (or use client-selected model)
-  const model = modelOverride || await pickModel('chat');
+  const model = modelOverride || await pickModel('chat', userMessage.length);
 
   // 5. Call OpenRouter
   if (!OPENROUTER_API_KEY) {
@@ -339,7 +345,7 @@ export async function acheevyRespondStream(
   ];
 
   // 4. Pick model via LUC (or use client-selected model)
-  const model = modelOverride || await pickModel('chat');
+  const model = modelOverride || await pickModel('chat', userMessage.length);
 
   // 5. Store user message in Neon (fire-and-forget)
   addMessage(conversationId, userId, 'user', userMessage).catch(() => {});

@@ -73,4 +73,7 @@ export const MODELS: ModelOption[] = [
   { id: 'qwen/qwen3.5-397b-a17b',           name: 'Qwen 3.5 397B',        provider: 'Qwen',        price_in: 0.39,  price_out: 2.34,  context: '256K',  tag: 'OPEN' },
   { id: 'openai/o4-mini',                   name: 'o4 Mini',              provider: 'OpenAI',      price_in: 1.10,  price_out: 4.40,  context: '200K',  tag: 'REASON' },
   { id: 'deepseek/deepseek-r1',             name: 'DeepSeek R1',          provider: 'DeepSeek',    price_in: 0.70,  price_out: 2.50,  context: '64K',   tag: 'REASON' },
+  { id: 'inception/mercury-2',              name: 'Mercury 2',            provider: 'Inception',   price_in: 0.25,  price_out: 0.75,  context: '128K',  tag: 'FAST' },
+  { id: 'nvidia/nemotron-3-super-120b-a12b:free', name: 'Nemotron 3 Super', provider: 'NVIDIA', price_in: 0,     price_out: 0,     context: '128K',  tag: 'FREE' },
+  { id: 'nvidia/nemotron-nano-9b-v2:free',  name: 'Nemotron Nano 9B',     provider: 'NVIDIA',      price_in: 0,     price_out: 0,     context: '128K',  tag: 'FREE' },
 ];
