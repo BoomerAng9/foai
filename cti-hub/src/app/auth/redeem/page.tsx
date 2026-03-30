@@ -3,23 +3,28 @@
 import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
-import { Check, AlertCircle, Shield, ArrowRight } from 'lucide-react';
+import { Check, AlertCircle, Shield, ArrowRight, Phone } from 'lucide-react';
+import type { ConfirmationResult } from 'firebase/auth';
 
-type Step = 'disclaimer' | 'signup' | 'redeeming' | 'success' | 'error';
+type Step = 'disclaimer' | 'signup' | 'phone-otp' | 'redeeming' | 'success' | 'error';
 
 function RedeemContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const keyFromUrl = searchParams.get('key') || '';
-  const { user, signInWithOAuth } = useAuth();
+  const { user, signInWithOAuth, sendPhoneOtp, confirmPhoneOtp } = useAuth();
 
   const [step, setStep] = useState<Step>('disclaimer');
   const [error, setError] = useState('');
   const [signingIn, setSigningIn] = useState(false);
+  const [phoneNumber, setPhoneNumber] = useState('');
+  const [otpCode, setOtpCode] = useState('');
+  const [confirmResult, setConfirmResult] = useState<ConfirmationResult | null>(null);
+  const [sendingOtp, setSendingOtp] = useState(false);
 
   // Auto-redeem when user signs in with a key
   useEffect(() => {
-    if (user && keyFromUrl && step === 'signup') {
+    if (user && keyFromUrl && (step === 'signup' || step === 'phone-otp')) {
       redeemKey();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -149,12 +154,107 @@ function RedeemContent() {
               <div className="relative flex justify-center"><span className="bg-[#111] px-3 text-[10px] text-slate-500 font-mono">OR</span></div>
             </div>
 
-            <p className="text-center text-xs text-slate-500">
-              Phone auth coming soon. Use Google for now.
-            </p>
+            <div className="space-y-3">
+              <input
+                type="tel"
+                value={phoneNumber}
+                onChange={e => setPhoneNumber(e.target.value)}
+                placeholder="+1 (555) 123-4567"
+                className="w-full h-12 px-4 bg-white/[0.05] border border-white/[0.08] text-white text-sm focus:outline-none focus:border-[#E8A020]/50 placeholder:text-slate-600"
+              />
+              <button
+                onClick={async () => {
+                  if (!phoneNumber.trim()) return;
+                  setSendingOtp(true);
+                  setError('');
+                  try {
+                    const result = await sendPhoneOtp(phoneNumber.trim(), 'recaptcha-container');
+                    setConfirmResult(result);
+                    setStep('phone-otp');
+                  } catch (err) {
+                    setError(err instanceof Error ? err.message : 'Failed to send code');
+                  } finally {
+                    setSendingOtp(false);
+                  }
+                }}
+                disabled={sendingOtp || !phoneNumber.trim()}
+                className="w-full h-12 border border-white/10 text-white text-sm font-bold hover:bg-white/5 transition-colors flex items-center justify-center gap-2 disabled:opacity-30"
+              >
+                {sendingOtp ? (
+                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                ) : (
+                  <>
+                    <Phone className="w-4 h-4" />
+                    Continue with Phone
+                  </>
+                )}
+              </button>
+            </div>
+            <div id="recaptcha-container" />
+
+            {error && (
+              <div className="mt-4 p-3 bg-red-500/10 border border-red-500/20 flex items-center gap-2">
+                <AlertCircle className="w-4 h-4 text-red-400 shrink-0" />
+                <p className="text-xs text-red-400">{error}</p>
+              </div>
+            )}
 
             <button
               onClick={() => setStep('disclaimer')}
+              className="w-full mt-4 text-xs text-slate-500 hover:text-white transition-colors"
+            >
+              &larr; Back
+            </button>
+          </div>
+        )}
+
+        {/* Phone OTP verification */}
+        {step === 'phone-otp' && (
+          <div className="bg-[#111] border border-white/10 p-8">
+            <h2 className="text-lg font-bold text-white mb-2 text-center">Enter Verification Code</h2>
+            <p className="text-xs text-slate-400 text-center mb-6">We sent a code to {phoneNumber}</p>
+
+            <input
+              type="text"
+              value={otpCode}
+              onChange={e => setOtpCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+              placeholder="123456"
+              maxLength={6}
+              className="w-full h-14 px-4 bg-white/[0.05] border border-white/[0.08] text-center text-2xl font-mono font-bold tracking-[0.5em] text-white focus:outline-none focus:border-[#E8A020]/50 placeholder:text-slate-600 mb-4"
+            />
+
+            {error && (
+              <div className="mb-4 p-3 bg-red-500/10 border border-red-500/20 flex items-center gap-2">
+                <AlertCircle className="w-4 h-4 text-red-400 shrink-0" />
+                <p className="text-xs text-red-400">{error}</p>
+              </div>
+            )}
+
+            <button
+              onClick={async () => {
+                if (!confirmResult || otpCode.length < 6) return;
+                setSigningIn(true);
+                setError('');
+                try {
+                  await confirmPhoneOtp(confirmResult, otpCode);
+                  // onAuthStateChanged will fire → useEffect auto-redeems
+                } catch (err) {
+                  setError(err instanceof Error ? err.message : 'Invalid code');
+                  setSigningIn(false);
+                }
+              }}
+              disabled={otpCode.length < 6 || signingIn}
+              className="w-full h-12 bg-[#E8A020] text-black text-sm font-bold hover:bg-[#D4901A] transition-colors flex items-center justify-center gap-2 disabled:opacity-30"
+            >
+              {signingIn ? (
+                <div className="w-5 h-5 border-2 border-black border-t-transparent rounded-full animate-spin" />
+              ) : (
+                'Verify & Join'
+              )}
+            </button>
+
+            <button
+              onClick={() => { setStep('signup'); setOtpCode(''); setError(''); }}
               className="w-full mt-4 text-xs text-slate-500 hover:text-white transition-colors"
             >
               &larr; Back
