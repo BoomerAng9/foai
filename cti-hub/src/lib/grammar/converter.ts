@@ -1,41 +1,75 @@
 /**
- * GRAMMAR (NTNTN) — Natural-to-Technical-Natural-to-Technical-Natural converter.
+ * GRAMMAR (NTNTN) — The Intention Engine
  *
- * Converts plain-language user requests into structured technical prompts.
- * The output is what ACHEEVY and the agents actually execute against.
+ * Grammar IS NTNTN. They are the same thing.
+ * NTNTN is the brand name for the Intention Engine.
  *
- * Flow:
- * 1. User types: "I need a landing page for my SaaS"
- * 2. Grammar converts to structured spec with context, task, format, criteria
- * 3. ACHEEVY reads back the interpretation conversationally
- * 4. User confirms, adjusts, or rejects
- * 5. Only after confirmation does ACHEEVY proceed
+ * What it does:
+ * 1. HUDDLE: Frames user intent into a structured objective
+ * 2. CONTEXT: MIM loads governed context for the active session
+ * 3. ROUTE: Picker_Ang resolves which agents/capabilities handle each part
+ * 4. CONFIRM: ACHEEVY reads back the technical interpretation conversationally
+ * 5. EXECUTE: Only after user confirmation does the system proceed
+ *
+ * This is the Core Runtime's intent normalization layer.
+ * Updated from the original Grammar repo to use current models and APIs.
  */
 
-const GRAMMAR_SYSTEM_PROMPT = `You are GRAMMAR, the technical translation layer for The Deploy Platform.
+export const NTNTN_SYSTEM_PROMPT = `You are NTNTN (Grammar), the Intention Engine for The Deploy Platform.
 
-Your job: take a plain-language request and convert it into a precise, structured technical prompt.
+YOUR ROLE: You sit between the user and ACHEEVY. You take vague, natural language and convert it into precise, governed technical objectives that the agent workforce can execute.
 
-RULES:
-- Never execute the request. Only translate it.
-- Output a structured block that ACHEEVY can execute.
-- Be precise. Remove ambiguity. Add constraints the user implied but didn't say.
-- If the request is too vague, list what's missing and ask clarifying questions.
-- Keep the user's intent. Don't add features they didn't ask for.
-- Format as a structured spec, not a paragraph.
+YOU ARE NOT AN ASSISTANT. You are a translator. You don't execute. You don't advise. You frame.
+
+PROCESS:
+1. RECEIVE the user's raw intent (plain language, potentially vague)
+2. IDENTIFY the core objective — what they actually want to achieve
+3. DECOMPOSE into structured components:
+   - OBJECTIVE: One clear sentence of what will be produced
+   - CONTEXT: What background knowledge is needed
+   - CONSTRAINTS: Budget, timeline, quality, format, platform requirements
+   - AGENTS: Which Boomer_Angs or Lil_Hawks should handle this
+   - STEPS: Numbered execution sequence
+   - SUCCESS: How to know it's done correctly
+   - COST ESTIMATE: Approximate token/API cost
+4. SURFACE any ambiguities — things the user probably meant but didn't say
+5. FLAG any risks — things that could go wrong or need clarification
 
 OUTPUT FORMAT:
----
-CONTEXT: [What the system needs to know about this request]
-TASK: [Exactly what to produce — specific, measurable]
-FORMAT: [Output structure, file types, dimensions, constraints]
-CRITERIA: [How to evaluate if the output is correct]
-AGENTS: [Which agents should handle this — ACHEEVY delegates]
-ESTIMATED_COST: [Rough token/API cost estimate]
----
+\`\`\`
+OBJECTIVE: [One sentence — what will be produced]
 
-If the request involves multiple steps, break them into numbered sub-tasks.
-If the request is a question (not a build task), say "PASSTHROUGH — no conversion needed" and return the original text.`;
+CONTEXT:
+[What the system needs to know]
+
+CONSTRAINTS:
+- [Constraint 1]
+- [Constraint 2]
+
+AGENTS:
+- Primary: [Agent name] — [why]
+- Support: [Agent name] — [why]
+
+EXECUTION STEPS:
+1. [Step]
+2. [Step]
+3. [Step]
+
+SUCCESS CRITERIA:
+- [How to know it's done right]
+
+AMBIGUITIES:
+- [Things that need clarification, if any]
+
+ESTIMATED COST: [Rough estimate]
+\`\`\`
+
+RULES:
+- If the request is a simple question (not a build/create/research task), output: "PASSTHROUGH — direct question, no conversion needed" and return the original text.
+- Never add features the user didn't ask for.
+- Never remove requirements the user stated.
+- Be precise. Remove ambiguity. Add implied constraints.
+- Keep the user's voice — the objective should sound like what they meant, just sharper.`;
 
 export interface GrammarResult {
   original: string;
@@ -44,24 +78,60 @@ export interface GrammarResult {
   needsClarification: boolean;
 }
 
+/**
+ * Build the Grammar conversion prompt.
+ * This is what gets sent to the LLM to convert the user's intent.
+ */
 export function buildGrammarPrompt(userMessage: string): string {
-  return `[GRAMMAR CONVERSION REQUEST]\n\nUser said: "${userMessage}"\n\nConvert this into a structured technical prompt. Follow the output format exactly.`;
+  return `[NTNTN INTENTION ENGINE — CONVERT]\n\nUser's raw intent: "${userMessage}"\n\nConvert this into a structured technical objective using the NTNTN output format. If it's a simple question, output PASSTHROUGH.`;
 }
 
+/**
+ * Check if the conversion result is a passthrough (no conversion needed).
+ */
 export function isPassthrough(converted: string): boolean {
   return converted.includes('PASSTHROUGH') || converted.includes('no conversion needed');
 }
 
+/**
+ * Build the confirmation prompt for ACHEEVY to read back to the user.
+ * ACHEEVY interprets the technical spec conversationally and asks for confirmation.
+ */
 export function buildConfirmationPrompt(original: string, converted: string): string {
-  return `[GRAMMAR CONFIRMATION]\n\nThe user said: "${original}"\n\nI've translated this into the following technical spec:\n\n${converted}\n\nRead this back to the user conversationally. Don't read the raw spec — interpret it naturally. End with: "Is this what you want? Say yes to proceed, or tell me what to adjust."`;
+  return `[GRAMMAR CONFIRMATION — SPEAK THIS BACK TO THE USER]
+
+The user said: "${original}"
+
+The Intention Engine converted this into:
+
+${converted}
+
+YOUR JOB: Read this technical spec back to the user CONVERSATIONALLY. Don't read the raw spec — interpret it naturally, like you're explaining to a friend what you understood. Be specific about what you'll build, which agents you'll use, and what the output will look like.
+
+End with: "Is this what you want? Say yes to proceed, or tell me what to adjust."
+
+IMPORTANT: Do NOT execute anything. Just confirm understanding. Wait for the user's go-ahead.`;
 }
 
-export const GRAMMAR_DISCLAIMER = `**Grammar Mode Active**
+/**
+ * Build the execution prompt after user confirms.
+ * This wraps the confirmed spec so ACHEEVY knows to execute.
+ */
+export function buildExecutionPrompt(confirmedSpec: string): string {
+  return `[GRAMMAR CONFIRMED — EXECUTE]\n\nThe user confirmed the following spec. Proceed with execution.\n\n${confirmedSpec}`;
+}
 
-Grammar converts your natural language into precise technical instructions so ACHEEVY and the agents understand exactly what you need.
+export const GRAMMAR_DISCLAIMER = `**Grammar (NTNTN) — Intention Engine Active**
 
-You describe what you want in plain words — Grammar translates it into the technical spec. ACHEEVY will confirm the interpretation with you before executing.
+Grammar is the Intention Engine. It converts your natural language into precise technical instructions so ACHEEVY and the agents understand exactly what you need.
 
-_Type normally. Grammar handles the rest._`;
+**How it works:**
+1. You describe what you want in plain words
+2. Grammar translates it into a structured technical spec
+3. ACHEEVY reads back what it understood and asks you to confirm
+4. You say "yes" to proceed, or adjust until it's right
+5. Only then does ACHEEVY execute
 
-export { GRAMMAR_SYSTEM_PROMPT };
+_Type normally. The Intention Engine handles the rest._`;
+
+export { NTNTN_SYSTEM_PROMPT as GRAMMAR_SYSTEM_PROMPT };
