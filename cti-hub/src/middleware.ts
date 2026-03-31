@@ -6,7 +6,7 @@ const OWNER_ONLY_ROUTES = ['/live', '/plug-bin', '/open-seats', '/enrollments', 
 const OWNER_EMAILS = ['bpo@achievemor.io', 'jarrett.risher@gmail.com'];
 
 // Routes only available on deploy.foai.cloud (customer-facing product)
-const DEPLOY_ROUTES = ['/chat', '/agents', '/deploy-agent', '/projects', '/settings', '/profile', '/billing', '/auth', '/grammar'];
+const DEPLOY_ROUTES = ['/chat', '/agents', '/deploy-agent', '/projects', '/settings', '/profile', '/billing', '/auth', '/grammar', '/deploy-landing', '/about'];
 
 export function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
@@ -24,9 +24,9 @@ export function middleware(request: NextRequest) {
       return NextResponse.redirect(new URL('/chat', request.url));
     }
 
-    // Redirect / to /chat on deploy domain
+    // Landing page on deploy domain root
     if (pathname === '/') {
-      return NextResponse.redirect(new URL('/chat', request.url));
+      return NextResponse.rewrite(new URL('/deploy-landing', request.url));
     }
 
     return NextResponse.next();
