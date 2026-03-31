@@ -55,21 +55,31 @@ async function provisionFirebaseUser(firebaseUser: User): Promise<void> {
   // Force refresh to get a fresh token (tokens expire after 1 hour)
   const idToken = await firebaseUser.getIdToken(true);
 
-  await fetch('/api/auth/session', {
+  // Set session cookie — must succeed for auth to work
+  const sessionRes = await fetch('/api/auth/session', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ accessToken: idToken }),
   });
+  if (!sessionRes.ok) {
+    const err = await sessionRes.text().catch(() => 'unknown');
+    console.error('[Auth] Session cookie failed:', sessionRes.status, err);
+  }
 
-  await fetch('/api/auth/provision', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      firebaseUid: firebaseUser.uid,
-      displayName: firebaseUser.displayName || firebaseUser.email?.split('@')[0] || 'User',
-      email: firebaseUser.email,
-    }),
-  });
+  // Provision user — non-fatal if it fails (user may already exist)
+  try {
+    await fetch('/api/auth/provision', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        firebaseUid: firebaseUser.uid,
+        displayName: firebaseUser.displayName || firebaseUser.email?.split('@')[0] || 'User',
+        email: firebaseUser.email,
+      }),
+    });
+  } catch (err) {
+    console.error('[Auth] Provision failed (non-fatal):', err);
+  }
 }
 
 // ─── Provider ─────────────────────────────────────────────
@@ -134,8 +144,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           // Access check — owners pass instantly, team members checked against DB
           const verifyRes = await fetch(`/api/access-keys/verify?email=${encodeURIComponent(firebaseUser.email || '')}`);
           const verifyData = await verifyRes.json().catch(() => ({ allowed: false }));
+          console.log('[Auth] Verify result:', firebaseUser.email, verifyData);
 
           if (!verifyData.allowed) {
+            console.warn('[Auth] Access denied for:', firebaseUser.email);
             setDenied(true);
             setUser(null);
             await firebaseSignOut(getFirebaseAuth());
@@ -146,15 +158,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
           setDenied(false);
 
-          // Auth loop: persist session cookie FIRST (before setting user state)
-          // This ensures the cookie exists before any redirect triggers
-          await provisionFirebaseUser(firebaseUser);
-
-          // NOW set user state — this triggers the login page redirect
+          // Set user state FIRST — this unblocks the UI immediately
           setUser(firebaseUser);
 
-          // Hydrate profile, subscription, orgs, tier limits
-          await hydrateProfile(firebaseUser);
+          // Then persist session cookie (non-blocking for UI)
+          try {
+            await provisionFirebaseUser(firebaseUser);
+          } catch (err) {
+            console.error('[Auth] Provision failed (non-fatal):', err);
+          }
+
+          // Hydrate profile — failures are non-fatal (defaults apply)
+          try {
+            await hydrateProfile(firebaseUser);
+          } catch (err) {
+            console.error('[Auth] Profile hydration failed (non-fatal):', err);
+          }
         } else {
           setUser(null);
           setProfile(null);
