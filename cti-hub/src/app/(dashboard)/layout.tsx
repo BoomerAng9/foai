@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { AccountPanel } from '@/components/account/AccountPanel';
 import {
   MessageSquare,
   Activity,
@@ -240,6 +241,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           </div>
         </div>
       </main>
+
+      {/* Account Panel — bottom-right on every page */}
+      <AccountPanel />
     </div>
   );
 }
