@@ -27,7 +27,7 @@ const agents: AgentNode[] = [
   { name: 'Chicken Hawk', role: 'ops', task: 'Deploy', color: '#F97316', angle: -50 },
   { name: 'Scout_Ang', role: 'research', task: 'Research', color: '#3B82F6', angle: -15 },
   { name: 'Edu_Ang', role: 'training', task: 'Onboard', color: '#22C55E', angle: 15 },
-  { name: 'Money Engine', role: 'revenue', task: 'Invoice', color: '#EAB308', angle: 50 },
+  { name: 'CFO_Ang', role: 'revenue', task: 'Invoice', color: '#EAB308', angle: 50 },
 ];
 
 export const Scene6cScale: React.FC = () => {

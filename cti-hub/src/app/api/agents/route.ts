@@ -28,7 +28,7 @@ export async function GET(request: NextRequest) {
         LIMIT 20
       `;
       recentActivity = ledger.map(l => ({
-        agent: l.action === 'chat' ? 'ACHEEVY' : l.action === 'image-gen' ? 'Visual Engine' : 'Money Engine',
+        agent: l.action === 'chat' ? 'ACHEEVY' : l.action === 'image-gen' ? 'Visual Engine' : 'CFO_Ang',
         action: l.action,
         target: 'User',
         message: `${l.action} — $${Number(l.cost).toFixed(6)}`,
@@ -84,8 +84,8 @@ export async function GET(request: NextRequest) {
 }
 
 function getAgentStatus(agentId: string, activity: Array<{ agent: string; timestamp: string }>): string {
-  // ACHEEVY and Money Engine are always monitoring
-  if (agentId === 'acheevy' || agentId === 'money_engine') return 'monitoring';
+  // ACHEEVY and CFO_Ang are always monitoring
+  if (agentId === 'acheevy' || agentId === 'cfo_ang') return 'monitoring';
 
   // Check if agent had recent activity (last 5 min)
   const recent = activity.find(a =>

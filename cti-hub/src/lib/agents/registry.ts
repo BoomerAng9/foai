@@ -261,15 +261,16 @@ export const AGENTS: AgentProfile[] = [
 
   // ── MONEY ENGINE ──
   {
-    id: 'money_engine',
-    name: 'Money Engine',
-    role: 'Financial Tracker',
+    id: 'cfo_ang',
+    name: 'CFO_Ang',
+    role: 'Chief Financial Officer',
     department: 'FIN',
-    tier: 'specialist',
-    persona: 'Every dollar tracked. Every token counted.',
+    tier: 'strategic',
+    persona: 'Every dollar tracked. Every token counted. Receivables, bookkeeping, pricing.',
     avatar: '/acheevy-helmet.png',
-    capabilities: ['Budget tracking', 'Cost analysis', 'Revenue optimization'],
-    subscriptionTier: 'all', hireable: true, individualPrice: 47,
+    capabilities: ['Budget tracking', 'Cost analysis', 'Revenue optimization', 'Receivables', 'Bookkeeping', 'Pricing strategy'],
+    mcpToolName: 'cfo_ang_finance',
+    subscriptionTier: 'growth', hireable: true, individualPrice: 147,
   },
 ];
 

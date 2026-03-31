@@ -11,10 +11,12 @@ const AGENT_ENDPOINTS: Record<string, string> = {
   content_ang: process.env.CONTENT_ANG_URL || 'https://content-ang-apbgyi35aq-uc.a.run.app',
   biz_ang: process.env.BIZ_ANG_URL || 'https://biz-ang-apbgyi35aq-uc.a.run.app',
   ops_ang: process.env.OPS_ANG_URL || 'https://ops-ang-apbgyi35aq-uc.a.run.app',
-  chicken_hawk: process.env.CHICKEN_HAWK_URL || '',
-  // Additional services
+  cfo_ang: process.env.CFO_ANG_URL || 'https://cfo-ang-apbgyi35aq-uc.a.run.app',
+  chicken_hawk: process.env.CHICKEN_HAWK_URL || 'http://chicken-hawk-gateway-gateway-1:8000',
+  // Additional services on Cloud Run
   hermes: process.env.HERMES_URL || 'https://hermes-agent-apbgyi35aq-uc.a.run.app',
-  money_engine: process.env.MONEY_ENGINE_URL || 'https://money-engine-api-apbgyi35aq-uc.a.run.app',
+  nemoclaw: process.env.NEMOCLAW_URL || 'https://nemoclaw-service-apbgyi35aq-uc.a.run.app',
+  openclaw: process.env.OPENCLAW_URL || 'https://openclaw-service-apbgyi35aq-uc.a.run.app',
 };
 
 export interface DispatchResult {
@@ -145,6 +147,9 @@ export function detectAgent(message: string): string | null {
   }
   if (lower.includes('monitor') || lower.includes('health check') || lower.includes('uptime') || lower.includes('incident')) {
     return 'ops_ang';
+  }
+  if (lower.includes('budget') || lower.includes('invoice') || lower.includes('billing') || lower.includes('revenue') || lower.includes('cost') || lower.includes('financ') || lower.includes('receivable') || lower.includes('bookkeep')) {
+    return 'cfo_ang';
   }
   if (lower.includes('code') || lower.includes('build') || lower.includes('deploy') || lower.includes('develop')) {
     return 'chicken_hawk';

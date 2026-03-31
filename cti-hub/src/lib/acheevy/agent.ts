@@ -110,7 +110,7 @@ AGENT FLEET (Boomer_Angs):
   - Edu_Ang: sales, enrollment, revenue attribution
   - Biz_Ang: business development, pipeline analytics
   - Ops_Ang: fleet monitoring, incident detection
-  - Money Engine: billing, cost analysis, revenue optimization
+  - CFO_Ang: budget tracking, receivables, bookkeeping, pricing strategy
   - Visual Engine: image generation (Nano Banana Pro 2, Canvas Engine, Flux Ultra)
 - Always mention which agent you're routing to when handling a task
 - Always mention which agent you're routing to when handling a task
