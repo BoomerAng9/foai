@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import {
-  Paperclip, Camera, Cloud, ArrowDownToLine, Github, BookOpen, Search, ChevronRight, Check,
+  Paperclip, Camera, Cloud, ArrowDownToLine, Github, BookOpen, Search, ChevronRight, Check, Languages,
 } from 'lucide-react';
 import type { TierId } from '@/lib/chat/types';
 import { TIERS } from '@/lib/chat/types';
@@ -19,6 +19,8 @@ interface AttachmentMenuProps {
   activeTier: TierId;
   onTierChange: (tier: TierId) => void;
   isSubscriber: boolean;
+  grammarActive?: boolean;
+  onGrammarToggle?: () => void;
 }
 
 interface MenuItem {
@@ -39,6 +41,8 @@ export function AttachmentMenu({
   activeTier,
   onTierChange,
   isSubscriber,
+  grammarActive,
+  onGrammarToggle,
 }: AttachmentMenuProps) {
   const [open, setOpen] = useState(false);
   const [showResearch, setShowResearch] = useState(false);
@@ -65,6 +69,12 @@ export function AttachmentMenu({
   }
 
   const menuItems: MenuItem[] = [
+    {
+      icon: <Languages className={`w-4 h-4 ${grammarActive ? 'text-accent' : 'text-fg-tertiary'}`} />,
+      label: grammarActive ? 'Grammar ON ✓' : 'Grammar',
+      onClick: () => { if (onGrammarToggle) onGrammarToggle(); setOpen(false); },
+      dividerAfter: true,
+    },
     {
       icon: <Paperclip className="w-4 h-4 text-fg-tertiary" />,
       label: 'Add files or photos',

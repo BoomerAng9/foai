@@ -12,6 +12,7 @@ import { LucPopup } from '@/components/chat/LucPopup';
 import type { LucEstimate } from '@/lib/luc/types';
 import { AttachmentMenu } from '@/components/chat/AttachmentMenu';
 import type { Skill } from '@/lib/skills/registry';
+import { buildGrammarPrompt, buildConfirmationPrompt, isPassthrough, GRAMMAR_DISCLAIMER } from '@/lib/grammar/converter';
 
 function formatFileSize(bytes: number) {
   if (bytes < 1024) return bytes + ' B';
@@ -43,7 +44,9 @@ export default function ChatWithACHEEVY() {
   const [budgetRemaining, setBudgetRemaining] = useState<number | null>(null);
   const [budgetStarting, setBudgetStarting] = useState<number>(20);
   const [autoAccept, setAutoAccept] = useState(false);
-  const [voiceEnabled, setVoiceEnabled] = useState(false);
+  const [voiceEnabled, setVoiceEnabled] = useState(true); // Voice ON by default
+  const [grammarActive, setGrammarActive] = useState(false);
+  const [grammarShownDisclaimer, setGrammarShownDisclaimer] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [activeSkill, setActiveSkill] = useState<Skill | null>(null);
   const [streamingCost, setStreamingCost] = useState<{ tokens_in: number; tokens_out: number; cost: number } | null>(null);
@@ -274,8 +277,18 @@ export default function ChatWithACHEEVY() {
   }
 
   async function handleSend(text?: string, skipEstimate?: boolean) {
-    const msg = text || input.trim();
+    let msg = text || input.trim();
     if (!msg || sending) return;
+
+    // Grammar mode: wrap the message in a conversion prompt
+    // ACHEEVY will convert, read back, and confirm before executing
+    if (grammarActive && !isPassthrough(msg) && !msg.startsWith('[GRAMMAR')) {
+      const grammarPrompt = buildGrammarPrompt(msg);
+      const confirmPrompt = buildConfirmationPrompt(msg, grammarPrompt);
+      // Send as a Grammar-wrapped message — ACHEEVY handles the confirmation
+      msg = `[GRAMMAR ACTIVE]\n\n${confirmPrompt}`;
+    }
+
     const currentAttachments = [...attachments];
     setInput('');
     setAttachments([]);
@@ -373,6 +386,20 @@ export default function ChatWithACHEEVY() {
         url: dataUrl,
       }]);
     } catch {}
+  }
+
+  function handleGrammarToggle() {
+    if (!grammarActive && !grammarShownDisclaimer) {
+      // Show disclaimer as a system message
+      setMessages(prev => [...prev, {
+        id: `grammar-disclaimer-${Date.now()}`,
+        role: 'acheevy',
+        content: GRAMMAR_DISCLAIMER,
+        created_at: new Date().toISOString(),
+      }]);
+      setGrammarShownDisclaimer(true);
+    }
+    setGrammarActive(!grammarActive);
   }
 
   function handleSkillSelect(skill: Skill) {
@@ -564,6 +591,8 @@ export default function ChatWithACHEEVY() {
                 activeTier={activeTier}
                 onTierChange={setActiveTier}
                 isSubscriber={true}
+                grammarActive={grammarActive}
+                onGrammarToggle={handleGrammarToggle}
               />
 
               <div className="flex-1 relative">
@@ -610,6 +639,12 @@ export default function ChatWithACHEEVY() {
                     <span className="text-signal-info">
                       ▸ ${streamingCost.cost < 0.0001 ? streamingCost.cost.toExponential(1) : streamingCost.cost.toFixed(4)} | {(streamingCost.tokens_in + streamingCost.tokens_out).toLocaleString()} tokens
                     </span>
+                  </>
+                )}
+                {grammarActive && (
+                  <>
+                    <span className="text-fg-ghost">|</span>
+                    <span className="text-accent font-semibold">GRAMMAR</span>
                   </>
                 )}
                 {activeSkill && (
