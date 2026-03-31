@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Jar Fill — Deploy Platform Plug</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: #0A0A0A;
+      color: #fff;
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      overflow: hidden;
+    }
+
+    .container {
+      text-align: center;
+      position: relative;
+    }
+
+    h1 {
+      font-size: 14px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: #E8A020;
+      margin-bottom: 40px;
+    }
+
+    .jar {
+      position: relative;
+      width: 160px;
+      height: 280px;
+      margin: 0 auto;
+    }
+
+    /* Jar outline */
+    .jar-body {
+      position: absolute;
+      bottom: 0;
+      left: 10px;
+      right: 10px;
+      height: 240px;
+      border: 3px solid rgba(232, 160, 32, 0.4);
+      border-radius: 0 0 20px 20px;
+      overflow: hidden;
+      background: rgba(232, 160, 32, 0.02);
+    }
+
+    /* Jar neck */
+    .jar-neck {
+      position: absolute;
+      top: 0;
+      left: 30px;
+      right: 30px;
+      height: 50px;
+      border: 3px solid rgba(232, 160, 32, 0.4);
+      border-bottom: none;
+      border-radius: 8px 8px 0 0;
+      background: rgba(232, 160, 32, 0.02);
+    }
+
+    /* Jar lid */
+    .jar-lid {
+      position: absolute;
+      top: -8px;
+      left: 20px;
+      right: 20px;
+      height: 12px;
+      background: #E8A020;
+      border-radius: 4px;
+    }
+
+    /* Fill liquid */
+    .fill {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 0%;
+      background: linear-gradient(180deg, rgba(232, 160, 32, 0.8) 0%, rgba(232, 160, 32, 0.6) 100%);
+      transition: height 0.1s linear;
+      border-radius: 0 0 17px 17px;
+    }
+
+    /* Bubbles */
+    .bubble {
+      position: absolute;
+      border-radius: 50%;
+      background: rgba(232, 160, 32, 0.3);
+      animation: rise 2s infinite ease-in;
+    }
+
+    @keyframes rise {
+      0% { transform: translateY(0) scale(1); opacity: 0.6; }
+      100% { transform: translateY(-200px) scale(0.3); opacity: 0; }
+    }
+
+    /* Wave surface */
+    .wave {
+      position: absolute;
+      top: -4px;
+      left: -2px;
+      right: -2px;
+      height: 8px;
+      background: rgba(232, 160, 32, 0.9);
+      border-radius: 50%;
+      animation: wobble 1.5s infinite ease-in-out;
+    }
+
+    @keyframes wobble {
+      0%, 100% { transform: scaleX(1); }
+      50% { transform: scaleX(0.95); }
+    }
+
+    /* Percentage */
+    .percent {
+      font-size: 48px;
+      font-weight: 900;
+      color: #E8A020;
+      margin-top: 30px;
+      text-shadow: 0 0 30px rgba(232, 160, 32, 0.3);
+    }
+
+    .label {
+      font-size: 10px;
+      color: #666;
+      margin-top: 8px;
+      letter-spacing: 0.3em;
+    }
+
+    /* Glow effect when full */
+    .jar-body.full {
+      box-shadow: 0 0 40px rgba(232, 160, 32, 0.3), inset 0 0 40px rgba(232, 160, 32, 0.1);
+      border-color: #E8A020;
+    }
+
+    .footer {
+      position: fixed;
+      bottom: 20px;
+      font-size: 9px;
+      color: #333;
+      letter-spacing: 0.2em;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Jar Fill Plug</h1>
+
+    <div class="jar">
+      <div class="jar-lid"></div>
+      <div class="jar-neck"></div>
+      <div class="jar-body" id="jarBody">
+        <div class="fill" id="fill">
+          <div class="wave"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="percent" id="percent">0%</div>
+    <div class="label">FILLING IN PROGRESS</div>
+  </div>
+
+  <div class="footer">DEPLOY PLATFORM · ACHIEVEMOR · PLUG</div>
+
+  <script>
+    const fill = document.getElementById('fill');
+    const percent = document.getElementById('percent');
+    const jarBody = document.getElementById('jarBody');
+    let level = 0;
+    const SPEED = 50; // ms per tick
+    const INCREMENT = 0.2; // % per tick
+
+    // Create random bubbles
+    function createBubble() {
+      const bubble = document.createElement('div');
+      bubble.className = 'bubble';
+      const size = 4 + Math.random() * 8;
+      bubble.style.width = size + 'px';
+      bubble.style.height = size + 'px';
+      bubble.style.left = (10 + Math.random() * 80) + '%';
+      bubble.style.bottom = '0';
+      bubble.style.animationDuration = (1.5 + Math.random() * 2) + 's';
+      fill.appendChild(bubble);
+      setTimeout(() => bubble.remove(), 3000);
+    }
+
+    function tick() {
+      level += INCREMENT;
+
+      if (level >= 100) {
+        level = 100;
+        fill.style.height = '100%';
+        percent.textContent = '100%';
+        percent.style.color = '#22C55E';
+        jarBody.classList.add('full');
+        document.querySelector('.label').textContent = 'COMPLETE';
+
+        // Reset after 3 seconds
+        setTimeout(() => {
+          level = 0;
+          fill.style.height = '0%';
+          percent.textContent = '0%';
+          percent.style.color = '#E8A020';
+          jarBody.classList.remove('full');
+          document.querySelector('.label').textContent = 'FILLING IN PROGRESS';
+        }, 3000);
+      } else {
+        fill.style.height = level + '%';
+        percent.textContent = Math.floor(level) + '%';
+      }
+
+      // Random bubbles while filling
+      if (level < 100 && Math.random() > 0.7) {
+        createBubble();
+      }
+    }
+
+    setInterval(tick, SPEED);
+  </script>
+</body>
+</html>
