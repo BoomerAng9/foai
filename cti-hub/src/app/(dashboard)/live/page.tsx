@@ -37,7 +37,7 @@ const STATUS_COLORS: Record<string, string> = {
 const PMO_OFFICES = [
   { id: 'CMD', name: 'Command', agents: ['ACHEEVY', 'Chicken Hawk'], color: '#E8A020' },
   { id: 'OPS', name: 'Operations', agents: ['Scout_Ang', 'Edu_Ang'], color: '#3B82F6' },
-  { id: 'ENG', name: 'Engineering', agents: ['Visual Engine', 'Money Engine'], color: '#22C55E' },
+  { id: 'ENG', name: 'Engineering', agents: ['Visual Engine', 'CFO_Ang'], color: '#22C55E' },
 ];
 
 export default function OperationsFloor() {

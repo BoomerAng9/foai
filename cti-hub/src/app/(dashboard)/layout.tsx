@@ -20,6 +20,7 @@ import {
   Terminal,
   Menu,
   X,
+  Zap,
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { AuthPromptTimer } from '@/components/auth/AuthPromptTimer';
@@ -34,6 +35,7 @@ interface NavItem {
 const NAV: NavItem[] = [
   { name: 'HOME', href: '/chat', icon: MessageSquare },
   { name: 'AGENT HQ', href: '/agents', icon: Users },
+  { name: 'DEPLOY', href: '/deploy-agent', icon: Zap },
   { name: 'WORKFLOWS', href: '/projects', icon: FolderOpen },
   { name: 'EXECUTIONS', href: '/live', icon: Activity, ownerOnly: true },
   { name: 'PLUG BIN', href: '/plug-bin', icon: Video, ownerOnly: true },

@@ -84,8 +84,8 @@ export async function GET(request: NextRequest) {
       status: teamMembers.length > 0 ? 'active' : 'idle',
       currentTask: `${teamMembers.filter(t => t.is_active).length} active team members`,
     },
-    'Money Engine': {
-      name: 'Money Engine',
+    'CFO_Ang': {
+      name: 'CFO_Ang',
       status: totalSpend > 0 ? 'active' : 'monitoring',
       currentTask: `$${totalSpend.toFixed(4)} tracked`,
     },
@@ -103,7 +103,7 @@ export async function GET(request: NextRequest) {
   // Jobs log from budget ledger + recent messages
   const jobsLog = [
     ...budgetLedger.slice(0, 15).map(l => ({
-      agent: l.action === 'chat' ? 'ACHEEVY' : l.action === 'image-gen' ? 'Visual Engine' : 'Money Engine',
+      agent: l.action === 'chat' ? 'ACHEEVY' : l.action === 'image-gen' ? 'Visual Engine' : 'CFO_Ang',
       task: `${l.action} — $${l.cost.toFixed(6)}`,
       status: 'completed',
       timestamp: l.created_at,

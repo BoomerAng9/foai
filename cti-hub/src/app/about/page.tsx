@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { ArrowRight, Terminal, Zap, Brain, Shield, Users, Monitor, Package, Menu, X } from 'lucide-react';
+import { ArrowRight, Terminal, Zap, Brain, Shield, Users, Monitor, Package, Menu, X, Mic, FileText, CreditCard, Building2, Plug } from 'lucide-react';
 
 export default function AboutPage() {
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
@@ -51,13 +51,13 @@ export default function AboutPage() {
         <div className="max-w-4xl mx-auto text-center">
           <p className="label-mono mb-4">About The Deploy Platform</p>
           <h1 className="text-3xl md:text-5xl font-black tracking-tight mb-6 leading-[1.1]">
-            AI that{' '}
-            <span style={{ color: '#E8A020', fontFamily: "'Permanent Marker', cursive" }}>manages</span>{' '}
-            solutions.
+            Scale your business.{' '}
+            <span style={{ color: '#E8A020', fontFamily: "'Permanent Marker', cursive" }}>Skip the hiring.</span>
           </h1>
           <p className="text-fg-secondary text-lg leading-relaxed max-w-2xl mx-auto">
-            From a single prompt to a fully deployed, governed, and delivered application.
-            No devops. No waiting. Just results.
+            Scaling is expensive. Hiring is slow. Managing is exhausting.
+            The Deploy Platform gives you an AI workforce that builds, ships, and operates
+            — so you can grow without the headcount.
           </p>
         </div>
       </section>
@@ -72,21 +72,23 @@ export default function AboutPage() {
               <h2 className="text-3xl font-bold tracking-tight mb-4">
                 ai<span style={{ color: '#E8A020' }}>PLUG</span>s
               </h2>
-              <p className="label-mono mb-3">The delivery unit</p>
+              <p className="label-mono mb-3">What you actually get</p>
             </div>
             <div className="space-y-4 text-fg-secondary leading-relaxed">
               <p>
-                An aiPLUG is the finished product — a deployed, working asset that ACHEEVY builds and ships for you.
-                It could be an API, a dashboard, a data pipeline, a full-stack app, or any digital solution.
+                An aiPLUG is the finished product you walk away with. It could be a live website,
+                an API, a sales dashboard, a data pipeline, or a full application. You describe what
+                you need. It gets built, tested, and deployed for you.
               </p>
               <p>
-                Every aiPLUG goes through a rigorous 10-stage pipeline: from RFP intake through commercial proposal,
-                technical architecture, QA, and delivery. When it ships, you get the BAMARAM — the victory confirmation
-                that your plug is live and working.
+                No Figma mockups to approve. No sprint planning meetings. No &quot;we&apos;ll circle back next week.&quot;
+                Every aiPLUG goes through a 10-stage pipeline — from intake to delivery — and you
+                watch progress in real time. When it ships, you get the BAMARAM: your confirmation
+                that the job is done and live.
               </p>
               <p>
-                Your completed aiPLUGs live in your <strong>Plug Bin</strong> — a collection of everything
-                that&apos;s been deployed to your workspace.
+                Every aiPLUG you&apos;ve ever built lives in your <strong>Plug Bin</strong> — your personal
+                library of everything that&apos;s been shipped to your workspace.
               </p>
             </div>
           </div>
@@ -99,7 +101,7 @@ export default function AboutPage() {
           <div className="mb-8 md:mb-14">
             <p className="label-mono mb-3">Two ways to build</p>
             <h2 className="text-2xl md:text-3xl font-bold tracking-tight">
-              Choose your speed.
+              Hands-off or hands-on. Your call.
             </h2>
           </div>
 
@@ -113,13 +115,12 @@ export default function AboutPage() {
               </h3>
               <p className="label-mono mb-4">2-5 minutes</p>
               <p className="text-fg-secondary text-sm leading-relaxed mb-6">
-                Give ACHEEVY a single prompt describing what you want. The system takes over:
-                analyzing your request, selecting the right tier, mapping the architecture,
-                generating use cases, and kicking off the 10-stage build pipeline. You watch
-                progress in real time on the pipeline tracker.
+                Tell ACHEEVY what you want in plain English. The platform takes it from there:
+                scoping your project, picking the right approach, and kicking off the build.
+                You sit back and watch progress in real time.
               </p>
               <ul className="space-y-2">
-                {['Fully autonomous execution', 'Confidence-gated decisions', 'Human approval at critical gates', 'Full audit trail via ICAR/ACP'].map(item => (
+                {['Fully autonomous — you describe, it delivers', 'Smart checkpoints before big decisions', 'You approve only when it matters', 'Full paper trail for everything built'].map(item => (
                   <li key={item} className="flex items-center gap-2 text-sm text-fg-secondary">
                     <span className="led led-live" /> {item}
                   </li>
@@ -136,13 +137,13 @@ export default function AboutPage() {
               </h3>
               <p className="label-mono mb-4">4-10 minutes</p>
               <p className="text-fg-secondary text-sm leading-relaxed mb-6">
-                ACHEEVY walks you through a structured consultation: Share Your Idea,
-                Clarity &amp; Risk, Audience Resonance, and Expert Lens. The output is a
-                validated Assessment Ledger with use cases, risk analysis, and a tier
-                recommendation — then the pipeline builds it.
+                Not sure exactly what you need? ACHEEVY walks you through it.
+                Share your idea, get clarity on risks and audience, then watch it
+                turn into a validated plan — with use cases, risk analysis, and a
+                clear build path.
               </p>
               <ul className="space-y-2">
-                {['4-phase needs analysis', 'Use case validation', 'Risk assessment built in', 'Fewer change orders during build'].map(item => (
+                {['Guided discovery — no blank-page anxiety', 'Validates your idea before building', 'Risk analysis built into every plan', 'Fewer surprises, fewer revisions'].map(item => (
                   <li key={item} className="flex items-center gap-2 text-sm text-fg-secondary">
                     <span className="led bg-signal-info" /> {item}
                   </li>
@@ -194,28 +195,88 @@ export default function AboutPage() {
         </div>
       </section>
 
+      {/* Voice-First AI */}
+      <section className="py-12 md:py-20 px-4 md:px-8 border-b border-border bg-bg-surface">
+        <div className="max-w-5xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-[1fr_1.5fr] gap-8 md:gap-16 items-center">
+            <div>
+              <div className="w-14 h-14 border border-border flex items-center justify-center mb-6">
+                <Mic className="w-7 h-7 text-fg-secondary" />
+              </div>
+              <h2 className="text-3xl font-bold tracking-tight mb-4">
+                Voice-First <span style={{ color: '#E8A020' }}>AI</span>
+              </h2>
+              <p className="label-mono">Talk to your business</p>
+            </div>
+            <div className="space-y-4 text-fg-secondary leading-relaxed">
+              <p>
+                Talk to your business, don&apos;t type. ACHEEVY listens, understands, and executes.
+                Voice commands drive everything — from research to deployment.
+              </p>
+              <p>
+                It&apos;s like having a CEO you can call anytime. Describe what you need out loud,
+                and watch the platform turn your words into action. No keyboard required.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Grammar (NTNTN) — The Intention Engine */}
+      <section className="py-12 md:py-20 px-4 md:px-8 border-b border-border">
+        <div className="max-w-5xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-[1.5fr_1fr] gap-8 md:gap-16 items-center">
+            <div>
+              <div className="w-14 h-14 border border-border flex items-center justify-center mb-6">
+                <Brain className="w-7 h-7 text-fg-secondary" />
+              </div>
+              <h2 className="text-3xl font-bold tracking-tight mb-4">
+                Grammar <span style={{ color: '#E8A020' }}>(NTNTN)</span>
+              </h2>
+              <p className="label-mono mb-4">The Intention Engine</p>
+              <div className="space-y-4 text-fg-secondary leading-relaxed">
+                <p>
+                  Say what you mean, even if you&apos;re not technical. Grammar translates your
+                  plain English into precise instructions the platform can act on.
+                </p>
+                <p>
+                  You describe the outcome. The platform figures out the how. No jargon.
+                  No spec documents. Just tell it what you want to happen, and it happens.
+                </p>
+              </div>
+            </div>
+            <div className="flex justify-center">
+              <div className="w-48 h-48 border border-border flex items-center justify-center">
+                <FileText className="w-16 h-16 text-fg-ghost" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Boomer_Angs */}
       <section className="py-12 md:py-20 px-4 md:px-8 border-b border-border bg-bg-surface">
         <div className="max-w-5xl mx-auto">
           <div className="mb-8 md:mb-14">
-            <p className="label-mono mb-3">The Agent Fleet</p>
+            <p className="label-mono mb-3">Your AI Workforce</p>
             <h2 className="text-3xl font-bold tracking-tight">
-              Boomer_Angs
+              The Boomer_Angs
             </h2>
             <p className="text-fg-secondary text-sm mt-3 max-w-xl">
-              Specialized execution agents dispatched by ACHEEVY. Each handles a different
-              domain of work within the pipeline.
+              Think of them as your employees — except they work 24/7, never call in sick,
+              and each one is a specialist. ACHEEVY assigns them work automatically.
+              You never manage them directly.
             </p>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {[
-              { name: 'Scout_Ang', role: 'Research & Discovery', desc: 'Web scraping, data gathering, market research, open seat scanning across institutions.' },
-              { name: 'Content_Ang', role: 'Content & Creative', desc: 'Writing, proposals, presentations, marketing copy, documentation, and creative deliverables.' },
-              { name: 'Edu_Ang', role: 'Education & Enrollment', desc: 'MindEdge affiliate management, enrollment tracking, course pipeline operations.' },
-              { name: 'Ops_Ang', role: 'Operations & Infrastructure', desc: 'Deployment, monitoring, health checks, infrastructure management, CI/CD pipelines.' },
-              { name: 'Biz_Ang', role: 'Business Development', desc: 'Revenue analysis, client proposals, partnership outreach, financial modeling.' },
-              { name: 'Hermes / LearnAng', role: 'Performance Evaluation', desc: 'Weekly Deep Think analysis of fleet performance. Scores agents, issues directives, tracks ecosystem health.' },
+              { name: 'Scout_Ang', role: 'Research', desc: 'Finds leads, scrapes the web, pulls market data, and digs up opportunities you\'d spend hours hunting for manually.' },
+              { name: 'Content_Ang', role: 'Content & Creative', desc: 'Writes proposals, marketing copy, presentations, docs — anything that needs words on a page, polished and on-brand.' },
+              { name: 'Edu_Ang', role: 'Education & Training', desc: 'Manages course enrollment, tracks learning pipelines, and handles education partnerships on your behalf.' },
+              { name: 'Ops_Ang', role: 'Operations', desc: 'Deploys your projects, monitors uptime, runs health checks, and keeps your infrastructure humming without you touching a terminal.' },
+              { name: 'Biz_Ang', role: 'Business Development', desc: 'Revenue analysis, client proposals, partnership outreach, financial modeling. Your BD team without the salary overhead.' },
+              { name: 'Hermes', role: 'Performance & Quality', desc: 'Reviews how every agent is performing each week. Scores output, flags problems, and keeps the whole workforce accountable.' },
             ].map((agent) => (
               <div key={agent.name} className="p-6 border border-border bg-bg hover:border-fg-ghost transition-colors">
                 <div className="flex items-center gap-2 mb-3">
@@ -241,17 +302,17 @@ export default function AboutPage() {
               <h2 className="text-2xl font-bold tracking-tight mb-4">
                 Chicken Hawk
               </h2>
-              <p className="label-mono mb-4">Tactical Operator</p>
+              <p className="label-mono mb-4">The Operations Manager</p>
               <div className="space-y-3 text-fg-secondary text-sm leading-relaxed">
                 <p>
-                  Chicken Hawk is the tactical layer between ACHEEVY and the execution fleet.
-                  While ACHEEVY plans and orchestrates at a strategic level, Chicken Hawk
-                  handles the ground-level operations: task decomposition, agent dispatch,
-                  progress tracking, and quality gates.
+                  If ACHEEVY is the CEO, Chicken Hawk is the operations manager
+                  who makes sure things actually get done. It takes ACHEEVY&apos;s plan
+                  and breaks it into tasks, assigns the right agents, tracks progress,
+                  and catches problems before they become yours.
                 </p>
                 <p>
-                  Think of Chicken Hawk as the field commander — translating ACHEEVY&apos;s
-                  high-level objectives into actionable work units for the Boomer_Angs.
+                  You never interact with Chicken Hawk directly. It works behind the scenes
+                  so you can focus on your business, not on managing AI.
                 </p>
               </div>
             </div>
@@ -262,17 +323,15 @@ export default function AboutPage() {
               <h2 className="text-2xl font-bold tracking-tight mb-4">
                 Lil_Hawks
               </h2>
-              <p className="label-mono mb-4">Sub-task Runners</p>
+              <p className="label-mono mb-4">The Task Runners</p>
               <div className="space-y-3 text-fg-secondary text-sm leading-relaxed">
                 <p>
-                  Lil_Hawks are lightweight, ephemeral agents spawned by Chicken Hawk for
-                  specific sub-tasks within a larger job. They handle the granular work:
-                  individual API calls, file transformations, data validation steps, and
-                  micro-deployments.
+                  Lil_Hawks handle the small stuff — individual tasks inside a bigger job.
+                  Need to call an API, convert a file, validate some data, or push a quick
+                  update? A Lil_Hawk spins up, does the job, reports back, and disappears.
                 </p>
                 <p>
-                  They spin up, execute their task, report back to Chicken Hawk, and
-                  terminate. Fast, focused, and disposable.
+                  Fast, focused, and disposable. They&apos;re the interns who actually deliver.
                 </p>
               </div>
             </div>
@@ -280,8 +339,96 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* PMO Office */}
+      {/* The Autonomous Company */}
       <section className="py-12 md:py-20 px-4 md:px-8 border-b border-border bg-bg-surface">
+        <div className="max-w-5xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-[1fr_1.5fr] gap-8 md:gap-16 items-center">
+            <div>
+              <div className="w-14 h-14 border border-border flex items-center justify-center mb-6">
+                <Building2 className="w-7 h-7 text-fg-secondary" />
+              </div>
+              <h2 className="text-3xl font-bold tracking-tight mb-4">
+                The Autonomous <span style={{ color: '#E8A020' }}>Company</span>
+              </h2>
+              <p className="label-mono">Zero payroll. Full output.</p>
+            </div>
+            <div className="space-y-4 text-fg-secondary leading-relaxed">
+              <p>
+                Build a 10-person organization with zero employees. ACHEEVY delegates to
+                specialized AI agents — research, content, sales, operations, engineering.
+                They work 24/7. No PTO. No payroll. Just results.
+              </p>
+              <p>
+                This isn&apos;t a chatbot with a fancy wrapper. It&apos;s a full operating company
+                that runs on your behalf. You set the direction. The platform runs the business.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* NURD Profile Cards */}
+      <section className="py-12 md:py-20 px-4 md:px-8 border-b border-border">
+        <div className="max-w-5xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-[1.5fr_1fr] gap-8 md:gap-16 items-center">
+            <div>
+              <div className="w-14 h-14 border border-border flex items-center justify-center mb-6">
+                <CreditCard className="w-7 h-7 text-fg-secondary" />
+              </div>
+              <h2 className="text-3xl font-bold tracking-tight mb-4">
+                NURD <span style={{ color: '#E8A020' }}>Profile Cards</span>
+              </h2>
+              <p className="label-mono mb-4">Your digital identity</p>
+              <div className="space-y-4 text-fg-secondary leading-relaxed">
+                <p>
+                  Your digital identity across Web 2.0 and 3.0. Customize your profile card,
+                  mint it as an NFT, and carry your reputation everywhere.
+                </p>
+                <p>
+                  Coming soon: portable identity via Unstoppable Domains. One card. Every platform.
+                  Your credentials, your brand, your proof of work — all in one place.
+                </p>
+              </div>
+            </div>
+            <div className="flex justify-center">
+              <div className="w-48 h-48 border border-border flex items-center justify-center">
+                <CreditCard className="w-16 h-16 text-fg-ghost" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* MCP Gateway */}
+      <section className="py-12 md:py-20 px-4 md:px-8 border-b border-border bg-bg-surface">
+        <div className="max-w-5xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-[1fr_1.5fr] gap-8 md:gap-16 items-center">
+            <div>
+              <div className="w-14 h-14 border border-border flex items-center justify-center mb-6">
+                <Plug className="w-7 h-7 text-fg-secondary" />
+              </div>
+              <h2 className="text-3xl font-bold tracking-tight mb-4">
+                MCP <span style={{ color: '#E8A020' }}>Gateway</span>
+              </h2>
+              <p className="label-mono">One URL. Every tool.</p>
+            </div>
+            <div className="space-y-4 text-fg-secondary leading-relaxed">
+              <p>
+                Connect your agents to any IDE. One URL, instant access to the full agent
+                workforce from Cursor, VS Code, Claude Code, or any MCP-compatible tool.
+              </p>
+              <p>
+                If you&apos;re technical, this is your bridge. If you&apos;re not, don&apos;t worry about it —
+                everything works through the chat interface too. But for power users who live
+                in their editor, the MCP Gateway means the Deploy Platform goes wherever you code.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* PMO Office */}
+      <section className="py-12 md:py-20 px-4 md:px-8 border-b border-border">
         <div className="max-w-5xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-[1fr_1.5fr] gap-8 md:gap-16 items-start">
             <div>
@@ -289,26 +436,25 @@ export default function AboutPage() {
                 <Monitor className="w-7 h-7 text-fg-secondary" />
               </div>
               <h2 className="text-3xl font-bold tracking-tight mb-4">
-                PMO Office
+                Operations Floor
               </h2>
-              <p className="label-mono">Live Look-In</p>
+              <p className="label-mono">See everything. In real time.</p>
             </div>
             <div className="space-y-4 text-fg-secondary leading-relaxed">
               <p>
-                The PMO (Project Management Office) is the real-time operations floor.
-                It shows every active agent, every running task, and every pipeline stage
-                across all your projects — live.
+                The Operations Floor is your live view into everything happening across
+                your projects. Every agent working, every task in progress, every pipeline
+                stage — updated in real time as work happens.
               </p>
               <p>
-                The Live Look-In connects via WebSocket to the State Engine, streaming
-                task lifecycle events as they happen: agent online, task assigned, progress
-                updates, quality gates passed, and delivery confirmations.
+                Think of it as walking into your company&apos;s office and seeing everyone at
+                their desk, working. Except nobody needs coffee breaks, and you can see
+                exactly what each person is doing at a glance.
               </p>
               <p>
-                Eight PMO departments organize the fleet: PMO-LAUNCH for deployment operations,
-                PMO-PULSE for research and discovery, PMO-CONTENT for creative work,
-                and specialized departments for education, business development,
-                infrastructure, evaluation, and governance.
+                Eight departments keep things organized: launch, research, content,
+                education, business development, infrastructure, evaluation, and governance.
+                Each one runs independently. All of them report to you.
               </p>
             </div>
           </div>
@@ -317,10 +463,13 @@ export default function AboutPage() {
 
       {/* CTA */}
       <section className="py-12 md:py-24 px-4 md:px-8 text-center">
-        <p className="label-mono mb-4">Ready?</p>
-        <h2 className="text-2xl md:text-4xl font-bold tracking-tight mb-8">
-          Start building with ACHEEVY.
+        <p className="label-mono mb-4">Ready to scale without hiring?</p>
+        <h2 className="text-2xl md:text-4xl font-bold tracking-tight mb-4">
+          Your AI workforce is waiting.
         </h2>
+        <p className="text-fg-secondary text-base mb-8 max-w-lg mx-auto">
+          Stop interviewing. Stop onboarding. Start shipping.
+        </p>
         <Link href="/chat" className="h-12 px-8 text-sm font-bold tracking-wide inline-flex items-center justify-center gap-2 transition-all"
           style={{ background: '#E8A020', color: '#000', borderRadius: '6px' }}>
           Get Started <ArrowRight className="w-4 h-4" />

@@ -186,7 +186,19 @@ function AgentDetail({ agent, onClose }: { agent: AgentState; onClose: () => voi
           {agent.lastActive && <span>Last: {new Date(agent.lastActive).toLocaleTimeString()}</span>}
         </div>
 
-        <button onClick={onClose} className="btn-bracket text-[10px] mt-4 w-full text-center">CLOSE</button>
+        <div className="flex gap-2 mt-4">
+          {agent.hireable && agent.individualPrice && (
+            <a
+              href={`/billing?hire=${agent.id}&price=${agent.individualPrice}`}
+              className="flex-1 h-10 bg-accent text-bg font-mono text-[10px] font-bold flex items-center justify-center gap-1.5 hover:bg-accent/90 transition-colors"
+            >
+              HIRE — ${agent.individualPrice}/mo
+            </a>
+          )}
+          <button onClick={onClose} className={`${agent.hireable ? 'flex-1' : 'w-full'} btn-bracket text-[10px] h-10 text-center`}>
+            CLOSE
+          </button>
+        </div>
       </div>
     </div>
   );
