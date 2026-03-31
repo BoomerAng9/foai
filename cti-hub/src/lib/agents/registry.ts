@@ -25,6 +25,8 @@ export interface AgentProfile {
   capabilities: string[];    // What this agent can do
   mcpToolName?: string;      // MCP tool name if exposed
   subscriptionTier: 'starter' | 'growth' | 'enterprise' | 'all';  // Min tier to access
+  individualPrice?: number;  // PlugMeIn individual monthly price (if hireable standalone)
+  hireable: boolean;         // Can users hire this agent individually?
   // hawk3d future fields (don't block, don't build)
   room?: string;             // Room ID for 3D placement
   position?: { x: number; y: number; z: number };
@@ -70,7 +72,7 @@ export const AGENTS: AgentProfile[] = [
     avatar: '/acheevy-helmet.png',
     capabilities: ['Strategic planning', 'Agent deployment', 'Cross-department coordination', 'Executive decisions'],
     mcpToolName: 'acheevy_delegate',
-    subscriptionTier: 'all',
+    subscriptionTier: 'all', hireable: false,
   },
   {
     id: 'chicken_hawk',
@@ -81,7 +83,7 @@ export const AGENTS: AgentProfile[] = [
     persona: 'Sharp, tactical, zero-tolerance for sloppy work. Routes tasks to the right Lil_Hawk.',
     avatar: '/acheevy-helmet.png',
     capabilities: ['Intent classification', 'Lil_Hawk dispatch', 'Review gate', 'Quality control'],
-    subscriptionTier: 'growth',
+    subscriptionTier: 'growth', hireable: false,
   },
 
   // ── BOOMER_ANGS (Strategic) ──
@@ -95,7 +97,7 @@ export const AGENTS: AgentProfile[] = [
     avatar: '/acheevy-helmet.png',
     capabilities: ['Web scraping', 'Opportunity sourcing', 'Institutional research', 'Data intelligence'],
     mcpToolName: 'scout_ang_research',
-    subscriptionTier: 'starter',
+    subscriptionTier: 'starter', hireable: true, individualPrice: 97,
   },
   {
     id: 'content_ang',
@@ -107,7 +109,7 @@ export const AGENTS: AgentProfile[] = [
     avatar: '/acheevy-helmet.png',
     capabilities: ['SEO content', 'Blog posts', 'Landing pages', 'Social media', 'Email campaigns'],
     mcpToolName: 'content_ang_create',
-    subscriptionTier: 'starter',
+    subscriptionTier: 'starter', hireable: true, individualPrice: 127,
   },
   {
     id: 'edu_ang',
@@ -119,7 +121,7 @@ export const AGENTS: AgentProfile[] = [
     avatar: '/acheevy-helmet.png',
     capabilities: ['Enrollment generation', 'Affiliate management', 'Revenue attribution', 'Commission tracking'],
     mcpToolName: 'edu_ang_enroll',
-    subscriptionTier: 'starter',
+    subscriptionTier: 'starter', hireable: true, individualPrice: 147,
   },
   {
     id: 'biz_ang',
@@ -131,7 +133,7 @@ export const AGENTS: AgentProfile[] = [
     avatar: '/acheevy-helmet.png',
     capabilities: ['Pipeline analytics', 'Lead generation', 'Client retention', 'Campaign performance'],
     mcpToolName: 'biz_ang_pipeline',
-    subscriptionTier: 'growth',
+    subscriptionTier: 'growth', hireable: true, individualPrice: 97,
   },
   {
     id: 'ops_ang',
@@ -143,7 +145,7 @@ export const AGENTS: AgentProfile[] = [
     avatar: '/acheevy-helmet.png',
     capabilities: ['Fleet monitoring', 'Incident detection', 'Uptime tracking', 'Historical recall'],
     mcpToolName: 'ops_ang_monitor',
-    subscriptionTier: 'growth',
+    subscriptionTier: 'growth', hireable: true, individualPrice: 197,
   },
 
   // ── LIL_HAWKS (Tactical/Specialist) ──
@@ -157,7 +159,7 @@ export const AGENTS: AgentProfile[] = [
     avatar: '/acheevy-helmet.png',
     capabilities: ['Feature development', 'Plan-first coding', 'Code review'],
     mcpToolName: 'lil_coding_hawk',
-    subscriptionTier: 'growth',
+    subscriptionTier: 'growth', hireable: false,
   },
   {
     id: 'lil_trae_hawk',
@@ -169,7 +171,7 @@ export const AGENTS: AgentProfile[] = [
     avatar: '/acheevy-helmet.png',
     capabilities: ['Large refactors', 'Repo-wide changes', 'Architecture work'],
     mcpToolName: 'lil_trae_hawk',
-    subscriptionTier: 'growth',
+    subscriptionTier: 'growth', hireable: false,
   },
   {
     id: 'lil_deep_hawk',
@@ -181,7 +183,7 @@ export const AGENTS: AgentProfile[] = [
     avatar: '/acheevy-helmet.png',
     capabilities: ['Multi-agent coordination', 'Squad mode', 'Complex project management'],
     mcpToolName: 'lil_deep_hawk',
-    subscriptionTier: 'enterprise',
+    subscriptionTier: 'enterprise', hireable: false,
   },
   {
     id: 'lil_agent_hawk',
@@ -193,7 +195,7 @@ export const AGENTS: AgentProfile[] = [
     avatar: '/acheevy-helmet.png',
     capabilities: ['Browser automation', 'CLI workflows', 'File operations'],
     mcpToolName: 'lil_agent_hawk',
-    subscriptionTier: 'growth',
+    subscriptionTier: 'growth', hireable: false,
   },
   {
     id: 'lil_flow_hawk',
@@ -205,7 +207,7 @@ export const AGENTS: AgentProfile[] = [
     avatar: '/acheevy-helmet.png',
     capabilities: ['SaaS integrations', 'Webhook orchestration', 'Payment automation'],
     mcpToolName: 'lil_flow_hawk',
-    subscriptionTier: 'growth',
+    subscriptionTier: 'growth', hireable: false,
   },
   {
     id: 'lil_memory_hawk',
@@ -217,7 +219,7 @@ export const AGENTS: AgentProfile[] = [
     avatar: '/acheevy-helmet.png',
     capabilities: ['Long-term memory', 'Semantic search', 'Knowledge base management'],
     mcpToolName: 'lil_memory_hawk',
-    subscriptionTier: 'growth',
+    subscriptionTier: 'growth', hireable: false,
   },
   {
     id: 'lil_back_hawk',
@@ -229,7 +231,7 @@ export const AGENTS: AgentProfile[] = [
     avatar: '/acheevy-helmet.png',
     capabilities: ['Backend scaffolding', 'Auth systems', 'Database schemas', 'API design'],
     mcpToolName: 'lil_back_hawk',
-    subscriptionTier: 'growth',
+    subscriptionTier: 'growth', hireable: false,
   },
   {
     id: 'lil_viz_hawk',
@@ -241,7 +243,7 @@ export const AGENTS: AgentProfile[] = [
     avatar: '/acheevy-helmet.png',
     capabilities: ['Monitoring dashboards', 'Data visualization', 'Real-time displays'],
     mcpToolName: 'lil_viz_hawk',
-    subscriptionTier: 'growth',
+    subscriptionTier: 'growth', hireable: false,
   },
 
   // ── VISUAL ENGINE ──
@@ -254,7 +256,7 @@ export const AGENTS: AgentProfile[] = [
     persona: 'Three engines, one mission. Photorealism to illustration.',
     avatar: '/acheevy-helmet.png',
     capabilities: ['Gemini image gen', 'Multi-model routing', 'Style adaptation'],
-    subscriptionTier: 'starter',
+    subscriptionTier: 'starter', hireable: true, individualPrice: 47,
   },
 
   // ── MONEY ENGINE ──
@@ -267,7 +269,7 @@ export const AGENTS: AgentProfile[] = [
     persona: 'Every dollar tracked. Every token counted.',
     avatar: '/acheevy-helmet.png',
     capabilities: ['Budget tracking', 'Cost analysis', 'Revenue optimization'],
-    subscriptionTier: 'all',
+    subscriptionTier: 'all', hireable: true, individualPrice: 47,
   },
 ];
 

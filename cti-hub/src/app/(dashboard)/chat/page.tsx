@@ -13,6 +13,7 @@ import type { LucEstimate } from '@/lib/luc/types';
 import { AttachmentMenu } from '@/components/chat/AttachmentMenu';
 import type { Skill } from '@/lib/skills/registry';
 import { buildGrammarPrompt, buildConfirmationPrompt, isPassthrough, GRAMMAR_DISCLAIMER } from '@/lib/grammar/converter';
+import { VoiceBar } from '@/components/voice/VoiceBar';
 
 function formatFileSize(bytes: number) {
   if (bytes < 1024) return bytes + ' B';
@@ -549,6 +550,19 @@ export default function ChatWithACHEEVY() {
           </button>
         )}
 
+        {/* Voice Bar */}
+        <VoiceBar
+          onTranscript={(text) => handleSend(text)}
+          voiceEnabled={voiceEnabled}
+          onVoiceToggle={() => {
+            if (voiceEnabled && audioRef.current) {
+              audioRef.current.pause();
+              audioRef.current = null;
+            }
+            setVoiceEnabled(!voiceEnabled);
+          }}
+        />
+
         <div className="border-t border-border bg-bg-surface p-2 sm:p-3 md:p-4">
           <div className="max-w-3xl mx-auto">
             {attachments.length > 0 && (
@@ -654,24 +668,9 @@ export default function ChatWithACHEEVY() {
                   </>
                 )}
               </div>
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => {
-                    if (voiceEnabled && audioRef.current) {
-                      audioRef.current.pause();
-                      audioRef.current = null;
-                    }
-                    setVoiceEnabled(!voiceEnabled);
-                  }}
-                  className={`font-mono text-[9px] transition-colors ${voiceEnabled ? 'text-accent font-bold' : 'text-fg-ghost hover:text-fg-secondary'}`}
-                  title={voiceEnabled ? 'Voice reply ON' : 'Voice reply OFF'}
-                >
-                  {voiceEnabled ? 'VOICE ON' : 'VOICE OFF'}
-                </button>
-                <p className="font-mono text-[9px] text-fg-ghost">
-                  The Deploy Platform
-                </p>
-              </div>
+              <p className="font-mono text-[9px] text-fg-ghost">
+                The Deploy Platform
+              </p>
             </div>
           </div>
         </div>
