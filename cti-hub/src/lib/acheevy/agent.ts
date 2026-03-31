@@ -17,6 +17,7 @@ import { addMessage, memorizeConversationTurn } from '@/lib/memory/store';
 import { checkMIMGate } from './mim-gate';
 import { generateImage, IMAGE_MODELS, type ImageModel } from '@/lib/image/generate';
 import { checkBudget, deductCost, getBudget, BudgetExhaustedError } from '@/lib/budget';
+import { dispatchToAgent, detectAgent } from '@/lib/agents/dispatch';
 
 // Pattern 1: verb + image noun (explicit: "create an image of X")
 const IMAGE_EXPLICIT = /\b(create|generate|make|draw|design|render|paint|sketch)\b.{0,30}\b(image|picture|photo|illustration|artwork|icon|logo|visual|graphic|portrait|poster|banner|card)\b/i;
@@ -414,6 +415,55 @@ export async function acheevyRespondStream(
     });
 
     return { stream: selectStream, model: 'model-selector', memories_recalled: memoriesRecalled };
+  }
+
+  // 5.7 Detect if a real agent should handle this (dispatch to live backend)
+  const targetAgent = detectAgent(userMessage);
+  if (targetAgent && !userMessage.startsWith('[GRAMMAR')) {
+    const dispatchStream = new ReadableStream<Uint8Array>({
+      async start(controller) {
+        try {
+          controller.enqueue(enc.encode(`data: ${JSON.stringify({ thinking: `Routing to ${targetAgent.replace('_', ' ')}...` })}\n\n`));
+          controller.enqueue(enc.encode(`data: ${JSON.stringify({ agent: targetAgent.replace('_', ' ') })}\n\n`));
+
+          const result = await dispatchToAgent(targetAgent, userMessage);
+
+          if (result.success) {
+            controller.enqueue(enc.encode(`data: ${JSON.stringify({ content: result.response })}\n\n`));
+          } else {
+            // Agent unavailable — fall through to ACHEEVY handling it via LLM
+            controller.enqueue(enc.encode(`data: ${JSON.stringify({ content: `I'm routing this to ${targetAgent.replace('_', ' ')}, but they're currently being deployed. Let me handle this directly.\n\n` })}\n\n`));
+          }
+
+          const budget = await getBudget().catch(() => ({ starting: 20, remaining: 20, exhausted: false }));
+          controller.enqueue(enc.encode(`data: ${JSON.stringify({ content: '', done: true, usage: { tokens_in: 0, tokens_out: 0, cost: 0, memories_recalled: memoriesRecalled }, budget })}\n\n`));
+
+          addMessage(conversationId, userId, 'acheevy', result.response, targetAgent, { dispatched: true, agent: targetAgent, elapsed_ms: result.elapsed_ms }).catch(() => {});
+        } catch (err) {
+          controller.enqueue(enc.encode(`data: ${JSON.stringify({ content: 'Dispatch failed. Let me handle this directly.' })}\n\n`));
+          controller.enqueue(enc.encode(`data: ${JSON.stringify({ content: '', done: true, usage: { tokens_in: 0, tokens_out: 0, cost: 0, memories_recalled: 0 } })}\n\n`));
+        }
+        controller.close();
+      },
+    });
+
+    // Only use dispatch if the agent is actually online
+    const dispatchResult = await dispatchToAgent(targetAgent, userMessage);
+    if (dispatchResult.success) {
+      const successStream = new ReadableStream<Uint8Array>({
+        async start(controller) {
+          controller.enqueue(enc.encode(`data: ${JSON.stringify({ thinking: `Dispatched to ${targetAgent.replace('_', ' ')}` })}\n\n`));
+          controller.enqueue(enc.encode(`data: ${JSON.stringify({ agent: targetAgent.replace('_', ' ') })}\n\n`));
+          controller.enqueue(enc.encode(`data: ${JSON.stringify({ content: dispatchResult.response })}\n\n`));
+          const budget = await getBudget().catch(() => ({ starting: 20, remaining: 20, exhausted: false }));
+          controller.enqueue(enc.encode(`data: ${JSON.stringify({ content: '', done: true, usage: { tokens_in: 0, tokens_out: 0, cost: 0, memories_recalled: memoriesRecalled }, budget })}\n\n`));
+          controller.close();
+          addMessage(conversationId, userId, 'acheevy', dispatchResult.response, targetAgent, { dispatched: true, agent: targetAgent, elapsed_ms: dispatchResult.elapsed_ms }).catch(() => {});
+        },
+      });
+      return { stream: successStream, model: `dispatch:${targetAgent}`, memories_recalled: memoriesRecalled };
+    }
+    // If dispatch failed, fall through to OpenRouter LLM
   }
 
   // 6. Call OpenRouter with stream: true
