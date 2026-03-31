@@ -188,7 +188,7 @@ export default function LandingPage() {
           <div className="mb-16">
             <p className="label-mono mb-3">Under the hood</p>
             <h2 className="text-3xl font-light tracking-tight">
-              Autonomous. <span className="font-bold">Governed. Transparent.</span>
+              Autonomous. Governed. <span style={{ color: '#E8A020', fontFamily: "'Permanent Marker', cursive" }}>Transparent.</span>
             </h2>
           </div>
 
