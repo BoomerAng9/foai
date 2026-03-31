@@ -6,13 +6,15 @@
  */
 
 const AGENT_ENDPOINTS: Record<string, string> = {
-  scout_ang: process.env.SCOUT_ANG_URL || 'https://scout-ang-939270059361.us-central1.run.app',
-  edu_ang: process.env.EDU_ANG_URL || 'https://edu-ang-939270059361.us-central1.run.app',
+  scout_ang: process.env.SCOUT_ANG_URL || 'https://scout-ang-apbgyi35aq-uc.a.run.app',
+  edu_ang: process.env.EDU_ANG_URL || 'https://edu-ang-apbgyi35aq-uc.a.run.app',
+  content_ang: process.env.CONTENT_ANG_URL || 'https://content-ang-apbgyi35aq-uc.a.run.app',
+  biz_ang: process.env.BIZ_ANG_URL || 'https://biz-ang-apbgyi35aq-uc.a.run.app',
+  ops_ang: process.env.OPS_ANG_URL || 'https://ops-ang-apbgyi35aq-uc.a.run.app',
   chicken_hawk: process.env.CHICKEN_HAWK_URL || '',
-  // These will be added as they come online:
-  content_ang: process.env.CONTENT_ANG_URL || '',
-  biz_ang: process.env.BIZ_ANG_URL || '',
-  ops_ang: process.env.OPS_ANG_URL || '',
+  // Additional services
+  hermes: process.env.HERMES_URL || 'https://hermes-agent-apbgyi35aq-uc.a.run.app',
+  money_engine: process.env.MONEY_ENGINE_URL || 'https://money-engine-api-apbgyi35aq-uc.a.run.app',
 };
 
 export interface DispatchResult {
