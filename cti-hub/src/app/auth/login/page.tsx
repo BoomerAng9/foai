@@ -15,12 +15,11 @@ export default function LoginPage() {
   // Redirect to home once auth resolves and cookie is set
   // Use window.location for full page reload so middleware picks up the new cookie
   useEffect(() => {
-    if (!authLoading && user) {
-      setTimeout(() => {
-        window.location.href = '/';
-      }, 500);
+    if (!authLoading && user && !denied) {
+      // Use window.location for full reload — ensures cookies are sent on next request
+      window.location.replace('/chat');
     }
-  }, [user, authLoading]);
+  }, [user, authLoading, denied]);
 
   async function handleGoogleSignIn() {
     setError('');

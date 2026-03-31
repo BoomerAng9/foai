@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { AccountPanel } from '@/components/account/AccountPanel';
 import {
   MessageSquare,
   Activity,
@@ -12,6 +13,7 @@ import {
   Search,
   Shield,
   User,
+  Users,
   CreditCard,
   LogOut,
   ChevronDown,
@@ -31,6 +33,7 @@ interface NavItem {
 
 const NAV: NavItem[] = [
   { name: 'HOME', href: '/chat', icon: MessageSquare },
+  { name: 'AGENT HQ', href: '/agents', icon: Users },
   { name: 'WORKFLOWS', href: '/projects', icon: FolderOpen },
   { name: 'EXECUTIONS', href: '/live', icon: Activity, ownerOnly: true },
   { name: 'PLUG BIN', href: '/plug-bin', icon: Video, ownerOnly: true },
@@ -238,6 +241,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           </div>
         </div>
       </main>
+
+      {/* Account Panel — bottom-right on every page */}
+      <AccountPanel />
     </div>
   );
 }
