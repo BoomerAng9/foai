@@ -1,0 +1,19 @@
+services:
+  voice:
+    build: .
+    restart: unless-stopped
+    environment:
+      - PORT=8091
+      - GOOGLE_KEY=${GOOGLE_KEY}
+      - SCOUT_ANG_URL=https://scout-ang-apbgyi35aq-uc.a.run.app
+      - CONTENT_ANG_URL=https://content-ang-apbgyi35aq-uc.a.run.app
+      - EDU_ANG_URL=https://edu-ang-apbgyi35aq-uc.a.run.app
+      - BIZ_ANG_URL=https://biz-ang-apbgyi35aq-uc.a.run.app
+      - OPS_ANG_URL=https://ops-ang-apbgyi35aq-uc.a.run.app
+      - CFO_ANG_URL=https://cfo-ang-apbgyi35aq-uc.a.run.app
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.voice-relay.rule=Host(`voice.foai.cloud`)"
+      - "traefik.http.routers.voice-relay.entrypoints=websecure"
+      - "traefik.http.routers.voice-relay.tls.certresolver=letsencrypt"
+      - "traefik.http.services.voice-relay.loadbalancer.server.port=8091"

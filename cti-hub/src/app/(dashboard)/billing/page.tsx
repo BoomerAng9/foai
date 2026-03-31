@@ -112,10 +112,26 @@ export default function BillingPage() {
               {/* CTA */}
               {isCurrent ? (
                 <div className="h-10 border border-accent flex items-center justify-center font-mono text-[10px] font-bold text-accent">
+
                   CURRENT PLAN
                 </div>
               ) : (
-                <button className="h-10 font-mono text-[10px] font-bold transition-colors flex items-center justify-center gap-1.5"
+                <button
+                  onClick={async () => {
+                    try {
+                      const res = await fetch('/api/stripe/checkout', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ plan: tier.slug, commitment }),
+                      });
+                      const data = await res.json();
+                      if (data.url) window.location.href = data.url;
+                      else alert(data.error || 'Checkout unavailable — Stripe integration pending.');
+                    } catch {
+                      alert('Checkout unavailable — Stripe integration pending.');
+                    }
+                  }}
+                  className="h-10 font-mono text-[10px] font-bold transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
                   style={{ background: tier.color, color: tier.slug === 'pay-per-use' ? '#fff' : '#000' }}
                 >
                   {tier.slug === 'pay-per-use' ? 'GET STARTED — $7' : `UPGRADE — $${price}/MO`}
