@@ -12,6 +12,7 @@ import {
   Search,
   Shield,
   User,
+  Users,
   CreditCard,
   LogOut,
   ChevronDown,
@@ -31,6 +32,7 @@ interface NavItem {
 
 const NAV: NavItem[] = [
   { name: 'HOME', href: '/chat', icon: MessageSquare },
+  { name: 'AGENT HQ', href: '/agents', icon: Users },
   { name: 'WORKFLOWS', href: '/projects', icon: FolderOpen },
   { name: 'EXECUTIONS', href: '/live', icon: Activity, ownerOnly: true },
   { name: 'PLUG BIN', href: '/plug-bin', icon: Video, ownerOnly: true },
