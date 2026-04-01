@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { ArrowRight, Users, Brain, Shield, Zap, BarChart3, Globe, Mic, CreditCard, Building2, MessageCircle } from 'lucide-react';
 import { LiveSandbox } from '@/components/landing/LiveSandbox';
 import { VerbSpinner } from '@/components/landing/VerbSpinner';
+import { PlugGallery } from '@/components/landing/PlugGallery';
 
 const USE_CASES = [
   {
@@ -114,6 +115,13 @@ export default function DeployLanding() {
             </p>
           </div>
           <LiveSandbox />
+        </div>
+      </section>
+
+      {/* Sample Plug Gallery */}
+      <section className="py-16 px-4 sm:px-6 border-t border-white/5">
+        <div className="max-w-6xl mx-auto">
+          <PlugGallery />
         </div>
       </section>
 

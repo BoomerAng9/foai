@@ -1,7 +1,7 @@
 /**
  * ACHEEVY Agent — conversational AI with memory, dispatch, and long-loop harness.
  *
- * Harness pattern (Anthropic Harness 2.0):
+ * Harness pattern:
  *   Planner (ACHEEVY) → Generator (Chicken Hawk + fleet) → Evaluator (QA)
  *
  * Every conversation turn:
