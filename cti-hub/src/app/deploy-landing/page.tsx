@@ -1,7 +1,8 @@
 'use client';
 
 import Link from 'next/link';
-import { ArrowRight, Users, Brain, Shield, Zap, BarChart3, Globe, Mic, CreditCard, Building2 } from 'lucide-react';
+import { ArrowRight, Users, Brain, Shield, Zap, BarChart3, Globe, Mic, CreditCard, Building2, MessageCircle } from 'lucide-react';
+import { LiveSandbox } from '@/components/landing/LiveSandbox';
 
 const USE_CASES = [
   {
@@ -50,7 +51,7 @@ export default function DeployLanding() {
   return (
     <div className="min-h-screen bg-[#0A0A0A] text-white">
       {/* Nav */}
-      <nav className="h-14 flex items-center justify-between px-6 border-b border-white/10">
+      <nav className="h-14 flex items-center justify-between px-4 sm:px-6 border-b border-white/10">
         <div className="flex items-center gap-2.5">
           <div className="w-7 h-7 bg-[#E8A020] flex items-center justify-center">
             <Zap className="w-3.5 h-3.5 text-black" />
@@ -66,19 +67,19 @@ export default function DeployLanding() {
       </nav>
 
       {/* Hero */}
-      <section className="relative py-24 px-6">
+      <section className="relative py-16 sm:py-24 px-4 sm:px-6">
         <div className="absolute top-[20%] left-1/2 -translate-x-1/2 w-[600px] h-[600px] rounded-full opacity-[0.04]"
           style={{ background: 'radial-gradient(circle, #E8A020 0%, transparent 70%)' }} />
 
         <div className="relative max-w-4xl mx-auto text-center">
-          <p className="font-mono text-[10px] tracking-[0.4em] text-[#E8A020] uppercase mb-6">The Agentic Operating System</p>
+          <p className="font-mono text-[10px] sm:text-xs tracking-[0.3em] text-[#E8A020] uppercase mb-6">What will we DEPLOY today?</p>
 
-          <h1 className="text-4xl sm:text-5xl md:text-7xl font-black tracking-tight leading-[1.05] mb-6">
-            Run a company.<br />
-            <span style={{ color: '#E8A020', fontFamily: "'Permanent Marker', cursive" }}>Without the company.</span>
+          <h1 className="text-3xl sm:text-5xl md:text-7xl font-black tracking-tight leading-[1.05] mb-6">
+            Run a <span style={{ color: '#E8A020', fontFamily: "'Permanent Marker', cursive" }}>company</span>.<br />
+            Without the <span style={{ color: '#E8A020', fontFamily: "'Permanent Marker', cursive" }}>company</span>.
           </h1>
 
-          <p className="text-lg text-white/50 max-w-2xl mx-auto mb-4">
+          <p className="text-base sm:text-lg text-white/50 max-w-2xl mx-auto mb-4">
             Not a chatbot. Not an automation tool. A fully governed, self-measuring, memory-driven autonomous workforce that runs your business the way a real organization does.
           </p>
 
@@ -86,25 +87,40 @@ export default function DeployLanding() {
             Hierarchy. Planning. Memory. Measurement. Accountability. Every agent knows its role, plans its work, remembers its history, and is evaluated against KPIs.
           </p>
 
-          <div className="flex items-center justify-center gap-4">
-            <Link href="/chat" className="h-12 px-8 bg-[#E8A020] text-black text-sm font-bold flex items-center gap-2 hover:bg-[#D4901A] transition-colors">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4">
+            <Link href="/chat" className="h-12 px-8 bg-[#E8A020] text-black text-sm font-bold flex items-center gap-2 hover:bg-[#D4901A] transition-colors w-full sm:w-auto justify-center">
               Deploy Your Workforce <ArrowRight className="w-4 h-4" />
             </Link>
+            <Link href="/chat" className="h-12 px-8 border border-white/20 text-sm text-white/70 hover:text-white hover:border-white/40 transition-colors flex items-center gap-2 w-full sm:w-auto justify-center">
+              <MessageCircle className="w-4 h-4" /> Chat w/ ACHEEVY
+            </Link>
           </div>
+        </div>
+      </section>
 
-          <p className="font-mono text-[9px] text-white/20 mt-8 tracking-[0.2em]">
-            BUILT BY ACHIEVEMOR · AOS — AGENTIC OPERATING SYSTEM
-          </p>
+      {/* Live Sandbox — The Proof */}
+      <section className="px-4 sm:px-6 pb-16">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-6">
+            <p className="font-mono text-[10px] text-[#E8A020] tracking-[0.3em] uppercase mb-2">Live right now</p>
+            <h2 className="text-xl sm:text-2xl font-light tracking-tight">
+              An autonomous company. <span className="font-bold">Running below.</span>
+            </h2>
+            <p className="text-xs text-white/30 mt-2 max-w-xl mx-auto">
+              These agents are real. They research, generate leads, create content, and communicate — all without human prompting. Click any agent to interact.
+            </p>
+          </div>
+          <LiveSandbox />
         </div>
       </section>
 
       {/* The Differentiator */}
-      <section className="py-16 px-6 border-t border-white/5">
+      <section className="py-16 px-4 sm:px-6 border-t border-white/5">
         <div className="max-w-3xl mx-auto text-center">
           <p className="font-mono text-[10px] text-[#E8A020] tracking-[0.3em] uppercase mb-4">The difference</p>
           <h2 className="text-2xl md:text-3xl font-light tracking-tight mb-6">
             Every AI platform can generate text.<br />
-            <span className="font-bold">This one runs like a real company.</span>
+            <span className="font-bold">This one runs like a real <span style={{ color: '#E8A020', fontFamily: "'Permanent Marker', cursive" }}>company</span>.</span>
           </h2>
           <p className="text-sm text-white/40 leading-relaxed">
             22 live services. 6 Boomer_Angs. 11 Lil_Hawks. A Digital CEO that delegates, not generates.
@@ -116,7 +132,7 @@ export default function DeployLanding() {
       </section>
 
       {/* Use Cases */}
-      <section className="py-16 px-6 border-t border-white/5">
+      <section className="py-16 px-4 sm:px-6 border-t border-white/5">
         <div className="max-w-5xl mx-auto">
           <p className="font-mono text-[10px] text-[#E8A020] tracking-[0.3em] uppercase mb-3 text-center">What you can deploy</p>
           <h2 className="text-2xl md:text-3xl font-light tracking-tight mb-12 text-center">
@@ -141,7 +157,7 @@ export default function DeployLanding() {
       </section>
 
       {/* Features Grid */}
-      <section className="py-16 px-6 border-t border-white/5">
+      <section className="py-16 px-4 sm:px-6 border-t border-white/5">
         <div className="max-w-5xl mx-auto">
           <p className="font-mono text-[10px] text-[#E8A020] tracking-[0.3em] uppercase mb-3 text-center">Platform capabilities</p>
           <h2 className="text-2xl md:text-3xl font-light tracking-tight mb-12 text-center">
@@ -163,7 +179,7 @@ export default function DeployLanding() {
       </section>
 
       {/* The Workforce */}
-      <section className="py-16 px-6 border-t border-white/5">
+      <section className="py-16 px-4 sm:px-6 border-t border-white/5">
         <div className="max-w-4xl mx-auto text-center">
           <p className="font-mono text-[10px] text-[#E8A020] tracking-[0.3em] uppercase mb-3">The workforce</p>
           <h2 className="text-2xl md:text-3xl font-light tracking-tight mb-8">
@@ -195,20 +211,25 @@ export default function DeployLanding() {
       </section>
 
       {/* CTA */}
-      <section className="py-20 px-6 border-t border-white/5 text-center">
+      <section className="py-20 px-4 sm:px-6 border-t border-white/5 text-center">
         <h2 className="text-2xl md:text-4xl font-light tracking-tight mb-4">
           Your autonomous workforce<br />
           <span className="font-bold">is waiting.</span>
         </h2>
         <p className="text-sm text-white/30 mb-8">$7 gets you in the door. The cost of a mint tea coconut latte.</p>
-        <Link href="/chat" className="inline-flex h-12 px-10 bg-[#E8A020] text-black text-sm font-bold items-center gap-2 hover:bg-[#D4901A] transition-colors">
-          START DEPLOYING <ArrowRight className="w-4 h-4" />
-        </Link>
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4">
+          <Link href="/chat" className="inline-flex h-12 px-10 bg-[#E8A020] text-black text-sm font-bold items-center gap-2 hover:bg-[#D4901A] transition-colors">
+            START DEPLOYING <ArrowRight className="w-4 h-4" />
+          </Link>
+          <Link href="/chat" className="inline-flex h-12 px-8 border border-white/20 text-sm text-white/70 hover:text-white hover:border-white/40 transition-colors items-center gap-2">
+            <MessageCircle className="w-4 h-4" /> Chat w/ ACHEEVY
+          </Link>
+        </div>
       </section>
 
       {/* Footer */}
-      <footer className="py-6 px-6 border-t border-white/5 flex items-center justify-between">
-        <span className="font-mono text-[9px] text-white/20 tracking-widest">THE DEPLOY PLATFORM · ACHIEVEMOR · AOS</span>
+      <footer className="py-6 px-4 sm:px-6 border-t border-white/5 flex items-center justify-between">
+        <span className="font-mono text-[9px] text-white/20 tracking-widest">THE DEPLOY PLATFORM</span>
         <span className="font-mono text-[9px] text-white/20">&copy; 2026</span>
       </footer>
     </div>
