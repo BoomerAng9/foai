@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { ArrowRight, Users, Brain, Shield, Zap, BarChart3, Globe, Mic, CreditCard, Building2, MessageCircle } from 'lucide-react';
 import { LiveSandbox } from '@/components/landing/LiveSandbox';
+import { VerbSpinner } from '@/components/landing/VerbSpinner';
 
 const USE_CASES = [
   {
@@ -72,7 +73,9 @@ export default function DeployLanding() {
           style={{ background: 'radial-gradient(circle, #E8A020 0%, transparent 70%)' }} />
 
         <div className="relative max-w-4xl mx-auto text-center">
-          <p className="font-mono text-[10px] sm:text-xs tracking-[0.3em] text-[#E8A020] uppercase mb-6">What will we DEPLOY today?</p>
+          <p className="font-mono text-[10px] sm:text-xs tracking-[0.3em] text-white/60 uppercase mb-6">
+            What will we <VerbSpinner /> today?
+          </p>
 
           <h1 className="text-3xl sm:text-5xl md:text-7xl font-black tracking-tight leading-[1.05] mb-6">
             Run a <span style={{ color: '#E8A020', fontFamily: "'Permanent Marker', cursive" }}>company</span>.<br />
