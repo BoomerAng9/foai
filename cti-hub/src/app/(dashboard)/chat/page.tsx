@@ -52,6 +52,7 @@ export default function ChatWithACHEEVY() {
   const [activeSkill, setActiveSkill] = useState<Skill | null>(null);
   const [streamingCost, setStreamingCost] = useState<{ tokens_in: number; tokens_out: number; cost: number } | null>(null);
   const [manageItInput, setManageItInput] = useState('');
+  const [guideMode, setGuideMode] = useState(false);
 
   const currentTier = TIERS.find(t => t.id === activeTier) || TIERS[0];
 
@@ -144,7 +145,7 @@ export default function ChatWithACHEEVY() {
     };
     setMessages(prev => [...prev, tempUserMsg]);
 
-    const streamId = `a-${Date.now()}`;
+    let streamId = `a-${Date.now()}`;
     setMessages(prev => [...prev, {
       id: streamId,
       role: 'acheevy',
@@ -162,6 +163,7 @@ export default function ChatWithACHEEVY() {
           conversation_id: activeConvId,
           attachments: currentAttachments.map(a => ({ name: a.name, type: a.type, size: a.size })),
           skill_context: activeSkill?.systemContext || undefined,
+          mode: guideMode ? 'guide' : undefined,
         }),
       });
 
@@ -255,6 +257,14 @@ export default function ChatWithACHEEVY() {
               setMessages(prev => prev.map(m =>
                 m.id === streamId ? { ...m, activeAgent: data.agent } : m
               ));
+            } else if (data.agent_working) {
+              // ACHEEVY is processing — show indicator, start a new message for ACHEEVY's response
+              const acheevyId = `acheevy-${Date.now()}`;
+              setMessages(prev => [
+                ...prev.map(m => m.id === streamId ? { ...m, streaming: false } : m),
+                { id: acheevyId, role: 'acheevy' as const, content: '', streaming: true, activeAgent: 'ACHEEVY', created_at: new Date().toISOString() },
+              ]);
+              streamId = acheevyId; // Subsequent content goes to ACHEEVY's message
             } else if (data.content) {
               fullVoiceText += data.content;
               setMessages(prev => prev.map(m =>
@@ -523,7 +533,7 @@ export default function ChatWithACHEEVY() {
                   </p>
                   <div className="flex-1" />
                   <button
-                    onClick={() => handleSend('[Charter Wizard] Help me define my deployment step by step', true)}
+                    onClick={() => { setGuideMode(true); handleSend('[Charter Wizard] Help me define my deployment step by step', true); }}
                     disabled={sending}
                     className="btn-solid self-start cursor-pointer"
                   >
@@ -653,6 +663,14 @@ export default function ChatWithACHEEVY() {
                     <span className="text-signal-info">
                       ▸ ${streamingCost.cost < 0.0001 ? streamingCost.cost.toExponential(1) : streamingCost.cost.toFixed(4)} | {(streamingCost.tokens_in + streamingCost.tokens_out).toLocaleString()} tokens
                     </span>
+                  </>
+                )}
+                {guideMode && (
+                  <>
+                    <span className="text-fg-ghost">|</span>
+                    <button onClick={() => setGuideMode(false)} className="text-signal-live font-semibold hover:text-signal-live/70 transition-colors">
+                      GUIDE ME ✓
+                    </button>
                   </>
                 )}
                 {grammarActive && (
