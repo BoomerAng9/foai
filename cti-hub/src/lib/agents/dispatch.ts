@@ -11,6 +11,7 @@ const AGENT_ENDPOINTS: Record<string, string> = {
   content_ang: process.env.CONTENT_ANG_URL || 'https://content-ang-apbgyi35aq-uc.a.run.app',
   biz_ang: process.env.BIZ_ANG_URL || 'https://biz-ang-apbgyi35aq-uc.a.run.app',
   ops_ang: process.env.OPS_ANG_URL || 'https://ops-ang-apbgyi35aq-uc.a.run.app',
+  iller_ang: process.env.ILLER_ANG_URL || 'https://iller-ang-apbgyi35aq-uc.a.run.app',
   cfo_ang: process.env.CFO_ANG_URL || 'https://cfo-ang-apbgyi35aq-uc.a.run.app',
   chicken_hawk: process.env.CHICKEN_HAWK_URL || 'http://chicken-hawk-gateway-gateway-1:8000',
   // Additional services on Cloud Run
@@ -150,6 +151,9 @@ export function detectAgent(message: string): string | null {
   }
   if (lower.includes('budget') || lower.includes('invoice') || lower.includes('billing') || lower.includes('revenue') || lower.includes('cost') || lower.includes('financ') || lower.includes('receivable') || lower.includes('bookkeep')) {
     return 'cfo_ang';
+  }
+  if (lower.includes('design') || lower.includes('graphic') || lower.includes('card') || lower.includes('illustration') || lower.includes('visual') || lower.includes('logo') || lower.includes('poster') || lower.includes('nft') || lower.includes('brand') || lower.includes('player card') || lower.includes('broadcast')) {
+    return 'iller_ang';
   }
   if (lower.includes('code') || lower.includes('build') || lower.includes('deploy') || lower.includes('develop')) {
     return 'chicken_hawk';

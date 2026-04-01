@@ -147,6 +147,18 @@ export const AGENTS: AgentProfile[] = [
     mcpToolName: 'ops_ang_monitor',
     subscriptionTier: 'growth', hireable: true, individualPrice: 197,
   },
+  {
+    id: 'iller_ang',
+    name: 'Iller_Ang',
+    role: 'Creative Director',
+    department: 'DSN',
+    tier: 'strategic',
+    persona: 'Direct. Visual-first. Doesn\'t explain designs — shows them. Speaks in references. Opinionated about typography, spacing, and color.',
+    avatar: '/iller-ang.png',
+    capabilities: ['Player cards', 'Broadcast graphics', 'Character art', 'NFT assets', 'Motion landing pages', 'Merchandise concepts', 'Podcast visuals', 'Profile cards', 'Digital art'],
+    mcpToolName: 'iller_ang_create',
+    subscriptionTier: 'growth', hireable: true, individualPrice: 197,
+  },
 
   // ── LIL_HAWKS (Tactical/Specialist) ──
   {

@@ -102,6 +102,25 @@ BOOMER_ANG_TOOLS = [
             "required": ["instruction"],
         },
     },
+    {
+        "name": "iller_ang_create",
+        "description": "Creative Director agent. Produces visual assets: player cards (4 styles), broadcast graphics, recruiting predictions, team composites, character illustrations, agent character art, podcast/media visuals, merchandise concepts, profile/NFT cards, digital art, cinematic game shots, motion landing pages. Use for any visual content request.",
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "instruction": {
+                    "type": "string",
+                    "description": "Visual asset request. e.g., 'Create a silver border player card for quarterback #7 Comets, night game action shot'",
+                },
+                "asset_type": {
+                    "type": "string",
+                    "enum": ["player_card", "broadcast", "recruiting", "composite", "character", "agent_art", "podcast", "merchandise", "profile_card", "digital_art", "cinematic", "lifestyle", "motion_page"],
+                    "default": "player_card",
+                },
+            },
+            "required": ["instruction"],
+        },
+    },
 ]
 
 LIL_HAWK_TOOLS = [
@@ -278,6 +297,7 @@ TIER_ACCESS = {
                    "biz_ang_pipeline", "ops_ang_monitor",
                    "lil_coding_hawk", "lil_trae_hawk", "lil_deep_hawk", "lil_agent_hawk",
                    "lil_flow_hawk", "lil_memory_hawk", "lil_back_hawk", "lil_viz_hawk",
+                   "iller_ang_create",
                    "grammar_convert", "tech_lang_lookup", "tech_lang_recommend"],
         "price": 1497,
     },
@@ -291,6 +311,7 @@ TIER_ACCESS = {
     "plugmein_biz": {"tools": ["biz_ang_pipeline"], "price": 97},
     "plugmein_edu": {"tools": ["edu_ang_enroll"], "price": 147},
     "plugmein_ops": {"tools": ["ops_ang_monitor"], "price": 197},
+    "plugmein_iller": {"tools": ["iller_ang_create"], "price": 197},
 }
 
 ALL_TOOLS = BOOMER_ANG_TOOLS + LIL_HAWK_TOOLS + GRAMMAR_TOOLS + TECH_LANG_INDEX_TOOLS

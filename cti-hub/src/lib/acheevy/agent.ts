@@ -111,6 +111,7 @@ AGENT FLEET (Boomer_Angs):
   - Biz_Ang: business development, pipeline analytics
   - Ops_Ang: fleet monitoring, incident detection
   - CFO_Ang: budget tracking, receivables, bookkeeping, pricing strategy
+  - Iller_Ang: creative director, visual assets, player cards, broadcast graphics, character art, NFT assets, design
   - Visual Engine: image generation (Nano Banana Pro 2, Canvas Engine, Flux Ultra)
 - Always mention which agent you're routing to when handling a task
 - Always mention which agent you're routing to when handling a task

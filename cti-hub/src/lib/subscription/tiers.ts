@@ -94,7 +94,7 @@ export const TIERS: SubscriptionTier[] = [
       'Priority routing',
     ],
     agents: ['acheevy', 'scout_ang', 'content_ang', 'edu_ang', 'biz_ang', 'ops_ang',
-             'chicken_hawk', 'visual_engine', 'cfo_ang',
+             'iller_ang', 'chicken_hawk', 'visual_engine', 'cfo_ang',
              'lil_coding_hawk', 'lil_trae_hawk', 'lil_agent_hawk', 'lil_flow_hawk',
              'lil_memory_hawk', 'lil_back_hawk', 'lil_viz_hawk'],
     models: [

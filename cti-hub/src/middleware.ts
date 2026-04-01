@@ -18,7 +18,8 @@ export function middleware(request: NextRequest) {
     const isAllowedRoute = pathname === '/' ||
       DEPLOY_ROUTES.some(route => pathname === route || pathname.startsWith(route + '/')) ||
       pathname.startsWith('/api/') ||
-      pathname.startsWith('/_next/');
+      pathname.startsWith('/_next/') ||
+      pathname.startsWith('/plugs/');
 
     if (!isAllowedRoute) {
       return NextResponse.redirect(new URL('/chat', request.url));
