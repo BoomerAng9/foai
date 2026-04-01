@@ -121,17 +121,10 @@ export function buildExecutionPrompt(confirmedSpec: string): string {
   return `[GRAMMAR CONFIRMED — EXECUTE]\n\nThe user confirmed the following spec. Proceed with execution.\n\n${confirmedSpec}`;
 }
 
-export const GRAMMAR_DISCLAIMER = `**Grammar (NTNTN) — Intention Engine Active**
+export const GRAMMAR_DISCLAIMER = `**Smart Translate is on.**
 
-Grammar is the Intention Engine. It converts your natural language into precise technical instructions so ACHEEVY and the agents understand exactly what you need.
+Just describe what you want in plain words. I'll translate it into a precise technical plan, read it back to you for confirmation, and only execute once you say "yes."
 
-**How it works:**
-1. You describe what you want in plain words
-2. Grammar translates it into a structured technical spec
-3. ACHEEVY reads back what it understood and asks you to confirm
-4. You say "yes" to proceed, or adjust until it's right
-5. Only then does ACHEEVY execute
-
-_Type normally. The Intention Engine handles the rest._`;
+_Talk naturally. I'll handle the rest._`;
 
 export { NTNTN_SYSTEM_PROMPT as GRAMMAR_SYSTEM_PROMPT };

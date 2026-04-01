@@ -46,7 +46,7 @@ interface Stage {
 const STAGES: Stage[] = [
   {
     num: 1, name: 'RFP', fullName: 'Request for Proposal',
-    description: 'User describes what they want. Grammar/NTNTN converts the request to a structured spec. Consult_Ang confirms understanding and clarifies intent.',
+    description: 'User describes what they want in plain language. Smart Translate converts the request to a structured spec. Consult_Ang confirms understanding and clarifies intent.',
     agents: [
       { name: 'Consult_Ang', emoji: '\uD83D\uDDE3\uFE0F' },
       { name: 'Grammar', emoji: '\uD83D\uDCDD' },

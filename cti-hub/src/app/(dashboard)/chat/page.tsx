@@ -533,7 +533,7 @@ export default function ChatWithACHEEVY() {
                   </p>
                   <div className="flex-1" />
                   <button
-                    onClick={() => { setGuideMode(true); handleSend('[Charter Wizard] Help me define my deployment step by step', true); }}
+                    onClick={() => { setGuideMode(true); handleSend('Help me figure out what I need to build.', true); }}
                     disabled={sending}
                     className="btn-solid self-start cursor-pointer"
                   >
@@ -655,7 +655,7 @@ export default function ChatWithACHEEVY() {
                   budgetRemaining > 3 ? 'text-signal-warning' :
                   'text-signal-error'
                 }`}>
-                  LUC {budgetRemaining !== null ? `$${budgetRemaining.toFixed(2)}` : 'active'}
+                  {budgetRemaining !== null ? `$${budgetRemaining.toFixed(2)} remaining` : 'Usage tracking on'}
                 </span>
                 {streamingCost && (
                   <>

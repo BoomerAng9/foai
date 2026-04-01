@@ -41,7 +41,7 @@ export const TIERS: SubscriptionTier[] = [
       'Pay for what you use',
       'Free-tier models',
       'Chat with ACHEEVY',
-      'Grammar (NTNTN) engine',
+      'Smart Translate — say it plain, we build it right',
     ],
     agents: ['acheevy', 'visual_engine'],
     models: ['nvidia/nemotron-3-super-120b-a12b:free', 'nvidia/nemotron-nano-9b-v2:free'],
