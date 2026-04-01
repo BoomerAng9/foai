@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect, useRef, useState } from 'react';
 import { FileText, Image as ImageIcon, Brain, Bot } from 'lucide-react';
 import { CopyButton } from './CopyButton';
 import { LucReceipt } from './LucReceipt';
@@ -43,27 +44,97 @@ function AgentBadge({ agent }: { agent: string }) {
   );
 }
 
+// Mermaid diagram renderer — loads mermaid.js on demand
+function MermaidBlock({ code, id }: { code: string; id: string }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [svg, setSvg] = useState('');
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        // Dynamic import — only loads when needed
+        const mermaid = (await import('mermaid')).default;
+        mermaid.initialize({ startOnLoad: false, theme: 'dark', themeVariables: {
+          primaryColor: '#E8A020', primaryTextColor: '#fff', primaryBorderColor: '#E8A020',
+          lineColor: '#666', secondaryColor: '#1a1a2e', tertiaryColor: '#0A0A0F',
+        }});
+        const { svg: rendered } = await mermaid.render(`mermaid-${id}`, code);
+        if (!cancelled) setSvg(rendered);
+      } catch (err) {
+        if (!cancelled) setError(err instanceof Error ? err.message : 'Diagram render failed');
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [code, id]);
+
+  if (error) return <div className="text-xs text-signal-error p-2 border border-signal-error/20 my-2">{error}</div>;
+  if (!svg) return <div className="text-xs text-fg-ghost p-4 text-center my-2">Rendering diagram...</div>;
+  return <div ref={ref} className="my-3 overflow-x-auto" dangerouslySetInnerHTML={{ __html: svg }} />;
+}
+
+// Chart data renderer — uses inline SVG bar chart (no dependency needed)
+function ChartBlock({ data }: { data: { title?: string; type?: string; labels: string[]; values: number[]; color?: string } }) {
+  const max = Math.max(...data.values, 1);
+  const barColor = data.color || '#E8A020';
+
+  return (
+    <div className="my-3 p-4 bg-bg-elevated border border-border">
+      {data.title && <p className="font-mono text-[10px] font-bold mb-3 text-fg-secondary">{data.title}</p>}
+      <div className="flex items-end gap-2 h-32">
+        {data.labels.map((label, i) => (
+          <div key={i} className="flex-1 flex flex-col items-center gap-1">
+            <div className="w-full relative" style={{ height: `${(data.values[i] / max) * 100}%`, minHeight: 4 }}>
+              <div className="absolute inset-0 rounded-t-sm transition-all" style={{ background: barColor, opacity: 0.8 }} />
+            </div>
+            <span className="font-mono text-[8px] text-fg-ghost truncate max-w-full">{label}</span>
+            <span className="font-mono text-[9px] text-fg-secondary font-bold">{data.values[i]}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function renderContent(content: string) {
-  // Split on markdown image pattern ![alt](src)
-  const parts = content.split(/(!\[.*?\]\(.*?\))/g);
-  return parts.map((part, i) => {
+  // Split on code blocks (```mermaid, ```chart) and image patterns
+  const blocks = content.split(/(```(?:mermaid|chart)[\s\S]*?```|!\[.*?\]\(.*?\))/g);
+
+  return blocks.map((part, i) => {
+    // Mermaid diagram
+    const mermaidMatch = part.match(/^```mermaid\n([\s\S]*?)```$/);
+    if (mermaidMatch) {
+      return <MermaidBlock key={i} code={mermaidMatch[1].trim()} id={String(i)} />;
+    }
+
+    // Chart JSON
+    const chartMatch = part.match(/^```chart\n([\s\S]*?)```$/);
+    if (chartMatch) {
+      try {
+        const chartData = JSON.parse(chartMatch[1].trim());
+        if (chartData.labels && chartData.values) {
+          return <ChartBlock key={i} data={chartData} />;
+        }
+      } catch { /* not valid JSON — render as text */ }
+      return <span key={i}>{part}</span>;
+    }
+
+    // Image
     const imgMatch = part.match(/^!\[(.*?)\]\((.*?)\)$/);
     if (imgMatch) {
       const src = imgMatch[2];
-      // Only allow data: and https:/http: URLs to prevent XSS via javascript: or other schemes
       if (!src.startsWith('data:') && !src.startsWith('https://') && !src.startsWith('http://')) {
         return <span key={i}>{part}</span>;
       }
       return (
         // eslint-disable-next-line @next/next/no-img-element
-        <img
-          key={i}
-          src={src}
-          alt={imgMatch[1]}
-          className="max-w-full max-h-[400px] object-contain my-3 border border-border"
-        />
+        <img key={i} src={src} alt={imgMatch[1]}
+          className="max-w-full max-h-[400px] object-contain my-3 border border-border" />
       );
     }
+
+    // Plain text
     return <span key={i}>{part}</span>;
   });
 }
