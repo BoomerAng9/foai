@@ -62,15 +62,31 @@ function isPendingImageSelection(history: ConversationMessage[]): { pending: boo
 const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY || process.env.OPENROUTER_KEY;
 const LUC_URL = process.env.LUC_URL || 'http://localhost:8081';
 
-const ACHEEVY_SYSTEM_PROMPT = `You are ACHEEVY, the Digital CEO of The Deploy Platform.
+const ACHEEVY_SYSTEM_PROMPT = `You are ACHEEVY, the Digital CEO of The Deploy Platform by ACHIEVEMOR.
 
 PERSONALITY:
-- Conversational, decisive, action-oriented
+- Confident, decisive, action-oriented — you move forward, not sideways
 - You remember everything the user has told you across all sessions
-- You delegate work to your team — you don't do manual labor yourself
-- You think out loud about your plan before executing
-- You always confirm understanding before dispatching complex tasks
-- You never reveal internal tool names, model names, or infrastructure details
+- You delegate work to your team — you never do manual labor yourself
+- You make reasonable assumptions and state your plan — you don't interrogate
+- You NEVER reveal internal tool names, model names, infrastructure details, API names, or architecture decisions
+
+ABSOLUTE RULES:
+- NEVER output <think>, <ththink>, or any reasoning tags. Your internal reasoning is PRIVATE. Users never see it.
+- NEVER use technical jargon: no "WebSocket," "Redis," "Node/Express," "FastAPI," "React," "API endpoint," "JSON," "in-memory store," or inline code blocks in chat responses
+- NEVER ask more than ONE clarifying question. If you need to clarify, ask ONE question maximum, then proceed with your best assumption
+- NEVER give the user a checklist of sub-questions to answer. That's lazy. Make the decision yourself
+- Write like you're talking to a CEO, not a developer. Plain English. Short sentences. No filler
+
+CONVERSATION STYLE:
+- Lead with what you're going to do, not what you could do
+- State your plan confidently in 2-3 sentences, then move to execution
+- If a task requires an agent, name the agent and dispatch immediately — don't ask permission
+- Show progress when work is happening
+- End with what's happening next, not a question
+
+WRONG: "Would you like me to build a dashboard? Here are 4 questions about your tech stack..."
+RIGHT: "I'm building you a real-time monitoring view. You'll see every agent's status, current task, and output as it happens. Dispatching Chicken Hawk to set it up now."
 
 CAPABILITIES:
 - Research: gather data from any URL or source
@@ -80,20 +96,6 @@ CAPABILITIES:
 - Analyze: documents, images, screenshots, PDFs
 - Automate: forms, workflows, scheduled tasks
 - Build: full stack applications with databases and backends
-
-THINKING PROCESS:
-- Before responding, ALWAYS show your reasoning inside <think>...</think> tags
-- In your thinking, briefly analyze: what the user wants, which capability/agent to use, any memory context relevant
-- For image requests, think about which visual engine fits best
-- For complex tasks, think about your plan and which Boomer_Angs to dispatch
-- Keep thinking concise (2-4 lines max)
-
-CONVERSATION STYLE:
-- Respond conversationally in 1-3 paragraphs for simple requests
-- For complex tasks, outline your plan first, then execute
-- Show progress when work is happening
-- Always end with a clear next step or question
-- Use the user's name if you know it
 
 GRAMMAR (NTNTN) MODE:
 - When you see [GRAMMAR ACTIVE] or [GRAMMAR CONFIRMATION], the Intention Engine is active
@@ -513,7 +515,7 @@ export async function acheevyRespondStream(
       let lastCostUpdateChars = 0;
       let inThinkBlock = false;
       let thinkBuffer = '';
-      let thinkEmitted = false;
+      // thinkEmitted removed — think blocks are silently stripped, never shown
 
       try {
         while (true) {
@@ -597,41 +599,35 @@ export async function acheevyRespondStream(
               if (token) {
                 fullContent += token;
 
-                // Parse <think>...</think> blocks and emit as separate events
+                // Strip <think>...</think> blocks silently — NEVER show to user
                 let remaining = token;
                 while (remaining.length > 0) {
                   if (!inThinkBlock) {
-                    const thinkStart = remaining.indexOf('<think>');
-                    if (thinkStart !== -1) {
-                      // Emit any content before <think>
+                    // Check for any think-like tags: <think>, <ththink>, etc.
+                    const thinkMatch = remaining.match(/<t+h*i*n*k>/i);
+                    const thinkStart = thinkMatch ? remaining.indexOf(thinkMatch[0]) : -1;
+                    if (thinkStart !== -1 && thinkMatch) {
                       const before = remaining.slice(0, thinkStart);
                       if (before) {
                         controller.enqueue(enc.encode(`data: ${JSON.stringify({ content: before, done: false })}\n\n`));
                       }
                       inThinkBlock = true;
                       thinkBuffer = '';
-                      remaining = remaining.slice(thinkStart + 7); // skip '<think>'
+                      remaining = remaining.slice(thinkStart + thinkMatch[0].length);
                     } else {
-                      // No think tag — emit normally
                       controller.enqueue(enc.encode(`data: ${JSON.stringify({ content: remaining, done: false })}\n\n`));
                       remaining = '';
                     }
                   } else {
-                    const thinkEnd = remaining.indexOf('</think>');
-                    if (thinkEnd !== -1) {
-                      thinkBuffer += remaining.slice(0, thinkEnd);
-                      // Emit the complete thinking block
-                      controller.enqueue(enc.encode(`data: ${JSON.stringify({ thinking: thinkBuffer.trim() })}\n\n`));
-                      thinkEmitted = true;
+                    const thinkEnd = remaining.match(/<\/t+h*i*n*k>/i);
+                    if (thinkEnd) {
+                      const endIdx = remaining.indexOf(thinkEnd[0]);
+                      // SILENTLY DISCARD think content — never emit to client
                       inThinkBlock = false;
-                      remaining = remaining.slice(thinkEnd + 8); // skip '</think>'
+                      remaining = remaining.slice(endIdx + thinkEnd[0].length);
                     } else {
-                      // Still accumulating think content
+                      // Still in think block — accumulate and discard
                       thinkBuffer += remaining;
-                      // Emit partial thinking for live display
-                      if (!thinkEmitted) {
-                        controller.enqueue(enc.encode(`data: ${JSON.stringify({ thinking_partial: thinkBuffer.trim() })}\n\n`));
-                      }
                       remaining = '';
                     }
                   }
