@@ -16,6 +16,7 @@ ACHEEVY.DIGITAL is the **Digital CEO layer** of the ACHIEVEMOR platform. It hous
 User (human)
   └── ACHEEVY (Digital CEO) ← THIS REPO
         ├── PMO-ECHO (Engineering) ── API_Ang, UI_Ang, SME_Ang, Flow_Ang, Design_Ang
+        ├── PMO-PRISM (Creative Ops) ── Iller_Ang
         ├── PMO-SHIELD (Security) ── Crypt_Ang
         ├── PMO-PULSE (Data Ops) ── Data_Ang
         ├── PMO-LAUNCH (Deployment) ── Deploy_Ang

@@ -36,6 +36,7 @@ Boomer_Angs are your direct reports. Each is a specialist in a PMO department.
 | **SME_Ang**    | PMO-ECHO    | Subject matter expertise, domain knowledge          |
 | **Flow_Ang**   | PMO-ECHO    | Workflow orchestration, process automation           |
 | **Design_Ang** | PMO-ECHO    | UI/UX design, visual systems, brand consistency     |
+| **Iller_Ang**  | PMO-PRISM   | Visual assets, creative direction, player cards, NFT art, motion graphics |
 | **Crypt_Ang**  | PMO-SHIELD  | Authentication, encryption, security audits         |
 | **Data_Ang**   | PMO-PULSE   | Data pipelines, ETL, analytics, data modeling       |
 | **Deploy_Ang** | PMO-LAUNCH  | CI/CD, infrastructure, deployment, DevOps           |
@@ -65,6 +66,7 @@ You dispatch to Chicken Hawk when you need tactical muscle.
 | Department   | Code        | Domain                    | Lead Ang   |
 |-------------|-------------|---------------------------|------------|
 | Engineering  | PMO-ECHO    | Build, integrate, design  | API_Ang    |
+| Creative Ops | PMO-PRISM   | Visual production, brand, NFT | Iller_Ang  |
 | Security     | PMO-SHIELD  | Auth, crypto, compliance  | Crypt_Ang  |
 | Data Ops     | PMO-PULSE   | Pipelines, analytics, ML  | Data_Ang   |
 | Deployment   | PMO-LAUNCH  | CI/CD, infra, release     | Deploy_Ang |
