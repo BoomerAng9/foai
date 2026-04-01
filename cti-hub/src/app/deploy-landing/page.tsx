@@ -39,7 +39,7 @@ const USE_CASES = [
 
 const FEATURES = [
   { name: 'Voice-First', desc: 'Talk to ACHEEVY. Every response speaks back. Bidirectional voice with Gemini 3.1 Flash Live.', icon: Mic },
-  { name: 'Grammar Engine', desc: 'Say what you mean in plain words. The Intention Engine translates it into precise technical specs.', icon: Brain },
+  { name: 'NTNTN Engine', desc: 'Say what you mean in plain words. The NTNTN Engine translates it into precise technical specs. Access it via the + button in chat.', icon: Brain },
   { name: 'NURD Profile Cards', desc: 'Your digital identity across Web 2.0 and 3.0. Customize, mint as NFT, carry everywhere. Coming soon.', icon: CreditCard },
   { name: 'Agent HQ', desc: '16 agents across 12 departments. Watch them work in real time. Click any agent to see their status and capabilities.', icon: Users },
   { name: 'MCP Gateway', desc: 'One URL, every agent. Connect from Cursor, VS Code, Claude Code — your workforce in your IDE.', icon: Zap },
@@ -89,9 +89,6 @@ export default function DeployLanding() {
           <div className="flex items-center justify-center gap-4">
             <Link href="/chat" className="h-12 px-8 bg-[#E8A020] text-black text-sm font-bold flex items-center gap-2 hover:bg-[#D4901A] transition-colors">
               Deploy Your Workforce <ArrowRight className="w-4 h-4" />
-            </Link>
-            <Link href="/grammar" className="h-12 px-8 border border-white/10 text-sm text-white/60 hover:text-white hover:border-white/20 transition-colors flex items-center">
-              Try the Intention Engine
             </Link>
           </div>
 

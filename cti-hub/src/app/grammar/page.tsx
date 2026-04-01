@@ -68,11 +68,9 @@ export default function GrammarStandalone() {
     <div className="min-h-screen bg-[#0A0A0A] text-white">
       {/* Nav */}
       <nav className="h-14 flex items-center justify-between px-6 border-b border-white/10">
-        <div className="flex items-center gap-3">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/grammar-logo-white.svg" alt="Grammar" className="h-6" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
-          <span className="font-mono text-sm font-bold tracking-wider">GRAMMAR</span>
-          <span className="font-mono text-[9px] text-white/40 ml-1">NTNTN</span>
+        <div className="flex items-center gap-2.5">
+          <Languages className="w-4 h-4 text-[#E8A020]" />
+          <span className="font-mono text-xs font-bold tracking-wider">NTNTN ENGINE</span>
         </div>
         <Link href="/chat" className="flex items-center gap-1.5 text-[11px] font-mono text-white/50 hover:text-white transition-colors">
           Open Full Platform <ArrowRight className="w-3 h-3" />
@@ -86,7 +84,7 @@ export default function GrammarStandalone() {
             <Languages className="w-8 h-8 text-[#E8A020]" />
           </div>
           <h1 className="text-4xl font-black tracking-tight mb-3">
-            The <span style={{ color: '#E8A020', fontFamily: "'Permanent Marker', cursive" }}>Intention</span> Engine
+            The <span style={{ color: '#E8A020', fontFamily: "'Permanent Marker', cursive" }}>NTNTN</span> Engine
           </h1>
           <p className="text-lg text-white/50 max-w-xl mx-auto">
             Describe what you want in plain words. Grammar converts it into a precise technical prompt you can use anywhere.
@@ -153,7 +151,7 @@ export default function GrammarStandalone() {
         )}
 
         <p className="text-center font-mono text-[9px] text-white/20 mt-12">
-          GRAMMAR (NTNTN) · The Intention Engine · By ACHIEVEMOR
+          GRAMMAR (NTNTN) · The NTNTN Engine · By ACHIEVEMOR
         </p>
       </div>
     </div>

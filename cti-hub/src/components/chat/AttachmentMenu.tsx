@@ -71,7 +71,7 @@ export function AttachmentMenu({
   const menuItems: MenuItem[] = [
     {
       icon: <Languages className={`w-4 h-4 ${grammarActive ? 'text-accent' : 'text-fg-tertiary'}`} />,
-      label: grammarActive ? 'Grammar ON ✓' : 'Grammar',
+      label: grammarActive ? 'NTNTN Engine ON ✓' : 'NTNTN Engine',
       onClick: () => { if (onGrammarToggle) onGrammarToggle(); setOpen(false); },
       dividerAfter: true,
     },
