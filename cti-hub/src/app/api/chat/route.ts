@@ -3,6 +3,7 @@ import { requireAuth } from '@/lib/auth-guard';
 import { acheevyRespondStream } from '@/lib/acheevy/agent';
 import { createConversation, getMessages } from '@/lib/memory/store';
 import { rateLimit } from '@/lib/rate-limit-simple';
+import { processGuideMe, getAcheevyGuidePrompt, ACHEEVY_MODEL } from '@/lib/acheevy/guide-me-engine';
 
 export async function POST(request: NextRequest) {
   try {
@@ -10,7 +11,7 @@ export async function POST(request: NextRequest) {
     if (!auth.ok) return auth.response;
     const userId = auth.userId;
     const body = await request.json();
-    const { message, conversation_id, model, skill_context } = body;
+    const { message, conversation_id, model, skill_context, mode } = body;
 
     if (!message || typeof message !== 'string') {
       return NextResponse.json({ error: 'message required' }, { status: 400 });
@@ -44,6 +45,59 @@ export async function POST(request: NextRequest) {
       ? `[SKILL CONTEXT - Apply this framework to your response]\n${skill_context}\n\n[USER MESSAGE]\n${message}`
       : message;
 
+    // Guide Me mode — three-party consulting team
+    if (mode === 'guide') {
+      const guideResult = await processGuideMe(convId || 'temp', message, history);
+      const enc = new TextEncoder();
+
+      const guideStream = new ReadableStream<Uint8Array>({
+        async start(controller) {
+          // 1. Consult_Ang responds instantly
+          controller.enqueue(enc.encode(`data: ${JSON.stringify({ agent: 'Consult_Ang' })}\n\n`));
+          controller.enqueue(enc.encode(`data: ${JSON.stringify({ content: guideResult.consultResponse })}\n\n`));
+
+          // 2. If ACHEEVY is needed, stream the full response
+          if (guideResult.acheevyNeeded) {
+            controller.enqueue(enc.encode(`data: ${JSON.stringify({ agent_working: 'ACHEEVY', message: 'Processing your request...' })}\n\n`));
+
+            // Get ACHEEVY's response via the existing streaming engine
+            const acheevyResult = await acheevyRespondStream(
+              userId,
+              convId || 'temp',
+              `[GUIDE ME MODE — Note_Ang context: ${guideResult.notesSummary}]\n\n${enrichedMessage}`,
+              history,
+              ACHEEVY_MODEL,
+            );
+
+            // Pipe ACHEEVY's stream
+            const reader = acheevyResult.stream.getReader();
+            try {
+              while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+                controller.enqueue(value);
+              }
+            } catch { /* stream ended */ }
+          } else {
+            // Simple response — Consult_Ang handled it alone
+            controller.enqueue(enc.encode(`data: ${JSON.stringify({ content: '', done: true, usage: { tokens_in: 0, tokens_out: 0, cost: 0, memories_recalled: 0 } })}\n\n`));
+          }
+
+          controller.close();
+        },
+      });
+
+      return new Response(guideStream, {
+        headers: {
+          'Content-Type': 'text/event-stream',
+          'Cache-Control': 'no-cache',
+          Connection: 'keep-alive',
+          'X-Conversation-Id': convId || '',
+        },
+      });
+    }
+
+    // Standard mode — single ACHEEVY response
     const result = await acheevyRespondStream(
       userId,
       convId || 'temp',

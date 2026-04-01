@@ -63,6 +63,28 @@ export const DEPARTMENTS: Department[] = [
 export const AGENTS: AgentProfile[] = [
   // ── COMMAND ──
   {
+    id: 'consult_ang',
+    name: 'Consult_Ang',
+    role: 'Senior Consultant (Fast)',
+    department: 'CMD',
+    tier: 'command',
+    persona: 'Quick, adaptive, actively listening. First point of contact. Keeps the conversation moving while ACHEEVY processes.',
+    avatar: '/acheevy-helmet.png',
+    capabilities: ['Active listening', 'Quick responses', 'Clarifying questions', 'Context bridging', 'Voice interaction'],
+    subscriptionTier: 'all', hireable: false,
+  },
+  {
+    id: 'note_ang',
+    name: 'Note_Ang',
+    role: 'Session Recorder',
+    department: 'CMD',
+    tier: 'command',
+    persona: 'Silent. Observant. Captures everything. Detects patterns. Feeds context to the team.',
+    avatar: '/acheevy-helmet.png',
+    capabilities: ['Session recording', 'Pattern detection', 'Context summarization', 'Audit logging', 'Inference layer'],
+    subscriptionTier: 'all', hireable: false,
+  },
+  {
     id: 'acheevy',
     name: 'ACHEEVY',
     role: 'Digital CEO',
