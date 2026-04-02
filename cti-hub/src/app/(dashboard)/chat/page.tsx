@@ -545,7 +545,7 @@ export default function ChatWithACHEEVY() {
                 className="w-32 h-32 sm:w-44 sm:h-44 object-contain mb-4 animate-materialize"
                 style={{ filter: 'drop-shadow(0 8px 24px rgba(232,160,32,0.2))' }}
               />
-              <h1 className="text-xl sm:text-2xl font-light tracking-tight mb-1">
+              <h1 className="text-xl sm:text-2xl font-light tracking-tight mb-1 text-center">
                 Chat w/ <span className="font-bold">ACHEEVY</span>
               </h1>
               <p className="text-fg-secondary text-sm text-center mb-6">
