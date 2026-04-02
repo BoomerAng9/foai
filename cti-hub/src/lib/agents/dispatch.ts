@@ -13,10 +13,12 @@ const AGENT_ENDPOINTS: Record<string, string> = {
   ops_ang: process.env.OPS_ANG_URL || 'https://ops-ang-apbgyi35aq-uc.a.run.app',
   iller_ang: process.env.ILLER_ANG_URL || 'https://iller-ang-apbgyi35aq-uc.a.run.app',
   cfo_ang: process.env.CFO_ANG_URL || 'https://cfo-ang-apbgyi35aq-uc.a.run.app',
+  // Tactical layer — Chicken Hawk dispatches via AIMS OpenClaw (aims-vps)
   chicken_hawk: process.env.CHICKEN_HAWK_URL || 'http://chicken-hawk-gateway-gateway-1:8000',
-  // Additional services on Cloud Run
+  // Supporting services
   hermes: process.env.HERMES_URL || 'https://hermes-agent-apbgyi35aq-uc.a.run.app',
   nemoclaw: process.env.NEMOCLAW_URL || 'https://nemoclaw-service-apbgyi35aq-uc.a.run.app',
+  // AIMS OpenClaw — production execution engine (aims-vps, NOT personal myclaw)
   openclaw: process.env.OPENCLAW_URL || 'https://openclaw-service-apbgyi35aq-uc.a.run.app',
 };
 
