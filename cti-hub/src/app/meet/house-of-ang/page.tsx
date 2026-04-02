@@ -13,6 +13,10 @@ import {
   Palette,
   MessageCircle,
   Plus,
+  Hammer,
+  GitFork,
+  Code2,
+  Monitor,
   Zap,
   Crown,
 } from 'lucide-react'
@@ -107,6 +111,58 @@ const agents = [
       'Generates creative briefs and text-to-image prompts',
       'Manages NFT metadata and digital asset pipelines',
       'Runs its own MCP server for direct IDE integration',
+    ],
+  },
+  {
+    name: 'BuildSmith',
+    role: 'The Builder',
+    department: 'Engineering',
+    icon: Hammer,
+    tagline: 'From zero to live in one dispatch.',
+    capabilities: [
+      'Scaffolds projects from specifications and briefs',
+      'Writes production-grade code across frameworks',
+      'Deploys containers and provisions infrastructure',
+      'The backbone of every build cycle in the platform',
+    ],
+  },
+  {
+    name: 'Picker_Ang',
+    role: 'The Selector',
+    department: 'Orchestration',
+    icon: GitFork,
+    tagline: 'The right agent for the right job, every time.',
+    capabilities: [
+      'Intelligent agent routing across the entire workforce',
+      'Scores agents against task requirements for optimal assignment',
+      'Determines which agents handle which parts of a task',
+      'Enables multi-agent collaboration on complex projects',
+    ],
+  },
+  {
+    name: 'Code_Ang',
+    role: 'Full-Stack Coder',
+    department: 'Engineering',
+    icon: Code2,
+    tagline: 'Reads codebases like novels. Writes them like poetry.',
+    capabilities: [
+      'Writes, reviews, tests, and deploys code across multiple languages',
+      'Reads existing codebases and extends them with precision',
+      'Full-stack capability — frontend, backend, infrastructure',
+      'Integrates with CI/CD pipelines for automated deployment',
+    ],
+  },
+  {
+    name: 'Iller_Ang MCP',
+    role: 'Design-to-IDE Bridge',
+    department: 'Design / DevTools',
+    icon: Monitor,
+    tagline: 'Design assets generated right in your workflow.',
+    capabilities: [
+      'Model Context Protocol server for Iller_Ang',
+      'Connect from Cursor, VS Code, or Claude Code',
+      'Generate visual assets without leaving your IDE',
+      'Brand-consistent design output on every call',
     ],
   },
 ]
@@ -220,11 +276,11 @@ export default function HouseOfAngPage() {
 
                   {/* CTA */}
                   <Link
-                    href="/chat"
+                    href={`/chat?deploy=${encodeURIComponent(agent.name)}`}
                     className="mt-auto inline-flex items-center justify-center gap-2 rounded-xl border border-[#E8A020]/20 bg-[#E8A020]/5 px-4 py-2.5 text-sm font-medium text-[#E8A020] transition-all duration-300 hover:border-[#E8A020]/40 hover:bg-[#E8A020]/10 hover:shadow-lg hover:shadow-[#E8A020]/5"
                   >
                     <MessageCircle className="h-4 w-4" />
-                    Access this agent
+                    Deploy this Boomer_Ang
                   </Link>
                 </div>
               </div>

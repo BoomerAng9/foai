@@ -34,40 +34,6 @@ interface LilHawk {
 
 const lilHawks: LilHawk[] = [
   {
-    name: 'BuildSmith',
-    codename: 'Lil_Build_Hawk',
-    role: 'The Builder',
-    description:
-      'Scaffolds projects, writes code, deploys containers. From zero to live in one dispatch. The backbone of every build cycle.',
-    icon: <Hammer className="w-6 h-6" />,
-    highlighted: true,
-  },
-  {
-    name: 'Picker_Ang',
-    role: 'The Selector',
-    description:
-      'Intelligent agent routing. Determines which agents handle which parts of a task. Scores agents against task requirements for optimal assignment.',
-    icon: <GitFork className="w-6 h-6" />,
-    highlighted: true,
-  },
-  {
-    name: 'Code_Ang',
-    codename: 'Lil_Coding_Hawk',
-    role: 'Full-Stack Coder',
-    description:
-      'Writes, reviews, tests, and deploys code across multiple languages. Reads existing codebases and extends them with precision.',
-    icon: <Code2 className="w-6 h-6" />,
-    highlighted: true,
-  },
-  {
-    name: 'Iller_Ang MCP',
-    role: 'Design-to-IDE Bridge',
-    description:
-      'Model Context Protocol server for Iller_Ang. Connect to Cursor, VS Code, or Claude Code. Design assets generated right in your workflow.',
-    icon: <Palette className="w-6 h-6" />,
-    highlighted: true,
-  },
-  {
     name: 'Lil_Deep_Hawk',
     role: 'Deep Research',
     description:
@@ -323,7 +289,7 @@ export default function ChickenHawkPage() {
               {
                 step: '02',
                 title: 'Agent Scoring',
-                desc: 'Picker_Ang evaluates which Lil_Hawks are best suited for each part of the task. Agents are scored against requirements.',
+                desc: 'Chicken Hawk evaluates which Lil_Hawks are best suited for each part of the task. Agents are scored against requirements.',
               },
               {
                 step: '03',
