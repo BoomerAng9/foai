@@ -27,6 +27,7 @@ const agents = [
     role: 'Research & Intelligence',
     department: 'Research',
     icon: Search,
+    portrait: '/agents/scout-ang.png',
     tagline: 'The one who always knows what\u2019s happening before you ask.',
     capabilities: [
       'Scrapes the web for real-time intelligence and competitive insights',
@@ -40,6 +41,7 @@ const agents = [
     role: 'Content Operations',
     department: 'Content',
     icon: PenTool,
+    portrait: '/agents/content-ang.png',
     tagline: 'Writes like your best employee \u2014 if they never slept.',
     capabilities: [
       'Generates SEO-optimized content, blog articles, and newsletters',
@@ -53,6 +55,7 @@ const agents = [
     role: 'Business Development & Growth',
     department: 'Growth',
     icon: TrendingUp,
+    portrait: '/agents/biz-ang.png',
     tagline: 'Closes deals while you\u2019re asleep.',
     capabilities: [
       'Tracks pipeline stages and scores leads by conversion likelihood',
@@ -66,6 +69,7 @@ const agents = [
     role: 'Operations & Health Monitoring',
     department: 'Operations',
     icon: Activity,
+    portrait: '/agents/ops-ang.png',
     tagline: 'Nothing gets past Ops.',
     capabilities: [
       'Monitors system health across all platform services',
@@ -79,6 +83,7 @@ const agents = [
     role: 'Education & Sales',
     department: 'Education / Sales',
     icon: GraduationCap,
+    portrait: '/agents/edu-ang.png',
     tagline: 'Turns strangers into students, students into advocates.',
     capabilities: [
       'Manages enrollment funnels from first touch to onboarding',
@@ -92,6 +97,7 @@ const agents = [
     role: 'Finance & Revenue',
     department: 'Finance',
     icon: DollarSign,
+    portrait: '/agents/cfo-ang.png',
     tagline: 'Every dollar accounted for. Every cent justified.',
     capabilities: [
       'Tracks spending across subscriptions, tools, and services',
@@ -105,6 +111,7 @@ const agents = [
     role: 'Creative Director & Design',
     department: 'Design',
     icon: Palette,
+    portrait: '/agents/iller-ang.png',
     tagline: 'Sees the world in pixels and palettes.',
     capabilities: [
       'Produces visual assets aligned with brand guidelines',
@@ -118,6 +125,7 @@ const agents = [
     role: 'The Builder',
     department: 'Engineering',
     icon: Hammer,
+    portrait: '/agents/buildsmith.png',
     tagline: 'From zero to live in one dispatch.',
     capabilities: [
       'Scaffolds projects from specifications and briefs',
@@ -131,6 +139,7 @@ const agents = [
     role: 'The Selector',
     department: 'Orchestration',
     icon: GitFork,
+    portrait: '/agents/picker-ang.png',
     tagline: 'The right agent for the right job, every time.',
     capabilities: [
       'Intelligent agent routing across the entire workforce',
@@ -144,6 +153,7 @@ const agents = [
     role: 'Full-Stack Coder',
     department: 'Engineering',
     icon: Code2,
+    portrait: '/agents/code-ang.png',
     tagline: 'Reads codebases like novels. Writes them like poetry.',
     capabilities: [
       'Writes, reviews, tests, and deploys code across multiple languages',
@@ -265,7 +275,21 @@ export default function HouseOfAngPage() {
                 {/* Gradient border */}
                 <div className="absolute -inset-px rounded-2xl bg-gradient-to-b from-[#E8A020]/20 via-[#E8A020]/5 to-transparent opacity-50 transition-opacity duration-500 group-hover:opacity-100" />
 
-                <div className="relative flex h-full flex-col rounded-2xl border border-white/5 bg-[#111111] p-6 transition-all duration-500 group-hover:border-[#E8A020]/20 group-hover:bg-[#141414]">
+                <div className="relative flex h-full flex-col rounded-2xl border border-white/5 bg-[#111111] overflow-hidden transition-all duration-500 group-hover:border-[#E8A020]/20 group-hover:bg-[#141414]">
+                  {/* Agent Portrait */}
+                  {agent.portrait && (
+                    <div className="relative h-48 w-full bg-gradient-to-b from-[#E8A020]/5 to-transparent overflow-hidden">
+                      <Image
+                        src={agent.portrait}
+                        alt={agent.name}
+                        width={400}
+                        height={300}
+                        className="w-full h-full object-cover object-top opacity-80 group-hover:opacity-100 transition-opacity duration-500"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-[#111111] via-transparent to-transparent" />
+                    </div>
+                  )}
+                  <div className="p-6 flex flex-col flex-1">
                   {/* Header */}
                   <div className="mb-4 flex items-start justify-between">
                     <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#E8A020]/10 text-[#E8A020] transition-all duration-300 group-hover:bg-[#E8A020]/20 group-hover:shadow-lg group-hover:shadow-[#E8A020]/10">
@@ -310,6 +334,7 @@ export default function HouseOfAngPage() {
                     <MessageCircle className="h-4 w-4" />
                     Deploy this Boomer_Ang
                   </Link>
+                  </div>
                 </div>
               </div>
             )
