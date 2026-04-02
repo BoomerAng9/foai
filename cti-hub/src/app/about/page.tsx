@@ -608,7 +608,7 @@ export default function AboutPage() {
           {/* Agent Team Pages */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
             <Link
-              href="/agents/house-of-ang"
+              href="/meet/house-of-ang"
               className="border border-white/10 p-6 hover:border-[#E8A020]/40 transition-all group"
               style={{ borderRadius: 12, background: 'rgba(232,160,32,0.03)' }}
             >
@@ -624,7 +624,7 @@ export default function AboutPage() {
               </span>
             </Link>
             <Link
-              href="/agents/chicken-hawk"
+              href="/meet/chicken-hawk"
               className="border border-white/10 p-6 hover:border-[#E8A020]/40 transition-all group"
               style={{ borderRadius: 12, background: 'rgba(232,160,32,0.03)' }}
             >

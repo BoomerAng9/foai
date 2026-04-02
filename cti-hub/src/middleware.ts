@@ -6,7 +6,7 @@ const OWNER_ONLY_ROUTES = ['/live', '/plug-bin', '/open-seats', '/enrollments', 
 const OWNER_EMAILS = ['bpo@achievemor.io', 'jarrett.risher@gmail.com'];
 
 // Routes only available on deploy.foai.cloud (customer-facing product)
-const DEPLOY_ROUTES = ['/chat', '/agents', '/deploy-agent', '/projects', '/settings', '/profile', '/billing', '/auth', '/grammar', '/deploy-landing', '/about'];
+const DEPLOY_ROUTES = ['/chat', '/agents', '/meet', '/deploy-agent', '/projects', '/settings', '/profile', '/billing', '/auth', '/grammar', '/deploy-landing', '/about', '/plug'];
 
 export function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
