@@ -315,7 +315,7 @@ export function LiveSandbox() {
         </div>
         <div className="flex items-center gap-1.5">
           <Zap className="w-3 h-3 text-[#E8A020]" />
-          <span className="font-mono text-[9px] text-white/30">Powered by free-tier models · Zero cost</span>
+          <span className="font-mono text-[9px] text-white/30">Learn how you can run this practically free.</span>
         </div>
       </div>
     </div>

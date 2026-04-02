@@ -31,7 +31,7 @@ const SAMPLE_PLUGS: PlugCard[] = [
     gradient: 'from-amber-500/10 to-orange-600/10',
     agents: ['Scout_Ang', 'Content_Ang', 'Iller_Ang'],
     tag: 'SPORTS',
-    href: '/plug/perform',
+    href: 'https://perform.foai.cloud',
   },
   {
     id: 'teacher',
