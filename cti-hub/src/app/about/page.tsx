@@ -605,6 +605,42 @@ export default function AboutPage() {
             </div>
           </div>
 
+          {/* Agent Team Pages */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
+            <Link
+              href="/agents/house-of-ang"
+              className="border border-white/10 p-6 hover:border-[#E8A020]/40 transition-all group"
+              style={{ borderRadius: 12, background: 'rgba(232,160,32,0.03)' }}
+            >
+              <div className="flex items-center gap-3 mb-2">
+                <span style={{ fontSize: 24 }}>&#x1F3E0;</span>
+                <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 14, fontWeight: 700, color: '#E8A020' }}>The House of ANG</span>
+              </div>
+              <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)', lineHeight: 1.6 }}>
+                Meet the Boomer_Angs — 7 executive AI agents that handle research, content, sales, operations, education, finance, and design. They plan before they act and remember what worked.
+              </p>
+              <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: '#E8A020', display: 'flex', alignItems: 'center', gap: 6, marginTop: 12 }} className="group-hover:translate-x-1 transition-transform">
+                EXPLORE &#x2192;
+              </span>
+            </Link>
+            <Link
+              href="/agents/chicken-hawk"
+              className="border border-white/10 p-6 hover:border-[#E8A020]/40 transition-all group"
+              style={{ borderRadius: 12, background: 'rgba(232,160,32,0.03)' }}
+            >
+              <div className="flex items-center gap-3 mb-2">
+                <span style={{ fontSize: 24 }}>&#x1F985;</span>
+                <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 14, fontWeight: 700, color: '#E8A020' }}>Chicken Hawk &amp; the Sqwaad</span>
+              </div>
+              <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)', lineHeight: 1.6 }}>
+                The tactical execution layer. Chicken Hawk commands, the Lil_Hawks swarm. BuildSmith, Picker_Ang, Code_Ang, Iller_Ang MCP — 11 specialized micro-agents that get it done.
+              </p>
+              <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: '#E8A020', display: 'flex', alignItems: 'center', gap: 6, marginTop: 12 }} className="group-hover:translate-x-1 transition-transform">
+                EXPLORE &#x2192;
+              </span>
+            </Link>
+          </div>
+
           {/* Boomer_Angs Grid with Flip Cards */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
             {[
