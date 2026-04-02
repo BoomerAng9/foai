@@ -98,3 +98,79 @@ export function shouldAutoEvaluate(): boolean {
 export function resetCounter() {
   _turnCounter = 0;
 }
+
+// ── Hermes Integration (LearnAng) ──────────────────────────────────────────
+
+const HERMES_URL = process.env.HERMES_URL || 'https://hermes-agent-939270059361.us-central1.run.app';
+
+interface HermesEvaluation {
+  evaluation_id: string;
+  ecosystem_score: number;
+  agents_evaluated: number;
+  directives_posted: number;
+  tenant_id: string;
+  timestamp: string;
+}
+
+/**
+ * Trigger a Hermes Deep Think evaluation cycle.
+ * Hermes evaluates all Boomer_Angs, scores them, and posts improvement directives.
+ */
+export async function triggerHermesEvaluation(
+  tenantId: string = 'cti',
+  evalType: string = 'auto',
+  multiModel: boolean = false,
+): Promise<HermesEvaluation | null> {
+  try {
+    const res = await fetch(
+      `${HERMES_URL}/evaluate/trigger?tenant_id=${tenantId}&eval_type=${evalType}&multi_model=${multiModel}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Length': '0' },
+        signal: AbortSignal.timeout(90000), // 90s — evaluations can be slow
+      }
+    );
+    if (!res.ok) {
+      console.error(`[AutoResearch] Hermes returned ${res.status}`);
+      return null;
+    }
+    return await res.json();
+  } catch (err) {
+    console.error('[AutoResearch] Hermes evaluation failed:', err instanceof Error ? err.message : err);
+    return null;
+  }
+}
+
+/**
+ * Get recent Hermes evaluations for trend analysis.
+ */
+export async function getHermesHistory(limit: number = 5): Promise<HermesEvaluation[]> {
+  try {
+    const res = await fetch(`${HERMES_URL}/history/recent?limit=${limit}`, {
+      signal: AbortSignal.timeout(10000),
+    });
+    if (!res.ok) return [];
+    return await res.json();
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * Full evaluation cycle: local evaluation + Hermes Deep Think.
+ * Called automatically every 10th turn or on manual trigger.
+ */
+export async function runFullEvaluation(
+  taskType: string,
+  input: string,
+  output: string,
+  context?: string,
+): Promise<{ local: EvaluationResult; hermes: HermesEvaluation | null }> {
+  // Run local evaluation and Hermes in parallel
+  const [local, hermes] = await Promise.all([
+    evaluateOutput(taskType, input, output, context),
+    triggerHermesEvaluation('cti', 'auto', false),
+  ]);
+
+  return { local, hermes };
+}
