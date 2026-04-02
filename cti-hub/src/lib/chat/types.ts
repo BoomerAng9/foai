@@ -76,4 +76,9 @@ export const MODELS: ModelOption[] = [
   { id: 'inception/mercury-2',              name: 'Mercury 2',            provider: 'Inception',   price_in: 0.25,  price_out: 0.75,  context: '128K',  tag: 'FAST' },
   { id: 'nvidia/nemotron-3-super-120b-a12b:free', name: 'Nemotron 3 Super', provider: 'NVIDIA', price_in: 0,     price_out: 0,     context: '128K',  tag: 'FREE' },
   { id: 'nvidia/nemotron-nano-9b-v2:free',  name: 'Nemotron Nano 9B',     provider: 'NVIDIA',      price_in: 0,     price_out: 0,     context: '128K',  tag: 'FREE' },
+  { id: 'qwen/qwen3-coder:free',            name: 'Qwen3 Coder 480B',    provider: 'Qwen',        price_in: 0,     price_out: 0,     context: '256K',  tag: 'FREE' },
+  { id: 'qwen/qwen3-next-80b-a3b-instruct:free', name: 'Qwen3 Next 80B', provider: 'Qwen',       price_in: 0,     price_out: 0,     context: '128K',  tag: 'FREE' },
+  { id: 'qwen/qwen3.6-plus-preview:free',   name: 'Qwen 3.6 Plus',       provider: 'Qwen',        price_in: 0,     price_out: 0,     context: '256K',  tag: 'FREE' },
+  { id: 'meta-llama/llama-3.3-70b-instruct:free', name: 'Llama 3.3 70B', provider: 'Meta',        price_in: 0,     price_out: 0,     context: '128K',  tag: 'FREE' },
+  { id: 'google/gemma-3-27b-it:free',       name: 'Gemma 3 27B',         provider: 'Google',      price_in: 0,     price_out: 0,     context: '128K',  tag: 'FREE' },
 ];

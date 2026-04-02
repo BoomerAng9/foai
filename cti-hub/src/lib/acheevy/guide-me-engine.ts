@@ -18,10 +18,10 @@
 
 const OPENROUTER_KEY = process.env.OPENROUTER_API_KEY || '';
 
-// Model assignments
-const CONSULT_MODEL = 'inception/mercury-2';  // Fast, ~200ms
-const ACHEEVY_MODEL = 'z-ai/glm-5-turbo';    // Execution, methodical
-const NOTE_MODEL = 'nvidia/nemotron-nano-9b-v2:free'; // Free, background
+// Model assignments — ALL FREE TIER
+const CONSULT_MODEL = 'qwen/qwen3-next-80b-a3b-instruct:free';  // Fast, free
+const ACHEEVY_MODEL = 'nvidia/nemotron-3-super-120b-a12b:free';  // Execution, free 120B
+const NOTE_MODEL = 'nvidia/nemotron-nano-9b-v2:free';            // Background recorder, free
 
 interface SessionMessage {
   role: 'user' | 'consult_ang' | 'acheevy' | 'note_ang';

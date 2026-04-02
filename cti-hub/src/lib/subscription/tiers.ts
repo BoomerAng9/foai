@@ -44,7 +44,15 @@ export const TIERS: SubscriptionTier[] = [
       'Smart Translate — say it plain, we build it right',
     ],
     agents: ['acheevy', 'visual_engine'],
-    models: ['nvidia/nemotron-3-super-120b-a12b:free', 'nvidia/nemotron-nano-9b-v2:free'],
+    models: [
+      'nvidia/nemotron-3-super-120b-a12b:free',
+      'nvidia/nemotron-nano-9b-v2:free',
+      'qwen/qwen3-coder:free',
+      'qwen/qwen3-next-80b-a3b-instruct:free',
+      'qwen/qwen3.6-plus-preview:free',
+      'meta-llama/llama-3.3-70b-instruct:free',
+      'google/gemma-3-27b-it:free',
+    ],
     tokenAllocation: 50000, // Starting package
     nurdCardIncluded: false,
     nftMintIncluded: false,
