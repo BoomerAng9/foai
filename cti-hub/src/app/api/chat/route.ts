@@ -97,7 +97,45 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // Standard mode — single ACHEEVY response
+    // Detect if ACHEEVY should handle this autonomously via V1 backend
+    const ACHEEVY_V1_URL = process.env.ACHEEVY_V1_URL || 'http://31.97.138.45:8000';
+    const isAutonomousTask = detectAutonomousTask(enrichedMessage);
+
+    if (isAutonomousTask && ACHEEVY_V1_URL) {
+      // Route to ACHEEVY V1 (II Agent) for full autonomous execution
+      try {
+        const v1Response = await fetch(`${ACHEEVY_V1_URL}/v1/chat/conversations`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${process.env.ACHEEVY_V1_TOKEN || ''}`,
+          },
+          body: JSON.stringify({
+            content: enrichedMessage,
+            model_id: 'default',
+          }),
+        });
+
+        if (v1Response.ok && v1Response.body) {
+          // Proxy the V1 SSE stream back to the client
+          return new Response(v1Response.body, {
+            headers: {
+              'Content-Type': 'text/event-stream',
+              'Cache-Control': 'no-cache',
+              Connection: 'keep-alive',
+              'X-Conversation-Id': convId || '',
+              'X-Acheevy-Mode': 'autonomous',
+            },
+          });
+        }
+        // V1 failed — fall through to standard mode
+        console.warn('[Chat] V1 backend unavailable, falling back to standard mode');
+      } catch (v1Err) {
+        console.warn('[Chat] V1 proxy error:', v1Err instanceof Error ? v1Err.message : v1Err);
+      }
+    }
+
+    // Standard mode — single ACHEEVY response (fast chat)
     const result = await acheevyRespondStream(
       userId,
       convId || 'temp',
@@ -118,4 +156,36 @@ export async function POST(request: NextRequest) {
     const msg = error instanceof Error ? error.message : 'Chat failed';
     return NextResponse.json({ error: msg }, { status: 500 });
   }
+}
+
+/**
+ * Detect if a message describes a task ACHEEVY should handle autonomously.
+ * Autonomous = needs tools (browser, code, file ops, research, build, deploy).
+ * Simple chat stays on the fast path (direct OpenRouter).
+ */
+function detectAutonomousTask(message: string): boolean {
+  const lower = message.toLowerCase();
+
+  // Simple responses — keep on fast path
+  const simplePatterns = [
+    /^(yes|no|ok|sure|thanks|thank you|got it|sounds good|perfect|great|cool|hello|hi|hey)/i,
+    /^(what|how much|when|where|who) .{0,40}\?$/i,
+  ];
+  if (simplePatterns.some(p => p.test(lower))) return false;
+
+  // Autonomous triggers — route to V1 for full agent execution
+  const autonomousKeywords = [
+    'build', 'create', 'deploy', 'design', 'develop', 'code', 'write code',
+    'make me', 'set up', 'automate', 'integrate', 'research', 'analyze',
+    'generate', 'produce', 'construct', 'architect', 'scaffold',
+    'scrape', 'crawl', 'search the web', 'find information',
+    'edit file', 'modify', 'refactor', 'debug', 'fix this code',
+    'install', 'configure', 'provision', 'spin up',
+    'write a', 'create a', 'build a', 'make a', 'design a',
+    'full stack', 'web app', 'mobile app', 'api', 'database',
+    'presentation', 'slides', 'report', 'document',
+    'video', 'image', 'logo', 'brand',
+  ];
+
+  return autonomousKeywords.some(kw => lower.includes(kw));
 }
