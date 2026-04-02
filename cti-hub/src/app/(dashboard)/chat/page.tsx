@@ -179,11 +179,74 @@ export default function ChatWithACHEEVY() {
       const contentType = res.headers.get('Content-Type') || '';
 
       if (!res.ok || !res.body || !contentType.includes('text/event-stream')) {
+        // On 401, try to auto-refresh the session token and retry once
+        if (res.status === 401 && user) {
+          try {
+            const freshToken = await user.getIdToken(true);
+            await fetch('/api/auth/session', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ accessToken: freshToken }),
+            });
+            // Retry the original request
+            const retryRes = await fetch('/api/chat', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                message: msg,
+                conversation_id: activeConvId,
+                attachments: currentAttachments.map(a => ({ name: a.name, type: a.type, size: a.size })),
+                skill_context: activeSkill?.systemContext || undefined,
+                mode: guideMode ? 'guide' : undefined,
+              }),
+            });
+            if (retryRes.ok && retryRes.body) {
+              // Swap to the retry response and continue with streaming below
+              // Re-assign and fall through — but since we can't re-assign const, handle inline
+              const retryContentType = retryRes.headers.get('Content-Type') || '';
+              if (retryContentType.includes('text/event-stream')) {
+                const reader = retryRes.body.getReader();
+                const decoder = new TextDecoder();
+                let buf = '';
+                let voiceText = '';
+                while (true) {
+                  const { done, value } = await reader.read();
+                  if (done) break;
+                  buf += decoder.decode(value, { stream: true });
+                  const lines = buf.split('\n');
+                  buf = lines.pop() || '';
+                  for (const line of lines) {
+                    if (!line.startsWith('data: ')) continue;
+                    try {
+                      const data = JSON.parse(line.slice(6));
+                      if (data.done) {
+                        setStreamingCost(null);
+                        setMessages(prev => prev.map(m =>
+                          m.id === streamId ? { ...m, streaming: false, metadata: data.usage } : m
+                        ));
+                      } else if (data.content) {
+                        voiceText += data.content;
+                        setMessages(prev => prev.map(m =>
+                          m.id === streamId ? { ...m, content: (m.content || '') + data.content } : m
+                        ));
+                      }
+                      if (data.cost) setStreamingCost(data.cost);
+                    } catch {}
+                  }
+                }
+                return; // Successfully retried
+              }
+            }
+          } catch (refreshErr) {
+            console.error('[Chat] Token refresh failed:', refreshErr);
+          }
+        }
+
         let errorMsg = 'Connection error. Please try again.';
         try {
           const errData = await res.json();
           if (res.status === 401) {
-            errorMsg = 'Session expired. Please refresh the page and sign in again.';
+            errorMsg = 'Your session needs a refresh. Please sign out and sign back in.';
           } else {
             errorMsg = errData.error || errorMsg;
           }
