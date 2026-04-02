@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import {
   ArrowLeft,
   Crosshair,
@@ -165,6 +166,17 @@ export default function ChickenHawkPage() {
             <span className="font-semibold text-white">&quot;the Sqwaad.&quot;</span>{' '}
             When ACHEEVY says &quot;build it,&quot; Chicken Hawk dispatches the Sqwaad.
           </p>
+          {/* Hero Image */}
+          <div className="mt-10 relative rounded-xl overflow-hidden border border-white/10 max-w-3xl mx-auto">
+            <Image
+              src="/chicken-hawks-hero.png"
+              alt="Chicken Hawk and the Lil_Hawks"
+              width={800}
+              height={500}
+              className="w-full h-auto"
+              priority
+            />
+          </div>
         </div>
       </section>
 

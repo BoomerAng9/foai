@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import {
   ArrowLeft,
   Search,
@@ -156,6 +157,17 @@ export default function HouseOfAngPage() {
             before they act, remember what worked, and are measured against KPIs.
             Seven agents. Seven departments. One unified mission.
           </p>
+          {/* Hero Image */}
+          <div className="mt-10 relative rounded-xl overflow-hidden border border-white/10 max-w-3xl mx-auto">
+            <Image
+              src="/boomer-angs-hero.png"
+              alt="The Boomer_Angs"
+              width={800}
+              height={450}
+              className="w-full h-auto"
+              priority
+            />
+          </div>
         </div>
       </section>
 
