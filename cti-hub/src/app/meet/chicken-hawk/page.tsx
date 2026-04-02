@@ -198,6 +198,32 @@ export default function ChickenHawkPage() {
         </div>
       </section>
 
+      {/* How to Access */}
+      <section className="px-6 pb-12 max-w-4xl mx-auto">
+        <h2 className="text-xl font-bold tracking-tight mb-1">How to Access the Chicken Hawks</h2>
+        <p className="text-sm text-white/40 mb-6">Chicken Hawk and the Sqwaad work behind the scenes</p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="border border-white/10 rounded-xl p-5 bg-white/[0.02]">
+            <div className="flex items-center gap-2 mb-2">
+              <Shield className="w-4 h-4" style={{ color: accent }} />
+              <h3 className="font-bold text-sm">Automatic Dispatch</h3>
+            </div>
+            <p className="text-xs text-white/40 leading-relaxed">
+              When you ask ACHEEVY to build, deploy, or execute anything, Chicken Hawk automatically coordinates the Lil_Hawks. You don&apos;t dispatch them directly — the tactical layer handles routing, parallelism, and failure recovery.
+            </p>
+          </div>
+          <div className="border border-white/10 rounded-xl p-5 bg-white/[0.02]">
+            <div className="flex items-center gap-2 mb-2">
+              <Crosshair className="w-4 h-4" style={{ color: accent }} />
+              <h3 className="font-bold text-sm">Watch Them Work</h3>
+            </div>
+            <p className="text-xs text-white/40 leading-relaxed">
+              As the Sqwaad executes, you see progress updates in real time. Each Lil_Hawk reports status through Chicken Hawk. The work streams back to you as it completes — no waiting for the whole job to finish.
+            </p>
+          </div>
+        </div>
+      </section>
+
       {/* The Sqwaad Grid */}
       <section className="px-6 pb-20 max-w-5xl mx-auto">
         <div className="text-center mb-12">

@@ -227,6 +227,34 @@ export default function HouseOfAngPage() {
         </div>
       </section>
 
+      {/* How to Access */}
+      <section className="px-6 pb-12">
+        <div className="mx-auto max-w-4xl">
+          <h2 className="text-xl font-bold tracking-tight mb-1">How to Access the Boomer_Angs</h2>
+          <p className="text-sm text-white/40 mb-6">Two ways to reach the executive agents</p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="border border-white/10 rounded-xl p-5 bg-white/[0.02]">
+              <div className="flex items-center gap-2 mb-2">
+                <MessageCircle className="w-4 h-4 text-[#E8A020]" />
+                <h3 className="font-bold text-sm">Talk to ACHEEVY</h3>
+              </div>
+              <p className="text-xs text-white/40 leading-relaxed">
+                Just describe what you need in chat. ACHEEVY understands context and automatically delegates to the right Boomer_Ang based on your request. No routing required — the intelligence layer handles it.
+              </p>
+            </div>
+            <div className="border border-white/10 rounded-xl p-5 bg-white/[0.02]">
+              <div className="flex items-center gap-2 mb-2">
+                <Plus className="w-4 h-4 text-[#E8A020]" />
+                <h3 className="font-bold text-sm">Skills Menu</h3>
+              </div>
+              <p className="text-xs text-white/40 leading-relaxed">
+                Use the + button in chat to open the Skills menu. Select a specific agent directly when you know exactly who you need. Each agent is listed with their specialty for quick access.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Agent Cards */}
       <section className="px-6 pb-20">
         <div className="mx-auto grid max-w-7xl gap-6 sm:grid-cols-2 lg:grid-cols-3">

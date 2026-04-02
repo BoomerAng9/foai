@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect, useCallback, Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { Send, CornerDownLeft, ArrowDown, X, FileText, Image as ImageIcon } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { ChatSidebar } from '@/components/chat/ChatSidebar';
@@ -21,11 +22,14 @@ function formatFileSize(bytes: number) {
   return (bytes / 1048576).toFixed(1) + ' MB';
 }
 
-export default function ChatWithACHEEVY() {
+function ChatWithACHEEVY() {
   const { user } = useAuth();
+  const searchParams = useSearchParams();
+  const deployAgent = searchParams.get('deploy');
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const deployInitRef = useRef(false);
 
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [activeConvId, setActiveConvId] = useState<string | null>(null);
@@ -104,6 +108,23 @@ export default function ChatWithACHEEVY() {
     el.addEventListener('scroll', onScroll);
     return () => el.removeEventListener('scroll', onScroll);
   }, []);
+
+  // Auto-send deployment message when ?deploy=AgentName is in URL
+  useEffect(() => {
+    if (!deployAgent || deployInitRef.current || !user) return;
+    deployInitRef.current = true;
+    // Wait a tick for chat to initialize, then send the deployment prompt
+    const timer = setTimeout(() => {
+      const deployMsg = `I want to deploy ${deployAgent} for my business. Walk me through what ${deployAgent} can do for me and help me set it up.`;
+      setInput(deployMsg);
+      // Auto-send after a brief delay so user sees the message
+      setTimeout(() => {
+        const form = document.querySelector('form');
+        if (form) form.requestSubmit();
+      }, 500);
+    }, 1000);
+    return () => clearTimeout(timer);
+  }, [deployAgent, user]);
 
   function scrollToBottom() {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' });
@@ -769,5 +790,13 @@ export default function ChatWithACHEEVY() {
         />
       )}
     </div>
+  );
+}
+
+export default function ChatPage() {
+  return (
+    <Suspense>
+      <ChatWithACHEEVY />
+    </Suspense>
   );
 }
