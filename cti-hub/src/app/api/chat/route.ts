@@ -112,7 +112,7 @@ export async function POST(request: NextRequest) {
           },
           body: JSON.stringify({
             content: enrichedMessage,
-            model_id: 'default',
+            model_id: process.env.ACHEEVY_V1_MODEL_ID || 'default',
           }),
         });
 
