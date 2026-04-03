@@ -4,8 +4,9 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import {
   ArrowLeft, Star, TrendingUp, Award, MessageSquare,
-  ChevronDown, ChevronUp, Filter, Search, Zap,
+  ChevronDown, ChevronUp, Filter, Search, Zap, Mic, Film, FileText,
 } from 'lucide-react';
+import { PlugChat } from '@/components/plug/PlugChat';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -303,6 +304,53 @@ export default function PerFormPage() {
           {filtered.map((prospect, idx) => (
             <ProspectCard key={prospect.id} prospect={prospect} rank={idx + 1} />
           ))}
+        </div>
+
+        {/* Live Analysis Panel */}
+        <div className="mt-12 border border-white/10 rounded-lg overflow-hidden">
+          <div className="flex items-center gap-2 px-4 py-3 bg-white/5 border-b border-white/10">
+            <Mic className="w-4 h-4 text-[#E8A020]" />
+            <span className="font-mono text-xs text-white/60 uppercase tracking-wider">Live Analysis — Ask the Analysts</span>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-px bg-white/10">
+            <button
+              onClick={() => {
+                const el = document.getElementById('perform-chat');
+                if (el) el.scrollIntoView({ behavior: 'smooth' });
+              }}
+              className="flex items-center gap-3 p-4 bg-[#0A0A0A] hover:bg-white/5 transition-colors"
+            >
+              <Search className="w-4 h-4 text-[#3B82F6]" />
+              <div className="text-left">
+                <p className="font-mono text-[10px] font-bold text-white">SCOUT REPORT</p>
+                <p className="text-[9px] text-white/40">Deep dive on any prospect</p>
+              </div>
+            </button>
+            <button className="flex items-center gap-3 p-4 bg-[#0A0A0A] hover:bg-white/5 transition-colors">
+              <Film className="w-4 h-4 text-[#F97316]" />
+              <div className="text-left">
+                <p className="font-mono text-[10px] font-bold text-white">FILM BREAKDOWN</p>
+                <p className="text-[9px] text-white/40">Play-by-play analysis</p>
+              </div>
+            </button>
+            <button className="flex items-center gap-3 p-4 bg-[#0A0A0A] hover:bg-white/5 transition-colors">
+              <Mic className="w-4 h-4 text-[#8B5CF6]" />
+              <div className="text-left">
+                <p className="font-mono text-[10px] font-bold text-white">PODCAST SCRIPT</p>
+                <p className="text-[9px] text-white/40">Generate episode content</p>
+              </div>
+            </button>
+          </div>
+          <div id="perform-chat" className="h-96">
+            <PlugChat
+              agentName="Scout_Ang"
+              agentRole="NFL Draft Analyst"
+              agentColor="#3B82F6"
+              systemPrompt="You are Scout_Ang, the lead NFL Draft analyst for Per|Form on The Deploy Platform.\n\nYOU ARE AN EXPERT IN:\n- NFL Draft scouting and prospect evaluation\n- Film analysis (route running, pass rush technique, coverage skills)\n- Combine and Pro Day metrics interpretation\n- Historical draft comparisons\n- Team needs and fit analysis\n- Mock draft predictions\n\nWhen asked about a prospect, give a FULL scouting report: size/speed, strengths (3-5), weaknesses (2-3), NFL comparison, draft grade (A+ through F), projected round, and team fit.\n\nWhen asked about team needs, be specific about roster gaps and which prospects fill them.\n\nFor podcast scripts, write in conversational tone with [PAUSE], [EMPHASIS], and [GRAPHIC] production cues.\n\nBe bold. Have takes. Back them with evidence."
+              placeholder="Ask about any prospect, team need, or draft scenario..."
+              welcomeMessage="I'm Scout_Ang — Per|Form's lead draft analyst. Ask me about any prospect, team need, mock draft scenario, or I can generate a podcast script for you. What do you want to break down?"
+            />
+          </div>
         </div>
 
         {/* Footer */}
