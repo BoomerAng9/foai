@@ -24,6 +24,14 @@ export interface TimelineClip {
   color: string;
 }
 
+export type TransitionType = 'cut' | 'crossfade' | 'wipe' | 'dissolve' | 'slide';
+
+export interface ClipTransition {
+  fromClipId: string;
+  toClipId: string;
+  type: TransitionType;
+}
+
 export interface TimelineTrackDef {
   id: string;
   label: string;
@@ -40,9 +48,11 @@ const DEFAULT_TRACKS: TimelineTrackDef[] = [
 
 interface TimelineProps {
   clips: TimelineClip[];
+  transitions?: ClipTransition[];
   onClipSelect: (clipId: string) => void;
   onClipMove?: (clipId: string, newStartTime: number) => void;
   onClipResize?: (clipId: string, newDuration: number) => void;
+  onTransitionChange?: (fromId: string, toId: string, type: TransitionType) => void;
   selectedClipId: string | null;
   playheadTime: number;
   onPlayheadChange: (time: number) => void;
@@ -139,8 +149,35 @@ function ClipBlock({ clip, zoom, selected, onSelect, onDragStart }: {
   );
 }
 
+const TRANSITION_TYPES: TransitionType[] = ['cut', 'crossfade', 'wipe', 'dissolve', 'slide'];
+
+function TransitionIndicator({ transition, zoom, position, onCycle }: {
+  transition: ClipTransition;
+  zoom: number;
+  position: number;
+  onCycle: () => void;
+}) {
+  const colors: Record<TransitionType, string> = {
+    cut: BC.textGhost,
+    crossfade: BC.gold,
+    wipe: BC.amber,
+    dissolve: '#8B5CF6',
+    slide: '#3B82F6',
+  };
+  return (
+    <button
+      onClick={onCycle}
+      className="absolute top-0 bottom-0 z-10 flex items-center justify-center cursor-pointer hover:scale-110 transition-transform"
+      style={{ left: `${position * 80 * zoom - 8}px`, width: '16px' }}
+      title={`Transition: ${transition.type} (click to change)`}
+    >
+      <div className="w-3 h-3 rotate-45" style={{ background: colors[transition.type], border: '1px solid rgba(0,0,0,0.3)' }} />
+    </button>
+  );
+}
+
 export function Timeline({
-  clips, onClipSelect, onClipMove, onClipResize,
+  clips, transitions = [], onClipSelect, onClipMove, onClipResize, onTransitionChange,
   selectedClipId, playheadTime, onPlayheadChange, totalDuration,
 }: TimelineProps) {
   const [zoom, setZoom] = useState(1);
@@ -233,6 +270,27 @@ export function Timeline({
                       onDragStart={(e) => handleDragStart(clip.id, e)}
                     />
                   ))}
+                  {/* Transition indicators */}
+                  {trackClips.sort((a, b) => a.startTime - b.startTime).map((clip, i) => {
+                    const nextClip = trackClips.sort((a, b) => a.startTime - b.startTime)[i + 1];
+                    if (!nextClip) return null;
+                    const trans = transitions.find(t => t.fromClipId === clip.id && t.toClipId === nextClip.id)
+                      || { fromClipId: clip.id, toClipId: nextClip.id, type: 'cut' as TransitionType };
+                    return (
+                      <TransitionIndicator
+                        key={`trans-${clip.id}-${nextClip.id}`}
+                        transition={trans}
+                        zoom={zoom}
+                        position={clip.startTime + clip.duration}
+                        onCycle={() => {
+                          if (!onTransitionChange) return;
+                          const currentIdx = TRANSITION_TYPES.indexOf(trans.type);
+                          const nextType = TRANSITION_TYPES[(currentIdx + 1) % TRANSITION_TYPES.length];
+                          onTransitionChange(clip.id, nextClip.id, nextType);
+                        }}
+                      />
+                    );
+                  })}
                   {trackClips.length === 0 && (
                     <div className="absolute inset-0 flex items-center pl-3">
                       <span className="text-[8px] font-mono" style={{ color: 'rgba(255,255,255,0.1)' }}>

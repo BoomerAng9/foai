@@ -11,7 +11,7 @@ import {
 import { CameraMenu, parseCameraSpec, CAMERA_DEFAULTS } from '@/components/broadcast/CameraMenu';
 import type { CameraSpec } from '@/components/broadcast/CameraMenu';
 import { Timeline } from '@/components/broadcast/Timeline';
-import type { TimelineClip } from '@/components/broadcast/Timeline';
+import type { TimelineClip, ClipTransition, TransitionType } from '@/components/broadcast/Timeline';
 
 // Broad|Cast brand colors
 const BC = {
@@ -107,8 +107,10 @@ export default function BroadcastStudio() {
   const [resolution, setResolution] = useState('4K UHD');
   const [cameraSpec, setCameraSpec] = useState<CameraSpec>(CAMERA_DEFAULTS);
   const [timelineClips, setTimelineClips] = useState<TimelineClip[]>([]);
+  const [clipTransitions, setClipTransitions] = useState<ClipTransition[]>([]);
   const [selectedClipId, setSelectedClipId] = useState<string | null>(null);
   const [playheadTime, setPlayheadTime] = useState(0);
+  const [rendering, setRendering] = useState(false);
   const chatEndRef = useRef<HTMLDivElement>(null);
 
   const addScene = useCallback(async () => {
@@ -453,10 +455,48 @@ export default function BroadcastStudio() {
             </div>
           </div>
 
+          {/* Render bar */}
+          {timelineClips.filter(c => c.videoUrl).length > 0 && (
+            <div className="flex items-center justify-between px-4 h-8 shrink-0" style={{ borderTop: `1px solid ${BC.border}`, background: BC.surface }}>
+              <span className="text-[9px] font-mono" style={{ color: BC.textGhost }}>
+                {timelineClips.filter(c => c.videoUrl).length} clip{timelineClips.filter(c => c.videoUrl).length !== 1 ? 's' : ''} ready
+              </span>
+              <button
+                onClick={async () => {
+                  setRendering(true);
+                  setChatMessages(prev => [...prev, { role: 'iller_ang', content: 'Rendering your timeline. I\'ll let you know when the export is ready.' }]);
+                  try {
+                    const transMap: Record<string, { type: string; duration: number }> = {};
+                    clipTransitions.forEach(t => {
+                      transMap[`${t.fromClipId}-${t.toClipId}`] = { type: t.type, duration: 15 };
+                    });
+                    const res = await fetch('/api/broadcast/render', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ clips: timelineClips, transitions: transMap, resolution }),
+                    });
+                    const data = await res.json();
+                    setChatMessages(prev => [...prev, { role: 'iller_ang', content: `Render ${data.status}: ${data.message}` }]);
+                  } catch {
+                    setChatMessages(prev => [...prev, { role: 'iller_ang', content: 'Render failed. Let me know if you want to retry.' }]);
+                  } finally {
+                    setRendering(false);
+                  }
+                }}
+                disabled={rendering}
+                className="px-3 py-1 text-[9px] font-mono font-bold tracking-wider transition-all disabled:opacity-50"
+                style={{ background: BC.gold, color: BC.bg }}
+              >
+                {rendering ? 'RENDERING...' : 'EXPORT MP4'}
+              </button>
+            </div>
+          )}
+
           {/* Timeline */}
           <div className="h-44 shrink-0">
             <Timeline
               clips={timelineClips}
+              transitions={clipTransitions}
               onClipSelect={(id) => {
                 setSelectedClipId(id);
                 const clip = timelineClips.find(c => c.id === id);
@@ -467,6 +507,17 @@ export default function BroadcastStudio() {
               }}
               onClipMove={(id, newStart) => {
                 setTimelineClips(prev => prev.map(c => c.id === id ? { ...c, startTime: newStart } : c));
+              }}
+              onTransitionChange={(fromId, toId, type) => {
+                setClipTransitions(prev => {
+                  const existing = prev.findIndex(t => t.fromClipId === fromId && t.toClipId === toId);
+                  if (existing >= 0) {
+                    const updated = [...prev];
+                    updated[existing] = { fromClipId: fromId, toClipId: toId, type };
+                    return updated;
+                  }
+                  return [...prev, { fromClipId: fromId, toClipId: toId, type }];
+                });
               }}
               selectedClipId={selectedClipId}
               playheadTime={playheadTime}
