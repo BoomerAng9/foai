@@ -1,14 +1,16 @@
 'use client';
 
 import { useState, useRef, useEffect, useCallback, Suspense } from 'react';
+import { AnimatePresence } from 'framer-motion';
 import { useSearchParams } from 'next/navigation';
 import { Send, CornerDownLeft, ArrowDown, X, FileText, Image as ImageIcon } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { ChatSidebar } from '@/components/chat/ChatSidebar';
 import { MessageBubble } from '@/components/chat/MessageBubble';
 import { RolodexVerb } from '@/components/chat/RolodexVerb';
-import type { Message, Attachment, Conversation, TierId } from '@/lib/chat/types';
+import type { Message, Attachment, Conversation, TierId, AgentTier } from '@/lib/chat/types';
 import { TIERS } from '@/lib/chat/types';
+import { TaskView } from '@/components/chat/TaskView';
 import { LucPopup } from '@/components/chat/LucPopup';
 import type { LucEstimate } from '@/lib/luc/types';
 import { AttachmentMenu } from '@/components/chat/AttachmentMenu';
@@ -57,6 +59,12 @@ function ChatWithACHEEVY() {
   const [streamingCost, setStreamingCost] = useState<{ tokens_in: number; tokens_out: number; cost: number } | null>(null);
   const [manageItInput, setManageItInput] = useState('');
   const [guideMode, setGuideMode] = useState(false);
+  const [activeDispatch, setActiveDispatch] = useState<{
+    tier: AgentTier;
+    agents: string[];
+    taskSummary: string;
+    streamContent: string;
+  } | null>(null);
 
   const currentTier = TIERS.find(t => t.id === activeTier) || TIERS[0];
 
@@ -197,6 +205,18 @@ function ChatWithACHEEVY() {
         ]);
       }
 
+      // Detect agent tier from response headers — activate split-screen
+      const agentTier = parseInt(res.headers.get('X-Agent-Tier') || '0', 10) as AgentTier;
+      const agentRoster = (res.headers.get('X-Agent-Roster') || '').split(',').filter(Boolean);
+      if (agentTier > 0 && agentRoster.length > 0) {
+        setActiveDispatch({
+          tier: agentTier,
+          agents: agentRoster,
+          taskSummary: msg.slice(0, 80),
+          streamContent: '',
+        });
+      }
+
       const contentType = res.headers.get('Content-Type') || '';
 
       if (!res.ok || !res.body || !contentType.includes('text/event-stream')) {
@@ -297,6 +317,9 @@ function ChatWithACHEEVY() {
             const data = JSON.parse(line.slice(6));
             if (data.done) {
               setStreamingCost(null);
+              // Mark dispatch as complete, then auto-dismiss after 3s
+              setActiveDispatch(prev => prev ? { ...prev, streamContent: prev.streamContent + ' [complete]' } : null);
+              setTimeout(() => setActiveDispatch(null), 5000);
               setMessages(prev => prev.map(m =>
                 m.id === streamId ? { ...m, streaming: false, metadata: data.usage } : m
               ));
@@ -354,6 +377,8 @@ function ChatWithACHEEVY() {
               setMessages(prev => prev.map(m =>
                 m.id === streamId ? { ...m, content: m.content + data.content } : m
               ));
+              // Feed content to active dispatch for process tracker
+              setActiveDispatch(prev => prev ? { ...prev, streamContent: (prev.streamContent + data.content).slice(-500) } : null);
             }
           } catch {}
         }
@@ -557,7 +582,20 @@ function ChatWithACHEEVY() {
         </div>
 
         <div ref={scrollRef} className="flex-1 overflow-y-auto">
-          {isEmpty ? (
+          {/* Agent Assembly + Process Tracker — split-screen during autonomous tasks */}
+          <AnimatePresence>
+            {activeDispatch && (
+              <TaskView
+                tier={activeDispatch.tier}
+                agents={activeDispatch.agents}
+                taskSummary={activeDispatch.taskSummary}
+                streamContent={activeDispatch.streamContent}
+                onDismiss={() => setActiveDispatch(null)}
+              />
+            )}
+          </AnimatePresence>
+
+          {isEmpty && !activeDispatch ? (
             <div className="flex flex-col items-center px-4 sm:px-6 md:px-8 py-4 md:py-8">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img

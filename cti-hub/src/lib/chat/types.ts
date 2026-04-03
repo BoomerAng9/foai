@@ -44,6 +44,29 @@ export const TIERS: Tier[] = [
   { id: 'lfg', name: 'LFG', color: '#F59E0B' },
 ];
 
+// Agent assembly tiers — determines which transition animation plays
+export type AgentTier = 1 | 2 | 3 | 4;
+
+export interface AgentDispatch {
+  tier: AgentTier;
+  agents: string[];       // Which agents are working
+  taskSummary: string;    // One-line summary of what's being done
+  phase: 'receiving' | 'analyzing' | 'proposing' | 'building' | 'verifying' | 'complete';
+}
+
+// Agent roster for assembly animations
+export const AGENT_ROSTER = {
+  acheevy: { name: 'ACHEEVY', role: 'Digital CEO', color: '#E8A020' },
+  scout_ang: { name: 'Scout_Ang', role: 'Research & Intel', color: '#3B82F6' },
+  content_ang: { name: 'Content_Ang', role: 'Content & Copy', color: '#8B5CF6' },
+  biz_ang: { name: 'Biz_Ang', role: 'Business Strategy', color: '#10B981' },
+  code_ang: { name: 'Code_Ang', role: 'Engineering', color: '#F43F5E' },
+  iller_ang: { name: 'Iller_Ang', role: 'Creative Director', color: '#F97316' },
+  learn_ang: { name: 'Learn_Ang', role: 'Training & Education', color: '#06B6D4' },
+  luc: { name: 'LUC', role: 'Cost Analyst', color: '#84CC16' },
+  chicken_hawk: { name: 'Chicken Hawk', role: 'Tactical Ops', color: '#DC2626' },
+} as const;
+
 export interface ModelOption {
   id: string;
   name: string;

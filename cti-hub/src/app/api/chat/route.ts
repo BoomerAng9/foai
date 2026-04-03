@@ -97,9 +97,10 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // Detect if ACHEEVY should handle this autonomously via V1 backend
+    // Detect task tier and route accordingly
     const ACHEEVY_V1_URL = process.env.ACHEEVY_V1_URL || 'http://31.97.138.45:8000';
-    const isAutonomousTask = detectAutonomousTask(enrichedMessage);
+    const taskInfo = detectTaskTier(enrichedMessage);
+    const isAutonomousTask = taskInfo.tier > 0;
 
     if (isAutonomousTask && ACHEEVY_V1_URL) {
       // Route to ACHEEVY V1 (II Agent) for full autonomous execution
@@ -125,6 +126,8 @@ export async function POST(request: NextRequest) {
               Connection: 'keep-alive',
               'X-Conversation-Id': convId || '',
               'X-Acheevy-Mode': 'autonomous',
+              'X-Agent-Tier': String(taskInfo.tier),
+              'X-Agent-Roster': taskInfo.agents.join(','),
             },
           });
         }
@@ -159,33 +162,72 @@ export async function POST(request: NextRequest) {
 }
 
 /**
- * Detect if a message describes a task ACHEEVY should handle autonomously.
- * Autonomous = needs tools (browser, code, file ops, research, build, deploy).
- * Simple chat stays on the fast path (direct OpenRouter).
+ * Detect task complexity and return agent tier (0 = simple chat, 1-4 = autonomous).
+ * Tier 1: ACHEEVY Solo — simple generation/research
+ * Tier 2: Boomer_Ang Dispatch — department-specific tasks
+ * Tier 3: Chicken Hawk + Sqwaad — build/deploy/code execution
+ * Tier 4: Full Assembly — multi-department major projects
  */
-function detectAutonomousTask(message: string): boolean {
+function detectTaskTier(message: string): { tier: 0 | 1 | 2 | 3 | 4; agents: string[] } {
   const lower = message.toLowerCase();
 
-  // Simple responses — keep on fast path
+  // Simple responses — tier 0, fast path
   const simplePatterns = [
     /^(yes|no|ok|sure|thanks|thank you|got it|sounds good|perfect|great|cool|hello|hi|hey)/i,
     /^(what|how much|when|where|who) .{0,40}\?$/i,
   ];
-  if (simplePatterns.some(p => p.test(lower))) return false;
+  if (simplePatterns.some(p => p.test(lower))) return { tier: 0, agents: [] };
 
-  // Autonomous triggers — route to V1 for full agent execution
-  const autonomousKeywords = [
-    'build', 'create', 'deploy', 'design', 'develop', 'code', 'write code',
-    'make me', 'set up', 'automate', 'integrate', 'research', 'analyze',
-    'generate', 'produce', 'construct', 'architect', 'scaffold',
-    'scrape', 'crawl', 'search the web', 'find information',
-    'edit file', 'modify', 'refactor', 'debug', 'fix this code',
-    'install', 'configure', 'provision', 'spin up',
-    'write a', 'create a', 'build a', 'make a', 'design a',
-    'full stack', 'web app', 'mobile app', 'api', 'database',
-    'presentation', 'slides', 'report', 'document',
-    'video', 'image', 'logo', 'brand',
+  // Tier 4 — Full Assembly: multi-domain, enterprise-scale
+  const tier4Patterns = [
+    'full stack', 'entire app', 'complete platform', 'enterprise',
+    'build and deploy', 'end to end', 'full project', 'production ready',
+    'mobile app', 'saas', 'marketplace', 'everything',
   ];
+  if (tier4Patterns.some(kw => lower.includes(kw))) {
+    return { tier: 4, agents: ['acheevy', 'scout_ang', 'code_ang', 'biz_ang', 'content_ang', 'iller_ang', 'chicken_hawk'] };
+  }
 
-  return autonomousKeywords.some(kw => lower.includes(kw));
+  // Tier 3 — Chicken Hawk: build/deploy/code execution
+  const tier3Patterns = [
+    'build', 'deploy', 'code', 'write code', 'develop', 'scaffold',
+    'create a', 'build a', 'make a', 'set up', 'spin up', 'provision',
+    'install', 'configure', 'refactor', 'debug', 'fix this code',
+    'edit file', 'modify', 'web app', 'api', 'database',
+    'architect', 'construct',
+  ];
+  if (tier3Patterns.some(kw => lower.includes(kw))) {
+    return { tier: 3, agents: ['acheevy', 'code_ang', 'chicken_hawk'] };
+  }
+
+  // Tier 2 — Boomer_Ang Dispatch: department-specific
+  const tier2Map: Record<string, string[]> = {
+    'research|analyze|investigate|find information|scrape|crawl|search the web': ['acheevy', 'scout_ang'],
+    'design|brand|logo|video|image|creative|animation': ['acheevy', 'iller_ang'],
+    'write|content|blog|copy|document|report|presentation|slides': ['acheevy', 'content_ang'],
+    'business|strategy|pricing|revenue|market|plan': ['acheevy', 'biz_ang'],
+    'train|teach|course|tutorial|learn': ['acheevy', 'learn_ang'],
+    'cost|budget|estimate|price|quote': ['acheevy', 'luc'],
+  };
+  for (const [patterns, agents] of Object.entries(tier2Map)) {
+    if (patterns.split('|').some(kw => lower.includes(kw))) {
+      return { tier: 2, agents };
+    }
+  }
+
+  // Tier 1 — ACHEEVY Solo: autonomous but simple
+  const tier1Patterns = [
+    'generate', 'produce', 'automate', 'integrate', 'make me',
+    'write a', 'design a',
+  ];
+  if (tier1Patterns.some(kw => lower.includes(kw))) {
+    return { tier: 1, agents: ['acheevy'] };
+  }
+
+  return { tier: 0, agents: [] };
+}
+
+// Backward compat wrapper
+function detectAutonomousTask(message: string): boolean {
+  return detectTaskTier(message).tier > 0;
 }
