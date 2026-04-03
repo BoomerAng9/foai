@@ -213,6 +213,40 @@ function ProspectCard({ prospect, rank }: { prospect: Prospect; rank: number }) 
 export default function PerFormPage() {
   const [posFilter, setPosFilter] = useState<string>('ALL');
   const [feedIndex, setFeedIndex] = useState(0);
+  const [liveProspects, setLiveProspects] = useState<Prospect[] | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  // Fetch real data from the player index DB
+  useEffect(() => {
+    async function loadPlayers() {
+      try {
+        const res = await fetch('/api/perform/players?sort=rank&limit=50');
+        if (res.ok) {
+          const data = await res.json();
+          if (data.players && data.players.length > 0) {
+            setLiveProspects(data.players.map((p: any, i: number) => ({
+              id: `db-${p.id}`,
+              name: p.name,
+              school: p.school,
+              position: p.position,
+              height: p.height || '',
+              weight: p.weight ? `${p.weight} lbs` : '',
+              projectedRound: p.projected_round || 7,
+              overallRank: p.overall_rank || i + 1,
+              grade: parseFloat(p.grade) || 70,
+              keyStats: p.key_stats || '',
+              scoutingSummary: p.scouting_summary || '',
+              analystName: 'Scout_Ang',
+              analystPersona: 'data-driven' as const,
+              trend: (p.trend || 'steady') as 'rising' | 'falling' | 'steady',
+            })));
+          }
+        }
+      } catch {}
+      setLoading(false);
+    }
+    loadPlayers();
+  }, []);
 
   // Auto-cycle analyst takes
   useEffect(() => {
@@ -222,8 +256,10 @@ export default function PerFormPage() {
     return () => clearInterval(interval);
   }, []);
 
-  const positions = ['ALL', ...new Set(PROSPECTS.map(p => p.position))];
-  const filtered = posFilter === 'ALL' ? PROSPECTS : PROSPECTS.filter(p => p.position === posFilter);
+  // Use live data if available, fall back to seed data
+  const activeProspects = liveProspects || PROSPECTS;
+  const positions = ['ALL', ...new Set(activeProspects.map(p => p.position))];
+  const filtered = posFilter === 'ALL' ? activeProspects : activeProspects.filter(p => p.position === posFilter);
 
   const currentTake = ANALYST_TAKES[feedIndex];
 
@@ -279,6 +315,14 @@ export default function PerFormPage() {
               <p className="text-xs text-white/60 leading-relaxed">&ldquo;{currentTake.text}&rdquo;</p>
             </div>
           </div>
+        </div>
+
+        {/* Data Source Indicator */}
+        <div className="flex items-center gap-2 mb-4">
+          <div className={`w-2 h-2 rounded-full ${liveProspects ? 'bg-green-500 animate-pulse' : 'bg-yellow-500'}`} />
+          <span className="font-mono text-[9px] text-white/40">
+            {loading ? 'Loading player index...' : liveProspects ? `LIVE DATABASE · ${liveProspects.length} prospects indexed` : 'SEED DATA · Run /api/perform/seed to populate live index'}
+          </span>
         </div>
 
         {/* Position Filter */}
