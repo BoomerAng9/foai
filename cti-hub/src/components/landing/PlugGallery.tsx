@@ -29,7 +29,7 @@ const SAMPLE_PLUGS: PlugCard[] = [
     icon: <Trophy className="w-6 h-6" />,
     color: '#E8A020',
     gradient: 'from-amber-500/10 to-orange-600/10',
-    agents: ['Scout_Ang', 'Content_Ang', 'Iller_Ang'],
+    agents: ['Scout_Ang', 'Content_Ang', 'ILLA'],
     tag: 'SPORTS',
     href: 'https://perform.foai.cloud',
   },

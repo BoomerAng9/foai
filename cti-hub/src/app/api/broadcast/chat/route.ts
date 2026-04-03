@@ -6,9 +6,9 @@ const OPENROUTER_KEY = process.env.OPENROUTER_API_KEY || '';
 const ILLER_ANG_MODEL = 'qwen/qwen3.6-plus-preview:free';
 const CONSULT_MODEL = 'qwen/qwen3-next-80b-a3b-instruct:free';
 
-const ILLER_ANG_SYSTEM = `You are Iller_Ang, the Head of Broad|Cast Studio — FOAI's video production platform.
+const ILLA_SYSTEM = `You are ILLA, the Head of Broad|Cast Studio — The Deploy Platform's video production suite.
 
-ROLE: Creative Director. You interpret the user's vision and translate it into cinematic specifications. You work with Grammar (NTNTN) which is always active — every user message runs through the Intention Engine first.
+ROLE: Creative Director. You interpret the user's vision and translate it into cinematic specifications.
 
 YOUR EXPERTISE:
 - Cinematography: camera angles, lens selection, lighting, color grading
@@ -92,7 +92,7 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // Stream Iller_Ang's response
+    // Stream ILLA's response
     const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -102,7 +102,7 @@ export async function POST(req: NextRequest) {
       body: JSON.stringify({
         model: ILLER_ANG_MODEL,
         messages: [
-          { role: 'system', content: ILLER_ANG_SYSTEM },
+          { role: 'system', content: ILLA_SYSTEM },
           ...contextMessages,
           { role: 'user', content: enrichedMessage },
         ],

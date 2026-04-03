@@ -1,12 +1,13 @@
 'use client';
 
 import { useState, useRef, useCallback } from 'react';
+import { useAuth } from '@/hooks/useAuth';
 import {
   Plus, FolderOpen, Image as ImageIcon, Film, FileText, Bot,
   Camera, Play, Pause, SkipBack, SkipForward, Square,
   Maximize2, ChevronDown, ChevronRight, Settings, Layout,
   Layers, Sliders, Music, Sparkles, ListTodo, MessageSquare,
-  Send, CornerDownLeft,
+  Send, CornerDownLeft, Volume2, VolumeX,
 } from 'lucide-react';
 import { CameraMenu, parseCameraSpec, CAMERA_DEFAULTS } from '@/components/broadcast/CameraMenu';
 import type { CameraSpec } from '@/components/broadcast/CameraMenu';
@@ -98,12 +99,13 @@ function Timecode({ time = '00:00:00:00' }: { time?: string }) {
 
 
 export default function BroadcastStudio() {
+  const { user } = useAuth();
   const [scenes, setScenes] = useState<Scene[]>([]);
   const [playing, setPlaying] = useState(false);
   const [selectedScene, setSelectedScene] = useState<string | null>(null);
   const [chatInput, setChatInput] = useState('');
   const [chatMessages, setChatMessages] = useState<{ role: string; content: string; id?: string }[]>([
-    { role: 'system', content: 'Iller_Ang is ready. Describe your vision and I\'ll set up the cinematic specs.' },
+    { role: 'system', content: 'ILLA is ready. Describe your vision and I\'ll set up the cinematic specs.' },
   ]);
   const [newSceneInput, setNewSceneInput] = useState('');
   const [resolution, setResolution] = useState('4K UHD');
@@ -115,7 +117,10 @@ export default function BroadcastStudio() {
   const [rendering, setRendering] = useState(false);
   const [showTextEditor, setShowTextEditor] = useState(false);
   const [textOverlays, setTextOverlays] = useState<TextOverlayConfig[]>([]);
+  const [showScenarios, setShowScenarios] = useState(false);
+  const [voiceEnabled, setVoiceEnabled] = useState(true);
   const chatEndRef = useRef<HTMLDivElement>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
 
   const addScene = useCallback(async () => {
     if (!newSceneInput.trim()) return;
@@ -150,12 +155,12 @@ export default function BroadcastStudio() {
       if (!res.ok) {
         const err = await res.json();
         setScenes(prev => prev.map(s => s.id === sceneId ? { ...s, status: 'error' } : s));
-        setChatMessages(prev => [...prev, { role: 'iller_ang', content: `Generation issue: ${err.error || 'Service unavailable'}. The scene is saved — we can retry when ready.` }]);
+        setChatMessages(prev => [...prev, { role: 'illa', content: `Generation issue: ${err.error || 'Service unavailable'}. The scene is saved — we can retry when ready.` }]);
         return;
       }
 
       const data = await res.json();
-      setChatMessages(prev => [...prev, { role: 'iller_ang', content: `Scene "${scene.name}" is generating. Estimated cost: ${data.estimated_cost < 0.01 ? '<$0.01' : `$${data.estimated_cost.toFixed(2)}`}. I'll let you know when it's ready.` }]);
+      setChatMessages(prev => [...prev, { role: 'illa', content: `Scene "${scene.name}" is generating. I'll let you know when it's ready.` }]);
 
       // Poll for completion
       const pollInterval = setInterval(async () => {
@@ -186,11 +191,11 @@ export default function BroadcastStudio() {
                 color: 'rgba(212,168,83,0.5)',
               }];
             });
-            setChatMessages(prev => [...prev, { role: 'iller_ang', content: `"${scene.name}" is ready and on the timeline. Looking good — check the preview canvas.` }]);
+            setChatMessages(prev => [...prev, { role: 'illa', content: `"${scene.name}" is ready and on the timeline. Looking good — check the preview canvas.` }]);
           } else if (statusData.status === 'failed') {
             clearInterval(pollInterval);
             setScenes(prev => prev.map(s => s.id === sceneId ? { ...s, status: 'error' } : s));
-            setChatMessages(prev => [...prev, { role: 'iller_ang', content: `"${scene.name}" failed to generate. Let me know if you want to retry with different specs.` }]);
+            setChatMessages(prev => [...prev, { role: 'illa', content: `"${scene.name}" failed to generate. Let me know if you want to retry with different specs.` }]);
           }
         } catch {
           // Keep polling on network errors
@@ -211,8 +216,8 @@ export default function BroadcastStudio() {
     setChatInput('');
 
     // Add streaming placeholder
-    const streamId = `iller-${Date.now()}`;
-    setChatMessages(prev => [...prev, { role: 'iller_ang', content: '', id: streamId }]);
+    const streamId = `illa-${Date.now()}`;
+    setChatMessages(prev => [...prev, { role: 'illa', content: '', id: streamId }]);
 
     try {
       const res = await fetch('/api/broadcast/chat', {
@@ -225,8 +230,51 @@ export default function BroadcastStudio() {
       });
 
       if (!res.ok || !res.body) {
+        // Auto-refresh session on 401 and retry
+        if (res.status === 401 && user) {
+          try {
+            const freshToken = await user.getIdToken(true);
+            await fetch('/api/auth/session', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ accessToken: freshToken }),
+            });
+            const retryRes = await fetch('/api/broadcast/chat', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ message: userMsg, history: chatMessages.slice(-10) }),
+            });
+            if (retryRes.ok && retryRes.body) {
+              // Fall through to streaming with retry response
+              const reader = retryRes.body.getReader();
+              const decoder = new TextDecoder();
+              let buffer = '';
+              while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+                buffer += decoder.decode(value, { stream: true });
+                const lines = buffer.split('\n');
+                buffer = lines.pop() || '';
+                for (const line of lines) {
+                  if (!line.startsWith('data: ')) continue;
+                  try {
+                    const data = JSON.parse(line.slice(6));
+                    if (data.content) {
+                      setChatMessages(prev => prev.map(m =>
+                        m.id === streamId ? { ...m, content: m.content + data.content } : m
+                      ));
+                      chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+                    }
+                    if (data.done) break;
+                  } catch {}
+                }
+              }
+              return;
+            }
+          } catch {}
+        }
         setChatMessages(prev => prev.map(m =>
-          m.id === streamId ? { role: 'iller_ang', content: 'Connection issue. Try again.' } : m
+          m.id === streamId ? { role: 'illa', content: 'Connection issue. Try again.' } : m
         ));
         return;
       }
@@ -234,6 +282,7 @@ export default function BroadcastStudio() {
       const reader = res.body.getReader();
       const decoder = new TextDecoder();
       let buffer = '';
+      let fullVoiceText = '';
 
       while (true) {
         const { done, value } = await reader.read();
@@ -247,13 +296,13 @@ export default function BroadcastStudio() {
           try {
             const data = JSON.parse(line.slice(6));
             if (data.content) {
+              fullVoiceText += data.content;
               setChatMessages(prev => prev.map(m =>
                 m.id === streamId ? { ...m, content: m.content + data.content } : m
               ));
-              // Auto-scroll chat
               chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
 
-              // Parse camera specs from Iller_Ang's response — auto-populate camera menu
+              // Parse camera specs from ILLA's response — auto-populate camera menu
               setChatMessages(prev => {
                 const currentMsg = prev.find(m => m.id === streamId);
                 if (currentMsg) {
@@ -265,16 +314,40 @@ export default function BroadcastStudio() {
                 return prev;
               });
             }
-            if (data.done) break;
+            if (data.done) {
+              // Auto-voice: read ILLA's response aloud
+              if (voiceEnabled && fullVoiceText) {
+                const cleanText = fullVoiceText
+                  .replace(/!\[.*?\]\(.*?\)/g, '')
+                  .replace(/\[CAMERA_SPEC\][\s\S]*?\[\/CAMERA_SPEC\]/g, '')
+                  .replace(/\*\*/g, '')
+                  .slice(0, 500)
+                  .trim();
+                if (cleanText) {
+                  fetch('/api/voice/synthesize', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ text: cleanText }),
+                  }).then(r => r.json()).then(d => {
+                    if (d.audio) {
+                      const audio = new Audio(d.audio);
+                      audioRef.current = audio;
+                      audio.play().catch(() => {});
+                    }
+                  }).catch(() => {});
+                }
+              }
+              break;
+            }
           } catch {}
         }
       }
     } catch {
       setChatMessages(prev => prev.map(m =>
-        m.id === streamId ? { role: 'iller_ang', content: 'Connection error. Please try again.' } : m
+        m.id === streamId ? { role: 'illa', content: 'Connection error. Please try again.' } : m
       ));
     }
-  }, [chatInput, chatMessages]);
+  }, [chatInput, chatMessages, voiceEnabled]);
 
   return (
     <div className="flex flex-col h-full" style={{ background: BC.bg, color: BC.text }}>
@@ -305,7 +378,7 @@ export default function BroadcastStudio() {
 
         <div className="flex items-center gap-2">
           <div className="w-2 h-2 rounded-full" style={{ background: BC.amber }} />
-          <span className="text-[10px] font-mono" style={{ color: BC.textSec }}>Iller_Ang</span>
+          <span className="text-[10px] font-mono" style={{ color: BC.textSec }}>ILLA</span>
         </div>
       </div>
 
@@ -404,7 +477,7 @@ export default function BroadcastStudio() {
           <CollapsibleSection title="AI Assistants" icon={Bot}>
             <div className="space-y-1">
               {[
-                { name: 'Iller_Ang', role: 'Head of Studio', color: BC.amber, active: true },
+                { name: 'ILLA', role: 'Head of Studio', color: BC.amber, active: true },
                 { name: 'ACHEEVY', role: 'Digital CEO', color: BC.gold, active: true },
                 { name: 'Beat_Ang', role: 'Audio & Music', color: '#A855F7', active: true },
                 { name: 'CUT_Ang', role: 'Video Editing', color: '#EC4899', active: true },
@@ -487,7 +560,7 @@ export default function BroadcastStudio() {
               <button
                 onClick={async () => {
                   setRendering(true);
-                  setChatMessages(prev => [...prev, { role: 'iller_ang', content: 'Rendering your timeline. I\'ll let you know when the export is ready.' }]);
+                  setChatMessages(prev => [...prev, { role: 'illa', content: 'Rendering your timeline. I\'ll let you know when the export is ready.' }]);
                   try {
                     const transMap: Record<string, { type: string; duration: number }> = {};
                     clipTransitions.forEach(t => {
@@ -499,9 +572,9 @@ export default function BroadcastStudio() {
                       body: JSON.stringify({ clips: timelineClips, transitions: transMap, resolution }),
                     });
                     const data = await res.json();
-                    setChatMessages(prev => [...prev, { role: 'iller_ang', content: `Render ${data.status}: ${data.message}` }]);
+                    setChatMessages(prev => [...prev, { role: 'illa', content: `Render ${data.status}: ${data.message}` }]);
                   } catch {
-                    setChatMessages(prev => [...prev, { role: 'iller_ang', content: 'Render failed. Let me know if you want to retry.' }]);
+                    setChatMessages(prev => [...prev, { role: 'illa', content: 'Render failed. Let me know if you want to retry.' }]);
                   } finally {
                     setRendering(false);
                   }
@@ -514,7 +587,7 @@ export default function BroadcastStudio() {
               </button>
               <button
                 onClick={async () => {
-                  setChatMessages(prev => [...prev, { role: 'iller_ang', content: 'Publishing to CDN... generating shareable link.' }]);
+                  setChatMessages(prev => [...prev, { role: 'illa', content: 'Publishing to CDN... generating shareable link.' }]);
                   try {
                     const res = await fetch('/api/broadcast/publish', {
                       method: 'POST',
@@ -522,9 +595,9 @@ export default function BroadcastStudio() {
                       body: JSON.stringify({ videoUrl: timelineClips[0]?.videoUrl || '', platform: 'cdn' }),
                     });
                     const data = await res.json();
-                    setChatMessages(prev => [...prev, { role: 'iller_ang', content: `Published. Share link: ${data.url || 'Generation in progress'}` }]);
+                    setChatMessages(prev => [...prev, { role: 'illa', content: `Published. Share link: ${data.url || 'Generation in progress'}` }]);
                   } catch {
-                    setChatMessages(prev => [...prev, { role: 'iller_ang', content: 'Publish failed. Render the video first, then publish.' }]);
+                    setChatMessages(prev => [...prev, { role: 'illa', content: 'Publish failed. Render the video first, then publish.' }]);
                   }
                 }}
                 className="px-3 py-1 text-[9px] font-mono font-bold tracking-wider transition-all hover:bg-white/[0.08]"
@@ -619,9 +692,22 @@ export default function BroadcastStudio() {
             <div className="flex items-center gap-2 px-3 py-2 shrink-0" style={{ borderBottom: `1px solid ${BC.border}` }}>
               <MessageSquare className="w-3 h-3" style={{ color: BC.gold }} />
               <span className="text-[10px] font-semibold tracking-wide" style={{ color: BC.text, fontFamily: "'Inter', sans-serif" }}>Team Chat</span>
-              <div className="ml-auto flex items-center gap-1">
+              <div className="ml-auto flex items-center gap-2">
+                <button
+                  onClick={() => {
+                    if (voiceEnabled && audioRef.current) { audioRef.current.pause(); audioRef.current = null; }
+                    setVoiceEnabled(!voiceEnabled);
+                  }}
+                  className="p-0.5 hover:bg-white/[0.05] transition-colors"
+                  title={voiceEnabled ? 'Mute ILLA' : 'Unmute ILLA'}
+                >
+                  {voiceEnabled
+                    ? <Volume2 className="w-3 h-3" style={{ color: BC.amber }} />
+                    : <VolumeX className="w-3 h-3" style={{ color: BC.textGhost }} />
+                  }
+                </button>
                 <div className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: BC.amber }} />
-                <span className="text-[8px] font-mono" style={{ color: BC.textGhost }}>Iller_Ang</span>
+                <span className="text-[8px] font-mono" style={{ color: BC.textGhost }}>ILLA</span>
               </div>
             </div>
 
@@ -630,8 +716,8 @@ export default function BroadcastStudio() {
               {chatMessages.map((msg, i) => (
                 <div key={i} className={`flex flex-col ${msg.role === 'user' ? 'items-end' : 'items-start'}`}>
                   {msg.role !== 'user' && (
-                    <span className="text-[8px] font-mono font-bold tracking-wider mb-0.5" style={{ color: msg.role === 'iller_ang' ? BC.amber : BC.gold }}>
-                      {msg.role === 'iller_ang' ? 'ILLER_ANG' : 'SYSTEM'}
+                    <span className="text-[8px] font-mono font-bold tracking-wider mb-0.5" style={{ color: msg.role === 'illa' ? BC.amber : BC.gold }}>
+                      {msg.role === 'illa' ? 'ILLA' : 'SYSTEM'}
                     </span>
                   )}
                   <div
@@ -648,9 +734,49 @@ export default function BroadcastStudio() {
               <div ref={chatEndRef} />
             </div>
 
+            {/* Scenarios overlay */}
+            {showScenarios && (
+              <div className="px-2 py-2 space-y-1.5" style={{ borderTop: `1px solid ${BC.border}`, background: 'rgba(255,255,255,0.02)' }}>
+                <div className="flex items-center justify-between px-1">
+                  <span className="text-[8px] font-mono font-bold tracking-[0.15em] uppercase" style={{ color: BC.textGhost }}>Scenarios</span>
+                  <button onClick={() => setShowScenarios(false)} className="text-[9px] font-mono hover:text-white/60 transition-colors" style={{ color: BC.textGhost }}>x</button>
+                </div>
+                <div className="grid grid-cols-3 gap-1">
+                  {[
+                    { id: 'media', label: 'Media', icon: '🎬' },
+                    { id: 'slides', label: 'Slides', icon: '📊' },
+                    { id: 'voice', label: 'Voice', icon: '🎙' },
+                    { id: 'content', label: 'Content', icon: '✏️' },
+                    { id: 'brand', label: 'Brand', icon: '🎨' },
+                    { id: 'sports', label: 'Sports', icon: '🏆' },
+                  ].map(tile => (
+                    <button
+                      key={tile.id}
+                      onClick={() => {
+                        setChatInput(prev => prev + `[${tile.label}] `);
+                        setShowScenarios(false);
+                      }}
+                      className="flex flex-col items-center gap-0.5 py-1.5 hover:bg-white/[0.05] transition-colors"
+                      style={{ border: `1px solid ${BC.border}` }}
+                    >
+                      <span className="text-[12px]">{tile.icon}</span>
+                      <span className="text-[7px] font-mono" style={{ color: BC.textSec }}>{tile.label}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {/* Chat input */}
             <div className="px-2 py-2 shrink-0" style={{ borderTop: `1px solid ${BC.border}` }}>
               <div className="flex items-end gap-1.5">
+                <button
+                  onClick={() => setShowScenarios(!showScenarios)}
+                  className="p-2 shrink-0 transition-colors hover:bg-white/[0.05]"
+                  style={{ border: `1px solid ${BC.border}`, color: showScenarios ? BC.gold : BC.textGhost }}
+                >
+                  <Plus className="w-3 h-3" />
+                </button>
                 <textarea
                   value={chatInput}
                   onChange={e => setChatInput(e.target.value)}
@@ -674,13 +800,9 @@ export default function BroadcastStudio() {
                   <CornerDownLeft className="w-2.5 h-2.5" style={{ color: BC.textGhost }} />
                   <span className="text-[7px] font-mono" style={{ color: BC.textGhost }}>ENTER</span>
                 </div>
-                <div className="flex gap-2">
-                  {['Media', 'Task', 'Request'].map(action => (
-                    <button key={action} className="text-[7px] font-mono uppercase tracking-wider hover:text-white/60 transition-colors" style={{ color: BC.textGhost }}>
-                      {action}
-                    </button>
-                  ))}
-                </div>
+                <span className="text-[7px] font-mono" style={{ color: BC.textGhost }}>
+                  + scenarios &amp; plugins
+                </span>
               </div>
             </div>
           </div>

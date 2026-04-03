@@ -175,7 +175,7 @@ export default function AboutPage() {
           inherits: false;
         }
 
-        /* ---- Gold glow for Iller_Ang ---- */
+        /* ---- Gold glow for ILLA ---- */
         .gold-glow {
           animation: glowPulse 3s ease-in-out infinite;
           border: 1px solid rgba(232,160,32,0.3);
@@ -577,7 +577,7 @@ export default function AboutPage() {
             </p>
           </div>
 
-          {/* Iller_Ang Featured Card */}
+          {/* ILLA Featured Card */}
           <div className="mb-10 scroll-reveal">
             <div
               className="gold-glow glass-tile p-6 md:p-8 flex flex-col md:flex-row items-center gap-6 md:gap-10"
@@ -586,19 +586,19 @@ export default function AboutPage() {
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src="/iller-ang.png"
-                alt="Iller_Ang"
+                alt="ILLA"
                 className="w-28 h-28 md:w-36 md:h-36 object-contain"
                 style={{ filter: 'drop-shadow(0 0 40px rgba(232,160,32,0.3))' }}
               />
               <div>
                 <div className="flex items-center gap-3 mb-2">
                   <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#E8A020' }} />
-                  <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 13, fontWeight: 600, letterSpacing: '0.1em', color: 'rgba(255,255,255,0.9)' }}>Iller_Ang</span>
+                  <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 13, fontWeight: 600, letterSpacing: '0.1em', color: 'rgba(255,255,255,0.9)' }}>ILLA</span>
                   <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, background: 'rgba(232,160,32,0.2)', color: '#E8A020', padding: '2px 8px', borderRadius: 4 }}>CREATIVE DIRECTOR</span>
                 </div>
                 <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: 14, lineHeight: 1.7, maxWidth: 500 }}>
-                  The creative visionary behind every visual system. Iller_Ang designs the interfaces,
-                  brand systems, motion graphics, and visual identity. This page? Iller_Ang&apos;s work.
+                  The creative visionary behind every visual system. ILLA designs the interfaces,
+                  brand systems, motion graphics, and visual identity. This page? ILLA&apos;s work.
                   PMO-PRISM design methodology — dark mode first, glass morphism, holographic accents.
                 </p>
               </div>
@@ -633,7 +633,7 @@ export default function AboutPage() {
                 <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 14, fontWeight: 700, color: '#E8A020' }}>Chicken Hawk &amp; the Sqwaad</span>
               </div>
               <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)', lineHeight: 1.6 }}>
-                The tactical execution layer. Chicken Hawk commands, the Lil_Hawks swarm. BuildSmith, Picker_Ang, Code_Ang, Iller_Ang MCP — 11 specialized micro-agents that get it done.
+                The tactical execution layer. Chicken Hawk commands, the Lil_Hawks swarm. BuildSmith, Picker_Ang, Code_Ang, ILLA — 11 specialized micro-agents that get it done.
               </p>
               <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: '#E8A020', display: 'flex', alignItems: 'center', gap: 6, marginTop: 12 }} className="group-hover:translate-x-1 transition-transform">
                 EXPLORE &#x2192;
@@ -646,7 +646,7 @@ export default function AboutPage() {
             {[
               { name: 'Scout_Ang', role: 'Research & Intel', desc: 'Finds leads, scrapes the web, pulls market data, and digs up opportunities you\'d spend hours hunting for manually.', back: 'Scout_Ang operates 24/7 across web sources, databases, and market feeds. Also serves as Per|Form\'s lead NFL Draft analyst with real-time scouting reports.' },
               { name: 'Content_Ang', role: 'Content & Copy', desc: 'Writes proposals, marketing copy, presentations, docs — anything that needs words on a page, polished and on-brand.', back: 'From brand voice guides to investor decks, Content_Ang adapts tone and format. Every piece reviewed for clarity, grammar, and strategic alignment.' },
-              { name: 'Iller_Ang', role: 'Creative Director', desc: 'Head of Broad|Cast Studio. Interprets cinematic vision, directs video production, designs visual deliverables and brand assets.', back: 'Iller_Ang translates plain English into cinematic specs — camera, lens, lighting, movement, film profile. Grammar converts, Iller_Ang creates.' },
+              { name: 'ILLA', role: 'Creative Director', desc: 'Head of Broad|Cast Studio. Interprets cinematic vision, directs video production, designs visual deliverables and brand assets.', back: 'ILLA translates plain English into cinematic specs — camera, lens, lighting, movement, film profile. Grammar converts, ILLA creates.' },
               { name: 'Code_Ang', role: 'Engineering', desc: 'Writes code, builds APIs, deploys services, debugs issues. Full-stack engineering without the hiring process.', back: 'Code_Ang handles everything from React components to Docker deployments. Chicken Hawk dispatches the Lil_Hawks for parallel execution.' },
               { name: 'Biz_Ang', role: 'Business Strategy', desc: 'Revenue analysis, client proposals, partnership outreach, financial modeling. Your BD team without the salary overhead.', back: 'Competitive analysis, partnership proposals, revenue modeling, and growth opportunity identification. Also powers the SMB Marketing plug.' },
               { name: 'Learn_Ang', role: 'Training & Education', desc: 'Multilingual classroom assistant, curriculum design, student analytics. Powers the Teacher Digital Twin plug.', back: 'Learn_Ang integrates with learning platforms, tracks progress, generates lesson plans, and grades assignments across multiple languages.' },

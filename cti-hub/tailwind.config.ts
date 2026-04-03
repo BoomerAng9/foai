@@ -18,6 +18,7 @@ const config: Config = {
       fontFamily: {
         mono: ['IBM Plex Mono', 'GeistMono', 'monospace'],
         sans: ['Geist', 'system-ui', '-apple-system', 'sans-serif'],
+        outfit: ['Outfit', 'sans-serif'],
       },
       borderRadius: {
         none: '0',

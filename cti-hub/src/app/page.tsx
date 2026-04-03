@@ -234,7 +234,7 @@ export default function LandingPage() {
               { name: 'ACHEEVY', role: 'Digital CEO', color: '#E8A020' },
               { name: 'Scout_Ang', role: 'Research & Intel', color: '#3B82F6' },
               { name: 'Code_Ang', role: 'Engineering', color: '#F43F5E' },
-              { name: 'Iller_Ang', role: 'Creative Director', color: '#F97316' },
+              { name: 'ILLA', role: 'Creative Director', color: '#F97316' },
               { name: 'Biz_Ang', role: 'Business Strategy', color: '#10B981' },
               { name: 'Content_Ang', role: 'Content & Copy', color: '#8B5CF6' },
               { name: 'LUC', role: 'Cost Analyst', color: '#84CC16' },

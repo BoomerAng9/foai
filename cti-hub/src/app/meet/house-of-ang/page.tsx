@@ -107,7 +107,7 @@ const agents = [
     ],
   },
   {
-    name: 'Iller_Ang',
+    name: 'ILLA',
     role: 'Creative Director & Design',
     department: 'Design',
     icon: Palette,
@@ -163,13 +163,13 @@ const agents = [
     ],
   },
   {
-    name: 'Iller_Ang MCP',
+    name: 'ILLA MCP',
     role: 'Design-to-IDE Bridge',
     department: 'Design / DevTools',
     icon: Monitor,
     tagline: 'Design assets generated right in your workflow.',
     capabilities: [
-      'Model Context Protocol server for Iller_Ang',
+      'Model Context Protocol server for ILLA',
       'Connect from Cursor, VS Code, or Claude Code',
       'Generate visual assets without leaving your IDE',
       'Brand-consistent design output on every call',

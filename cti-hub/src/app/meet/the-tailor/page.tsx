@@ -22,7 +22,7 @@ const AGENTS = [
   { name: 'Ops_Ang', role: 'Operations Chief', portrait: '/agents/ops-ang.png', status: 'Active', specialty: 'Fleet monitoring, incident detection, uptime, historical recall' },
   { name: 'Edu_Ang', role: 'Education & Training', portrait: '/agents/edu-ang.png', status: 'Active', specialty: 'Enrollment, affiliate management, revenue attribution' },
   { name: 'CFO_Ang', role: 'Finance & Budget', portrait: '/agents/cfo-ang.png', status: 'Active', specialty: 'Cost tracking, budget management, financial modeling' },
-  { name: 'Iller_Ang', role: 'Head of Broad|Cast Studio', portrait: '/agents/iller-ang.png', status: 'Active', specialty: 'Cinematography, video production, creative direction, design' },
+  { name: 'ILLA', role: 'Head of Broad|Cast Studio', portrait: '/agents/iller-ang.png', status: 'Active', specialty: 'Cinematography, video production, creative direction, design' },
   { name: 'Code_Ang', role: 'Engineering', portrait: '/agents/code-ang.png', status: 'Active', specialty: 'Full-stack development, API design, deployment pipelines' },
   { name: 'Picker_Ang', role: 'Task Router', portrait: '/agents/picker-ang.png', status: 'Active', specialty: 'Intent classification, agent dispatch, routing optimization' },
   { name: 'BuildSmith', role: 'Infrastructure', portrait: '/agents/buildsmith.png', status: 'Active', specialty: 'Docker, cloud infrastructure, CI/CD, system architecture' },

@@ -61,7 +61,7 @@ export const AGENT_ROSTER = {
   content_ang: { name: 'Content_Ang', role: 'Content & Copy', color: '#8B5CF6' },
   biz_ang: { name: 'Biz_Ang', role: 'Business Strategy', color: '#10B981' },
   code_ang: { name: 'Code_Ang', role: 'Engineering', color: '#F43F5E' },
-  iller_ang: { name: 'Iller_Ang', role: 'Creative Director', color: '#F97316' },
+  illa: { name: 'ILLA', role: 'Creative Director', color: '#F97316' },
   learn_ang: { name: 'Learn_Ang', role: 'Training & Education', color: '#06B6D4' },
   luc: { name: 'LUC', role: 'Cost Analyst', color: '#84CC16' },
   chicken_hawk: { name: 'Chicken Hawk', role: 'Tactical Ops', color: '#DC2626' },
