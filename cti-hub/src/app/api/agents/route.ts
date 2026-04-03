@@ -20,35 +20,44 @@ export async function GET(request: NextRequest) {
 
   if (sql) {
     try {
-      // Recent agent-to-agent messages (from budget_ledger as proxy for now)
-      const ledger = await sql`
-        SELECT user_id, action, cost::float, created_at
-        FROM budget_ledger
-        ORDER BY created_at DESC
-        LIMIT 20
-      `;
-      recentActivity = ledger.map(l => ({
-        agent: l.action === 'chat' ? 'ACHEEVY' : l.action === 'image-gen' ? 'Visual Engine' : 'CFO_Ang',
-        action: l.action,
-        target: 'User',
-        message: `${l.action} — $${Number(l.cost).toFixed(6)}`,
-        timestamp: l.created_at,
-      }));
+      // Recent agent-to-agent messages (from budget_ledger as proxy)
+      // Wrapped in try-catch per table since tables may not exist yet
+      try {
+        const ledger = await sql`
+          SELECT user_id, action, cost::float, created_at
+          FROM budget_ledger
+          ORDER BY created_at DESC
+          LIMIT 20
+        `;
+        recentActivity = ledger.map(l => ({
+          agent: l.action === 'chat' ? 'ACHEEVY' : l.action === 'image-gen' ? 'Visual Engine' : 'CFO_Ang',
+          action: l.action,
+          target: 'User',
+          message: `${l.action} — $${Number(l.cost).toFixed(6)}`,
+          timestamp: l.created_at,
+        }));
+      } catch {
+        // budget_ledger table may not exist — continue with empty activity
+      }
 
       // Recent messages as task proxy
-      const msgs = await sql`
-        SELECT agent_name, LEFT(content, 80) as content, created_at
-        FROM messages
-        WHERE role = 'acheevy'
-        ORDER BY created_at DESC
-        LIMIT 10
-      `;
-      activeTasks = msgs.map(m => ({
-        agent: m.agent_name || 'ACHEEVY',
-        task: m.content || 'Processing',
-        status: 'completed',
-        started_at: m.created_at,
-      }));
+      try {
+        const msgs = await sql`
+          SELECT agent_name, LEFT(content, 80) as content, created_at
+          FROM messages
+          WHERE role = 'acheevy'
+          ORDER BY created_at DESC
+          LIMIT 10
+        `;
+        activeTasks = msgs.map(m => ({
+          agent: m.agent_name || 'ACHEEVY',
+          task: m.content || 'Processing',
+          status: 'completed',
+          started_at: m.created_at,
+        }));
+      } catch {
+        // messages table may not exist — continue with empty tasks
+      }
     } catch (err) {
       console.error('[Agents] State query failed:', err instanceof Error ? err.message : err);
     }
