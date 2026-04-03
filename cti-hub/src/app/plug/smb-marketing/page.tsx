@@ -6,6 +6,7 @@ import {
   ArrowLeft, Calendar, Eye, TrendingUp, MessageSquare,
   Send, Star, Users, BarChart3, Zap, FileText,
 } from 'lucide-react';
+import { PlugChat } from '@/components/plug/PlugChat';
 
 // ─── Synthetic Data ──────────────────────────────────────────────────────────
 
@@ -240,38 +241,15 @@ export default function SMBMarketingPage() {
             <MessageSquare className="w-4 h-4 text-[#E8A020]" />
             <span className="font-mono text-xs text-white/40 uppercase tracking-wider">Chat with ACHEEVY — Campaign Strategy</span>
           </div>
-          <div className="space-y-3 mb-4 max-h-64 overflow-y-auto">
-            {messages.map((m, i) => (
-              <div
-                key={i}
-                className={`text-sm p-3 rounded-lg ${
-                  m.role === 'acheevy'
-                    ? 'bg-white/5 border border-white/10'
-                    : 'bg-[#E8A020]/10 border border-[#E8A020]/20 ml-8'
-                }`}
-              >
-                {m.role === 'acheevy' && (
-                  <span className="text-[10px] font-mono text-[#E8A020] uppercase block mb-1">ACHEEVY</span>
-                )}
-                {m.text}
-              </div>
-            ))}
-          </div>
-          <div className="flex gap-2">
-            <input
-              type="text"
-              value={chatInput}
-              onChange={(e) => setChatInput(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && handleSend()}
-              placeholder="Ask ACHEEVY about campaign strategy..."
-              className="flex-1 bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm placeholder:text-white/20 focus:outline-none focus:border-[#E8A020]/50"
+          <div className="h-80">
+            <PlugChat
+              agentName="Biz_Ang"
+              agentRole="Marketing Strategist"
+              agentColor="#10B981"
+              systemPrompt="You are Biz_Ang, the marketing strategist on The Deploy Platform. You help small and medium businesses plan and execute marketing campaigns.\n\nYOU CAN:\n- Create social media content calendars\n- Write ad copy for Google, Meta, LinkedIn\n- Analyze campaign performance metrics\n- Suggest audience targeting strategies\n- Build email marketing sequences\n- Design A/B testing frameworks\n\nKEEP RESPONSES ACTIONABLE. Give specific copy, specific numbers, specific next steps. SMB owners don't have time for theory."
+              placeholder="Ask about campaign strategy..."
+              welcomeMessage="I'm Biz_Ang, your marketing strategist. I can help you plan campaigns, write ad copy, build content calendars, or analyze what's working. What's your biggest marketing challenge right now?"
             />
-            <button
-              onClick={handleSend}
-              className="px-3 py-2 bg-[#E8A020] text-black rounded-lg hover:bg-[#E8A020]/80 transition-colors"
-            >
-              <Send className="w-4 h-4" />
-            </button>
           </div>
         </div>
       </main>

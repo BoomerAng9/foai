@@ -6,6 +6,7 @@ import {
   ArrowLeft, BookOpen, Users, MessageSquare, GraduationCap,
   ClipboardCheck, BarChart3, Globe, Send,
 } from 'lucide-react';
+import { PlugChat } from '@/components/plug/PlugChat';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -297,49 +298,16 @@ export default function TeacherDigitalTwinPage() {
             </div>
           </div>
 
-          {/* Digital Twin Chat */}
-          <div className="border border-white/10 rounded-lg p-4 flex flex-col">
-            <div className="flex items-center gap-2 mb-4">
-              <MessageSquare className="w-4 h-4 text-[#E8A020]" />
-              <span className="font-mono text-xs text-white/40 uppercase tracking-wider">
-                Digital Twin Chat · {classroom.language}
-              </span>
-            </div>
-            <div className="flex-1 space-y-3 mb-4 max-h-64 overflow-y-auto">
-              {messages.map((m, i) => (
-                <div
-                  key={i}
-                  className={`text-sm p-3 rounded-lg ${
-                    m.role === 'twin'
-                      ? 'bg-white/5 border border-white/10'
-                      : 'bg-[#E8A020]/10 border border-[#E8A020]/20 ml-8'
-                  }`}
-                >
-                  {m.role === 'twin' && (
-                    <span className="text-[10px] font-mono text-[#E8A020] uppercase block mb-1">
-                      {classroom.language} Twin
-                    </span>
-                  )}
-                  {m.text}
-                </div>
-              ))}
-            </div>
-            <div className="flex gap-2">
-              <input
-                type="text"
-                value={chatInput}
-                onChange={(e) => setChatInput(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && handleSend()}
-                placeholder={`Message your ${classroom.language} twin...`}
-                className="flex-1 bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm placeholder:text-white/20 focus:outline-none focus:border-[#E8A020]/50"
-              />
-              <button
-                onClick={handleSend}
-                className="px-3 py-2 bg-[#E8A020] text-black rounded-lg hover:bg-[#E8A020]/80 transition-colors"
-              >
-                <Send className="w-4 h-4" />
-              </button>
-            </div>
+          {/* Digital Twin Chat — Live ACHEEVY Connection */}
+          <div className="h-96">
+            <PlugChat
+              agentName="Learn_Ang"
+              agentRole={`${classroom.language} Digital Twin`}
+              agentColor="#E8A020"
+              systemPrompt={`You are Learn_Ang, a multilingual teaching assistant on The Deploy Platform. You are the Digital Twin for a ${classroom.language} language teacher.\n\nYOU ARE:\n- An expert ${classroom.language} language educator\n- Familiar with the classroom: ${classroom.studentCount} students, current lesson: "${classroom.currentLesson}"\n- You can create lesson plans, grade assignments, generate quizzes, track student progress\n- You respond in ${classroom.language} when appropriate, with English translations\n\nKEEP RESPONSES CONCISE. Use bullet points. Be warm and supportive.`}
+              placeholder={`Message your ${classroom.language} twin...`}
+              welcomeMessage={classroom.twinGreeting}
+            />
           </div>
         </div>
       </main>

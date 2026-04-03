@@ -1,0 +1,13 @@
+{
+  "name": "acheevy-telegram",
+  "version": "1.0.0",
+  "description": "ACHEEVY Telegram bot — standalone access to The Deploy Platform",
+  "main": "bot.js",
+  "scripts": {
+    "start": "node bot.js",
+    "dev": "node --watch bot.js"
+  },
+  "dependencies": {
+    "node-telegram-bot-api": "^0.66.0"
+  }
+}

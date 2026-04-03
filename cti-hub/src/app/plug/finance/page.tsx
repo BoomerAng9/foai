@@ -7,6 +7,7 @@ import {
   AlertTriangle, MessageSquare, RefreshCw, PiggyBank, Wallet,
   ShieldAlert, Calendar,
 } from 'lucide-react';
+import { PlugChat } from '@/components/plug/PlugChat';
 
 // ─── Synthetic Data ──────────────────────────────────────────────────────────
 
@@ -225,38 +226,15 @@ export default function FinancePage() {
             <MessageSquare className="w-4 h-4 text-[#E8A020]" />
             <span className="font-mono text-xs text-white/40 uppercase tracking-wider">Chat with ACHEEVY</span>
           </div>
-          <div className="space-y-3 mb-4 max-h-64 overflow-y-auto">
-            {messages.map((m, i) => (
-              <div
-                key={i}
-                className={`text-sm p-3 rounded-lg ${
-                  m.role === 'acheevy'
-                    ? 'bg-white/5 border border-white/10'
-                    : 'bg-[#E8A020]/10 border border-[#E8A020]/20 ml-8'
-                }`}
-              >
-                {m.role === 'acheevy' && (
-                  <span className="text-[10px] font-mono text-[#E8A020] uppercase block mb-1">ACHEEVY &middot; CFO_Ang</span>
-                )}
-                {m.text}
-              </div>
-            ))}
-          </div>
-          <div className="flex gap-2">
-            <input
-              type="text"
-              value={chatInput}
-              onChange={(e) => setChatInput(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && handleSend()}
+          <div className="h-80">
+            <PlugChat
+              agentName="LUC"
+              agentRole="Financial Analyst"
+              agentColor="#84CC16"
+              systemPrompt="You are LUC, the financial analyst on The Deploy Platform. You help businesses understand their financial health and make data-driven decisions.\n\nYOU CAN:\n- Analyze cash flow patterns and identify trends\n- Create budget forecasts and projections\n- Evaluate pricing strategies and unit economics\n- Build financial models for growth scenarios\n- Flag financial risks and suggest mitigations\n- Compare revenue streams and cost centers\n- Explain financial concepts in plain language\n\nALWAYS give specific numbers, percentages, and actionable recommendations. Business owners need clarity, not jargon."
               placeholder="Ask about your finances..."
-              className="flex-1 bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm placeholder:text-white/20 focus:outline-none focus:border-[#E8A020]/50"
+              welcomeMessage="I'm LUC, your financial analyst. I can help with cash flow analysis, budget forecasting, pricing strategy, or any financial question. What would you like to look at?"
             />
-            <button
-              onClick={handleSend}
-              className="px-3 py-2 bg-[#E8A020] text-black rounded-lg hover:bg-[#E8A020]/80 transition-colors"
-            >
-              <DollarSign className="w-4 h-4" />
-            </button>
           </div>
         </div>
       </main>
