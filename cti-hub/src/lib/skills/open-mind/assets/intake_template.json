@@ -1,0 +1,20 @@
+{
+  "task_summary": "",
+  "missing_info_questions": [],
+  "assumptions_if_unanswered": [],
+  "risk_tier": "low|medium|high",
+  "novelty_level": "LOW|MEDIUM|HIGH",
+  "uncertainty_level": "LOW|MEDIUM|HIGH",
+  "requires_retrieval": true,
+  "retrieval_targets": ["web", "internal_docs"],
+  "tools_needed": ["AutoResearch"],
+  "success_criteria": [],
+  "surprise_criteria": [],
+  "non_goals": [],
+  "audience": "",
+  "time_horizon": "",
+  "freshness_requirement": "current|recent|any",
+  "invoking_agent": "",
+  "department": "",
+  "chain_of_command_approval": false
+}

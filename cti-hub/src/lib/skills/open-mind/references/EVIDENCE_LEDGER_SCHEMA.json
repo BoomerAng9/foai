@@ -1,0 +1,191 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Open Mind Evidence Ledger",
+  "description": "Structured record linking claims to sources for the Open Mind harness skill. Built by AutoResearch engine during retrieval phase.",
+  "type": "object",
+  "required": ["sources", "claims", "metadata"],
+  "properties": {
+    "metadata": {
+      "type": "object",
+      "required": ["skill_activation_id", "invoking_agent", "task_summary", "novelty_level", "uncertainty_level", "timestamp"],
+      "properties": {
+        "skill_activation_id": {
+          "type": "string",
+          "description": "Unique ID for this Open Mind activation"
+        },
+        "invoking_agent": {
+          "type": "string",
+          "description": "Agent that activated Open Mind (e.g., Scout_Ang, Edu_Ang)"
+        },
+        "task_summary": {
+          "type": "string",
+          "description": "One-sentence restatement of the task"
+        },
+        "novelty_level": {
+          "type": "string",
+          "enum": ["LOW", "MEDIUM", "HIGH"]
+        },
+        "uncertainty_level": {
+          "type": "string",
+          "enum": ["LOW", "MEDIUM", "HIGH"]
+        },
+        "risk_tier": {
+          "type": "string",
+          "enum": ["low", "medium", "high"]
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "model_used": {
+          "type": "string",
+          "description": "OpenRouter model string used for this activation"
+        },
+        "query_clusters_executed": {
+          "type": "integer",
+          "minimum": 3
+        }
+      }
+    },
+    "sources": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "title", "type"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^S\\d+$",
+            "description": "Stable source ID (S1, S2, ...)"
+          },
+          "title": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": ["web", "internal", "org_doc", "peer_reviewed", "standard", "vendor_doc"]
+          },
+          "url_or_doc_id": {
+            "type": "string"
+          },
+          "credibility_notes": {
+            "type": "string",
+            "description": "Assessment of source reliability"
+          },
+          "freshness": {
+            "type": "string",
+            "enum": ["current", "recent", "aging", "stale"],
+            "description": "current=<30d, recent=<6mo, aging=<2yr, stale=>2yr"
+          },
+          "retrieval_query": {
+            "type": "string",
+            "description": "The query that surfaced this source"
+          },
+          "retrieval_cluster": {
+            "type": "string",
+            "description": "Which query cluster this came from (e.g., failure_modes, adjacent_domains)"
+          }
+        }
+      }
+    },
+    "claims": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["claim_id", "claim_text", "status"],
+        "properties": {
+          "claim_id": {
+            "type": "string",
+            "pattern": "^C\\d+$",
+            "description": "Stable claim ID (C1, C2, ...)"
+          },
+          "claim_text": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["VERIFIED", "PARTIALLY_SUPPORTED", "INFERENCE", "HYPOTHESIS"],
+            "description": "VERIFIED=direct source support. PARTIALLY_SUPPORTED=topic match, not exact. INFERENCE=logically derived from evidence. HYPOTHESIS=speculative, needs testing."
+          },
+          "support": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["source_id"],
+              "properties": {
+                "source_id": { "type": "string" },
+                "locator": {
+                  "type": "string",
+                  "description": "Section, paragraph, or quote reference within the source"
+                }
+              }
+            }
+          },
+          "counterevidence": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "source_id": { "type": "string" },
+                "locator": { "type": "string" },
+                "conflict_notes": { "type": "string" }
+              }
+            }
+          },
+          "assumptions": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Assumptions underlying this claim"
+          },
+          "validation_needed": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Steps required to validate INFERENCE/HYPOTHESIS claims"
+          },
+          "confidence": {
+            "type": "number",
+            "minimum": 0.0,
+            "maximum": 1.0,
+            "description": "Confidence score: 0.0-1.0"
+          },
+          "falsification_criteria": {
+            "type": "string",
+            "description": "For HYPOTHESIS claims: what evidence would disprove this"
+          }
+        }
+      }
+    },
+    "open_questions": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Things we still need to learn"
+    },
+    "conflicts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["topic", "sources"],
+        "properties": {
+          "topic": { "type": "string" },
+          "sources": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "notes": { "type": "string" },
+          "resolution_plan": { "type": "string" }
+        }
+      }
+    },
+    "coverage_score": {
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 1.0,
+      "description": "Ratio of VERIFIED+PARTIALLY_SUPPORTED claims to total key claims"
+    },
+    "retrieval_gaps": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Areas where more evidence is needed"
+    }
+  }
+}

@@ -1,0 +1,53 @@
+{
+  "research_questions": [],
+  "query_clusters": [
+    {
+      "angle": "current_best_practices",
+      "queries": [],
+      "why": "Establish what exists as baseline"
+    },
+    {
+      "angle": "failure_modes",
+      "queries": [],
+      "why": "Understand where current approaches break"
+    },
+    {
+      "angle": "adjacent_domains",
+      "queries": [],
+      "why": "Import structural ideas from unrelated fields"
+    },
+    {
+      "angle": "constraints_and_factors",
+      "queries": [],
+      "why": "Map regulatory, physical, economic boundaries"
+    },
+    {
+      "angle": "emerging_signals",
+      "queries": [],
+      "why": "Detect market shifts, new tech, unmet needs"
+    }
+  ],
+  "source_policy": {
+    "priority": ["primary_docs", "vendor_docs", "standards_bodies", "peer_reviewed", "internal_org_docs"],
+    "avoid": ["unknown blogs unless corroborated", "uncited claims", "sources older than 12 months for fast-moving domains"]
+  },
+  "internal_retrieval": {
+    "enabled": false,
+    "targets": [],
+    "queries": []
+  },
+  "stop_conditions": [
+    ">= 3 unique high-quality sources for each major claim",
+    "conflicts between sources identified and logged",
+    "evidence ledger can be constructed with claim-source mappings"
+  ],
+  "minimum_clusters": 3,
+  "minimum_clusters_high_novelty": 5,
+  "autoResearch_config": {
+    "engine": "AutoResearch",
+    "max_queries_per_cluster": 5,
+    "dedup_sources": true,
+    "credibility_scoring": true,
+    "conflict_detection": true
+  }
+}

@@ -1,0 +1,90 @@
+{
+  "options": [
+    {
+      "type": "CONVENTIONAL",
+      "summary": "",
+      "what_it_borrows_from_precedent": [],
+      "what_is_newly_combined": [],
+      "what_is_original": [],
+      "evidence_support": [],
+      "tradeoffs": {
+        "pros": [],
+        "cons": [],
+        "risks": []
+      },
+      "validation_plan": [],
+      "fast_falsification_test": "",
+      "implementation_complexity": "low|medium|high",
+      "time_to_value": ""
+    },
+    {
+      "type": "DIFFERENTIATED",
+      "summary": "",
+      "core_assumption_challenged": "",
+      "what_it_borrows_from_precedent": [],
+      "what_is_newly_combined": [],
+      "what_is_original": [],
+      "evidence_support": [],
+      "tradeoffs": {
+        "pros": [],
+        "cons": [],
+        "risks": []
+      },
+      "validation_plan": [],
+      "fast_falsification_test": "",
+      "implementation_complexity": "low|medium|high",
+      "time_to_value": ""
+    },
+    {
+      "type": "EXPERIMENTAL",
+      "summary": "",
+      "imported_domain": "",
+      "structural_mapping": "",
+      "what_it_borrows_from_precedent": [],
+      "what_is_newly_combined": [],
+      "what_is_original": [],
+      "evidence_support": [],
+      "tradeoffs": {
+        "pros": [],
+        "cons": [],
+        "risks": []
+      },
+      "validation_plan": [],
+      "fast_falsification_test": "",
+      "implementation_complexity": "low|medium|high",
+      "time_to_value": ""
+    }
+  ],
+  "avoidance_list": [],
+  "protocols_applied": [],
+  "constraints_applied": [],
+  "decision_criteria": [],
+  "recommendation_candidate": "CONVENTIONAL|DIFFERENTIATED|EXPERIMENTAL",
+  "recommendation_rationale": "",
+  "novelty_scores": {
+    "overall": 0.0,
+    "novelty_avg": 0.0,
+    "quality_avg": 0.0,
+    "coherence_avg": 0.0,
+    "dimension_scores": {
+      "Q1_originality": 0,
+      "Q2_surprise": 0,
+      "Q3_non_derivativeness": 0,
+      "Q4_uniqueness": 0,
+      "Q5_requirements": 0,
+      "Q6_coherence_novel": 0,
+      "Q7_practicality": 0,
+      "Q8_internal_consistency": 0,
+      "Q9_integration_fitness": 0
+    }
+  },
+  "red_flags": {
+    "matches_known_template": false,
+    "probable_token_generation": false,
+    "paraphrases_prompt": false,
+    "superficial_creativity": false,
+    "resembles_previous_output": false
+  },
+  "open_questions": [],
+  "what_would_change_our_mind": []
+}
