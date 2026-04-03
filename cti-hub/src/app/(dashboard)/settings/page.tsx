@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { User, CreditCard, MessageSquare, Shield, ExternalLink } from 'lucide-react';
+import { User, CreditCard, MessageSquare, Shield, ExternalLink, Radio } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 
 export default function SettingsPage() {
@@ -55,6 +55,7 @@ export default function SettingsPage() {
         <div className="space-y-px">
           {[
             { label: 'OPEN CHAT', desc: 'Talk to ACHEEVY', href: '/chat', icon: MessageSquare },
+            { label: 'CHANNELS', desc: 'Telegram, WhatsApp, Discord, Email', href: '/settings/channels', icon: Radio },
             { label: 'MANAGE BILLING', desc: 'Update plan and payment', href: '/pricing', icon: CreditCard },
             ...(isOwner ? [{ label: 'OPERATIONS', desc: 'Fleet monitoring', href: '/live', icon: Shield }] : []),
           ].map(action => (
