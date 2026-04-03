@@ -18,15 +18,12 @@ departments:
       - Lil_Coding_Hawk
       - Lil_Agent_Hawk
       - Lil_Flow_Hawk
-      - Lil_Viz_Hawk
-      - Lil_Blend_Hawk
       - Lil_Sand_Hawk
     color: "#DBEAFE"
     triggers:
       - build
       - develop
       - create
-      - design
       - code
       - implement
       - frontend
@@ -117,6 +114,35 @@ departments:
       - lint
       - coverage
       - validation
+
+  PMO-PRISM:
+    name: "Creative Ops"
+    description: "Visual asset production, brand design, NFT art, motion graphics, and creative direction"
+    lead: Iller_Ang
+    members:
+      - Iller_Ang
+    lil_hawks:
+      - Lil_Viz_Hawk
+      - Lil_Blend_Hawk
+    color: "#FFF0E6"
+    triggers:
+      - visual
+      - graphic
+      - card
+      - illustration
+      - NFT
+      - art
+      - brand
+      - motion
+      - player card
+      - broadcast
+      - recruiting
+      - composite
+      - merchandise
+      - podcast studio
+      - character art
+      - landing page design
+      - creative
 
 # Special Rooms (not PMO departments but part of the org)
 special_rooms:

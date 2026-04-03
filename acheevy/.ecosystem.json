@@ -90,10 +90,10 @@
     }
   ],
 
-  "pmo_departments": ["PMO-ECHO", "PMO-SHIELD", "PMO-PULSE", "PMO-LAUNCH", "PMO-LENS"],
+  "pmo_departments": ["PMO-ECHO", "PMO-PRISM", "PMO-SHIELD", "PMO-PULSE", "PMO-LAUNCH", "PMO-LENS"],
 
   "workforce": {
-    "boomer_angs": ["API_Ang", "UI_Ang", "SME_Ang", "Flow_Ang", "Design_Ang", "Crypt_Ang", "Data_Ang", "Deploy_Ang", "QA_Ang"],
+    "boomer_angs": ["API_Ang", "UI_Ang", "SME_Ang", "Flow_Ang", "Design_Ang", "Iller_Ang", "Crypt_Ang", "Data_Ang", "Deploy_Ang", "QA_Ang"],
     "lil_hawks": ["Lil_TRAE_Hawk", "Lil_Coding_Hawk", "Lil_Agent_Hawk", "Lil_Flow_Hawk", "Lil_Sand_Hawk", "Lil_Memory_Hawk", "Lil_Graph_Hawk", "Lil_Back_Hawk", "Lil_Viz_Hawk", "Lil_Blend_Hawk", "Lil_Deep_Hawk"],
     "executives": ["ACHEEVY", "Chicken_Hawk"]
   },

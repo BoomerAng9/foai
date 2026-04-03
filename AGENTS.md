@@ -12,7 +12,8 @@ ACHEEVY (Boss)
 │   ├── Scout_Ang
 │   ├── Content_Ang
 │   ├── Ops_Ang
-│   └── Biz_Ang
+│   ├── Biz_Ang
+│   └── Iller_Ang (Creative Director — PMO-PRISM)
 └── Infrastructure Engines
     ├── RuntimeAng (OpenClaw) — LIVE
     ├── GuardAng (NemoClaw) — LIVE
@@ -44,6 +45,7 @@ Deployed by ACHEEVY only. Report directly to ACHEEVY — never to Chicken Hawk.
 | **Content_Ang** | foai.cloud SEO — content creation, optimization, and organic traffic growth |
 | **Ops_Ang** | Reporting and platform health — dashboards, alerts, uptime |
 | **Biz_Ang** | SaaS client growth — lead generation, onboarding, retention |
+| **Iller_Ang** | Creative Director — visual asset production, player cards, broadcast graphics, NFT art, agent character art, motion landing pages (PMO-PRISM) |
 
 ## Infrastructure Engines
 

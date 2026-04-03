@@ -110,12 +110,31 @@ BOOMER_ANG_TOOLS = [
             "properties": {
                 "instruction": {
                     "type": "string",
-                    "description": "Visual asset request. e.g., 'Create a silver border player card for quarterback #7 Comets, night game action shot'",
+                    "description": "Creative brief. e.g., 'Design a silver border player card for Comets QB #7, night game action shot'",
                 },
                 "asset_type": {
                     "type": "string",
-                    "enum": ["player_card", "broadcast", "recruiting", "composite", "character", "agent_art", "podcast", "merchandise", "profile_card", "digital_art", "cinematic", "lifestyle", "motion_page"],
-                    "default": "player_card",
+                    "enum": [
+                        "player_card",
+                        "broadcast_graphic",
+                        "recruiting_prediction",
+                        "team_composite",
+                        "character_illustration",
+                        "agent_character_art",
+                        "podcast_visual",
+                        "merchandise_concept",
+                        "profile_nft_card",
+                        "digital_art",
+                        "cinematic_game_shot",
+                        "lifestyle_direction",
+                        "motion_landing_page",
+                    ],
+                    "description": "Type of visual asset to produce",
+                },
+                "nft_mint": {
+                    "type": "boolean",
+                    "default": False,
+                    "description": "Route output through NFT minting pipeline (IPFS + ERC-721 metadata)",
                 },
             },
             "required": ["instruction"],
@@ -289,15 +308,15 @@ TECH_LANG_INDEX_TOOLS = [
 TIER_ACCESS = {
     "starter": {
         "tools": ["acheevy_delegate", "scout_ang_research", "content_ang_create", "edu_ang_enroll",
+                   "iller_ang_create",
                    "grammar_convert", "tech_lang_lookup", "tech_lang_recommend"],
         "price": 497,
     },
     "growth": {
         "tools": ["acheevy_delegate", "scout_ang_research", "content_ang_create", "edu_ang_enroll",
-                   "biz_ang_pipeline", "ops_ang_monitor",
+                   "biz_ang_pipeline", "ops_ang_monitor", "iller_ang_create",
                    "lil_coding_hawk", "lil_trae_hawk", "lil_deep_hawk", "lil_agent_hawk",
                    "lil_flow_hawk", "lil_memory_hawk", "lil_back_hawk", "lil_viz_hawk",
-                   "iller_ang_create",
                    "grammar_convert", "tech_lang_lookup", "tech_lang_recommend"],
         "price": 1497,
     },

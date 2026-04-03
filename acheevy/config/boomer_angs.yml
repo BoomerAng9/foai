@@ -96,3 +96,13 @@ angs:
     run_path: /run
     timeout_seconds: 90
     is_review_gate: true
+
+  Iller_Ang:
+    description: "Creative direction, visual asset production, player cards, broadcast graphics, NFT art, agent character art, motion landing pages"
+    glyph: "I"
+    department: PMO-PRISM
+    specialty: "Creative Ops"
+    glow_color: "#FF6B00"
+    health_path: /health
+    run_path: /run
+    timeout_seconds: 120
