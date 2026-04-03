@@ -12,6 +12,8 @@ import { CameraMenu, parseCameraSpec, CAMERA_DEFAULTS } from '@/components/broad
 import type { CameraSpec } from '@/components/broadcast/CameraMenu';
 import { Timeline } from '@/components/broadcast/Timeline';
 import type { TimelineClip, ClipTransition, TransitionType } from '@/components/broadcast/Timeline';
+import { TextOverlayEditor } from '@/components/broadcast/TextOverlay';
+import type { TextOverlayConfig } from '@/components/broadcast/TextOverlay';
 
 // Broad|Cast brand colors
 const BC = {
@@ -111,6 +113,8 @@ export default function BroadcastStudio() {
   const [selectedClipId, setSelectedClipId] = useState<string | null>(null);
   const [playheadTime, setPlayheadTime] = useState(0);
   const [rendering, setRendering] = useState(false);
+  const [showTextEditor, setShowTextEditor] = useState(false);
+  const [textOverlays, setTextOverlays] = useState<TextOverlayConfig[]>([]);
   const chatEndRef = useRef<HTMLDivElement>(null);
 
   const addScene = useCallback(async () => {
@@ -430,8 +434,18 @@ export default function BroadcastStudio() {
               <video
                 src={scenes.find(s => s.id === selectedScene)?.videoUrl}
                 className="max-w-full max-h-full"
-                controls={false}
+                controls
+                style={{ maxHeight: '100%' }}
               />
+            ) : timelineClips.filter(c => c.videoUrl).length > 0 ? (
+              <div className="flex flex-col items-center gap-2">
+                <span className="text-[11px] font-mono" style={{ color: BC.textSec }}>
+                  {timelineClips.filter(c => c.videoUrl).length} clips on timeline
+                </span>
+                <span className="text-[9px] font-mono" style={{ color: BC.textGhost }}>
+                  Select a clip or hit EXPORT MP4 to render
+                </span>
+              </div>
             ) : (
               <div className="flex flex-col items-center gap-3">
                 <svg width="48" height="48" viewBox="0 0 100 100" fill="none" opacity="0.2">
@@ -442,6 +456,13 @@ export default function BroadcastStudio() {
                 <span className="text-[11px] font-mono" style={{ color: BC.textGhost }}>
                   Add scenes or describe your vision in chat
                 </span>
+              </div>
+            )}
+            {/* Generating overlay */}
+            {scenes.some(s => s.status === 'generating') && (
+              <div className="absolute bottom-3 left-3 flex items-center gap-2 px-3 py-1.5" style={{ background: 'rgba(0,0,0,0.8)', border: `1px solid ${BC.border}` }}>
+                <div className="w-2 h-2 rounded-full animate-pulse" style={{ background: BC.amber }} />
+                <span className="text-[9px] font-mono" style={{ color: BC.amber }}>Generating scene...</span>
               </div>
             )}
           </div>
@@ -532,14 +553,14 @@ export default function BroadcastStudio() {
           {/* Properties panels */}
           <div className="overflow-y-auto" style={{ maxHeight: '40%', borderBottom: `1px solid ${BC.border}` }}>
             {[
-              { icon: Film, label: 'Scenes', count: scenes.length },
-              { icon: Layers, label: 'Layers', count: 0 },
-              { icon: Sparkles, label: 'Effects', count: 0 },
-              { icon: Music, label: 'Audio', count: 0 },
-              { icon: Sliders, label: 'Adjustments', count: 0 },
-              { icon: ListTodo, label: 'Task List', count: 0 },
+              { icon: Film, label: 'Scenes', count: scenes.length, action: undefined },
+              { icon: Layers, label: 'Layers', count: textOverlays.length, action: () => setShowTextEditor(!showTextEditor) },
+              { icon: Sparkles, label: 'Effects', count: 0, action: undefined },
+              { icon: Music, label: 'Audio', count: 0, action: undefined },
+              { icon: Sliders, label: 'Adjustments', count: 0, action: undefined },
+              { icon: ListTodo, label: 'Task List', count: scenes.filter(s => s.status === 'generating').length, action: undefined },
             ].map(panel => (
-              <button key={panel.label} className="w-full flex items-center justify-between px-3 py-2 hover:bg-white/[0.03] transition-colors" style={{ borderBottom: `1px solid ${BC.border}` }}>
+              <button key={panel.label} onClick={panel.action} className="w-full flex items-center justify-between px-3 py-2 hover:bg-white/[0.03] transition-colors" style={{ borderBottom: `1px solid ${BC.border}` }}>
                 <div className="flex items-center gap-2">
                   <panel.icon className="w-3 h-3" style={{ color: BC.textGhost }} />
                   <span className="text-[10px] font-medium" style={{ color: BC.textSec, fontFamily: 'Inter, sans-serif' }}>{panel.label}</span>
@@ -549,6 +570,26 @@ export default function BroadcastStudio() {
                 )}
               </button>
             ))}
+            {/* Text Overlay Editor */}
+            {showTextEditor && (
+              <TextOverlayEditor
+                currentTime={playheadTime}
+                onAdd={(overlay) => {
+                  setTextOverlays(prev => [...prev, overlay]);
+                  // Add to V2 track as overlay clip
+                  setTimelineClips(prev => [...prev, {
+                    id: overlay.id,
+                    trackId: 'V2',
+                    name: overlay.text.slice(0, 20),
+                    startTime: overlay.startTime,
+                    duration: overlay.duration,
+                    type: 'overlay' as const,
+                    color: 'rgba(139,92,246,0.5)',
+                  }]);
+                }}
+                onClose={() => setShowTextEditor(false)}
+              />
+            )}
           </div>
 
           {/* Chat */}
