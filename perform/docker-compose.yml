@@ -6,12 +6,6 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.perform.rule=Host(`perform.foai.cloud`)"
-      - "traefik.http.routers.perform.tls=true"
+      - "traefik.http.routers.perform.entrypoints=websecure"
       - "traefik.http.routers.perform.tls.certresolver=letsencrypt"
       - "traefik.http.services.perform.loadbalancer.server.port=3000"
-    networks:
-      - traefik-net
-
-networks:
-  traefik-net:
-    external: true
