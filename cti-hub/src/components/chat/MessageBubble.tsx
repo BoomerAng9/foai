@@ -145,10 +145,14 @@ export function MessageBubble({ msg }: { msg: Message }) {
       <div className="flex items-center gap-2 mb-2">
         {msg.role === 'acheevy' && (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src="/acheevy-helmet.png" alt="" className="w-5 h-5 object-contain" />
+          <img
+            src={msg.activeAgent && msg.activeAgent !== 'ACHEEVY' ? '/boomer-ang-icon.png' : '/acheevy-helmet.png'}
+            alt=""
+            className="w-5 h-5 object-contain"
+          />
         )}
         <span className="label-mono">
-          {msg.role === 'user' ? 'YOU' : 'ACHEEVY'}
+          {msg.role === 'user' ? 'YOU' : msg.activeAgent || 'ACHEEVY'}
         </span>
         {msg.streaming && <TypingIndicator />}
         <div className="flex-1" />
