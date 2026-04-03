@@ -367,7 +367,7 @@ export default function TeacherDigitalTwinPage() {
       {/* Footer */}
       <footer className="border-t border-white/10 px-6 py-4 mt-8">
         <p className="text-center text-xs text-white/30 font-mono">
-          Powered by Learn_Ang &middot; ACHEEVY &middot; The Deploy Platform
+          Powered by The Deploy Platform
         </p>
       </footer>
     </div>

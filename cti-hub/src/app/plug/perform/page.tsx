@@ -198,7 +198,7 @@ function ProspectCard({ prospect, rank }: { prospect: Prospect; rank: number }) 
             </div>
           </div>
           <div className="flex items-center gap-3 mt-3">
-            <span className="text-[9px] text-white/30 font-mono">P.A.I. + AGI GRADE: {prospect.grade}</span>
+            <span className="text-[9px] text-white/30 font-mono">GRADE: {prospect.grade}</span>
             <span className="text-[9px] text-white/30 font-mono">ROUND: {prospect.projectedRound}</span>
             <span className="text-[9px] text-white/30 font-mono">OVERALL: #{prospect.overallRank}</span>
           </div>
@@ -327,7 +327,7 @@ export default function PerFormPage() {
         <div className="flex items-center gap-2 mb-4">
           <div className={`w-2 h-2 rounded-full ${liveProspects ? 'bg-green-500 animate-pulse' : 'bg-yellow-500'}`} />
           <span className="font-mono text-[9px] text-white/40">
-            {loading ? 'Loading player index...' : liveProspects ? `LIVE DATABASE · ${liveProspects.length} prospects indexed` : 'SEED DATA · Run /api/perform/seed to populate live index'}
+            {loading ? 'Loading player index...' : liveProspects ? `LIVE DATABASE · ${liveProspects.length} prospects indexed` : 'SEED DATA · Demo mode'}
           </span>
         </div>
 
@@ -398,7 +398,7 @@ export default function PerFormPage() {
               agentColor="#3B82F6"
               systemPrompt="You are Scout_Ang, the lead NFL Draft analyst for Per|Form on The Deploy Platform.\n\nYOU ARE AN EXPERT IN:\n- NFL Draft scouting and prospect evaluation\n- Film analysis (route running, pass rush technique, coverage skills)\n- Combine and Pro Day metrics interpretation\n- Historical draft comparisons\n- Team needs and fit analysis\n- Mock draft predictions\n\nWhen asked about a prospect, give a FULL scouting report: size/speed, strengths (3-5), weaknesses (2-3), NFL comparison, draft grade (A+ through F), projected round, and team fit.\n\nWhen asked about team needs, be specific about roster gaps and which prospects fill them.\n\nFor podcast scripts, write in conversational tone with [PAUSE], [EMPHASIS], and [GRAPHIC] production cues.\n\nBe bold. Have takes. Back them with evidence."
               placeholder="Ask about any prospect, team need, or draft scenario..."
-              welcomeMessage="I'm Scout_Ang — Per|Form's lead draft analyst. Ask me about any prospect, team need, mock draft scenario, or I can generate a podcast script for you. What do you want to break down?"
+              welcomeMessage="I'm Per|Form's lead draft analyst. Ask me about any prospect, team need, mock draft scenario, or I can generate a podcast script for you. What do you want to break down?"
             />
           </div>
         </div>
@@ -406,7 +406,7 @@ export default function PerFormPage() {
         {/* Footer */}
         <div className="mt-12 text-center">
           <p className="font-mono text-[9px] text-white/20">
-            PER|FORM 2026 · Powered by Boomer_Ang Analyst Personas · P.A.I. + AGI Grading Formula
+            PER|FORM 2026 · Powered by The Deploy Platform
           </p>
         </div>
       </div>

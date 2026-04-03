@@ -161,7 +161,7 @@ export default function SMBMarketingPage() {
             <Zap className="w-6 h-6 text-[#E8A020]" />
             <div>
               <h1 className="text-xl font-bold">Marketing Agency</h1>
-              <p className="text-xs text-white/40 font-mono">Powered by Scout_Ang + Biz_Ang + Content_Ang</p>
+              <p className="text-xs text-white/40 font-mono">Powered by The Deploy Platform</p>
             </div>
           </div>
 
@@ -217,7 +217,7 @@ export default function SMBMarketingPage() {
           </button>
 
           <p className="text-[10px] text-white/20 text-center mt-4 font-mono">
-            Scout_Ang + Biz_Ang + Content_Ang will research your business in real-time
+            Our agents will research your business in real-time
           </p>
         </div>
       </div>
@@ -234,15 +234,15 @@ export default function SMBMarketingPage() {
           <div className="space-y-2 text-sm text-white/50">
             <div className="flex items-center gap-2 justify-center">
               <span className="w-2 h-2 rounded-full bg-blue-400 animate-pulse" />
-              <span>Scout_Ang researching {business.name}...</span>
+              <span>Researching {business.name}...</span>
             </div>
             <div className="flex items-center gap-2 justify-center">
               <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
-              <span>Biz_Ang analyzing market position...</span>
+              <span>Analyzing market position...</span>
             </div>
             <div className="flex items-center gap-2 justify-center">
               <span className="w-2 h-2 rounded-full bg-purple-400 animate-pulse" />
-              <span>Content_Ang generating content calendar...</span>
+              <span>Generating content calendar...</span>
             </div>
           </div>
           <p className="text-[10px] text-white/20 font-mono mt-6">This takes 15-30 seconds</p>
@@ -278,9 +278,9 @@ export default function SMBMarketingPage() {
         <div className="max-w-7xl mx-auto flex items-center gap-6">
           <span className="text-xs text-white/40 font-mono uppercase tracking-wider">Agents</span>
           {[
-            { name: 'Scout_Ang', status: 'Research complete', color: 'bg-green-400' },
-            { name: 'Biz_Ang', status: 'Strategy ready', color: 'bg-green-400' },
-            { name: 'Content_Ang', status: 'Calendar generated', color: 'bg-green-400' },
+            { name: 'Research', status: 'Complete', color: 'bg-green-400' },
+            { name: 'Strategy', status: 'Ready', color: 'bg-green-400' },
+            { name: 'Content', status: 'Generated', color: 'bg-green-400' },
           ].map((agent, i) => (
             <div key={i} className="flex items-center gap-2">
               <span className={`w-2 h-2 rounded-full ${agent.color}`} />
@@ -297,7 +297,7 @@ export default function SMBMarketingPage() {
           <div className="border border-white/10 p-4">
             <div className="flex items-center gap-2 mb-3">
               <Search className="w-4 h-4 text-[#3B82F6]" />
-              <span className="font-mono text-xs text-white/40 uppercase tracking-wider">Scout_Ang — Market Research</span>
+              <span className="font-mono text-xs text-white/40 uppercase tracking-wider">Market Research</span>
             </div>
             <p className="text-sm text-white/70 leading-relaxed mb-4">{research.summary}</p>
 
@@ -336,7 +336,7 @@ export default function SMBMarketingPage() {
           <div className="border border-white/10 p-4">
             <div className="flex items-center gap-2 mb-3">
               <Calendar className="w-4 h-4 text-[#8B5CF6]" />
-              <span className="font-mono text-xs text-white/40 uppercase tracking-wider">Content_Ang — 7-Day Content Calendar</span>
+              <span className="font-mono text-xs text-white/40 uppercase tracking-wider">7-Day Content Calendar</span>
             </div>
             <div className="text-sm text-white/60 leading-relaxed whitespace-pre-wrap">
               {contentCalendar}
@@ -348,7 +348,7 @@ export default function SMBMarketingPage() {
         <div className="border border-white/10 p-4">
           <div className="flex items-center gap-2 mb-4">
             <MessageSquare className="w-4 h-4 text-[#E8A020]" />
-            <span className="font-mono text-xs text-white/40 uppercase tracking-wider">Chat with Biz_Ang — Live Strategy</span>
+            <span className="font-mono text-xs text-white/40 uppercase tracking-wider">Live Strategy Chat</span>
           </div>
           <div className="h-96">
             <PlugChat
@@ -357,7 +357,7 @@ export default function SMBMarketingPage() {
               agentColor="#10B981"
               systemPrompt={`You are Biz_Ang, the marketing strategist on The Deploy Platform. You are working with a real business:\n\nBusiness: ${business.name}\nIndustry: ${business.industry}\nLocation: ${business.location}\n${business.website ? `Website: ${business.website}` : ''}\n\n${research ? `Scout_Ang's research found:\n- Summary: ${research.summary}\n- Competitors: ${research.competitors.join(', ')}\n- Opportunities: ${research.opportunities.join(', ')}` : ''}\n\nGive SPECIFIC, ACTIONABLE advice for THIS business. Reference their competitors by name. Suggest specific content for their industry. No generic advice.`}
               placeholder={`Ask about ${business.name}'s marketing strategy...`}
-              welcomeMessage={`I've reviewed Scout_Ang's research on ${business.name}. I have specific recommendations for your ${business.industry} marketing. What would you like to focus on — content strategy, competitor response, or audience growth?`}
+              welcomeMessage={`I've reviewed the research on ${business.name}. I have specific recommendations for your ${business.industry} marketing. What would you like to focus on — content strategy, competitor response, or audience growth?`}
             />
           </div>
         </div>
@@ -365,7 +365,7 @@ export default function SMBMarketingPage() {
 
       <footer className="border-t border-white/10 px-6 py-4 mt-8">
         <p className="text-center text-xs text-white/30 font-mono">
-          Powered by Scout_Ang &middot; Biz_Ang &middot; Content_Ang &middot; The Deploy Platform
+          Powered by The Deploy Platform
         </p>
       </footer>
     </div>

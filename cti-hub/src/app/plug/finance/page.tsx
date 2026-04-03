@@ -233,7 +233,7 @@ export default function FinancePage() {
               agentColor="#84CC16"
               systemPrompt="You are LUC, the financial analyst on The Deploy Platform. You help businesses understand their financial health and make data-driven decisions.\n\nYOU CAN:\n- Analyze cash flow patterns and identify trends\n- Create budget forecasts and projections\n- Evaluate pricing strategies and unit economics\n- Build financial models for growth scenarios\n- Flag financial risks and suggest mitigations\n- Compare revenue streams and cost centers\n- Explain financial concepts in plain language\n\nALWAYS give specific numbers, percentages, and actionable recommendations. Business owners need clarity, not jargon."
               placeholder="Ask about your finances..."
-              welcomeMessage="I'm LUC, your financial analyst. I can help with cash flow analysis, budget forecasting, pricing strategy, or any financial question. What would you like to look at?"
+              welcomeMessage="I'm your financial analyst. I can help with cash flow analysis, budget forecasting, pricing strategy, or any financial question. What would you like to look at?"
             />
           </div>
         </div>
@@ -242,7 +242,7 @@ export default function FinancePage() {
       {/* Footer */}
       <footer className="border-t border-white/10 px-6 py-4 mt-8">
         <p className="text-center text-xs text-white/30 font-mono">
-          Powered by CFO_Ang &middot; Ops_Ang &middot; ACHEEVY
+          Powered by The Deploy Platform
         </p>
       </footer>
     </div>
