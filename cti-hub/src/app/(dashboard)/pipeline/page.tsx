@@ -21,7 +21,7 @@ const C = {
 
 const AGENTS = [
   { id: "chickenhawk", name: "Chicken Hawk", role: "Commander", emoji: "\uD83E\uDD85", color: C.hawk, glow: C.hawkGlow,
-    desc: "Governed via Telegram. Controls NemoClaw + Hermes. Approves partnerships, sets budgets, overrides schedules.", controls: ["NemoClaw Framework", "Hermes Agent"] },
+    desc: "Governed via Telegram. Approves partnerships, sets budgets, overrides schedules.", controls: ["Agent Framework", "Messaging Layer"] },
   { id: "acheevy", name: "ACHEEVY", role: "Orchestrator", emoji: "\u2699\uFE0F", color: C.acheevy, glow: C.acheevyGlow,
     desc: "Digital CEO. Qualifies courses, scores viability, sets pricing, manages the pipeline state machine.", controls: ["Boomer_Angs", "Lil_Hawks"] },
   { id: "boomerangs", name: "Boomer_Angs", role: "Scouts / Scrapers", emoji: "\uD83E\uDE83", color: C.boomer, glow: C.boomerGlow,
@@ -98,7 +98,7 @@ const COMMAND_CHAIN = {
       "Sets budget ceilings and discount bounds",
       "Overrides schedules and pauses pipeline stages",
       "Receives weekly summary + escalation alerts",
-      "Controls NemoClaw (agent framework) + Hermes (messaging)",
+      "Controls agent framework + messaging layer",
     ]},
     { name: "ACHEEVY", sub: "ORCHESTRATOR — Pipeline Brain", color: C.acheevy, items: [
       "Runs the qualify → secure → reconcile loop",
@@ -410,8 +410,8 @@ export default function CoursePipelineBlueprint() {
               }}>FRAMEWORK LAYER</div>
               <div style={{ display: "flex", gap: 10 }}>
                 {[
-                  { name: "NemoClaw", role: "Agent framework — manages Boomer_Ang + Lil_Hawk task queues, retries, error handling", color: C.acheevy },
-                  { name: "Hermes", role: "Messaging agent — Telegram bot, email delivery, webhook routing", color: C.lil },
+                  { name: "Task Engine", role: "Agent framework — manages Boomer_Ang + Lil_Hawk task queues, retries, error handling", color: C.acheevy },
+                  { name: "Relay", role: "Messaging layer — Telegram bot, email delivery, webhook routing", color: C.lil },
                 ].map((f) => (
                   <div key={f.name} style={{
                     flex: 1, padding: 12, background: C.bg, borderRadius: 6,

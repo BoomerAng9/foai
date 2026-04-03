@@ -100,9 +100,9 @@ const STAGES: Stage[] = [
   },
   {
     num: 6, name: 'REVIEW', fullName: 'Quality Gate',
-    description: 'Hermes evaluation engine scores every deliverable. Quality gate enforced. Review_Hone validates outputs against the original spec. Nothing passes without meeting the bar.',
+    description: 'Quality engine scores every deliverable. Quality gate enforced. Review_Hone validates outputs against the original spec. Nothing passes without meeting the bar.',
     agents: [
-      { name: 'Hermes', emoji: '\uD83D\uDCCA' },
+      { name: 'Quality Engine', emoji: '\uD83D\uDCCA' },
       { name: 'Review_Hone', emoji: '\uD83D\uDD0D' },
     ],
     output: 'Quality scores per deliverable, pass/fail status, revision notes if needed.',
@@ -123,7 +123,7 @@ const STAGES: Stage[] = [
     num: 8, name: 'TEST', fullName: 'Sandbox Testing',
     description: 'Sandboxed testing. The build runs in isolation. Functional checks, performance validation, compliance verification. Nothing touches production until it passes.',
     agents: [
-      { name: 'Hermes', emoji: '\uD83D\uDCCA' },
+      { name: 'Quality Engine', emoji: '\uD83D\uDCCA' },
       { name: 'BuildSmith', emoji: '\uD83D\uDD28' },
     ],
     output: 'Test report: functional pass/fail, performance metrics, compliance status.',
@@ -145,7 +145,7 @@ const STAGES: Stage[] = [
     description: 'The user receives confirmation. Metrics tracked. Memory stored. The plug appears in their Plug Bin. Continuous monitoring begins — your build is alive.',
     agents: [
       { name: 'ACHEEVY', emoji: '\u2699\uFE0F' },
-      { name: 'Hermes', emoji: '\uD83D\uDCCA' },
+      { name: 'Quality Engine', emoji: '\uD83D\uDCCA' },
     ],
     output: 'Acceptance confirmation, monitoring dashboard, Plug Bin entry, stored memory.',
     estimatedTime: 'Ongoing',

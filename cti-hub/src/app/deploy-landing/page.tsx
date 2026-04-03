@@ -41,7 +41,7 @@ const USE_CASES = [
 ];
 
 const FEATURES = [
-  { name: 'Voice-First', desc: 'Talk to ACHEEVY. Every response speaks back. Bidirectional voice with Gemini 3.1 Flash Live.', icon: Mic },
+  { name: 'Voice-First', desc: 'Talk to ACHEEVY. Every response speaks back. Bidirectional real-time voice — just talk.', icon: Mic },
   { name: 'Smart Translate', desc: 'Say what you mean in plain words. We translate it into precise technical specs. Just talk naturally — toggle it on via the + button in chat.', icon: Brain },
   { name: 'NURD Profile Cards', desc: 'Your digital identity across Web 2.0 and 3.0. Customize, mint as NFT, carry everywhere. Coming soon.', icon: CreditCard },
   { name: 'Agent HQ', desc: '16 agents across 12 departments. Watch them work in real time. Click any agent to see their status and capabilities.', icon: Users },
