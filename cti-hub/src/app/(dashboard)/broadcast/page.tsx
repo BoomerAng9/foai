@@ -510,6 +510,26 @@ export default function BroadcastStudio() {
               >
                 {rendering ? 'RENDERING...' : 'EXPORT MP4'}
               </button>
+              <button
+                onClick={async () => {
+                  setChatMessages(prev => [...prev, { role: 'iller_ang', content: 'Publishing to CDN... generating shareable link.' }]);
+                  try {
+                    const res = await fetch('/api/broadcast/publish', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ videoUrl: timelineClips[0]?.videoUrl || '', platform: 'cdn' }),
+                    });
+                    const data = await res.json();
+                    setChatMessages(prev => [...prev, { role: 'iller_ang', content: `Published. Share link: ${data.url || 'Generation in progress'}` }]);
+                  } catch {
+                    setChatMessages(prev => [...prev, { role: 'iller_ang', content: 'Publish failed. Render the video first, then publish.' }]);
+                  }
+                }}
+                className="px-3 py-1 text-[9px] font-mono font-bold tracking-wider transition-all hover:bg-white/[0.08]"
+                style={{ border: `1px solid ${BC.border}`, color: BC.textSec }}
+              >
+                PUBLISH
+              </button>
             </div>
           )}
 
