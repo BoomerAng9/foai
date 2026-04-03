@@ -132,17 +132,74 @@ export default function BroadcastStudio() {
   const [resolution, setResolution] = useState('4K UHD');
   const chatEndRef = useRef<HTMLDivElement>(null);
 
-  const addScene = useCallback(() => {
+  const addScene = useCallback(async () => {
     if (!newSceneInput.trim()) return;
+    const sceneId = `scene-${Date.now()}`;
     const scene: Scene = {
-      id: `scene-${Date.now()}`,
+      id: sceneId,
       name: `Scene ${scenes.length + 1}`,
       description: newSceneInput.trim(),
       status: 'pending',
     };
     setScenes(prev => [...prev, scene]);
     setNewSceneInput('');
-  }, [newSceneInput, scenes.length]);
+    setSelectedScene(sceneId);
+
+    // Submit to generation API
+    setScenes(prev => prev.map(s => s.id === sceneId ? { ...s, status: 'generating' } : s));
+
+    try {
+      const res = await fetch('/api/broadcast/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          description: scene.description,
+          duration: 5,
+          engine: 'seedance',
+        }),
+      });
+
+      if (!res.ok) {
+        const err = await res.json();
+        setScenes(prev => prev.map(s => s.id === sceneId ? { ...s, status: 'error' } : s));
+        setChatMessages(prev => [...prev, { role: 'iller_ang', content: `Generation issue: ${err.error || 'Service unavailable'}. The scene is saved — we can retry when ready.` }]);
+        return;
+      }
+
+      const data = await res.json();
+      setChatMessages(prev => [...prev, { role: 'iller_ang', content: `Scene "${scene.name}" is generating. Estimated cost: ${data.estimated_cost < 0.01 ? '<$0.01' : `$${data.estimated_cost.toFixed(2)}`}. I'll let you know when it's ready.` }]);
+
+      // Poll for completion
+      const pollInterval = setInterval(async () => {
+        try {
+          const statusRes = await fetch(`/api/broadcast/generate?id=${data.generation_id}&engine=${data.engine}`);
+          const statusData = await statusRes.json();
+
+          if (statusData.status === 'done') {
+            clearInterval(pollInterval);
+            setScenes(prev => prev.map(s => s.id === sceneId ? {
+              ...s,
+              status: 'ready',
+              videoUrl: statusData.video_url,
+              duration: 5,
+            } : s));
+            setChatMessages(prev => [...prev, { role: 'iller_ang', content: `"${scene.name}" is ready. Looking good — check the preview canvas.` }]);
+          } else if (statusData.status === 'failed') {
+            clearInterval(pollInterval);
+            setScenes(prev => prev.map(s => s.id === sceneId ? { ...s, status: 'error' } : s));
+            setChatMessages(prev => [...prev, { role: 'iller_ang', content: `"${scene.name}" failed to generate. Let me know if you want to retry with different specs.` }]);
+          }
+        } catch {
+          // Keep polling on network errors
+        }
+      }, 5000);
+
+      // Stop polling after 3 minutes
+      setTimeout(() => clearInterval(pollInterval), 180000);
+    } catch {
+      setScenes(prev => prev.map(s => s.id === sceneId ? { ...s, status: 'error' } : s));
+    }
+  }, [newSceneInput, scenes.length, chatMessages]);
 
   const handleChatSend = useCallback(async () => {
     if (!chatInput.trim()) return;
