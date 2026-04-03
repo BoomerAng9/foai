@@ -182,6 +182,76 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* Broad|Cast Studio */}
+      <section className="py-12 md:py-24 px-4 md:px-8 border-t border-border" style={{ background: '#0A0A0F' }}>
+        <div className="max-w-5xl mx-auto">
+          <div className="mb-12">
+            <p className="font-mono text-[11px] tracking-[0.2em] uppercase mb-3" style={{ color: '#D4A853' }}>New</p>
+            <h2 className="text-3xl font-light tracking-tight text-white">
+              <span className="font-extrabold" style={{ color: '#D4A853' }}>BROAD<span style={{ color: '#C0C0C0' }}>|</span>CAST</span> Studio
+            </h2>
+            <p className="text-white/60 text-sm mt-3 max-w-lg">
+              A full video production platform. Describe your vision — AI generates, edits, and publishes. Camera menu, timeline editor, Remotion compositing, 4K export.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {[
+              { label: 'AI GENERATION', desc: 'Describe a scene in plain English. Grammar converts to cinematic specs. Seedance 2.0 renders.' },
+              { label: 'VISUAL EDITING', desc: 'Multi-track timeline with transitions. Drag clips, add text overlays, export to 7+ social formats.' },
+              { label: 'SPORTS ANALYTICS', desc: 'Index game film, segment players, generate scouting reports and broadcast graphics.' },
+            ].map((item, i) => (
+              <div key={i} className="p-6 border" style={{ borderColor: 'rgba(255,255,255,0.08)', background: 'rgba(255,255,255,0.02)' }}>
+                <p className="font-mono text-[10px] font-bold tracking-wider mb-2" style={{ color: '#D4A853' }}>{item.label}</p>
+                <p className="text-sm leading-relaxed" style={{ color: 'rgba(255,255,255,0.6)' }}>{item.desc}</p>
+              </div>
+            ))}
+          </div>
+
+          <div className="mt-8">
+            <Link href="/broadcast" className="inline-flex items-center gap-2 px-6 py-3 text-xs font-bold tracking-wider" style={{ background: '#D4A853', color: '#0A0A0F' }}>
+              OPEN STUDIO <ArrowRight className="w-3 h-3" />
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Agent Workforce */}
+      <section className="py-12 md:py-24 px-4 md:px-8 border-t border-border">
+        <div className="max-w-5xl mx-auto">
+          <div className="mb-12">
+            <p className="label-mono mb-3">The workforce</p>
+            <h2 className="text-3xl font-light tracking-tight">
+              Your team. <span className="font-bold" style={{ color: '#E8A020' }}>Always on.</span>
+            </h2>
+            <p className="text-fg-secondary text-sm mt-3 max-w-lg">
+              Every task is handled by specialized agents. You see who&apos;s working, what they&apos;re doing, and when it&apos;s done.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            {[
+              { name: 'ACHEEVY', role: 'Digital CEO', color: '#E8A020' },
+              { name: 'Scout_Ang', role: 'Research & Intel', color: '#3B82F6' },
+              { name: 'Code_Ang', role: 'Engineering', color: '#F43F5E' },
+              { name: 'Iller_Ang', role: 'Creative Director', color: '#F97316' },
+              { name: 'Biz_Ang', role: 'Business Strategy', color: '#10B981' },
+              { name: 'Content_Ang', role: 'Content & Copy', color: '#8B5CF6' },
+              { name: 'LUC', role: 'Cost Analyst', color: '#84CC16' },
+              { name: 'Chicken Hawk', role: 'Tactical Ops', color: '#DC2626' },
+            ].map(agent => (
+              <div key={agent.name} className="flex items-center gap-3 p-4 border border-border hover:border-fg-ghost transition-colors">
+                <div className="w-3 h-3 rounded-full shrink-0" style={{ background: agent.color }} />
+                <div>
+                  <p className="font-mono text-[11px] font-bold tracking-wider">{agent.name}</p>
+                  <p className="text-[10px] text-fg-tertiary">{agent.role}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* Capabilities */}
       <section id="capabilities" className="py-12 md:py-24 px-4 md:px-8 border-t border-border bg-bg-surface">
         <div className="max-w-5xl mx-auto">
@@ -194,11 +264,13 @@ export default function LandingPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
             {[
-              { label: 'AGENT FLEET', value: '8 PMO offices, 24+ specialized agents routing your work' },
+              { label: 'AGENT FLEET', value: '15+ specialized agents across 8 departments routing your work' },
               { label: 'MEMORY', value: 'Semantic recall across all conversations. Nothing is forgotten' },
-              { label: 'COST TRACKING', value: 'Every token counted, every dollar tracked. Full transparency' },
-              { label: 'DEPLOYMENTS', value: 'From conversation to live Cloud Run URL. No devops required' },
-              { label: 'RESEARCH', value: 'Web scraping, data extraction, synthesis — automated' },
+              { label: 'VIDEO PRODUCTION', value: 'Broad|Cast Studio — generate, edit, composite, and publish video' },
+              { label: 'SPORTS ANALYTICS', value: 'Per|Form — scouting reports, draft analysis, podcast production' },
+              { label: 'MULTI-CHANNEL', value: 'Telegram, WhatsApp, Discord, Email — ACHEEVY meets you wherever you are' },
+              { label: 'COST TRACKING', value: 'Every token counted, every dollar tracked. LUC manages your budget' },
+              { label: 'DEPLOYMENTS', value: 'From conversation to live URL. No devops required' },
               { label: 'GOVERNANCE', value: 'MIM-governed context. IP protection. Human-in-the-loop gates' },
             ].map((cap, i) => (
               <div key={i} className="flex items-start gap-4 p-6 border border-border hover:border-fg-ghost transition-colors">
@@ -208,6 +280,32 @@ export default function LandingPage() {
                   <p className="text-fg-secondary text-sm leading-relaxed">{cap.value}</p>
                 </div>
               </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Demo Plugs */}
+      <section className="py-12 md:py-24 px-4 md:px-8 border-t border-border">
+        <div className="max-w-5xl mx-auto">
+          <div className="mb-12">
+            <p className="label-mono mb-3">Ready-to-deploy solutions</p>
+            <h2 className="text-3xl font-light tracking-tight">
+              Plug in. <span className="font-bold">Go live.</span>
+            </h2>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {[
+              { name: 'Teacher Twin', desc: 'Multilingual classroom assistant with grading, lesson plans, and student analytics.', href: '/plug/teacher', agent: 'Learn_Ang' },
+              { name: 'SMB Marketing', desc: 'Campaign planning, ad copy, content calendars, and performance analytics.', href: '/plug/smb-marketing', agent: 'Biz_Ang' },
+              { name: 'Finance Analyst', desc: 'Cash flow analysis, budget forecasting, pricing strategy, and financial modeling.', href: '/plug/finance', agent: 'LUC' },
+            ].map(plug => (
+              <Link key={plug.name} href={plug.href} className="p-6 border border-border hover:border-fg-ghost transition-colors group">
+                <p className="font-mono text-[10px] text-fg-ghost mb-1">{plug.agent}</p>
+                <p className="font-bold text-sm mb-2 group-hover:text-accent transition-colors">{plug.name}</p>
+                <p className="text-fg-secondary text-xs leading-relaxed">{plug.desc}</p>
+              </Link>
             ))}
           </div>
         </div>
