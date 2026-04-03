@@ -65,7 +65,7 @@ function CornerBracket({ position }: { position: 'tl' | 'tr' | 'bl' | 'br' }) {
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const { user, profile, organization, signOut } = useAuth();
-  const isOwnerUser = user?.email === 'bpo@achievemor.io' || user?.email === 'jarrett.risher@gmail.com';
+  const isOwnerUser = profile?.role === 'admin' || profile?.role === 'operator';
   const visibleNav = NAV.filter(item => !item.ownerOnly || isOwnerUser);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);

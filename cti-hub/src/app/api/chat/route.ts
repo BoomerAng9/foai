@@ -98,7 +98,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Detect task tier and route accordingly
-    const ACHEEVY_V1_URL = process.env.ACHEEVY_V1_URL || 'http://31.97.138.45:8000';
+    const ACHEEVY_V1_URL = process.env.ACHEEVY_V1_URL;
     const taskInfo = detectTaskTier(enrichedMessage);
     const isAutonomousTask = taskInfo.tier > 0;
 

@@ -21,7 +21,7 @@ const TelegramBot = require('node-telegram-bot-api');
 
 const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
 const OPENROUTER_KEY = process.env.OPENROUTER_API_KEY;
-const V1_URL = process.env.ACHEEVY_V1_URL;
+const V1_URL = process.env.ACHEEVY_V1_URL; // Must be set via env, no hardcoded fallback
 const V1_TOKEN = process.env.ACHEEVY_V1_TOKEN;
 const MODEL = process.env.ACHEEVY_MODEL || 'qwen/qwen3.6-plus-preview:free';
 

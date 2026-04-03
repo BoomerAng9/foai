@@ -10,10 +10,7 @@
  */
 
 // Owner emails — always allowed, no key needed
-const OWNER_EMAILS = [
-  'bpo@achievemor.io',
-  'jarrett.risher@gmail.com',
-];
+const OWNER_EMAILS = (process.env.OWNER_EMAILS || '').split(',').map(e => e.trim()).filter(Boolean);
 
 export function isOwner(email: string | null | undefined): boolean {
   if (!email) return false;
