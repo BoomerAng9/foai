@@ -140,7 +140,7 @@ export function AttachmentMenu({
       </button>
 
       {open && (
-        <div className="absolute bottom-full mb-2 left-0 flex gap-2 z-50">
+        <div className="fixed bottom-20 left-4 flex gap-2 z-50 max-h-[70vh] overflow-y-auto">
           <div className="w-[260px] bg-bg-surface border border-border shadow-lg py-1.5">
             {menuItems.map((item, i) => (
               <div key={i}>

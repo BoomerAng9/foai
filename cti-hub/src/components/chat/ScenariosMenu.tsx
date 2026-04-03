@@ -77,7 +77,7 @@ export function ScenariosMenu({ onSelect, onClose }: ScenariosMenuProps) {
   // Initial view — Specify / Auto toggle
   if (mode === null) {
     return (
-      <div className="w-[320px] bg-bg-surface border border-border shadow-lg p-4">
+      <div className="w-[300px] bg-bg-surface border border-border shadow-lg p-4">
         <div className="flex items-center justify-between mb-3">
           <span className="font-mono text-[10px] font-bold tracking-wider uppercase text-fg-secondary">Scenarios</span>
           <button onClick={onClose} className="text-fg-ghost hover:text-fg text-xs">x</button>

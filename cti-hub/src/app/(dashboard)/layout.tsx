@@ -21,6 +21,7 @@ import {
   Menu,
   X,
   Zap,
+  Info,
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { AuthPromptTimer } from '@/components/auth/AuthPromptTimer';
@@ -43,6 +44,7 @@ const NAV: NavItem[] = [
   { name: 'MARKETPLACE', href: '/open-seats', icon: Search, ownerOnly: true },
   { name: 'ENROLLMENTS', href: '/enrollments', icon: TrendingUp, ownerOnly: true },
   { name: 'SQUAD', href: '/team', icon: Shield, ownerOnly: true },
+  { name: 'ABOUT', href: '/about', icon: Info },
   { name: 'ACCOUNT', href: '/settings', icon: User },
   { name: 'BILLING', href: '/pricing', icon: CreditCard, ownerOnly: true },
 ];
