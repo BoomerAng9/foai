@@ -12,9 +12,9 @@
  * LUC routes to optimal model. User never sees model names.
  */
 
-const FAL_API_KEY = process.env.FAL_API_KEY;
+const FAL_API_KEY = process.env.FAL_API_KEY || process.env.FAL_KEY;
 const KIE_API_KEY = process.env.KIE_AI_API_KEY;
-const GOOGLE_KEY = process.env.GOOGLE_KEY;
+const GOOGLE_KEY = process.env.GOOGLE_KEY || process.env.GEMINI_API_KEY;
 const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY || process.env.OPENROUTER_KEY;
 const LUC_URL = process.env.LUC_URL || 'http://localhost:8081';
 
