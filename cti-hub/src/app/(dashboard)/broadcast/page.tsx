@@ -144,20 +144,68 @@ export default function BroadcastStudio() {
     setNewSceneInput('');
   }, [newSceneInput, scenes.length]);
 
-  const handleChatSend = useCallback(() => {
+  const handleChatSend = useCallback(async () => {
     if (!chatInput.trim()) return;
-    setChatMessages(prev => [...prev, { role: 'user', content: chatInput }]);
-    // Grammar always-on: every message is processed through the intention engine
     const userMsg = chatInput;
+    setChatMessages(prev => [...prev, { role: 'user', content: userMsg }]);
     setChatInput('');
-    // Simulate Iller_Ang response (will be wired to actual API)
-    setTimeout(() => {
-      setChatMessages(prev => [...prev, {
-        role: 'iller_ang',
-        content: `[Grammar Active] I'm interpreting your vision: "${userMsg}". Let me set up the cinematic specs — camera, lighting, movement. One moment...`,
-      }]);
-    }, 800);
-  }, [chatInput]);
+
+    // Add streaming placeholder
+    const streamId = `iller-${Date.now()}`;
+    setChatMessages(prev => [...prev, { role: 'iller_ang', content: '', id: streamId }]);
+
+    try {
+      const res = await fetch('/api/broadcast/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          message: userMsg,
+          history: chatMessages.slice(-10),
+        }),
+      });
+
+      if (!res.ok || !res.body) {
+        setChatMessages(prev => prev.map(m =>
+          (m as any).id === streamId ? { role: 'iller_ang', content: 'Connection issue. Try again.' } : m
+        ));
+        return;
+      }
+
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = '';
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n');
+        buffer = lines.pop() || '';
+
+        for (const line of lines) {
+          if (!line.startsWith('data: ')) continue;
+          try {
+            const data = JSON.parse(line.slice(6));
+            if (data.content) {
+              setChatMessages(prev => prev.map(m =>
+                (m as any).id === streamId ? { ...m, content: m.content + data.content } : m
+              ));
+              // Auto-scroll chat
+              chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+
+              // Parse camera specs from Iller_Ang's response for camera menu auto-populate
+              // (future: wire to camera selector state)
+            }
+            if (data.done) break;
+          } catch {}
+        }
+      }
+    } catch {
+      setChatMessages(prev => prev.map(m =>
+        (m as any).id === streamId ? { role: 'iller_ang', content: 'Connection error. Please try again.' } : m
+      ));
+    }
+  }, [chatInput, chatMessages]);
 
   return (
     <div className="flex flex-col h-full" style={{ background: BC.bg, color: BC.text }}>
