@@ -8,6 +8,10 @@ import {
   Layers, Sliders, Music, Sparkles, ListTodo, MessageSquare,
   Send, CornerDownLeft,
 } from 'lucide-react';
+import { CameraMenu, parseCameraSpec, CAMERA_DEFAULTS } from '@/components/broadcast/CameraMenu';
+import type { CameraSpec } from '@/components/broadcast/CameraMenu';
+import { Timeline } from '@/components/broadcast/Timeline';
+import type { TimelineClip } from '@/components/broadcast/Timeline';
 
 // Broad|Cast brand colors
 const BC = {
@@ -90,35 +94,6 @@ function Timecode({ time = '00:00:00:00' }: { time?: string }) {
   );
 }
 
-function TimelineTrack({ label, color, clips }: { label: string; color: string; clips: Scene[] }) {
-  return (
-    <div className="flex items-stretch h-10" style={{ borderBottom: `1px solid ${BC.border}` }}>
-      <div className="w-12 shrink-0 flex items-center justify-center" style={{ borderRight: `1px solid ${BC.border}` }}>
-        <span className="text-[9px] font-mono font-bold tracking-wider" style={{ color: BC.textGhost }}>{label}</span>
-      </div>
-      <div className="flex-1 relative flex items-center gap-0.5 px-1">
-        {clips.filter(c => c.status === 'ready').map((clip, i) => (
-          <div
-            key={clip.id}
-            className="h-7 px-2 flex items-center gap-1 cursor-pointer hover:brightness-110 transition-all"
-            style={{
-              background: color,
-              minWidth: clip.duration ? `${Math.max(clip.duration * 8, 60)}px` : '80px',
-            }}
-          >
-            <Film className="w-2.5 h-2.5" style={{ color: 'rgba(0,0,0,0.5)' }} />
-            <span className="text-[8px] font-mono font-medium truncate" style={{ color: 'rgba(0,0,0,0.7)' }}>
-              {clip.name || `Scene ${i + 1}`}
-            </span>
-          </div>
-        ))}
-        {clips.length === 0 && (
-          <span className="text-[9px] font-mono" style={{ color: BC.textGhost }}>Empty track — add scenes to populate</span>
-        )}
-      </div>
-    </div>
-  );
-}
 
 export default function BroadcastStudio() {
   const [scenes, setScenes] = useState<Scene[]>([]);
@@ -130,6 +105,10 @@ export default function BroadcastStudio() {
   ]);
   const [newSceneInput, setNewSceneInput] = useState('');
   const [resolution, setResolution] = useState('4K UHD');
+  const [cameraSpec, setCameraSpec] = useState<CameraSpec>(CAMERA_DEFAULTS);
+  const [timelineClips, setTimelineClips] = useState<TimelineClip[]>([]);
+  const [selectedClipId, setSelectedClipId] = useState<string | null>(null);
+  const [playheadTime, setPlayheadTime] = useState(0);
   const chatEndRef = useRef<HTMLDivElement>(null);
 
   const addScene = useCallback(async () => {
@@ -149,12 +128,15 @@ export default function BroadcastStudio() {
     setScenes(prev => prev.map(s => s.id === sceneId ? { ...s, status: 'generating' } : s));
 
     try {
+      const dur = parseInt(cameraSpec.duration) || 5;
       const res = await fetch('/api/broadcast/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          description: scene.description,
-          duration: 5,
+          description: `${scene.description}. Camera: ${cameraSpec.movement}. Lens: ${cameraSpec.lens}, ${cameraSpec.aperture}. Film profile: ${cameraSpec.profile}. Lighting: ${cameraSpec.lighting}. Aspect: ${cameraSpec.aspect}.`,
+          camera: cameraSpec.movement.toLowerCase().replace(/\s+/g, '_'),
+          mood: cameraSpec.lighting.toLowerCase(),
+          duration: dur,
           engine: 'seedance',
         }),
       });
@@ -177,13 +159,28 @@ export default function BroadcastStudio() {
 
           if (statusData.status === 'done') {
             clearInterval(pollInterval);
+            const clipDuration = dur;
             setScenes(prev => prev.map(s => s.id === sceneId ? {
               ...s,
               status: 'ready',
               videoUrl: statusData.video_url,
-              duration: 5,
+              duration: clipDuration,
             } : s));
-            setChatMessages(prev => [...prev, { role: 'iller_ang', content: `"${scene.name}" is ready. Looking good — check the preview canvas.` }]);
+            // Auto-add to timeline V1 track
+            setTimelineClips(prev => {
+              const existingEnd = prev.filter(c => c.trackId === 'V1').reduce((max, c) => Math.max(max, c.startTime + c.duration), 0);
+              return [...prev, {
+                id: `clip-${sceneId}`,
+                trackId: 'V1',
+                name: scene.name,
+                startTime: existingEnd,
+                duration: clipDuration,
+                videoUrl: statusData.video_url,
+                type: 'video' as const,
+                color: 'rgba(212,168,83,0.5)',
+              }];
+            });
+            setChatMessages(prev => [...prev, { role: 'iller_ang', content: `"${scene.name}" is ready and on the timeline. Looking good — check the preview canvas.` }]);
           } else if (statusData.status === 'failed') {
             clearInterval(pollInterval);
             setScenes(prev => prev.map(s => s.id === sceneId ? { ...s, status: 'error' } : s));
@@ -250,8 +247,17 @@ export default function BroadcastStudio() {
               // Auto-scroll chat
               chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
 
-              // Parse camera specs from Iller_Ang's response for camera menu auto-populate
-              // (future: wire to camera selector state)
+              // Parse camera specs from Iller_Ang's response — auto-populate camera menu
+              setChatMessages(prev => {
+                const currentMsg = prev.find(m => (m as any).id === streamId);
+                if (currentMsg) {
+                  const parsed = parseCameraSpec(currentMsg.content + data.content);
+                  if (parsed) {
+                    setCameraSpec(prev => ({ ...prev, ...parsed }));
+                  }
+                }
+                return prev;
+              });
             }
             if (data.done) break;
           } catch {}
@@ -410,48 +416,7 @@ export default function BroadcastStudio() {
           </CollapsibleSection>
 
           <CollapsibleSection title="Camera" icon={Camera}>
-            <div className="space-y-2">
-              <div>
-                <span className="text-[8px] font-mono uppercase tracking-wider" style={{ color: BC.textGhost }}>Lens</span>
-                <div className="flex flex-wrap gap-1 mt-1">
-                  {['24mm', '35mm', '50mm', '85mm', '135mm'].map(lens => (
-                    <button key={lens} className="px-2 py-1 text-[9px] font-mono hover:bg-white/[0.08] transition-colors" style={{ border: `1px solid ${BC.border}`, color: BC.textSec }}>
-                      {lens}
-                    </button>
-                  ))}
-                </div>
-              </div>
-              <div>
-                <span className="text-[8px] font-mono uppercase tracking-wider" style={{ color: BC.textGhost }}>Aperture</span>
-                <div className="flex flex-wrap gap-1 mt-1">
-                  {['f/1.4', 'f/2.0', 'f/2.8', 'f/4', 'f/8'].map(ap => (
-                    <button key={ap} className="px-2 py-1 text-[9px] font-mono hover:bg-white/[0.08] transition-colors" style={{ border: `1px solid ${BC.border}`, color: BC.textSec }}>
-                      {ap}
-                    </button>
-                  ))}
-                </div>
-              </div>
-              <div>
-                <span className="text-[8px] font-mono uppercase tracking-wider" style={{ color: BC.textGhost }}>Movement</span>
-                <div className="flex flex-wrap gap-1 mt-1">
-                  {['Static', 'Pan', 'Tilt', 'Dolly', 'Tracking', 'Crane', 'Handheld'].map(mv => (
-                    <button key={mv} className="px-1.5 py-1 text-[8px] font-mono hover:bg-white/[0.08] transition-colors" style={{ border: `1px solid ${BC.border}`, color: BC.textSec }}>
-                      {mv}
-                    </button>
-                  ))}
-                </div>
-              </div>
-              <div>
-                <span className="text-[8px] font-mono uppercase tracking-wider" style={{ color: BC.textGhost }}>Film Profile</span>
-                <div className="flex flex-wrap gap-1 mt-1">
-                  {['ARRI', 'RED', 'Sony', '16mm', 'VHS'].map(prof => (
-                    <button key={prof} className="px-2 py-1 text-[9px] font-mono hover:bg-white/[0.08] transition-colors" style={{ border: `1px solid ${BC.border}`, color: BC.textSec }}>
-                      {prof}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </div>
+            <CameraMenu spec={cameraSpec} onChange={setCameraSpec} />
           </CollapsibleSection>
         </div>
 
@@ -489,19 +454,25 @@ export default function BroadcastStudio() {
           </div>
 
           {/* Timeline */}
-          <div className="h-44 shrink-0 overflow-y-auto" style={{ background: BC.bg }}>
-            {/* Playhead ruler */}
-            <div className="h-5 flex items-end px-12" style={{ borderBottom: `1px solid ${BC.border}` }}>
-              {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(sec => (
-                <div key={sec} className="flex-1 text-right pr-1">
-                  <span className="text-[7px] font-mono" style={{ color: BC.textGhost }}>{sec}s</span>
-                </div>
-              ))}
-            </div>
-            <TimelineTrack label="V1" color="rgba(212,168,83,0.4)" clips={scenes} />
-            <TimelineTrack label="V2" color="rgba(139,92,246,0.3)" clips={[]} />
-            <TimelineTrack label="A1" color="rgba(34,197,94,0.3)" clips={[]} />
-            <TimelineTrack label="A2" color="rgba(59,130,246,0.3)" clips={[]} />
+          <div className="h-44 shrink-0">
+            <Timeline
+              clips={timelineClips}
+              onClipSelect={(id) => {
+                setSelectedClipId(id);
+                const clip = timelineClips.find(c => c.id === id);
+                if (clip) {
+                  const sceneId = clip.id.replace('clip-', '');
+                  setSelectedScene(sceneId);
+                }
+              }}
+              onClipMove={(id, newStart) => {
+                setTimelineClips(prev => prev.map(c => c.id === id ? { ...c, startTime: newStart } : c));
+              }}
+              selectedClipId={selectedClipId}
+              playheadTime={playheadTime}
+              onPlayheadChange={setPlayheadTime}
+              totalDuration={Math.max(30, timelineClips.reduce((max, c) => Math.max(max, c.startTime + c.duration), 0) + 10)}
+            />
           </div>
         </div>
 
