@@ -285,9 +285,13 @@ export default function BroadcastStudio() {
           <CollapsibleSection title="AI Assistants" icon={Bot}>
             <div className="space-y-1">
               {[
-                { name: 'Iller_Ang', role: 'Creative Director', color: BC.amber, active: true },
+                { name: 'Iller_Ang', role: 'Head of Studio', color: BC.amber, active: true },
                 { name: 'ACHEEVY', role: 'Digital CEO', color: BC.gold, active: true },
-                { name: 'Chicken Hawk', role: 'Tactical Ops', color: '#DC2626', active: false },
+                { name: 'Beat_Ang', role: 'Audio & Music', color: '#A855F7', active: true },
+                { name: 'CUT_Ang', role: 'Video Editing', color: '#EC4899', active: true },
+                { name: 'Social_Ang', role: 'Social Distribution', color: '#14B8A6', active: false },
+                { name: 'Publish_Ang', role: 'Publishing & CDN', color: '#6366F1', active: false },
+                { name: 'PROMO_Ang', role: 'Marketing & Promo', color: '#F59E0B', active: false },
               ].map(agent => (
                 <div key={agent.name} className="flex items-center gap-2 px-2 py-1.5" style={{ opacity: agent.active ? 1 : 0.5 }}>
                   <div className="w-2 h-2 rounded-full" style={{ background: agent.color }} />

@@ -65,6 +65,12 @@ export const AGENT_ROSTER = {
   learn_ang: { name: 'Learn_Ang', role: 'Training & Education', color: '#06B6D4' },
   luc: { name: 'LUC', role: 'Cost Analyst', color: '#84CC16' },
   chicken_hawk: { name: 'Chicken Hawk', role: 'Tactical Ops', color: '#DC2626' },
+  // Broad|Cast Studio specialists
+  beat_ang: { name: 'Beat_Ang', role: 'Audio & Music', color: '#A855F7' },
+  cut_ang: { name: 'CUT_Ang', role: 'Video Editing', color: '#EC4899' },
+  social_ang: { name: 'Social_Ang', role: 'Social Distribution', color: '#14B8A6' },
+  publish_ang: { name: 'Publish_Ang', role: 'Publishing & CDN', color: '#6366F1' },
+  promo_ang: { name: 'PROMO_Ang', role: 'Marketing & Promo', color: '#F59E0B' },
 } as const;
 
 export interface ModelOption {
