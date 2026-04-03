@@ -85,7 +85,7 @@ export default function FinancePage() {
       {/* Header */}
       <header className="border-b border-white/10 px-6 py-4">
         <div className="max-w-7xl mx-auto flex items-center gap-4">
-          <Link href="/deploy-landing" className="text-white/40 hover:text-[#E8A020] transition-colors">
+          <Link href="/chat" className="text-white/40 hover:text-[#E8A020] transition-colors">
             <ArrowLeft className="w-5 h-5" />
           </Link>
           <Wallet className="w-6 h-6 text-[#E8A020]" />

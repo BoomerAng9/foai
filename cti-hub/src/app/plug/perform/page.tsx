@@ -268,17 +268,23 @@ export default function PerFormPage() {
       {/* Header */}
       <nav className="h-14 flex items-center justify-between px-4 sm:px-6 border-b border-white/10">
         <div className="flex items-center gap-3">
-          <Link href="/deploy-landing" className="p-1.5 hover:bg-white/5 rounded-lg transition-colors">
+          <Link href="/chat" className="p-1.5 hover:bg-white/5 transition-colors" title="Home">
+            <svg className="w-4 h-4 text-white/40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg>
+          </Link>
+          <Link href="/plug-bin" className="p-1.5 hover:bg-white/5 transition-colors" title="Back to Plugs">
             <ArrowLeft className="w-4 h-4 text-white/40" />
           </Link>
-          <div>
+          <div className="border-l border-white/10 pl-3">
             <span className="font-mono text-xs font-bold tracking-wider text-[#E8A020]">PER|FORM</span>
-            <span className="font-mono text-[9px] text-white/30 ml-2">2026 NFL MOCK DRAFT</span>
+            <span className="font-mono text-[9px] text-white/30 ml-2">2026 NFL DRAFT</span>
           </div>
         </div>
-        <div className="flex items-center gap-2">
-          <span className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse" />
-          <span className="font-mono text-[9px] text-white/40">LIVE · AI ANALYSTS ACTIVE</span>
+        <div className="flex items-center gap-3">
+          <Link href="/broadcast" className="font-mono text-[9px] text-white/30 hover:text-[#D4A853] transition-colors">BROAD|CAST</Link>
+          <div className="flex items-center gap-1.5">
+            <span className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse" />
+            <span className="font-mono text-[9px] text-white/40">LIVE</span>
+          </div>
         </div>
       </nav>
 

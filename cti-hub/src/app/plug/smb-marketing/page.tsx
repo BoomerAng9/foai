@@ -256,7 +256,7 @@ export default function SMBMarketingPage() {
     <div className="min-h-screen bg-[#0A0A0A] text-white">
       <header className="border-b border-white/10 px-6 py-4">
         <div className="max-w-7xl mx-auto flex items-center gap-4">
-          <Link href="/deploy-landing" className="text-white/40 hover:text-[#E8A020] transition-colors">
+          <Link href="/chat" className="text-white/40 hover:text-[#E8A020] transition-colors">
             <ArrowLeft className="w-5 h-5" />
           </Link>
           <Zap className="w-5 h-5 text-[#E8A020]" />
