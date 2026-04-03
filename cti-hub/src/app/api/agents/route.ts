@@ -5,11 +5,18 @@ import { AGENTS, DEPARTMENTS, getAgentsForTier, getDepartmentsForRole } from '@/
 import { getBudget } from '@/lib/budget';
 
 export async function GET(request: NextRequest) {
-  const auth = await requireAuth(request);
-  if (!auth.ok) return auth.response;
+  let isOwner = false;
+  let userTier = 'starter';
 
-  const isOwner = auth.role === 'owner';
-  const userTier = isOwner ? 'enterprise' : 'starter'; // TODO: get from profile
+  try {
+    const auth = await requireAuth(request);
+    if (auth.ok) {
+      isOwner = auth.role === 'owner';
+      userTier = isOwner ? 'enterprise' : 'starter';
+    }
+  } catch {
+    // Auth failed — show public agent view
+  }
 
   const departments = getDepartmentsForRole(isOwner);
   const agents = isOwner ? AGENTS : getAgentsForTier(userTier as 'starter' | 'growth' | 'enterprise');
