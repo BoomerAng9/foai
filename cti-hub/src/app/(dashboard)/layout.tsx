@@ -38,6 +38,7 @@ const NAV: NavItem[] = [
   { name: 'DEPLOY', href: '/deploy-agent', icon: Zap },
   { name: 'WORKFLOWS', href: '/projects', icon: FolderOpen },
   { name: 'EXECUTIONS', href: '/live', icon: Activity, ownerOnly: true },
+  { name: 'BROAD|CAST', href: '/broadcast', icon: Video },
   { name: 'PLUG BIN', href: '/plug-bin', icon: Video, ownerOnly: true },
   { name: 'MARKETPLACE', href: '/open-seats', icon: Search, ownerOnly: true },
   { name: 'ENROLLMENTS', href: '/enrollments', icon: TrendingUp, ownerOnly: true },
@@ -229,8 +230,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </header>
 
         {/* Content */}
-        <div className={`flex-1 overflow-auto relative ${pathname === '/chat' ? '' : 'p-3 sm:p-4 md:p-6'}`}>
-          {pathname !== '/chat' && (
+        <div className={`flex-1 overflow-auto relative ${(pathname === '/chat' || pathname.startsWith('/broadcast')) ? '' : 'p-3 sm:p-4 md:p-6'}`}>
+          {pathname !== '/chat' && !pathname.startsWith('/broadcast') && (
             <>
               <CornerBracket position="tl" />
               <CornerBracket position="tr" />
@@ -238,7 +239,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               <CornerBracket position="br" />
             </>
           )}
-          <div className={pathname === '/chat' ? 'h-full' : 'animate-materialize'}>
+          <div className={(pathname === '/chat' || pathname.startsWith('/broadcast')) ? 'h-full' : 'animate-materialize'}>
             {children}
           </div>
         </div>
