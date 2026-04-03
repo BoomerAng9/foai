@@ -52,8 +52,12 @@ const BOARD_2026 = [
 
 export async function POST(req: NextRequest) {
   try {
-    const auth = await requireAuth(req);
-    if (!auth.ok) return auth.response;
+    // Allow internal seeding via secret header (for VPS-to-VPS calls)
+    const internalKey = req.headers.get('x-internal-key');
+    if (internalKey !== process.env.OPENROUTER_API_KEY?.slice(-10)) {
+      const auth = await requireAuth(req);
+      if (!auth.ok) return auth.response;
+    }
     if (!sql) return NextResponse.json({ error: 'Database not configured' }, { status: 503 });
 
     // Ensure table exists
