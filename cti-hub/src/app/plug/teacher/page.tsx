@@ -162,28 +162,25 @@ function StatusBadge({ status }: { status: string }) {
 
 // ─── Page Component ──────────────────────────────────────────────────────────
 
+// Transliteration helper — adds romanized pronunciation for non-Latin scripts
+function transliterate(text: string, lang: string): string | null {
+  if (lang === 'english') return null;
+  // Basic transliteration hints for common Arabic/Russian (full system would use a transliteration API)
+  // In production, Learn_Ang handles this in its system prompt
+  return null; // Let the LLM handle transliteration in responses
+}
+
 export default function TeacherDigitalTwinPage() {
   const [activeTab, setActiveTab] = useState<'english' | 'arabic' | 'russian'>('english');
-  const [chatInput, setChatInput] = useState('');
-  const [messages, setMessages] = useState(CLASSROOMS.english.twinMessages);
+  const [showTransliteration, setShowTransliteration] = useState(true);
+  const [teacherName] = useState('Ms. Thompson'); // Would come from registration
+  const [parentMode] = useState(false); // URL param ?parent=true for parent view
 
   const classroom = CLASSROOMS[activeTab];
   const maxScore = 100;
 
   function switchTab(tab: 'english' | 'arabic' | 'russian') {
     setActiveTab(tab);
-    setMessages(CLASSROOMS[tab].twinMessages);
-    setChatInput('');
-  }
-
-  function handleSend() {
-    if (!chatInput.trim()) return;
-    setMessages((prev) => [
-      ...prev,
-      { role: 'user', text: chatInput },
-      { role: 'twin', text: `[${classroom.language} Twin] Processing your request...` },
-    ]);
-    setChatInput('');
   }
 
   return (
@@ -196,9 +193,24 @@ export default function TeacherDigitalTwinPage() {
           </Link>
           <GraduationCap className="w-6 h-6 text-[#E8A020]" />
           <div>
-            <h1 className="text-xl font-bold tracking-tight">Teacher&apos;s Digital Twin</h1>
-            <p className="text-xs text-white/40 font-mono">Multilingual Classroom LMS</p>
+            <h1 className="text-xl font-bold tracking-tight">{teacherName}&apos;s Classroom</h1>
+            <p className="text-xs text-white/40 font-mono">
+              {parentMode ? 'Parent View — Read Only' : 'Multilingual Classroom Assistant'}
+            </p>
           </div>
+          {/* Transliteration toggle */}
+          {activeTab !== 'english' && (
+            <button
+              onClick={() => setShowTransliteration(!showTransliteration)}
+              className={`ml-auto px-3 py-1 font-mono text-[10px] border transition-colors ${
+                showTransliteration
+                  ? 'border-[#E8A020]/50 text-[#E8A020] bg-[#E8A020]/10'
+                  : 'border-white/10 text-white/40'
+              }`}
+            >
+              {showTransliteration ? 'TRANSLITERATION ON' : 'TRANSLITERATION OFF'}
+            </button>
+          )}
         </div>
       </header>
 
@@ -302,20 +314,60 @@ export default function TeacherDigitalTwinPage() {
           <div className="h-96">
             <PlugChat
               agentName="Learn_Ang"
-              agentRole={`${classroom.language} Digital Twin`}
+              agentRole={`${teacherName}'s ${classroom.language} Assistant`}
               agentColor="#E8A020"
-              systemPrompt={`You are Learn_Ang, a multilingual teaching assistant on The Deploy Platform. You are the Digital Twin for a ${classroom.language} language teacher.\n\nYOU ARE:\n- An expert ${classroom.language} language educator\n- Familiar with the classroom: ${classroom.studentCount} students, current lesson: "${classroom.currentLesson}"\n- You can create lesson plans, grade assignments, generate quizzes, track student progress\n- You respond in ${classroom.language} when appropriate, with English translations\n\nKEEP RESPONSES CONCISE. Use bullet points. Be warm and supportive.`}
-              placeholder={`Message your ${classroom.language} twin...`}
+              systemPrompt={`You are Learn_Ang, ${teacherName}'s teaching assistant for the ${classroom.language} classroom on The Deploy Platform.\n\nYOU ARE:\n- An expert ${classroom.language} language educator working directly for ${teacherName}\n- Familiar with the classroom: ${classroom.studentCount} students, current lesson: "${classroom.currentLesson}"\n- You can create lesson plans, grade assignments, generate quizzes, track student progress\n- Address the teacher by name (${teacherName})\n\n${activeTab !== 'english' && showTransliteration ? `TRANSLITERATION RULE (CRITICAL): When you write in ${classroom.language}, ALWAYS include transliteration (romanized pronunciation) on the next line in italics. Example:\nصباح الخير\n*Sabah al-khayr (Good morning)*\n\nThis helps teachers and parents who are learning the language follow along. NEVER skip transliteration unless the teacher turns it off.` : activeTab !== 'english' ? `Write in ${classroom.language} without transliteration (teacher has turned it off).` : `Respond in English.`}\n\nKEEP RESPONSES CONCISE. Use bullet points. Be warm and supportive. Never use the phrase "Digital Twin" — you are ${teacherName}'s assistant.`}
+              placeholder={`Message ${teacherName}'s ${classroom.language} assistant...`}
               welcomeMessage={classroom.twinGreeting}
             />
           </div>
         </div>
       </main>
 
+      {/* Parent Portal & Registration Section */}
+      <section className="max-w-7xl mx-auto px-6 py-8">
+        <div className="border border-white/10 rounded-lg p-6">
+          <div className="flex items-center gap-2 mb-4">
+            <Users className="w-5 h-5 text-[#E8A020]" />
+            <h3 className="text-lg font-bold">Parent Portal</h3>
+          </div>
+          <p className="text-sm text-white/50 mb-6 max-w-2xl">
+            Parents get a read-only live view of their child&apos;s progress — grades, assignments, attendance, and teacher communications. All activity is real-time.
+          </p>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+            <div className="p-4 bg-white/[0.02] border border-white/10">
+              <p className="font-mono text-[10px] text-[#E8A020] font-bold tracking-wider mb-2">STEP 1</p>
+              <p className="text-sm font-semibold mb-1">Teacher Invites Student</p>
+              <p className="text-xs text-white/40">Teacher enters student name + parent email. System creates student portal account.</p>
+            </div>
+            <div className="p-4 bg-white/[0.02] border border-white/10">
+              <p className="font-mono text-[10px] text-[#E8A020] font-bold tracking-wider mb-2">STEP 2</p>
+              <p className="text-sm font-semibold mb-1">Parent Approves</p>
+              <p className="text-xs text-white/40">Email sent to parent with approval link. Parent reviews the educational extension and approves or declines.</p>
+            </div>
+            <div className="p-4 bg-white/[0.02] border border-white/10">
+              <p className="font-mono text-[10px] text-[#E8A020] font-bold tracking-wider mb-2">STEP 3</p>
+              <p className="text-sm font-semibold mb-1">Live Look-In</p>
+              <p className="text-xs text-white/40">Parent gets read-only dashboard: grades, assignments, quiz trends, teacher notes. Updated in real-time.</p>
+            </div>
+          </div>
+
+          <div className="flex gap-3">
+            <button className="px-4 py-2 text-xs font-mono font-bold tracking-wider bg-[#E8A020] text-black hover:bg-[#E8A020]/80 transition-colors">
+              INVITE STUDENTS
+            </button>
+            <button className="px-4 py-2 text-xs font-mono font-bold tracking-wider border border-white/20 text-white/60 hover:text-white hover:border-white/40 transition-colors">
+              MANAGE PARENT ACCESS
+            </button>
+          </div>
+        </div>
+      </section>
+
       {/* Footer */}
       <footer className="border-t border-white/10 px-6 py-4 mt-8">
         <p className="text-center text-xs text-white/30 font-mono">
-          Powered by Tutor_Ang &middot; Edu_Ang &middot; ACHEEVY
+          Powered by Learn_Ang &middot; ACHEEVY &middot; The Deploy Platform
         </p>
       </footer>
     </div>
