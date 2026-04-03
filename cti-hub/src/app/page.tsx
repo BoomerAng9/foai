@@ -197,7 +197,7 @@ export default function LandingPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {[
-              { label: 'AI GENERATION', desc: 'Describe a scene in plain English. Grammar converts to cinematic specs. Seedance 2.0 renders.' },
+              { label: 'AI GENERATION', desc: 'Describe a scene in plain English. Grammar converts to cinematic specs. The engine renders.' },
               { label: 'VISUAL EDITING', desc: 'Multi-track timeline with transitions. Drag clips, add text overlays, export to 7+ social formats.' },
               { label: 'SPORTS ANALYTICS', desc: 'Index game film, segment players, generate scouting reports and broadcast graphics.' },
             ].map((item, i) => (

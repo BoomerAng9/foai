@@ -29,7 +29,7 @@ export const Scene4ImageGen: React.FC = () => {
   const routingDots = frame >= 150 ? '.'.repeat(Math.floor(((frame - 150) % 60) / 20) + 1) : '';
 
   // Frame 300-450: Model selector fans out
-  const models = ['GPT-Image-1', 'Gemini-Imagen', 'Flux Pro'];
+  const models = ['Precision', 'Vivid', 'Creative'];
   const modelStart = 300;
 
   // Frame 450-600: Selection + spinner
