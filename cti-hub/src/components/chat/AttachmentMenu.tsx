@@ -2,12 +2,14 @@
 
 import { useState, useRef, useEffect } from 'react';
 import {
-  Paperclip, Camera, Cloud, ArrowDownToLine, Github, BookOpen, Search, ChevronRight, Check, Languages,
+  Paperclip, Camera, Cloud, ArrowDownToLine, Github, BookOpen, Search, ChevronRight, Check, Languages, Sparkles,
 } from 'lucide-react';
 import type { TierId } from '@/lib/chat/types';
 import { TIERS } from '@/lib/chat/types';
 import { DeepResearchMenu } from './DeepResearchMenu';
 import { SkillsMenu } from './SkillsMenu';
+import { ScenariosMenu } from './ScenariosMenu';
+import type { ScenarioSelection } from './ScenariosMenu';
 import type { Skill } from '@/lib/skills/registry';
 
 interface AttachmentMenuProps {
@@ -47,6 +49,7 @@ export function AttachmentMenu({
   const [open, setOpen] = useState(false);
   const [showResearch, setShowResearch] = useState(false);
   const [showSkills, setShowSkills] = useState(false);
+  const [showScenarios, setShowScenarios] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -116,6 +119,13 @@ export function AttachmentMenu({
       label: 'Deep Research',
       hasSubmenu: true,
       onClick: () => setShowResearch(!showResearch),
+      dividerAfter: true,
+    },
+    {
+      icon: <Sparkles className="w-4 h-4 text-accent" />,
+      label: 'Scenarios',
+      hasSubmenu: true,
+      onClick: () => { setShowScenarios(!showScenarios); setShowResearch(false); setShowSkills(false); },
     },
   ];
 
@@ -193,6 +203,32 @@ export function AttachmentMenu({
                 setShowSkills(false);
               }}
               activeSkillId={activeSkillId}
+            />
+          )}
+          {showScenarios && (
+            <ScenariosMenu
+              onSelect={(selection) => {
+                // Pass scenario context to the chat input
+                const context = selection.mode === 'auto'
+                  ? '[SCENARIO: AUTO]'
+                  : `[SCENARIO: SPECIFY] Categories: ${selection.categories.join(', ')}${selection.subOptions.length > 0 ? ` | Options: ${selection.subOptions.join(', ')}` : ''}`;
+                // Inject into skill context via onSkillSelect
+                onSkillSelect({
+                  id: 'scenario',
+                  alias: selection.mode === 'auto' ? 'AUTO' : `SPECIFY: ${selection.categories.join(', ')}`,
+                  name: 'Scenario',
+                  description: context,
+                  whenToAsk: 'When user wants structured task building',
+                  triggers: ['scenario', 'specify', 'auto'],
+                  givesYou: 'Structured scenario with confirmation flow',
+                  category: 'special',
+                  systemContext: `The user activated Scenarios mode (${selection.mode}). ${selection.categories.length > 0 ? `They selected: ${selection.categories.join(', ')}. ` : ''}${selection.subOptions.length > 0 ? `Sub-options: ${selection.subOptions.join(', ')}. ` : ''}Process their next message through Grammar as a filter, then present the structured interpretation for confirmation before executing. Present as: "Hey — here's what I'm understanding you need:" followed by bullet points, then ask: "Is this what you were looking for?" with [Yes] [No] [Adjust] options.`,
+                  example: '',
+                });
+                setOpen(false);
+                setShowScenarios(false);
+              }}
+              onClose={() => setShowScenarios(false)}
             />
           )}
         </div>
