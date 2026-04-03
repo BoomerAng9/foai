@@ -102,8 +102,8 @@ export default function BroadcastStudio() {
   const [playing, setPlaying] = useState(false);
   const [selectedScene, setSelectedScene] = useState<string | null>(null);
   const [chatInput, setChatInput] = useState('');
-  const [chatMessages, setChatMessages] = useState<{ role: string; content: string }[]>([
-    { role: 'system', content: 'Iller_Ang is ready. Describe your vision — Grammar will handle the technical specs.' },
+  const [chatMessages, setChatMessages] = useState<{ role: string; content: string; id?: string }[]>([
+    { role: 'system', content: 'Iller_Ang is ready. Describe your vision and I\'ll set up the cinematic specs.' },
   ]);
   const [newSceneInput, setNewSceneInput] = useState('');
   const [resolution, setResolution] = useState('4K UHD');
@@ -226,7 +226,7 @@ export default function BroadcastStudio() {
 
       if (!res.ok || !res.body) {
         setChatMessages(prev => prev.map(m =>
-          (m as any).id === streamId ? { role: 'iller_ang', content: 'Connection issue. Try again.' } : m
+          m.id === streamId ? { role: 'iller_ang', content: 'Connection issue. Try again.' } : m
         ));
         return;
       }
@@ -248,14 +248,14 @@ export default function BroadcastStudio() {
             const data = JSON.parse(line.slice(6));
             if (data.content) {
               setChatMessages(prev => prev.map(m =>
-                (m as any).id === streamId ? { ...m, content: m.content + data.content } : m
+                m.id === streamId ? { ...m, content: m.content + data.content } : m
               ));
               // Auto-scroll chat
               chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
 
               // Parse camera specs from Iller_Ang's response — auto-populate camera menu
               setChatMessages(prev => {
-                const currentMsg = prev.find(m => (m as any).id === streamId);
+                const currentMsg = prev.find(m => m.id === streamId);
                 if (currentMsg) {
                   const parsed = parseCameraSpec(currentMsg.content + data.content);
                   if (parsed) {
@@ -271,7 +271,7 @@ export default function BroadcastStudio() {
       }
     } catch {
       setChatMessages(prev => prev.map(m =>
-        (m as any).id === streamId ? { role: 'iller_ang', content: 'Connection error. Please try again.' } : m
+        m.id === streamId ? { role: 'iller_ang', content: 'Connection error. Please try again.' } : m
       ));
     }
   }, [chatInput, chatMessages]);
@@ -285,17 +285,19 @@ export default function BroadcastStudio() {
         </button>
 
         <div className="flex items-center gap-3">
-          {/* Logo mark */}
-          <svg width="24" height="24" viewBox="0 0 100 100" fill="none">
-            <line x1="20" y1="80" x2="80" y2="20" stroke={BC.silver} strokeWidth="12" strokeLinecap="round" />
-            <line x1="20" y1="20" x2="80" y2="80" stroke={BC.silver} strokeWidth="12" strokeLinecap="round" />
-            <circle cx="15" cy="50" r="6" fill={BC.silver} />
+          {/* Logo mark — Broad|Cast X */}
+          <svg width="28" height="28" viewBox="0 0 100 100" fill="none">
+            {/* Two crossing strokes with rounded caps */}
+            <line x1="15" y1="85" x2="85" y2="15" stroke={BC.silver} strokeWidth="14" strokeLinecap="round" />
+            <line x1="15" y1="15" x2="85" y2="85" stroke={BC.silver} strokeWidth="14" strokeLinecap="round" />
+            {/* Dot accent */}
+            <circle cx="12" cy="50" r="7" fill={BC.silver} />
           </svg>
           <div className="flex flex-col items-center">
-            <span className="text-[13px] font-extrabold tracking-[0.25em]" style={{ color: BC.gold, fontFamily: 'Outfit, sans-serif' }}>
-              BROAD<span style={{ color: BC.silver }}>|</span>CAST
+            <span className="text-[15px] tracking-[0.2em]" style={{ color: BC.gold, fontFamily: "'Outfit', sans-serif", fontWeight: 800 }}>
+              BROAD<span style={{ color: BC.silver, opacity: 0.6 }}>|</span>CAST
             </span>
-            <span className="text-[7px] tracking-[0.3em] uppercase" style={{ color: BC.textGhost, fontFamily: 'Inter, sans-serif' }}>
+            <span className="text-[7px] tracking-[0.3em] uppercase" style={{ color: BC.textGhost, fontFamily: "'Inter', sans-serif", fontWeight: 400 }}>
               Video Creation Studio
             </span>
           </div>
@@ -448,10 +450,10 @@ export default function BroadcastStudio() {
               </div>
             ) : (
               <div className="flex flex-col items-center gap-3">
-                <svg width="48" height="48" viewBox="0 0 100 100" fill="none" opacity="0.2">
-                  <line x1="20" y1="80" x2="80" y2="20" stroke={BC.silver} strokeWidth="10" strokeLinecap="round" />
-                  <line x1="20" y1="20" x2="80" y2="80" stroke={BC.silver} strokeWidth="10" strokeLinecap="round" />
-                  <circle cx="15" cy="50" r="5" fill={BC.silver} />
+                <svg width="48" height="48" viewBox="0 0 100 100" fill="none" opacity="0.15">
+                  <line x1="15" y1="85" x2="85" y2="15" stroke={BC.silver} strokeWidth="14" strokeLinecap="round" />
+                  <line x1="15" y1="15" x2="85" y2="85" stroke={BC.silver} strokeWidth="14" strokeLinecap="round" />
+                  <circle cx="12" cy="50" r="7" fill={BC.silver} />
                 </svg>
                 <span className="text-[11px] font-mono" style={{ color: BC.textGhost }}>
                   Add scenes or describe your vision in chat
@@ -616,10 +618,10 @@ export default function BroadcastStudio() {
           <div className="flex-1 flex flex-col min-h-0">
             <div className="flex items-center gap-2 px-3 py-2 shrink-0" style={{ borderBottom: `1px solid ${BC.border}` }}>
               <MessageSquare className="w-3 h-3" style={{ color: BC.gold }} />
-              <span className="text-[10px] font-semibold tracking-wide" style={{ color: BC.text, fontFamily: 'Inter, sans-serif' }}>Team Chat</span>
+              <span className="text-[10px] font-semibold tracking-wide" style={{ color: BC.text, fontFamily: "'Inter', sans-serif" }}>Team Chat</span>
               <div className="ml-auto flex items-center gap-1">
                 <div className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: BC.amber }} />
-                <span className="text-[8px] font-mono" style={{ color: BC.amber }}>GRAMMAR ON</span>
+                <span className="text-[8px] font-mono" style={{ color: BC.textGhost }}>Iller_Ang</span>
               </div>
             </div>
 
