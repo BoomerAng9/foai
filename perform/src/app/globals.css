@@ -1,0 +1,17 @@
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=Outfit:wght@400;600;700;800;900&family=Inter:wght@300;400;500;600&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --tie-gold: #D4A853;
+  --tie-silver: #C0C0C0;
+  --tie-amber: #FFB300;
+  --tie-dark: #0A0A0F;
+}
+
+body {
+  background: var(--tie-dark);
+  color: #FFFFFF;
+}
