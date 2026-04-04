@@ -18,10 +18,10 @@
 
 const OPENROUTER_KEY = process.env.OPENROUTER_API_KEY || '';
 
-// Model assignments — ALL FREE TIER
-const CONSULT_MODEL = 'qwen/qwen3-next-80b-a3b-instruct:free';  // Fast, free
-const ACHEEVY_MODEL = 'nvidia/nemotron-3-super-120b-a12b:free';  // Execution, free 120B
-const NOTE_MODEL = 'nvidia/nemotron-nano-9b-v2:free';            // Background recorder, free
+// Model assignments — ALL Gemma 4 (paid, near-zero cost)
+const CONSULT_MODEL = 'google/gemma-4-26b-a4b-it';
+const ACHEEVY_MODEL = 'google/gemma-4-26b-a4b-it';
+const NOTE_MODEL = 'google/gemma-4-26b-a4b-it';
 
 interface SessionMessage {
   role: 'user' | 'consult_ang' | 'acheevy' | 'note_ang';

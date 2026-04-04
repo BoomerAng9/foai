@@ -178,9 +178,8 @@ async function pickModel(task: string = 'chat', messageLength: number = 0): Prom
   } catch {}
 
   // Smart fallback: short messages → Mercury 2 (fast), medium → Nemotron (free), long → MiniMax (quality)
-  if (task === 'fast' || messageLength < 100) return 'inception/mercury-2';
-  if (task === 'chat' && messageLength < 500) return 'nvidia/nemotron-3-super-120b-a12b:free';
-  return 'minimax/minimax-m2.7';
+  // All models → Gemma 4 26B MoE (paid, near-zero cost, no telemetry concerns)
+  return 'google/gemma-4-26b-a4b-it';
 }
 
 async function recordUsage(model: string, tokensIn: number, tokensOut: number) {

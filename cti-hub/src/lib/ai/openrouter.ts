@@ -40,7 +40,7 @@ function getOpenRouterHeaders() {
 }
 
 export function getOpenRouterModel(inputMode: 'text' | 'voice' = 'text') {
-  const textModel = process.env.OPENROUTER_TEXT_MODEL || 'nvidia/nemotron-3-super-120b-a12b:free';
+  const textModel = process.env.OPENROUTER_TEXT_MODEL || 'google/gemma-4-26b-a4b-it';
   const voiceModel = process.env.OPENROUTER_VOICE_MODEL || textModel;
   return inputMode === 'voice' ? voiceModel : textModel;
 }

@@ -115,6 +115,7 @@ export async function POST(request: NextRequest) {
             content: enrichedMessage,
             model_id: process.env.ACHEEVY_V1_MODEL_ID || 'default',
           }),
+          signal: AbortSignal.timeout(5000), // 5s timeout — don't hang if V1 is down
         });
 
         if (v1Response.ok && v1Response.body) {

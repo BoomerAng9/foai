@@ -3,8 +3,8 @@ import { requireAuth } from '@/lib/auth-guard';
 import { buildGrammarPrompt, buildConfirmationPrompt, isPassthrough, NTNTN_SYSTEM_PROMPT } from '@/lib/grammar/converter';
 
 const OPENROUTER_KEY = process.env.OPENROUTER_API_KEY || '';
-const ILLER_ANG_MODEL = 'qwen/qwen3.6-plus-preview:free';
-const CONSULT_MODEL = 'qwen/qwen3-next-80b-a3b-instruct:free';
+const ILLER_ANG_MODEL = 'google/gemma-4-26b-a4b-it';
+const CONSULT_MODEL = 'google/gemma-4-26b-a4b-it';
 
 const ILLA_SYSTEM = `You are ILLA, the Head of Broad|Cast Studio — The Deploy Platform's video production suite.
 
