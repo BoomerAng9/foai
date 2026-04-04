@@ -192,10 +192,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => unsubscribe();
   }, [hydrateProfile]);
 
-  // Refresh session token every 50 minutes to prevent expiry
+  // Refresh session token immediately on mount AND every 25 minutes
   useEffect(() => {
     if (!user) return;
-    const interval = setInterval(async () => {
+    const refreshSession = async () => {
       try {
         const freshToken = await user.getIdToken(true);
         await fetch('/api/auth/session', {
@@ -206,7 +206,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       } catch (err) {
         console.error('[Auth] Token refresh failed:', err instanceof Error ? err.message : err);
       }
-    }, 50 * 60 * 1000); // 50 minutes
+    };
+    refreshSession(); // Refresh immediately on mount
+    const interval = setInterval(refreshSession, 25 * 60 * 1000); // Every 25 min
     return () => clearInterval(interval);
   }, [user]);
 

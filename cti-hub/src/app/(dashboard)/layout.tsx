@@ -184,7 +184,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             </button>
 
             {userMenuOpen && (
-              <div className="absolute bottom-full left-0 w-full bg-bg-surface border border-border shadow-lg z-50">
+              <div className="fixed bottom-16 left-3 w-52 bg-bg-surface border border-border shadow-lg" style={{ zIndex: 9999 }}>
                 <Link href="/settings" onClick={() => { setUserMenuOpen(false); setMobileMenuOpen(false); }}
                   className="flex items-center gap-2 px-4 py-2.5 text-xs font-mono text-fg-secondary hover:bg-bg-elevated hover:text-fg">
                   <User className="w-3.5 h-3.5" /> ACCOUNT
@@ -194,8 +194,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                   <CreditCard className="w-3.5 h-3.5" /> BILLING
                 </Link>
                 <div className="border-t border-border" />
-                <button onClick={() => signOut()}
-                  className="flex items-center gap-2 w-full px-4 py-2.5 text-xs font-mono text-signal-error hover:bg-bg-elevated">
+                <button onClick={async (e) => { e.stopPropagation(); await signOut(); window.location.href = '/auth/login'; }}
+                  className="flex items-center gap-2 w-full px-4 py-2.5 text-xs font-mono text-signal-error hover:bg-bg-elevated cursor-pointer"
+                  style={{ position: 'relative', zIndex: 9999 }}>
                   <LogOut className="w-3.5 h-3.5" /> SIGN OUT
                 </button>
               </div>
