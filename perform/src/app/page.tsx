@@ -215,8 +215,8 @@ export default function HomePage() {
           <div className="max-w-3xl mx-auto mt-6 mb-8">
             <div className="flex flex-wrap justify-center gap-2">
               {[
-                'LV', 'NYG', 'NE', 'CLE', 'TEN', 'CAR', 'NYJ', 'DAL',
-                'CHI', 'NO', 'SF', 'MIA', 'IND', 'JAX', 'CIN', 'ARI',
+                'LV', 'NYJ', 'ARI', 'TEN', 'NYG', 'CLE', 'CAR', 'NE',
+                'NO', 'CHI', 'SF', 'DAL', 'MIA', 'CIN', 'IND', 'JAX',
                 'SEA', 'ATL', 'LAC', 'HOU', 'PIT', 'DEN', 'GB', 'MIN',
                 'TB', 'LAR', 'BAL', 'DET', 'BUF', 'WAS', 'PHI', 'KC',
               ].map((team, i) => (

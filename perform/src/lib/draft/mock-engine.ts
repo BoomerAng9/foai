@@ -158,15 +158,16 @@ function scoreFit(
 }
 
 // 2026 Draft Order — Raiders #1 overall
+// 2026 NFL Draft Order — confirmed from NFL.com
 const DEFAULT_DRAFT_ORDER: string[] = [
-  'LV', 'NYG', 'NE', 'CLE', 'TEN', 'CAR', 'NYJ', 'DAL',
-  'CHI', 'NO', 'SF', 'MIA', 'IND', 'JAX', 'CIN', 'ARI',
+  'LV', 'NYJ', 'ARI', 'TEN', 'NYG', 'CLE', 'CAR', 'NE',
+  'NO', 'CHI', 'SF', 'DAL', 'MIA', 'CIN', 'IND', 'JAX',
   'SEA', 'ATL', 'LAC', 'HOU', 'PIT', 'DEN', 'GB', 'MIN',
   'TB', 'LAR', 'BAL', 'DET', 'BUF', 'WAS', 'PHI', 'KC',
 ];
 
 const DEFAULT_TEAM_NEEDS: Record<string, Record<string, number>> = {
-  LV: { QB: 1, CB: 2, DT: 2, WR: 2 },
+  LV: { RB: 1, WR: 1, CB: 2, DT: 2 }, // Signed Kirk Cousins — QB addressed
   NYG: { EDGE: 1, OT: 1, WR: 2 },
   NE: { WR: 1, EDGE: 1, CB: 2 },
   CLE: { QB: 1, WR: 1, OT: 2 },
