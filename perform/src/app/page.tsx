@@ -279,13 +279,7 @@ function ProspectCarousel({ prospects }: { prospects: TopProspect[] }) {
   const items = [...prospects, ...prospects];
 
   return (
-    <motion.div
-      ref={sectionRef}
-      className="relative"
-      initial="hidden"
-      animate={isInView ? 'visible' : 'hidden'}
-      variants={fadeUp}
-    >
+    <div ref={sectionRef} className="relative">
       <button onClick={scrollLeft} className="absolute left-2 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full flex items-center justify-center transition-all hover:scale-110" style={{ background: 'rgba(212,168,83,0.9)', color: 'var(--pf-bg)', zIndex: 10, boxShadow: '0 4px 12px rgba(0,0,0,0.5)' }}>
         <span className="text-lg font-bold">&lt;</span>
       </button>
@@ -304,7 +298,7 @@ function ProspectCarousel({ prospects }: { prospects: TopProspect[] }) {
           <NFTCard key={`${p.id}-${i}`} player={p} rank={(i % prospects.length) + 1} />
         ))}
       </div>
-    </motion.div>
+    </div>
   );
 }
 
