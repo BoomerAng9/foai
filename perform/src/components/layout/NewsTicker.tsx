@@ -129,9 +129,6 @@ export function NewsTicker() {
             const article = item.data;
             return (
               <span key={`a-${article.url}-${i}`} className="inline-flex items-center gap-2 shrink-0">
-                <span className="text-[10px] font-mono font-bold" style={{ color: '#D4A853' }}>
-                  {article.source}:
-                </span>
                 <span className="text-[10px] font-mono text-white/60">
                   {article.title.slice(0, 120)}{article.title.length > 120 ? '...' : ''}
                 </span>

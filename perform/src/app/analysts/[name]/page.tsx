@@ -1,29 +1,63 @@
 'use client';
 
-import { use, useState } from 'react';
+import { use, useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { getAnalyst } from '@/lib/analysts/personas';
 
-const CONTENT_TYPES = [
-  { value: 'scouting_report', label: 'Scouting Report' },
-  { value: 'film_breakdown', label: 'Film Breakdown' },
-  { value: 'hot_take', label: 'Hot Take' },
-  { value: 'ranking_update', label: 'Ranking Update' },
-] as const;
+interface Article {
+  id: number;
+  analyst_id: string;
+  content_type: string;
+  title: string;
+  content: string;
+  created_at: string;
+}
 
-type ContentType = (typeof CONTENT_TYPES)[number]['value'];
+function formatDate(dateStr: string): string {
+  const d = new Date(dateStr);
+  return d.toLocaleDateString('en-US', {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+  });
+}
+
+function renderMarkdown(text: string): string {
+  return text
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\*(.+?)\*/g, '<em>$1</em>')
+    .replace(/^### (.+)$/gm, '<h3 class="font-outfit text-lg font-bold text-white/90 mt-6 mb-2">$1</h3>')
+    .replace(/^## (.+)$/gm, '<h2 class="font-outfit text-xl font-bold text-white/90 mt-6 mb-3">$2</h2>')
+    .replace(/\n\n/g, '</p><p class="mb-4">')
+    .replace(/\n/g, '<br/>');
+}
 
 export default function AnalystFeedPage({ params }: { params: Promise<{ name: string }> }) {
   const { name } = use(params);
   const analyst = getAnalyst(name);
 
-  const [topic, setTopic] = useState('');
-  const [contentType, setContentType] = useState<ContentType>('hot_take');
-  const [generatedContent, setGeneratedContent] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [articles, setArticles] = useState<Article[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function loadFeed() {
+      try {
+        const res = await fetch(`/api/analysts/${name}/feed`);
+        const data = await res.json();
+        setArticles(data.articles || []);
+      } catch {
+        setArticles([]);
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadFeed();
+  }, [name]);
 
   if (!analyst) {
     return (
@@ -48,38 +82,11 @@ export default function AnalystFeedPage({ params }: { params: Promise<{ name: st
     );
   }
 
-  async function handleGenerate() {
-    if (!topic.trim()) return;
-    setLoading(true);
-    setError('');
-    setGeneratedContent('');
-
-    try {
-      const res = await fetch(`/api/analysts/${analyst!.id}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ contentType, context: topic }),
-      });
-
-      if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.error || 'Generation failed');
-      }
-
-      const data = await res.json();
-      setGeneratedContent(data.content);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Something went wrong');
-    } finally {
-      setLoading(false);
-    }
-  }
-
   return (
     <div className="min-h-screen flex flex-col" style={{ background: '#0A0A0F' }}>
       <Header />
 
-      <main className="flex-1 px-6 py-16 max-w-4xl mx-auto w-full">
+      <main className="flex-1 px-6 py-16 max-w-3xl mx-auto w-full">
         {/* Back link */}
         <Link
           href="/analysts"
@@ -89,25 +96,19 @@ export default function AnalystFeedPage({ params }: { params: Promise<{ name: st
           &larr; ANALYST DESK
         </Link>
 
-        {/* Analyst Profile */}
-        <div
-          className="rounded-xl p-8 mb-12"
-          style={{
-            background: 'rgba(255,255,255,0.03)',
-            border: `1px solid ${analyst.color}`,
-          }}
-        >
-          <div className="flex items-center gap-4 mb-4">
+        {/* Analyst Header */}
+        <div className="mb-12 pb-8" style={{ borderBottom: `2px solid ${analyst.color}` }}>
+          <div className="flex items-center gap-4 mb-3">
             <div
-              className="w-4 h-4 rounded-full shrink-0"
+              className="w-3 h-3 rounded-full shrink-0"
               style={{ background: analyst.color }}
             />
-            <h1 className="font-outfit text-2xl md:text-3xl font-extrabold tracking-wider text-white">
+            <h1 className="font-outfit text-3xl md:text-4xl font-extrabold tracking-wide text-white">
               {analyst.name}
             </h1>
           </div>
           <p
-            className="text-sm font-mono italic mb-2"
+            className="text-sm font-mono italic mb-1"
             style={{ color: analyst.color }}
           >
             {analyst.archetype}
@@ -117,137 +118,56 @@ export default function AnalystFeedPage({ params }: { params: Promise<{ name: st
           </p>
         </div>
 
-        {/* Generate Take Section */}
-        <div
-          className="rounded-xl p-8 mb-12"
-          style={{
-            background: 'rgba(255,255,255,0.02)',
-            border: '1px solid rgba(255,255,255,0.06)',
-          }}
-        >
-          <h2
-            className="font-outfit text-lg font-bold tracking-[0.15em] mb-6"
-            style={{ color: '#D4A853' }}
-          >
-            GENERATE TAKE
-          </h2>
-
-          {/* Topic input */}
-          <input
-            type="text"
-            value={topic}
-            onChange={(e) => setTopic(e.target.value)}
-            placeholder="Enter a topic, player name, or prompt..."
-            className="w-full px-4 py-3 rounded-md text-sm font-mono text-white/80 placeholder:text-white/20 mb-4 outline-none transition-colors focus:border-opacity-100"
-            style={{
-              background: 'rgba(255,255,255,0.04)',
-              border: '1px solid rgba(255,255,255,0.1)',
-            }}
-            onFocus={(e) => {
-              e.currentTarget.style.borderColor = analyst.color;
-            }}
-            onBlur={(e) => {
-              e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)';
-            }}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' && !loading) handleGenerate();
-            }}
-          />
-
-          {/* Content type selector */}
-          <div className="flex flex-wrap gap-2 mb-6">
-            {CONTENT_TYPES.map((ct) => (
-              <button
-                key={ct.value}
-                onClick={() => setContentType(ct.value)}
-                className="px-4 py-2 rounded-md text-xs font-mono tracking-wider transition-all"
-                style={{
-                  background:
-                    contentType === ct.value
-                      ? analyst.color
-                      : 'rgba(255,255,255,0.04)',
-                  color:
-                    contentType === ct.value
-                      ? '#0A0A0F'
-                      : 'rgba(255,255,255,0.4)',
-                  border: `1px solid ${
-                    contentType === ct.value
-                      ? analyst.color
-                      : 'rgba(255,255,255,0.08)'
-                  }`,
-                  fontWeight: contentType === ct.value ? 700 : 400,
-                }}
-              >
-                {ct.label.toUpperCase()}
-              </button>
-            ))}
-          </div>
-
-          {/* Generate button */}
-          <button
-            onClick={handleGenerate}
-            disabled={loading || !topic.trim()}
-            className="px-8 py-3 rounded-md text-sm font-outfit font-bold tracking-[0.15em] transition-all hover:brightness-110 disabled:opacity-40 disabled:cursor-not-allowed"
-            style={{ background: analyst.color, color: '#0A0A0F' }}
-          >
-            {loading ? 'GENERATING...' : 'GENERATE'}
-          </button>
-        </div>
-
-        {/* Error */}
-        {error && (
-          <div
-            className="rounded-md px-4 py-3 mb-8 text-sm font-mono"
-            style={{
-              background: 'rgba(249,115,22,0.1)',
-              border: '1px solid rgba(249,115,22,0.3)',
-              color: '#F97316',
-            }}
-          >
-            {error}
-          </div>
-        )}
-
-        {/* Loading indicator */}
+        {/* Feed */}
         {loading && (
-          <div className="flex items-center gap-3 mb-8">
+          <div className="flex items-center gap-3 py-12">
             <div
               className="w-2 h-2 rounded-full animate-pulse"
               style={{ background: analyst.color }}
             />
-            <span className="text-xs font-mono text-white/30">
-              {analyst.name} is composing a take...
-            </span>
+            <span className="text-sm font-mono text-white/30">Loading feed...</span>
           </div>
         )}
 
-        {/* Generated Content */}
-        {generatedContent && (
-          <div
-            className="rounded-xl p-8"
-            style={{
-              background: 'rgba(255,255,255,0.02)',
-              borderLeft: `4px solid ${analyst.color}`,
-            }}
-          >
-            <div className="flex items-center gap-3 mb-6">
-              <div
-                className="w-2.5 h-2.5 rounded-full"
-                style={{ background: analyst.color }}
-              />
-              <span
-                className="text-xs font-mono tracking-wider font-bold"
-                style={{ color: analyst.color }}
-              >
-                {analyst.name.toUpperCase()}
-              </span>
-              <span className="text-[10px] font-mono text-white/20">
-                {contentType.replace('_', ' ').toUpperCase()}
-              </span>
-            </div>
-            <div className="text-sm font-mono text-white/60 leading-relaxed whitespace-pre-wrap">
-              {generatedContent}
-            </div>
+        {!loading && articles.length === 0 && (
+          <div className="py-20 text-center">
+            <p className="text-lg font-outfit text-white/40 mb-2">
+              Content publishing soon
+            </p>
+            <p className="text-xs font-mono text-white/20">
+              Check back shortly
+            </p>
+          </div>
+        )}
+
+        {!loading && articles.length > 0 && (
+          <div className="space-y-16">
+            {articles.map((article) => (
+              <article key={article.id}>
+                <div className="mb-4">
+                  <span
+                    className="text-[10px] font-mono tracking-widest font-bold uppercase"
+                    style={{ color: analyst.color }}
+                  >
+                    {article.content_type.replace(/_/g, ' ')}
+                  </span>
+                  <span className="text-[10px] font-mono text-white/20 ml-3">
+                    {formatDate(article.created_at)}
+                  </span>
+                </div>
+                <h2 className="font-outfit text-xl md:text-2xl font-bold text-white/90 mb-6 leading-tight">
+                  {article.title}
+                </h2>
+                <div
+                  className="text-sm font-mono text-white/60 leading-relaxed"
+                  dangerouslySetInnerHTML={{ __html: `<p class="mb-4">${renderMarkdown(article.content)}</p>` }}
+                />
+                <div
+                  className="mt-8 h-px"
+                  style={{ background: `linear-gradient(to right, ${analyst.color}33, transparent)` }}
+                />
+              </article>
+            ))}
           </div>
         )}
       </main>
