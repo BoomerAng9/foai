@@ -2,12 +2,14 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { motion } from 'framer-motion';
+import { motion, type Variants } from 'framer-motion';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { ANALYSTS } from '@/lib/analysts/personas';
+import PaywallGate from '@/components/PaywallGate';
 
-const cardVariants = {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const cardVariants: any = {
   hidden: { opacity: 0, y: 40 },
   visible: (i: number) => ({
     opacity: 1,
@@ -15,13 +17,14 @@ const cardVariants = {
     transition: {
       delay: i * 0.1,
       duration: 0.5,
-      ease: [0.25, 0.46, 0.45, 0.94],
+      ease: 'easeOut' as const,
     },
   }),
 };
 
 export default function AnalystsPage() {
   return (
+    <PaywallGate>
     <div className="min-h-screen flex flex-col" style={{ background: '#0A0A0F' }}>
       <Header />
 
@@ -139,5 +142,6 @@ export default function AnalystsPage() {
 
       <Footer />
     </div>
+    </PaywallGate>
   );
 }

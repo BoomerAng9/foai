@@ -13,6 +13,7 @@ import {
   heroStagger,
   heroItem,
 } from '@/lib/motion';
+import PaywallGate from '@/components/PaywallGate';
 
 interface AnalystTake {
   analyst: string;
@@ -128,6 +129,7 @@ export default function StudioPage() {
   }
 
   return (
+    <PaywallGate>
     <div className="min-h-screen flex flex-col" style={{ background: '#0A0A0F' }}>
       <Header />
 
@@ -427,5 +429,6 @@ export default function StudioPage() {
 
       <Footer />
     </div>
+    </PaywallGate>
   );
 }

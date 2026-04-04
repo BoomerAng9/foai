@@ -7,6 +7,7 @@ import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { getGradeForScore } from '@/lib/tie/grades';
 import { staggerContainer, staggerItem } from '@/lib/motion';
+import PaywallGate from '@/components/PaywallGate';
 
 /* ── types ─────────────────────────────────────────────────────────── */
 
@@ -125,6 +126,7 @@ export default function DraftBoardPage() {
   });
 
   return (
+    <PaywallGate>
     <div className="min-h-screen flex flex-col" style={{ background: '#0B0E14' }}>
       <Header />
 
@@ -499,5 +501,6 @@ export default function DraftBoardPage() {
 
       <Footer />
     </div>
+    </PaywallGate>
   );
 }

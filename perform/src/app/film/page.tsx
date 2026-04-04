@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
+import PaywallGate from '@/components/PaywallGate';
 
 type Source = 'youtube' | 'web' | 'upload';
 
@@ -63,6 +64,7 @@ export default function FilmRoomPage() {
   }
 
   return (
+    <PaywallGate>
     <div className="min-h-screen flex flex-col" style={{ background: '#0A0A0F' }}>
       <Header />
 
@@ -187,5 +189,6 @@ export default function FilmRoomPage() {
 
       <Footer />
     </div>
+    </PaywallGate>
   );
 }

@@ -7,6 +7,7 @@ import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { getGradeForScore } from '@/lib/tie/grades';
 import { staggerContainer, staggerItem, heroStagger, heroItem, scrollReveal } from '@/lib/motion';
+import PaywallGate from '@/components/PaywallGate';
 
 interface PlayerRow {
   id: number;
@@ -132,6 +133,7 @@ export default function PlayerDetailPage({ params }: { params: Promise<{ player:
   const intgScore = Math.min(Math.round(score * 0.95 + 3 + (score % 3)), 100);
 
   return (
+    <PaywallGate>
     <div className="min-h-screen flex flex-col" style={{ background: '#0A0A0F', color: '#fff' }}>
       <Header />
 
@@ -372,5 +374,6 @@ export default function PlayerDetailPage({ params }: { params: Promise<{ player:
 
       <Footer />
     </div>
+    </PaywallGate>
   );
 }
