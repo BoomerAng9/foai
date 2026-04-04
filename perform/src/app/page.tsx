@@ -74,7 +74,7 @@ export default function HomePage() {
         {prospects.length > 0 ? (
           <div className="space-y-2">
             {prospects.map((p, i) => (
-              <Link key={p.id} href={`/draft/${p.id}`} className="flex items-center gap-4 px-4 py-3 transition-all hover:bg-white/[0.03]" style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+              <Link key={p.id} href={`/draft/${encodeURIComponent(p.name)}`} className="flex items-center gap-4 px-4 py-3 transition-all hover:bg-white/[0.03]" style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
                 <span className="w-8 text-center font-outfit text-lg font-extrabold" style={{ color: '#D4A853' }}>
                   {i + 1}
                 </span>
