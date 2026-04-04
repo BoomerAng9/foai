@@ -35,6 +35,7 @@ interface PlayerRow {
   broad_jump: number | null;
   three_cone: number | null;
   shuttle: number | null;
+  key_stats: string | null;
 }
 
 /* ── Position colors ─────────────────────────────────── */
@@ -89,12 +90,48 @@ function StatBar({ label, value }: { label: string; value: number }) {
   );
 }
 
+/* ── Parse key_stats string into label/value pairs ──── */
+function parseKeyStats(raw: string): { value: string; label: string }[] {
+  const stats: { value: string; label: string }[] = [];
+
+  // Split on commas, semicolons, or " / " delimiters
+  const parts = raw.split(/[,;]|(?:\s\/\s)/).map((s) => s.trim()).filter(Boolean);
+
+  for (const part of parts) {
+    // Pattern: "73% completion" → value="73%", label="completion"
+    const pctMatch = part.match(/^([\d.]+%)\s+(.+)/i);
+    if (pctMatch) {
+      stats.push({ value: pctMatch[1], label: pctMatch[2] });
+      continue;
+    }
+    // Pattern: "27 TD" or "1,234 YDS" → value="27", label="TD"
+    const numLabelMatch = part.match(/^([\d,]+(?:\.\d+)?)\s+(.+)/i);
+    if (numLabelMatch) {
+      stats.push({ value: numLabelMatch[1], label: numLabelMatch[2] });
+      continue;
+    }
+    // Pattern: "TD: 27" or "Yards: 1,234"
+    const labelNumMatch = part.match(/^(.+?):\s*([\d,]+(?:\.\d+)?%?)/i);
+    if (labelNumMatch) {
+      stats.push({ value: labelNumMatch[2], label: labelNumMatch[1] });
+      continue;
+    }
+    // Pattern: "0 INT" already covered by numLabelMatch above
+    // Fallback: just show as-is
+    if (part.length < 30) {
+      stats.push({ value: part, label: '' });
+    }
+  }
+  return stats;
+}
+
 export default function PlayerDetailPage({ params }: { params: Promise<{ player: string }> }) {
   const { player } = use(params);
   const [data, setData] = useState<PlayerRow | null>(null);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
   const [highlights, setHighlights] = useState<{ videoId: string; title: string; thumbnailUrl: string; url: string }[]>([]);
+  const [headshotUrl, setHeadshotUrl] = useState<string | null>(null);
 
   useEffect(() => {
     async function load() {
@@ -130,6 +167,17 @@ export default function PlayerDetailPage({ params }: { params: Promise<{ player:
       })
       .catch(() => {});
   }, [data?.name]);
+
+  /* Fetch ESPN headshot */
+  useEffect(() => {
+    if (!data?.name) return;
+    fetch(`/api/players/headshot?name=${encodeURIComponent(data.name)}&school=${encodeURIComponent(data.school || '')}`)
+      .then((r) => r.json())
+      .then((json) => {
+        if (json.url) setHeadshotUrl(json.url);
+      })
+      .catch(() => {});
+  }, [data?.name, data?.school]);
 
   /* ── Derived values ─────────────────────────────────── */
   const score = (() => {
@@ -185,6 +233,20 @@ export default function PlayerDetailPage({ params }: { params: Promise<{ player:
                 {/* Left: Name block */}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-3 mb-2">
+                    {/* Headshot */}
+                    {headshotUrl ? (
+                      <div className="shrink-0 w-14 h-14 sm:w-16 sm:h-16 rounded-full overflow-hidden ring-2 ring-white/10">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={headshotUrl} alt={data.name} className="w-full h-full object-cover" />
+                      </div>
+                    ) : (
+                      <div
+                        className="shrink-0 w-14 h-14 sm:w-16 sm:h-16 rounded-full flex items-center justify-center ring-2 ring-white/10 font-outfit font-bold text-lg"
+                        style={{ background: `${posColor}25`, color: posColor }}
+                      >
+                        {data.name.split(' ').map((n) => n[0]).join('').slice(0, 2)}
+                      </div>
+                    )}
                     <h1 className="font-outfit text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-white truncate">
                       {data.name}
                     </h1>
@@ -319,6 +381,116 @@ export default function PlayerDetailPage({ params }: { params: Promise<{ player:
                 <p className="text-sm text-white/60 leading-relaxed">{data.scouting_summary}</p>
               </motion.div>
             )}
+
+            {/* ── 2025 Season Stats ──────────────────────────── */}
+            {(() => {
+              const parsedStats = data.key_stats ? parseKeyStats(data.key_stats) : [];
+              const hasCombine = data.forty_time || data.vertical_jump || data.bench_reps || data.broad_jump || data.three_cone || data.shuttle;
+
+              // Fallback: basic bio stats if no key_stats
+              const displayStats = parsedStats.length > 0
+                ? parsedStats
+                : [
+                    ...(data.height ? [{ value: data.height, label: 'HEIGHT' }] : []),
+                    ...(data.weight ? [{ value: `${data.weight}`, label: 'WEIGHT (LBS)' }] : []),
+                    ...(data.class_year ? [{ value: data.class_year, label: 'CLASS' }] : []),
+                  ];
+
+              return (displayStats.length > 0 || hasCombine) ? (
+                <>
+                  {displayStats.length > 0 && (
+                    <motion.div
+                      variants={scrollReveal}
+                      initial="hidden"
+                      whileInView="visible"
+                      viewport={{ once: true, margin: '-40px' }}
+                      className="mb-10"
+                    >
+                      <h2
+                        className="text-xs font-mono font-bold tracking-[0.2em] mb-5"
+                        style={{ color: '#D4A853' }}
+                      >
+                        2025 SEASON {data.school ? `\u2014 ${data.school.toUpperCase()}` : ''}
+                      </h2>
+                      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+                        {displayStats.map((stat, i) => (
+                          <motion.div
+                            key={i}
+                            initial={{ opacity: 0, y: 16 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.4, delay: i * 0.06 }}
+                            viewport={{ once: true }}
+                            className="p-4 rounded-xl text-center"
+                            style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}
+                          >
+                            <div
+                              className="text-2xl sm:text-3xl font-mono font-black leading-none mb-1.5"
+                              style={{ color: '#D4A853' }}
+                            >
+                              {stat.value}
+                            </div>
+                            {stat.label && (
+                              <div className="text-[10px] font-mono text-white/40 tracking-wider uppercase">
+                                {stat.label}
+                              </div>
+                            )}
+                          </motion.div>
+                        ))}
+                      </div>
+                    </motion.div>
+                  )}
+
+                  {hasCombine && (
+                    <motion.div
+                      variants={scrollReveal}
+                      initial="hidden"
+                      whileInView="visible"
+                      viewport={{ once: true, margin: '-40px' }}
+                      className="mb-10"
+                    >
+                      <h2
+                        className="text-xs font-mono font-bold tracking-[0.2em] mb-5"
+                        style={{ color: '#D4A853' }}
+                      >
+                        COMBINE / PRO DAY
+                      </h2>
+                      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+                        {[
+                          { value: data.forty_time, label: '40-YD DASH', suffix: 's' },
+                          { value: data.vertical_jump, label: 'VERTICAL', suffix: '"' },
+                          { value: data.bench_reps, label: 'BENCH REPS', suffix: '' },
+                          { value: data.broad_jump, label: 'BROAD JUMP', suffix: '"' },
+                          { value: data.three_cone, label: '3-CONE', suffix: 's' },
+                          { value: data.shuttle, label: 'SHUTTLE', suffix: 's' },
+                        ]
+                          .filter((m) => m.value != null)
+                          .map((m, i) => (
+                            <motion.div
+                              key={m.label}
+                              initial={{ opacity: 0, y: 16 }}
+                              whileInView={{ opacity: 1, y: 0 }}
+                              transition={{ duration: 0.4, delay: i * 0.06 }}
+                              viewport={{ once: true }}
+                              className="p-4 rounded-xl text-center"
+                              style={{ background: 'rgba(212,168,83,0.05)', border: '1px solid rgba(212,168,83,0.12)' }}
+                            >
+                              <div
+                                className="text-xl sm:text-2xl font-mono font-black leading-none mb-1.5"
+                                style={{ color: '#D4A853' }}
+                              >
+                                {m.value}{m.suffix}
+                              </div>
+                              <div className="text-[10px] font-mono text-white/40 tracking-wider">
+                                {m.label}
+                              </div>
+                            </motion.div>
+                          ))}
+                      </div>
+                    </motion.div>
+                  )}
+                </>
+              ) : null;
+            })()}
 
             {/* ── YouTube Highlights ────────────────────────── */}
             {highlights.length > 0 && (
