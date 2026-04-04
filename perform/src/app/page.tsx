@@ -120,20 +120,47 @@ export default function HomePage() {
     <div className="min-h-screen flex flex-col" style={{ background: '#0A0A0F' }}>
       <Header />
 
-      {/* ── HERO ── */}
-      <section className="relative px-6 pt-20 pb-12 text-center overflow-hidden">
+      {/* ── HERO — ON THE CLOCK ── */}
+      <section className="relative px-6 pt-16 pb-12 text-center overflow-hidden">
         <div className="pointer-events-none absolute inset-0" style={{
-          background: 'radial-gradient(ellipse 60% 50% at 50% 30%, rgba(212,168,83,0.08) 0%, transparent 100%)',
+          background: 'radial-gradient(ellipse 60% 50% at 50% 20%, rgba(212,168,83,0.08) 0%, transparent 100%)',
         }} />
-        <p className="text-xs font-mono tracking-[0.4em] mb-4" style={{ color: 'rgba(212,168,83,0.5)' }}>
+        <p className="text-xs font-mono tracking-[0.4em] mb-6" style={{ color: 'rgba(212,168,83,0.5)' }}>
           2026 NFL DRAFT · PITTSBURGH · APRIL 23-25
         </p>
-        <h1 className="font-outfit text-5xl md:text-7xl font-extrabold tracking-tight text-white mb-4">
-          PER<span style={{ color: '#555' }}>|</span><span style={{ color: '#D4A853' }}>FORM</span>
-        </h1>
-        <p className="text-sm text-white/25 font-mono max-w-lg mx-auto mb-8">
-          Every prospect graded. Every pick projected.
+        <p className="text-sm font-mono tracking-[0.3em] uppercase mb-3" style={{ color: '#C0C0C0' }}>
+          WITH THE FIRST PICK IN THE 2026 NFL DRAFT
         </p>
+        <h1 className="font-outfit text-4xl md:text-6xl font-extrabold tracking-tight mb-2" style={{ color: '#D4A853' }}>
+          THE RAIDERS ARE ON THE CLOCK
+        </h1>
+        <div className="flex justify-center mt-8 mb-6">
+          <div className="inline-flex items-center gap-1 px-4 py-2 rounded-full" style={{ background: 'rgba(212,168,83,0.08)', border: '1px solid rgba(212,168,83,0.2)' }}>
+            <div className="w-2 h-2 rounded-full animate-pulse" style={{ background: '#22C55E' }} />
+            <span className="text-[10px] font-mono tracking-wider" style={{ color: '#D4A853' }}>19 DAYS UNTIL DRAFT NIGHT</span>
+          </div>
+        </div>
+
+        {/* First Round Order */}
+        <div className="max-w-3xl mx-auto mt-6 mb-8">
+          <div className="flex flex-wrap justify-center gap-2">
+            {[
+              'LV', 'NYG', 'NE', 'CLE', 'TEN', 'CAR', 'NYJ', 'DAL',
+              'CHI', 'NO', 'SF', 'MIA', 'IND', 'JAX', 'CIN', 'ARI',
+              'SEA', 'ATL', 'LAC', 'HOU', 'PIT', 'DEN', 'GB', 'MIN',
+              'TB', 'LAR', 'BAL', 'DET', 'BUF', 'WAS', 'PHI', 'KC',
+            ].map((team, i) => (
+              <span key={team} className="inline-flex items-center gap-1 px-2 py-1 text-[9px] font-mono transition-colors hover:bg-white/5 cursor-default" style={{
+                color: i === 0 ? '#D4A853' : 'rgba(255,255,255,0.25)',
+                fontWeight: i === 0 ? 800 : 400,
+                border: i === 0 ? '1px solid rgba(212,168,83,0.4)' : '1px solid rgba(255,255,255,0.05)',
+              }}>
+                <span className="text-white/15">{i + 1}.</span> {team}
+              </span>
+            ))}
+          </div>
+        </div>
+
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
           <Link href="/draft" className="px-8 py-3.5 text-sm font-outfit font-bold tracking-wider transition-all hover:brightness-110" style={{ background: '#D4A853', color: '#0A0A0F' }}>
             DRAFT BOARD
