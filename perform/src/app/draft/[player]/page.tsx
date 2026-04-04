@@ -94,6 +94,7 @@ export default function PlayerDetailPage({ params }: { params: Promise<{ player:
   const [data, setData] = useState<PlayerRow | null>(null);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
+  const [highlights, setHighlights] = useState<{ videoId: string; title: string; thumbnailUrl: string; url: string }[]>([]);
 
   useEffect(() => {
     async function load() {
@@ -117,6 +118,18 @@ export default function PlayerDetailPage({ params }: { params: Promise<{ player:
     }
     load();
   }, [player]);
+
+  /* Fetch YouTube highlights once we have the player name */
+  useEffect(() => {
+    if (!data?.name) return;
+    fetch(`/api/youtube?type=player&player=${encodeURIComponent(data.name)}`)
+      .then((r) => r.json())
+      .then((json) => {
+        const vids = (json.videos || []).slice(0, 3);
+        setHighlights(vids);
+      })
+      .catch(() => {});
+  }, [data?.name]);
 
   /* ── Derived values ─────────────────────────────────── */
   const score = (() => {
@@ -304,6 +317,55 @@ export default function PlayerDetailPage({ params }: { params: Promise<{ player:
                   SCOUTING SUMMARY
                 </h2>
                 <p className="text-sm text-white/60 leading-relaxed">{data.scouting_summary}</p>
+              </motion.div>
+            )}
+
+            {/* ── YouTube Highlights ────────────────────────── */}
+            {highlights.length > 0 && (
+              <motion.div
+                variants={scrollReveal}
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true, margin: '-40px' }}
+                className="mb-10"
+              >
+                <h2
+                  className="text-xs font-mono font-bold tracking-[0.2em] mb-5"
+                  style={{ color: '#D4A853' }}
+                >
+                  HIGHLIGHTS
+                </h2>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  {highlights.map((vid) => (
+                    <a
+                      key={vid.videoId}
+                      href={vid.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="group rounded-xl overflow-hidden transition-all hover:ring-1"
+                      style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}
+                    >
+                      <div className="relative aspect-video overflow-hidden">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={vid.thumbnailUrl}
+                          alt={vid.title}
+                          className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                        />
+                        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                          <div className="w-12 h-12 rounded-full flex items-center justify-center" style={{ background: 'rgba(0,0,0,0.7)' }}>
+                            <span className="text-white text-lg ml-0.5">&#9654;</span>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="p-3">
+                        <p className="text-xs font-mono text-white/60 leading-snug line-clamp-2">
+                          {vid.title}
+                        </p>
+                      </div>
+                    </a>
+                  ))}
+                </div>
               </motion.div>
             )}
 

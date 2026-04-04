@@ -7,6 +7,14 @@ import PaywallGate from '@/components/PaywallGate';
 
 type Source = 'youtube' | 'web' | 'upload';
 
+interface YouTubeVid {
+  videoId: string;
+  title: string;
+  thumbnailUrl: string;
+  url: string;
+  channelTitle: string;
+}
+
 interface Play {
   timestamp: string;
   duration: number;
@@ -33,9 +41,38 @@ export default function FilmRoomPage() {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<FilmResult | null>(null);
   const [error, setError] = useState('');
+  const [ytVideos, setYtVideos] = useState<YouTubeVid[]>([]);
+  const [ytLoading, setYtLoading] = useState(false);
+  const [selectedVideo, setSelectedVideo] = useState<YouTubeVid | null>(null);
+
+  /** Search YouTube for videos when source is YouTube */
+  async function searchYT() {
+    if (!playerName.trim() || source !== 'youtube') return;
+    setYtLoading(true);
+    setYtVideos([]);
+    setSelectedVideo(null);
+    setResult(null);
+    setError('');
+    try {
+      const res = await fetch(`/api/youtube?type=player&player=${encodeURIComponent(playerName.trim())}`);
+      const json = await res.json();
+      setYtVideos((json.videos || []).slice(0, 6));
+    } catch {
+      setError('YouTube search failed.');
+    } finally {
+      setYtLoading(false);
+    }
+  }
 
   async function analyze() {
     if (!playerName.trim()) return;
+
+    // If YouTube source but no search done yet, search first
+    if (source === 'youtube' && ytVideos.length === 0 && !ytLoading) {
+      await searchYT();
+      return;
+    }
+
     setLoading(true);
     setError('');
     setResult(null);
@@ -48,6 +85,7 @@ export default function FilmRoomPage() {
           playerName: playerName.trim(),
           source,
           analysisType: 'full_game',
+          youtubeUrl: selectedVideo?.url || undefined,
         }),
       });
       const data = await res.json();
@@ -121,17 +159,65 @@ export default function FilmRoomPage() {
             </p>
           )}
 
+          {/* YouTube video picker */}
+          {source === 'youtube' && ytVideos.length > 0 && (
+            <div className="space-y-3">
+              <p className="text-[10px] font-mono text-white/40 tracking-wider">SELECT A VIDEO TO ANALYZE</p>
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                {ytVideos.map((vid) => (
+                  <button
+                    key={vid.videoId}
+                    onClick={() => setSelectedVideo(vid)}
+                    className="rounded-lg overflow-hidden text-left transition-all"
+                    style={{
+                      background: 'rgba(255,255,255,0.03)',
+                      border: selectedVideo?.videoId === vid.videoId
+                        ? '2px solid #D4A853'
+                        : '1px solid rgba(255,255,255,0.06)',
+                      outline: 'none',
+                    }}
+                  >
+                    <div className="relative aspect-video overflow-hidden">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={vid.thumbnailUrl}
+                        alt={vid.title}
+                        className="w-full h-full object-cover"
+                      />
+                      {selectedVideo?.videoId === vid.videoId && (
+                        <div className="absolute inset-0 flex items-center justify-center" style={{ background: 'rgba(212,168,83,0.2)' }}>
+                          <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ background: '#D4A853' }}>
+                            <span className="text-black text-sm font-bold">&#10003;</span>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                    <div className="p-2">
+                      <p className="text-[10px] font-mono text-white/50 leading-snug line-clamp-2">{vid.title}</p>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {ytLoading && (
+            <div className="text-center py-4">
+              <span className="text-xs font-mono text-white/30 animate-pulse">Searching YouTube...</span>
+            </div>
+          )}
+
           <button
             onClick={analyze}
-            disabled={loading || !playerName.trim()}
+            disabled={loading || ytLoading || !playerName.trim()}
             className="w-full px-6 py-4 rounded-lg text-sm font-outfit font-bold tracking-wider transition-all"
             style={{
-              background: loading ? 'rgba(212,168,83,0.3)' : '#D4A853',
-              color: loading ? '#D4A853' : '#0A0A0F',
-              cursor: loading || !playerName.trim() ? 'not-allowed' : 'pointer',
+              background: loading || ytLoading ? 'rgba(212,168,83,0.3)' : '#D4A853',
+              color: loading || ytLoading ? '#D4A853' : '#0A0A0F',
+              cursor: loading || ytLoading || !playerName.trim() ? 'not-allowed' : 'pointer',
             }}
           >
-            {loading ? 'ANALYZING...' : 'STUDY PLAYER'}
+            {loading ? 'ANALYZING...' : ytLoading ? 'SEARCHING...' : source === 'youtube' && ytVideos.length === 0 ? 'SEARCH YOUTUBE' : 'STUDY PLAYER'}
           </button>
         </div>
 

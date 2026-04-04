@@ -281,6 +281,7 @@ const FIRST_ROUND_TEAMS = [
 export default function HomePage() {
   const [prospects, setProspects] = useState<TopProspect[]>([]);
   const [heroIdx, setHeroIdx] = useState(0);
+  const [draftVideos, setDraftVideos] = useState<{ videoId: string; title: string; thumbnailUrl: string; url: string; channelTitle: string }[]>([]);
 
   // Scroll-based parallax for hero
   const { scrollY } = useScroll();
@@ -290,15 +291,22 @@ export default function HomePage() {
   // Section refs for scroll reveal
   const carouselRef = useRef<HTMLElement>(null);
   const feedRef = useRef<HTMLElement>(null);
+  const draftVidRef = useRef<HTMLElement>(null);
   const ctaRef = useRef<HTMLElement>(null);
   const carouselInView = useInView(carouselRef, { once: true, margin: '-80px' });
   const feedInView = useInView(feedRef, { once: true, margin: '-80px' });
+  const draftVidInView = useInView(draftVidRef, { once: true, margin: '-80px' });
   const ctaInView = useInView(ctaRef, { once: true, margin: '-80px' });
 
   useEffect(() => {
     fetch('/api/players')
       .then(r => r.json())
       .then(d => setProspects((d.players || []).slice(0, 40)))
+      .catch(() => {});
+
+    fetch('/api/youtube?type=draft&limit=6')
+      .then(r => r.json())
+      .then(d => setDraftVideos((d.videos || []).slice(0, 6)))
       .catch(() => {});
   }, []);
 
@@ -470,6 +478,73 @@ export default function HomePage() {
             <LiveFeed />
           </motion.div>
         </motion.section>
+
+        {/* ── DRAFT COVERAGE VIDEOS ── */}
+        {draftVideos.length > 0 && (
+          <>
+            <div style={{ height: '120px' }} />
+            <motion.section
+              ref={draftVidRef}
+              className="px-6 py-16 md:py-20"
+              initial="hidden"
+              animate={draftVidInView ? 'visible' : 'hidden'}
+              variants={scrollReveal}
+            >
+              <div className="max-w-5xl mx-auto">
+                <motion.h2
+                  className="font-outfit text-xl md:text-2xl font-extrabold tracking-wide mb-8"
+                  style={{ color: 'var(--pf-text)' }}
+                  variants={fadeIn}
+                >
+                  DRAFT COVERAGE
+                </motion.h2>
+                <motion.div
+                  className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5"
+                  variants={staggerContainer}
+                  initial="hidden"
+                  animate={draftVidInView ? 'visible' : 'hidden'}
+                >
+                  {draftVideos.map((vid) => (
+                    <motion.a
+                      key={vid.videoId}
+                      href={vid.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      variants={staggerItem}
+                      className="group rounded-xl overflow-hidden transition-all hover:ring-1"
+                      style={{
+                        background: 'rgba(255,255,255,0.02)',
+                        border: '1px solid var(--pf-gold-border)',
+                      }}
+                    >
+                      <div className="relative aspect-video overflow-hidden">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={vid.thumbnailUrl}
+                          alt={vid.title}
+                          className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                        />
+                        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                          <div className="w-12 h-12 rounded-full flex items-center justify-center" style={{ background: 'rgba(0,0,0,0.7)' }}>
+                            <span className="text-white text-lg ml-0.5">&#9654;</span>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="p-4">
+                        <p className="text-sm font-mono text-white/70 leading-snug line-clamp-2 mb-1">
+                          {vid.title}
+                        </p>
+                        <p className="text-[10px] font-mono text-white/30 tracking-wider">
+                          {vid.channelTitle}
+                        </p>
+                      </div>
+                    </motion.a>
+                  ))}
+                </motion.div>
+              </div>
+            </motion.section>
+          </>
+        )}
 
         {/* ── SPACER ── */}
         <div style={{ height: '120px' }} />
