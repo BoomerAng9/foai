@@ -1,9 +1,18 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import Link from 'next/link';
+import {
+  scrollReveal,
+  scrollRevealBlur,
+  staggerContainer,
+  staggerItem,
+  heroStagger,
+  heroItem,
+} from '@/lib/motion';
 
 interface AnalystTake {
   analyst: string;
@@ -12,11 +21,36 @@ interface AnalystTake {
   content: string;
 }
 
-const ANALYSTS_STATIC = [
-  { id: 'analyst-1', name: 'Analyst 1', archetype: 'Stuart Scott energy', color: '#D4A853' },
-  { id: 'analyst-2', name: 'Analyst 2', archetype: 'Deion Sanders swagger', color: '#60A5FA' },
-  { id: 'analyst-3', name: 'Analyst 3', archetype: 'Film room grinder', color: '#34D399' },
-  { id: 'analyst-4', name: 'Analyst 4', archetype: 'Hot-take debate energy', color: '#F97316' },
+interface FeedItem {
+  title?: string;
+  summary?: string;
+}
+
+const ANALYSTS = [
+  {
+    id: 'analyst-1',
+    name: 'The Anchor',
+    descriptor: 'Breaking news and headline analysis',
+    color: '#D4A853',
+  },
+  {
+    id: 'analyst-2',
+    name: 'The Scout',
+    descriptor: 'Player evaluations and recruiting',
+    color: '#60A5FA',
+  },
+  {
+    id: 'analyst-3',
+    name: 'The Coach',
+    descriptor: 'Film breakdown and scheme analysis',
+    color: '#34D399',
+  },
+  {
+    id: 'analyst-4',
+    name: 'The Contrarian',
+    descriptor: 'Hot takes and debate',
+    color: '#F97316',
+  },
 ];
 
 const SEGMENTS = [
@@ -24,25 +58,25 @@ const SEGMENTS = [
     slug: 'around-the-horn',
     title: 'AROUND THE HORN',
     desc: 'Quick-fire takes from all 4 analysts. 30 seconds on the clock.',
-    icon: '\u23F1',
+    accent: '#D4A853',
   },
   {
     slug: 'bull-vs-bear',
     title: 'BULL VS BEAR',
     desc: 'Two analysts argue opposite sides of one player or pick.',
-    icon: '\u2694',
+    accent: '#EF4444',
   },
   {
     slug: 'film-room',
     title: 'FILM ROOM',
-    desc: 'Deep dive breakdown on a single player — tape don\'t lie.',
-    icon: '\uD83C\uDFAC',
+    desc: "Deep dive breakdown on a single player — tape don't lie.",
+    accent: '#34D399',
   },
   {
     slug: 'mock-draft-live',
     title: 'MOCK DRAFT LIVE',
     desc: 'Analysts make picks in real-time. No take-backs.',
-    icon: '\uD83D\uDCCB',
+    accent: '#60A5FA',
   },
 ];
 
@@ -51,6 +85,24 @@ export default function StudioPage() {
   const [loading, setLoading] = useState(false);
   const [takes, setTakes] = useState<AnalystTake[]>([]);
   const [debateStarted, setDebateStarted] = useState(false);
+  const [feeds, setFeeds] = useState<Record<string, FeedItem | null>>({});
+
+  // Fetch latest content for each analyst
+  useEffect(() => {
+    ANALYSTS.forEach(async (analyst) => {
+      try {
+        const res = await fetch(`/api/analysts/${analyst.name.toLowerCase().replace(/\s+/g, '-')}/feed`);
+        if (res.ok) {
+          const data = await res.json();
+          if (data && (data.title || data.summary)) {
+            setFeeds((prev) => ({ ...prev, [analyst.id]: data }));
+          }
+        }
+      } catch {
+        // Feed not available yet
+      }
+    });
+  }, []);
 
   async function startDebate() {
     if (!topic.trim()) return;
@@ -69,7 +121,7 @@ export default function StudioPage() {
         setTakes(data.takes);
       }
     } catch {
-      // silent fail — panels stay empty
+      // silent fail
     } finally {
       setLoading(false);
     }
@@ -79,83 +131,158 @@ export default function StudioPage() {
     <div className="min-h-screen flex flex-col" style={{ background: '#0A0A0F' }}>
       <Header />
 
-      <main className="flex-1 px-4 md:px-8 py-8 max-w-7xl mx-auto w-full">
-        {/* Title */}
-        <div className="text-center mb-10">
-          <div className="inline-block px-3 py-1 mb-3 rounded" style={{ background: 'rgba(212,168,83,0.12)', border: '1px solid rgba(212,168,83,0.25)' }}>
-            <span className="text-[10px] font-mono tracking-[0.3em]" style={{ color: '#D4A853' }}>BROADCAST STUDIO</span>
-          </div>
-          <h1 className="font-outfit text-4xl md:text-6xl font-black tracking-tight text-white">
+      {/* Subtle grid overlay */}
+      <div
+        className="fixed inset-0 pointer-events-none z-0"
+        style={{
+          backgroundImage:
+            'linear-gradient(rgba(255,255,255,0.015) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.015) 1px, transparent 1px)',
+          backgroundSize: '60px 60px',
+        }}
+      />
+
+      <main className="relative z-10 flex-1 px-4 md:px-8 py-12 max-w-7xl mx-auto w-full">
+        {/* Header */}
+        <motion.div
+          className="text-center mb-14"
+          variants={heroStagger}
+          initial="hidden"
+          animate="visible"
+        >
+          <motion.div
+            variants={heroItem}
+            className="inline-block px-4 py-1.5 mb-4 rounded-full"
+            style={{
+              background: 'rgba(212,168,83,0.08)',
+              border: '1px solid rgba(212,168,83,0.2)',
+            }}
+          >
+            <span
+              className="text-[10px] font-mono tracking-[0.3em]"
+              style={{ color: '#D4A853' }}
+            >
+              BROADCAST STUDIO
+            </span>
+          </motion.div>
+          <motion.h1
+            variants={heroItem}
+            className="font-outfit text-5xl md:text-7xl font-black tracking-tight text-white"
+          >
             THE WAR ROOM
-          </h1>
-          <p className="mt-2 text-sm font-mono text-white/40">
-            Live analyst debate &mdash; powered by TIE data
-          </p>
-          {/* Decorative bar */}
-          <div className="mt-4 mx-auto w-48 h-[2px]" style={{ background: 'linear-gradient(90deg, transparent, #D4A853, transparent)' }} />
-        </div>
+          </motion.h1>
+          <motion.p
+            variants={heroItem}
+            className="mt-3 text-sm font-mono text-white/35"
+          >
+            Live analyst debate — powered by TIE data
+          </motion.p>
+          <motion.div
+            variants={heroItem}
+            className="mt-5 mx-auto w-48 h-[2px]"
+            style={{
+              background: 'linear-gradient(90deg, transparent, #D4A853, transparent)',
+            }}
+          />
+        </motion.div>
 
         {/* Topic input */}
-        <div className="max-w-2xl mx-auto mb-8 flex gap-3">
+        <motion.div
+          className="max-w-2xl mx-auto mb-12 flex gap-3"
+          variants={scrollReveal}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true }}
+        >
           <input
             type="text"
             value={topic}
             onChange={(e) => setTopic(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && startDebate()}
             placeholder="Enter debate topic... e.g. Who should go #1 overall?"
-            className="flex-1 px-4 py-3 rounded-lg text-sm font-mono text-white placeholder-white/25 outline-none transition-colors"
+            className="flex-1 px-5 py-3.5 rounded-xl text-sm font-mono text-white placeholder-white/20 outline-none transition-all focus:ring-1"
             style={{
               background: 'rgba(255,255,255,0.04)',
               border: '1px solid rgba(255,255,255,0.08)',
+              // @ts-expect-error CSS custom property for focus ring
+              '--tw-ring-color': '#D4A85340',
             }}
           />
-          <button
+          <motion.button
             onClick={startDebate}
             disabled={loading || !topic.trim()}
-            className="px-6 py-3 rounded-lg text-xs font-mono font-bold tracking-[0.2em] transition-all"
+            className="px-7 py-3.5 rounded-xl text-xs font-mono font-bold tracking-[0.2em] transition-all"
             style={{
               background: loading ? 'rgba(212,168,83,0.3)' : '#D4A853',
               color: loading ? '#D4A853' : '#0A0A0F',
               cursor: loading || !topic.trim() ? 'not-allowed' : 'pointer',
             }}
+            whileHover={!loading && topic.trim() ? { scale: 1.03 } : {}}
+            whileTap={!loading && topic.trim() ? { scale: 0.97 } : {}}
           >
-            {loading ? 'DEBATING...' : 'START DEBATE'}
-          </button>
-        </div>
+            {loading ? 'DEBATING...' : 'GO LIVE'}
+          </motion.button>
+        </motion.div>
 
-        {/* 2x2 Analyst Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-12">
-          {ANALYSTS_STATIC.map((analyst, i) => {
-            const take = takes.find(t => t.analyst === analyst.name);
+        {/* 2x2 Analyst Panel Grid */}
+        <motion.div
+          className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-16"
+          variants={staggerContainer}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: '-40px' }}
+        >
+          {ANALYSTS.map((analyst) => {
+            const take = takes.find((t) => t.analyst === analyst.name);
+            const feed = feeds[analyst.id];
             const isActive = debateStarted;
 
             return (
-              <div
+              <motion.div
                 key={analyst.id}
-                className="relative rounded-lg overflow-hidden transition-all"
+                variants={staggerItem}
+                className="relative rounded-xl overflow-hidden"
                 style={{
                   background: 'rgba(255,255,255,0.02)',
-                  border: `1px solid ${isActive ? analyst.color + '40' : 'rgba(255,255,255,0.06)'}`,
-                  borderLeft: `3px solid ${analyst.color}`,
-                  minHeight: debateStarted ? '200px' : '120px',
+                  border: `1px solid ${isActive ? analyst.color + '35' : 'rgba(255,255,255,0.06)'}`,
+                  borderTop: `2px solid ${analyst.color}`,
+                  minHeight: debateStarted ? '220px' : '160px',
+                  transition: 'border-color 0.3s ease',
                 }}
               >
                 {/* Panel header */}
-                <div className="flex items-center gap-3 px-4 py-3" style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-                  <div className="w-2.5 h-2.5 rounded-full" style={{ background: analyst.color, boxShadow: `0 0 8px ${analyst.color}60` }} />
-                  <span className="font-outfit text-sm font-bold text-white tracking-wide">{analyst.name.toUpperCase()}</span>
-                  <span className="text-[10px] font-mono text-white/30 ml-auto">{analyst.archetype}</span>
+                <div
+                  className="flex items-center gap-3 px-5 py-3.5"
+                  style={{
+                    borderBottom: '1px solid rgba(255,255,255,0.04)',
+                    background: `linear-gradient(135deg, ${analyst.color}08, transparent)`,
+                  }}
+                >
+                  <div
+                    className="w-2.5 h-2.5 rounded-full"
+                    style={{
+                      background: analyst.color,
+                      boxShadow: `0 0 10px ${analyst.color}50`,
+                    }}
+                  />
+                  <span className="font-outfit text-sm font-bold text-white tracking-wide">
+                    {analyst.name.toUpperCase()}
+                  </span>
+                  <span className="text-[10px] font-mono text-white/25 ml-auto">
+                    {analyst.descriptor}
+                  </span>
                 </div>
 
                 {/* Panel content */}
-                <div className="px-4 py-3">
+                <div className="px-5 py-4">
                   {loading && !take && (
                     <div className="flex items-center gap-2">
                       <div
                         className="w-1.5 h-1.5 rounded-full animate-pulse"
                         style={{ background: analyst.color }}
                       />
-                      <span className="text-xs font-mono text-white/20">Forming take...</span>
+                      <span className="text-xs font-mono text-white/20">
+                        Forming take...
+                      </span>
                     </div>
                   )}
                   {take && (
@@ -163,58 +290,139 @@ export default function StudioPage() {
                       {take.content}
                     </p>
                   )}
-                  {!debateStarted && (
+                  {!debateStarted && feed && (
+                    <div>
+                      <p className="text-[10px] font-mono text-white/20 mb-2 tracking-wider">
+                        LATEST
+                      </p>
+                      <p className="text-sm text-white/50 leading-relaxed font-sans">
+                        {feed.title || feed.summary}
+                      </p>
+                    </div>
+                  )}
+                  {!debateStarted && !feed && (
                     <p className="text-xs font-mono text-white/15 italic">
-                      Waiting for topic...
+                      Broadcasting soon...
                     </p>
                   )}
                 </div>
 
-                {/* Live indicator when active */}
+                {/* Live indicator */}
                 {isActive && (
-                  <div className="absolute top-3 right-3 flex items-center gap-1.5">
-                    <div className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: '#EF4444' }} />
-                    <span className="text-[9px] font-mono text-white/30">LIVE</span>
+                  <div className="absolute top-3.5 right-4 flex items-center gap-1.5">
+                    <div
+                      className="w-1.5 h-1.5 rounded-full animate-pulse"
+                      style={{ background: '#EF4444' }}
+                    />
+                    <span className="text-[9px] font-mono text-white/30">
+                      LIVE
+                    </span>
                   </div>
                 )}
-              </div>
+
+                {/* Corner glow */}
+                <div
+                  className="absolute -bottom-8 -right-8 w-24 h-24 rounded-full pointer-events-none opacity-[0.06]"
+                  style={{
+                    background: `radial-gradient(circle, ${analyst.color}, transparent)`,
+                  }}
+                />
+              </motion.div>
             );
           })}
-        </div>
+        </motion.div>
 
-        {/* Segments section */}
-        <div className="mb-8">
-          <div className="flex items-center gap-3 mb-6">
-            <div className="w-8 h-[1px]" style={{ background: '#D4A853' }} />
-            <h2 className="font-outfit text-xl font-bold text-white tracking-wide">SEGMENTS</h2>
-            <div className="flex-1 h-[1px]" style={{ background: 'rgba(255,255,255,0.06)' }} />
+        {/* Segments Section */}
+        <motion.div
+          className="mb-12"
+          variants={scrollRevealBlur}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: '-40px' }}
+        >
+          <div className="flex items-center gap-4 mb-8">
+            <div className="w-10 h-[1px]" style={{ background: '#D4A853' }} />
+            <h2 className="font-outfit text-xl font-bold text-white tracking-[0.15em]">
+              SEGMENTS
+            </h2>
+            <div
+              className="flex-1 h-[1px]"
+              style={{ background: 'rgba(255,255,255,0.05)' }}
+            />
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <motion.div
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4"
+            variants={staggerContainer}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+          >
             {SEGMENTS.map((seg) => (
-              <Link
-                key={seg.slug}
-                href={`/studio/${seg.slug}`}
-                className="group rounded-lg p-5 transition-all hover:scale-[1.02]"
-                style={{
-                  background: 'rgba(255,255,255,0.02)',
-                  border: '1px solid rgba(255,255,255,0.06)',
-                }}
-              >
-                <div className="text-2xl mb-3">{seg.icon}</div>
-                <h3 className="font-outfit text-sm font-bold text-white tracking-[0.15em] mb-2 group-hover:text-[#D4A853] transition-colors">
-                  {seg.title}
-                </h3>
-                <p className="text-xs font-mono text-white/30 leading-relaxed">
-                  {seg.desc}
-                </p>
-                <div className="mt-3 text-[10px] font-mono tracking-wider" style={{ color: '#D4A853' }}>
-                  ENTER STUDIO &rarr;
-                </div>
-              </Link>
+              <motion.div key={seg.slug} variants={staggerItem}>
+                <Link href={`/studio/${seg.slug}`} className="block h-full">
+                  <motion.div
+                    className="relative h-full rounded-xl p-6 overflow-hidden cursor-pointer"
+                    style={{
+                      background: 'rgba(255,255,255,0.02)',
+                      border: '1px solid rgba(255,255,255,0.06)',
+                    }}
+                    whileHover={{
+                      scale: 1.03,
+                      y: -3,
+                      transition: { duration: 0.25, ease: 'easeOut' },
+                    }}
+                    onHoverStart={(e) => {
+                      const el = (
+                        e as unknown as { target: HTMLElement }
+                      ).target.closest('[class*="rounded-xl"]') as HTMLElement | null;
+                      if (el) {
+                        el.style.borderColor = seg.accent + '50';
+                        el.style.boxShadow = `0 4px 24px ${seg.accent}12`;
+                      }
+                    }}
+                    onHoverEnd={(e) => {
+                      const el = (
+                        e as unknown as { target: HTMLElement }
+                      ).target.closest('[class*="rounded-xl"]') as HTMLElement | null;
+                      if (el) {
+                        el.style.borderColor = 'rgba(255,255,255,0.06)';
+                        el.style.boxShadow = 'none';
+                      }
+                    }}
+                  >
+                    {/* Accent bar */}
+                    <div
+                      className="w-6 h-1 rounded-full mb-4"
+                      style={{ background: seg.accent }}
+                    />
+
+                    <h3 className="font-outfit text-sm font-bold text-white tracking-[0.15em] mb-2">
+                      {seg.title}
+                    </h3>
+                    <p className="text-xs font-mono text-white/30 leading-relaxed">
+                      {seg.desc}
+                    </p>
+                    <div
+                      className="mt-4 text-[10px] font-mono tracking-wider"
+                      style={{ color: seg.accent }}
+                    >
+                      ENTER STUDIO &rarr;
+                    </div>
+
+                    {/* Corner glow */}
+                    <div
+                      className="absolute -top-8 -right-8 w-20 h-20 rounded-full pointer-events-none opacity-[0.04]"
+                      style={{
+                        background: `radial-gradient(circle, ${seg.accent}, transparent)`,
+                      }}
+                    />
+                  </motion.div>
+                </Link>
+              </motion.div>
             ))}
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
       </main>
 
       <Footer />
