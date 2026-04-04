@@ -150,19 +150,20 @@ export default function DeployAgentPage() {
           </picture>
           <div className="absolute inset-0 bg-gradient-to-t from-[#0A0A0A] via-[#0A0A0A]/40 to-transparent" />
           <div className="absolute inset-0 flex flex-col items-center justify-end pb-10 px-4 text-center">
-            <Rocket className="w-8 h-8 text-[#E8A020] mb-4" />
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/aims-logo-gold.png" alt="" className="w-16 h-16 object-contain mb-4 opacity-90" style={{ filter: 'drop-shadow(0 0 12px rgba(232,160,32,0.4))' }} />
             <h1 className="font-mono text-3xl sm:text-4xl md:text-5xl font-black text-white tracking-tight mb-3">
               Deploy Your Workforce
             </h1>
             <p className="text-sm sm:text-base text-[#999] max-w-xl leading-relaxed">
               Boomer_Angs handle strategy. Lil_Hawks handle execution. You handle the vision.
             </p>
-            <button
-              onClick={() => document.getElementById('roster')?.scrollIntoView({ behavior: 'smooth' })}
+            <a
+              href="/meet/house-of-ang"
               className="mt-6 font-mono text-xs font-bold tracking-wider bg-[#E8A020] text-[#0A0A0A] px-6 py-2.5 hover:bg-[#F0B030] transition-colors flex items-center gap-2"
             >
               BROWSE THE ROSTER <ArrowRight className="w-3.5 h-3.5" />
-            </button>
+            </a>
           </div>
         </div>
       </section>

@@ -1,6 +1,7 @@
 /**
  * Memory recall — semantic search across conversations, memory, and data sources.
  * Uses pgvector cosine similarity against Gemini embeddings.
+ * Gracefully returns empty if embeddings or DB fail.
  */
 
 import { sql } from '@/lib/insforge';
@@ -21,20 +22,22 @@ export async function recallMemory(
   limit: number = 5,
 ): Promise<RecallResult[]> {
   if (!sql) return [];
-
-  const embedding = await generateEmbedding(query);
-  const vectorStr = `[${embedding.join(',')}]`;
-
-  const rows = await sql`
-    SELECT id, content, summary, source_type, created_at,
-           1 - (embedding <=> ${vectorStr}::vector) as similarity
-    FROM memory
-    WHERE user_id = ${userId}
-    ORDER BY embedding <=> ${vectorStr}::vector
-    LIMIT ${limit}
-  `;
-
-  return rows as unknown as RecallResult[];
+  try {
+    const embedding = await generateEmbedding(query);
+    if (embedding.length === 0) return [];
+    const vectorStr = `[${embedding.join(',')}]`;
+    const rows = await sql`
+      SELECT id, content, summary, source_type, created_at,
+             1 - (embedding <=> ${vectorStr}::vector) as similarity
+      FROM memory
+      WHERE user_id = ${userId}
+      ORDER BY embedding <=> ${vectorStr}::vector
+      LIMIT ${limit}
+    `;
+    return rows as unknown as RecallResult[];
+  } catch {
+    return [];
+  }
 }
 
 export async function recallSources(
@@ -43,20 +46,22 @@ export async function recallSources(
   limit: number = 5,
 ): Promise<RecallResult[]> {
   if (!sql) return [];
-
-  const embedding = await generateEmbedding(query);
-  const vectorStr = `[${embedding.join(',')}]`;
-
-  const rows = await sql`
-    SELECT id, content, name as summary, source_type, created_at,
-           1 - (embedding <=> ${vectorStr}::vector) as similarity
-    FROM data_sources
-    WHERE user_id = ${userId} AND status = 'ready'
-    ORDER BY embedding <=> ${vectorStr}::vector
-    LIMIT ${limit}
-  `;
-
-  return rows as unknown as RecallResult[];
+  try {
+    const embedding = await generateEmbedding(query);
+    if (embedding.length === 0) return [];
+    const vectorStr = `[${embedding.join(',')}]`;
+    const rows = await sql`
+      SELECT id, content, name as summary, source_type, created_at,
+             1 - (embedding <=> ${vectorStr}::vector) as similarity
+      FROM data_sources
+      WHERE user_id = ${userId} AND status = 'ready'
+      ORDER BY embedding <=> ${vectorStr}::vector
+      LIMIT ${limit}
+    `;
+    return rows as unknown as RecallResult[];
+  } catch {
+    return [];
+  }
 }
 
 export async function recallAll(
@@ -64,12 +69,15 @@ export async function recallAll(
   query: string,
   limit: number = 10,
 ): Promise<RecallResult[]> {
-  const [memories, sources] = await Promise.all([
-    recallMemory(userId, query, limit),
-    recallSources(userId, query, limit),
-  ]);
-
-  return [...memories, ...sources]
-    .sort((a, b) => b.similarity - a.similarity)
-    .slice(0, limit);
+  try {
+    const [memories, sources] = await Promise.all([
+      recallMemory(userId, query, limit),
+      recallSources(userId, query, limit),
+    ]);
+    return [...memories, ...sources]
+      .sort((a, b) => b.similarity - a.similarity)
+      .slice(0, limit);
+  } catch {
+    return [];
+  }
 }
