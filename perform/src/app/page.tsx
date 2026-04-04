@@ -109,7 +109,7 @@ export default function HomePage() {
           <h2 className="font-outfit text-2xl font-extrabold text-white tracking-wide mb-6 text-center">HOW IT WORKS</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {[
-              { title: 'TIE GRADES', desc: 'Every prospect scored on Performance, Attributes, and Intangibles. Three dimensions weighted into one grade.' },
+              { title: 'TIE GRADES', desc: 'Every prospect evaluated and scored by our proprietary grading system. The results speak for themselves.' },
               { title: 'AI ANALYSTS', desc: 'Four autonomous analysts generate scouting reports, film breakdowns, hot takes, and ranking updates daily.' },
               { title: 'LIVE DATA', desc: 'Pipeline scrapes sports news around the clock. Grades update automatically when new data arrives.' },
             ].map(item => (
