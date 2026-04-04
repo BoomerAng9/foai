@@ -44,6 +44,7 @@ const NAV: NavItem[] = [
   { name: 'MARKETPLACE', href: '/open-seats', icon: Search, ownerOnly: true },
   { name: 'ENROLLMENTS', href: '/enrollments', icon: TrendingUp, ownerOnly: true },
   { name: 'SQUAD', href: '/team', icon: Shield, ownerOnly: true },
+  { name: 'PER|FORM', href: 'https://perform.foai.cloud', icon: Activity },
   { name: 'ABOUT', href: '/about', icon: Info },
   { name: 'ACCOUNT', href: '/settings', icon: User },
   { name: 'BILLING', href: '/pricing', icon: CreditCard, ownerOnly: true },
@@ -136,12 +137,16 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         <nav className="flex-1 py-4 px-3 md:px-1.5 lg:px-3 space-y-0.5 overflow-y-auto">
           {visibleNav.map((item) => {
             const active = pathname === item.href || pathname.startsWith(item.href + '/');
+            const isExternal = item.href.startsWith('http');
+            const El = isExternal ? 'a' : Link;
+            const extraProps = isExternal ? { target: '_blank', rel: 'noopener noreferrer' } : {};
             return (
-              <Link
+              <El
                 key={item.href}
                 href={item.href}
                 onClick={() => setMobileMenuOpen(false)}
                 title={item.name}
+                {...extraProps}
                 className={`flex items-center gap-3 px-3 md:px-0 md:justify-center lg:px-3 lg:justify-start py-2 text-[11px] font-mono font-medium tracking-wide transition-all ${
                   active
                     ? 'bg-accent text-bg'
@@ -150,7 +155,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               >
                 <item.icon className="w-3.5 h-3.5 shrink-0" />
                 <span className={`md:hidden ${sidebarExpanded ? 'md:inline' : ''} lg:inline`}>{item.name}</span>
-              </Link>
+              </El>
             );
           })}
         </nav>
