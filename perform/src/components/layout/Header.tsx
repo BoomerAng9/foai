@@ -8,9 +8,9 @@ const NAV_ITEMS = [
   { label: 'Home', href: '/' },
   { label: 'Draft Board', href: '/draft' },
   { label: 'Mock Draft', href: '/draft/mock' },
+  { label: 'War Room', href: '/studio' },
   { label: 'Analysts', href: '/analysts' },
   { label: 'Flag Football', href: '/flag-football' },
-  { label: 'Podcast', href: '/podcast' },
   { label: 'Dashboard', href: '/dashboard' },
 ];
 
