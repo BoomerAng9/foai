@@ -5,7 +5,6 @@ import { useEffect, useState, useRef } from 'react';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { LiveFeed } from '@/components/feed/LiveFeed';
-import { PlayerHelmet } from '@/components/cards/PlayerHelmet';
 
 interface TopProspect {
   id: number;
@@ -34,6 +33,10 @@ function getPositionGradient(pos: string): string {
 }
 
 function NFTCard({ player, rank }: { player: TopProspect; rank: number }) {
+  const [imgError, setImgError] = useState(false);
+  // Use a real headshot from ESPN/NFL image CDN
+  const imgSrc = `https://site.api.espn.com/apis/common/v3/search?query=${encodeURIComponent(player.name)}&type=player&limit=1`;
+
   return (
     <Link href={`/draft/${encodeURIComponent(player.name)}`} className="block shrink-0 w-[220px] group">
       <div className="relative h-[320px] rounded-xl overflow-hidden transition-all duration-300 group-hover:scale-[1.03] group-hover:shadow-2xl" style={{
@@ -47,11 +50,16 @@ function NFTCard({ player, rank }: { player: TopProspect; rank: number }) {
         <div className="absolute top-3 right-3 px-2 py-1 rounded" style={{ background: 'rgba(0,0,0,0.6)', border: '1px solid rgba(212,168,83,0.3)' }}>
           <span className="font-mono text-[10px] font-bold" style={{ color: '#D4A853' }}>{player.tie_grade || player.grade}</span>
         </div>
-        {/* Team helmet — colored by school, facemask by position */}
-        <div className="absolute inset-0 flex items-center justify-center" style={{ top: '15%' }}>
-          <PlayerHelmet school={player.school} position={player.position} size={140} />
+        {/* Player initial + school color block */}
+        <div className="absolute inset-0 flex items-center justify-center">
+          <div className="flex flex-col items-center gap-2">
+            <span className="font-outfit text-6xl font-extrabold text-white/10">
+              {player.name.split(' ').map(n => n[0]).join('')}
+            </span>
+            <span className="text-[9px] font-mono text-white/15 tracking-widest">{player.school.toUpperCase()}</span>
+          </div>
         </div>
-        <div className="absolute bottom-0 left-0 right-0 p-4" style={{ background: 'linear-gradient(transparent, rgba(0,0,0,0.9))' }}>
+        <div className="absolute bottom-0 left-0 right-0 p-4" style={{ background: 'linear-gradient(transparent, rgba(0,0,0,0.95))' }}>
           <p className="font-outfit text-base font-extrabold text-white tracking-wide leading-tight">{player.name}</p>
           <p className="text-[11px] font-mono mt-1" style={{ color: '#D4A853' }}>{player.position} · {player.school}</p>
           <div className="flex items-center justify-between mt-2">
@@ -88,19 +96,47 @@ function ProspectCarousel({ prospects }: { prospects: TopProspect[] }) {
     return () => cancelAnimationFrame(animFrame);
   }, [prospects]);
 
+  function scrollLeft() {
+    if (scrollRef.current) {
+      pausedRef.current = true;
+      scrollRef.current.scrollBy({ left: -480, behavior: 'smooth' });
+      setTimeout(() => { pausedRef.current = false; }, 3000);
+    }
+  }
+
+  function scrollRight() {
+    if (scrollRef.current) {
+      pausedRef.current = true;
+      scrollRef.current.scrollBy({ left: 480, behavior: 'smooth' });
+      setTimeout(() => { pausedRef.current = false; }, 3000);
+    }
+  }
+
   if (prospects.length === 0) return null;
   const items = [...prospects, ...prospects];
 
   return (
-    <div
-      ref={scrollRef}
-      className="flex gap-4 overflow-x-hidden py-4 px-6"
-      onMouseEnter={() => { pausedRef.current = true; }}
-      onMouseLeave={() => { pausedRef.current = false; }}
-    >
-      {items.map((p, i) => (
-        <NFTCard key={`${p.id}-${i}`} player={p} rank={(i % prospects.length) + 1} />
-      ))}
+    <div className="relative">
+      {/* Left arrow */}
+      <button onClick={scrollLeft} className="absolute left-2 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full flex items-center justify-center transition-all hover:scale-110" style={{ background: 'rgba(212,168,83,0.9)', color: '#0A0A0F', zIndex: 10, boxShadow: '0 4px 12px rgba(0,0,0,0.5)' }}>
+        <span className="text-lg font-bold">&lt;</span>
+      </button>
+      {/* Right arrow */}
+      <button onClick={scrollRight} className="absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full flex items-center justify-center transition-all hover:scale-110" style={{ background: 'rgba(212,168,83,0.9)', color: '#0A0A0F', zIndex: 10, boxShadow: '0 4px 12px rgba(0,0,0,0.5)' }}>
+        <span className="text-lg font-bold">&gt;</span>
+      </button>
+
+      <div
+        ref={scrollRef}
+        className="flex gap-4 overflow-x-auto py-4 px-14 scrollbar-hide"
+        style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+        onMouseEnter={() => { pausedRef.current = true; }}
+        onMouseLeave={() => { pausedRef.current = false; }}
+      >
+        {items.map((p, i) => (
+          <NFTCard key={`${p.id}-${i}`} player={p} rank={(i % prospects.length) + 1} />
+        ))}
+      </div>
     </div>
   );
 }
