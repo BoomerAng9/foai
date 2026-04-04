@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 
@@ -16,6 +16,94 @@ interface TopProspect {
   grade: string;
   nfl_comparison: string;
   projected_round: number;
+  strengths: string;
+}
+
+function getPositionGradient(pos: string): string {
+  const p = pos?.toUpperCase() || '';
+  if (p === 'QB') return 'linear-gradient(135deg, #1a1a3e 0%, #2d1b4e 50%, #0f0f2a 100%)';
+  if (p === 'RB') return 'linear-gradient(135deg, #2a1a1a 0%, #3e1b1b 50%, #1a0f0f 100%)';
+  if (p === 'WR' || p === 'TE') return 'linear-gradient(135deg, #1a2a1a 0%, #1b3e2d 50%, #0f1a0f 100%)';
+  if (p.includes('OL') || p === 'OT' || p === 'OG' || p === 'C') return 'linear-gradient(135deg, #2a2a1a 0%, #3e3e1b 50%, #1a1a0f 100%)';
+  if (p.includes('DL') || p === 'DT' || p === 'DE' || p === 'EDGE') return 'linear-gradient(135deg, #1a1a2a 0%, #1b2d3e 50%, #0f0f1a 100%)';
+  if (p === 'LB' || p === 'ILB' || p === 'OLB') return 'linear-gradient(135deg, #2a1a2a 0%, #3e1b3e 50%, #1a0f1a 100%)';
+  if (p === 'CB' || p === 'S' || p === 'FS' || p === 'SS') return 'linear-gradient(135deg, #1a2a2a 0%, #1b3e3e 50%, #0f1a1a 100%)';
+  return 'linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 50%, #0f0f0f 100%)';
+}
+
+function NFTCard({ player, rank }: { player: TopProspect; rank: number }) {
+  return (
+    <Link href={`/draft/${encodeURIComponent(player.name)}`} className="block shrink-0 w-[220px] group">
+      <div className="relative h-[320px] rounded-xl overflow-hidden transition-all duration-300 group-hover:scale-[1.03] group-hover:shadow-2xl" style={{
+        background: getPositionGradient(player.position),
+        border: '1px solid rgba(212,168,83,0.2)',
+        boxShadow: '0 8px 32px rgba(0,0,0,0.4)',
+      }}>
+        <div className="absolute top-3 left-3 w-8 h-8 flex items-center justify-center rounded-full" style={{ background: '#D4A853', color: '#0A0A0F' }}>
+          <span className="font-outfit text-xs font-extrabold">#{rank}</span>
+        </div>
+        <div className="absolute top-3 right-3 px-2 py-1 rounded" style={{ background: 'rgba(0,0,0,0.6)', border: '1px solid rgba(212,168,83,0.3)' }}>
+          <span className="font-mono text-[10px] font-bold" style={{ color: '#D4A853' }}>{player.tie_grade || player.grade}</span>
+        </div>
+        {/* Player silhouette — ILLA will generate real portraits */}
+        <div className="absolute inset-0 flex items-center justify-center opacity-[0.06]">
+          <svg width="120" height="120" viewBox="0 0 100 100" fill="none">
+            <circle cx="50" cy="30" r="20" fill="white" />
+            <path d="M15 95 Q15 60 50 55 Q85 60 85 95" fill="white" />
+          </svg>
+        </div>
+        <div className="absolute bottom-0 left-0 right-0 p-4" style={{ background: 'linear-gradient(transparent, rgba(0,0,0,0.9))' }}>
+          <p className="font-outfit text-base font-extrabold text-white tracking-wide leading-tight">{player.name}</p>
+          <p className="text-[11px] font-mono mt-1" style={{ color: '#D4A853' }}>{player.position} · {player.school}</p>
+          <div className="flex items-center justify-between mt-2">
+            <span className="text-[9px] font-mono text-white/30">RD {player.projected_round || '?'}</span>
+            <span className="text-[9px] font-mono text-white/30">{player.nfl_comparison || ''}</span>
+          </div>
+        </div>
+        <div className="absolute inset-0 rounded-xl pointer-events-none" style={{
+          background: 'linear-gradient(135deg, rgba(255,255,255,0.05) 0%, transparent 50%, rgba(255,255,255,0.02) 100%)',
+        }} />
+      </div>
+    </Link>
+  );
+}
+
+function ProspectCarousel({ prospects }: { prospects: TopProspect[] }) {
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const pausedRef = useRef(false);
+
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el || prospects.length === 0) return;
+    let pos = 0;
+    let animFrame: number;
+    function animate() {
+      if (!pausedRef.current) {
+        pos += 0.5;
+        if (el && pos >= el.scrollWidth / 2) pos = 0;
+        if (el) el.scrollLeft = pos;
+      }
+      animFrame = requestAnimationFrame(animate);
+    }
+    animFrame = requestAnimationFrame(animate);
+    return () => cancelAnimationFrame(animFrame);
+  }, [prospects]);
+
+  if (prospects.length === 0) return null;
+  const items = [...prospects, ...prospects];
+
+  return (
+    <div
+      ref={scrollRef}
+      className="flex gap-4 overflow-x-hidden py-4 px-6"
+      onMouseEnter={() => { pausedRef.current = true; }}
+      onMouseLeave={() => { pausedRef.current = false; }}
+    >
+      {items.map((p, i) => (
+        <NFTCard key={`${p.id}-${i}`} player={p} rank={(i % prospects.length) + 1} />
+      ))}
+    </div>
+  );
 }
 
 export default function HomePage() {
@@ -24,7 +112,7 @@ export default function HomePage() {
   useEffect(() => {
     fetch('/api/players')
       .then(r => r.json())
-      .then(d => setProspects((d.players || []).slice(0, 10)))
+      .then(d => setProspects((d.players || []).slice(0, 40)))
       .catch(() => {});
   }, []);
 
@@ -33,7 +121,7 @@ export default function HomePage() {
       <Header />
 
       {/* ── HERO ── */}
-      <section className="relative px-6 pt-24 pb-20 text-center overflow-hidden">
+      <section className="relative px-6 pt-20 pb-12 text-center overflow-hidden">
         <div className="pointer-events-none absolute inset-0" style={{
           background: 'radial-gradient(ellipse 60% 50% at 50% 30%, rgba(212,168,83,0.08) 0%, transparent 100%)',
         }} />
@@ -43,117 +131,37 @@ export default function HomePage() {
         <h1 className="font-outfit text-5xl md:text-7xl font-extrabold tracking-tight text-white mb-4">
           PER<span style={{ color: '#555' }}>|</span><span style={{ color: '#D4A853' }}>FORM</span>
         </h1>
-        <p className="text-lg text-white/40 font-mono mb-2">
-          Sports Grading &amp; Ranking Platform
-        </p>
-        <p className="text-sm text-white/25 font-mono max-w-lg mx-auto mb-10">
-          Every prospect graded. Every pick projected. Autonomous analyst coverage that never sleeps.
+        <p className="text-sm text-white/25 font-mono max-w-lg mx-auto mb-8">
+          Every prospect graded. Every pick projected.
         </p>
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
           <Link href="/draft" className="px-8 py-3.5 text-sm font-outfit font-bold tracking-wider transition-all hover:brightness-110" style={{ background: '#D4A853', color: '#0A0A0F' }}>
-            2026 DRAFT BOARD
+            DRAFT BOARD
           </Link>
-          <Link href="/draft/mock" className="px-8 py-3.5 text-sm font-mono tracking-wider border transition-colors hover:bg-white/5" style={{ borderColor: 'rgba(212,168,83,0.4)', color: '#D4A853' }}>
-            MOCK DRAFT SIMULATOR
-          </Link>
-        </div>
-      </section>
-
-      {/* ── TOP 10 PROSPECTS ── */}
-      <section className="px-6 py-16 max-w-6xl mx-auto w-full">
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <p className="text-[10px] font-mono tracking-[0.4em] mb-1" style={{ color: 'rgba(212,168,83,0.5)' }}>LIVE RANKINGS</p>
-            <h2 className="font-outfit text-2xl font-extrabold text-white tracking-wide">TOP 10 PROSPECTS</h2>
-          </div>
-          <Link href="/draft" className="text-xs font-mono tracking-wider hover:text-white/70 transition-colors" style={{ color: '#D4A853' }}>
-            VIEW ALL 50 →
+          <Link href="/studio" className="px-8 py-3.5 text-sm font-mono tracking-wider border transition-colors hover:bg-white/5" style={{ borderColor: 'rgba(212,168,83,0.4)', color: '#D4A853' }}>
+            THE WAR ROOM
           </Link>
         </div>
-
-        {prospects.length > 0 ? (
-          <div className="space-y-2">
-            {prospects.map((p, i) => (
-              <Link key={p.id} href={`/draft/${encodeURIComponent(p.name)}`} className="flex items-center gap-4 px-4 py-3 transition-all hover:bg-white/[0.03]" style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-                <span className="w-8 text-center font-outfit text-lg font-extrabold" style={{ color: '#D4A853' }}>
-                  {i + 1}
-                </span>
-                <div className="flex-1 min-w-0">
-                  <span className="font-outfit text-sm font-bold text-white">{p.name}</span>
-                  <span className="text-xs text-white/30 font-mono ml-3">{p.position} · {p.school}</span>
-                </div>
-                <span className="text-xs font-mono text-white/20 hidden sm:block">
-                  comp: {p.nfl_comparison || '—'}
-                </span>
-                <span className="text-xs font-mono px-2 py-0.5" style={{
-                  background: 'rgba(212,168,83,0.1)',
-                  color: '#D4A853',
-                  border: '1px solid rgba(212,168,83,0.2)',
-                }}>
-                  {p.tie_grade || `${p.grade}`}
-                </span>
-                <span className="text-xs font-mono text-white/20">
-                  Rd {p.projected_round || '?'}
-                </span>
-              </Link>
-            ))}
-          </div>
-        ) : (
-          <div className="text-center py-12 text-white/20 font-mono text-sm">Loading draft board...</div>
-        )}
       </section>
 
-      {/* ── WHAT IS PER|FORM ── */}
-      <section className="px-6 py-16" style={{ borderTop: '1px solid rgba(255,255,255,0.05)' }}>
-        <div className="max-w-4xl mx-auto">
-          <h2 className="font-outfit text-2xl font-extrabold text-white tracking-wide mb-6 text-center">HOW IT WORKS</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {[
-              { title: 'TIE GRADES', desc: 'Every prospect evaluated and scored by our proprietary grading system. The results speak for themselves.' },
-              { title: 'AI ANALYSTS', desc: 'Four autonomous analysts generate scouting reports, film breakdowns, hot takes, and ranking updates daily.' },
-              { title: 'LIVE DATA', desc: 'Pipeline scrapes sports news around the clock. Grades update automatically when new data arrives.' },
-            ].map(item => (
-              <div key={item.title} className="p-6" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)' }}>
-                <h3 className="font-outfit text-sm font-bold tracking-wider mb-3" style={{ color: '#D4A853' }}>{item.title}</h3>
-                <p className="text-xs text-white/40 font-mono leading-relaxed">{item.desc}</p>
-              </div>
-            ))}
-          </div>
+      {/* ── TOP 40 NFT CARD CAROUSEL ── */}
+      <section className="py-8">
+        <div className="flex items-center justify-between px-6 mb-4">
+          <h2 className="font-outfit text-xl font-extrabold text-white tracking-wide">TOP 40 PROSPECTS</h2>
+          <Link href="/draft" className="text-xs font-mono tracking-wider" style={{ color: '#D4A853' }}>FULL BOARD →</Link>
         </div>
+        <ProspectCarousel prospects={prospects} />
       </section>
 
-      {/* ── COVERAGE LINKS ── */}
-      <section className="px-6 py-16" style={{ borderTop: '1px solid rgba(255,255,255,0.05)' }}>
-        <div className="max-w-4xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-4">
-          {[
-            { label: 'Draft Board', href: '/draft', desc: '50 prospects' },
-            { label: 'Mock Draft', href: '/draft/mock', desc: '7-round sim' },
-            { label: 'Analysts', href: '/analysts', desc: '4 AI voices' },
-            { label: 'Flag Football', href: '/flag-football', desc: 'LA 2028' },
-          ].map(link => (
-            <Link key={link.href} href={link.href} className="p-5 text-center transition-all hover:border-[#D4A853]/40" style={{ border: '1px solid rgba(255,255,255,0.06)', background: 'rgba(255,255,255,0.02)' }}>
-              <span className="font-outfit text-sm font-bold text-white block mb-1">{link.label}</span>
-              <span className="text-[10px] font-mono text-white/30">{link.desc}</span>
-            </Link>
-          ))}
-        </div>
-      </section>
-
-      {/* ── DRAFT INFO ── */}
+      {/* ── BOTTOM NAV ── */}
       <section className="px-6 py-16" style={{ borderTop: '1px solid rgba(255,255,255,0.05)' }}>
         <div className="max-w-3xl mx-auto text-center">
-          <h2 className="font-outfit text-2xl font-extrabold text-white tracking-wide mb-4">2026 NFL DRAFT</h2>
-          <p className="text-sm text-white/40 font-mono leading-relaxed mb-2">
-            April 23-25, 2026 · Pittsburgh, Pennsylvania
-          </p>
-          <p className="text-sm text-white/30 font-mono leading-relaxed mb-6">
-            257 selections across 7 rounds. Coverage on ESPN, ABC, NFL Network.
-          </p>
-          <p className="text-xs text-white/20 font-mono leading-relaxed max-w-xl mx-auto">
-            Per|Form delivers autonomous grading and analysis powered by the TIE system.
-            Our AI analyst team generates daily content — scouting reports, film breakdowns,
-            mock drafts, and debate segments — without human writers.
-          </p>
+          <h2 className="font-outfit text-2xl font-extrabold text-white tracking-wide mb-6">257 PICKS. 7 ROUNDS.</h2>
+          <div className="flex flex-wrap justify-center gap-4">
+            <Link href="/draft/mock" className="px-6 py-3 text-xs font-mono font-bold tracking-wider transition-all hover:brightness-110" style={{ background: '#D4A853', color: '#0A0A0F' }}>MOCK DRAFT</Link>
+            <Link href="/analysts" className="px-6 py-3 text-xs font-mono font-bold tracking-wider border transition-colors hover:bg-white/5" style={{ borderColor: 'rgba(212,168,83,0.4)', color: '#D4A853' }}>ANALYSTS</Link>
+            <Link href="/flag-football" className="px-6 py-3 text-xs font-mono font-bold tracking-wider border transition-colors hover:bg-white/5" style={{ borderColor: 'rgba(212,168,83,0.4)', color: '#D4A853' }}>FLAG FOOTBALL</Link>
+          </div>
         </div>
       </section>
 
