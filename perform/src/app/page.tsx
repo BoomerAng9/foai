@@ -5,6 +5,7 @@ import { useEffect, useState, useRef } from 'react';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { LiveFeed } from '@/components/feed/LiveFeed';
+import { PlayerHelmet } from '@/components/cards/PlayerHelmet';
 
 interface TopProspect {
   id: number;
@@ -46,12 +47,9 @@ function NFTCard({ player, rank }: { player: TopProspect; rank: number }) {
         <div className="absolute top-3 right-3 px-2 py-1 rounded" style={{ background: 'rgba(0,0,0,0.6)', border: '1px solid rgba(212,168,83,0.3)' }}>
           <span className="font-mono text-[10px] font-bold" style={{ color: '#D4A853' }}>{player.tie_grade || player.grade}</span>
         </div>
-        {/* Player silhouette — ILLA will generate real portraits */}
-        <div className="absolute inset-0 flex items-center justify-center opacity-[0.06]">
-          <svg width="120" height="120" viewBox="0 0 100 100" fill="none">
-            <circle cx="50" cy="30" r="20" fill="white" />
-            <path d="M15 95 Q15 60 50 55 Q85 60 85 95" fill="white" />
-          </svg>
+        {/* Team helmet — colored by school, facemask by position */}
+        <div className="absolute inset-0 flex items-center justify-center" style={{ top: '15%' }}>
+          <PlayerHelmet school={player.school} position={player.position} size={140} />
         </div>
         <div className="absolute bottom-0 left-0 right-0 p-4" style={{ background: 'linear-gradient(transparent, rgba(0,0,0,0.9))' }}>
           <p className="font-outfit text-base font-extrabold text-white tracking-wide leading-tight">{player.name}</p>
