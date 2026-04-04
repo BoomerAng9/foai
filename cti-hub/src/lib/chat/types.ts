@@ -83,9 +83,11 @@ export interface ModelOption {
   tag?: string;
 }
 
-// OpenRouter model catalog — March 2026 verified pricing ($/1M tokens)
+// OpenRouter model catalog — April 2026 verified pricing ($/1M tokens)
 export const MODELS: ModelOption[] = [
-  { id: 'minimax/minimax-m2.7',              name: 'MiniMax M2.7',          provider: 'MiniMax',     price_in: 0.30,  price_out: 1.20,  context: '200K',  tag: 'DEFAULT' },
+  { id: 'google/gemma-4-26b-a4b-it',        name: 'Gemma 4 26B',           provider: 'Google',      price_in: 0.13,  price_out: 0.40,  context: '256K',  tag: 'DEFAULT' },
+  { id: 'anthropic/claude-opus-4-6',         name: 'Claude Opus 4.6',      provider: 'Anthropic',   price_in: 15.00, price_out: 75.00, context: '1M',    tag: 'PREMIUM' },
+  { id: 'moonshotai/kimi-k2.5r',            name: 'Kimi K2.5r',           provider: 'Moonshot',    price_in: 0.50,  price_out: 2.80,  context: '128K',  tag: 'REASON' },
   { id: 'deepseek/deepseek-v3.2',           name: 'DeepSeek V3.2',        provider: 'DeepSeek',    price_in: 0.26,  price_out: 0.38,  context: '164K',  tag: 'CHEAP' },
   { id: 'meta-llama/llama-4-scout',          name: 'Llama 4 Scout',        provider: 'Meta',        price_in: 0.08,  price_out: 0.30,  context: '328K',  tag: 'CHEAP' },
   { id: 'qwen/qwen3.5-flash-02-23',         name: 'Qwen 3.5 Flash',       provider: 'Qwen',        price_in: 0.065, price_out: 0.26,  context: '1M',    tag: 'CHEAP' },

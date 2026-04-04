@@ -301,7 +301,7 @@ export const AGENTS: AgentProfile[] = [
     department: 'FIN',
     tier: 'strategic',
     persona: 'Every dollar tracked. Every token counted. Receivables, bookkeeping, pricing.',
-    avatar: '/acheevy-helmet.png',
+    avatar: '/agents/cfo-ang.png',
     capabilities: ['Budget tracking', 'Cost analysis', 'Revenue optimization', 'Receivables', 'Bookkeeping', 'Pricing strategy'],
     mcpToolName: 'cfo_ang_finance',
     subscriptionTier: 'growth', hireable: true, individualPrice: 147,

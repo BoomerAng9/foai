@@ -8,8 +8,9 @@ import { useAuth } from '@/hooks/useAuth';
 import { ChatSidebar } from '@/components/chat/ChatSidebar';
 import { MessageBubble } from '@/components/chat/MessageBubble';
 import { RolodexVerb } from '@/components/chat/RolodexVerb';
-import type { Message, Attachment, Conversation, TierId, AgentTier } from '@/lib/chat/types';
-import { TIERS } from '@/lib/chat/types';
+import type { Message, Attachment, Conversation, TierId, AgentTier, ModelOption } from '@/lib/chat/types';
+import { TIERS, MODELS } from '@/lib/chat/types';
+import { ChevronDown } from 'lucide-react';
 import { TaskView } from '@/components/chat/TaskView';
 import { LucPopup } from '@/components/chat/LucPopup';
 import type { LucEstimate } from '@/lib/luc/types';
@@ -59,6 +60,9 @@ function ChatWithACHEEVY() {
   const [streamingCost, setStreamingCost] = useState<{ tokens_in: number; tokens_out: number; cost: number } | null>(null);
   const [manageItInput, setManageItInput] = useState('');
   const [guideMode, setGuideMode] = useState(false);
+  const [selectedModel, setSelectedModel] = useState('google/gemma-4-26b-a4b-it');
+  const [modelDropdownOpen, setModelDropdownOpen] = useState(false);
+  const modelDropdownRef = useRef<HTMLDivElement>(null);
   const [activeDispatch, setActiveDispatch] = useState<{
     tier: AgentTier;
     agents: string[];
@@ -152,6 +156,29 @@ function ChatWithACHEEVY() {
     return () => clearTimeout(timer);
   }, [deployAgent, user]);
 
+  // Close model dropdown on outside click
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (modelDropdownRef.current && !modelDropdownRef.current.contains(e.target as Node)) {
+        setModelDropdownOpen(false);
+      }
+    }
+    if (modelDropdownOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => document.removeEventListener('mousedown', handleClickOutside);
+    }
+  }, [modelDropdownOpen]);
+
+  // Group models by tag for the dropdown
+  const modelsByTag = MODELS.reduce<Record<string, ModelOption[]>>((acc, m) => {
+    const tag = m.tag || 'OTHER';
+    if (!acc[tag]) acc[tag] = [];
+    acc[tag].push(m);
+    return acc;
+  }, {});
+  const tagOrder = ['DEFAULT', 'PREMIUM', 'FAST', 'REASON', 'CHEAP', 'OPEN', 'FREE', 'OTHER'];
+  const selectedModelObj = MODELS.find(m => m.id === selectedModel);
+
   function scrollToBottom() {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' });
   }
@@ -208,6 +235,7 @@ function ChatWithACHEEVY() {
         body: JSON.stringify({
           message: msg,
           conversation_id: activeConvId,
+          model: selectedModel,
           attachments: currentAttachments.map(a => ({ name: a.name, type: a.type, size: a.size })),
           skill_context: activeSkill?.systemContext || undefined,
           mode: guideMode ? 'guide' : undefined,
@@ -254,6 +282,7 @@ function ChatWithACHEEVY() {
               body: JSON.stringify({
                 message: msg,
                 conversation_id: activeConvId,
+                model: selectedModel,
                 attachments: currentAttachments.map(a => ({ name: a.name, type: a.type, size: a.size })),
                 skill_context: activeSkill?.systemContext || undefined,
                 mode: guideMode ? 'guide' : undefined,
@@ -605,13 +634,58 @@ function ChatWithACHEEVY() {
       </div>
 
       <div className="flex-1 flex flex-col relative bg-bg min-w-0">
-        <div className="flex items-center px-2 sm:px-4 py-1 shrink-0">
+        <div className="flex items-center px-2 sm:px-4 py-1 shrink-0 gap-2">
           <button
             onClick={() => setSidebarOpen(!sidebarOpen)}
             className="btn-bracket text-[10px]"
           >
             {sidebarOpen ? 'HIDE' : 'THREADS'}
           </button>
+
+          {/* Model Switcher */}
+          <div ref={modelDropdownRef} className="relative">
+            <button
+              onClick={() => setModelDropdownOpen(!modelDropdownOpen)}
+              className="flex items-center gap-1.5 px-2 py-1 border border-border bg-bg-surface hover:border-accent/50 transition-colors text-[10px] font-mono text-fg-secondary"
+            >
+              <span className="truncate max-w-[140px] sm:max-w-[200px]">{selectedModelObj?.name || 'Select Model'}</span>
+              <ChevronDown className={`w-3 h-3 shrink-0 transition-transform ${modelDropdownOpen ? 'rotate-180' : ''}`} />
+            </button>
+            {modelDropdownOpen && (
+              <div className="absolute left-0 top-full mt-1 z-50 w-[300px] max-h-[400px] overflow-y-auto border border-border bg-bg-surface shadow-lg">
+                {tagOrder.map(tag => {
+                  const models = modelsByTag[tag];
+                  if (!models?.length) return null;
+                  return (
+                    <div key={tag}>
+                      <div className="px-3 py-1.5 text-[9px] font-mono font-bold tracking-widest text-fg-ghost uppercase bg-bg-elevated border-b border-border">
+                        {tag}
+                      </div>
+                      {models.map(m => (
+                        <button
+                          key={m.id}
+                          onClick={() => { setSelectedModel(m.id); setModelDropdownOpen(false); }}
+                          className={`w-full text-left px-3 py-2 hover:bg-bg-elevated transition-colors border-b border-border/50 ${
+                            m.id === selectedModel ? 'bg-accent/10 border-l-2 border-l-accent' : ''
+                          }`}
+                        >
+                          <div className="flex items-center justify-between">
+                            <span className={`font-mono text-[11px] ${m.id === selectedModel ? 'text-accent font-semibold' : 'text-fg'}`}>
+                              {m.name}
+                            </span>
+                            <span className="font-mono text-[9px] text-fg-ghost">{m.context}</span>
+                          </div>
+                          <div className="font-mono text-[9px] text-fg-tertiary mt-0.5">
+                            {m.provider}{m.price_in === 0 ? ' — free' : ` — $${m.price_in}/$${m.price_out} per 1M`}
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
         </div>
 
         <div ref={scrollRef} className="flex-1 overflow-y-auto">
