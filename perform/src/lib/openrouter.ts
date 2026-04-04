@@ -1,7 +1,7 @@
 const OPENROUTER_KEY = process.env.OPENROUTER_API_KEY || '';
 const BASE_URL = 'https://openrouter.ai/api/v1/chat/completions';
 
-export const GEMMA4_MODEL = 'google/gemma-3-27b-it:free';
+export const GEMMA4_MODEL = 'google/gemma-4-26b-a4b-it';
 
 export async function chatCompletion(opts: {
   model?: string;
