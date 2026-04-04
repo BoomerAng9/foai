@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect, useCallback, Suspense } from 'react';
-import { AnimatePresence } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
 import { useSearchParams } from 'next/navigation';
 import { Send, CornerDownLeft, ArrowDown, X, FileText, Image as ImageIcon } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
@@ -69,6 +69,8 @@ function ChatWithACHEEVY() {
     taskSummary: string;
     streamContent: string;
   } | null>(null);
+  const [showScenarios, setShowScenarios] = useState(false);
+  const [scenarioContext, setScenarioContext] = useState<string | null>(null);
 
   const currentTier = TIERS.find(t => t.id === activeTier) || TIERS[0];
 
@@ -242,7 +244,7 @@ function ChatWithACHEEVY() {
           conversation_id: activeConvId,
           model: selectedModel,
           attachments: currentAttachments.map(a => ({ name: a.name, type: a.type, size: a.size })),
-          skill_context: activeSkill?.systemContext || undefined,
+          skill_context: scenarioContext || activeSkill?.systemContext || undefined,
           mode: guideMode ? 'guide' : undefined,
         }),
       });
@@ -289,7 +291,7 @@ function ChatWithACHEEVY() {
                 conversation_id: activeConvId,
                 model: selectedModel,
                 attachments: currentAttachments.map(a => ({ name: a.name, type: a.type, size: a.size })),
-                skill_context: activeSkill?.systemContext || undefined,
+                skill_context: scenarioContext || activeSkill?.systemContext || undefined,
                 mode: guideMode ? 'guide' : undefined,
               }),
             });
@@ -878,7 +880,75 @@ function ChatWithACHEEVY() {
               </button>
             </div>
 
-            <div className="flex items-center justify-between mt-2">
+            {/* Scenarios toggle */}
+            <div className="flex items-center mt-2 mb-1">
+              <button
+                onClick={() => setShowScenarios(!showScenarios)}
+                className="font-mono text-[9px] text-fg-ghost hover:text-accent transition-colors flex items-center gap-1"
+              >
+                <span className="text-[11px] leading-none">{showScenarios ? '−' : '+'}</span>
+                <span>scenarios &amp; plugins</span>
+              </button>
+              {scenarioContext && (
+                <button
+                  onClick={() => setScenarioContext(null)}
+                  className="ml-2 font-mono text-[9px] text-accent border border-accent/30 px-1.5 py-0.5 hover:bg-accent/10 transition-colors flex items-center gap-1"
+                >
+                  {scenarioContext} <X className="w-2.5 h-2.5" />
+                </button>
+              )}
+            </div>
+
+            {/* Scenarios Panel */}
+            <AnimatePresence>
+              {showScenarios && (
+                <motion.div
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: 'auto', opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  transition={{ duration: 0.25, ease: 'easeInOut' }}
+                  className="overflow-hidden"
+                >
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 py-3">
+                    {[
+                      { id: 'research', name: 'Research', desc: 'Deep web research mode' },
+                      { id: 'content', name: 'Content', desc: 'Blog, social, email creation' },
+                      { id: 'finance', name: 'Finance', desc: 'Budget, invoice, cost analysis' },
+                      { id: 'marketing', name: 'Marketing', desc: 'Campaign, SEO, ads strategy' },
+                      { id: 'code', name: 'Code', desc: 'Build, deploy, debug' },
+                      { id: 'design', name: 'Design', desc: 'Visual assets, mockups' },
+                      { id: 'education', name: 'Education', desc: 'Lesson plans, courses' },
+                      { id: 'custom', name: 'Custom', desc: 'Define your own scenario' },
+                    ].map(tile => (
+                      <button
+                        key={tile.id}
+                        onClick={() => {
+                          setScenarioContext(tile.name);
+                          setShowScenarios(false);
+                        }}
+                        className="flex flex-col gap-1 p-3 border transition-all text-left hover:border-accent/50"
+                        style={{
+                          background: scenarioContext === tile.name
+                            ? 'rgba(232,160,32,0.10)'
+                            : 'rgba(255,255,255,0.02)',
+                          borderColor: scenarioContext === tile.name
+                            ? 'rgba(232,160,32,0.5)'
+                            : 'rgba(255,255,255,0.08)',
+                          backdropFilter: 'blur(12px)',
+                        }}
+                      >
+                        <span className="font-mono text-[11px] font-semibold tracking-wide" style={{
+                          color: scenarioContext === tile.name ? '#E8A020' : 'rgba(255,255,255,0.85)',
+                        }}>{tile.name}</span>
+                        <span className="font-mono text-[9px]" style={{ color: 'rgba(255,255,255,0.4)' }}>{tile.desc}</span>
+                      </button>
+                    ))}
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            <div className="flex items-center justify-between mt-1">
               <div className="flex items-center gap-2 font-mono text-[9px]">
                 <span className="led" style={{ background: currentTier.color }} />
                 <span className="font-semibold uppercase tracking-wider">{currentTier.name}</span>

@@ -367,18 +367,15 @@ export default function BroadcastStudio() {
         <div className="flex items-center gap-3">
           {/* Logo mark — Broad|Cast X */}
           <svg width="28" height="28" viewBox="0 0 100 100" fill="none">
-            {/* Two crossing strokes with rounded caps */}
-            <line x1="15" y1="85" x2="85" y2="15" stroke={BC.silver} strokeWidth="14" strokeLinecap="round" />
-            <line x1="15" y1="15" x2="85" y2="85" stroke={BC.silver} strokeWidth="14" strokeLinecap="round" />
-            {/* Dot accent */}
-            <circle cx="12" cy="50" r="7" fill={BC.silver} />
+            <rect x="4" y="4" width="92" height="92" rx="18" stroke={BC.silver} strokeWidth="6" fill="none" />
+            <text x="50" y="62" textAnchor="middle" fill={BC.silver} fontFamily="'Outfit', sans-serif" fontWeight="800" fontSize="44" letterSpacing="2">BC</text>
           </svg>
           <div className="flex flex-col items-center">
             <span className="text-[15px] tracking-[0.2em]" style={{ color: BC.gold, fontFamily: "'Outfit', sans-serif", fontWeight: 800 }}>
               BROAD<span style={{ color: BC.silver, opacity: 0.6 }}>|</span>CAST
             </span>
-            <span className="text-[7px] tracking-[0.3em] uppercase" style={{ color: BC.textGhost, fontFamily: "'Inter', sans-serif", fontWeight: 400 }}>
-              Video Creation Studio
+            <span className="text-[7px] tracking-[0.3em] uppercase font-mono" style={{ color: BC.textGhost }}>
+              VIDEO CREATION STUDIO
             </span>
           </div>
         </div>
@@ -531,9 +528,8 @@ export default function BroadcastStudio() {
             ) : (
               <div className="flex flex-col items-center gap-3">
                 <svg width="48" height="48" viewBox="0 0 100 100" fill="none" opacity="0.15">
-                  <line x1="15" y1="85" x2="85" y2="15" stroke={BC.silver} strokeWidth="14" strokeLinecap="round" />
-                  <line x1="15" y1="15" x2="85" y2="85" stroke={BC.silver} strokeWidth="14" strokeLinecap="round" />
-                  <circle cx="12" cy="50" r="7" fill={BC.silver} />
+                  <circle cx="50" cy="50" r="44" stroke={BC.silver} strokeWidth="5" />
+                  <polygon points="38,28 38,72 76,50" fill={BC.silver} />
                 </svg>
                 <span className="text-[11px] font-mono" style={{ color: BC.textGhost }}>
                   Add scenes or describe your vision in chat
