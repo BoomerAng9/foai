@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useState } from 'react';
 import { Menu, X } from 'lucide-react';
+import { ThemeToggle } from '@/components/ThemeToggle';
 
 const NAV_ITEMS = [
   { label: 'Home', href: '/' },
@@ -43,7 +44,8 @@ export function Header() {
         {menuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
       </button>
 
-      <div className="hidden md:flex items-center gap-2">
+      <div className="hidden md:flex items-center gap-3">
+        <ThemeToggle />
         <div className="w-2 h-2 rounded-full" style={{ background: '#22C55E' }} />
         <span className="text-[9px] font-mono text-white/30">LIVE</span>
       </div>

@@ -28,51 +28,6 @@ import {
 } from '@/lib/motion';
 
 /* ─────────────────────────────────────────
-   CSS Variables for theme switching
-   ───────────────────────────────────────── */
-const CSS_VARS = `
-  :root {
-    --pf-bg: #0A0A0F;
-    --pf-bg-secondary: #111118;
-    --pf-text: #FFFFFF;
-    --pf-text-muted: rgba(255,255,255,0.4);
-    --pf-text-subtle: rgba(255,255,255,0.15);
-    --pf-gold: #D4A853;
-    --pf-gold-dim: rgba(212,168,83,0.5);
-    --pf-gold-glow: rgba(212,168,83,0.08);
-    --pf-gold-border: rgba(212,168,83,0.2);
-    --pf-gold-border-strong: rgba(212,168,83,0.4);
-    --pf-divider: rgba(255,255,255,0.05);
-    --pf-card-shadow: rgba(0,0,0,0.4);
-    --pf-overlay: rgba(10,10,15,0.75);
-  }
-  .light-theme {
-    --pf-bg: #FAFAFA;
-    --pf-bg-secondary: #F0F0F2;
-    --pf-text: #0A0A0F;
-    --pf-text-muted: rgba(10,10,15,0.5);
-    --pf-text-subtle: rgba(10,10,15,0.15);
-    --pf-gold: #B8912E;
-    --pf-gold-dim: rgba(184,145,46,0.6);
-    --pf-gold-glow: rgba(184,145,46,0.06);
-    --pf-gold-border: rgba(184,145,46,0.25);
-    --pf-gold-border-strong: rgba(184,145,46,0.5);
-    --pf-divider: rgba(0,0,0,0.06);
-    --pf-card-shadow: rgba(0,0,0,0.08);
-    --pf-overlay: rgba(250,250,250,0.8);
-  }
-  @keyframes ambientShift {
-    0%   { background-position: 0% 50%; }
-    50%  { background-position: 100% 50%; }
-    100% { background-position: 0% 50%; }
-  }
-  @keyframes typeCursor {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0; }
-  }
-`;
-
-/* ─────────────────────────────────────────
    Types
    ───────────────────────────────────────── */
 interface TopProspect {
@@ -356,7 +311,6 @@ export default function HomePage() {
 
   return (
     <>
-      <style dangerouslySetInnerHTML={{ __html: CSS_VARS }} />
       <div className="min-h-screen flex flex-col" style={{ background: 'var(--pf-bg)' }}>
         <ScrollProgress />
         <Header />
