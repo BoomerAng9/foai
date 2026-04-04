@@ -229,9 +229,14 @@ function ChatWithACHEEVY() {
     }]);
 
     try {
+      // Get fresh token — send as Bearer to bypass stale cookie
+      const idToken = user ? await user.getIdToken(true) : '';
       const res = await fetch('/api/chat', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          ...(idToken ? { 'Authorization': `Bearer ${idToken}` } : {}),
+        },
         body: JSON.stringify({
           message: msg,
           conversation_id: activeConvId,

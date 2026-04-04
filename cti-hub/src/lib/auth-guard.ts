@@ -28,7 +28,11 @@ export interface AuthFailure {
 export async function requireAuth(
   request: NextRequest,
 ): Promise<AuthResult | AuthFailure> {
-  const token = request.cookies.get(AUTH_COOKIE)?.value;
+  // Accept token from cookie OR Authorization header (Bearer token)
+  const cookieToken = request.cookies.get(AUTH_COOKIE)?.value;
+  const authHeader = request.headers.get('Authorization');
+  const bearerToken = authHeader?.startsWith('Bearer ') ? authHeader.slice(7) : null;
+  const token = cookieToken || bearerToken;
 
   if (!token) {
     return {

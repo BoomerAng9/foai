@@ -137,33 +137,47 @@ export default function DeployAgentPage() {
     <div className="max-w-6xl mx-auto pb-16 space-y-16">
       {/* ── HERO ─────────────────────────────────────── */}
       <section className="relative -mx-3 sm:-mx-4 md:-mx-6 -mt-3 sm:-mt-4 md:-mt-6">
-        <div className="relative w-full h-[340px] sm:h-[420px] overflow-hidden bg-[#0A0A0A]">
-          <picture>
-            <source srcSet="/squad-hero-generated.png" type="image/png" />
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src="/squad-hero.png"
-              alt="Deploy Your Workforce"
-              className="w-full h-full object-cover opacity-60"
-              style={{ filter: 'drop-shadow(0 8px 32px rgba(0,0,0,0.6))' }}
-            />
-          </picture>
-          <div className="absolute inset-0 bg-gradient-to-t from-[#0A0A0A] via-[#0A0A0A]/40 to-transparent" />
-          <div className="absolute inset-0 flex flex-col items-center justify-end pb-10 px-4 text-center">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/aims-logo-gold.png" alt="" className="w-16 h-16 object-contain mb-4 opacity-90" style={{ filter: 'drop-shadow(0 0 12px rgba(232,160,32,0.4))' }} />
+        <div className="relative w-full h-[340px] sm:h-[420px] overflow-hidden" style={{ background: 'linear-gradient(180deg, #0D0D12 0%, #111118 40%, #0A0A0F 100%)' }}>
+          {/* Animated grid background */}
+          <div className="absolute inset-0 opacity-[0.04]" style={{
+            backgroundImage: 'linear-gradient(rgba(232,160,32,0.3) 1px, transparent 1px), linear-gradient(90deg, rgba(232,160,32,0.3) 1px, transparent 1px)',
+            backgroundSize: '60px 60px',
+          }} />
+          {/* Radial glow behind logo */}
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full opacity-20" style={{
+            background: 'radial-gradient(circle, rgba(232,160,32,0.3) 0%, transparent 70%)',
+          }} />
+          {/* Content */}
+          <div className="absolute inset-0 flex flex-col items-center justify-center px-4 text-center">
+            {/* AIMS logo mark — cropped to hide text */}
+            <div className="w-20 h-20 mb-6 overflow-hidden rounded-xl" style={{ filter: 'drop-shadow(0 0 20px rgba(232,160,32,0.4))' }}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/aims-logo-gold.png" alt="" className="w-full h-auto object-cover object-top" style={{ marginTop: '-5%', transform: 'scale(1.15)' }} />
+            </div>
+            <p className="text-[10px] font-mono tracking-[0.5em] uppercase mb-4" style={{ color: 'rgba(232,160,32,0.5)' }}>
+              AI-Managed Solutions
+            </p>
             <h1 className="font-mono text-3xl sm:text-4xl md:text-5xl font-black text-white tracking-tight mb-3">
               Deploy Your Workforce
             </h1>
-            <p className="text-sm sm:text-base text-[#999] max-w-xl leading-relaxed">
+            <p className="text-sm sm:text-base text-[#777] max-w-xl leading-relaxed mb-8">
               Boomer_Angs handle strategy. Lil_Hawks handle execution. You handle the vision.
             </p>
-            <a
-              href="/meet/house-of-ang"
-              className="mt-6 font-mono text-xs font-bold tracking-wider bg-[#E8A020] text-[#0A0A0A] px-6 py-2.5 hover:bg-[#F0B030] transition-colors flex items-center gap-2"
-            >
-              BROWSE THE ROSTER <ArrowRight className="w-3.5 h-3.5" />
-            </a>
+            <div className="flex gap-4">
+              <a
+                href="/meet/house-of-ang"
+                className="font-mono text-xs font-bold tracking-wider bg-[#E8A020] text-[#0A0A0A] px-6 py-2.5 hover:bg-[#F0B030] transition-colors flex items-center gap-2"
+              >
+                BROWSE THE ROSTER <ArrowRight className="w-3.5 h-3.5" />
+              </a>
+              <a
+                href="/chat"
+                className="font-mono text-xs font-bold tracking-wider px-6 py-2.5 transition-colors flex items-center gap-2"
+                style={{ border: '1px solid rgba(232,160,32,0.4)', color: '#E8A020' }}
+              >
+                CHAT WITH ACHEEVY
+              </a>
+            </div>
           </div>
         </div>
       </section>

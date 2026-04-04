@@ -220,9 +220,16 @@ export default function BroadcastStudio() {
     setChatMessages(prev => [...prev, { role: 'illa', content: '', id: streamId }]);
 
     try {
+      // Get fresh token and send as Bearer — bypasses stale cookie issues
+      const idToken = user ? await user.getIdToken(true) : '';
+      const authHeaders: Record<string, string> = {
+        'Content-Type': 'application/json',
+        ...(idToken ? { 'Authorization': `Bearer ${idToken}` } : {}),
+      };
+
       const res = await fetch('/api/broadcast/chat', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: authHeaders,
         body: JSON.stringify({
           message: userMsg,
           history: chatMessages.slice(-10),
