@@ -118,11 +118,23 @@ function TypewriterHeadline({ text, delay = 600 }: { text: string; delay?: numbe
 function NFTCard({ player, rank }: { player: TopProspect; rank: number }) {
   const cardRef = useRef<HTMLDivElement>(null);
   const [isHovered, setIsHovered] = useState(false);
+  const [headshotUrl, setHeadshotUrl] = useState<string>('');
+  const [imgLoaded, setImgLoaded] = useState(false);
 
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
   const rotateX = useSpring(useTransform(mouseY, [-0.5, 0.5], [8, -8]), { stiffness: 200, damping: 20 });
   const rotateY = useSpring(useTransform(mouseX, [-0.5, 0.5], [-8, 8]), { stiffness: 200, damping: 20 });
+
+  // Fetch headshot from ESPN via our API
+  useEffect(() => {
+    if (!player.name) return;
+    const params = new URLSearchParams({ name: player.name, school: player.school || '' });
+    fetch(`/api/players/headshot?${params}`)
+      .then(r => r.json())
+      .then(d => { if (d.url) setHeadshotUrl(d.url); })
+      .catch(() => {});
+  }, [player.name, player.school]);
 
   const handleMouseMove = useCallback((e: React.MouseEvent) => {
     const rect = cardRef.current?.getBoundingClientRect();
@@ -136,6 +148,8 @@ function NFTCard({ player, rank }: { player: TopProspect; rank: number }) {
     mouseY.set(0);
     setIsHovered(false);
   }, [mouseX, mouseY]);
+
+  const initials = player.name.split(' ').map(n => n[0]).join('');
 
   return (
     <Link href={`/draft/${encodeURIComponent(player.name)}`} className="block shrink-0 w-[220px] group">
@@ -158,21 +172,43 @@ function NFTCard({ player, rank }: { player: TopProspect; rank: number }) {
         onMouseLeave={handleMouseLeave}
         whileHover={{ scale: 1.03 }}
       >
-        <div className="absolute top-3 left-3 w-8 h-8 flex items-center justify-center rounded-full" style={{ background: 'var(--pf-gold)', color: 'var(--pf-bg)' }}>
+        <div className="absolute top-3 left-3 w-8 h-8 flex items-center justify-center rounded-full" style={{ background: 'var(--pf-gold)', color: 'var(--pf-bg)', zIndex: 4 }}>
           <span className="font-outfit text-xs font-extrabold">#{rank}</span>
         </div>
-        <div className="absolute top-3 right-3 px-2 py-1 rounded" style={{ background: 'rgba(0,0,0,0.6)', border: '1px solid var(--pf-gold-border-strong)' }}>
+        <div className="absolute top-3 right-3 px-2 py-1 rounded" style={{ background: 'rgba(0,0,0,0.6)', border: '1px solid var(--pf-gold-border-strong)', zIndex: 4 }}>
           <span className="font-mono text-[10px] font-bold" style={{ color: 'var(--pf-gold)' }}>{player.tie_grade || player.grade}</span>
         </div>
+
+        {/* Player headshot image or initials fallback */}
         <div className="absolute inset-0 flex items-center justify-center">
-          <div className="flex flex-col items-center gap-2">
-            <span className="font-outfit text-6xl font-extrabold text-white/10">
-              {player.name.split(' ').map(n => n[0]).join('')}
-            </span>
-            <span className="text-[9px] font-mono text-white/15 tracking-widest">{player.school.toUpperCase()}</span>
-          </div>
+          {headshotUrl ? (
+            <>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={headshotUrl}
+                alt={player.name}
+                className="absolute inset-0 w-full h-full object-cover object-top transition-opacity duration-500"
+                style={{ opacity: imgLoaded ? 0.7 : 0, filter: 'contrast(1.1) brightness(0.9)' }}
+                onLoad={() => setImgLoaded(true)}
+                onError={() => setHeadshotUrl('')}
+              />
+              {/* Show initials as loading state until image loads */}
+              {!imgLoaded && (
+                <div className="flex flex-col items-center gap-2">
+                  <span className="font-outfit text-6xl font-extrabold text-white/10">{initials}</span>
+                  <span className="text-[9px] font-mono text-white/15 tracking-widest">{player.school.toUpperCase()}</span>
+                </div>
+              )}
+            </>
+          ) : (
+            <div className="flex flex-col items-center gap-2">
+              <span className="font-outfit text-6xl font-extrabold text-white/10">{initials}</span>
+              <span className="text-[9px] font-mono text-white/15 tracking-widest">{player.school.toUpperCase()}</span>
+            </div>
+          )}
         </div>
-        <div className="absolute bottom-0 left-0 right-0 p-4" style={{ background: 'linear-gradient(transparent, rgba(0,0,0,0.95))' }}>
+
+        <div className="absolute bottom-0 left-0 right-0 p-4" style={{ background: 'linear-gradient(transparent, rgba(0,0,0,0.95))', zIndex: 3 }}>
           <p className="font-outfit text-base font-extrabold text-white tracking-wide leading-tight">{player.name}</p>
           <p className="text-[11px] font-mono mt-1" style={{ color: 'var(--pf-gold)' }}>{player.position} · {player.school}</p>
           <div className="flex items-center justify-between mt-2">
@@ -182,6 +218,7 @@ function NFTCard({ player, rank }: { player: TopProspect; rank: number }) {
         </div>
         <div className="absolute inset-0 rounded-xl pointer-events-none" style={{
           background: 'linear-gradient(135deg, rgba(255,255,255,0.05) 0%, transparent 50%, rgba(255,255,255,0.02) 100%)',
+          zIndex: 2,
         }} />
       </motion.div>
     </Link>
