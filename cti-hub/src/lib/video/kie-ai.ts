@@ -5,7 +5,7 @@
  * Two models: seedance-2 (quality) and seedance-2-fast (speed).
  */
 
-const KIE_API_KEY = process.env.KIE_API_KEY || '';
+const KIE_API_KEY = process.env.KIE_AI_API_KEY || process.env.KIE_API_KEY || '';
 const KIE_BASE = 'https://api.kie.ai';
 
 export interface VideoGenerationInput {
