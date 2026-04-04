@@ -69,7 +69,7 @@ export const AGENTS: AgentProfile[] = [
     department: 'CMD',
     tier: 'command',
     persona: 'Quick, adaptive, actively listening. First point of contact. Keeps the conversation moving while ACHEEVY processes.',
-    avatar: '/boomer-ang-icon.png',
+    avatar: '/acheevy-helmet.png', // Command tier — uses ACHEEVY helmet
     capabilities: ['Active listening', 'Quick responses', 'Clarifying questions', 'Context bridging', 'Voice interaction'],
     subscriptionTier: 'all', hireable: false,
   },
@@ -80,7 +80,7 @@ export const AGENTS: AgentProfile[] = [
     department: 'CMD',
     tier: 'command',
     persona: 'Silent. Observant. Captures everything. Detects patterns. Feeds context to the team.',
-    avatar: '/boomer-ang-icon.png',
+    avatar: '/acheevy-helmet.png', // Command tier — uses ACHEEVY helmet
     capabilities: ['Session recording', 'Pattern detection', 'Context summarization', 'Audit logging', 'Inference layer'],
     subscriptionTier: 'all', hireable: false,
   },
@@ -190,7 +190,7 @@ export const AGENTS: AgentProfile[] = [
     department: 'TECH',
     tier: 'tactical',
     persona: 'Plan-first, approval-gated. Clean code or no code.',
-    avatar: '/boomer-ang-icon.png',
+    avatar: '/agents/code-ang.png',
     capabilities: ['Feature development', 'Plan-first coding', 'Code review'],
     mcpToolName: 'lil_coding_hawk',
     subscriptionTier: 'growth', hireable: false,
@@ -202,7 +202,7 @@ export const AGENTS: AgentProfile[] = [
     department: 'TECH',
     tier: 'tactical',
     persona: 'Heavy lifter. Repo-wide refactors. Doesn\'t ask permission.',
-    avatar: '/boomer-ang-icon.png',
+    avatar: '/boomer-ang-icon.png', // TODO: needs dedicated Lil_Hawk image
     capabilities: ['Large refactors', 'Repo-wide changes', 'Architecture work'],
     mcpToolName: 'lil_trae_hawk',
     subscriptionTier: 'growth', hireable: false,
@@ -214,7 +214,7 @@ export const AGENTS: AgentProfile[] = [
     department: 'TECH',
     tier: 'tactical',
     persona: 'Coordinator. Squad mode. DeerFlow 2.0 powered.',
-    avatar: '/boomer-ang-icon.png',
+    avatar: '/boomer-ang-icon.png', // TODO: needs dedicated Lil_Hawk image
     capabilities: ['Multi-agent coordination', 'Squad mode', 'Complex project management'],
     mcpToolName: 'lil_deep_hawk',
     subscriptionTier: 'enterprise', hireable: false,
@@ -226,7 +226,7 @@ export const AGENTS: AgentProfile[] = [
     department: 'TECH',
     tier: 'specialist',
     persona: 'OS-level, browser, CLI. Anything that runs on a machine.',
-    avatar: '/boomer-ang-icon.png',
+    avatar: '/boomer-ang-icon.png', // TODO: needs dedicated Lil_Hawk image
     capabilities: ['Browser automation', 'CLI workflows', 'File operations'],
     mcpToolName: 'lil_agent_hawk',
     subscriptionTier: 'growth', hireable: false,
@@ -238,7 +238,7 @@ export const AGENTS: AgentProfile[] = [
     department: 'TECH',
     tier: 'specialist',
     persona: 'Connects everything. n8n powered. Webhook wizard.',
-    avatar: '/boomer-ang-icon.png',
+    avatar: '/boomer-ang-icon.png', // TODO: needs dedicated Lil_Hawk image
     capabilities: ['SaaS integrations', 'Webhook orchestration', 'Payment automation'],
     mcpToolName: 'lil_flow_hawk',
     subscriptionTier: 'growth', hireable: false,
@@ -250,7 +250,7 @@ export const AGENTS: AgentProfile[] = [
     department: 'DT',
     tier: 'specialist',
     persona: 'Remembers everything. RAG-powered. Semantic search.',
-    avatar: '/boomer-ang-icon.png',
+    avatar: '/boomer-ang-icon.png', // TODO: needs dedicated Lil_Hawk image
     capabilities: ['Long-term memory', 'Semantic search', 'Knowledge base management'],
     mcpToolName: 'lil_memory_hawk',
     subscriptionTier: 'growth', hireable: false,
@@ -262,7 +262,7 @@ export const AGENTS: AgentProfile[] = [
     department: 'TECH',
     tier: 'specialist',
     persona: 'APIs, auth, databases. Infrastructure from scratch.',
-    avatar: '/boomer-ang-icon.png',
+    avatar: '/boomer-ang-icon.png', // TODO: needs dedicated Lil_Hawk image
     capabilities: ['Backend scaffolding', 'Auth systems', 'Database schemas', 'API design'],
     mcpToolName: 'lil_back_hawk',
     subscriptionTier: 'growth', hireable: false,
@@ -274,7 +274,7 @@ export const AGENTS: AgentProfile[] = [
     department: 'DSN',
     tier: 'specialist',
     persona: 'Makes data beautiful. Dashboards, charts, real-time metrics.',
-    avatar: '/boomer-ang-icon.png',
+    avatar: '/boomer-ang-icon.png', // TODO: needs dedicated Lil_Hawk image
     capabilities: ['Monitoring dashboards', 'Data visualization', 'Real-time displays'],
     mcpToolName: 'lil_viz_hawk',
     subscriptionTier: 'growth', hireable: false,
@@ -288,7 +288,7 @@ export const AGENTS: AgentProfile[] = [
     department: 'DSN',
     tier: 'specialist',
     persona: 'Three engines, one mission. Photorealism to illustration.',
-    avatar: '/boomer-ang-icon.png',
+    avatar: '/boomer-ang-icon.png', // TODO: needs dedicated Visual Engine image
     capabilities: ['Gemini image gen', 'Multi-model routing', 'Style adaptation'],
     subscriptionTier: 'starter', hireable: true, individualPrice: 47,
   },
