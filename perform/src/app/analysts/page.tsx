@@ -17,16 +17,16 @@ export default function AnalystsPage() {
             className="text-xs font-mono tracking-[0.3em] mb-3"
             style={{ color: 'rgba(255,255,255,0.3)' }}
           >
-            ANALYST COVERAGE
+            2026 NFL DRAFT
           </p>
           <h1
             className="font-outfit text-4xl md:text-5xl font-extrabold tracking-[0.15em] mb-4"
             style={{ color: '#D4A853' }}
           >
-            THE ANALYST DESK
+            ON THE CLOCK
           </h1>
           <p className="text-sm font-mono text-white/40 tracking-wider">
-            Four autonomous voices. Zero human writers.
+            The crew breaks it all down.
           </p>
         </div>
 
