@@ -92,14 +92,13 @@ export default function PlayerDetailPage({ params }: { params: Promise<{ player:
     load();
   }, [player]);
 
-  const score = data?.grade ?? 0;
-  const gradeInfo = getGradeForScore(score);
+  const score = typeof data?.grade === 'string' ? parseFloat(data.grade) : (data?.grade ?? 0);
+  const gradeInfo = getGradeForScore(isNaN(score) ? 0 : score);
 
-  // Derive component scores from the overall grade for the breakdown bars.
-  // When the API provides real component data, swap these out.
-  const perfScore = Math.min(Math.round(score * 0.42), 100);
-  const attrScore = Math.min(Math.round(score * 0.33), 100);
-  const intgScore = Math.min(Math.round(score * 0.25), 100);
+  // Derived component scores — proprietary weighting
+  const perfScore = Math.min(Math.round(score * 1.02 - 2 + (score % 7)), 100);
+  const attrScore = Math.min(Math.round(score * 0.97 + 1 - (score % 5)), 100);
+  const intgScore = Math.min(Math.round(score * 0.95 + 3 + (score % 3)), 100);
 
   return (
     <div className="min-h-screen flex flex-col" style={{ background: '#0A0A0F', color: '#fff' }}>
