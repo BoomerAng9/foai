@@ -1,497 +1,162 @@
 'use client';
 
 import Link from 'next/link';
-import Image from 'next/image';
-import { useRef } from 'react';
+import { useEffect, useState } from 'react';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
-import { TIEBadge } from '@/components/tie/TIEBadge';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
 
-/* ------------------------------------------------------------------ */
-/*  1. HERO                                                           */
-/* ------------------------------------------------------------------ */
-function Hero() {
-  return (
-    <section className="relative flex flex-col items-center justify-center text-center px-6 pt-28 pb-20 overflow-hidden">
-      {/* Subtle radial glow behind logo */}
-      <div
-        className="pointer-events-none absolute inset-0"
-        style={{
-          background:
-            'radial-gradient(ellipse 50% 40% at 50% 30%, rgba(212,168,83,0.10) 0%, transparent 100%)',
-        }}
-      />
-
-      {/* Per|Form Lion Logo */}
-      <div className="relative w-64 h-64 md:w-80 md:h-80 mb-8">
-        <Image
-          src="/brand/perform-logo-dark.png"
-          alt="Per|Form — Gold roaring lion"
-          fill
-          className="object-contain drop-shadow-2xl"
-          priority
-        />
-      </div>
-
-      {/* Tagline */}
-      <h1
-        className="font-outfit text-4xl md:text-5xl font-extrabold tracking-[0.18em] uppercase"
-        style={{ color: '#D4A853' }}
-      >
-        AT YOUR BEST
-      </h1>
-
-      {/* CTAs */}
-      <div className="mt-10 flex flex-col sm:flex-row items-center gap-4">
-        <Link
-          href="/draft"
-          className="px-8 py-3.5 rounded-md text-sm font-outfit font-bold tracking-wider transition-all hover:brightness-110"
-          style={{ background: '#D4A853', color: '#0A0A0F' }}
-        >
-          EXPLORE THE DRAFT BOARD
-        </Link>
-        <a
-          href="https://buymeacoffee.com/foai"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="px-8 py-3.5 rounded-md text-sm font-mono tracking-wider border transition-colors hover:bg-white/5"
-          style={{ borderColor: '#D4A853', color: '#D4A853' }}
-        >
-          BUY ME A COFFEE
-        </a>
-      </div>
-    </section>
-  );
+interface TopProspect {
+  id: number;
+  name: string;
+  position: string;
+  school: string;
+  overall_rank: number;
+  tie_grade: string;
+  tie_tier: string;
+  grade: string;
+  nfl_comparison: string;
+  projected_round: number;
 }
 
-/* ------------------------------------------------------------------ */
-/*  2. LIVE TICKER PLACEHOLDER                                        */
-/* ------------------------------------------------------------------ */
-function LiveTicker() {
-  return (
-    <div
-      className="w-full px-6 py-3 font-mono text-xs tracking-wide overflow-hidden"
-      style={{
-        background: '#0D0D12',
-        borderLeft: '4px solid #D4A853',
-        color: 'rgba(255,255,255,0.5)',
-      }}
-    >
-      <span style={{ color: '#D4A853', fontWeight: 700 }}>BREAKING NEWS</span>
-      <span className="mx-3 opacity-30">|</span>
-      <span>Live feed loading...</span>
-    </div>
-  );
-}
+export default function HomePage() {
+  const [prospects, setProspects] = useState<TopProspect[]>([]);
 
-/* ------------------------------------------------------------------ */
-/*  3. THE DRAFT                                                      */
-/* ------------------------------------------------------------------ */
-function TheDraft() {
-  return (
-    <section className="px-6 py-24 max-w-6xl mx-auto">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
-        {/* Image */}
-        <div className="relative w-full aspect-[4/3] rounded-xl overflow-hidden">
-          <Image
-            src="/brand/helmet-evolution.webp"
-            alt="Helmet evolution — past meets future"
-            fill
-            className="object-cover"
-          />
-        </div>
+  useEffect(() => {
+    fetch('/api/players')
+      .then(r => r.json())
+      .then(d => setProspects((d.players || []).slice(0, 10)))
+      .catch(() => {});
+  }, []);
 
-        {/* Text */}
-        <div>
-          <p
-            className="text-xs font-mono tracking-[0.3em] mb-3"
-            style={{ color: 'rgba(255,255,255,0.3)' }}
-          >
-            NFL DRAFT 2026
-          </p>
-          <h2
-            className="font-outfit text-3xl md:text-4xl font-extrabold tracking-wider mb-2"
-            style={{ color: '#D4A853' }}
-          >
-            2026 NFL DRAFT
-          </h2>
-          <h3
-            className="font-outfit text-xl font-bold tracking-wider mb-6"
-            style={{ color: '#C0C0C0' }}
-          >
-            PITTSBURGH
-          </h3>
-          <p className="text-sm text-white/50 font-mono leading-relaxed mb-8">
-            50+ prospects graded and ranked by TIE. Every player scored on
-            Performance, Attributes, and Intangibles. Full 7-round projections.
-            Bull and Bear cases for every first-rounder. Daily updates through
-            draft night.
-          </p>
-          <Link
-            href="/draft"
-            className="inline-block px-8 py-3 rounded-md text-sm font-outfit font-bold tracking-wider transition-all hover:brightness-110"
-            style={{ background: '#D4A853', color: '#0A0A0F' }}
-          >
-            VIEW DRAFT BOARD
-          </Link>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-/* ------------------------------------------------------------------ */
-/*  4. PLAYER CARDS & NFTs                                            */
-/* ------------------------------------------------------------------ */
-const GALLERY_ITEMS = [
-  { src: '/cards/risher-card-1.png', alt: 'Zion Risher — Comets #7' },
-  { src: '/cards/risher-card-2.png', alt: 'Zion Risher — Hillside' },
-  { src: '/cards/syracuse-card.webp', alt: 'Syracuse DL Card' },
-  { src: '/nft/draftpro.jpg', alt: 'DraftPro.crypto NFT' },
-  { src: '/nft/draftme.jpg', alt: 'DraftMe.NFT' },
-  { src: '/nft/curryville.jpg', alt: 'Curryville.NFT' },
-  { src: '/nft/buzzunil.jpg', alt: 'BuzzUNIL.blockchain' },
-];
-
-function PlayerCardsGallery() {
-  const scrollRef = useRef<HTMLDivElement>(null);
-
-  const scroll = (dir: 'left' | 'right') => {
-    if (!scrollRef.current) return;
-    const amount = dir === 'left' ? -320 : 320;
-    scrollRef.current.scrollBy({ left: amount, behavior: 'smooth' });
-  };
-
-  return (
-    <section className="py-24 overflow-hidden">
-      <div className="px-6 max-w-6xl mx-auto mb-10 flex items-end justify-between">
-        <div>
-          <p
-            className="text-xs font-mono tracking-[0.3em] mb-3"
-            style={{ color: 'rgba(255,255,255,0.3)' }}
-          >
-            COLLECTIBLES
-          </p>
-          <h2
-            className="font-outfit text-3xl md:text-4xl font-extrabold tracking-wider"
-            style={{ color: '#D4A853' }}
-          >
-            PLAYER CARDS &amp; DIGITAL COLLECTIBLES
-          </h2>
-        </div>
-        <div className="hidden md:flex gap-2">
-          <button
-            onClick={() => scroll('left')}
-            className="p-2 rounded-full border transition-colors hover:bg-white/5"
-            style={{ borderColor: 'rgba(212,168,83,0.3)' }}
-            aria-label="Scroll left"
-          >
-            <ChevronLeft size={20} color="#D4A853" />
-          </button>
-          <button
-            onClick={() => scroll('right')}
-            className="p-2 rounded-full border transition-colors hover:bg-white/5"
-            style={{ borderColor: 'rgba(212,168,83,0.3)' }}
-            aria-label="Scroll right"
-          >
-            <ChevronRight size={20} color="#D4A853" />
-          </button>
-        </div>
-      </div>
-
-      {/* Horizontal scroll container */}
-      <div
-        ref={scrollRef}
-        className="flex gap-5 overflow-x-auto px-6 pb-4 snap-x snap-mandatory scrollbar-hide"
-        style={{ scrollbarWidth: 'none' }}
-      >
-        {GALLERY_ITEMS.map((item) => (
-          <div
-            key={item.src}
-            className="relative flex-none w-64 h-80 md:w-72 md:h-96 rounded-xl overflow-hidden snap-start border"
-            style={{ borderColor: 'rgba(255,255,255,0.06)' }}
-          >
-            <Image
-              src={item.src}
-              alt={item.alt}
-              fill
-              className="object-cover hover:scale-105 transition-transform duration-500"
-            />
-          </div>
-        ))}
-      </div>
-    </section>
-  );
-}
-
-/* ------------------------------------------------------------------ */
-/*  5. FLAG FOOTBALL                                                  */
-/* ------------------------------------------------------------------ */
-function FlagFootball() {
-  return (
-    <section className="px-6 py-24 max-w-6xl mx-auto">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
-        {/* Text */}
-        <div className="order-2 md:order-1">
-          <p
-            className="text-xs font-mono tracking-[0.3em] mb-3"
-            style={{ color: 'rgba(255,255,255,0.3)' }}
-          >
-            2028 OLYMPICS
-          </p>
-          <h2
-            className="font-outfit text-3xl md:text-4xl font-extrabold tracking-wider mb-6"
-            style={{ color: '#D4A853' }}
-          >
-            FLAG FOOTBALL GOES GLOBAL
-          </h2>
-          <p className="text-sm text-white/50 font-mono leading-relaxed mb-8">
-            Flag football makes its Olympic debut at the 2028 Los Angeles Games
-            — the first time the sport will be featured on the world&apos;s biggest
-            stage. Per|Form is tracking every athlete, every combine, every
-            roster decision. From NFL flag leagues to international competition,
-            we grade and rank the players building this historic moment.
-          </p>
-          <Link
-            href="/flag-football"
-            className="inline-block px-8 py-3 rounded-md text-sm font-outfit font-bold tracking-wider transition-all hover:brightness-110"
-            style={{ background: '#D4A853', color: '#0A0A0F' }}
-          >
-            FLAG FOOTBALL HUB
-          </Link>
-        </div>
-
-        {/* Image */}
-        <div className="relative w-full aspect-[4/3] rounded-xl overflow-hidden order-1 md:order-2">
-          <Image
-            src="/flag-football/hero.png"
-            alt="Flag football — Olympic bound"
-            fill
-            className="object-cover"
-          />
-        </div>
-      </div>
-    </section>
-  );
-}
-
-/* ------------------------------------------------------------------ */
-/*  6. ABOUT TIE                                                      */
-/* ------------------------------------------------------------------ */
-function AboutTIE() {
-  return (
-    <section className="px-6 py-24 max-w-4xl mx-auto text-center">
-      <p
-        className="text-xs font-mono tracking-[0.3em] mb-3"
-        style={{ color: 'rgba(255,255,255,0.3)' }}
-      >
-        GRADING SYSTEM
-      </p>
-      <h2
-        className="font-outfit text-3xl md:text-4xl font-extrabold tracking-wider mb-4"
-        style={{ color: '#D4A853' }}
-      >
-        POWERED BY TIE
-      </h2>
-      <h3
-        className="font-outfit text-lg font-bold tracking-wider mb-8"
-        style={{ color: '#C0C0C0' }}
-      >
-        TALENT &amp; INNOVATION ENGINE
-      </h3>
-      <p className="text-sm text-white/50 font-mono leading-relaxed max-w-2xl mx-auto mb-14">
-        Every player graded on three pillars: Performance (40%), Attributes
-        (30%), Intangibles (30%). TIE scores drive our draft board, player
-        cards, and analyst coverage. The formula is proprietary. The results
-        speak for themselves.
-      </p>
-
-      {/* Sample badges */}
-      <div className="flex items-center justify-center gap-10 md:gap-16">
-        {[
-          { score: 95, grade: 'A+', color: '#22C55E' },
-          { score: 78, grade: 'B+', color: '#D4A853' },
-          { score: 61, grade: 'C', color: '#F97316' },
-        ].map((b) => (
-          <div key={b.grade} className="flex flex-col items-center gap-3">
-            <TIEBadge
-              score={b.score}
-              grade={b.grade}
-              badgeColor={b.color}
-              size="lg"
-            />
-            <span className="text-xs font-mono text-white/40">{b.grade}</span>
-          </div>
-        ))}
-      </div>
-    </section>
-  );
-}
-
-/* ------------------------------------------------------------------ */
-/*  7. NIL & THE TRANSFER PORTAL                                      */
-/* ------------------------------------------------------------------ */
-function NILSection() {
-  return (
-    <section className="px-6 py-24 max-w-6xl mx-auto">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
-        {/* Book cover */}
-        <div className="relative w-full max-w-sm mx-auto aspect-[3/4] rounded-xl overflow-hidden shadow-2xl">
-          <Image
-            src="/brand/nil-book.jpg"
-            alt="Mastering the N.I.L. — by ACHIEVEMOR"
-            fill
-            className="object-cover"
-          />
-        </div>
-
-        {/* Text */}
-        <div>
-          <p
-            className="text-xs font-mono tracking-[0.3em] mb-3"
-            style={{ color: 'rgba(255,255,255,0.3)' }}
-          >
-            NIL &amp; TRANSFER PORTAL
-          </p>
-          <h2
-            className="font-outfit text-3xl md:text-4xl font-extrabold tracking-wider mb-2"
-            style={{ color: '#D4A853' }}
-          >
-            MASTERING THE N.I.L.
-          </h2>
-          <h3
-            className="font-outfit text-base font-bold tracking-wider mb-6"
-            style={{ color: '#C0C0C0' }}
-          >
-            An Essential Guide for Student-Athletes and Parents — by ACHIEVEMOR
-          </h3>
-          <p className="text-sm text-white/50 font-mono leading-relaxed mb-8">
-            The NIL landscape changes daily. New deals, new collectives, new
-            rules. Per|Form tracks the business side of college athletics —
-            transfer portal movement, NIL valuations, and the decisions that
-            shape careers before the draft even starts.
-          </p>
-          <Link
-            href="/nil"
-            className="inline-block px-8 py-3 rounded-md text-sm font-mono tracking-wider border transition-colors hover:bg-white/5"
-            style={{ borderColor: '#D4A853', color: '#D4A853' }}
-          >
-            LEARN MORE
-          </Link>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-/* ------------------------------------------------------------------ */
-/*  8. READ & REACT                                                   */
-/* ------------------------------------------------------------------ */
-function ReadAndReact() {
-  return (
-    <section className="px-6 py-24 max-w-6xl mx-auto">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
-        {/* Text */}
-        <div className="order-2 md:order-1">
-          <p
-            className="text-xs font-mono tracking-[0.3em] mb-3"
-            style={{ color: 'rgba(255,255,255,0.3)' }}
-          >
-            ANALYST COVERAGE
-          </p>
-          <h2
-            className="font-outfit text-3xl md:text-4xl font-extrabold tracking-wider mb-6"
-            style={{ color: '#D4A853' }}
-          >
-            READ &amp; REACT
-          </h2>
-          <p className="text-sm text-white/50 font-mono leading-relaxed mb-4">
-            Daily analysis. Weekly deep dives. Autonomous coverage from our AI
-            analyst team.
-          </p>
-          <p className="text-sm text-white/40 font-mono leading-relaxed">
-            Four distinct voices. Bull vs Bear debates. Film breakdowns. Hot
-            takes. All powered by TIE data, all delivered on a schedule that
-            never sleeps.
-          </p>
-        </div>
-
-        {/* Image */}
-        <div className="relative w-full aspect-[4/3] rounded-xl overflow-hidden order-1 md:order-2">
-          <Image
-            src="/brand/read-react.webp"
-            alt="Read & React — 3D text with LSU player"
-            fill
-            className="object-cover"
-          />
-        </div>
-      </div>
-    </section>
-  );
-}
-
-/* ------------------------------------------------------------------ */
-/*  9. THE PER|FORM PLATFORM                                          */
-/* ------------------------------------------------------------------ */
-function PlatformSection() {
-  return (
-    <section className="px-6 py-24 max-w-6xl mx-auto">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
-        {/* Image */}
-        <div className="relative w-full aspect-square max-w-md mx-auto rounded-xl overflow-hidden">
-          <Image
-            src="/brand/perform-contract-3d.webp"
-            alt="Per|Form contracts — 3D stamp art"
-            fill
-            className="object-contain"
-          />
-        </div>
-
-        {/* Text */}
-        <div>
-          <p
-            className="text-xs font-mono tracking-[0.3em] mb-3"
-            style={{ color: 'rgba(255,255,255,0.3)' }}
-          >
-            BEYOND THE FIELD
-          </p>
-          <h2
-            className="font-outfit text-3xl md:text-4xl font-extrabold tracking-wider mb-6"
-            style={{ color: '#D4A853' }}
-          >
-            THE PER|FORM PLATFORM
-          </h2>
-          <p className="text-sm text-white/50 font-mono leading-relaxed">
-            Per|Form isn&apos;t just about sports performance — it&apos;s about
-            the contracts, agreements, and decisions that shape careers. NIL
-            deals. Transfer commitments. Draft declarations. We track the
-            paperwork too.
-          </p>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-/* ------------------------------------------------------------------ */
-/*  PAGE                                                              */
-/* ------------------------------------------------------------------ */
-export default function Home() {
   return (
     <div className="min-h-screen flex flex-col" style={{ background: '#0A0A0F' }}>
       <Header />
-      <main className="flex-1">
-        <Hero />
-        <LiveTicker />
-        <TheDraft />
-        <PlayerCardsGallery />
-        <FlagFootball />
-        <AboutTIE />
-        <NILSection />
-        <ReadAndReact />
-        <PlatformSection />
-      </main>
+
+      {/* ── HERO ── */}
+      <section className="relative px-6 pt-24 pb-20 text-center overflow-hidden">
+        <div className="pointer-events-none absolute inset-0" style={{
+          background: 'radial-gradient(ellipse 60% 50% at 50% 30%, rgba(212,168,83,0.08) 0%, transparent 100%)',
+        }} />
+        <p className="text-xs font-mono tracking-[0.4em] mb-4" style={{ color: 'rgba(212,168,83,0.5)' }}>
+          2026 NFL DRAFT · PITTSBURGH · APRIL 23-25
+        </p>
+        <h1 className="font-outfit text-5xl md:text-7xl font-extrabold tracking-tight text-white mb-4">
+          PER<span style={{ color: '#555' }}>|</span><span style={{ color: '#D4A853' }}>FORM</span>
+        </h1>
+        <p className="text-lg text-white/40 font-mono mb-2">
+          Sports Grading &amp; Ranking Platform
+        </p>
+        <p className="text-sm text-white/25 font-mono max-w-lg mx-auto mb-10">
+          Every prospect graded. Every pick projected. Autonomous analyst coverage that never sleeps.
+        </p>
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+          <Link href="/draft" className="px-8 py-3.5 text-sm font-outfit font-bold tracking-wider transition-all hover:brightness-110" style={{ background: '#D4A853', color: '#0A0A0F' }}>
+            2026 DRAFT BOARD
+          </Link>
+          <Link href="/draft/mock" className="px-8 py-3.5 text-sm font-mono tracking-wider border transition-colors hover:bg-white/5" style={{ borderColor: 'rgba(212,168,83,0.4)', color: '#D4A853' }}>
+            MOCK DRAFT SIMULATOR
+          </Link>
+        </div>
+      </section>
+
+      {/* ── TOP 10 PROSPECTS ── */}
+      <section className="px-6 py-16 max-w-6xl mx-auto w-full">
+        <div className="flex items-center justify-between mb-8">
+          <div>
+            <p className="text-[10px] font-mono tracking-[0.4em] mb-1" style={{ color: 'rgba(212,168,83,0.5)' }}>LIVE RANKINGS</p>
+            <h2 className="font-outfit text-2xl font-extrabold text-white tracking-wide">TOP 10 PROSPECTS</h2>
+          </div>
+          <Link href="/draft" className="text-xs font-mono tracking-wider hover:text-white/70 transition-colors" style={{ color: '#D4A853' }}>
+            VIEW ALL 50 →
+          </Link>
+        </div>
+
+        {prospects.length > 0 ? (
+          <div className="space-y-2">
+            {prospects.map((p, i) => (
+              <Link key={p.id} href={`/draft/${p.id}`} className="flex items-center gap-4 px-4 py-3 transition-all hover:bg-white/[0.03]" style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                <span className="w-8 text-center font-outfit text-lg font-extrabold" style={{ color: '#D4A853' }}>
+                  {i + 1}
+                </span>
+                <div className="flex-1 min-w-0">
+                  <span className="font-outfit text-sm font-bold text-white">{p.name}</span>
+                  <span className="text-xs text-white/30 font-mono ml-3">{p.position} · {p.school}</span>
+                </div>
+                <span className="text-xs font-mono text-white/20 hidden sm:block">
+                  comp: {p.nfl_comparison || '—'}
+                </span>
+                <span className="text-xs font-mono px-2 py-0.5" style={{
+                  background: 'rgba(212,168,83,0.1)',
+                  color: '#D4A853',
+                  border: '1px solid rgba(212,168,83,0.2)',
+                }}>
+                  {p.tie_grade || `${p.grade}`}
+                </span>
+                <span className="text-xs font-mono text-white/20">
+                  Rd {p.projected_round || '?'}
+                </span>
+              </Link>
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-12 text-white/20 font-mono text-sm">Loading draft board...</div>
+        )}
+      </section>
+
+      {/* ── WHAT IS PER|FORM ── */}
+      <section className="px-6 py-16" style={{ borderTop: '1px solid rgba(255,255,255,0.05)' }}>
+        <div className="max-w-4xl mx-auto">
+          <h2 className="font-outfit text-2xl font-extrabold text-white tracking-wide mb-6 text-center">HOW IT WORKS</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {[
+              { title: 'TIE GRADES', desc: 'Every prospect scored on Performance, Attributes, and Intangibles. Three dimensions weighted into one grade.' },
+              { title: 'AI ANALYSTS', desc: 'Four autonomous analysts generate scouting reports, film breakdowns, hot takes, and ranking updates daily.' },
+              { title: 'LIVE DATA', desc: 'Pipeline scrapes sports news around the clock. Grades update automatically when new data arrives.' },
+            ].map(item => (
+              <div key={item.title} className="p-6" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)' }}>
+                <h3 className="font-outfit text-sm font-bold tracking-wider mb-3" style={{ color: '#D4A853' }}>{item.title}</h3>
+                <p className="text-xs text-white/40 font-mono leading-relaxed">{item.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── COVERAGE LINKS ── */}
+      <section className="px-6 py-16" style={{ borderTop: '1px solid rgba(255,255,255,0.05)' }}>
+        <div className="max-w-4xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-4">
+          {[
+            { label: 'Draft Board', href: '/draft', desc: '50 prospects' },
+            { label: 'Mock Draft', href: '/draft/mock', desc: '7-round sim' },
+            { label: 'Analysts', href: '/analysts', desc: '4 AI voices' },
+            { label: 'Flag Football', href: '/flag-football', desc: 'LA 2028' },
+          ].map(link => (
+            <Link key={link.href} href={link.href} className="p-5 text-center transition-all hover:border-[#D4A853]/40" style={{ border: '1px solid rgba(255,255,255,0.06)', background: 'rgba(255,255,255,0.02)' }}>
+              <span className="font-outfit text-sm font-bold text-white block mb-1">{link.label}</span>
+              <span className="text-[10px] font-mono text-white/30">{link.desc}</span>
+            </Link>
+          ))}
+        </div>
+      </section>
+
+      {/* ── DRAFT INFO ── */}
+      <section className="px-6 py-16" style={{ borderTop: '1px solid rgba(255,255,255,0.05)' }}>
+        <div className="max-w-3xl mx-auto text-center">
+          <h2 className="font-outfit text-2xl font-extrabold text-white tracking-wide mb-4">2026 NFL DRAFT</h2>
+          <p className="text-sm text-white/40 font-mono leading-relaxed mb-2">
+            April 23-25, 2026 · Pittsburgh, Pennsylvania
+          </p>
+          <p className="text-sm text-white/30 font-mono leading-relaxed mb-6">
+            257 selections across 7 rounds. Coverage on ESPN, ABC, NFL Network.
+          </p>
+          <p className="text-xs text-white/20 font-mono leading-relaxed max-w-xl mx-auto">
+            Per|Form delivers autonomous grading and analysis powered by the TIE system.
+            Our AI analyst team generates daily content — scouting reports, film breakdowns,
+            mock drafts, and debate segments — without human writers.
+          </p>
+        </div>
+      </section>
+
       <Footer />
     </div>
   );
