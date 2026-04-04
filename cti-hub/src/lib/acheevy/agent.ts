@@ -93,7 +93,7 @@ CONVERSATION STYLE:
 - End with what's happening next, not a question
 
 WRONG: "Would you like me to build a dashboard? Here are 4 questions about your tech stack..."
-RIGHT: "I'm building you a real-time monitoring view. You'll see every agent's status, current task, and output as it happens. Dispatching Chicken Hawk to set it up now."
+RIGHT: "I'm building you a real-time monitoring view. You'll see every agent's status, current task, and output as it happens."
 
 CAPABILITIES:
 - Research: gather data from any URL or source
@@ -140,19 +140,12 @@ GRAMMAR (NTNTN) MODE:
 - If the user says "no" or adjusts, re-interpret and confirm again
 - Grammar converts vague intent into precise objectives — respect the structured spec it produces
 
-AGENT FLEET (Boomer_Angs):
-- You command a fleet of specialized agents. When dispatching work, name the agent:
-  - Chicken Hawk: tactical operations, builds, deployments
-  - Scout_Ang: marketplace research, competitive intel
-  - Content_Ang: content marketing, SEO, social media
-  - Edu_Ang: sales, enrollment, revenue attribution
-  - Biz_Ang: business development, pipeline analytics
-  - Ops_Ang: fleet monitoring, incident detection
-  - CFO_Ang: budget tracking, receivables, bookkeeping, pricing strategy
-  - Iller_Ang: creative director, visual assets, player cards, broadcast graphics, character art, NFT assets, design
-  - Visual Engine: image generation (Nano Banana Pro 2, Canvas Engine, Flux Ultra)
-- Always mention which agent you're routing to when handling a task
-- Always mention which agent you're routing to when handling a task
+EXECUTION RULES:
+- Do the work yourself. Do NOT pretend to dispatch to other agents unless they are actually online and responding.
+- Do NOT say "I'm dispatching to [agent name]" or "I've routed this to [agent]" — that is fake if the agent isn't running.
+- Answer the user's request directly. If they ask for content, write it. If they ask for analysis, analyze it. If they ask for a plan, plan it.
+- Be concise. Answer what was asked. Don't pad with extra structure, bullet points, or headers unless the user asked for them.
+- If you can't do something (like generate a video or image), say so plainly — don't pretend it's happening.
 
 MEMORY CONTEXT (recalled from prior sessions):
 {memory_context}
@@ -453,55 +446,6 @@ export async function acheevyRespondStream(
     });
 
     return { stream: selectStream, model: 'model-selector', memories_recalled: memoriesRecalled };
-  }
-
-  // 5.7 Detect if a real agent should handle this (dispatch to live backend)
-  const targetAgent = detectAgent(userMessage);
-  if (targetAgent && !userMessage.startsWith('[GRAMMAR')) {
-    const dispatchStream = new ReadableStream<Uint8Array>({
-      async start(controller) {
-        try {
-          controller.enqueue(enc.encode(`data: ${JSON.stringify({ thinking: `Routing to ${targetAgent.replace('_', ' ')}...` })}\n\n`));
-          controller.enqueue(enc.encode(`data: ${JSON.stringify({ agent: targetAgent.replace('_', ' ') })}\n\n`));
-
-          const result = await dispatchToAgent(targetAgent, userMessage);
-
-          if (result.success) {
-            controller.enqueue(enc.encode(`data: ${JSON.stringify({ content: result.response })}\n\n`));
-          } else {
-            // Agent unavailable — fall through to ACHEEVY handling it via LLM
-            controller.enqueue(enc.encode(`data: ${JSON.stringify({ content: `I'm routing this to ${targetAgent.replace('_', ' ')}, but they're currently being deployed. Let me handle this directly.\n\n` })}\n\n`));
-          }
-
-          const budget = await getBudget().catch(() => ({ starting: 20, remaining: 20, exhausted: false }));
-          controller.enqueue(enc.encode(`data: ${JSON.stringify({ content: '', done: true, usage: { tokens_in: 0, tokens_out: 0, cost: 0, memories_recalled: memoriesRecalled }, budget })}\n\n`));
-
-          addMessage(conversationId, userId, 'acheevy', result.response, targetAgent, { dispatched: true, agent: targetAgent, elapsed_ms: result.elapsed_ms }).catch(() => {});
-        } catch (err) {
-          controller.enqueue(enc.encode(`data: ${JSON.stringify({ content: 'Dispatch failed. Let me handle this directly.' })}\n\n`));
-          controller.enqueue(enc.encode(`data: ${JSON.stringify({ content: '', done: true, usage: { tokens_in: 0, tokens_out: 0, cost: 0, memories_recalled: 0 } })}\n\n`));
-        }
-        controller.close();
-      },
-    });
-
-    // Only use dispatch if the agent is actually online
-    const dispatchResult = await dispatchToAgent(targetAgent, userMessage);
-    if (dispatchResult.success) {
-      const successStream = new ReadableStream<Uint8Array>({
-        async start(controller) {
-          controller.enqueue(enc.encode(`data: ${JSON.stringify({ thinking: `Dispatched to ${targetAgent.replace('_', ' ')}` })}\n\n`));
-          controller.enqueue(enc.encode(`data: ${JSON.stringify({ agent: targetAgent.replace('_', ' ') })}\n\n`));
-          controller.enqueue(enc.encode(`data: ${JSON.stringify({ content: dispatchResult.response })}\n\n`));
-          const budget = await getBudget().catch(() => ({ starting: 20, remaining: 20, exhausted: false }));
-          controller.enqueue(enc.encode(`data: ${JSON.stringify({ content: '', done: true, usage: { tokens_in: 0, tokens_out: 0, cost: 0, memories_recalled: memoriesRecalled }, budget })}\n\n`));
-          controller.close();
-          addMessage(conversationId, userId, 'acheevy', dispatchResult.response, targetAgent, { dispatched: true, agent: targetAgent, elapsed_ms: dispatchResult.elapsed_ms }).catch(() => {});
-        },
-      });
-      return { stream: successStream, model: `dispatch:${targetAgent}`, memories_recalled: memoriesRecalled };
-    }
-    // If dispatch failed, fall through to OpenRouter LLM
   }
 
   // 6. Call OpenRouter with stream: true
