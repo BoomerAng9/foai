@@ -97,49 +97,7 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // Detect task tier and route accordingly
-    const ACHEEVY_V1_URL = process.env.ACHEEVY_V1_URL;
-    const taskInfo = detectTaskTier(enrichedMessage);
-    const isAutonomousTask = taskInfo.tier > 0;
-
-    if (isAutonomousTask && ACHEEVY_V1_URL) {
-      // Route to ACHEEVY V1 (II Agent) for full autonomous execution
-      try {
-        const v1Response = await fetch(`${ACHEEVY_V1_URL}/v1/chat/conversations`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${process.env.ACHEEVY_V1_TOKEN || ''}`,
-          },
-          body: JSON.stringify({
-            content: enrichedMessage,
-            model_id: process.env.ACHEEVY_V1_MODEL_ID || 'default',
-          }),
-          signal: AbortSignal.timeout(5000), // 5s timeout — don't hang if V1 is down
-        });
-
-        if (v1Response.ok && v1Response.body) {
-          // Proxy the V1 SSE stream back to the client
-          return new Response(v1Response.body, {
-            headers: {
-              'Content-Type': 'text/event-stream',
-              'Cache-Control': 'no-cache',
-              Connection: 'keep-alive',
-              'X-Conversation-Id': convId || '',
-              'X-Acheevy-Mode': 'autonomous',
-              'X-Agent-Tier': String(taskInfo.tier),
-              'X-Agent-Roster': taskInfo.agents.join(','),
-            },
-          });
-        }
-        // V1 failed — fall through to standard mode
-        console.warn('[Chat] V1 backend unavailable, falling back to standard mode');
-      } catch (v1Err) {
-        console.warn('[Chat] V1 proxy error:', v1Err instanceof Error ? v1Err.message : v1Err);
-      }
-    }
-
-    // Standard mode — single ACHEEVY response (fast chat)
+    // Standard mode — ACHEEVY responds via Gemma 4 on OpenRouter
     const result = await acheevyRespondStream(
       userId,
       convId || 'temp',
