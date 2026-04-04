@@ -5,8 +5,8 @@ const OWNER_ONLY_ROUTES = ['/live', '/plug-bin', '/open-seats', '/enrollments', 
 // Must match src/lib/allowlist.ts — cannot import in Edge Runtime middleware
 const OWNER_EMAILS = (process.env.OWNER_EMAILS || '').split(',').map(e => e.trim()).filter(Boolean);
 
-// Routes only available on deploy.foai.cloud (customer-facing product)
-const DEPLOY_ROUTES = ['/chat', '/agents', '/meet', '/deploy-agent', '/projects', '/settings', '/profile', '/billing', '/auth', '/grammar', '/deploy-landing', '/about', '/plug', '/broadcast'];
+// Routes available on deploy.foai.cloud (customer-facing product)
+const DEPLOY_ROUTES = ['/chat', '/agents', '/meet', '/deploy-agent', '/projects', '/settings', '/profile', '/billing', '/auth', '/grammar', '/deploy-landing', '/about', '/plug', '/broadcast', '/create', '/pipeline', '/process'];
 
 export function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;

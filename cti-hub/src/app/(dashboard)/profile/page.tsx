@@ -1,12 +1,18 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { NurdCard, DEFAULT_CARD, type NurdCardData } from '@/components/profile/NurdCard';
 import { moderateText, moderateImagePrompt } from '@/lib/moderation/content-filter';
 import { Save, AlertTriangle, Sparkles, Image } from 'lucide-react';
 
 export default function ProfileCardPage() {
   const [card, setCard] = useState<NurdCardData>({ ...DEFAULT_CARD });
+
+  useEffect(() => {
+    fetch('/api/profile').then(r => r.json()).then(d => {
+      if (d.card) setCard({ ...DEFAULT_CARD, ...d.card });
+    }).catch(() => {});
+  }, []);
   const [editing, setEditing] = useState(false);
   const [moderationError, setModerationError] = useState('');
   const [avatarPrompt, setAvatarPrompt] = useState('');
@@ -53,7 +59,7 @@ export default function ProfileCardPage() {
     }
   }
 
-  function handleSave() {
+  async function handleSave() {
     // Full moderation check on all fields
     const fields = [card.name, card.class, card.coreTrait, card.vibeAbility, card.description];
     for (const field of fields) {
@@ -63,7 +69,14 @@ export default function ProfileCardPage() {
         return;
       }
     }
-    // TODO: Save to database
+    // Save to database
+    try {
+      await fetch('/api/profile', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(card),
+      });
+    } catch {}
     setSaved(true);
     setEditing(false);
     setTimeout(() => setSaved(false), 3000);
