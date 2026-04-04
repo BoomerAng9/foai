@@ -62,7 +62,7 @@ export default function DraftBoardPage() {
 
   const sorted = [...filtered].sort((a, b) => {
     if (sortBy === 'rank') return (a.overall_rank ?? 999) - (b.overall_rank ?? 999);
-    if (sortBy === 'grade') return (b.grade ?? 0) - (a.grade ?? 0);
+    if (sortBy === 'grade') return (parseFloat(String(b.grade)) || 0) - (parseFloat(String(a.grade)) || 0);
     return a.name.localeCompare(b.name);
   });
 
@@ -138,7 +138,7 @@ export default function DraftBoardPage() {
         ) : (
           <div className="flex flex-col gap-1">
             {sorted.map((p) => {
-              const score = p.grade ?? 0;
+              const score = typeof p.grade === 'string' ? parseFloat(p.grade) : (p.grade ?? 0);
               const gradeInfo = getGradeForScore(score);
               return (
                 <Link

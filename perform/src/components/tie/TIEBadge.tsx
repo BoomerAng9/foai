@@ -25,7 +25,7 @@ export function TIEBadge({ score, grade, badgeColor, size = 'md' }: TIEBadgeProp
       />
       {/* Score */}
       <text x="50" y="48" textAnchor="middle" fill={badgeColor} fontSize={fontSize} fontWeight="800" fontFamily="'Outfit', sans-serif">
-        {score > 100 ? '101+' : score.toFixed(0)}
+        {isNaN(score) ? '—' : score > 100 ? '101+' : score.toFixed(0)}
       </text>
       {/* Grade */}
       <text x="50" y="68" textAnchor="middle" fill="rgba(255,255,255,0.7)" fontSize={gradeSize} fontWeight="600" fontFamily="'IBM Plex Mono', monospace">
