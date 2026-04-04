@@ -27,15 +27,15 @@ export async function searchProspectNews(playerName: string): Promise<ScrapedArt
 export async function searchDraftNews(): Promise<ScrapedArticle[]> {
   if (!BRAVE_KEY) return [];
   const queries = [
-    'NFL draft 2026 latest news',
-    'college football transfer portal today',
-    'NFL combine 2026 results',
-    'college football recruiting commitments today',
+    'NFL draft 2026 prospects',
+    'college football transfer portal',
+    'NFL combine 2026',
+    'college football recruiting commitments',
   ];
   const results: ScrapedArticle[] = [];
   for (const q of queries) {
     try {
-      const res = await fetch(`${BRAVE_URL}?q=${encodeURIComponent(q)}&count=5&freshness=pd`, {
+      const res = await fetch(`${BRAVE_URL}?q=${encodeURIComponent(q)}&count=5&freshness=pw`, {
         headers: { 'X-Subscription-Token': BRAVE_KEY, 'Accept': 'application/json' },
         signal: AbortSignal.timeout(8000),
       });
