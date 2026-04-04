@@ -11,6 +11,7 @@ const NAV_ITEMS = [
   { label: 'War Room', href: '/studio' },
   { label: 'Analysts', href: '/analysts' },
   { label: 'Players', href: '/players' },
+  { label: 'Film Room', href: '/film' },
   { label: 'Flag Football', href: '/flag-football' },
   { label: 'Dashboard', href: '/dashboard' },
 ];
