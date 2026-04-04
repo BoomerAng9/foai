@@ -1,10 +1,50 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { FileText, Image as ImageIcon, Brain, Bot } from 'lucide-react';
+import { FileText, Image as ImageIcon, Brain, Bot, Volume2 } from 'lucide-react';
 import { CopyButton } from './CopyButton';
 import { LucReceipt } from './LucReceipt';
 import type { Message } from '@/lib/chat/types';
+
+function SpeakButton({ text }: { text: string }) {
+  const [playing, setPlaying] = useState(false);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  async function handleSpeak() {
+    if (playing && audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current = null;
+      setPlaying(false);
+      return;
+    }
+
+    setPlaying(true);
+    try {
+      // Strip markdown for cleaner speech
+      const cleanText = text.replace(/[#*`\[\]()_~>|]/g, '').replace(/\n{2,}/g, '. ').slice(0, 4000);
+      const res = await fetch('/api/tts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: cleanText }),
+      });
+      if (!res.ok) { setPlaying(false); return; }
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const audio = new Audio(url);
+      audioRef.current = audio;
+      audio.onended = () => { setPlaying(false); URL.revokeObjectURL(url); };
+      audio.play();
+    } catch {
+      setPlaying(false);
+    }
+  }
+
+  return (
+    <button onClick={handleSpeak} className="p-1 hover:bg-bg-elevated transition-colors" title={playing ? 'Stop' : 'Listen'}>
+      <Volume2 className={`w-3.5 h-3.5 ${playing ? 'text-accent animate-pulse' : 'text-fg-tertiary hover:text-fg-secondary'}`} />
+    </button>
+  );
+}
 
 function TypingIndicator() {
   return (
@@ -156,7 +196,12 @@ export function MessageBubble({ msg }: { msg: Message }) {
         </span>
         {msg.streaming && <TypingIndicator />}
         <div className="flex-1" />
-        {!msg.streaming && msg.role === 'acheevy' && <CopyButton text={msg.content} />}
+        {!msg.streaming && msg.role === 'acheevy' && (
+          <>
+            <SpeakButton text={msg.content} />
+            <CopyButton text={msg.content} />
+          </>
+        )}
       </div>
 
       {msg.attachments && msg.attachments.length > 0 && (
