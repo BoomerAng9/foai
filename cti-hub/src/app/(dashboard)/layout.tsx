@@ -44,6 +44,7 @@ const NAV: NavItem[] = [
   { name: 'PLUG BIN', href: '/plug-bin', icon: Video, ownerOnly: true },
   { name: 'MARKETPLACE', href: '/open-seats', icon: Search, ownerOnly: true },
   { name: 'ENROLLMENTS', href: '/enrollments', icon: TrendingUp, ownerOnly: true },
+  { name: 'AFFILIATES', href: '/affiliates', icon: TrendingUp, ownerOnly: true },
   { name: 'SQUAD', href: '/team', icon: Shield, ownerOnly: true },
   { name: 'PER|FORM', href: 'https://perform.foai.cloud', icon: Activity },
   { name: 'ABOUT', href: '/about', icon: Info },

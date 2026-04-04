@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
 import { FileText, Image as ImageIcon, Brain, Bot, Volume2 } from 'lucide-react';
 import { CopyButton } from './CopyButton';
 import { LucReceipt } from './LucReceipt';
@@ -85,29 +85,42 @@ function AgentBadge({ agent }: { agent: string }) {
 }
 
 // Mermaid diagram renderer — loads mermaid.js on demand
-function MermaidBlock({ code, id }: { code: string; id: string }) {
+// Uses useId + counter to guarantee unique render IDs across re-renders
+let mermaidCounter = 0;
+
+function MermaidBlock({ code }: { code: string }) {
   const ref = useRef<HTMLDivElement>(null);
   const [svg, setSvg] = useState('');
   const [error, setError] = useState('');
+  const reactId = useId().replace(/:/g, '_');
 
   useEffect(() => {
     let cancelled = false;
-    (async () => {
+    // Reset on code change so stale SVG doesn't linger
+    setSvg('');
+    setError('');
+
+    // Small delay to ensure DOM is settled (fixes first-render miss during streaming)
+    const timer = setTimeout(async () => {
       try {
-        // Dynamic import — only loads when needed
         const mermaid = (await import('mermaid')).default;
         mermaid.initialize({ startOnLoad: false, theme: 'dark', themeVariables: {
           primaryColor: '#E8A020', primaryTextColor: '#fff', primaryBorderColor: '#E8A020',
           lineColor: '#666', secondaryColor: '#1a1a2e', tertiaryColor: '#0A0A0F',
         }});
-        const { svg: rendered } = await mermaid.render(`mermaid-${id}`, code);
+        // Unique ID per render attempt — avoids stale element collisions
+        const renderId = `mmd${reactId}_${++mermaidCounter}`;
+        // Clean up any leftover container from a previous failed render
+        document.getElementById('d' + renderId)?.remove();
+        const { svg: rendered } = await mermaid.render(renderId, code);
         if (!cancelled) setSvg(rendered);
       } catch (err) {
         if (!cancelled) setError(err instanceof Error ? err.message : 'Diagram render failed');
       }
-    })();
-    return () => { cancelled = true; };
-  }, [code, id]);
+    }, 50);
+
+    return () => { cancelled = true; clearTimeout(timer); };
+  }, [code, reactId]);
 
   if (error) return <div className="text-xs text-signal-error p-2 border border-signal-error/20 my-2">{error}</div>;
   if (!svg) return <div className="text-xs text-fg-ghost p-4 text-center my-2">Rendering diagram...</div>;
@@ -145,7 +158,7 @@ function renderContent(content: string) {
     // Mermaid diagram
     const mermaidMatch = part.match(/^```mermaid\n([\s\S]*?)```$/);
     if (mermaidMatch) {
-      return <MermaidBlock key={i} code={mermaidMatch[1].trim()} id={String(i)} />;
+      return <MermaidBlock key={`mermaid-${i}-${mermaidMatch[1].trim().length}`} code={mermaidMatch[1].trim()} />;
     }
 
     // Chart JSON
