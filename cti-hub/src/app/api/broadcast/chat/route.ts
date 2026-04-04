@@ -116,13 +116,14 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Generation failed' }, { status: 502 });
     }
 
-    // SSE stream back to client
+    // SSE stream back to client — detect [CAMERA_SPEC] blocks for video generation
     const encoder = new TextEncoder();
     const stream = new ReadableStream({
       async start(controller) {
         const reader = res.body!.getReader();
         const decoder = new TextDecoder();
         let buffer = '';
+        let fullResponse = '';
 
         try {
           while (true) {
@@ -142,13 +143,52 @@ export async function POST(req: NextRequest) {
                 const parsed = JSON.parse(data);
                 const content = parsed.choices?.[0]?.delta?.content;
                 if (content) {
+                  fullResponse += content;
                   controller.enqueue(encoder.encode(`data: ${JSON.stringify({ content })}\n\n`));
                 }
                 if (parsed.choices?.[0]?.finish_reason === 'stop') {
+                  // Detect [CAMERA_SPEC] block and extract as video prompt
+                  const specMatch = fullResponse.match(/\[CAMERA_SPEC\]([\s\S]*?)\[\/CAMERA_SPEC\]/);
+                  if (specMatch) {
+                    // Build a video prompt from ILLA's full response (minus the spec block)
+                    const narrative = fullResponse
+                      .replace(/\[CAMERA_SPEC\][\s\S]*?\[\/CAMERA_SPEC\]/g, '')
+                      .replace(/\*\*/g, '')
+                      .trim();
+                    // Parse spec fields
+                    const specText = specMatch[1];
+                    const specFields: Record<string, string> = {};
+                    for (const specLine of specText.split('\n')) {
+                      const kv = specLine.match(/^\s*(\w+):\s*(.+)/);
+                      if (kv) specFields[kv[1].toLowerCase()] = kv[2].trim();
+                    }
+                    // Send video_ready event with prompt and parsed specs
+                    controller.enqueue(encoder.encode(`data: ${JSON.stringify({
+                      video_ready: true,
+                      video_prompt: narrative.slice(0, 800),
+                      camera_spec: specFields,
+                    })}\n\n`));
+                  }
                   controller.enqueue(encoder.encode(`data: ${JSON.stringify({ done: true })}\n\n`));
                 }
               } catch {}
             }
+          }
+          // Final check if stream ended without finish_reason
+          const specMatch = fullResponse.match(/\[CAMERA_SPEC\]([\s\S]*?)\[\/CAMERA_SPEC\]/);
+          if (specMatch) {
+            const narrative = fullResponse.replace(/\[CAMERA_SPEC\][\s\S]*?\[\/CAMERA_SPEC\]/g, '').replace(/\*\*/g, '').trim();
+            const specText = specMatch[1];
+            const specFields: Record<string, string> = {};
+            for (const specLine of specText.split('\n')) {
+              const kv = specLine.match(/^\s*(\w+):\s*(.+)/);
+              if (kv) specFields[kv[1].toLowerCase()] = kv[2].trim();
+            }
+            controller.enqueue(encoder.encode(`data: ${JSON.stringify({
+              video_ready: true,
+              video_prompt: narrative.slice(0, 800),
+              camera_spec: specFields,
+            })}\n\n`));
           }
           controller.enqueue(encoder.encode(`data: ${JSON.stringify({ done: true })}\n\n`));
         } catch (err) {

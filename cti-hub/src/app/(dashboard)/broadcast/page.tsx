@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import {
   Plus, FolderOpen, Image as ImageIcon, Film, FileText, Bot,
@@ -119,8 +119,114 @@ export default function BroadcastStudio() {
   const [textOverlays, setTextOverlays] = useState<TextOverlayConfig[]>([]);
   const [showScenarios, setShowScenarios] = useState(false);
   const [voiceEnabled, setVoiceEnabled] = useState(true);
+  // Video generation state
+  const [videoTaskId, setVideoTaskId] = useState<string | null>(null);
+  const [videoProgress, setVideoProgress] = useState(0);
+  const [videoStatus, setVideoStatus] = useState<'idle' | 'generating' | 'complete' | 'error'>('idle');
+  const [generatedVideoUrl, setGeneratedVideoUrl] = useState<string | null>(null);
+  const [pendingVideoPrompt, setPendingVideoPrompt] = useState<string | null>(null);
+  const [pendingCameraSpec, setPendingCameraSpec] = useState<Record<string, string> | null>(null);
   const chatEndRef = useRef<HTMLDivElement>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  // Poll for video generation status
+  useEffect(() => {
+    if (!videoTaskId || videoStatus !== 'generating') return;
+    pollRef.current = setInterval(async () => {
+      try {
+        const idToken = user ? await user.getIdToken(true) : '';
+        const res = await fetch(`/api/video/seedance?taskId=${videoTaskId}`, {
+          headers: idToken ? { Authorization: `Bearer ${idToken}` } : {},
+        });
+        if (!res.ok) return;
+        const data = await res.json();
+        if (data.progress !== undefined) setVideoProgress(data.progress);
+        if (data.status === 'SUCCESS' || data.status === 'completed' || data.videoUrl) {
+          setVideoStatus('complete');
+          setGeneratedVideoUrl(data.videoUrl || null);
+          setVideoProgress(100);
+          if (pollRef.current) clearInterval(pollRef.current);
+          // Add to scenes + timeline
+          if (data.videoUrl) {
+            const sceneId = `scene-${Date.now()}`;
+            const dur = parseInt(pendingCameraSpec?.duration || '8') || 8;
+            setScenes(prev => [...prev, {
+              id: sceneId,
+              name: `Scene ${prev.length + 1}`,
+              description: pendingVideoPrompt?.slice(0, 60) || 'Generated scene',
+              videoUrl: data.videoUrl,
+              duration: dur,
+              status: 'ready',
+            }]);
+            setTimelineClips(prev => {
+              const existingEnd = prev.filter(c => c.trackId === 'V1').reduce((max, c) => Math.max(max, c.startTime + c.duration), 0);
+              return [...prev, {
+                id: `clip-${sceneId}`,
+                trackId: 'V1',
+                name: `Scene ${scenes.length + 1}`,
+                startTime: existingEnd,
+                duration: dur,
+                videoUrl: data.videoUrl,
+                type: 'video' as const,
+                color: 'rgba(212,168,83,0.5)',
+              }];
+            });
+            setSelectedScene(sceneId);
+            setChatMessages(prev => [...prev, { role: 'illa', content: 'Your video is ready and on the timeline. Check the preview canvas.' }]);
+          }
+        } else if (data.status === 'FAILED' || data.status === 'failed' || data.error) {
+          setVideoStatus('error');
+          if (pollRef.current) clearInterval(pollRef.current);
+          setChatMessages(prev => [...prev, { role: 'illa', content: `Video generation failed: ${data.error || 'Unknown error'}. Let me know if you want to retry.` }]);
+        }
+      } catch {}
+    }, 5000);
+    return () => { if (pollRef.current) clearInterval(pollRef.current); };
+  }, [videoTaskId, videoStatus]);
+
+  const handleGenerateVideo = useCallback(async () => {
+    if (!pendingVideoPrompt) return;
+    setVideoStatus('generating');
+    setVideoProgress(0);
+    setGeneratedVideoUrl(null);
+    setChatMessages(prev => [...prev, { role: 'illa', content: 'Sending to the production floor. Your video is now generating...' }]);
+    try {
+      const idToken = user ? await user.getIdToken(true) : '';
+      const aspect = pendingCameraSpec?.aspect || cameraSpec.aspect || '16:9';
+      const dur = parseInt(pendingCameraSpec?.duration || cameraSpec.duration || '8') || 8;
+      const res = await fetch('/api/video/seedance', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(idToken ? { Authorization: `Bearer ${idToken}` } : {}),
+        },
+        body: JSON.stringify({
+          prompt: pendingVideoPrompt,
+          duration: Math.min(dur, 15),
+          aspectRatio: aspect,
+          generateAudio: true,
+          fast: false,
+        }),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({ error: 'Request failed' }));
+        setVideoStatus('error');
+        setChatMessages(prev => [...prev, { role: 'illa', content: `Generation issue: ${err.error || 'Service unavailable'}. We can retry when ready.` }]);
+        return;
+      }
+      const data = await res.json();
+      if (data.taskId) {
+        setVideoTaskId(data.taskId);
+      } else {
+        setVideoStatus('error');
+        setChatMessages(prev => [...prev, { role: 'illa', content: 'No task ID returned. Check your video credits.' }]);
+      }
+    } catch {
+      setVideoStatus('error');
+      setChatMessages(prev => [...prev, { role: 'illa', content: 'Connection error starting video generation. Please try again.' }]);
+    }
+  }, [pendingVideoPrompt, pendingCameraSpec, cameraSpec, user]);
 
   const addScene = useCallback(async () => {
     if (!newSceneInput.trim()) return;
@@ -272,6 +378,13 @@ export default function BroadcastStudio() {
                       ));
                       chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
                     }
+                    if (data.video_ready) {
+                      setPendingVideoPrompt(data.video_prompt || null);
+                      setPendingCameraSpec(data.camera_spec || null);
+                      setVideoStatus('idle');
+                      setGeneratedVideoUrl(null);
+                      setVideoTaskId(null);
+                    }
                     if (data.done) break;
                   } catch {}
                 }
@@ -321,6 +434,14 @@ export default function BroadcastStudio() {
                 return prev;
               });
             }
+            // Detect video_ready signal from chat route
+            if (data.video_ready) {
+              setPendingVideoPrompt(data.video_prompt || null);
+              setPendingCameraSpec(data.camera_spec || null);
+              setVideoStatus('idle');
+              setGeneratedVideoUrl(null);
+              setVideoTaskId(null);
+            }
             if (data.done) {
               // Auto-voice: read ILLA's response aloud
               if (voiceEnabled && fullVoiceText) {
@@ -367,12 +488,15 @@ export default function BroadcastStudio() {
         <div className="flex items-center gap-3">
           {/* Logo mark — Broad|Cast X */}
           <svg width="28" height="28" viewBox="0 0 100 100" fill="none">
-            <rect x="4" y="4" width="92" height="92" rx="18" stroke={BC.silver} strokeWidth="6" fill="none" />
-            <text x="50" y="62" textAnchor="middle" fill={BC.silver} fontFamily="'Outfit', sans-serif" fontWeight="800" fontSize="44" letterSpacing="2">BC</text>
+            {/* Broad|Cast logo — two interlocking diagonal strokes with dot accent */}
+            <line x1="15" y1="80" x2="55" y2="20" stroke={BC.silver} strokeWidth="14" strokeLinecap="round" />
+            <line x1="45" y1="80" x2="85" y2="20" stroke={BC.silver} strokeWidth="14" strokeLinecap="round" />
+            <line x1="50" y1="25" x2="90" y2="75" stroke={BC.silver} strokeWidth="14" strokeLinecap="round" />
+            <circle cx="12" cy="55" r="7" fill={BC.silver} />
           </svg>
           <div className="flex flex-col items-center">
-            <span className="text-[15px] tracking-[0.2em]" style={{ color: BC.gold, fontFamily: "'Outfit', sans-serif", fontWeight: 800 }}>
-              BROAD<span style={{ color: BC.silver, opacity: 0.6 }}>|</span>CAST
+            <span className="text-[15px] tracking-[0.35em] uppercase" style={{ color: '#8B7A5E', fontFamily: "'Inter', sans-serif", fontWeight: 600, letterSpacing: '0.35em' }}>
+              BROAD<span style={{ color: '#FFFFFF', opacity: 0.3 }}>|</span>CAST
             </span>
             <span className="text-[7px] tracking-[0.3em] uppercase font-mono" style={{ color: BC.textGhost }}>
               VIDEO CREATION STUDIO
@@ -509,7 +633,16 @@ export default function BroadcastStudio() {
         <div className="flex-1 flex flex-col min-w-0">
           {/* Video Preview Canvas */}
           <div className="flex-1 flex items-center justify-center relative" style={{ background: '#000' }}>
-            {selectedScene && scenes.find(s => s.id === selectedScene)?.videoUrl ? (
+            {/* Show generated video in player */}
+            {generatedVideoUrl ? (
+              <video
+                src={generatedVideoUrl}
+                className="max-w-full max-h-full"
+                controls
+                autoPlay
+                style={{ maxHeight: '100%' }}
+              />
+            ) : selectedScene && scenes.find(s => s.id === selectedScene)?.videoUrl ? (
               <video
                 src={scenes.find(s => s.id === selectedScene)?.videoUrl}
                 className="max-w-full max-h-full"
@@ -525,22 +658,85 @@ export default function BroadcastStudio() {
                   Select a clip or hit EXPORT MP4 to render
                 </span>
               </div>
+            ) : videoStatus === 'generating' ? (
+              <div className="flex flex-col items-center gap-4">
+                <div className="relative w-20 h-20">
+                  <svg className="w-20 h-20 -rotate-90" viewBox="0 0 80 80">
+                    <circle cx="40" cy="40" r="34" stroke="rgba(255,255,255,0.08)" strokeWidth="6" fill="none" />
+                    <circle cx="40" cy="40" r="34" stroke={BC.gold} strokeWidth="6" fill="none"
+                      strokeDasharray={`${2 * Math.PI * 34}`}
+                      strokeDashoffset={`${2 * Math.PI * 34 * (1 - videoProgress / 100)}`}
+                      strokeLinecap="round"
+                      className="transition-all duration-500"
+                    />
+                  </svg>
+                  <span className="absolute inset-0 flex items-center justify-center text-[13px] font-mono font-bold" style={{ color: BC.gold }}>
+                    {videoProgress}%
+                  </span>
+                </div>
+                <span className="text-[11px] font-mono" style={{ color: BC.amber }}>
+                  Generating video...
+                </span>
+                <span className="text-[9px] font-mono" style={{ color: BC.textGhost }}>
+                  This typically takes 30-90 seconds
+                </span>
+              </div>
             ) : (
               <div className="flex flex-col items-center gap-3">
                 <svg width="48" height="48" viewBox="0 0 100 100" fill="none" opacity="0.15">
-                  <circle cx="50" cy="50" r="44" stroke={BC.silver} strokeWidth="5" />
-                  <polygon points="38,28 38,72 76,50" fill={BC.silver} />
+                  {/* Broad|Cast logo mark */}
+                  <line x1="15" y1="80" x2="55" y2="20" stroke={BC.silver} strokeWidth="14" strokeLinecap="round" />
+                  <line x1="45" y1="80" x2="85" y2="20" stroke={BC.silver} strokeWidth="14" strokeLinecap="round" />
+                  <line x1="50" y1="25" x2="90" y2="75" stroke={BC.silver} strokeWidth="14" strokeLinecap="round" />
+                  <circle cx="12" cy="55" r="7" fill={BC.silver} />
                 </svg>
                 <span className="text-[11px] font-mono" style={{ color: BC.textGhost }}>
                   Add scenes or describe your vision in chat
                 </span>
               </div>
             )}
+
+            {/* GENERATE VIDEO button — appears when ILLA provides camera specs */}
+            {pendingVideoPrompt && videoStatus === 'idle' && (
+              <div className="absolute bottom-3 right-3 flex flex-col items-end gap-1.5">
+                <button
+                  onClick={handleGenerateVideo}
+                  className="flex items-center gap-2 px-4 py-2 text-[11px] font-mono font-bold tracking-wider transition-all hover:brightness-110 active:scale-95"
+                  style={{ background: BC.gold, color: BC.bg, boxShadow: '0 0 20px rgba(212,168,83,0.3)' }}
+                >
+                  <Film className="w-3.5 h-3.5" />
+                  GENERATE VIDEO
+                </button>
+                <span className="text-[8px] font-mono px-2" style={{ color: BC.textGhost }}>
+                  Camera specs ready
+                </span>
+              </div>
+            )}
+
             {/* Generating overlay */}
-            {scenes.some(s => s.status === 'generating') && (
+            {(scenes.some(s => s.status === 'generating') || videoStatus === 'generating') && (
               <div className="absolute bottom-3 left-3 flex items-center gap-2 px-3 py-1.5" style={{ background: 'rgba(0,0,0,0.8)', border: `1px solid ${BC.border}` }}>
                 <div className="w-2 h-2 rounded-full animate-pulse" style={{ background: BC.amber }} />
-                <span className="text-[9px] font-mono" style={{ color: BC.amber }}>Generating scene...</span>
+                <span className="text-[9px] font-mono" style={{ color: BC.amber }}>
+                  {videoStatus === 'generating' ? `Generating video... ${videoProgress}%` : 'Generating scene...'}
+                </span>
+              </div>
+            )}
+
+            {/* Error state */}
+            {videoStatus === 'error' && (
+              <div className="absolute bottom-3 left-3 flex items-center gap-2 px-3 py-1.5" style={{ background: 'rgba(0,0,0,0.8)', border: '1px solid rgba(239,68,68,0.3)' }}>
+                <div className="w-2 h-2 rounded-full" style={{ background: '#EF4444' }} />
+                <span className="text-[9px] font-mono" style={{ color: '#EF4444' }}>Generation failed</span>
+                {pendingVideoPrompt && (
+                  <button
+                    onClick={() => { setVideoStatus('idle'); }}
+                    className="text-[9px] font-mono px-2 py-0.5 ml-1"
+                    style={{ border: `1px solid ${BC.border}`, color: BC.textSec }}
+                  >
+                    RETRY
+                  </button>
+                )}
               </div>
             )}
           </div>
