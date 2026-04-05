@@ -14,6 +14,30 @@ interface Issue {
   details: string;
 }
 
+/** Known NFL players who should NOT be in a 2026 prospect DB */
+const ALREADY_DRAFTED_NAMES = new Set([
+  'devon achane', 'bijan robinson', 'jahmyr gibbs', 'zach charbonnet',
+  'roschon johnson', 'chase brown', 'tank bigsby', 'sean tucker',
+  'eric gray', 'israel abanikanda', 'kenny mcintosh', 'dewayne mcbride',
+  'isiah pacheco', 'hassan haskins', 'chris rodriguez jr.', 'zach evans',
+  'sarodorick thompson', 'kendre miller', 'tyjae spears', 'braelon allen',
+  'ray davis', 'audric estime', 'marshawn lloyd', 'frank gore jr.',
+  'kimani vidal', 'carson steele', 'cody schrader', 'bucky irving',
+  'trey benson', 'blake corum', 'rasheen ali', 'cam davis',
+  'tyrone tracy jr.', 'nate noel', 'justice ellison', 'jase mcclellan',
+  'jaylen wright', 'deuce vaughn', 'will shipley', 'jordan waters',
+  'bryce young', 'cj stroud', 'anthony richardson', 'will levis',
+  'caleb williams', 'jayden daniels', 'drake maye', 'bo nix',
+  'michael penix jr.', 'jj mccarthy', 'spencer rattler', 'cam ward',
+  'shedeur sanders', 'jalen milroe', 'marvin harrison jr.', 'malik nabers',
+  'rome odunze', 'ladd mcconkey', 'travis hunter', 'brock bowers',
+  'ashton jeanty', 'cam skattebo', 'quinshon judkins', 'dylan sampson',
+  'treveyon henderson', 'donovan edwards', 'omarion hampton', 'kaleb johnson',
+  'montrell johnson', 'phil mafah', 'tahj brooks', 'ollie gordon ii',
+  'jarquez hunter', 'rj harvey', 'dj giddens', 'devin neal',
+  'bhayshul tuten', 'cj baxter', 'jaydon blue',
+]);
+
 // Expected grade ranges per projected round
 const ROUND_GRADE_RANGES: Record<number, [number, number]> = {
   1: [80, 100],
@@ -136,6 +160,17 @@ export async function GET() {
           playerName: p.name,
           issue: 'MISSING_SCOUTING_SUMMARY',
           details: 'No scouting summary set',
+        });
+      }
+
+      // Already drafted — NOT a 2026 prospect
+      const normalizedName = p.name?.toLowerCase()?.replace(/[^a-z\s]/g, '')?.replace(/\s+/g, ' ')?.trim();
+      if (normalizedName && ALREADY_DRAFTED_NAMES.has(normalizedName)) {
+        issues.push({
+          playerId: p.id,
+          playerName: p.name,
+          issue: 'ALREADY_DRAFTED',
+          details: `${p.name} is already in the NFL — not a 2026 prospect`,
         });
       }
 

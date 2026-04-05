@@ -52,14 +52,65 @@ async function braveSearch(query: string, apiKey: string): Promise<string> {
   return snippets;
 }
 
+/* ── NFL players already drafted (2022-2025) — BLOCKLIST ──
+ * These names frequently appear in search results as comparisons
+ * or in mock draft articles referencing past classes. */
+const ALREADY_DRAFTED: Set<string> = new Set([
+  // 2023+ RBs
+  'devon achane', 'bijan robinson', 'jahmyr gibbs', 'zach charbonnet',
+  'roschon johnson', 'chase brown', 'tank bigsby', 'sean tucker',
+  'eric gray', 'israel abanikanda', 'kenny mcintosh', 'dewayne mcbride',
+  'isiah pacheco', 'hassan haskins', 'chris rodriguez jr.', 'chris rodriguez',
+  'zach evans', 'sarodorick thompson', 'kendre miller', 'tyjae spears',
+  'braelon allen', 'ray davis', 'audric estime', 'marshawn lloyd',
+  'frank gore jr.', 'kimani vidal', 'carson steele', 'cody schrader',
+  'bucky irving', 'trey benson', 'blake corum', 'jonathon brooks',
+  'rasheen ali', 'cam davis', 'tyrone tracy jr.', 'nate noel',
+  'justice ellison', 'jase mcclellan', 'jaylen wright', 'deuce vaughn',
+  'will shipley', 'jordan waters',
+  // 2023+ QBs
+  'bryce young', 'cj stroud', 'anthony richardson', 'will levis',
+  'caleb williams', 'jayden daniels', 'drake maye', 'bo nix',
+  'michael penix jr.', 'jj mccarthy', 'spencer rattler',
+  'cam ward', 'shedeur sanders', 'jalen milroe',
+  // 2023+ WRs
+  'jaxon smith-njigba', 'quentin johnston', 'zay flowers',
+  'marvin harrison jr.', 'malik nabers', 'rome odunze',
+  'ladd mcconkey', 'keon coleman', 'xavier worthy', 'brian thomas jr.',
+  'troy franklin', 'adonai mitchell', 'luther burden iii',
+  'tetairoa mcmillan', 'travis hunter',
+  // 2023+ Misc
+  'brock bowers', 'dalton kincaid', 'sam laporta',
+  'will anderson jr.', 'tyree wilson', 'jalen carter',
+  'nolan smith', 'lukas van ness', 'paris johnson jr.',
+  'peter skoronski', 'joe alt', 'olu fashanu',
+  'xavier legette', 'ricky pearsall',
+]);
+
+/** Normalize a name for blocklist comparison */
+function normalizeName(name: string): string {
+  return name.toLowerCase().replace(/[^a-z\s]/g, '').replace(/\s+/g, ' ').trim();
+}
+
 /* ── OpenRouter extraction helper ── */
 async function extractPlayers(
   snippets: string,
   round: number,
   apiKey: string,
 ): Promise<ExtractedPlayer[]> {
-  const systemPrompt = `You extract NFL Draft prospect data from search snippets. Return ONLY a JSON array of objects with keys: name, position, school. No markdown fences, no explanation. If a player's school is unknown, use "Unknown". Return at least 20 prospects if possible. Only include players projected for round ${round} of the 2026 NFL Draft.`;
-  const userPrompt = `Extract every 2026 NFL Draft prospect mentioned in these search snippets for round ${round}. Return a JSON array.\n\n${snippets}`;
+  const systemPrompt = `You extract NFL Draft prospect data from search snippets.
+
+CRITICAL RULES:
+1. ONLY include players who are CURRENTLY IN COLLEGE and eligible for the 2026 NFL Draft.
+2. DO NOT include any player who has already been drafted or is currently playing in the NFL.
+3. DO NOT include players from the 2022, 2023, 2024, or 2025 NFL Draft classes.
+4. If a player is mentioned as a comparison (e.g., "runs like Devon Achane"), do NOT extract the comparison player.
+5. Every player MUST have a real college/university name — never use "Unknown".
+6. If you are unsure whether a player is a 2026 prospect, SKIP them.
+
+Return ONLY a JSON array of objects with keys: name, position, school.
+No markdown fences, no explanation.`;
+  const userPrompt = `Extract ONLY confirmed 2026 NFL Draft prospects from these search snippets for round ${round}. Skip any player already in the NFL or from a prior draft class. Return a JSON array.\n\n${snippets}`;
 
   const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
     method: 'POST',
@@ -92,7 +143,10 @@ async function extractPlayers(
       (p: Record<string, unknown>) =>
         typeof p.name === 'string' && p.name.length > 1 &&
         typeof p.position === 'string' &&
-        typeof p.school === 'string',
+        typeof p.school === 'string' &&
+        (p.school as string) !== 'Unknown' &&
+        (p.school as string).trim() !== '' &&
+        !ALREADY_DRAFTED.has(normalizeName(p.name as string)),
     );
   } catch {
     return [];
