@@ -66,7 +66,11 @@ export async function searchYouTube(
  * Search for player highlights
  */
 export async function searchPlayerHighlights(playerName: string): Promise<YouTubeVideo[]> {
-  return searchYouTube(`${playerName} college football highlights 2025 2026`, 5);
+  // Simple search — just the name + highlights. Don't over-specify.
+  const results = await searchYouTube(`${playerName} highlights`, 5);
+  if (results.length > 0) return results;
+  // Fallback: just the name
+  return searchYouTube(playerName, 5);
 }
 
 /**
