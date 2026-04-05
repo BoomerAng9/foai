@@ -98,7 +98,7 @@ ByteRover's Context Tree for prior creation packets, patterns, and decisions.
 - Override ACHEEVY chain-of-command or GRAMMAR governance
 - Make final decisions — it produces structured option packets for the invoking agent
   to act on
-- Run ORACLE's sandboxed execution — the invoking agent uses ORACLE FDH for that
+- Run ORACLE's Cloud Run Jobs execution — the invoking agent uses ORACLE FDH for that
 - Negotiate between agents via ACP — the invoking agent handles that
 - Process payments via UCP — UEF Layer 1 handles that
 
@@ -155,7 +155,7 @@ ByteRover's Context Tree for prior creation packets, patterns, and decisions.
 
 6. **Capability-first, provider-agnostic** — Never hard-code providers. All search,
    retrieval, and reasoning tools are chosen by capability class via the model router
-   and OpenRouter. Open Mind asks for "live web search," "deep research," "sandboxed
+   and OpenRouter. Open Mind asks for "live web search," "deep research," "Cloud Run Jobs
    simulation" — routing picks the tools.
 
 7. **Name and reject the default** — Do not say "be creative." Name the specific

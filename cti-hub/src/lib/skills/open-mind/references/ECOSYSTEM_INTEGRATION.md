@@ -38,7 +38,7 @@ relevant *thinking patterns* — not the execution machinery.
 | RLM (Recursive Language Model) | Stage 2 | For massive creation tasks, the agent can use RLM-style recursive context distillation during evidence grounding. |
 
 ### What Open Mind Does NOT Adopt from ORACLE
-- Sandboxed code execution (Open Mind does not execute code)
+- Cloud Run Jobs execution (Open Mind does not execute code)
 - Direct LLM calls (the invoking agent handles model calls)
 - MCP tool definitions (Open Mind does not call tools)
 - Container constraints (Open Mind is prompt-level, not infrastructure)
@@ -409,7 +409,7 @@ Organizational creativity compounds over time
 
 | Component | Reason for Exclusion |
 |-----------|---------------------|
-| ORACLE sandbox containers | Open Mind does not execute code — sandboxing is the agent's concern |
+| ORACLE Cloud Run Jobs | Open Mind does not execute code — execution isolation is the agent's concern |
 | UEF MCP tool definitions | Open Mind does not call tools — the invoking agent uses MCP |
 | UEF ACP agent negotiation | Open Mind does not negotiate between agents — it shapes one agent's thinking |
 | UEF UCP commerce protocol | Open Mind does not handle payments — UEF handles that at Layer 1 |
