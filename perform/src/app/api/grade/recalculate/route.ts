@@ -160,7 +160,7 @@ export async function POST(req: NextRequest) {
           else if (gradeResult.grade >= 75) tieTier = 'STARTER';
           else if (gradeResult.grade >= 68) tieTier = 'SOLID';
 
-          await sql`
+          await sql!`
             UPDATE perform_players
             SET
               grade = ${gradeResult.grade},

@@ -382,6 +382,38 @@ export default function PlayerDetailPage({ params }: { params: Promise<{ player:
               </motion.div>
             )}
 
+            {/* ── PER|FORM TAKE — editorial callout for top-15 picks ── */}
+            {data.overall_rank != null && data.overall_rank <= 15 && (() => {
+              const takes: Record<string, string> = {
+                'Jeremiyah Love': "Our #1 overall. Bigger and faster than Jeanty. The Raiders signed Kirk Cousins \u2014 they need a game-changer at Running Back, not another Quarterback.",
+                'Fernando Mendoza': "Consensus #1, but we disagree. Elite talent, but the Raiders addressed Quarterback in free agency.",
+              };
+              const take = takes[data.name];
+              if (!take) return null;
+              return (
+                <motion.div
+                  variants={scrollReveal}
+                  initial="hidden"
+                  whileInView="visible"
+                  viewport={{ once: true, margin: '-40px' }}
+                  className="mb-10 p-6 rounded-xl"
+                  style={{
+                    background: 'rgba(212,168,83,0.08)',
+                    border: '1px solid rgba(212,168,83,0.25)',
+                    borderLeft: '4px solid #D4A853',
+                  }}
+                >
+                  <h2
+                    className="text-xs font-mono font-bold tracking-[0.2em] mb-3"
+                    style={{ color: '#D4A853' }}
+                  >
+                    PER|FORM TAKE
+                  </h2>
+                  <p className="text-sm text-white/80 leading-relaxed font-medium">{take}</p>
+                </motion.div>
+              );
+            })()}
+
             {/* ── 2025 Season Stats ──────────────────────────── */}
             {(() => {
               const parsedStats = data.key_stats ? parseKeyStats(data.key_stats) : [];

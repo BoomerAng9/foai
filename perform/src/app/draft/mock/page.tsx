@@ -24,8 +24,11 @@ function scoreColor(score: number): string {
   return '#F59E0B';
 }
 
+type DraftMode = 'consensus' | 'perform';
+
 export default function MockDraftPage() {
   const [rounds, setRounds] = useState(3);
+  const [mode, setMode] = useState<DraftMode>('perform');
   const [picks, setPicks] = useState<DraftPick[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -41,7 +44,7 @@ export default function MockDraftPage() {
       const res = await fetch('/api/tie/mock-draft', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ rounds }),
+        body: JSON.stringify({ rounds, mode }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Failed');
@@ -78,9 +81,35 @@ export default function MockDraftPage() {
         <h1 className="text-2xl md:text-3xl font-extrabold tracking-widest text-center mb-1" style={{ color: '#D4A853' }}>
           MOCK DRAFT SIMULATOR
         </h1>
-        <p className="text-center text-xs text-white/30 font-mono mb-8">
+        <p className="text-center text-xs text-white/30 font-mono mb-6">
           TIE-POWERED DRAFT ENGINE
         </p>
+
+        {/* Mode Toggle */}
+        <div className="flex items-center justify-center gap-1 mb-8">
+          <button
+            onClick={() => setMode('consensus')}
+            className="px-4 py-2 text-xs font-mono font-bold tracking-wider rounded-l-lg transition-all"
+            style={{
+              background: mode === 'consensus' ? 'rgba(255,255,255,0.10)' : 'rgba(255,255,255,0.03)',
+              color: mode === 'consensus' ? '#fff' : 'rgba(255,255,255,0.35)',
+              border: mode === 'consensus' ? '1px solid rgba(255,255,255,0.20)' : '1px solid rgba(255,255,255,0.08)',
+            }}
+          >
+            CONSENSUS
+          </button>
+          <button
+            onClick={() => setMode('perform')}
+            className="px-4 py-2 text-xs font-mono font-bold tracking-wider rounded-r-lg transition-all"
+            style={{
+              background: mode === 'perform' ? 'rgba(212,168,83,0.15)' : 'rgba(255,255,255,0.03)',
+              color: mode === 'perform' ? '#D4A853' : 'rgba(255,255,255,0.35)',
+              border: mode === 'perform' ? '1px solid rgba(212,168,83,0.40)' : '1px solid rgba(255,255,255,0.08)',
+            }}
+          >
+            PER|FORM TAKE
+          </button>
+        </div>
 
         {/* Controls */}
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-8">

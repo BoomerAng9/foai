@@ -31,8 +31,11 @@ export interface DraftPick {
   rationale: string;
 }
 
+export type MockDraftMode = 'consensus' | 'perform';
+
 export interface MockDraftOptions {
   rounds?: number;
+  mode?: MockDraftMode;
   teamNeeds?: Record<string, Record<string, number>>;
 }
 
@@ -206,11 +209,31 @@ export function generateMockDraft(
   options: MockDraftOptions = {},
 ): DraftPick[] {
   const rounds = Math.min(7, Math.max(1, options.rounds ?? 3));
-  const teamNeeds = options.teamNeeds ?? DEFAULT_TEAM_NEEDS;
+  const mode: MockDraftMode = options.mode ?? 'perform';
+  const teamNeeds = options.teamNeeds ?? { ...DEFAULT_TEAM_NEEDS };
   const slots = buildDraftOrder(DEFAULT_DRAFT_ORDER, rounds);
 
-  // Sort by overallRank (consensus big board) — this is the primary signal
-  const sorted = [...prospects].sort((a, b) => (a.overallRank || 999) - (b.overallRank || 999));
+  // Clone prospects so we can adjust rankings per mode
+  const adjusted = prospects.map(p => ({ ...p }));
+
+  if (mode === 'consensus') {
+    // Consensus: Mendoza is #1 overall, Love drops to #2
+    // Raiders still need a QB in consensus world (Cousins signing is Per|Form's take)
+    const mendoza = adjusted.find(p => p.name === 'Fernando Mendoza');
+    const love = adjusted.find(p => p.name === 'Jeremiyah Love');
+    if (mendoza && love) {
+      mendoza.overallRank = 1;
+      love.overallRank = 2;
+    }
+    // In consensus mode, Raiders still want QB
+    if (teamNeeds.LV) {
+      teamNeeds.LV = { QB: 1, WR: 2, CB: 2, DT: 2 };
+    }
+  }
+  // In 'perform' mode: Love #1, Raiders signed Cousins so RB is critical need (default data)
+
+  // Sort by overallRank (big board) — this is the primary signal
+  const sorted = adjusted.sort((a, b) => (a.overallRank || 999) - (b.overallRank || 999));
 
   const picked = new Set<string>();
   const picks: DraftPick[] = [];
