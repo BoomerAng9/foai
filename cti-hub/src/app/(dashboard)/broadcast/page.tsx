@@ -559,23 +559,10 @@ export default function BroadcastStudio() {
           <Plus className="w-3 h-3" /> NEW PROJECT
         </button>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center">
+          {/* Full Broad|Cast logo — mark + text as single image */}
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/broadcast-logo.png" alt="Broad|Cast" className="h-8 w-auto object-contain" style={{ filter: 'brightness(0.9)' }} />
-          <div className="flex flex-col items-center">
-            <span className="text-[15px] tracking-[0.35em] uppercase" style={{
-              color: '#8B7A5E',
-              fontFamily: "var(--font-geist-sans), 'Inter', sans-serif",
-              fontWeight: 800,
-              letterSpacing: '0.35em',
-              fontStretch: 'condensed',
-            }}>
-              BROAD<span style={{ color: '#FFFFFF', opacity: 0.3 }}>|</span>CAST
-            </span>
-            <span className="text-[7px] tracking-[0.3em] uppercase font-mono" style={{ color: BC.textGhost }}>
-              VIDEO CREATION STUDIO
-            </span>
-          </div>
+          <img src="/broadcast-logo.png" alt="Broad|Cast Video Creation Studio" className="h-10 w-auto object-contain" />
         </div>
 
         <div className="flex items-center gap-2">
@@ -932,7 +919,7 @@ export default function BroadcastStudio() {
         </div>
 
         {/* ── RIGHT SIDEBAR: Properties + Chat (stacks below on mobile) ── */}
-        <div className="w-full md:w-72 shrink-0 flex flex-col overflow-hidden md:max-h-full max-h-[50vh]" style={{ borderLeft: `1px solid ${BC.border}`, background: BC.surface }}>
+        <div className="w-full md:w-96 shrink-0 flex flex-col overflow-hidden md:max-h-full max-h-[50vh]" style={{ borderLeft: `1px solid ${BC.border}`, background: BC.surface }}>
           {/* Properties panels */}
           <div className="overflow-y-auto" style={{ maxHeight: '40%', borderBottom: `1px solid ${BC.border}` }}>
             {[
