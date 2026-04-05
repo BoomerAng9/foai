@@ -19,7 +19,7 @@ import {
 } from 'firebase/auth';
 import { getFirebaseAuth } from '@/lib/firebase';
 
-export { PLAN_CONFIG, type PlanFeature } from '@/lib/billing/plans';
+export { PLAN_CONFIG, type PlanFeature, PLANS } from '@/lib/billing/plans';
 
 // ─── Types ────────────────────────────────────────────────
 

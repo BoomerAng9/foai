@@ -33,8 +33,9 @@ export async function POST(request: NextRequest) {
     const body = await request.json().catch(() => ({}));
     const requestedPlan = typeof body.plan === 'string' ? body.plan.trim() : '';
 
-    if (requestedPlan !== 'pro') {
-      return NextResponse.json({ error: 'Only the Pro plan is available through self-serve checkout.' }, { status: 400 });
+    const validPlans = ['pay_per_use', 'bucket_list', 'premium', 'lfg'];
+    if (!validPlans.includes(requestedPlan)) {
+      return NextResponse.json({ error: 'Invalid plan. Choose: pay_per_use, bucket_list, premium, or lfg.' }, { status: 400 });
     }
 
     const priceId = getStripePriceId(requestedPlan);

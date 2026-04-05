@@ -57,7 +57,7 @@ function BoomerCard({ agent }: { agent: AgentProfile }) {
           ${agent.individualPrice}/mo
         </span>
         <Link
-          href={`/billing?hire=${agent.id}&price=${agent.individualPrice}`}
+          href={`/billing?hire=${agent.id}&plan=bucket_list`}
           className="font-mono text-[11px] font-bold tracking-wider bg-[#E8A020] text-[#0A0A0A] px-4 py-1.5 hover:bg-[#F0B030] transition-colors"
         >
           DEPLOY
