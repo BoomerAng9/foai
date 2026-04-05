@@ -562,7 +562,7 @@ export default function BroadcastStudio() {
         <div className="flex items-center">
           {/* Full Broad|Cast logo — mark + text as single image */}
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/broadcast-logo.png" alt="Broad|Cast Video Creation Studio" className="h-10 w-auto object-contain" />
+          <img src="/broadcast-logo.svg" alt="Broad|Cast Video Creation Studio" className="h-10 w-auto object-contain" />
         </div>
 
         <div className="flex items-center gap-2">
@@ -745,7 +745,7 @@ export default function BroadcastStudio() {
             ) : (
               <div className="flex flex-col items-center gap-3">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src="/broadcast-logo.png" alt="" className="h-12 w-auto object-contain opacity-15" />
+                <img src="/broadcast-logo.svg" alt="" className="h-12 w-auto object-contain opacity-15" />
                 <span className="text-[11px] font-mono" style={{ color: BC.textGhost }}>
                   Add scenes or describe your vision in chat
                 </span>
