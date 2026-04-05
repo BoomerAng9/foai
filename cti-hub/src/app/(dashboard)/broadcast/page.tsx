@@ -226,7 +226,15 @@ export default function BroadcastStudio() {
     setChatMessages(prev => [...prev, { role: 'illa', content: 'Sending to the production floor. Your video is now generating...' }]);
     try {
       const idToken = user ? await user.getIdToken(true) : '';
-      const aspect = pendingCameraSpec?.aspect || cameraSpec.aspect || '16:9';
+      // Map cinematic aspect ratios to Seedance-supported ratios
+      const rawAspect = pendingCameraSpec?.aspect || cameraSpec.aspect || '16:9';
+      const ASPECT_MAP: Record<string, string> = {
+        '2.39:1': '21:9', '2.35:1': '21:9', '2.40:1': '21:9', 'cinemascope': '21:9',
+        '1.85:1': '16:9', '1.78:1': '16:9', 'widescreen': '16:9',
+        '1.33:1': '4:3', 'standard': '4:3',
+        '0.75:1': '3:4', 'portrait': '9:16', 'vertical': '9:16',
+      };
+      const aspect = ASPECT_MAP[rawAspect.toLowerCase()] || rawAspect;
       const dur = parseInt(pendingCameraSpec?.duration || cameraSpec.duration || '8') || 8;
       const res = await fetch('/api/video/seedance', {
         method: 'POST',
