@@ -66,12 +66,14 @@ const GROUP_COLORS: Record<string, string> = {
 };
 
 /* ── Ranking bar animation variants ────────────────── */
-const barContainer = {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const barContainer: any = {
   hidden: {},
   visible: { transition: { staggerChildren: 0.12, delayChildren: 0.4 } },
 };
 
-const barItem = {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const barItem: any = {
   hidden: { opacity: 0, x: -60, scaleX: 0.7 },
   visible: {
     opacity: 1,
