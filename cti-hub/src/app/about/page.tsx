@@ -5,6 +5,8 @@ import { motion } from 'framer-motion';
 import { ArrowRight, Terminal, Zap, Brain, Shield, Users, Rocket } from 'lucide-react';
 import { staggerContainer, staggerItem, scrollReveal } from '@/lib/motion';
 
+/* eslint-disable @next/next/no-img-element */
+
 const agents = [
   { name: 'ACHEEVY', role: 'Digital CEO', desc: 'You describe the problem. ACHEEVY scopes the project, assigns agents, and delivers the finished product. No forms. No sprint planning. Just results.' },
   { name: 'Chicken Hawk', role: 'Operations Manager', desc: 'Takes ACHEEVY\'s plan and breaks it into tasks. Assigns agents, tracks progress, catches problems before they become yours.' },
@@ -60,6 +62,9 @@ export default function AboutPage() {
           className="max-w-4xl mx-auto text-center"
           initial="hidden" animate="show" variants={staggerContainer}
         >
+          <motion.div variants={staggerItem} className="mb-6">
+            <img src="/acheevy-deploy-hero.svg" alt="ACHEEVY" className="w-32 h-32 md:w-40 md:h-40 object-contain mx-auto" style={{ filter: 'drop-shadow(0 0 30px rgba(232,160,32,0.2))' }} />
+          </motion.div>
           <motion.p variants={staggerItem} className="font-mono text-[11px] tracking-[0.2em] uppercase text-accent mb-6">
             About The Deploy Platform
           </motion.p>
@@ -78,16 +83,19 @@ export default function AboutPage() {
         className="bg-bg-surface py-16 md:py-24 px-4 md:px-8"
         initial="hidden" whileInView="visible" viewport={{ once: true, margin: '-80px' }} variants={scrollReveal}
       >
-        <div className="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-10 items-start">
+        <div className="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-10 items-center">
           <div>
             <p className="font-mono text-[11px] tracking-[0.15em] uppercase text-accent mb-3">What You Get</p>
             <h2 className="font-outfit text-2xl md:text-3xl font-bold text-fg mb-4">
               ai<span className="text-accent">PLUG</span>s — Finished Products
             </h2>
+            <div className="space-y-4 text-fg-secondary text-[15px] leading-relaxed">
+              <p>An aiPLUG is the finished product you walk away with. A live website, an API, a sales dashboard, a data pipeline — whatever you need, described in plain English and delivered through a 10-stage pipeline.</p>
+              <p>No Figma mockups to approve. No sprint meetings. When it ships, you get the BAMARAM: your confirmation that the job is done and live.</p>
+            </div>
           </div>
-          <div className="space-y-4 text-fg-secondary text-[15px] leading-relaxed">
-            <p>An aiPLUG is the finished product you walk away with. A live website, an API, a sales dashboard, a data pipeline — whatever you need, described in plain English and delivered through a 10-stage pipeline.</p>
-            <p>No Figma mockups to approve. No sprint meetings. When it ships, you get the BAMARAM: your confirmation that the job is done and live.</p>
+          <div className="flex justify-center">
+            <img src="/acheevy-plug.png" alt="aiPLUG" className="w-64 h-64 object-contain" style={{ filter: 'drop-shadow(0 0 40px rgba(232,160,32,0.15))' }} />
           </div>
         </div>
       </motion.section>
@@ -106,6 +114,7 @@ export default function AboutPage() {
               { title: 'Guide Me', time: '4-10 min', desc: 'Not sure what you need? ACHEEVY walks you through discovery, validates your idea, and builds a clear plan.', items: ['Guided discovery', 'Risk analysis built in', 'Fewer surprises'] },
             ].map((path) => (
               <div key={path.title} className="bg-bg-surface border border-border rounded-sm p-6 md:p-8 hover:border-accent/40 transition-colors">
+                <img src={path.title === 'Manage It' ? '/icon-manage-it.png' : '/icon-guide-me.png'} alt="" className="w-12 h-12 object-contain mb-4" />
                 <h3 className="font-outfit text-lg font-bold text-fg mb-1">
                   Let ACHEEVY <span className="text-accent">{path.title}</span>
                 </h3>
