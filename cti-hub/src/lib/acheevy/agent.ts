@@ -438,10 +438,10 @@ export async function acheevyRespondStream(
     + profileBlock
     + (rfpContext ? `\n\n${rfpContext}` : '');
 
-  // 4. Build message chain
+  // 4. Build message chain (trim history to 10 for faster first-token)
   const messages: ConversationMessage[] = [
     { role: 'system', content: systemPrompt },
-    ...conversationHistory.slice(-20),
+    ...conversationHistory.slice(-10),
     { role: 'user', content: userMessage },
   ];
 

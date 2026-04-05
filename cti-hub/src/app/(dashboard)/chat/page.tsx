@@ -420,18 +420,26 @@ function ChatWithACHEEVY() {
                 setBudgetRemaining(data.budget.remaining);
                 setBudgetStarting(data.budget.starting);
               }
-              // Auto-voice: read ACHEEVY's response aloud (deferred to avoid side-effects in state updater)
-              if (voiceEnabled && fullVoiceText) {
+              // Auto-voice: read ACHEEVY's response aloud
+              if (fullVoiceText && fullVoiceText.length > 10) {
                 const cleanText = fullVoiceText
                   .replace(/!\[.*?\]\(.*?\)/g, '')
                   .replace(/<!--[\s\S]*?-->/g, '')
+                  .replace(/```[\s\S]*?```/g, '')
                   .replace(/\*\*/g, '')
-                  .slice(0, 500)
+                  .replace(/\[.*?\]\(.*?\)/g, '')
+                  .replace(/#+ /g, '')
+                  .slice(0, 400)
                   .trim();
-                if (cleanText) {
+                if (cleanText.length > 10) {
+                  // Use Bearer token for auth
+                  const voiceToken = user ? await user.getIdToken() : null;
                   fetch('/api/voice/synthesize', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: {
+                      'Content-Type': 'application/json',
+                      ...(voiceToken ? { 'Authorization': `Bearer ${voiceToken}` } : {}),
+                    },
                     body: JSON.stringify({ text: cleanText }),
                   }).then(r => r.json()).then(d => {
                     if (d.audio) {
