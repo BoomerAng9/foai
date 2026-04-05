@@ -66,11 +66,22 @@ export async function searchYouTube(
  * Search for player highlights
  */
 export async function searchPlayerHighlights(playerName: string): Promise<YouTubeVideo[]> {
-  // Simple search — just the name + highlights. Don't over-specify.
-  const results = await searchYouTube(`${playerName} highlights`, 5);
-  if (results.length > 0) return results;
-  // Fallback: just the name
-  return searchYouTube(playerName, 5);
+  // Three specific searches: 2025 highlights, top plays, pro day/combine
+  const [highlights, topPlays, proDayCombine] = await Promise.all([
+    searchYouTube(`${playerName} 2025 highlights`, 1),
+    searchYouTube(`${playerName} top plays`, 1),
+    searchYouTube(`${playerName} pro day combine`, 1),
+  ]);
+
+  const results = [...highlights, ...topPlays, ...proDayCombine];
+
+  // Deduplicate by videoId
+  const seen = new Set<string>();
+  return results.filter(v => {
+    if (seen.has(v.videoId)) return false;
+    seen.add(v.videoId);
+    return true;
+  });
 }
 
 /**
