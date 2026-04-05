@@ -42,9 +42,10 @@ export function gradeToProjectedRound(grade: number): number {
   if (grade >= 83) return 2;
   if (grade >= 78) return 3;
   if (grade >= 73) return 4;
-  if (grade >= 68) return 5;
-  if (grade >= 64) return 6;
-  return 7;
+  if (grade >= 67) return 5;
+  if (grade >= 62) return 6;
+  if (grade >= 55) return 7;
+  return 8; // UDFA
 }
 
 export function gradeToFilmGrade(grade: number): string {
@@ -210,17 +211,18 @@ function detectTrend(grade: number, consensusRank: number): string {
 
 /* ── Core Grading Function ── */
 function rankToBaseGrade(rank: number): number {
-  // Non-linear curve: top prospects cluster tightly, lower ranks spread out
-  if (rank <= 5) return 94 - (rank - 1) * 0.6;
-  if (rank <= 15) return 91.5 - (rank - 5) * 0.35;
-  if (rank <= 32) return 88 - (rank - 15) * 0.3;
-  if (rank <= 64) return 82.9 - (rank - 32) * 0.2;
-  if (rank <= 100) return 76.5 - (rank - 64) * 0.15;
-  if (rank <= 150) return 71.1 - (rank - 100) * 0.1;
-  if (rank <= 225) return 66.1 - (rank - 150) * 0.07;
-  if (rank <= 350) return 60.85 - (rank - 225) * 0.05;
-  if (rank <= 500) return 54.6 - (rank - 350) * 0.035;
-  return 49.35 - (rank - 500) * 0.03;
+  // Non-linear curve: tight at top, wider spread through mid-rounds
+  // Designed so ~32 players are Round 1-2, ~100 are Day 2, rest are Day 3
+  if (rank <= 5) return 94 - (rank - 1) * 0.6;       // 94.0 → 91.6
+  if (rank <= 15) return 91.5 - (rank - 5) * 0.35;    // 91.5 → 88.0
+  if (rank <= 32) return 88 - (rank - 15) * 0.3;      // 88.0 → 82.9
+  if (rank <= 64) return 82.9 - (rank - 32) * 0.18;   // 82.9 → 77.1
+  if (rank <= 100) return 77.1 - (rank - 64) * 0.12;  // 77.1 → 72.8
+  if (rank <= 150) return 72.8 - (rank - 100) * 0.09; // 72.8 → 68.3
+  if (rank <= 225) return 68.3 - (rank - 150) * 0.06; // 68.3 → 63.8
+  if (rank <= 325) return 63.8 - (rank - 225) * 0.04; // 63.8 → 59.8
+  if (rank <= 450) return 59.8 - (rank - 325) * 0.03; // 59.8 → 56.1
+  return 56.1 - (rank - 450) * 0.025;                 // 56.1 → 52.4
 }
 
 export interface GradedProspect {
