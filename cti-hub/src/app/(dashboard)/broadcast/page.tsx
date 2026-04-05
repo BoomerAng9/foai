@@ -552,13 +552,8 @@ export default function BroadcastStudio() {
         </button>
 
         <div className="flex items-center gap-3">
-          {/* Logo mark — interlocking diagonal strokes with dot accent */}
-          <svg width="28" height="28" viewBox="0 0 100 100" fill="none">
-            <line x1="15" y1="80" x2="55" y2="20" stroke={BC.silver} strokeWidth="14" strokeLinecap="round" />
-            <line x1="45" y1="80" x2="85" y2="20" stroke={BC.silver} strokeWidth="14" strokeLinecap="round" />
-            <line x1="50" y1="25" x2="90" y2="75" stroke={BC.silver} strokeWidth="14" strokeLinecap="round" />
-            <circle cx="12" cy="55" r="7" fill={BC.silver} />
-          </svg>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/broadcast-logo.png" alt="Broad|Cast" className="h-8 w-auto object-contain" style={{ filter: 'brightness(0.9)' }} />
           <div className="flex flex-col items-center">
             <span className="text-[15px] tracking-[0.35em] uppercase" style={{
               color: '#8B7A5E',
@@ -754,13 +749,8 @@ export default function BroadcastStudio() {
               </div>
             ) : (
               <div className="flex flex-col items-center gap-3">
-                <svg width="48" height="48" viewBox="0 0 100 100" fill="none" opacity="0.15">
-                  {/* Broad|Cast logo mark */}
-                  <line x1="15" y1="80" x2="55" y2="20" stroke={BC.silver} strokeWidth="14" strokeLinecap="round" />
-                  <line x1="45" y1="80" x2="85" y2="20" stroke={BC.silver} strokeWidth="14" strokeLinecap="round" />
-                  <line x1="50" y1="25" x2="90" y2="75" stroke={BC.silver} strokeWidth="14" strokeLinecap="round" />
-                  <circle cx="12" cy="55" r="7" fill={BC.silver} />
-                </svg>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src="/broadcast-logo.png" alt="" className="h-12 w-auto object-contain opacity-15" />
                 <span className="text-[11px] font-mono" style={{ color: BC.textGhost }}>
                   Add scenes or describe your vision in chat
                 </span>
