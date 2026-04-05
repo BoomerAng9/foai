@@ -58,7 +58,7 @@ export async function generateVideo(
   if (input.firstFrameUrl) (body.input as Record<string, unknown>).first_frame_url = input.firstFrameUrl;
   if (input.lastFrameUrl) (body.input as Record<string, unknown>).last_frame_url = input.lastFrameUrl;
   if (input.referenceImageUrls?.length) (body.input as Record<string, unknown>).reference_image_urls = input.referenceImageUrls;
-  if (input.referenceVideoUrls?.length) (body.input as Record<string, unknown>)['reference_video_urls '] = input.referenceVideoUrls;
+  if (input.referenceVideoUrls?.length) (body.input as Record<string, unknown>).reference_video_urls = input.referenceVideoUrls;
   if (input.referenceAudioUrls?.length) (body.input as Record<string, unknown>).reference_audio_urls = input.referenceAudioUrls;
   if (options.callbackUrl) body.callBackUrl = options.callbackUrl;
 

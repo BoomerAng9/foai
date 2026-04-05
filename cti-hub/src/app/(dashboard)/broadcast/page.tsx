@@ -1,13 +1,13 @@
 'use client';
 
-import { useState, useRef, useCallback, useEffect } from 'react';
+import { useState, useRef, useCallback, useEffect, Component, type ReactNode, type ErrorInfo } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import {
   Plus, FolderOpen, Image as ImageIcon, Film, FileText, Bot,
   Camera, Play, Pause, SkipBack, SkipForward, Square,
   Maximize2, ChevronDown, ChevronRight, Settings, Layout,
   Layers, Sliders, Music, Sparkles, ListTodo, MessageSquare,
-  Send, CornerDownLeft, Volume2, VolumeX,
+  Send, CornerDownLeft, Volume2, VolumeX, AlertTriangle, RefreshCw,
 } from 'lucide-react';
 import { CameraMenu, parseCameraSpec, CAMERA_DEFAULTS } from '@/components/broadcast/CameraMenu';
 import type { CameraSpec } from '@/components/broadcast/CameraMenu';
@@ -15,6 +15,36 @@ import { Timeline } from '@/components/broadcast/Timeline';
 import type { TimelineClip, ClipTransition, TransitionType } from '@/components/broadcast/Timeline';
 import { TextOverlayEditor } from '@/components/broadcast/TextOverlay';
 import type { TextOverlayConfig } from '@/components/broadcast/TextOverlay';
+
+// ── Error Boundary ──
+interface ErrorBoundaryState { hasError: boolean; error: Error | null }
+class BroadcastErrorBoundary extends Component<{ children: ReactNode }, ErrorBoundaryState> {
+  state: ErrorBoundaryState = { hasError: false, error: null };
+  static getDerivedStateFromError(error: Error) { return { hasError: true, error }; }
+  componentDidCatch(error: Error, info: ErrorInfo) { console.error('[Broad|Cast] Crash:', error, info); }
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="flex flex-col items-center justify-center h-full gap-4" style={{ background: '#0A0A0F', color: '#fff' }}>
+          <AlertTriangle className="w-10 h-10" style={{ color: '#EF4444' }} />
+          <span className="text-[14px] font-mono" style={{ color: '#EF4444' }}>Broad|Cast Studio encountered an error</span>
+          <span className="text-[11px] font-mono max-w-md text-center" style={{ color: 'rgba(255,255,255,0.5)' }}>
+            {this.state.error?.message || 'An unexpected error occurred.'}
+          </span>
+          <button
+            onClick={() => this.setState({ hasError: false, error: null })}
+            className="flex items-center gap-2 px-4 py-2 text-[11px] font-mono font-bold tracking-wider transition-all hover:brightness-110"
+            style={{ background: '#D4A853', color: '#0A0A0F' }}
+          >
+            <RefreshCw className="w-3.5 h-3.5" />
+            RECOVER
+          </button>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
 
 // Broad|Cast brand colors
 const BC = {
@@ -180,9 +210,12 @@ export default function BroadcastStudio() {
           if (pollRef.current) clearInterval(pollRef.current);
           setChatMessages(prev => [...prev, { role: 'illa', content: `Video generation failed: ${data.error || 'Unknown error'}. Let me know if you want to retry.` }]);
         }
-      } catch {}
+      } catch (err) {
+        console.warn('[Broad|Cast] Video poll error:', err);
+      }
     }, 5000);
     return () => { if (pollRef.current) clearInterval(pollRef.current); };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [videoTaskId, videoStatus]);
 
   const handleGenerateVideo = useCallback(async () => {
@@ -245,10 +278,14 @@ export default function BroadcastStudio() {
     setScenes(prev => prev.map(s => s.id === sceneId ? { ...s, status: 'generating' } : s));
 
     try {
+      const idToken = user ? await user.getIdToken(true) : '';
       const dur = parseInt(cameraSpec.duration) || 5;
       const res = await fetch('/api/broadcast/generate', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          ...(idToken ? { 'Authorization': `Bearer ${idToken}` } : {}),
+        },
         body: JSON.stringify({
           description: `${scene.description}. Camera: ${cameraSpec.movement}. Lens: ${cameraSpec.lens}, ${cameraSpec.aperture}. Film profile: ${cameraSpec.profile}. Lighting: ${cameraSpec.lighting}. Aspect: ${cameraSpec.aspect}.`,
           camera: cameraSpec.movement.toLowerCase().replace(/\s+/g, '_'),
@@ -259,9 +296,13 @@ export default function BroadcastStudio() {
       });
 
       if (!res.ok) {
-        const err = await res.json();
+        const err = await res.json().catch(() => ({ error: 'Request failed' }));
         setScenes(prev => prev.map(s => s.id === sceneId ? { ...s, status: 'error' } : s));
-        setChatMessages(prev => [...prev, { role: 'illa', content: `Generation issue: ${err.error || 'Service unavailable'}. The scene is saved — we can retry when ready.` }]);
+        if (res.status === 401 || res.status === 403) {
+          setChatMessages(prev => [...prev, { role: 'illa', content: 'Please sign in to generate scenes. Your session may have expired.' }]);
+        } else {
+          setChatMessages(prev => [...prev, { role: 'illa', content: `Generation issue: ${err.error || 'Service unavailable'}. The scene is saved — we can retry when ready.` }]);
+        }
         return;
       }
 
@@ -271,7 +312,11 @@ export default function BroadcastStudio() {
       // Poll for completion
       const pollInterval = setInterval(async () => {
         try {
-          const statusRes = await fetch(`/api/broadcast/generate?id=${data.generation_id}&engine=${data.engine}`);
+          const pollToken = user ? await user.getIdToken(true) : '';
+          const statusRes = await fetch(`/api/broadcast/generate?id=${data.generation_id}&engine=${data.engine}`, {
+            headers: pollToken ? { 'Authorization': `Bearer ${pollToken}` } : {},
+          });
+          if (!statusRes.ok) return; // keep polling on transient errors
           const statusData = await statusRes.json();
 
           if (statusData.status === 'done') {
@@ -301,7 +346,7 @@ export default function BroadcastStudio() {
           } else if (statusData.status === 'failed') {
             clearInterval(pollInterval);
             setScenes(prev => prev.map(s => s.id === sceneId ? { ...s, status: 'error' } : s));
-            setChatMessages(prev => [...prev, { role: 'illa', content: `"${scene.name}" failed to generate. Let me know if you want to retry with different specs.` }]);
+            setChatMessages(prev => [...prev, { role: 'illa', content: `"${scene.name}" failed to generate: ${statusData.error || 'Unknown reason'}. Let me know if you want to retry with different specs.` }]);
           }
         } catch {
           // Keep polling on network errors
@@ -310,10 +355,12 @@ export default function BroadcastStudio() {
 
       // Stop polling after 3 minutes
       setTimeout(() => clearInterval(pollInterval), 180000);
-    } catch {
+    } catch (err) {
       setScenes(prev => prev.map(s => s.id === sceneId ? { ...s, status: 'error' } : s));
+      const msg = err instanceof Error ? err.message : 'Unknown error';
+      setChatMessages(prev => [...prev, { role: 'illa', content: `Failed to start scene generation: ${msg}` }]);
     }
-  }, [newSceneInput, scenes.length, chatMessages]);
+  }, [newSceneInput, scenes.length, cameraSpec, user]);
 
   const handleChatSend = useCallback(async () => {
     if (!chatInput.trim()) return;
@@ -343,58 +390,75 @@ export default function BroadcastStudio() {
       });
 
       if (!res.ok || !res.body) {
-        // Auto-refresh session on 401 and retry
-        if (res.status === 401 && user) {
-          try {
-            const freshToken = await user.getIdToken(true);
-            await fetch('/api/auth/session', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ accessToken: freshToken }),
-            });
-            const retryRes = await fetch('/api/broadcast/chat', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ message: userMsg, history: chatMessages.slice(-10) }),
-            });
-            if (retryRes.ok && retryRes.body) {
-              // Fall through to streaming with retry response
-              const reader = retryRes.body.getReader();
-              const decoder = new TextDecoder();
-              let buffer = '';
-              while (true) {
-                const { done, value } = await reader.read();
-                if (done) break;
-                buffer += decoder.decode(value, { stream: true });
-                const lines = buffer.split('\n');
-                buffer = lines.pop() || '';
-                for (const line of lines) {
-                  if (!line.startsWith('data: ')) continue;
-                  try {
-                    const data = JSON.parse(line.slice(6));
-                    if (data.content) {
-                      setChatMessages(prev => prev.map(m =>
-                        m.id === streamId ? { ...m, content: m.content + data.content } : m
-                      ));
-                      chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-                    }
-                    if (data.video_ready) {
-                      setPendingVideoPrompt(data.video_prompt || null);
-                      setPendingCameraSpec(data.camera_spec || null);
-                      setVideoStatus('idle');
-                      setGeneratedVideoUrl(null);
-                      setVideoTaskId(null);
-                    }
-                    if (data.done) break;
-                  } catch {}
+        // Descriptive error based on status code
+        if (res.status === 401 || res.status === 403) {
+          // Auto-refresh session on 401 and retry once
+          if (res.status === 401 && user) {
+            try {
+              const freshToken = await user.getIdToken(true);
+              await fetch('/api/auth/session', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ accessToken: freshToken }),
+              });
+              const retryRes = await fetch('/api/broadcast/chat', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Authorization': `Bearer ${freshToken}`,
+                },
+                body: JSON.stringify({ message: userMsg, history: chatMessages.slice(-10) }),
+              });
+              if (retryRes.ok && retryRes.body) {
+                // Fall through to streaming with retry response
+                const reader = retryRes.body.getReader();
+                const decoder = new TextDecoder();
+                let buffer = '';
+                while (true) {
+                  const { done, value } = await reader.read();
+                  if (done) break;
+                  buffer += decoder.decode(value, { stream: true });
+                  const lines = buffer.split('\n');
+                  buffer = lines.pop() || '';
+                  for (const line of lines) {
+                    if (!line.startsWith('data: ')) continue;
+                    try {
+                      const data = JSON.parse(line.slice(6));
+                      if (data.content) {
+                        setChatMessages(prev => prev.map(m =>
+                          m.id === streamId ? { ...m, content: m.content + data.content } : m
+                        ));
+                        chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+                      }
+                      if (data.video_ready) {
+                        setPendingVideoPrompt(data.video_prompt || null);
+                        setPendingCameraSpec(data.camera_spec || null);
+                        setVideoStatus('idle');
+                        setGeneratedVideoUrl(null);
+                        setVideoTaskId(null);
+                      }
+                      if (data.done) break;
+                    } catch {}
+                  }
                 }
+                return;
               }
-              return;
-            }
-          } catch {}
+            } catch {}
+          }
+          // Auth definitely failed
+          setChatMessages(prev => prev.map(m =>
+            m.id === streamId ? { role: 'illa', content: 'Please sign in to use Broad|Cast Studio. Your session may have expired.' } : m
+          ));
+          return;
         }
+        // Non-auth error — parse server response for details
+        let errorDetail = `Server returned ${res.status}`;
+        try {
+          const errBody = await res.json();
+          if (errBody.error) errorDetail = errBody.error;
+        } catch {}
         setChatMessages(prev => prev.map(m =>
-          m.id === streamId ? { role: 'illa', content: 'Connection issue. Try again.' } : m
+          m.id === streamId ? { role: 'illa', content: `ILLA is temporarily unavailable: ${errorDetail}. Please try again in a moment.` } : m
         ));
         return;
       }
@@ -470,14 +534,16 @@ export default function BroadcastStudio() {
           } catch {}
         }
       }
-    } catch {
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Unknown error';
       setChatMessages(prev => prev.map(m =>
-        m.id === streamId ? { role: 'illa', content: 'Connection error. Please try again.' } : m
+        m.id === streamId ? { role: 'illa', content: `Network error: ${msg}. Check your connection and try again.` } : m
       ));
     }
-  }, [chatInput, chatMessages, voiceEnabled]);
+  }, [chatInput, chatMessages, voiceEnabled, user]);
 
   return (
+    <BroadcastErrorBoundary>
     <div className="flex flex-col h-full" style={{ background: BC.bg, color: BC.text }}>
       {/* ── Studio Header ── */}
       <div className="flex items-center justify-between px-4 h-11 shrink-0" style={{ borderBottom: `1px solid ${BC.border}` }}>
@@ -486,16 +552,21 @@ export default function BroadcastStudio() {
         </button>
 
         <div className="flex items-center gap-3">
-          {/* Logo mark — Broad|Cast X */}
+          {/* Logo mark — interlocking diagonal strokes with dot accent */}
           <svg width="28" height="28" viewBox="0 0 100 100" fill="none">
-            {/* Broad|Cast logo — two interlocking diagonal strokes with dot accent */}
             <line x1="15" y1="80" x2="55" y2="20" stroke={BC.silver} strokeWidth="14" strokeLinecap="round" />
             <line x1="45" y1="80" x2="85" y2="20" stroke={BC.silver} strokeWidth="14" strokeLinecap="round" />
             <line x1="50" y1="25" x2="90" y2="75" stroke={BC.silver} strokeWidth="14" strokeLinecap="round" />
             <circle cx="12" cy="55" r="7" fill={BC.silver} />
           </svg>
           <div className="flex flex-col items-center">
-            <span className="text-[15px] tracking-[0.35em] uppercase" style={{ color: '#8B7A5E', fontFamily: "'Inter', sans-serif", fontWeight: 600, letterSpacing: '0.35em' }}>
+            <span className="text-[15px] tracking-[0.35em] uppercase" style={{
+              color: '#8B7A5E',
+              fontFamily: "var(--font-geist-sans), 'Inter', sans-serif",
+              fontWeight: 800,
+              letterSpacing: '0.35em',
+              fontStretch: 'condensed',
+            }}>
               BROAD<span style={{ color: '#FFFFFF', opacity: 0.3 }}>|</span>CAST
             </span>
             <span className="text-[7px] tracking-[0.3em] uppercase font-mono" style={{ color: BC.textGhost }}>
@@ -510,11 +581,11 @@ export default function BroadcastStudio() {
         </div>
       </div>
 
-      {/* ── Three-Panel Layout ── */}
-      <div className="flex flex-1 min-h-0">
+      {/* ── Three-Panel Layout (responsive: stack on small screens) ── */}
+      <div className="flex flex-1 min-h-0 flex-col md:flex-row">
 
-        {/* ── LEFT SIDEBAR ── */}
-        <div className="w-56 shrink-0 flex flex-col overflow-y-auto" style={{ borderRight: `1px solid ${BC.border}`, background: BC.surface }}>
+        {/* ── LEFT SIDEBAR (hidden on mobile, shown as drawer concept) ── */}
+        <div className="hidden md:flex w-56 shrink-0 flex-col overflow-y-auto" style={{ borderRight: `1px solid ${BC.border}`, background: BC.surface }}>
           {/* Nav items */}
           {[
             { icon: Layout, label: 'Dashboard' },
@@ -761,19 +832,29 @@ export default function BroadcastStudio() {
                   setRendering(true);
                   setChatMessages(prev => [...prev, { role: 'illa', content: 'Rendering your timeline. I\'ll let you know when the export is ready.' }]);
                   try {
+                    const idToken = user ? await user.getIdToken(true) : '';
                     const transMap: Record<string, { type: string; duration: number }> = {};
                     clipTransitions.forEach(t => {
                       transMap[`${t.fromClipId}-${t.toClipId}`] = { type: t.type, duration: 15 };
                     });
                     const res = await fetch('/api/broadcast/render', {
                       method: 'POST',
-                      headers: { 'Content-Type': 'application/json' },
+                      headers: {
+                        'Content-Type': 'application/json',
+                        ...(idToken ? { 'Authorization': `Bearer ${idToken}` } : {}),
+                      },
                       body: JSON.stringify({ clips: timelineClips, transitions: transMap, resolution }),
                     });
+                    if (!res.ok) {
+                      const err = await res.json().catch(() => ({ error: 'Render request failed' }));
+                      setChatMessages(prev => [...prev, { role: 'illa', content: `Render error: ${err.error || 'Service unavailable'}` }]);
+                      return;
+                    }
                     const data = await res.json();
                     setChatMessages(prev => [...prev, { role: 'illa', content: `Render ${data.status}: ${data.message}` }]);
-                  } catch {
-                    setChatMessages(prev => [...prev, { role: 'illa', content: 'Render failed. Let me know if you want to retry.' }]);
+                  } catch (err) {
+                    const msg = err instanceof Error ? err.message : 'Unknown error';
+                    setChatMessages(prev => [...prev, { role: 'illa', content: `Render failed: ${msg}. Let me know if you want to retry.` }]);
                   } finally {
                     setRendering(false);
                   }
@@ -788,15 +869,25 @@ export default function BroadcastStudio() {
                 onClick={async () => {
                   setChatMessages(prev => [...prev, { role: 'illa', content: 'Publishing to CDN... generating shareable link.' }]);
                   try {
+                    const idToken = user ? await user.getIdToken(true) : '';
                     const res = await fetch('/api/broadcast/publish', {
                       method: 'POST',
-                      headers: { 'Content-Type': 'application/json' },
+                      headers: {
+                        'Content-Type': 'application/json',
+                        ...(idToken ? { 'Authorization': `Bearer ${idToken}` } : {}),
+                      },
                       body: JSON.stringify({ videoUrl: timelineClips[0]?.videoUrl || '', platform: 'cdn' }),
                     });
+                    if (!res.ok) {
+                      const err = await res.json().catch(() => ({ error: 'Publish request failed' }));
+                      setChatMessages(prev => [...prev, { role: 'illa', content: `Publish error: ${err.error || 'Service unavailable'}` }]);
+                      return;
+                    }
                     const data = await res.json();
                     setChatMessages(prev => [...prev, { role: 'illa', content: `Published. Share link: ${data.url || 'Generation in progress'}` }]);
-                  } catch {
-                    setChatMessages(prev => [...prev, { role: 'illa', content: 'Publish failed. Render the video first, then publish.' }]);
+                  } catch (err) {
+                    const msg = err instanceof Error ? err.message : 'Unknown error';
+                    setChatMessages(prev => [...prev, { role: 'illa', content: `Publish failed: ${msg}. Render the video first, then publish.` }]);
                   }
                 }}
                 className="px-3 py-1 text-[9px] font-mono font-bold tracking-wider transition-all hover:bg-white/[0.08]"
@@ -842,8 +933,8 @@ export default function BroadcastStudio() {
           </div>
         </div>
 
-        {/* ── RIGHT SIDEBAR: Properties + Chat ── */}
-        <div className="w-72 shrink-0 flex flex-col overflow-hidden" style={{ borderLeft: `1px solid ${BC.border}`, background: BC.surface }}>
+        {/* ── RIGHT SIDEBAR: Properties + Chat (stacks below on mobile) ── */}
+        <div className="w-full md:w-72 shrink-0 flex flex-col overflow-hidden md:max-h-full max-h-[50vh]" style={{ borderLeft: `1px solid ${BC.border}`, background: BC.surface }}>
           {/* Properties panels */}
           <div className="overflow-y-auto" style={{ maxHeight: '40%', borderBottom: `1px solid ${BC.border}` }}>
             {[
@@ -1008,5 +1099,6 @@ export default function BroadcastStudio() {
         </div>
       </div>
     </div>
+    </BroadcastErrorBoundary>
   );
 }

@@ -124,6 +124,35 @@ export async function POST(req: NextRequest) {
         const decoder = new TextDecoder();
         let buffer = '';
         let fullResponse = '';
+        let sentDone = false;
+
+        /** Extract and send video_ready event from CAMERA_SPEC block */
+        function sendVideoReady(response: string) {
+          const specMatch = response.match(/\[CAMERA_SPEC\]([\s\S]*?)\[\/CAMERA_SPEC\]/);
+          if (!specMatch) return;
+          const narrative = response
+            .replace(/\[CAMERA_SPEC\][\s\S]*?\[\/CAMERA_SPEC\]/g, '')
+            .replace(/\*\*/g, '')
+            .trim();
+          const specText = specMatch[1];
+          const specFields: Record<string, string> = {};
+          for (const specLine of specText.split('\n')) {
+            const kv = specLine.match(/^\s*(\w+):\s*(.+)/);
+            if (kv) specFields[kv[1].toLowerCase()] = kv[2].trim();
+          }
+          controller.enqueue(encoder.encode(`data: ${JSON.stringify({
+            video_ready: true,
+            video_prompt: narrative.slice(0, 800),
+            camera_spec: specFields,
+          })}\n\n`));
+        }
+
+        /** Send done event exactly once */
+        function sendDone() {
+          if (sentDone) return;
+          sentDone = true;
+          controller.enqueue(encoder.encode(`data: ${JSON.stringify({ done: true })}\n\n`));
+        }
 
         try {
           while (true) {
@@ -147,52 +176,22 @@ export async function POST(req: NextRequest) {
                   controller.enqueue(encoder.encode(`data: ${JSON.stringify({ content })}\n\n`));
                 }
                 if (parsed.choices?.[0]?.finish_reason === 'stop') {
-                  // Detect [CAMERA_SPEC] block and extract as video prompt
-                  const specMatch = fullResponse.match(/\[CAMERA_SPEC\]([\s\S]*?)\[\/CAMERA_SPEC\]/);
-                  if (specMatch) {
-                    // Build a video prompt from ILLA's full response (minus the spec block)
-                    const narrative = fullResponse
-                      .replace(/\[CAMERA_SPEC\][\s\S]*?\[\/CAMERA_SPEC\]/g, '')
-                      .replace(/\*\*/g, '')
-                      .trim();
-                    // Parse spec fields
-                    const specText = specMatch[1];
-                    const specFields: Record<string, string> = {};
-                    for (const specLine of specText.split('\n')) {
-                      const kv = specLine.match(/^\s*(\w+):\s*(.+)/);
-                      if (kv) specFields[kv[1].toLowerCase()] = kv[2].trim();
-                    }
-                    // Send video_ready event with prompt and parsed specs
-                    controller.enqueue(encoder.encode(`data: ${JSON.stringify({
-                      video_ready: true,
-                      video_prompt: narrative.slice(0, 800),
-                      camera_spec: specFields,
-                    })}\n\n`));
-                  }
-                  controller.enqueue(encoder.encode(`data: ${JSON.stringify({ done: true })}\n\n`));
+                  sendVideoReady(fullResponse);
+                  sendDone();
                 }
-              } catch {}
+              } catch {
+                // Malformed SSE chunk — skip
+              }
             }
           }
-          // Final check if stream ended without finish_reason
-          const specMatch = fullResponse.match(/\[CAMERA_SPEC\]([\s\S]*?)\[\/CAMERA_SPEC\]/);
-          if (specMatch) {
-            const narrative = fullResponse.replace(/\[CAMERA_SPEC\][\s\S]*?\[\/CAMERA_SPEC\]/g, '').replace(/\*\*/g, '').trim();
-            const specText = specMatch[1];
-            const specFields: Record<string, string> = {};
-            for (const specLine of specText.split('\n')) {
-              const kv = specLine.match(/^\s*(\w+):\s*(.+)/);
-              if (kv) specFields[kv[1].toLowerCase()] = kv[2].trim();
-            }
-            controller.enqueue(encoder.encode(`data: ${JSON.stringify({
-              video_ready: true,
-              video_prompt: narrative.slice(0, 800),
-              camera_spec: specFields,
-            })}\n\n`));
+          // Final check if stream ended without finish_reason (some providers do this)
+          if (!sentDone) {
+            sendVideoReady(fullResponse);
+            sendDone();
           }
-          controller.enqueue(encoder.encode(`data: ${JSON.stringify({ done: true })}\n\n`));
         } catch (err) {
-          controller.enqueue(encoder.encode(`data: ${JSON.stringify({ error: 'Stream error' })}\n\n`));
+          const errMsg = err instanceof Error ? err.message : 'Stream interrupted';
+          controller.enqueue(encoder.encode(`data: ${JSON.stringify({ error: `Stream error: ${errMsg}` })}\n\n`));
         } finally {
           controller.close();
         }
