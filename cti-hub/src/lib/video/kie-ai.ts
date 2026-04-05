@@ -1,8 +1,8 @@
 /**
- * Kie.AI — Seedance 2.0 Video Generation Client
+ * Kie.AI — Video Generation Client
  *
  * Text-to-video, image-to-video, dynamic camera, audio generation.
- * Two models: seedance-2 (quality) and seedance-2-fast (speed).
+ * Providers: Seedance 2.0 (quality/fast) and Kling 3.0.
  */
 
 const KIE_API_KEY = process.env.KIE_AI_API_KEY || process.env.KIE_API_KEY || '';
@@ -21,6 +21,7 @@ export interface VideoGenerationInput {
   aspectRatio?: '1:1' | '4:3' | '3:4' | '16:9' | '9:16' | '21:9' | 'adaptive';
   duration?: number; // 4-15 seconds
   webSearch?: boolean;
+  provider?: 'seedance' | 'kling';
 }
 
 export interface VideoTaskResult {
@@ -31,7 +32,7 @@ export interface VideoTaskResult {
 }
 
 /**
- * Generate video using Seedance 2.0
+ * Generate video using Seedance 2.0 or Kling 3.0
  */
 export async function generateVideo(
   input: VideoGenerationInput,
@@ -39,7 +40,10 @@ export async function generateVideo(
 ): Promise<VideoTaskResult> {
   if (!KIE_API_KEY) throw new Error('KIE_API_KEY not configured');
 
-  const model = options.fast ? 'bytedance/seedance-2-fast' : 'bytedance/seedance-2';
+  const provider = input.provider || 'seedance';
+  const model = provider === 'kling'
+    ? 'kling/kling-3.0'
+    : options.fast ? 'bytedance/seedance-2-fast' : 'bytedance/seedance-2';
 
   const body: Record<string, unknown> = {
     model,

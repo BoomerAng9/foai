@@ -18,8 +18,10 @@ interface Episode {
 
 const ANALYST_META: Record<string, { name: string; color: string; imagePath: string; gender: string }> = {
   'void-caster': { name: 'The Void-Caster', color: '#D4A853', imagePath: '/analysts/void-caster-realistic.png', gender: 'male' },
-  'air-pod-host-1': { name: 'Haze', color: '#60A5FA', imagePath: '/analysts/air-pod-studio.png', gender: 'male' },
-  'air-pod-host-2': { name: 'Smoke', color: '#8B5CF6', imagePath: '/analysts/camo-duo-standing.png', gender: 'male' },
+  'the-haze': { name: 'The Haze', color: '#60A5FA', imagePath: '/analysts/air-pod-studio.png', gender: 'male' },
+  // Legacy IDs map to The Haze duo show
+  'air-pod-host-1': { name: 'The Haze', color: '#60A5FA', imagePath: '/analysts/air-pod-studio.png', gender: 'male' },
+  'air-pod-host-2': { name: 'The Haze', color: '#60A5FA', imagePath: '/analysts/air-pod-studio.png', gender: 'male' },
   'the-colonel': { name: 'The Colonel', color: '#34D399', imagePath: '/analysts/female-analyst.png', gender: 'female' },
   'astra-novatos': { name: 'Astra Novatos', color: '#F59E0B', imagePath: '/analysts/astra-novatos-tux.png', gender: 'male' },
   'bun-e': { name: 'Bun-E', color: '#EF4444', imagePath: '/analysts/robot-mascot.jpeg', gender: 'male' },

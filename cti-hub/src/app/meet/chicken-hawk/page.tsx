@@ -29,6 +29,7 @@ interface LilHawk {
   role: string;
   description: string;
   icon: React.ReactNode;
+  avatar: string;
   highlighted?: boolean;
 }
 
@@ -39,6 +40,7 @@ const lilHawks: LilHawk[] = [
     description:
       'Multi-source web research with citations. Digs deep, cross-references, and delivers verified intelligence.',
     icon: <Search className="w-6 h-6" />,
+    avatar: '/agents/lil-deep-hawk.png',
   },
   {
     name: 'Lil_Memory_Hawk',
@@ -46,6 +48,7 @@ const lilHawks: LilHawk[] = [
     description:
       'Stores, recalls, and compresses long-term agent memory. Keeps the Sqwaad sharp across sessions.',
     icon: <Brain className="w-6 h-6" />,
+    avatar: '/agents/lil-memory-hawk.png',
   },
   {
     name: 'Lil_Flow_Hawk',
@@ -53,6 +56,7 @@ const lilHawks: LilHawk[] = [
     description:
       'Connects services, triggers actions, manages pipelines. The glue between every moving part.',
     icon: <Workflow className="w-6 h-6" />,
+    avatar: '/agents/lil-flow-hawk.png',
   },
   {
     name: 'Lil_Viz_Hawk',
@@ -60,6 +64,7 @@ const lilHawks: LilHawk[] = [
     description:
       'Charts, graphs, dashboards from raw data. Turns numbers into decisions.',
     icon: <BarChart3 className="w-6 h-6" />,
+    avatar: '/agents/lil-viz-hawk.png',
   },
   {
     name: 'Lil_Blend_Hawk',
@@ -67,6 +72,7 @@ const lilHawks: LilHawk[] = [
     description:
       'Connects external APIs, databases, and third-party services. If it has an endpoint, Blend_Hawk talks to it.',
     icon: <Plug className="w-6 h-6" />,
+    avatar: '/agents/lil-blend-hawk.png',
   },
   {
     name: 'Lil_Sand_Hawk',
@@ -74,6 +80,7 @@ const lilHawks: LilHawk[] = [
     description:
       'Runs code in isolated containers safely. Test, break, iterate -- without risk to production.',
     icon: <Box className="w-6 h-6" />,
+    avatar: '/agents/lil-sand-hawk.png',
   },
   {
     name: 'Lil_Trae_Hawk',
@@ -81,6 +88,7 @@ const lilHawks: LilHawk[] = [
     description:
       'Prepares data and manages model training. From raw datasets to production-ready models.',
     icon: <GraduationCap className="w-6 h-6" />,
+    avatar: '/agents/lil-trae-hawk.png',
   },
 ];
 
@@ -123,7 +131,7 @@ export default function ChickenHawkPage() {
             className="text-2xl md:text-3xl font-light mb-8"
             style={{ color: accent }}
           >
-            &amp; the Lil_Hawks
+            and Lil_Hawks
           </p>
           <p className="text-lg text-white/60 max-w-2xl mx-auto leading-relaxed">
             Chicken Hawk is the Tactical Commander -- the bridge between
@@ -135,8 +143,8 @@ export default function ChickenHawkPage() {
           {/* Hero Image */}
           <div className="mt-10 relative rounded-xl overflow-hidden border border-white/10 max-w-3xl mx-auto">
             <Image
-              src="/chicken-hawks-hero.png"
-              alt="Chicken Hawk and the Lil_Hawks"
+              src="/chicken-hawk-sqwaad.png"
+              alt="Chicken Hawk and Lil_Hawks"
               width={800}
               height={500}
               className="w-full h-auto"
@@ -259,14 +267,24 @@ export default function ChickenHawkPage() {
                   style={{ background: accent }}
                 />
               )}
-              <div
-                className="w-10 h-10 rounded-lg flex items-center justify-center mb-4"
-                style={{
-                  background: hawk.highlighted ? `${accent}1A` : 'rgba(255,255,255,0.05)',
-                  color: hawk.highlighted ? accent : 'rgba(255,255,255,0.5)',
-                }}
-              >
-                {hawk.icon}
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-12 h-12 rounded-full overflow-hidden border border-white/10 bg-white/5 shrink-0">
+                  <Image
+                    src={hawk.avatar}
+                    alt={hawk.name}
+                    width={48}
+                    height={48}
+                    className="w-full h-full object-cover"
+                    onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                  />
+                  {/* Fallback icon when image not loaded */}
+                  <div
+                    className="w-full h-full flex items-center justify-center -mt-12"
+                    style={{ color: hawk.highlighted ? accent : 'rgba(255,255,255,0.4)' }}
+                  >
+                    {hawk.icon}
+                  </div>
+                </div>
               </div>
               <div className="flex items-center gap-2 mb-1">
                 <h3

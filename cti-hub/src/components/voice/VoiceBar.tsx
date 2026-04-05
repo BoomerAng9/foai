@@ -1,7 +1,11 @@
 'use client';
 
 import { useState, useRef, useCallback, useEffect } from 'react';
-import { Mic, MicOff, Volume2, VolumeX, Square } from 'lucide-react';
+import Image from 'next/image';
+import { Mic, Volume2, VolumeX, Square } from 'lucide-react';
+
+// The Colonel — voice activation avatar
+const VOICE_AVATAR = '/agents/the-colonel.png';
 
 interface VoiceBarProps {
   onTranscript: (text: string) => void;
@@ -110,13 +114,27 @@ export function VoiceBar({ onTranscript, voiceEnabled, onVoiceToggle }: VoiceBar
     <div className="flex items-center gap-3 px-3 py-2 bg-bg-surface border-t border-border">
       <button
         onClick={() => listening ? stopListening() : startListening()}
-        className={`w-10 h-10 rounded-full flex items-center justify-center transition-all shrink-0 ${
-          listening ? 'text-white animate-pulse' : 'bg-bg-elevated border border-border text-fg-secondary hover:text-fg hover:border-fg-ghost'
+        className={`relative w-12 h-12 rounded-full flex items-center justify-center transition-all shrink-0 overflow-hidden ${
+          listening ? 'ring-2 ring-accent animate-pulse' : 'ring-1 ring-border hover:ring-accent/50'
         }`}
-        style={listening ? { backgroundColor: '#E8A020' } : undefined}
         title={listening ? 'Stop listening' : 'Talk to ACHEEVY'}
       >
-        {listening ? <Square className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
+        <Image
+          src={VOICE_AVATAR}
+          alt="Voice"
+          width={48}
+          height={48}
+          className="rounded-full object-cover"
+          onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+        />
+        {/* Fallback mic icon if image fails */}
+        <span className="absolute inset-0 flex items-center justify-center">
+          {listening ? <Square className="w-4 h-4 text-white drop-shadow-md" /> : null}
+        </span>
+        {/* Listening glow ring */}
+        {listening && (
+          <span className="absolute inset-0 rounded-full border-2 border-accent animate-ping opacity-30" />
+        )}
       </button>
 
       <div className="flex items-end gap-[2px] h-8 flex-1 min-w-0">

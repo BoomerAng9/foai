@@ -25,3 +25,8 @@ export const GRADE_SCALE: GradeEntry[] = [
 export function getGradeForScore(score: number): GradeEntry {
   return GRADE_SCALE.find(g => score >= g.min && score <= g.max) || GRADE_SCALE[GRADE_SCALE.length - 1];
 }
+
+/** Shorthand — returns the badge color for a numeric grade */
+export function getGradeColor(score: number): string {
+  return getGradeForScore(score).badgeColor;
+}

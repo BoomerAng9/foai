@@ -56,12 +56,9 @@ function getPositionColor(pos: string): string {
   return POS_COLORS[pos?.toUpperCase()] || '#D4A853';
 }
 
-/* ── Grade color by value ────────────────────────────── */
+/* ── Grade color by value (from centralized scale) ──── */
 function getGradeColor(score: number): string {
-  if (score >= 90) return '#D4A853'; // gold
-  if (score >= 80) return '#60A5FA'; // blue
-  if (score >= 70) return '#34D399'; // green
-  return '#71717A'; // gray
+  return getGradeForScore(score).badgeColor;
 }
 
 /* ── Stat bar component ──────────────────────────────── */

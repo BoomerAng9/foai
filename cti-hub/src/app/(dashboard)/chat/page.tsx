@@ -923,7 +923,7 @@ function ChatWithACHEEVY() {
               )}
             </div>
 
-            {/* Scenarios Panel */}
+            {/* Scenarios Panel — 27 tiles across 6 categories */}
             <AnimatePresence>
               {showScenarios && (
                 <motion.div
@@ -933,39 +933,72 @@ function ChatWithACHEEVY() {
                   transition={{ duration: 0.25, ease: 'easeInOut' }}
                   className="overflow-hidden"
                 >
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 py-3">
-                    {[
-                      { id: 'research', name: 'Research', desc: 'Deep web research mode' },
-                      { id: 'content', name: 'Content', desc: 'Blog, social, email creation' },
-                      { id: 'finance', name: 'Finance', desc: 'Budget, invoice, cost analysis' },
-                      { id: 'marketing', name: 'Marketing', desc: 'Campaign, SEO, ads strategy' },
-                      { id: 'code', name: 'Code', desc: 'Build, deploy, debug' },
-                      { id: 'design', name: 'Design', desc: 'Visual assets, mockups' },
-                      { id: 'education', name: 'Education', desc: 'Lesson plans, courses' },
-                      { id: 'custom', name: 'Custom', desc: 'Define your own scenario' },
-                    ].map(tile => (
-                      <button
-                        key={tile.id}
-                        onClick={() => {
-                          setScenarioContext(tile.name);
-                          setShowScenarios(false);
-                        }}
-                        className="flex flex-col gap-1 p-3 border transition-all text-left hover:border-accent/50"
-                        style={{
-                          background: scenarioContext === tile.name
-                            ? 'rgba(232,160,32,0.10)'
-                            : 'rgba(255,255,255,0.02)',
-                          borderColor: scenarioContext === tile.name
-                            ? 'rgba(232,160,32,0.5)'
-                            : 'rgba(255,255,255,0.08)',
-                          backdropFilter: 'blur(12px)',
-                        }}
-                      >
-                        <span className="font-mono text-[11px] font-semibold tracking-wide" style={{
-                          color: scenarioContext === tile.name ? '#E8A020' : 'rgba(255,255,255,0.85)',
-                        }}>{tile.name}</span>
-                        <span className="font-mono text-[9px]" style={{ color: 'rgba(255,255,255,0.4)' }}>{tile.desc}</span>
-                      </button>
+                  <div className="py-3 space-y-4 max-h-[50vh] overflow-y-auto pr-1">
+                    {([
+                      { label: 'SKILLS', color: '#E8A020', tiles: [
+                        { id: 'open-mind', name: 'Open Mind', desc: 'Innovation & brainstorming' },
+                        { id: 'speakly', name: 'Speakly', desc: 'Presentation & pitch coaching' },
+                        { id: 'broadcast', name: 'Broadcast Studio', desc: 'Video production suite' },
+                        { id: 'pascal', name: 'Pascal Editor', desc: 'Document & content editing' },
+                        { id: 'adaptive-lang', name: 'Adaptive Language', desc: 'Tone & dialect matching' },
+                        { id: 'virtual-office', name: 'Virtual Office', desc: 'Workspace management' },
+                      ]},
+                      { label: 'STRATEGIC AGENTS', color: '#06B6D4', tiles: [
+                        { id: 'scout-ang', name: 'Scout_Ang', desc: 'Research & web intelligence' },
+                        { id: 'content-ang', name: 'Content_Ang', desc: 'Blog, social, email creation' },
+                        { id: 'edu-ang', name: 'Edu_Ang', desc: 'Lesson plans & courses' },
+                        { id: 'biz-ang', name: 'Biz_Ang', desc: 'Business strategy & ops' },
+                        { id: 'ops-ang', name: 'Ops_Ang', desc: 'Process & workflow automation' },
+                        { id: 'iller-ang', name: 'Iller_Ang', desc: 'Visual & cinematic direction' },
+                        { id: 'cfo-ang', name: 'CFO_Ang', desc: 'Finance & budget analysis' },
+                      ]},
+                      { label: 'TACTICAL AGENTS', color: '#8B5CF6', tiles: [
+                        { id: 'lil-scout', name: 'Lil_Scout', desc: 'Quick web lookups' },
+                        { id: 'lil-writer', name: 'Lil_Writer', desc: 'Fast content drafts' },
+                        { id: 'lil-coder', name: 'Lil_Coder', desc: 'Code snippets & fixes' },
+                        { id: 'lil-designer', name: 'Lil_Designer', desc: 'Quick visual mockups' },
+                        { id: 'lil-analyst', name: 'Lil_Analyst', desc: 'Data crunching' },
+                        { id: 'lil-social', name: 'Lil_Social', desc: 'Social media posts' },
+                        { id: 'lil-support', name: 'Lil_Support', desc: 'Customer support drafts' },
+                        { id: 'lil-scheduler', name: 'Lil_Scheduler', desc: 'Calendar & task planning' },
+                      ]},
+                      { label: 'TOOLS', color: '#10B981', tiles: [
+                        { id: 'research', name: 'Research', desc: 'Deep web research mode' },
+                        { id: 'film-analysis', name: 'Film Analysis', desc: 'Video & media breakdown' },
+                        { id: 'image-gen', name: 'Image Gen', desc: 'AI image generation' },
+                        { id: 'video-gen', name: 'Video Gen', desc: 'AI video generation' },
+                        { id: 'voice', name: 'Voice', desc: 'Text-to-speech & voice' },
+                        { id: 'custom', name: 'Custom', desc: 'Define your own scenario' },
+                      ]},
+                    ] as { label: string; color: string; tiles: { id: string; name: string; desc: string }[] }[]).map(group => (
+                      <div key={group.label}>
+                        <p className="font-mono text-[9px] uppercase tracking-[0.2em] mb-2" style={{ color: group.color }}>{group.label}</p>
+                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                          {group.tiles.map(tile => (
+                            <button
+                              key={tile.id}
+                              onClick={() => {
+                                setScenarioContext(tile.name);
+                                setShowScenarios(false);
+                              }}
+                              className="flex flex-col gap-1 p-2.5 border transition-all text-left hover:border-accent/50"
+                              style={{
+                                background: scenarioContext === tile.name
+                                  ? 'rgba(232,160,32,0.10)'
+                                  : 'rgba(255,255,255,0.02)',
+                                borderColor: scenarioContext === tile.name
+                                  ? 'rgba(232,160,32,0.5)'
+                                  : 'rgba(255,255,255,0.08)',
+                              }}
+                            >
+                              <span className="font-mono text-[10px] font-semibold tracking-wide" style={{
+                                color: scenarioContext === tile.name ? '#E8A020' : 'rgba(255,255,255,0.85)',
+                              }}>{tile.name}</span>
+                              <span className="font-mono text-[8px]" style={{ color: 'rgba(255,255,255,0.35)' }}>{tile.desc}</span>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
                     ))}
                   </div>
                 </motion.div>

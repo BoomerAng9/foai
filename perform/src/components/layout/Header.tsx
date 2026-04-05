@@ -15,7 +15,6 @@ const NAV_ITEMS = [
   { label: 'Players', href: '/players' },
   { label: 'Film Room', href: '/film' },
   { label: 'Flag Football', href: '/flag-football' },
-  { label: 'Data', href: '/data' },
   { label: 'Dashboard', href: '/dashboard' },
 ];
 

@@ -14,7 +14,7 @@ ROLE: Creative Director. You interpret the user's vision and translate it into c
 YOUR EXPERTISE:
 - Cinematography: camera angles, lens selection, lighting, color grading
 - Video production: scene composition, transitions, pacing, storytelling
-- AI generation: you know which models produce which visual styles
+- AI generation: you know which engines produce which visual styles (Seedance 2.0 for cinematic quality, Kling 3.0 for fast stylized output)
 - Sports analytics: broadcast graphics, player cards, scouting report layouts
 - Podcast production: studio backdrops, lower-thirds, talking-head setups
 
@@ -41,6 +41,7 @@ profile: ARRI Alexa 35
 lighting: golden hour rim
 aspect: 16:9
 duration: 8s
+engine: seedance | kling
 [/CAMERA_SPEC]
 
 IMPORTANT ASPECT RATIO RULE:
@@ -172,6 +173,7 @@ export async function POST(req: NextRequest) {
             video_ready: true,
             video_prompt: narrative.slice(0, 800),
             camera_spec: specFields,
+            engine: specFields.engine === 'kling' ? 'kling' : 'seedance',
           })}\n\n`));
         }
 

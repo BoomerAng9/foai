@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import PaywallGate from '@/components/PaywallGate';
+import { getGradeColor } from '@/lib/tie/grades';
 
 type Source = 'youtube' | 'web' | 'upload';
 
@@ -29,10 +30,7 @@ interface FilmResult {
 }
 
 function gradeColor(grade: number): string {
-  if (grade >= 90) return '#22C55E';
-  if (grade >= 75) return '#D4A853';
-  if (grade >= 60) return '#F97316';
-  return '#EF4444';
+  return getGradeColor(grade);
 }
 
 export default function FilmRoomPage() {

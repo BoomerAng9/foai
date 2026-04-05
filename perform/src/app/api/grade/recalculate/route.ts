@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@/lib/db';
+import { getGradeForScore } from '@/lib/tie/grades';
 
 /* ──────────────────────────────────────────────────────────────
  *  POST /api/grade/recalculate
@@ -20,14 +21,7 @@ interface GradeResult {
 }
 
 function deriveTieGrade(grade: number): string {
-  if (grade >= 90) return 'Blue Chip';
-  if (grade >= 85) return 'First Round Lock';
-  if (grade >= 80) return 'Day 1 Starter';
-  if (grade >= 75) return 'Solid Starter';
-  if (grade >= 70) return 'Quality Starter';
-  if (grade >= 65) return 'Developmental';
-  if (grade >= 60) return 'Late Round';
-  return 'UDFA';
+  return getGradeForScore(grade).label;
 }
 
 async function braveSearch(query: string, apiKey: string): Promise<string> {

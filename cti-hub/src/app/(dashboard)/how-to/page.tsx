@@ -40,7 +40,7 @@ const C = {
 
 const SOURCE_OPTIONS: { id: SourceType; label: string; icon: typeof Youtube; placeholder: string }[] = [
   { id: 'youtube', label: 'YouTube', icon: Youtube, placeholder: 'Paste a YouTube URL...' },
-  { id: 'web', label: 'Web', icon: Globe, placeholder: 'Paste a web page URL...' },
+  { id: 'web', label: 'Web', icon: Globe, placeholder: 'Optional — paste a URL or leave blank to auto-search' },
   { id: 'pdf', label: 'Upload', icon: Upload, placeholder: 'Paste text content from your PDF...' },
 ];
 
@@ -54,13 +54,21 @@ export default function HowToPage() {
 
   const currentSource = SOURCE_OPTIONS.find((s) => s.id === source)!;
 
+  // URL is only required for YouTube. Web uses topic as search query if no URL given.
+  const needsUrl = source === 'youtube';
+  const needsContent = source === 'pdf';
+
   async function handleLearn() {
     if (!topic.trim()) {
       setError('Tell us what you want to learn.');
       return;
     }
-    if (!urlOrContent.trim()) {
-      setError('Provide a source URL or content.');
+    if (needsUrl && !urlOrContent.trim()) {
+      setError('Paste a YouTube URL to extract from.');
+      return;
+    }
+    if (needsContent && !urlOrContent.trim()) {
+      setError('Paste your document content.');
       return;
     }
 
@@ -72,6 +80,9 @@ export default function HowToPage() {
       const body: Record<string, string> = { source, topic: topic.trim() };
       if (source === 'pdf') {
         body.content = urlOrContent.trim();
+      } else if (source === 'web' && !urlOrContent.trim()) {
+        // No URL provided — use topic as a web search via Brave
+        body.url = `https://www.google.com/search?q=${encodeURIComponent(topic.trim())}`;
       } else {
         body.url = urlOrContent.trim();
       }
@@ -174,7 +185,7 @@ export default function HowToPage() {
         {/* URL / Content Input */}
         <div>
           <label className="block text-[10px] font-mono font-semibold tracking-wider mb-1.5" style={{ color: C.textSoft }}>
-            {source === 'pdf' ? 'PASTE CONTENT' : 'SOURCE URL'}
+            {source === 'pdf' ? 'PASTE CONTENT' : source === 'web' ? 'SOURCE URL (optional)' : 'SOURCE URL'}
           </label>
           {source === 'pdf' ? (
             <textarea

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@/lib/db';
+import { getGradeForScore } from '@/lib/tie/grades';
 
 /**
  * GET /api/nft/card/[id] — Generate SVG card image for a draft prospect NFT
@@ -9,17 +10,11 @@ import { sql } from '@/lib/db';
  */
 
 function gradeColor(grade: number): string {
-  if (grade >= 88) return '#D4A853';
-  if (grade >= 83) return '#3B82F6';
-  if (grade >= 78) return '#10B981';
-  return '#8B5CF6';
+  return getGradeForScore(grade).badgeColor;
 }
 
 function tierLabel(grade: number): string {
-  if (grade >= 88) return 'ELITE';
-  if (grade >= 83) return 'BLUE CHIP';
-  if (grade >= 78) return 'STARTER';
-  return 'PROSPECT';
+  return getGradeForScore(grade).label;
 }
 
 export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {

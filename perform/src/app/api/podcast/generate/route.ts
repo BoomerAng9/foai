@@ -15,9 +15,11 @@ const TYPE_INSTRUCTIONS: Record<EpisodeType, string> = {
   debate: 'Present both sides of a hot debate, then pick your side decisively and defend it.',
 };
 
-// Google Cloud TTS voice mapping: The Colonel is female, everyone else is male
+// Google Cloud TTS voice mapping
+// The Colonel = female, The Haze = alternates male voices for Haze/Smoke, rest = male
 function getTTSVoice(analystId: string): string {
-  return analystId === 'the-colonel' ? 'en-US-Journey-F' : 'en-US-Journey-D';
+  if (analystId === 'the-colonel') return 'en-US-Journey-F';
+  return 'en-US-Journey-D';
 }
 
 async function ensureTable() {

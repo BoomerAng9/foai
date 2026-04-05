@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
+import { getGradeColor } from '@/lib/tie/grades';
 
 interface DraftPick {
   overall: number;
@@ -18,10 +19,7 @@ interface DraftPick {
 }
 
 function scoreColor(score: number): string {
-  if (score >= 90) return '#D4A853';
-  if (score >= 80) return '#22C55E';
-  if (score >= 70) return '#60A5FA';
-  return '#F59E0B';
+  return getGradeColor(score);
 }
 
 type DraftMode = 'consensus' | 'perform';
