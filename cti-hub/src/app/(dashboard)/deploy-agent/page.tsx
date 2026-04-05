@@ -175,7 +175,7 @@ export default function DeployAgentPage() {
                 className="font-mono text-xs font-bold tracking-wider px-6 py-2.5 transition-colors flex items-center gap-2"
                 style={{ border: '1px solid rgba(232,160,32,0.4)', color: '#E8A020' }}
               >
-                CHAT WITH ACHEEVY
+                Chat w/ ACHEEVY
               </a>
             </div>
           </div>

@@ -36,7 +36,7 @@ export const PLANS: Record<PlanId, Plan> = {
     description: 'One-time entry. Pay as you go.',
     credits: 50,
     features: [
-      'Chat with ACHEEVY',
+      'Chat w/ ACHEEVY',
       'Basic agent access',
       'Plug Bin storage (1GB)',
     ],

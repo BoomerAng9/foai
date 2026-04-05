@@ -108,7 +108,7 @@ Examples: "Scanning LinkedIn for AI startup leads in the Southeast region."
  */
 export async function runAutonomousCycle(): Promise<void> {
   const activeAgents = AGENTS.filter(a =>
-    ['acheevy', 'scout_ang', 'content_ang', 'edu_ang', 'biz_ang', 'ops_ang', 'cfo_ang'].includes(a.id)
+    ['acheevy', 'q_ang', 'content_ang', 'sales_ang', 'biz_ang', 'ops_ang', 'cfo_ang'].includes(a.id)
   );
 
   for (const agent of activeAgents) {

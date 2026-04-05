@@ -6,8 +6,8 @@
  */
 
 const AGENT_ENDPOINTS: Record<string, string> = {
-  scout_ang: process.env.SCOUT_ANG_URL || 'https://scout-ang-apbgyi35aq-uc.a.run.app',
-  edu_ang: process.env.EDU_ANG_URL || 'https://edu-ang-apbgyi35aq-uc.a.run.app',
+  q_ang: process.env.SCOUT_ANG_URL || 'https://scout-ang-apbgyi35aq-uc.a.run.app',
+  sales_ang: process.env.EDU_ANG_URL || 'https://edu-ang-apbgyi35aq-uc.a.run.app',
   content_ang: process.env.CONTENT_ANG_URL || 'https://content-ang-apbgyi35aq-uc.a.run.app',
   biz_ang: process.env.BIZ_ANG_URL || 'https://biz-ang-apbgyi35aq-uc.a.run.app',
   ops_ang: process.env.OPS_ANG_URL || 'https://ops-ang-apbgyi35aq-uc.a.run.app',
@@ -137,10 +137,10 @@ export function detectAgent(message: string): string | null {
   const lower = message.toLowerCase();
 
   if (lower.includes('research') || lower.includes('find') || lower.includes('search') || lower.includes('scrape') || lower.includes('scout')) {
-    return 'scout_ang';
+    return 'q_ang';
   }
   if (lower.includes('enroll') || lower.includes('sales') || lower.includes('affiliate') || lower.includes('revenue')) {
-    return 'edu_ang';
+    return 'sales_ang';
   }
   if (lower.includes('content') || lower.includes('blog') || lower.includes('seo') || lower.includes('social media') || lower.includes('newsletter')) {
     return 'content_ang';

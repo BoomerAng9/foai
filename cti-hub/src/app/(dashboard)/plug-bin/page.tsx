@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { Eye, Code2, Send, LayoutGrid, List, Rows3 } from 'lucide-react';
+import { Eye, Code2, Send, LayoutGrid, List, Rows3, Plus } from 'lucide-react';
 
 /* ── Types ──────────────────────────────────────────────── */
 type PlugStatus = 'BUILDING' | 'ACTIVE' | 'PAUSED' | 'RETIRED';
@@ -277,7 +277,15 @@ export default function PlugBinPage() {
               {plugs.length}
             </span>
           </div>
-          {!isEmpty && <ViewToggle mode={view} onChange={setView} />}
+          <div className="flex items-center gap-3">
+            {!isEmpty && <ViewToggle mode={view} onChange={setView} />}
+            <Link
+              href="/plug-bin/create"
+              className="flex items-center gap-1.5 px-4 py-1.5 bg-accent text-bg font-mono text-[10px] font-bold tracking-wider hover:brightness-110 transition-all"
+            >
+              <Plus className="w-3 h-3" /> CREATE
+            </Link>
+          </div>
         </div>
 
         {/* ── Content ─────────────────────────────────────── */}

@@ -69,7 +69,7 @@ export const AGENTS: AgentProfile[] = [
     department: 'CMD',
     tier: 'command',
     persona: 'Quick, adaptive, actively listening. First point of contact. Keeps the conversation moving while ACHEEVY processes.',
-    avatar: '/acheevy-helmet.png', // Command tier — uses ACHEEVY helmet
+    avatar: '/agents/content-ang.png', // Distinct from ACHEEVY — uses own visor face
     capabilities: ['Active listening', 'Quick responses', 'Clarifying questions', 'Context bridging', 'Voice interaction'],
     subscriptionTier: 'all', hireable: false,
   },
@@ -80,7 +80,7 @@ export const AGENTS: AgentProfile[] = [
     department: 'CMD',
     tier: 'command',
     persona: 'Silent. Observant. Captures everything. Detects patterns. Feeds context to the team.',
-    avatar: '/acheevy-helmet.png', // Command tier — uses ACHEEVY helmet
+    avatar: '/agents/ops-ang.png', // Distinct from ACHEEVY — uses own visor face
     capabilities: ['Session recording', 'Pattern detection', 'Context summarization', 'Audit logging', 'Inference layer'],
     subscriptionTier: 'all', hireable: false,
   },

@@ -144,7 +144,7 @@ function detectTaskTier(message: string): { tier: 0 | 1 | 2 | 3 | 4; agents: str
     'mobile app', 'saas', 'marketplace', 'everything',
   ];
   if (tier4Patterns.some(kw => lower.includes(kw))) {
-    return { tier: 4, agents: ['acheevy', 'scout_ang', 'code_ang', 'biz_ang', 'content_ang', 'iller_ang', 'chicken_hawk'] };
+    return { tier: 4, agents: ['acheevy', 'q_ang', 'code_ang', 'biz_ang', 'content_ang', 'iller_ang', 'chicken_hawk'] };
   }
 
   // Tier 3 — Chicken Hawk: build/deploy/code execution
@@ -161,7 +161,7 @@ function detectTaskTier(message: string): { tier: 0 | 1 | 2 | 3 | 4; agents: str
 
   // Tier 2 — Boomer_Ang Dispatch: department-specific
   const tier2Map: Record<string, string[]> = {
-    'research|analyze|investigate|find information|scrape|crawl|search the web': ['acheevy', 'scout_ang'],
+    'research|analyze|investigate|find information|scrape|crawl|search the web': ['acheevy', 'q_ang'],
     'design|brand|logo|video|image|creative|animation': ['acheevy', 'iller_ang'],
     'write|content|blog|copy|document|report|presentation|slides': ['acheevy', 'content_ang'],
     'business|strategy|pricing|revenue|market|plan': ['acheevy', 'biz_ang'],

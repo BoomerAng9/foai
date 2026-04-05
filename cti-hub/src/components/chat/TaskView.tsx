@@ -170,7 +170,7 @@ function derivePhase(content: string): AgentDispatch['phase'] {
 function getAgentStatus(agentKey: string, phase: AgentDispatch['phase']): string {
   const statusMap: Record<string, Record<string, string>> = {
     acheevy: { receiving: 'reviewing request...', analyzing: 'coordinating...', building: 'overseeing...', complete: 'mission complete' },
-    scout_ang: { analyzing: 'gathering intel...', building: 'monitoring sources...', complete: 'intel delivered' },
+    q_ang: { analyzing: 'gathering intel...', building: 'monitoring sources...', complete: 'intel delivered' },
     code_ang: { building: 'writing code...', verifying: 'running tests...', complete: 'code shipped' },
     iller_ang: { analyzing: 'drafting concepts...', building: 'designing assets...', complete: 'designs ready' },
     content_ang: { building: 'drafting content...', verifying: 'reviewing copy...', complete: 'content published' },
