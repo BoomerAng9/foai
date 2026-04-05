@@ -166,11 +166,34 @@ export async function POST() {
     let totalInserted = 0;
     const roundResults: Record<number, number> = {};
 
+    // Randomized position-specific queries for broader coverage
+    const EXTRA_QUERIES = [
+      '2026 NFL Draft quarterback prospects late rounds',
+      '2026 NFL Draft wide receiver day 3 picks',
+      '2026 NFL Draft offensive lineman rounds 4 5 6 7',
+      '2026 NFL Draft cornerback safety late round prospects',
+      '2026 NFL Draft defensive tackle nose tackle prospects',
+      '2026 NFL Draft tight end prospects rounds 3 4 5',
+      '2026 NFL Draft running back day 2 day 3',
+      '2026 NFL Draft linebacker prospects mid rounds',
+      '2026 NFL Draft edge rusher day 2 day 3 picks',
+      '2026 NFL Draft UDFA undrafted free agent prospects',
+      '2026 Senior Bowl roster players NFL Draft',
+      '2026 NFL Combine invites full list',
+      '2026 college football seniors declaring NFL Draft',
+      '2026 NFL Draft sleepers hidden gems late picks',
+      '2026 NFL Draft FCS prospects small school',
+      'DraftTek 2026 NFL Draft prospects page 4 5 6',
+      '2026 NFL Draft center guard prospects',
+      '2026 NFL Draft punter kicker specialists 2026',
+    ];
+    // Shuffle and pick 4 extra queries per run
+    const shuffled = EXTRA_QUERIES.sort(() => Math.random() - 0.5).slice(0, 4);
+
     for (const round of [2, 3, 4, 5, 6, 7]) {
       try {
-        /* Search with two queries per round for broader coverage */
         const q1 = `2026 NFL Draft prospects round ${round}`;
-        const q2 = `2026 NFL Draft round ${round} picks players`;
+        const q2 = shuffled[round % shuffled.length] || `2026 NFL Draft round ${round} picks players`;
 
         const [snippets1, snippets2] = await Promise.all([
           braveSearch(q1, BRAVE_KEY),

@@ -111,8 +111,9 @@ export function VoiceBar({ onTranscript, voiceEnabled, onVoiceToggle }: VoiceBar
       <button
         onClick={() => listening ? stopListening() : startListening()}
         className={`w-10 h-10 rounded-full flex items-center justify-center transition-all shrink-0 ${
-          listening ? 'bg-signal-error text-white animate-pulse' : 'bg-bg-elevated border border-border text-fg-secondary hover:text-fg hover:border-fg-ghost'
+          listening ? 'text-white animate-pulse' : 'bg-bg-elevated border border-border text-fg-secondary hover:text-fg hover:border-fg-ghost'
         }`}
+        style={listening ? { backgroundColor: '#E8A020' } : undefined}
         title={listening ? 'Stop listening' : 'Talk to ACHEEVY'}
       >
         {listening ? <Square className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
