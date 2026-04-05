@@ -18,6 +18,7 @@ import { checkMIMGate } from './mim-gate';
 import { generateImage, IMAGE_MODELS, type ImageModel } from '@/lib/image/generate';
 import { checkBudget, deductCost, getBudget, BudgetExhaustedError } from '@/lib/budget';
 import { dispatchToAgent, detectAgent } from '@/lib/agents/dispatch';
+import { detectBuildIntent, buildRFPContext } from '@/lib/acheevy/intent-detector';
 
 // Pattern 1: verb + image noun (explicit: "create an image of X")
 const IMAGE_EXPLICIT = /\b(create|generate|make|draw|design|render|paint|sketch)\b.{0,30}\b(image|picture|photo|illustration|artwork|icon|logo|visual|graphic|portrait|poster|banner|card)\b/i;
@@ -261,12 +262,17 @@ export async function acheevyRespond(
     }
   } catch (err) { console.error('[Agent] Memory recall failed:', err instanceof Error ? err.message : err); }
 
-  // 2. Build system prompt with memory
+  // 2. Detect build intent — auto-trigger RFP-BAMARAM cycle
+  const intent = detectBuildIntent(userMessage);
+  const rfpContext = buildRFPContext(intent);
+
+  // 3. Build system prompt with memory + intent context
   const systemPrompt = ACHEEVY_SYSTEM_PROMPT
     .replace('{memory_context}', memoryContext)
-    .replace('{source_context}', 'None active in this session.');
+    .replace('{source_context}', 'None active in this session.')
+    + (rfpContext ? `\n\n${rfpContext}` : '');
 
-  // 3. Build message chain
+  // 4. Build message chain
   const messages: ConversationMessage[] = [
     { role: 'system', content: systemPrompt },
     ...conversationHistory.slice(-20), // last 20 messages for context
@@ -421,20 +427,25 @@ export async function acheevyRespondStream(
     }
   } catch (err) { console.error('[Agent] Onboarding profile fetch failed:', err instanceof Error ? err.message : err); }
 
-  // 2. Build system prompt with memory + onboarding profile
+  // 2. Detect build intent — auto-trigger RFP-BAMARAM cycle
+  const intent = detectBuildIntent(userMessage);
+  const rfpContext = buildRFPContext(intent);
+
+  // 3. Build system prompt with memory + onboarding profile + intent
   const systemPrompt = ACHEEVY_SYSTEM_PROMPT
     .replace('{memory_context}', memoryContext)
     .replace('{source_context}', 'None active in this session.')
-    + profileBlock;
+    + profileBlock
+    + (rfpContext ? `\n\n${rfpContext}` : '');
 
-  // 3. Build message chain
+  // 4. Build message chain
   const messages: ConversationMessage[] = [
     { role: 'system', content: systemPrompt },
     ...conversationHistory.slice(-20),
     { role: 'user', content: userMessage },
   ];
 
-  // 4. Pick model via LUC (or use client-selected model)
+  // 5. Pick model via LUC (or use client-selected model)
   const model = modelOverride || await pickModel('chat', userMessage.length);
 
   // 5. Store user message in Neon (fire-and-forget)
