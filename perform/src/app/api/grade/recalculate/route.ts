@@ -111,7 +111,8 @@ Return ONLY a JSON object: {"grade": number, "tie_grade": "string", "strengths":
 export async function POST(req: NextRequest) {
   // Auth check
   const authHeader = req.headers.get('authorization') || '';
-  if (PIPELINE_KEY && authHeader !== `Bearer ${PIPELINE_KEY}`) {
+  const token = authHeader.replace('Bearer ', '');
+  if (!PIPELINE_KEY || token !== PIPELINE_KEY) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 

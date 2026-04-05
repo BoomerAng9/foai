@@ -116,6 +116,13 @@ export async function GET(req: NextRequest) {
  */
 export async function POST(req: NextRequest) {
   try {
+    const PIPELINE_KEY = process.env.PIPELINE_AUTH_KEY || '';
+    const authHeader = req.headers.get('authorization') || '';
+    const token = authHeader.replace('Bearer ', '');
+    if (!PIPELINE_KEY || token !== PIPELINE_KEY) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     await ensureTable();
     const body = await req.json();
     const players = Array.isArray(body) ? body : [body];

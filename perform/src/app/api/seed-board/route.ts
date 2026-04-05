@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@/lib/db';
 import { BOARD_2026 } from '@/lib/draft/seed-data';
 
@@ -6,8 +6,15 @@ import { BOARD_2026 } from '@/lib/draft/seed-data';
  * POST /api/seed-board — Seed the complete 2026 NFL Draft Big Board
  * Inserts all 50 prospects from seed-data.ts into the perform_players table.
  */
-export async function POST() {
+export async function POST(req: NextRequest) {
   try {
+    const PIPELINE_KEY = process.env.PIPELINE_AUTH_KEY || '';
+    const authHeader = req.headers.get('authorization') || '';
+    const token = authHeader.replace('Bearer ', '');
+    if (!PIPELINE_KEY || token !== PIPELINE_KEY) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     if (!sql) {
       return NextResponse.json({ error: 'Database not configured' }, { status: 503 });
     }

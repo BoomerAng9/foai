@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth-guard';
 import { buildGrammarPrompt, buildConfirmationPrompt, isPassthrough, NTNTN_SYSTEM_PROMPT } from '@/lib/grammar/converter';
+import { checkMIMGate } from '@/lib/acheevy/mim-gate';
 
 const OPENROUTER_KEY = process.env.OPENROUTER_API_KEY || '';
 const ILLER_ANG_MODEL = 'google/gemma-4-26b-a4b-it';
@@ -66,6 +67,16 @@ export async function POST(req: NextRequest) {
     const { message, history = [] } = await req.json();
     if (!message?.trim()) {
       return NextResponse.json({ error: 'Message required' }, { status: 400 });
+    }
+
+    // MIM governance gate — redirect, don't block
+    const mimResult = checkMIMGate(message);
+    if (!mimResult.allowed) {
+      return NextResponse.json({
+        content: mimResult.redirect || mimResult.reason || 'This request falls outside our operational boundaries.',
+        mim_blocked: true,
+        policy: mimResult.policy,
+      });
     }
 
     // Grammar is ALWAYS active in Broad|Cast Studio

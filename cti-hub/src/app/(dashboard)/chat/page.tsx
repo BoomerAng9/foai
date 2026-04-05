@@ -61,7 +61,8 @@ function ChatWithACHEEVY() {
   const [streamingCost, setStreamingCost] = useState<{ tokens_in: number; tokens_out: number; cost: number } | null>(null);
   const [manageItInput, setManageItInput] = useState('');
   const [guideMode, setGuideMode] = useState(false);
-  const [selectedModel, setSelectedModel] = useState('google/gemma-4-26b-a4b-it');
+  const defaultModel = MODELS.find(m => m.tag === 'DEFAULT')?.id || MODELS[0].id;
+  const [selectedModel, setSelectedModel] = useState(defaultModel);
   const [modelDropdownOpen, setModelDropdownOpen] = useState(false);
   const modelDropdownRef = useRef<HTMLDivElement>(null);
   const [activeDispatch, setActiveDispatch] = useState<{
