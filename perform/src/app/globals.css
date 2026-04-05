@@ -42,6 +42,10 @@
   --pf-overlay: rgba(250,250,250,0.8);
 }
 
+/* ═══════════════════════════════════════════════════════════════════
+   Broadcast-Quality Animations
+   ═══════════════════════════════════════════════════════════════════ */
+
 @keyframes ambientShift {
   0%   { background-position: 0% 50%; }
   50%  { background-position: 100% 50%; }
@@ -51,6 +55,135 @@
 @keyframes typeCursor {
   0%, 100% { opacity: 1; }
   50% { opacity: 0; }
+}
+
+/* Heartbeat pulse for "On the Clock" */
+@keyframes heartbeat {
+  0%   { transform: scale(1); }
+  14%  { transform: scale(1.06); }
+  28%  { transform: scale(1); }
+  42%  { transform: scale(1.04); }
+  56%  { transform: scale(1); }
+  100% { transform: scale(1); }
+}
+
+.heartbeat {
+  animation: heartbeat 1.5s ease-in-out infinite;
+}
+
+/* CRT scanline overlay */
+.scanlines::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 5;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(255,255,255,0.012) 2px,
+    rgba(255,255,255,0.012) 4px
+  );
+}
+
+/* CRT glow around hero content */
+.crt-glow {
+  text-shadow: 0 0 20px rgba(212,168,83,0.15), 0 0 60px rgba(212,168,83,0.06);
+}
+
+/* Holographic shimmer on hover */
+@keyframes holoShimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.holo-shimmer::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.35s ease;
+  background: linear-gradient(
+    105deg,
+    transparent 20%,
+    rgba(255,255,255,0.08) 30%,
+    rgba(212,168,83,0.12) 40%,
+    rgba(142,68,173,0.08) 45%,
+    rgba(39,174,96,0.08) 50%,
+    rgba(255,255,255,0.06) 55%,
+    transparent 70%
+  );
+  background-size: 200% 100%;
+}
+
+.holo-shimmer:hover::before {
+  opacity: 1;
+  animation: holoShimmer 1.5s ease-in-out infinite;
+}
+
+/* Live pulse indicator */
+@keyframes livePulse {
+  0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(239,68,68,0.4); }
+  50%      { opacity: 0.7; box-shadow: 0 0 0 6px rgba(239,68,68,0); }
+}
+
+.live-pulse {
+  animation: livePulse 2s ease-in-out infinite;
+}
+
+/* Position color glow for NFT cards */
+.card-glow-QB    { box-shadow: 0 0 30px rgba(231,76,60,0.2), 0 8px 32px rgba(0,0,0,0.4); }
+.card-glow-RB    { box-shadow: 0 0 30px rgba(39,174,96,0.2), 0 8px 32px rgba(0,0,0,0.4); }
+.card-glow-WR    { box-shadow: 0 0 30px rgba(142,68,173,0.2), 0 8px 32px rgba(0,0,0,0.4); }
+.card-glow-TE    { box-shadow: 0 0 30px rgba(230,126,34,0.2), 0 8px 32px rgba(0,0,0,0.4); }
+.card-glow-OT    { box-shadow: 0 0 30px rgba(41,128,185,0.2), 0 8px 32px rgba(0,0,0,0.4); }
+.card-glow-OL    { box-shadow: 0 0 30px rgba(41,128,185,0.2), 0 8px 32px rgba(0,0,0,0.4); }
+.card-glow-IOL   { box-shadow: 0 0 30px rgba(41,128,185,0.2), 0 8px 32px rgba(0,0,0,0.4); }
+.card-glow-EDGE  { box-shadow: 0 0 30px rgba(192,57,43,0.2), 0 8px 32px rgba(0,0,0,0.4); }
+.card-glow-DT    { box-shadow: 0 0 30px rgba(233,30,99,0.2), 0 8px 32px rgba(0,0,0,0.4); }
+.card-glow-LB    { box-shadow: 0 0 30px rgba(0,188,212,0.2), 0 8px 32px rgba(0,0,0,0.4); }
+.card-glow-CB    { box-shadow: 0 0 30px rgba(255,152,0,0.2), 0 8px 32px rgba(0,0,0,0.4); }
+.card-glow-S     { box-shadow: 0 0 30px rgba(139,195,74,0.2), 0 8px 32px rgba(0,0,0,0.4); }
+
+/* Broadcast frame for video wall */
+.broadcast-frame {
+  position: relative;
+}
+
+.broadcast-frame::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border: 2px solid rgba(212,168,83,0.3);
+  border-radius: inherit;
+  pointer-events: none;
+  z-index: 5;
+}
+
+.broadcast-frame::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, transparent, #D4A853, transparent);
+  opacity: 0.6;
+  pointer-events: none;
+  z-index: 6;
+}
+
+/* Sort toggle slide */
+@keyframes sortSlide {
+  from { transform: translateX(-4px); opacity: 0.5; }
+  to   { transform: translateX(0); opacity: 1; }
+}
+
+.sort-active {
+  animation: sortSlide 0.2s ease-out;
 }
 
 body {

@@ -14,6 +14,8 @@ import {
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { LiveFeed } from '@/components/feed/LiveFeed';
+import { BroadcastOverlay } from '@/components/broadcast/Overlay';
+import { COLORS, positionColor, NFL_TEAM_COLORS } from '@/lib/design/tokens';
 import {
   scrollReveal,
   scrollRevealScale,
@@ -42,21 +44,6 @@ interface TopProspect {
   nfl_comparison: string;
   projected_round: number;
   strengths: string;
-}
-
-/* ─────────────────────────────────────────
-   Helpers
-   ───────────────────────────────────────── */
-function getPositionGradient(pos: string): string {
-  const p = pos?.toUpperCase() || '';
-  if (p === 'QB') return 'linear-gradient(135deg, #1a1a3e 0%, #2d1b4e 50%, #0f0f2a 100%)';
-  if (p === 'RB') return 'linear-gradient(135deg, #2a1a1a 0%, #3e1b1b 50%, #1a0f0f 100%)';
-  if (p === 'WR' || p === 'TE') return 'linear-gradient(135deg, #1a2a1a 0%, #1b3e2d 50%, #0f1a0f 100%)';
-  if (p.includes('OL') || p === 'OT' || p === 'OG' || p === 'C') return 'linear-gradient(135deg, #2a2a1a 0%, #3e3e1b 50%, #1a1a0f 100%)';
-  if (p.includes('DL') || p === 'DT' || p === 'DE' || p === 'EDGE') return 'linear-gradient(135deg, #1a1a2a 0%, #1b2d3e 50%, #0f0f1a 100%)';
-  if (p === 'LB' || p === 'ILB' || p === 'OLB') return 'linear-gradient(135deg, #2a1a2a 0%, #3e1b3e 50%, #1a0f1a 100%)';
-  if (p === 'CB' || p === 'S' || p === 'FS' || p === 'SS') return 'linear-gradient(135deg, #1a2a2a 0%, #1b3e3e 50%, #0f1a1a 100%)';
-  return 'linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 50%, #0f0f0f 100%)';
 }
 
 /* ─────────────────────────────────────────
@@ -98,7 +85,7 @@ function TypewriterHeadline({ text, delay = 600 }: { text: string; delay?: numbe
 
   return (
     <h1
-      className="font-outfit text-4xl md:text-6xl lg:text-7xl font-extrabold tracking-tight"
+      className="font-outfit text-4xl md:text-6xl lg:text-7xl font-extrabold tracking-tight heartbeat crt-glow"
       style={{ color: 'var(--pf-gold)' }}
     >
       {text.slice(0, displayedCount)}
@@ -113,7 +100,7 @@ function TypewriterHeadline({ text, delay = 600 }: { text: string; delay?: numbe
 }
 
 /* ─────────────────────────────────────────
-   3D Tilt NFT Card
+   3D Tilt NFT Card — Position-colored glow
    ───────────────────────────────────────── */
 function NFTCard({ player, rank }: { player: TopProspect; rank: number }) {
   const cardRef = useRef<HTMLDivElement>(null);
@@ -121,12 +108,13 @@ function NFTCard({ player, rank }: { player: TopProspect; rank: number }) {
   const [headshotUrl, setHeadshotUrl] = useState<string>('');
   const [imgLoaded, setImgLoaded] = useState(false);
 
+  const pc = positionColor(player.position);
+
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
   const rotateX = useSpring(useTransform(mouseY, [-0.5, 0.5], [8, -8]), { stiffness: 200, damping: 20 });
   const rotateY = useSpring(useTransform(mouseX, [-0.5, 0.5], [-8, 8]), { stiffness: 200, damping: 20 });
 
-  // Fetch headshot from ESPN via our API
   useEffect(() => {
     if (!player.name) return;
     const params = new URLSearchParams({ name: player.name, school: player.school || '' });
@@ -151,17 +139,20 @@ function NFTCard({ player, rank }: { player: TopProspect; rank: number }) {
 
   const initials = player.name.split(' ').map(n => n[0]).join('');
 
+  // Position-specific gradient background
+  const cardBg = `linear-gradient(135deg, ${pc.dark}40 0%, ${pc.primary}15 50%, ${COLORS.bg} 100%)`;
+
   return (
     <Link href={`/draft/${encodeURIComponent(player.name)}`} className="block shrink-0 w-[220px] group">
       <motion.div
         ref={cardRef}
-        className="relative h-[320px] rounded-xl overflow-hidden"
+        className={`relative h-[320px] rounded-xl overflow-hidden holo-shimmer`}
         style={{
-          background: getPositionGradient(player.position),
-          border: isHovered ? '1px solid rgba(212,168,83,0.6)' : '1px solid var(--pf-gold-border)',
+          background: cardBg,
+          border: isHovered ? `1px solid ${pc.primary}99` : `1px solid ${pc.primary}30`,
           boxShadow: isHovered
-            ? '0 8px 40px rgba(212,168,83,0.2), 0 0 60px rgba(212,168,83,0.08)'
-            : '0 8px 32px var(--pf-card-shadow)',
+            ? `0 0 40px ${pc.primary}30, 0 8px 32px rgba(0,0,0,0.5)`
+            : `0 0 20px ${pc.primary}10, 0 8px 32px var(--pf-card-shadow)`,
           rotateX,
           rotateY,
           transformPerspective: 800,
@@ -172,11 +163,19 @@ function NFTCard({ player, rank }: { player: TopProspect; rank: number }) {
         onMouseLeave={handleMouseLeave}
         whileHover={{ scale: 1.03 }}
       >
-        <div className="absolute top-3 left-3 w-8 h-8 flex items-center justify-center rounded-full" style={{ background: 'var(--pf-gold)', color: 'var(--pf-bg)', zIndex: 4 }}>
+        {/* Position color accent line at top */}
+        <div className="absolute top-0 left-0 right-0 h-[3px]" style={{ background: `linear-gradient(90deg, transparent, ${pc.primary}, transparent)` }} />
+
+        <div className="absolute top-3 left-3 w-8 h-8 flex items-center justify-center rounded-full" style={{ background: pc.primary, color: '#fff', zIndex: 4 }}>
           <span className="font-outfit text-xs font-extrabold">#{rank}</span>
         </div>
-        <div className="absolute top-3 right-3 px-2 py-1 rounded" style={{ background: 'rgba(0,0,0,0.6)', border: '1px solid var(--pf-gold-border-strong)', zIndex: 4 }}>
-          <span className="font-mono text-[10px] font-bold" style={{ color: 'var(--pf-gold)' }}>{player.tie_grade || player.grade}</span>
+        <div className="absolute top-3 right-3 px-2 py-1 rounded" style={{ background: 'rgba(0,0,0,0.6)', border: `1px solid ${pc.primary}50`, zIndex: 4 }}>
+          <span className="font-mono text-[10px] font-bold" style={{ color: pc.primary }}>{player.tie_grade || player.grade}</span>
+        </div>
+
+        {/* Position badge */}
+        <div className="absolute top-12 right-3 px-1.5 py-0.5 rounded" style={{ background: `${pc.primary}20`, zIndex: 4 }}>
+          <span className="font-mono text-[9px] font-bold" style={{ color: pc.primary }}>{player.position}</span>
         </div>
 
         {/* Player headshot image or initials fallback */}
@@ -192,32 +191,33 @@ function NFTCard({ player, rank }: { player: TopProspect; rank: number }) {
                 onLoad={() => setImgLoaded(true)}
                 onError={() => setHeadshotUrl('')}
               />
-              {/* Show initials as loading state until image loads */}
               {!imgLoaded && (
                 <div className="flex flex-col items-center gap-2">
-                  <span className="font-outfit text-6xl font-extrabold text-white/10">{initials}</span>
-                  <span className="text-[9px] font-mono text-white/15 tracking-widest">{player.school.toUpperCase()}</span>
+                  <span className="font-outfit text-6xl font-extrabold" style={{ color: `${pc.primary}15` }}>{initials}</span>
+                  <span className="text-[9px] font-mono tracking-widest" style={{ color: `${pc.primary}20` }}>{player.school.toUpperCase()}</span>
                 </div>
               )}
             </>
           ) : (
             <div className="flex flex-col items-center gap-2">
-              <span className="font-outfit text-6xl font-extrabold text-white/10">{initials}</span>
-              <span className="text-[9px] font-mono text-white/15 tracking-widest">{player.school.toUpperCase()}</span>
+              <span className="font-outfit text-6xl font-extrabold" style={{ color: `${pc.primary}15` }}>{initials}</span>
+              <span className="text-[9px] font-mono tracking-widest" style={{ color: `${pc.primary}20` }}>{player.school.toUpperCase()}</span>
             </div>
           )}
         </div>
 
         <div className="absolute bottom-0 left-0 right-0 p-4" style={{ background: 'linear-gradient(transparent, rgba(0,0,0,0.95))', zIndex: 3 }}>
           <p className="font-outfit text-base font-extrabold text-white tracking-wide leading-tight">{player.name}</p>
-          <p className="text-[11px] font-mono mt-1" style={{ color: 'var(--pf-gold)' }}>{player.position} · {player.school}</p>
+          <p className="text-[11px] font-mono mt-1" style={{ color: pc.primary }}>{player.position} &middot; {player.school}</p>
           <div className="flex items-center justify-between mt-2">
             <span className="text-[9px] font-mono text-white/30">RD {player.projected_round || '?'}</span>
             <span className="text-[9px] font-mono text-white/30">{player.nfl_comparison || ''}</span>
           </div>
         </div>
+
+        {/* Subtle inner highlight */}
         <div className="absolute inset-0 rounded-xl pointer-events-none" style={{
-          background: 'linear-gradient(135deg, rgba(255,255,255,0.05) 0%, transparent 50%, rgba(255,255,255,0.02) 100%)',
+          background: `linear-gradient(135deg, ${pc.primary}08 0%, transparent 50%, ${pc.primary}04 100%)`,
           zIndex: 2,
         }} />
       </motion.div>
@@ -232,7 +232,6 @@ function ProspectCarousel({ prospects }: { prospects: TopProspect[] }) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const pausedRef = useRef(false);
   const sectionRef = useRef<HTMLDivElement>(null);
-  const isInView = useInView(sectionRef, { once: true, margin: '-80px' });
 
   useEffect(() => {
     const el = scrollRef.current;
@@ -319,6 +318,7 @@ export default function HomePage() {
   const [prospects, setProspects] = useState<TopProspect[]>([]);
   const [heroIdx, setHeroIdx] = useState(0);
   const [draftVideos, setDraftVideos] = useState<{ videoId: string; title: string; thumbnailUrl: string; url: string; channelTitle: string }[]>([]);
+  const [overlayOpen, setOverlayOpen] = useState(false);
 
   // Scroll-based parallax for hero
   const { scrollY } = useScroll();
@@ -345,6 +345,10 @@ export default function HomePage() {
       .then(r => r.json())
       .then(d => setDraftVideos((d.videos || []).slice(0, 6)))
       .catch(() => {});
+
+    // Show broadcast overlay after 3 seconds
+    const overlayTimer = setTimeout(() => setOverlayOpen(true), 3000);
+    return () => clearTimeout(overlayTimer);
   }, []);
 
   useEffect(() => {
@@ -360,8 +364,8 @@ export default function HomePage() {
         <ScrollProgress />
         <Header />
 
-        {/* ── HERO ── */}
-        <section className="relative px-6 pt-20 pb-16 md:pt-28 md:pb-24 text-center overflow-hidden min-h-[90vh] flex flex-col justify-center">
+        {/* ── HERO — Broadcast-quality with scanlines + CRT glow ── */}
+        <section className="relative px-6 pt-20 pb-16 md:pt-28 md:pb-24 text-center overflow-hidden min-h-[90vh] flex flex-col justify-center scanlines">
           {/* Ambient gradient background */}
           <div
             className="absolute inset-0 pointer-events-none"
@@ -397,9 +401,13 @@ export default function HomePage() {
           {/* Dark overlay */}
           <div className="absolute inset-0" style={{ background: 'var(--pf-overlay)', zIndex: 1 }} />
 
-          {/* Radial gold accent */}
+          {/* Multi-color radial accent (not just gold) */}
           <div className="pointer-events-none absolute inset-0" style={{
-            background: 'radial-gradient(ellipse 60% 50% at 50% 20%, var(--pf-gold-glow) 0%, transparent 100%)',
+            background: `
+              radial-gradient(ellipse 50% 40% at 30% 20%, rgba(231,76,60,0.04) 0%, transparent 100%),
+              radial-gradient(ellipse 50% 40% at 70% 20%, rgba(142,68,173,0.04) 0%, transparent 100%),
+              radial-gradient(ellipse 60% 50% at 50% 20%, var(--pf-gold-glow) 0%, transparent 100%)
+            `,
             zIndex: 2,
           }} />
 
@@ -420,8 +428,8 @@ export default function HomePage() {
             </motion.p>
 
             <motion.p
-              className="text-sm font-mono tracking-[0.3em] uppercase mb-4"
-              style={{ color: '#C0C0C0' }}
+              className="text-sm font-outfit tracking-[0.3em] uppercase mb-4"
+              style={{ color: COLORS.N200 }}
               variants={heroItem}
             >
               WITH THE FIRST PICK IN THE 2026 NFL DRAFT
@@ -433,12 +441,12 @@ export default function HomePage() {
 
             <motion.div className="flex justify-center mt-10 mb-8" variants={heroItem}>
               <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full" style={{ background: 'var(--pf-gold-glow)', border: '1px solid var(--pf-gold-border)' }}>
-                <div className="w-2 h-2 rounded-full animate-pulse" style={{ background: '#22C55E' }} />
+                <div className="w-2 h-2 rounded-full live-pulse" style={{ background: '#22C55E' }} />
                 <span className="text-[10px] font-mono tracking-wider" style={{ color: 'var(--pf-gold)' }}>19 DAYS UNTIL DRAFT NIGHT</span>
               </div>
             </motion.div>
 
-            {/* First Round Order — stagger in */}
+            {/* First Round Order — team-colored badges */}
             <motion.div
               className="max-w-3xl mx-auto mt-8 mb-10"
               variants={staggerContainer}
@@ -446,20 +454,28 @@ export default function HomePage() {
               animate="visible"
             >
               <div className="flex flex-wrap justify-center gap-2">
-                {FIRST_ROUND_TEAMS.map((team, i) => (
-                  <motion.span
-                    key={team}
-                    variants={staggerItem}
-                    className="inline-flex items-center gap-1 px-2 py-1 text-[9px] font-mono transition-colors hover:bg-white/5 cursor-default rounded-sm"
-                    style={{
-                      color: i === 0 ? 'var(--pf-gold)' : 'rgba(255,255,255,0.25)',
-                      fontWeight: i === 0 ? 800 : 400,
-                      border: i === 0 ? '1px solid var(--pf-gold-border-strong)' : '1px solid rgba(255,255,255,0.05)',
-                    }}
-                  >
-                    <span className="text-white/15">{i + 1}.</span> {team}
-                  </motion.span>
-                ))}
+                {FIRST_ROUND_TEAMS.map((team, i) => {
+                  const teamColor = NFL_TEAM_COLORS[team] || '#FFFFFF';
+                  const isOnClock = i === 0;
+                  return (
+                    <motion.span
+                      key={team}
+                      variants={staggerItem}
+                      className="inline-flex items-center gap-1 px-2 py-1 text-[9px] font-mono transition-colors hover:bg-white/5 cursor-default rounded-sm"
+                      style={{
+                        color: isOnClock ? COLORS.gold : teamColor,
+                        fontWeight: isOnClock ? 800 : 500,
+                        border: isOnClock
+                          ? `1px solid ${COLORS.gold}66`
+                          : `1px solid ${teamColor}25`,
+                        opacity: isOnClock ? 1 : 0.7,
+                        textShadow: isOnClock ? `0 0 8px ${COLORS.gold}40` : 'none',
+                      }}
+                    >
+                      <span style={{ color: isOnClock ? `${COLORS.gold}80` : 'rgba(255,255,255,0.15)' }}>{i + 1}.</span> {team}
+                    </motion.span>
+                  );
+                })}
               </div>
             </motion.div>
 
@@ -467,7 +483,7 @@ export default function HomePage() {
               <Link href="/draft" className="px-8 py-3.5 text-sm font-outfit font-bold tracking-wider rounded transition-all hover:brightness-110 hover:shadow-lg hover:shadow-yellow-900/20" style={{ background: 'var(--pf-gold)', color: 'var(--pf-bg)' }}>
                 DRAFT BOARD
               </Link>
-              <Link href="/studio" className="px-8 py-3.5 text-sm font-mono tracking-wider border rounded transition-colors hover:bg-white/5" style={{ borderColor: 'var(--pf-gold-border-strong)', color: 'var(--pf-gold)' }}>
+              <Link href="/studio" className="px-8 py-3.5 text-sm font-outfit tracking-wider border rounded transition-colors hover:bg-white/5" style={{ borderColor: 'var(--pf-gold-border-strong)', color: 'var(--pf-gold)' }}>
                 THE WAR ROOM
               </Link>
             </motion.div>
@@ -486,13 +502,17 @@ export default function HomePage() {
           variants={scrollReveal}
         >
           <div className="flex items-center justify-between px-6 mb-6">
-            <motion.h2
-              className="font-outfit text-xl md:text-2xl font-extrabold tracking-wide"
-              style={{ color: 'var(--pf-text)' }}
-              variants={fadeIn}
-            >
-              TOP 40 PROSPECTS
-            </motion.h2>
+            <motion.div className="flex items-center gap-3" variants={fadeIn}>
+              <h2
+                className="font-outfit text-xl md:text-2xl font-extrabold tracking-wide"
+                style={{ color: 'var(--pf-text)' }}
+              >
+                TOP 40 PROSPECTS
+              </h2>
+              <span className="text-[9px] font-mono px-2 py-0.5 rounded-full" style={{ background: `${COLORS.QB.primary}20`, color: COLORS.QB.primary }}>QB</span>
+              <span className="text-[9px] font-mono px-2 py-0.5 rounded-full" style={{ background: `${COLORS.WR.primary}20`, color: COLORS.WR.primary }}>WR</span>
+              <span className="text-[9px] font-mono px-2 py-0.5 rounded-full" style={{ background: `${COLORS.EDGE.primary}20`, color: COLORS.EDGE.primary }}>EDGE</span>
+            </motion.div>
             <motion.div variants={fadeIn}>
               <Link href="/draft" className="text-xs font-mono tracking-wider transition-colors hover:brightness-125" style={{ color: 'var(--pf-gold)' }}>FULL BOARD &rarr;</Link>
             </motion.div>
@@ -516,7 +536,7 @@ export default function HomePage() {
           </motion.div>
         </motion.section>
 
-        {/* ── DRAFT COVERAGE VIDEOS ── */}
+        {/* ── DRAFT COVERAGE VIDEOS — ESPN Video Wall Layout ── */}
         {draftVideos.length > 0 && (
           <>
             <div style={{ height: '120px' }} />
@@ -527,31 +547,37 @@ export default function HomePage() {
               animate={draftVidInView ? 'visible' : 'hidden'}
               variants={scrollReveal}
             >
-              <div className="max-w-5xl mx-auto">
-                <motion.h2
-                  className="font-outfit text-xl md:text-2xl font-extrabold tracking-wide mb-8"
-                  style={{ color: 'var(--pf-text)' }}
-                  variants={fadeIn}
-                >
-                  DRAFT COVERAGE
-                </motion.h2>
+              <div className="max-w-6xl mx-auto">
+                <motion.div className="flex items-center gap-3 mb-8" variants={fadeIn}>
+                  <div className="w-1 h-6 rounded-full" style={{ background: COLORS.gold }} />
+                  <h2
+                    className="font-outfit text-xl md:text-2xl font-extrabold tracking-wide"
+                    style={{ color: 'var(--pf-text)' }}
+                  >
+                    DRAFT COVERAGE
+                  </h2>
+                  <span className="text-[9px] font-mono px-2 py-0.5 rounded" style={{ background: 'rgba(239,68,68,0.15)', color: '#EF4444' }}>LIVE</span>
+                </motion.div>
+
+                {/* Video wall — staggered broadcast frame layout */}
                 <motion.div
-                  className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5"
+                  className="grid gap-4"
+                  style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))' }}
                   variants={staggerContainer}
                   initial="hidden"
                   animate={draftVidInView ? 'visible' : 'hidden'}
                 >
-                  {draftVideos.map((vid) => (
+                  {draftVideos.map((vid, idx) => (
                     <motion.a
                       key={vid.videoId}
                       href={vid.url}
                       target="_blank"
                       rel="noopener noreferrer"
                       variants={staggerItem}
-                      className="group rounded-xl overflow-hidden transition-all hover:ring-1"
+                      className={`group rounded-lg overflow-hidden broadcast-frame transition-all hover:scale-[1.02] ${idx === 0 ? 'sm:col-span-2 sm:row-span-2' : ''}`}
                       style={{
-                        background: 'rgba(255,255,255,0.02)',
-                        border: '1px solid var(--pf-gold-border)',
+                        background: COLORS.surface,
+                        border: '1px solid rgba(255,255,255,0.06)',
                       }}
                     >
                       <div className="relative aspect-video overflow-hidden">
@@ -559,19 +585,26 @@ export default function HomePage() {
                         <img
                           src={vid.thumbnailUrl}
                           alt={vid.title}
-                          className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                         />
+                        {/* Broadcast corner badge */}
+                        <div className="absolute top-2 left-2 flex items-center gap-1.5 px-2 py-1 rounded" style={{ background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(4px)' }}>
+                          <div className="w-1.5 h-1.5 rounded-full" style={{ background: '#EF4444' }} />
+                          <span className="text-[8px] font-mono font-bold tracking-wider text-white/80">REC</span>
+                        </div>
                         <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                          <div className="w-12 h-12 rounded-full flex items-center justify-center" style={{ background: 'rgba(0,0,0,0.7)' }}>
-                            <span className="text-white text-lg ml-0.5">&#9654;</span>
+                          <div className="w-14 h-14 rounded-full flex items-center justify-center" style={{ background: 'rgba(0,0,0,0.7)', border: `2px solid ${COLORS.gold}60` }}>
+                            <span className="text-white text-xl ml-0.5">&#9654;</span>
                           </div>
                         </div>
+                        {/* Bottom gradient overlay */}
+                        <div className="absolute bottom-0 left-0 right-0 h-16" style={{ background: 'linear-gradient(transparent, rgba(0,0,0,0.8))' }} />
                       </div>
                       <div className="p-4">
-                        <p className="text-sm font-mono text-white/70 leading-snug line-clamp-2 mb-1">
+                        <p className="text-sm font-outfit font-semibold text-white/80 leading-snug line-clamp-2 mb-1">
                           {vid.title}
                         </p>
-                        <p className="text-[10px] font-mono text-white/30 tracking-wider">
+                        <p className="text-[10px] font-mono tracking-wider" style={{ color: COLORS.gold }}>
                           {vid.channelTitle}
                         </p>
                       </div>
@@ -599,19 +632,28 @@ export default function HomePage() {
             <h2 className="font-outfit text-xl md:text-3xl font-extrabold tracking-wide mb-3" style={{ color: 'var(--pf-text)' }}>
               Will you be here for all 257 picks across 7 rounds?
             </h2>
-            <p className="text-sm font-mono mb-8" style={{ color: 'var(--pf-text-muted)' }}>
+            <p className="text-sm font-outfit mb-8" style={{ color: 'var(--pf-text-muted)' }}>
               We will. And we&apos;ll be covering every single one.
             </p>
             <div className="flex flex-wrap justify-center gap-4">
-              <Link href="/draft/mock" className="px-6 py-3 text-xs font-mono font-bold tracking-wider rounded transition-all hover:brightness-110 hover:shadow-lg hover:shadow-yellow-900/20" style={{ background: 'var(--pf-gold)', color: 'var(--pf-bg)' }}>MOCK DRAFT</Link>
-              <Link href="/analysts" className="px-6 py-3 text-xs font-mono font-bold tracking-wider border rounded transition-colors hover:bg-white/5" style={{ borderColor: 'var(--pf-gold-border-strong)', color: 'var(--pf-gold)' }}>ANALYSTS</Link>
-              <Link href="/flag-football" className="px-6 py-3 text-xs font-mono font-bold tracking-wider border rounded transition-colors hover:bg-white/5" style={{ borderColor: 'var(--pf-gold-border-strong)', color: 'var(--pf-gold)' }}>FLAG FOOTBALL</Link>
+              <Link href="/draft/mock" className="px-6 py-3 text-xs font-outfit font-bold tracking-wider rounded transition-all hover:brightness-110 hover:shadow-lg hover:shadow-yellow-900/20" style={{ background: 'var(--pf-gold)', color: 'var(--pf-bg)' }}>MOCK DRAFT</Link>
+              <Link href="/analysts" className="px-6 py-3 text-xs font-outfit font-bold tracking-wider border rounded transition-colors hover:bg-white/5" style={{ borderColor: 'var(--pf-gold-border-strong)', color: 'var(--pf-gold)' }}>ANALYSTS</Link>
+              <Link href="/flag-football" className="px-6 py-3 text-xs font-outfit font-bold tracking-wider border rounded transition-colors hover:bg-white/5" style={{ borderColor: 'var(--pf-gold-border-strong)', color: 'var(--pf-gold)' }}>FLAG FOOTBALL</Link>
             </div>
           </motion.div>
         </motion.section>
 
         <Footer />
       </div>
+
+      {/* Broadcast Overlay */}
+      <BroadcastOverlay
+        open={overlayOpen}
+        headline="2026 NFL Draft is 19 days away"
+        subtext="Pittsburgh | April 23-25 | Full coverage on Per|Form"
+        autoHideMs={10000}
+        onClose={() => setOverlayOpen(false)}
+      />
     </>
   );
 }
