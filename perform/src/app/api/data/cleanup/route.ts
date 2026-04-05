@@ -10,7 +10,7 @@ import { sql } from '@/lib/db';
 
 /** Players confirmed already in the NFL (drafted 2022-2025) */
 const ALREADY_DRAFTED = [
-  // RBs
+  // RBs (2022-2025)
   'Devon Achane', 'Bijan Robinson', 'Jahmyr Gibbs', 'Zach Charbonnet',
   'Roschon Johnson', 'Chase Brown', 'Tank Bigsby', 'Sean Tucker',
   'Eric Gray', 'Israel Abanikanda', 'Kenny McIntosh', 'DeWayne McBride',
@@ -27,26 +27,35 @@ const ALREADY_DRAFTED = [
   'Omarion Hampton', 'Devin Neal', 'Donovan Edwards', 'Treveyon Henderson',
   'Quinshon Judkins', 'Dylan Sampson', 'Ashton Jeanty', 'Cam Skattebo',
   'Kaleb Johnson', 'Damien Martinez', 'Chance Luper',
-  // QBs
+  // QBs (2022-2025)
   'Bryce Young', 'CJ Stroud', 'Anthony Richardson', 'Will Levis',
   'Caleb Williams', 'Jayden Daniels', 'Drake Maye', 'Bo Nix',
   'Michael Penix Jr.', 'JJ McCarthy', 'Spencer Rattler',
   'Cam Ward', 'Shedeur Sanders', 'Jalen Milroe',
-  // WRs
+  'Max Duggan', 'Jack Plummer', 'Dequan Finn', 'Will Altmyer',
+  // WRs (2022-2025)
   'Jaxon Smith-Njigba', 'Quentin Johnston', 'Zay Flowers',
   'Marvin Harrison Jr.', 'Malik Nabers', 'Rome Odunze',
   'Ladd McConkey', 'Keon Coleman', 'Xavier Worthy', 'Brian Thomas Jr.',
   'Troy Franklin', 'Adonai Mitchell', 'Luther Burden III',
   'Tetairoa McMillan', 'Travis Hunter', 'Xavier Legette', 'Ricky Pearsall',
-  // TEs
+  'Rashod Bateman', 'Trey Palmer', 'Theo Wease', 'Parker Washington',
+  'Jalen Cropper', 'Jalen Moreno-Cropper', 'Marcus Burke',
+  // TEs (2022-2025)
   'Brock Bowers', 'Dalton Kincaid', 'Sam LaPorta',
-  // OL
+  // OL (2022-2025)
   'Paris Johnson Jr.', 'Peter Skoronski', 'Joe Alt', 'Olu Fashanu',
-  // EDGE/DL
+  // EDGE/DL (2022-2025)
   'Will Anderson Jr.', 'Tyree Wilson', 'Jalen Carter',
   'Nolan Smith', 'Lukas Van Ness',
-  // DBs
+  // DBs (2022-2025)
   'Devon Witherspoon', 'Christian Gonzalez', 'Quinyon Mitchell',
+];
+
+/** Single-word junk names from bad LLM extractions */
+const JUNK_NAMES = [
+  'Lemon', 'Orange', 'Love', 'Tyson', 'Washington', 'Zvada',
+  'Hemby', 'Coleman', 'Unknown',
 ];
 
 export async function POST(req: NextRequest) {
@@ -71,7 +80,32 @@ export async function POST(req: NextRequest) {
     `;
     results.drafted_removed = draftedRes.length;
 
-    // 2. Remove players with "Unknown" school
+    // 2. Remove known junk single-word names from bad LLM extractions
+    const junkLower = JUNK_NAMES.map(n => n.toLowerCase());
+    const junkRes = await sql`
+      DELETE FROM perform_players
+      WHERE LOWER(TRIM(name)) = ANY(${junkLower})
+      RETURNING id
+    `;
+    results.junk_names_removed = junkRes.length;
+
+    // 3. Remove any single-word names (real prospects have first + last name)
+    const singleWordRes = await sql`
+      DELETE FROM perform_players
+      WHERE TRIM(name) NOT LIKE '% %'
+      RETURNING id
+    `;
+    results.single_word_names_removed = singleWordRes.length;
+
+    // 4. Remove players with "UNKNOWN" position
+    const unknownPosRes = await sql`
+      DELETE FROM perform_players
+      WHERE UPPER(TRIM(position)) = 'UNKNOWN' OR position IS NULL OR TRIM(position) = ''
+      RETURNING id
+    `;
+    results.unknown_position_removed = unknownPosRes.length;
+
+    // 5. Remove players with "Unknown" school
     const unknownRes = await sql`
       DELETE FROM perform_players
       WHERE LOWER(TRIM(school)) = 'unknown' OR school IS NULL OR TRIM(school) = ''
@@ -79,7 +113,7 @@ export async function POST(req: NextRequest) {
     `;
     results.unknown_school_removed = unknownRes.length;
 
-    // 3. Remove duplicate names (keep the one with the best grade)
+    // 6. Remove duplicate names (keep the one with the best grade)
     const dupRes = await sql`
       DELETE FROM perform_players
       WHERE id NOT IN (
@@ -92,7 +126,7 @@ export async function POST(req: NextRequest) {
     `;
     results.duplicates_removed = dupRes.length;
 
-    // 4. Recompute overall_rank and position_rank after cleanup
+    // 7. Recompute overall_rank and position_rank after cleanup
     await sql`
       WITH ranked AS (
         SELECT id,
@@ -107,7 +141,7 @@ export async function POST(req: NextRequest) {
       WHERE p.id = r.id
     `;
 
-    // 5. Get final count
+    // 8. Get final count
     const countRes = await sql`SELECT COUNT(*)::int AS cnt FROM perform_players`;
     const remaining = parseInt(countRes[0]?.cnt || '0', 10);
 

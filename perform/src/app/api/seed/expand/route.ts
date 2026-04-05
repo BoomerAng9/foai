@@ -73,12 +73,15 @@ const ALREADY_DRAFTED: Set<string> = new Set([
   'caleb williams', 'jayden daniels', 'drake maye', 'bo nix',
   'michael penix jr.', 'jj mccarthy', 'spencer rattler',
   'cam ward', 'shedeur sanders', 'jalen milroe',
+  'max duggan', 'jack plummer', 'dequan finn', 'will altmyer',
   // 2023+ WRs
   'jaxon smith-njigba', 'quentin johnston', 'zay flowers',
   'marvin harrison jr.', 'malik nabers', 'rome odunze',
   'ladd mcconkey', 'keon coleman', 'xavier worthy', 'brian thomas jr.',
   'troy franklin', 'adonai mitchell', 'luther burden iii',
-  'tetairoa mcmillan', 'travis hunter',
+  'tetairoa mcmillan', 'travis hunter', 'rashod bateman', 'trey palmer',
+  'theo wease', 'parker washington', 'jalen cropper', 'jalen moreno-cropper',
+  'marcus burke',
   // 2023+ Misc
   'brock bowers', 'dalton kincaid', 'sam laporta',
   'will anderson jr.', 'tyree wilson', 'jalen carter',
