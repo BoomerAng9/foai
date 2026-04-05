@@ -50,7 +50,7 @@ function getGrokHeaders(): Record<string, string> {
 export function getGrokModel(preference?: string): string {
   // Allow override via env or explicit preference
   if (preference) return preference;
-  return process.env.GROK_MODEL || 'grok-3-mini';
+  return process.env.GROK_MODEL || 'grok-4.20-beta';
 }
 
 async function lucRecordUsage(service: string, model: string, tokensIn: number, tokensOut: number) {
