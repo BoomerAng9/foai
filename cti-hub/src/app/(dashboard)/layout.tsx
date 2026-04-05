@@ -38,7 +38,7 @@ const NAV: NavItem[] = [
   { name: 'AGENT HQ', href: '/agents', icon: Users },
   { name: 'DEPLOY', href: '/deploy-agent', icon: Zap },
   { name: 'WORKFLOWS', href: '/projects', icon: FolderOpen },
-  { name: 'ASSETS', href: '/assets', icon: FolderOpen },
+  { name: 'PLUG BIN', href: '/assets', icon: FolderOpen },
   { name: 'EXECUTIONS', href: '/live', icon: Activity, ownerOnly: true },
   { name: 'BROAD|CAST', href: '/broadcast', icon: Video },
   { name: 'PLUG BIN', href: '/plug-bin', icon: Video, ownerOnly: true },

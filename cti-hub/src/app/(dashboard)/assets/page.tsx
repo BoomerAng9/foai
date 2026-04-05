@@ -143,10 +143,11 @@ export default function AssetsPage() {
           <div className="flex items-center gap-3 mb-1">
             <FolderOpen className="w-5 h-5 text-fg-tertiary" />
             <h1 className="text-xl sm:text-2xl font-light tracking-tight">
-              My <span className="font-bold">Assets</span>
+              <span className="font-bold">PLUG BIN</span>
             </h1>
           </div>
-          <p className="label-mono">Images, audio, docs, video, and plugs you have created</p>
+          <p className="label-mono">Store your assets here. Images, audio, docs, video, and plugs.</p>
+          <p className="text-[9px] font-mono text-fg-ghost mt-1">Storage: based on your plan tier</p>
         </div>
         <button
           onClick={() => setUploading(true)}

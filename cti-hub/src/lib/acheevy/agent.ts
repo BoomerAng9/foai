@@ -25,7 +25,7 @@ const IMAGE_EXPLICIT = /\b(create|generate|make|draw|design|render|paint|sketch)
 // Matches creative verbs followed by a/an/the/some + noun phrase (not code/text tasks)
 const IMAGE_IMPLICIT = /\b(create|generate|make|draw|design|render|paint|sketch)\b\s+(?:a|an|the|some|me\s+a|me\s+an)\s+\w+/i;
 // Negative patterns — things that look visual but aren't
-const IMAGE_NEGATIVE = /\b(create|generate|make)\b.{0,20}\b(function|component|page|api|route|file|folder|database|table|endpoint|script|hook|form|test|class|module|app|project|repo|branch|commit|pr|issue|config|schema|migration|query|variable|constant|interface|type|enum|struct|service|controller|model|view|template|layout|style|css|html|json|yaml|xml|csv|sql|docker|workflow|pipeline|action|webhook|cron|job|task|plan|list|array|object|map|set|string|number|boolean)\b/i;
+const IMAGE_NEGATIVE = /\b(create|generate|make)\b.{0,20}\b(function|component|page|api|route|file|folder|database|table|endpoint|script|hook|form|test|class|module|app|project|repo|branch|commit|pr|issue|config|schema|migration|query|variable|constant|interface|type|enum|struct|service|controller|model|view|template|layout|style|css|html|json|yaml|xml|csv|sql|docker|workflow|pipeline|action|webhook|cron|job|task|plan|list|array|object|map|set|string|number|boolean|team|squad|department|agent|boomer|ang|hawk|lil_|chicken|strategy|campaign|budget|report|dashboard|account|workspace|channel|integration|plug|content|marketing|sales|research|analysis|schedule|email|document|presentation|proposal|invoice|contract)\b/i;
 const MODEL_SELECT_PATTERN = /^\s*(?:use\s+)?(?:option\s+)?([123]|gemini|nano\s*banana|openai|canvas|dall-?e|chatgpt|flux)\s*$/i;
 
 function isImageRequest(msg: string): boolean {
