@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { searchDraftNews, type ScrapedArticle } from '@/lib/data-pipeline/scraper';
 
-export const revalidate = 300; // Revalidate every 5 minutes
+export const dynamic = 'force-dynamic'; // Always fetch fresh news
 
 export async function GET() {
   try {
