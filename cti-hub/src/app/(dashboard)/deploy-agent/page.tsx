@@ -214,7 +214,7 @@ export default function DeployAgentPage() {
       <section>
         <div className="flex items-center gap-3 mb-6">
           <Shield className="w-5 h-5 text-[#E8A020]" />
-          <h2 className="font-mono text-lg font-bold text-white tracking-wide">Command</h2>
+          <h2 className="font-mono text-lg font-bold text-[#0A0A0A] dark:text-white tracking-wide">Command</h2>
           <span className="font-mono text-[10px] text-[#555] uppercase tracking-widest">Leadership</span>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
