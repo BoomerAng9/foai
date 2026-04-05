@@ -387,10 +387,24 @@ export async function acheevyRespondStream(
     }
   } catch (err) { console.error('[Agent] Memory recall failed:', err instanceof Error ? err.message : err); }
 
-  // 2. Build system prompt with memory
+  // 1b. Fetch onboarding profile for personalization
+  let profileBlock = '';
+  try {
+    const { sql: dbSql } = await import('@/lib/insforge');
+    if (dbSql) {
+      const rows = await dbSql`SELECT * FROM user_onboarding WHERE user_id = ${userId} LIMIT 1`;
+      if (rows.length > 0) {
+        const p = rows[0];
+        profileBlock = `\n\nUSER PROFILE (from onboarding):\n- Name: ${p.display_name}\n- Business: ${p.business_type}\n- Goal: ${p.primary_goal}\n- Communication: ${p.communication_style}\n- Experience: ${p.experience_level}\n- Tone preference: ${p.tone_preference}\nUse this to personalize every response.`;
+      }
+    }
+  } catch (err) { console.error('[Agent] Onboarding profile fetch failed:', err instanceof Error ? err.message : err); }
+
+  // 2. Build system prompt with memory + onboarding profile
   const systemPrompt = ACHEEVY_SYSTEM_PROMPT
     .replace('{memory_context}', memoryContext)
-    .replace('{source_context}', 'None active in this session.');
+    .replace('{source_context}', 'None active in this session.')
+    + profileBlock;
 
   // 3. Build message chain
   const messages: ConversationMessage[] = [

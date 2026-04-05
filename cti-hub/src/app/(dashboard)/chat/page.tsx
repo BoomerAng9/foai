@@ -18,6 +18,7 @@ import { AttachmentMenu } from '@/components/chat/AttachmentMenu';
 import type { Skill } from '@/lib/skills/registry';
 import { buildGrammarPrompt, buildConfirmationPrompt, isPassthrough, GRAMMAR_DISCLAIMER } from '@/lib/grammar/converter';
 import { VoiceBar } from '@/components/voice/VoiceBar';
+import { AcheevyInterview } from '@/components/onboarding/AcheevyInterview';
 
 function formatFileSize(bytes: number) {
   if (bytes < 1024) return bytes + ' B';
@@ -71,8 +72,26 @@ function ChatWithACHEEVY() {
   } | null>(null);
   const [showScenarios, setShowScenarios] = useState(false);
   const [scenarioContext, setScenarioContext] = useState<string | null>(null);
+  const [showOnboarding, setShowOnboarding] = useState(false);
 
   const currentTier = TIERS.find(t => t.id === activeTier) || TIERS[0];
+
+  // Check onboarding status on first visit
+  useEffect(() => {
+    if (!user) return;
+    // Skip if already completed or skipped this session
+    if (localStorage.getItem('onboarding_completed') || localStorage.getItem('onboarding_skipped')) return;
+    fetch('/api/onboarding')
+      .then(r => r.ok ? r.json() : null)
+      .then(data => {
+        if (data && !data.completed) {
+          setShowOnboarding(true);
+        } else if (data?.completed) {
+          localStorage.setItem('onboarding_completed', 'true');
+        }
+      })
+      .catch(() => {});
+  }, [user]);
 
   // Keep session alive — refresh token every 30 minutes
   useEffect(() => {
@@ -618,6 +637,10 @@ function ChatWithACHEEVY() {
 
   return (
     <div className="flex h-full">
+      {/* Onboarding overlay */}
+      {showOnboarding && (
+        <AcheevyInterview onComplete={() => setShowOnboarding(false)} />
+      )}
       {/* Chat sidebar - slide-in on mobile */}
       {sidebarOpen && (
         <div
