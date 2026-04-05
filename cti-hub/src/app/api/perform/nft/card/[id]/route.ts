@@ -7,10 +7,13 @@ import { sql } from '@/lib/insforge';
  */
 
 function gradeColor(grade: number): string {
-  if (grade >= 88) return '#E8A020';
-  if (grade >= 83) return '#3B82F6';
-  if (grade >= 78) return '#10B981';
-  return '#8B5CF6';
+  if (grade >= 90) return '#D4A853'; // gold — Elite
+  if (grade >= 85) return '#60A5FA'; // blue — First Round
+  if (grade >= 80) return '#60A5FA'; // blue — Late First
+  if (grade >= 75) return '#34D399'; // green — Day 2
+  if (grade >= 70) return '#34D399'; // green — Solid
+  if (grade >= 65) return '#FBBF24'; // amber — Developmental
+  return '#71717A'; // gray
 }
 
 function tierLabel(grade: number): string {
@@ -91,7 +94,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
 
   <!-- Scouting summary -->
   ${p.scouting_summary ? `
-  <text x="24" y="410" font-family="monospace" font-size="9" fill="rgba(255,255,255,0.3)" letter-spacing="0.15em">SCOUT_ANG ASSESSMENT</text>
+  <text x="24" y="410" font-family="monospace" font-size="9" fill="rgba(255,255,255,0.3)" letter-spacing="0.15em">Q_ANG ASSESSMENT</text>
   <text x="24" y="430" font-family="sans-serif" font-size="11" fill="rgba(255,255,255,0.4)">${(p.scouting_summary || '').slice(0, 60)}</text>
   <text x="24" y="446" font-family="sans-serif" font-size="11" fill="rgba(255,255,255,0.4)">${(p.scouting_summary || '').slice(60, 120)}</text>
   ` : ''}
@@ -99,7 +102,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
   <!-- Bottom branding -->
   <line x1="24" y1="500" x2="376" y2="500" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
   <text x="24" y="525" font-family="monospace" font-size="8" fill="rgba(255,255,255,0.15)" letter-spacing="0.2em">THE DEPLOY PLATFORM · FOAI.CLOUD</text>
-  <text x="376" y="525" font-family="monospace" font-size="8" fill="rgba(255,255,255,0.15)" text-anchor="end" letter-spacing="0.1em">SCOUTED BY SCOUT_ANG</text>
+  <text x="376" y="525" font-family="monospace" font-size="8" fill="rgba(255,255,255,0.15)" text-anchor="end" letter-spacing="0.1em">SCOUTED BY Q_ANG</text>
   <text x="24" y="545" font-family="monospace" font-size="8" fill="${color}60" letter-spacing="0.15em">NFT #${p.id} · DRAFT CLASS 2026</text>
 </svg>`;
 

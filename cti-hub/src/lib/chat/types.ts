@@ -85,7 +85,8 @@ export interface ModelOption {
 
 // OpenRouter model catalog — April 2026 verified pricing ($/1M tokens)
 export const MODELS: ModelOption[] = [
-  { id: 'google/gemma-4-26b-a4b-it',        name: 'Gemma 4 26B',           provider: 'Google',      price_in: 0.13,  price_out: 0.40,  context: '256K',  tag: 'DEFAULT' },
+  { id: 'qwen/qwen3.6-plus-preview:free',   name: 'Qwen 3.6 Plus',        provider: 'Qwen',        price_in: 0,     price_out: 0,     context: '256K',  tag: 'DEFAULT' },
+  { id: 'google/gemma-4-26b-a4b-it',        name: 'Gemma 4 26B',           provider: 'Google',      price_in: 0.13,  price_out: 0.40,  context: '256K' },
   { id: 'anthropic/claude-opus-4-6',         name: 'Claude Opus 4.6',      provider: 'Anthropic',   price_in: 15.00, price_out: 75.00, context: '1M',    tag: 'PREMIUM' },
   { id: 'moonshotai/kimi-k2.5r',            name: 'Kimi K2.5r',           provider: 'Moonshot',    price_in: 0.50,  price_out: 2.80,  context: '128K',  tag: 'REASON' },
   { id: 'deepseek/deepseek-v3.2',           name: 'DeepSeek V3.2',        provider: 'DeepSeek',    price_in: 0.26,  price_out: 0.38,  context: '164K',  tag: 'CHEAP' },
@@ -112,7 +113,7 @@ export const MODELS: ModelOption[] = [
   { id: 'nvidia/nemotron-nano-9b-v2:free',  name: 'Nemotron Nano 9B',     provider: 'NVIDIA',      price_in: 0,     price_out: 0,     context: '128K',  tag: 'FREE' },
   { id: 'qwen/qwen3-coder:free',            name: 'Qwen3 Coder 480B',    provider: 'Qwen',        price_in: 0,     price_out: 0,     context: '256K',  tag: 'FREE' },
   { id: 'qwen/qwen3-next-80b-a3b-instruct:free', name: 'Qwen3 Next 80B', provider: 'Qwen',       price_in: 0,     price_out: 0,     context: '128K',  tag: 'FREE' },
-  { id: 'qwen/qwen3.6-plus-preview:free',   name: 'Qwen 3.6 Plus',       provider: 'Qwen',        price_in: 0,     price_out: 0,     context: '256K',  tag: 'FREE' },
+  // Qwen 3.6 Plus is DEFAULT (listed at top)
   { id: 'meta-llama/llama-3.3-70b-instruct:free', name: 'Llama 3.3 70B', provider: 'Meta',        price_in: 0,     price_out: 0,     context: '128K',  tag: 'FREE' },
   { id: 'google/gemma-3-27b-it:free',       name: 'Gemma 3 27B',         provider: 'Google',      price_in: 0,     price_out: 0,     context: '128K',  tag: 'FREE' },
 ];
