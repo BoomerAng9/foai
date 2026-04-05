@@ -23,6 +23,7 @@ import {
   X,
   Zap,
   Info,
+  Monitor,
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { AuthPromptTimer } from '@/components/auth/AuthPromptTimer';
@@ -44,6 +45,7 @@ const NAV: NavItem[] = [
   { name: 'BROAD|CAST', href: '/broadcast', icon: Video },
   { name: 'PLUG BIN', href: '/plug-bin', icon: Video, ownerOnly: true },
   { name: 'MARKETPLACE', href: '/marketplace', icon: ShoppingBag },
+  { name: 'AUTOMATION', href: '/automation', icon: Monitor, ownerOnly: true },
   { name: 'OPEN SEATS', href: '/open-seats', icon: Search, ownerOnly: true },
   { name: 'ENROLLMENTS', href: '/enrollments', icon: TrendingUp, ownerOnly: true },
   { name: 'AFFILIATES', href: '/affiliates', icon: TrendingUp, ownerOnly: true },
