@@ -1,9 +1,21 @@
 'use client';
 
 import { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { getGradeColor } from '@/lib/tie/grades';
+import { NFL_TEAM_COLORS } from '@/lib/design/tokens';
+
+const staggerContainer = {
+  hidden: {},
+  show: { transition: { staggerChildren: 0.04 } },
+};
+
+const staggerItem = {
+  hidden: { opacity: 0, x: -12 },
+  show: { opacity: 1, x: 0, transition: { duration: 0.3, ease: 'easeOut' as const } },
+};
 
 interface DraftPick {
   overall: number;
@@ -87,22 +99,24 @@ export default function MockDraftPage() {
         <div className="flex items-center justify-center gap-1 mb-8">
           <button
             onClick={() => setMode('consensus')}
-            className="px-4 py-2 text-xs font-mono font-bold tracking-wider rounded-l-lg transition-all"
+            className="px-5 py-2.5 text-xs font-mono font-bold tracking-wider rounded-l-lg transition-all duration-200"
             style={{
-              background: mode === 'consensus' ? 'rgba(255,255,255,0.10)' : 'rgba(255,255,255,0.03)',
-              color: mode === 'consensus' ? '#fff' : 'rgba(255,255,255,0.35)',
-              border: mode === 'consensus' ? '1px solid rgba(255,255,255,0.20)' : '1px solid rgba(255,255,255,0.08)',
+              background: mode === 'consensus' ? 'rgba(212,168,83,0.18)' : 'rgba(255,255,255,0.03)',
+              color: mode === 'consensus' ? '#D4A853' : 'rgba(255,255,255,0.35)',
+              border: mode === 'consensus' ? '1px solid rgba(212,168,83,0.5)' : '1px solid rgba(255,255,255,0.08)',
+              boxShadow: mode === 'consensus' ? '0 0 16px rgba(212,168,83,0.15)' : 'none',
             }}
           >
             CONSENSUS
           </button>
           <button
             onClick={() => setMode('perform')}
-            className="px-4 py-2 text-xs font-mono font-bold tracking-wider rounded-r-lg transition-all"
+            className="px-5 py-2.5 text-xs font-mono font-bold tracking-wider rounded-r-lg transition-all duration-200"
             style={{
-              background: mode === 'perform' ? 'rgba(212,168,83,0.15)' : 'rgba(255,255,255,0.03)',
+              background: mode === 'perform' ? 'rgba(212,168,83,0.18)' : 'rgba(255,255,255,0.03)',
               color: mode === 'perform' ? '#D4A853' : 'rgba(255,255,255,0.35)',
-              border: mode === 'perform' ? '1px solid rgba(212,168,83,0.40)' : '1px solid rgba(255,255,255,0.08)',
+              border: mode === 'perform' ? '1px solid rgba(212,168,83,0.5)' : '1px solid rgba(255,255,255,0.08)',
+              boxShadow: mode === 'perform' ? '0 0 16px rgba(212,168,83,0.15)' : 'none',
             }}
           >
             PER|FORM TAKE
@@ -179,56 +193,71 @@ export default function MockDraftPage() {
                   </button>
 
                   {/* Picks */}
-                  {!collapsed && (
-                    <div className="mt-2 space-y-1">
-                      {roundPicks.map(pick => (
-                        <div
-                          key={pick.overall}
-                          className="flex items-center gap-3 px-3 py-2 rounded transition-colors hover:bg-white/5"
-                          style={{ borderLeft: `2px solid ${scoreColor(pick.tieScore)}` }}
-                        >
-                          {/* Pick # */}
-                          <span className="text-[10px] font-mono text-white/30 w-8 text-right shrink-0">
-                            #{pick.overall}
-                          </span>
+                  <AnimatePresence>
+                    {!collapsed && (
+                      <motion.div
+                        className="mt-2 space-y-1"
+                        variants={staggerContainer}
+                        initial="hidden"
+                        animate="show"
+                        exit={{ opacity: 0, transition: { duration: 0.15 } }}
+                      >
+                        {roundPicks.map(pick => {
+                          const teamColor = NFL_TEAM_COLORS[pick.teamAbbrev] || scoreColor(pick.tieScore);
+                          return (
+                            <motion.div
+                              key={pick.overall}
+                              variants={staggerItem}
+                              className="flex items-center gap-3 px-3 py-2 rounded transition-colors hover:bg-white/5"
+                              style={{ borderLeft: `3px solid ${teamColor}` }}
+                            >
+                              {/* Pick # */}
+                              <span className="text-[10px] font-mono text-white/30 w-8 text-right shrink-0">
+                                #{pick.overall}
+                              </span>
 
-                          {/* Team */}
-                          <span className="text-xs font-mono font-bold text-white/70 w-10 shrink-0">
-                            {pick.teamAbbrev}
-                          </span>
+                              {/* Team */}
+                              <span
+                                className="text-xs font-mono font-bold w-10 shrink-0"
+                                style={{ color: teamColor }}
+                              >
+                                {pick.teamAbbrev}
+                              </span>
 
-                          {/* Player */}
-                          <span className="text-sm font-bold text-white/90 min-w-0 shrink-0">
-                            {pick.playerName}
-                          </span>
+                              {/* Player */}
+                              <span className="text-sm font-bold text-white/90 min-w-0 shrink-0">
+                                {pick.playerName}
+                              </span>
 
-                          {/* Position */}
-                          <span className="text-[10px] font-mono px-1.5 py-0.5 rounded shrink-0"
-                            style={{ background: 'rgba(212,168,83,0.1)', color: '#D4A853' }}>
-                            {pick.position}
-                          </span>
+                              {/* Position */}
+                              <span className="text-[10px] font-mono px-1.5 py-0.5 rounded shrink-0"
+                                style={{ background: 'rgba(212,168,83,0.1)', color: '#D4A853' }}>
+                                {pick.position}
+                              </span>
 
-                          {/* School */}
-                          <span className="text-xs text-white/30 font-mono hidden sm:inline shrink-0">
-                            {pick.school}
-                          </span>
+                              {/* School */}
+                              <span className="text-xs text-white/30 font-mono hidden sm:inline shrink-0">
+                                {pick.school}
+                              </span>
 
-                          {/* TIE Score */}
-                          <span
-                            className="text-xs font-mono font-bold ml-auto shrink-0"
-                            style={{ color: scoreColor(pick.tieScore) }}
-                          >
-                            {pick.tieScore}
-                          </span>
+                              {/* TIE Score */}
+                              <span
+                                className="text-xs font-mono font-bold ml-auto shrink-0"
+                                style={{ color: scoreColor(pick.tieScore) }}
+                              >
+                                {pick.tieScore}
+                              </span>
 
-                          {/* Rationale */}
-                          <span className="text-[10px] text-white/25 font-mono hidden md:inline max-w-[280px] truncate">
-                            {pick.rationale}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-                  )}
+                              {/* Rationale */}
+                              <span className="text-[10px] text-white/25 font-mono hidden md:inline max-w-[280px] truncate">
+                                {pick.rationale}
+                              </span>
+                            </motion.div>
+                          );
+                        })}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 </div>
               );
             })}

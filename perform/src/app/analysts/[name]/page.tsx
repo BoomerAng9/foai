@@ -2,9 +2,20 @@
 
 import { use, useState, useEffect } from 'react';
 import Link from 'next/link';
+import { motion } from 'framer-motion';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { getAnalyst } from '@/lib/analysts/personas';
+
+const cardReveal = {
+  hidden: { opacity: 0, y: 24 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.45, ease: 'easeOut' as const } },
+};
+
+function estimateReadTime(text: string): number {
+  const words = text.trim().split(/\s+/).length;
+  return Math.max(1, Math.round(words / 200));
+}
 
 interface Article {
   id: number;
@@ -143,16 +154,30 @@ export default function AnalystFeedPage({ params }: { params: Promise<{ name: st
         {!loading && articles.length > 0 && (
           <div className="space-y-16">
             {articles.map((article) => (
-              <article key={article.id}>
-                <div className="mb-4">
+              <motion.article
+                key={article.id}
+                variants={cardReveal}
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true, margin: '-60px' }}
+                className="rounded-lg p-6"
+                style={{
+                  background: 'rgba(255,255,255,0.02)',
+                  borderLeft: `3px solid ${analyst.color}`,
+                }}
+              >
+                <div className="mb-4 flex items-center gap-3">
                   <span
                     className="text-[10px] font-mono tracking-widest font-bold uppercase"
                     style={{ color: analyst.color }}
                   >
                     {article.content_type.replace(/_/g, ' ')}
                   </span>
-                  <span className="text-[10px] font-mono text-white/20 ml-3">
+                  <span className="text-[10px] font-mono text-white/20">
                     {formatDate(article.created_at)}
+                  </span>
+                  <span className="text-[10px] font-mono text-white/20 ml-auto">
+                    {estimateReadTime(article.content)} min read
                   </span>
                 </div>
                 <h2 className="font-outfit text-xl md:text-2xl font-bold text-white/90 mb-6 leading-tight">
@@ -166,7 +191,7 @@ export default function AnalystFeedPage({ params }: { params: Promise<{ name: st
                   className="mt-8 h-px"
                   style={{ background: `linear-gradient(to right, ${analyst.color}33, transparent)` }}
                 />
-              </article>
+              </motion.article>
             ))}
           </div>
         )}

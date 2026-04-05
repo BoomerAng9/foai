@@ -126,7 +126,7 @@ async function fallbackExecution(task: string, targetAgent?: string): Promise<{ 
   if (!OPENROUTER_KEY) throw new Error('No API key for fallback');
 
   const agentName = targetAgent || 'Chicken Hawk (fallback)';
-  const model = 'google/gemma-4-26b-a4b-it';
+  const model = 'qwen/qwen3.6-plus-preview:free';
 
   const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
     method: 'POST',

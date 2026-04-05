@@ -2,8 +2,14 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
+import { motion } from 'framer-motion';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
+
+const sectionReveal = {
+  hidden: { opacity: 0, y: 30 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: 'easeOut' as const } },
+};
 
 export default function FlagFootballPage() {
   return (
@@ -11,7 +17,12 @@ export default function FlagFootballPage() {
       <Header />
 
       {/* Hero */}
-      <section className="relative py-20 px-6 flex flex-col md:flex-row items-center gap-12 max-w-6xl mx-auto">
+      <motion.section
+        className="relative py-20 px-6 flex flex-col md:flex-row items-center gap-12 max-w-6xl mx-auto"
+        variants={sectionReveal}
+        initial="hidden"
+        animate="visible"
+      >
         <div className="flex-1">
           <h1 className="font-outfit text-4xl md:text-5xl font-extrabold tracking-tight text-white mb-4">
             FLAG FOOTBALL<br />
@@ -46,10 +57,17 @@ export default function FlagFootballPage() {
             />
           </div>
         </div>
-      </section>
+      </motion.section>
 
       {/* Key Facts */}
-      <section className="py-16 px-6" style={{ borderTop: '1px solid rgba(255,255,255,0.08)' }}>
+      <motion.section
+        className="py-16 px-6"
+        style={{ borderTop: '1px solid rgba(255,255,255,0.08)' }}
+        variants={sectionReveal}
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, margin: '-80px' }}
+      >
         <div className="max-w-4xl mx-auto">
           <h2 className="font-outfit text-2xl font-bold text-white mb-8 text-center">THE ROAD TO LA 2028</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -66,22 +84,36 @@ export default function FlagFootballPage() {
             ))}
           </div>
         </div>
-      </section>
+      </motion.section>
 
       {/* Coverage */}
-      <section className="py-16 px-6" style={{ borderTop: '1px solid rgba(255,255,255,0.08)' }}>
+      <motion.section
+        className="py-16 px-6"
+        style={{ borderTop: '1px solid rgba(255,255,255,0.08)' }}
+        variants={sectionReveal}
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, margin: '-80px' }}
+      >
         <div className="max-w-4xl mx-auto text-center">
-          <h2 className="font-outfit text-2xl font-bold text-white mb-4">PER|FORM FLAG COVERAGE</h2>
-          <p className="text-white/40 text-sm mb-8">Coming with college football season — full TIE grading for flag football athletes</p>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <h2 className="font-outfit text-2xl font-bold text-white mb-2">PER|FORM FLAG COVERAGE</h2>
+          <p className="text-white/40 text-sm mb-8">Launching with college football season &mdash; full TIE grading for every flag football athlete</p>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">
             {['TIE Grades', 'Player Cards', 'Team Rankings', 'Combine Data', 'Recruiting', 'NIL Tracking', 'Podcast Coverage', 'Olympic Qualifiers'].map(feature => (
-              <div key={feature} className="py-3 px-4 text-xs font-mono text-white/50" style={{ border: '1px solid rgba(255,255,255,0.08)' }}>
+              <div
+                key={feature}
+                className="py-3 px-4 text-xs font-mono text-white/50 rounded transition-colors hover:bg-white/5 hover:text-white/70"
+                style={{ border: '1px solid rgba(255,255,255,0.08)' }}
+              >
                 {feature}
               </div>
             ))}
           </div>
+          <p className="text-xs font-mono text-white/25 tracking-wider">
+            COVERAGE DROPS FALL 2026
+          </p>
         </div>
-      </section>
+      </motion.section>
 
       <Footer />
     </div>

@@ -28,6 +28,14 @@ const config: Config = {
         'fade-in': 'fade-in 0.3s ease-out both',
         'pulse-dot': 'pulse-dot 2s ease-in-out infinite',
         'cursor-blink': 'cursor-blink 1s step-end infinite',
+        shimmer: 'shimmer 2s ease-in-out infinite',
+      },
+      keyframes: {
+        shimmer: {
+          '0%': { opacity: '0.4' },
+          '50%': { opacity: '1' },
+          '100%': { opacity: '0.4' },
+        },
       },
     },
   },

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { BookOpen, Youtube, Globe, Upload, Loader2, ChevronRight } from 'lucide-react';
+import { BookOpen, Youtube, Globe, Upload, Loader2, ChevronRight, CheckCircle2 } from 'lucide-react';
 
 type SourceType = 'youtube' | 'web' | 'pdf';
 
@@ -23,26 +23,41 @@ interface ExtractResult {
   metadata: Record<string, unknown>;
 }
 
-const C = {
-  bg: '#0A0D10',
-  surface: '#12161B',
-  surfaceHover: '#1A1F27',
-  border: '#1F2733',
-  borderFocus: '#C9A227',
-  accent: '#C9A227',
-  accentGlow: 'rgba(201,162,39,0.12)',
-  accentDim: '#7A6318',
-  text: '#E4E8ED',
-  textSoft: '#94A3B8',
-  textDim: '#4B5C72',
-  success: '#10B981',
-};
-
 const SOURCE_OPTIONS: { id: SourceType; label: string; icon: typeof Youtube; placeholder: string }[] = [
   { id: 'youtube', label: 'YouTube', icon: Youtube, placeholder: 'Paste a YouTube URL...' },
   { id: 'web', label: 'Web', icon: Globe, placeholder: 'Optional — paste a URL or leave blank to auto-search' },
   { id: 'pdf', label: 'Upload', icon: Upload, placeholder: 'Paste text content from your PDF...' },
 ];
+
+function LoadingSkeleton() {
+  return (
+    <div className="space-y-4 animate-pulse">
+      {/* Progress bar */}
+      <div className="bg-bg-surface border border-border rounded-sm p-4">
+        <div className="flex items-center gap-3 mb-3">
+          <Loader2 className="w-4 h-4 animate-spin text-accent" />
+          <span className="font-mono text-[11px] tracking-wider text-fg-secondary">EXTRACTING KNOWLEDGE...</span>
+        </div>
+        <div className="w-full h-1.5 bg-bg rounded-full overflow-hidden">
+          <div className="h-full bg-accent/60 rounded-full animate-[shimmer_2s_ease-in-out_infinite]" style={{ width: '60%' }} />
+        </div>
+      </div>
+      {/* Skeleton cards */}
+      <div className="bg-bg-surface border border-border rounded-sm p-5 space-y-4">
+        <div className="h-5 bg-bg rounded w-2/3" />
+        {[1, 2, 3].map((i) => (
+          <div key={i} className="flex gap-3 p-3 bg-bg rounded-sm border border-border">
+            <div className="w-8 h-8 bg-border rounded shrink-0" />
+            <div className="flex-1 space-y-2">
+              <div className="h-3.5 bg-border rounded w-full" />
+              <div className="h-3 bg-border/60 rounded w-3/4" />
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 export default function HowToPage() {
   const [topic, setTopic] = useState('');
@@ -54,7 +69,6 @@ export default function HowToPage() {
 
   const currentSource = SOURCE_OPTIONS.find((s) => s.id === source)!;
 
-  // URL is only required for YouTube. Web uses topic as search query if no URL given.
   const needsUrl = source === 'youtube';
   const needsContent = source === 'pdf';
 
@@ -81,7 +95,6 @@ export default function HowToPage() {
       if (source === 'pdf') {
         body.content = urlOrContent.trim();
       } else if (source === 'web' && !urlOrContent.trim()) {
-        // No URL provided — use topic as a web search via Brave
         body.url = `https://www.google.com/search?q=${encodeURIComponent(topic.trim())}`;
       } else {
         body.url = urlOrContent.trim();
@@ -112,30 +125,20 @@ export default function HowToPage() {
     <div className="max-w-4xl mx-auto space-y-6">
       {/* Header */}
       <div className="flex items-center gap-3 mb-2">
-        <div
-          className="w-10 h-10 flex items-center justify-center"
-          style={{ background: C.accentGlow, border: `1px solid ${C.accent}` }}
-        >
-          <BookOpen className="w-5 h-5" style={{ color: C.accent }} />
+        <div className="w-10 h-10 flex items-center justify-center bg-accent/10 border border-accent">
+          <BookOpen className="w-5 h-5 text-accent" />
         </div>
         <div>
-          <h1 className="text-xl font-mono font-bold tracking-wide" style={{ color: C.text }}>
-            HOW TO
-          </h1>
-          <p className="text-xs font-mono" style={{ color: C.textSoft }}>
-            XTRAC_ANG — Extract knowledge from any source
-          </p>
+          <h1 className="text-xl font-mono font-bold tracking-wide text-fg">HOW TO</h1>
+          <p className="text-xs font-mono text-fg-secondary">XTRAC_ANG — Extract knowledge from any source</p>
         </div>
       </div>
 
       {/* Input Card */}
-      <div
-        className="rounded-sm p-5 space-y-4"
-        style={{ background: C.surface, border: `1px solid ${C.border}` }}
-      >
+      <div className="rounded-sm p-5 space-y-4 bg-bg-surface border border-border">
         {/* Topic */}
         <div>
-          <label className="block text-[10px] font-mono font-semibold tracking-wider mb-1.5" style={{ color: C.textSoft }}>
+          <label className="block text-[10px] font-mono font-semibold tracking-wider mb-1.5 text-fg-secondary">
             WHAT DO YOU WANT TO LEARN?
           </label>
           <input
@@ -143,21 +146,14 @@ export default function HowToPage() {
             value={topic}
             onChange={(e) => setTopic(e.target.value)}
             placeholder="e.g., How to build a REST API with Node.js"
-            className="w-full px-3 py-2.5 text-sm font-mono rounded-sm outline-none transition-colors"
-            style={{
-              background: C.bg,
-              border: `1px solid ${C.border}`,
-              color: C.text,
-            }}
-            onFocus={(e) => (e.target.style.borderColor = C.borderFocus)}
-            onBlur={(e) => (e.target.style.borderColor = C.border)}
+            className="input-field w-full px-3 py-2.5 text-sm font-mono rounded-sm"
             onKeyDown={(e) => e.key === 'Enter' && handleLearn()}
           />
         </div>
 
         {/* Source Toggle */}
         <div>
-          <label className="block text-[10px] font-mono font-semibold tracking-wider mb-1.5" style={{ color: C.textSoft }}>
+          <label className="block text-[10px] font-mono font-semibold tracking-wider mb-1.5 text-fg-secondary">
             SOURCE
           </label>
           <div className="flex gap-1.5">
@@ -167,12 +163,11 @@ export default function HowToPage() {
                 <button
                   key={opt.id}
                   onClick={() => { setSource(opt.id); setUrlOrContent(''); setError(''); }}
-                  className="flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-mono font-medium tracking-wide transition-all rounded-sm"
-                  style={{
-                    background: active ? C.accent : C.bg,
-                    color: active ? C.bg : C.textSoft,
-                    border: `1px solid ${active ? C.accent : C.border}`,
-                  }}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-mono font-medium tracking-wide transition-all rounded-sm border ${
+                    active
+                      ? 'bg-accent text-bg border-accent'
+                      : 'bg-bg text-fg-secondary border-border hover:border-fg-tertiary'
+                  }`}
                 >
                   <opt.icon className="w-3.5 h-3.5" />
                   {opt.label}
@@ -184,7 +179,7 @@ export default function HowToPage() {
 
         {/* URL / Content Input */}
         <div>
-          <label className="block text-[10px] font-mono font-semibold tracking-wider mb-1.5" style={{ color: C.textSoft }}>
+          <label className="block text-[10px] font-mono font-semibold tracking-wider mb-1.5 text-fg-secondary">
             {source === 'pdf' ? 'PASTE CONTENT' : source === 'web' ? 'SOURCE URL (optional)' : 'SOURCE URL'}
           </label>
           {source === 'pdf' ? (
@@ -193,14 +188,7 @@ export default function HowToPage() {
               onChange={(e) => setUrlOrContent(e.target.value)}
               placeholder={currentSource.placeholder}
               rows={5}
-              className="w-full px-3 py-2.5 text-sm font-mono rounded-sm outline-none resize-y"
-              style={{
-                background: C.bg,
-                border: `1px solid ${C.border}`,
-                color: C.text,
-              }}
-              onFocus={(e) => (e.target.style.borderColor = C.borderFocus)}
-              onBlur={(e) => (e.target.style.borderColor = C.border)}
+              className="input-field w-full px-3 py-2.5 text-sm font-mono rounded-sm resize-y"
             />
           ) : (
             <input
@@ -208,14 +196,7 @@ export default function HowToPage() {
               value={urlOrContent}
               onChange={(e) => setUrlOrContent(e.target.value)}
               placeholder={currentSource.placeholder}
-              className="w-full px-3 py-2.5 text-sm font-mono rounded-sm outline-none transition-colors"
-              style={{
-                background: C.bg,
-                border: `1px solid ${C.border}`,
-                color: C.text,
-              }}
-              onFocus={(e) => (e.target.style.borderColor = C.borderFocus)}
-              onBlur={(e) => (e.target.style.borderColor = C.border)}
+              className="input-field w-full px-3 py-2.5 text-sm font-mono rounded-sm"
               onKeyDown={(e) => e.key === 'Enter' && handleLearn()}
             />
           )}
@@ -223,136 +204,109 @@ export default function HowToPage() {
 
         {/* Error */}
         {error && (
-          <p className="text-xs font-mono" style={{ color: '#EF4444' }}>
-            {error}
-          </p>
+          <p className="text-xs font-mono text-signal-error">{error}</p>
         )}
 
         {/* Learn Button */}
         <button
           onClick={handleLearn}
           disabled={loading}
-          className="w-full flex items-center justify-center gap-2 px-4 py-3 text-sm font-mono font-bold tracking-wider rounded-sm transition-all"
-          style={{
-            background: loading ? C.accentDim : C.accent,
-            color: C.bg,
-            opacity: loading ? 0.7 : 1,
-            cursor: loading ? 'not-allowed' : 'pointer',
-          }}
+          className="btn-solid w-full h-11 text-sm font-mono font-bold tracking-wider rounded-sm"
         >
           {loading ? (
-            <>
+            <span className="flex items-center justify-center gap-2">
               <Loader2 className="w-4 h-4 animate-spin" />
               EXTRACTING...
-            </>
+            </span>
           ) : (
             'LEARN'
           )}
         </button>
       </div>
 
+      {/* Loading Skeleton */}
+      {loading && <LoadingSkeleton />}
+
       {/* Results */}
       {result && (
         <div className="space-y-4">
           {/* Tutorial Steps */}
           {result.tutorial ? (
-            <div
-              className="rounded-sm p-5 space-y-4"
-              style={{ background: C.surface, border: `1px solid ${C.border}` }}
-            >
-              <h2 className="text-lg font-mono font-bold tracking-wide" style={{ color: C.accent }}>
-                {result.tutorial.title}
-              </h2>
+            <div className="rounded-sm p-5 space-y-4 bg-bg-surface border border-border">
+              <div className="flex items-center gap-3">
+                <CheckCircle2 className="w-5 h-5 text-signal-live shrink-0" />
+                <h2 className="text-lg font-mono font-bold tracking-wide text-accent">
+                  {result.tutorial.title}
+                </h2>
+              </div>
+
+              {/* Step counter */}
+              <div className="flex items-center gap-2 text-fg-tertiary font-mono text-[10px] tracking-wider">
+                <span>{result.tutorial.steps.length} STEPS</span>
+                <span className="text-border">|</span>
+                <span>{result.extracted.length.toLocaleString()} CHARS EXTRACTED</span>
+              </div>
 
               <div className="space-y-3">
-                {result.tutorial.steps.map((step) => (
+                {result.tutorial.steps.map((step, idx) => (
                   <div
                     key={step.step_number}
-                    className="flex gap-3 p-3 rounded-sm transition-colors"
-                    style={{
-                      background: C.bg,
-                      border: `1px solid ${C.border}`,
-                    }}
+                    className="flex gap-3 p-3 rounded-sm bg-bg border border-border hover:border-accent/20 transition-colors"
                   >
                     {/* Step Number */}
-                    <div
-                      className="w-8 h-8 flex items-center justify-center shrink-0 text-xs font-mono font-bold"
-                      style={{
-                        background: C.accentGlow,
-                        border: `1px solid ${C.accent}`,
-                        color: C.accent,
-                      }}
-                    >
+                    <div className="w-8 h-8 flex items-center justify-center shrink-0 text-xs font-mono font-bold bg-accent/10 border border-accent text-accent">
                       {String(step.step_number).padStart(2, '0')}
                     </div>
 
                     {/* Content */}
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm leading-relaxed" style={{ color: C.text }}>
-                        {step.instruction}
-                      </p>
-                      <p className="text-[10px] font-mono mt-1.5 flex items-center gap-1" style={{ color: C.textDim }}>
+                      <p className="text-sm leading-relaxed text-fg">{step.instruction}</p>
+                      <p className="text-[10px] font-mono mt-1.5 flex items-center gap-1 text-fg-tertiary">
                         <ChevronRight className="w-3 h-3" />
                         {step.visual_description}
                       </p>
+                    </div>
+
+                    {/* Step progress indicator */}
+                    <div className="hidden sm:flex items-start pt-1">
+                      <span className="font-mono text-[9px] text-fg-ghost">
+                        {idx + 1}/{result.tutorial!.steps.length}
+                      </span>
                     </div>
                   </div>
                 ))}
               </div>
 
               {/* Summary */}
-              <div
-                className="p-3 rounded-sm"
-                style={{ background: C.accentGlow, border: `1px solid ${C.accentDim}` }}
-              >
-                <p className="text-[10px] font-mono font-semibold tracking-wider mb-1" style={{ color: C.accent }}>
-                  SUMMARY
-                </p>
-                <p className="text-sm" style={{ color: C.text }}>
-                  {result.tutorial.summary}
-                </p>
+              <div className="p-4 rounded-sm bg-accent/5 border border-accent/20">
+                <p className="text-[10px] font-mono font-semibold tracking-wider mb-1.5 text-accent">SUMMARY</p>
+                <p className="text-sm text-fg leading-relaxed">{result.tutorial.summary}</p>
               </div>
             </div>
           ) : null}
 
           {/* Raw Extraction */}
-          <details
-            className="rounded-sm"
-            style={{ background: C.surface, border: `1px solid ${C.border}` }}
-          >
-            <summary
-              className="px-4 py-3 text-[11px] font-mono font-medium tracking-wide cursor-pointer select-none"
-              style={{ color: C.textSoft }}
-            >
+          <details className="rounded-sm bg-bg-surface border border-border group">
+            <summary className="px-4 py-3 text-[11px] font-mono font-medium tracking-wide cursor-pointer select-none text-fg-secondary hover:text-fg transition-colors">
               RAW EXTRACTION ({result.extracted.length.toLocaleString()} chars)
             </summary>
-            <div
-              className="px-4 pb-4 text-xs font-mono leading-relaxed whitespace-pre-wrap max-h-96 overflow-y-auto"
-              style={{ color: C.textDim }}
-            >
+            <div className="px-4 pb-4 text-xs font-mono leading-relaxed whitespace-pre-wrap max-h-96 overflow-y-auto text-fg-tertiary">
               {result.extracted}
             </div>
           </details>
 
           {/* Metadata */}
           {result.metadata && Object.keys(result.metadata).length > 0 && (
-            <details
-              className="rounded-sm"
-              style={{ background: C.surface, border: `1px solid ${C.border}` }}
-            >
-              <summary
-                className="px-4 py-3 text-[10px] font-mono font-medium tracking-wider cursor-pointer select-none"
-                style={{ color: C.textDim }}
-              >
+            <details className="rounded-sm bg-bg-surface border border-border group">
+              <summary className="px-4 py-3 text-[10px] font-mono font-medium tracking-wider cursor-pointer select-none text-fg-tertiary hover:text-fg-secondary transition-colors">
                 METADATA
               </summary>
               <div className="px-4 pb-4">
-                <pre
-                  className="text-[10px] font-mono leading-relaxed whitespace-pre-wrap"
-                  style={{ color: C.textDim }}
-                >
-                  {JSON.stringify(result.metadata, null, 2)}
-                </pre>
+                <div className="bg-bg rounded-sm border border-border p-3">
+                  <pre className="text-[10px] font-mono leading-relaxed whitespace-pre-wrap text-fg-tertiary">
+                    {JSON.stringify(result.metadata, null, 2)}
+                  </pre>
+                </div>
               </div>
             </details>
           )}

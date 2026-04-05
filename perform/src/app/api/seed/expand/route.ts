@@ -68,7 +68,7 @@ async function extractPlayers(
       'Authorization': `Bearer ${apiKey}`,
     },
     body: JSON.stringify({
-      model: 'google/gemma-4-26b-a4b-it',
+      model: 'qwen/qwen3.5-flash-02-23',
       messages: [
         { role: 'system', content: systemPrompt },
         { role: 'user', content: userPrompt },
