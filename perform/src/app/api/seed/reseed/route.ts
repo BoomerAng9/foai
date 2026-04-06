@@ -4,9 +4,9 @@ import { gradeAllProspects } from '@/lib/draft/open-mind-grader';
 
 /* ──────────────────────────────────────────────────────────────
  *  POST /api/seed/reseed
- *  NUCLEAR OPTION: Drops all existing players and reseeds with
- *  the full 600-player DraftTek board, graded by Per|Form's
- *  Open Mind engine. Rankings are by GRADE, not consensus.
+ *  NUCLEAR OPTION: Wipes all 2026 prospects and reseeds with the
+ *  full 600-player DraftTek board graded by the CANONICAL 40/30/30
+ *  Per|Form formula. Rankings by final grade, not consensus.
  * ────────────────────────────────────────────────────────────── */
 
 export async function POST(req: NextRequest) {
@@ -20,7 +20,7 @@ export async function POST(req: NextRequest) {
 
     if (!sql) return NextResponse.json({ error: 'DB unavailable' }, { status: 503 });
 
-    // Ensure table exists
+    // Ensure table + new columns for three-pillar breakdown
     await sql.unsafe(`
       CREATE TABLE IF NOT EXISTS perform_players (
         id SERIAL PRIMARY KEY,
@@ -39,7 +39,7 @@ export async function POST(req: NextRequest) {
         overall_rank INTEGER,
         position_rank INTEGER,
         projected_round INTEGER,
-        grade NUMERIC(4,1),
+        grade NUMERIC(5,1),
         tie_grade TEXT,
         tie_tier TEXT,
         trend TEXT DEFAULT 'steady',
@@ -56,10 +56,30 @@ export async function POST(req: NextRequest) {
       )
     `);
 
+    // Add new three-pillar columns if they don't exist
+    await sql.unsafe(`
+      ALTER TABLE perform_players
+        ADD COLUMN IF NOT EXISTS game_performance NUMERIC(4,1),
+        ADD COLUMN IF NOT EXISTS athleticism NUMERIC(4,1),
+        ADD COLUMN IF NOT EXISTS intangibles NUMERIC(4,1),
+        ADD COLUMN IF NOT EXISTS multi_position_bonus NUMERIC(3,1),
+        ADD COLUMN IF NOT EXISTS grade_letter TEXT,
+        ADD COLUMN IF NOT EXISTS grade_icon TEXT,
+        ADD COLUMN IF NOT EXISTS grade_label TEXT,
+        ADD COLUMN IF NOT EXISTS grade_projection TEXT,
+        ADD COLUMN IF NOT EXISTS prime_sub_tags TEXT
+    `);
+
+    // Widen grade column to hold 101+ Prime Player scores
+    await sql.unsafe(`
+      ALTER TABLE perform_players
+      ALTER COLUMN grade TYPE NUMERIC(5,1)
+    `).catch(() => {/* already widened */});
+
     // Wipe all existing 2026 data
     const deleted = await sql`DELETE FROM perform_players WHERE class_year = '2026' RETURNING id`;
 
-    // Grade all 600 prospects
+    // Grade all 600 prospects with canonical formula
     const graded = gradeAllProspects();
 
     let inserted = 0;
@@ -70,11 +90,16 @@ export async function POST(req: NextRequest) {
           INSERT INTO perform_players (
             name, school, position, class_year,
             overall_rank, position_rank, projected_round,
-            grade, tie_grade, tie_tier, trend, film_grade
+            grade, tie_grade, tie_tier, trend, film_grade,
+            game_performance, athleticism, intangibles, multi_position_bonus,
+            grade_letter, grade_icon, grade_label, grade_projection, prime_sub_tags
           ) VALUES (
             ${p.name}, ${p.school}, ${p.position}, ${p.classYear},
             ${p.performRank}, ${p.positionRank}, ${p.projectedRound},
-            ${p.grade}, ${p.tieGrade}, ${p.tieTier}, ${p.trend}, ${p.filmGrade}
+            ${p.grade}, ${p.gradeLetter}, ${p.gradeLabel}, ${p.trend}, ${p.gradeLetter},
+            ${p.gamePerformance}, ${p.athleticism}, ${p.intangibles}, ${p.multiPositionBonus},
+            ${p.gradeLetter}, ${p.gradeIcon}, ${p.gradeLabel}, ${p.gradeProjection},
+            ${p.primeSubTags.join(',') || null}
           )
           ON CONFLICT (name, school, class_year) DO UPDATE SET
             position = EXCLUDED.position,
@@ -86,6 +111,15 @@ export async function POST(req: NextRequest) {
             tie_tier = EXCLUDED.tie_tier,
             trend = EXCLUDED.trend,
             film_grade = EXCLUDED.film_grade,
+            game_performance = EXCLUDED.game_performance,
+            athleticism = EXCLUDED.athleticism,
+            intangibles = EXCLUDED.intangibles,
+            multi_position_bonus = EXCLUDED.multi_position_bonus,
+            grade_letter = EXCLUDED.grade_letter,
+            grade_icon = EXCLUDED.grade_icon,
+            grade_label = EXCLUDED.grade_label,
+            grade_projection = EXCLUDED.grade_projection,
+            prime_sub_tags = EXCLUDED.prime_sub_tags,
             updated_at = NOW()
         `;
         inserted++;
@@ -94,36 +128,57 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // Sample: top 10 by Per|Form grade
+    // Top 10 by Per|Form grade
     const top10 = graded.slice(0, 10).map(p => ({
       performRank: p.performRank,
       name: p.name,
       position: p.position,
       school: p.school,
       grade: p.grade,
-      tieGrade: p.tieGrade,
+      gradeDisplay: `${p.gradeLetter} ${p.gradeIcon}`,
       consensusRank: p.consensusRank,
+      breakdown: {
+        gamePerformance: p.gamePerformance,
+        athleticism: p.athleticism,
+        intangibles: p.intangibles,
+        bonus: p.multiPositionBonus,
+      },
       trend: p.trend,
     }));
 
-    // Count biggest disagreements with consensus
+    // Prime Players (101+)
+    const primePlayers = graded
+      .filter(p => p.grade >= 101)
+      .map(p => ({
+        name: p.name,
+        position: p.position,
+        grade: p.grade,
+        subTags: p.primeSubTagIcons,
+      }));
+
+    // Biggest sleepers
     const sleepers = graded
       .filter(p => p.consensusRank - p.performRank > 30)
       .slice(0, 10)
       .map(p => ({
-        name: p.name, position: p.position,
-        consensus: p.consensusRank, perform: p.performRank,
-        grade: p.grade, jump: p.consensusRank - p.performRank,
+        name: p.name,
+        position: p.position,
+        consensus: p.consensusRank,
+        perform: p.performRank,
+        grade: p.grade,
+        jump: p.consensusRank - p.performRank,
       }));
 
     return NextResponse.json({
-      message: `Reseed complete. ${inserted} prospects graded by Open Mind.${errors.length > 0 ? ` ${errors.length} failed.` : ''}`,
+      message: `Reseed complete. ${inserted} prospects graded using canonical 40/30/30 formula.${errors.length > 0 ? ` ${errors.length} failed.` : ''}`,
       deleted: deleted.length,
       inserted,
       failed: errors.length,
       failedNames: errors.slice(0, 10),
       top10,
+      primePlayers,
       biggestSleepers: sleepers,
+      formulaNote: 'Max grade is 100 base + 7 multi-position bonus = 107 ceiling. 101+ is Prime Player.',
     });
   } catch (error) {
     const msg = error instanceof Error ? error.message : 'Reseed failed';
