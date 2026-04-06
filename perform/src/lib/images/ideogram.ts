@@ -16,7 +16,7 @@ const BASE = 'https://api.ideogram.ai';
 
 export interface IdeogramOptions {
   prompt: string;
-  aspectRatio?: '1:1' | '16:9' | '9:16' | '4:3' | '3:4' | '3:2' | '2:3';
+  aspectRatio?: '1x1' | '16x9' | '9x16' | '4x3' | '3x4' | '3x2' | '2x3';
   model?: 'V_3' | 'V_2';
   magicPromptOption?: 'AUTO' | 'ON' | 'OFF';
   negativePrompt?: string;
@@ -56,7 +56,8 @@ export async function generateIdeogramImage(
     });
 
     if (!res.ok) {
-      console.error(`[Ideogram] ${res.status}`);
+      const errText = await res.text().catch(() => '');
+      console.error(`[Ideogram] ${res.status}: ${errText}`);
       return null;
     }
 
@@ -105,7 +106,7 @@ Style: Premium sports trading card, matte finish, cinematic lighting, broadcast 
 
   return generateIdeogramImage({
     prompt,
-    aspectRatio: '3:4',
+    aspectRatio: '3x4',
     model: 'V_3',
     styleType: 'DESIGN',
     negativePrompt: 'blurry text, misspelled words, distorted faces, low quality, watermark',
