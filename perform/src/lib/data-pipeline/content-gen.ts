@@ -5,9 +5,13 @@
  * for all 600 prospects.
  */
 
-import { chatCompletion } from '@/lib/openrouter';
+import { chatCompletion, GEMMA4_MODEL } from '@/lib/openrouter';
 
-const LLAMA_MODEL = 'meta-llama/llama-3.3-70b-instruct:free';
+// Primary: Llama 3.3 70B free. Fallback: default model from openrouter.ts
+const MODELS = [
+  'meta-llama/llama-3.3-70b-instruct:free',
+  GEMMA4_MODEL,
+];
 
 interface ScoutingReport {
   scoutingSummary: string;
@@ -49,37 +53,53 @@ Projected Round: ${projectedRound}${statsStr}
 
 Return JSON only.`;
 
-  try {
-    const res = await chatCompletion({
-      model: LLAMA_MODEL,
-      messages: [
-        { role: 'system', content: systemPrompt },
-        { role: 'user', content: userPrompt },
-      ],
-      temperature: 0.4,
-      max_tokens: 1000,
-    });
-    const data = await res.json();
-    const raw: string = data.choices?.[0]?.message?.content ?? '';
-    // Strip markdown fences
-    const cleaned = raw.replace(/```(?:json)?\n?/g, '').trim();
-    const parsed = JSON.parse(cleaned);
-    return {
-      scoutingSummary: parsed.scoutingSummary || '',
-      strengths: parsed.strengths || '',
-      weaknesses: parsed.weaknesses || '',
-      nflComparison: parsed.nflComparison || '',
-      analystNotes: parsed.analystNotes || '',
-    };
-  } catch {
-    return {
-      scoutingSummary: '',
-      strengths: '',
-      weaknesses: '',
-      nflComparison: '',
-      analystNotes: '',
-    };
+  // Try each model in order until one works
+  for (const model of MODELS) {
+    try {
+      const res = await chatCompletion({
+        model,
+        messages: [
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: userPrompt },
+        ],
+        temperature: 0.4,
+        max_tokens: 1000,
+      });
+      const data = await res.json();
+
+      // Check for API-level errors (rate limit, model unavailable)
+      if (data.error) continue;
+
+      const raw: string = data.choices?.[0]?.message?.content ?? '';
+      if (!raw) continue;
+
+      // Strip markdown fences and parse JSON
+      const cleaned = raw
+        .replace(/```(?:json)?\n?/g, '')
+        .replace(/```\s*$/g, '')
+        .trim();
+      const parsed = JSON.parse(cleaned);
+      return {
+        scoutingSummary: parsed.scoutingSummary || '',
+        strengths: parsed.strengths || '',
+        weaknesses: parsed.weaknesses || '',
+        nflComparison: parsed.nflComparison || '',
+        analystNotes: parsed.analystNotes || '',
+      };
+    } catch {
+      // Try next model
+      continue;
+    }
   }
+
+  // All models failed
+  return {
+    scoutingSummary: '',
+    strengths: '',
+    weaknesses: '',
+    nflComparison: '',
+    analystNotes: '',
+  };
 }
 
 /** Generate reports in batches to stay under rate limits */
