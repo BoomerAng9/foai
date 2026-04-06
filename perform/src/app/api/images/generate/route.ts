@@ -48,7 +48,7 @@ export async function POST(req: NextRequest) {
         prompt: prompts[body.type as keyof typeof prompts] || body.subject,
         engine: 'recraft',
         size: sizes[body.type as keyof typeof sizes] || '1024x1024',
-        style: 'realistic_image',
+        style: 'realistic_image', // fal.ai format; gateway normalizes for direct API
       });
 
       if (!result) {

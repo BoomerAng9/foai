@@ -97,6 +97,26 @@ export async function generateImage(req: GatewayImageRequest): Promise<GatewayIm
   return null;
 }
 
+/* ── Style normalizer for Recraft direct API ──
+ * Recraft V4 direct accepts: any_preset from their official list
+ * Common aliases → Recraft-native names */
+function normalizeRecraftStyle(s?: string): string | undefined {
+  if (!s) return undefined;
+  const map: Record<string, string> = {
+    realistic_image: 'realistic_image',
+    photorealism: 'realistic_image',
+    photorealistic: 'realistic_image',
+    digital_illustration: 'digital_illustration',
+    'hand-drawn': 'digital_illustration/hand_drawn',
+    illustration: 'digital_illustration',
+    enterprise: 'realistic_image/enterprise',
+    vector_illustration: 'vector_illustration',
+    vector: 'vector_illustration',
+    icon: 'icon/broken_line',
+  };
+  return map[s.toLowerCase()] || s;
+}
+
 /* ── Recraft Direct API ── */
 async function _tryRecraftDirect(req: GatewayImageRequest, key: string): Promise<GatewayImageResult | null> {
   try {
@@ -105,7 +125,8 @@ async function _tryRecraftDirect(req: GatewayImageRequest, key: string): Promise
       model: req.model || 'recraftv4',
       n: req.n || 1,
     };
-    if (req.style) body.style = req.style;
+    const normalizedStyle = normalizeRecraftStyle(req.style);
+    if (normalizedStyle) body.style = normalizedStyle;
     if (req.size) body.size = req.size;
 
     const res = await fetch('https://external.api.recraft.ai/v1/images/generations', {
