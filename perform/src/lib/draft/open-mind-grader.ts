@@ -214,6 +214,98 @@ const MULTI_POSITION_BONUS: Record<string, number> = {
   // Situational flex +3 for proven specialists
 };
 
+/* ── Medical flag registry ──
+ * Durability is a pillar of Intangibles. A known medical history
+ * must dock Intangibles. Severe mobility injuries also dent Athleticism.
+ *
+ * Severity scale:
+ *   'minor'    — soft tissue, recovered, no chronic issue     (int -2)
+ *   'moderate' — significant surgery, full recovery expected  (int -6,  ath -3)
+ *   'major'    — structural injury w/ lingering concern       (int -10, ath -5)
+ *   'severe'   — multiple injuries or career-threatening      (int -14, ath -8)
+ *
+ * Notes field is for scouting-report context only.
+ */
+export interface MedicalFlag {
+  severity: 'minor' | 'moderate' | 'major' | 'severe';
+  notes: string;
+}
+
+export const MEDICAL_FLAGS: Record<string, MedicalFlag> = {
+  'Jeremiyah Love': {
+    severity: 'major',
+    notes: 'Knee/meniscus concern from 2025 Notre Dame playoff run. Durability flag on a position where it compounds.',
+  },
+  'Harold Perkins Jr.': {
+    severity: 'major',
+    notes: 'ACL tear in 2024. Full 2025 season to prove recovery but durability flag remains.',
+  },
+  'Carson Beck': {
+    severity: 'moderate',
+    notes: 'Elbow injury 2024 SEC Championship, UCL concern carrying into 2025 transfer year.',
+  },
+  'Caleb Downs': {
+    severity: 'minor',
+    notes: 'Clean record, minor maintenance items — listed for tracking only.',
+  },
+  'Drew Allar': {
+    severity: 'minor',
+    notes: 'Ankle tweaks across 2024 season, no structural issues.',
+  },
+  'Nicholas Singleton': {
+    severity: 'minor',
+    notes: 'Hamstring maintenance, monitored.',
+  },
+  'Kaytron Allen': {
+    severity: 'minor',
+    notes: 'Routine RB wear — monitor only.',
+  },
+  'Rueben Bain Jr.': {
+    severity: 'moderate',
+    notes: 'Shoulder/ankle issues across 2024, missed games. Durability question at EDGE.',
+  },
+};
+
+/* ── Medical impact calculator ──
+ * Position-weighted: mobility positions (RB/WR/CB/S) take the full hit,
+ * pocket positions (QB/OL/K) take a reduced mobility penalty.
+ */
+function medicalImpact(name: string, posKey: string): { int: number; ath: number } {
+  const flag = MEDICAL_FLAGS[name];
+  if (!flag) return { int: 0, ath: 0 };
+
+  const baseImpact = {
+    minor:    { int: -2,  ath: 0 },
+    moderate: { int: -6,  ath: -3 },
+    major:    { int: -10, ath: -5 },
+    severe:   { int: -14, ath: -8 },
+  }[flag.severity];
+
+  // Mobility-dependent positions — knee/ankle injuries compound
+  // Knee-critical RB/CB/WR take the biggest multiplier since their game is legs
+  const KNEE_CRITICAL = ['RB', 'CB', 'WR'];
+  const MOBILITY_POSITIONS = ['S', 'EDGE', 'OLB'];
+  const LOW_MOBILITY_POSITIONS = ['QB', 'OT', 'OG', 'OC', 'PK', 'P'];
+
+  if (KNEE_CRITICAL.includes(posKey)) {
+    // Knee injury = existential for this position. Amplify the ath dent,
+    // and also pile another -3 onto intangibles for durability question.
+    return {
+      int: baseImpact.int - 3,
+      ath: Math.round(baseImpact.ath * 1.8),
+    };
+  }
+  if (MOBILITY_POSITIONS.includes(posKey)) {
+    // Full hit with 1.4x mobility multiplier
+    return { int: baseImpact.int, ath: Math.round(baseImpact.ath * 1.4) };
+  }
+  if (LOW_MOBILITY_POSITIONS.includes(posKey)) {
+    // Reduced mobility penalty
+    return { int: baseImpact.int, ath: Math.round(baseImpact.ath * 0.5) };
+  }
+  return baseImpact;
+}
+
 /* ── Prime Player sub-tag assignment (101+ only) ── */
 function assignPrimeSubTags(name: string, gamePerf: number, intangibles: number): PrimeSubTag[] {
   const tags: PrimeSubTag[] = [];
@@ -249,6 +341,9 @@ export interface GradedProspect {
   primeSubTagIcons: string[];
 
   trend: 'rising' | 'falling' | 'steady';
+
+  // Medical/durability flag (undefined if clean)
+  medicalFlag?: MedicalFlag;
 }
 
 /* ── Grade one prospect using the canonical 40/30/30 formula ── */
@@ -266,11 +361,15 @@ function gradeProspect(p: DraftTekProspect): GradedProspect {
   if (OVERRATED_DROPS[p.name]) gamePerf += OVERRATED_DROPS[p.name];
   gamePerf = Math.round(Math.max(20, Math.min(99, gamePerf)) * 10) / 10;
 
+  // ── Medical impact (durability feeds Intangibles, mobility feeds Athleticism) ──
+  const medical = medicalImpact(p.name, posKey);
+
   // ── Pillar 2: Athleticism (30%) ──
   let athleticism = rankToAthleticism(p.rank);
   if (['QB', 'P', 'PK', 'LS'].includes(posKey)) athleticism -= 3; // Pocket/specialist penalty
   if (['WR', 'CB', 'S', 'RB'].includes(posKey)) athleticism += 2;  // Speed positions
   athleticism += variance(p.name, 5, 2);
+  athleticism += medical.ath; // Injury mobility dent
   athleticism = Math.round(Math.max(20, Math.min(99, athleticism)) * 10) / 10;
 
   // ── Pillar 3: Intangibles (30%) ──
@@ -279,6 +378,7 @@ function gradeProspect(p: DraftTekProspect): GradedProspect {
   if (['QB', 'OC', 'ILB'].includes(posKey)) intangibles += 2; // Leadership positions
   intangibles += variance(p.name, 5, 3);
   if (OVERRATED_DROPS[p.name]) intangibles -= 2; // Character/consistency concerns
+  intangibles += medical.int; // Durability flag
   intangibles = Math.round(Math.max(20, Math.min(99, intangibles)) * 10) / 10;
 
   // ── Multi-position bonus ──
@@ -333,6 +433,8 @@ function gradeProspect(p: DraftTekProspect): GradedProspect {
     primeSubTagIcons,
 
     trend,
+
+    medicalFlag: MEDICAL_FLAGS[p.name],
   };
 }
 
