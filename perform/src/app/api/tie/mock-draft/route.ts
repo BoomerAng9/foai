@@ -16,7 +16,7 @@ export async function POST(req: NextRequest) {
       position: p.position,
       overallRank: mode === 'consensus' ? p.consensusRank : p.performRank,
       grade: p.grade,
-      tieGrade: p.tieGrade,
+      tieGrade: p.gradeLetter,
       projectedRound: p.projectedRound,
     }));
 
