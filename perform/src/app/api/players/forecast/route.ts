@@ -97,57 +97,65 @@ export async function GET(req: NextRequest) {
         player.longevity.comps.downside,
       ].filter((c): c is NonNullable<typeof c> => c !== null);
 
-      const [careerArc, pillarRadar, medicalTimeline, compOverlay] = await Promise.all([
-        renderCareerArcChart({
-          playerName: player.name,
-          position: player.position,
-          expectedCareerYears: player.longevity.expectedCareerYears,
-          peakWindow: player.longevity.peakWindowYears,
-          comps: comps.map(c => ({
-            name: c.name,
-            careerYears: c.careerYears,
-            peakYears: c.peakYears,
-            outcome: c.outcome,
-          })),
-        }),
-        renderPillarRadarChart({
-          playerName: player.name,
-          actualPillars: {
-            gamePerformance: player.gamePerformance,
-            athleticism: player.athleticism,
-            intangibles: player.intangibles,
-          },
-          cleanPillars: {
-            gamePerformance: player.gamePerformanceClean,
-            athleticism: player.athleticismClean,
-            intangibles: player.intangiblesClean,
-          },
-        }),
-        player.medicalFlag
-          ? renderMedicalTimelineChart({
-              playerName: player.name,
-              events: [
-                {
-                  year: player.medicalFlag.year,
-                  event: player.medicalFlag.injuryTypes.join(', '),
-                  severity: player.medicalFlag.severity,
-                  recovered: player.medicalFlag.currentStatus === 'clean',
-                },
-              ],
-              currentStatus: player.medicalFlag.currentStatus,
-            })
-          : null,
-        renderCompOverlayChart({
-          playerName: player.name,
-          playerGrade: player.grade,
-          comps: comps.map(c => ({
-            name: c.name,
-            peakGrade: 85 + c.peakYears * 1.5, // rough peak grade proxy
-            careerYears: c.careerYears,
-            outcome: c.outcome,
-          })),
-        }),
-      ]);
+      // Serialize the 4 viz calls so we never burst past the RPM cap.
+      // 250ms stagger between calls is well under any paid tier limit.
+      const stagger = (ms: number) => new Promise(r => setTimeout(r, ms));
+
+      const careerArc = await renderCareerArcChart({
+        playerName: player.name,
+        position: player.position,
+        expectedCareerYears: player.longevity.expectedCareerYears,
+        peakWindow: player.longevity.peakWindowYears,
+        comps: comps.map(c => ({
+          name: c.name,
+          careerYears: c.careerYears,
+          peakYears: c.peakYears,
+          outcome: c.outcome,
+        })),
+      });
+      await stagger(250);
+
+      const pillarRadar = await renderPillarRadarChart({
+        playerName: player.name,
+        actualPillars: {
+          gamePerformance: player.gamePerformance,
+          athleticism: player.athleticism,
+          intangibles: player.intangibles,
+        },
+        cleanPillars: {
+          gamePerformance: player.gamePerformanceClean,
+          athleticism: player.athleticismClean,
+          intangibles: player.intangiblesClean,
+        },
+      });
+      await stagger(250);
+
+      const medicalTimeline = player.medicalFlag
+        ? await renderMedicalTimelineChart({
+            playerName: player.name,
+            events: [
+              {
+                year: player.medicalFlag.year,
+                event: player.medicalFlag.injuryTypes.join(', '),
+                severity: player.medicalFlag.severity,
+                recovered: player.medicalFlag.currentStatus === 'clean',
+              },
+            ],
+            currentStatus: player.medicalFlag.currentStatus,
+          })
+        : null;
+      if (medicalTimeline) await stagger(250);
+
+      const compOverlay = await renderCompOverlayChart({
+        playerName: player.name,
+        playerGrade: player.grade,
+        comps: comps.map(c => ({
+          name: c.name,
+          peakGrade: 85 + c.peakYears * 1.5,
+          careerYears: c.careerYears,
+          outcome: c.outcome,
+        })),
+      });
 
       visualizations = {
         engine: 'gemini-vega-lite',

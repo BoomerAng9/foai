@@ -25,7 +25,10 @@ const getProjectId = () => process.env.GCP_PROJECT_ID || '';
 const getLocation = () => process.env.GCP_LOCATION || 'us-central1';
 const getCredsPath = () => process.env.GOOGLE_APPLICATION_CREDENTIALS || '';
 const getApiKey = () => process.env.GEMINI_API_KEY || '';
-const getModel = () => process.env.GEMINI_VIZ_MODEL || 'gemini-2.5-pro';
+// Default to 2.5-flash — high quota, fast, excellent at structured JSON.
+// Override to gemini-2.5-pro or gemini-3-pro-preview for deep-dive mode
+// if you have the RPM headroom.
+const getModel = () => process.env.GEMINI_VIZ_MODEL || 'gemini-2.5-flash';
 
 /* ── Auth mode detection ── */
 function vertexEnabled(): boolean {
