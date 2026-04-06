@@ -10,12 +10,7 @@
 const CFBD_KEY = process.env.CFBD_API_KEY || '';
 const BASE = 'https://api.collegefootballdata.com';
 
-interface CFBDHeaders {
-  Authorization: string;
-  Accept: string;
-}
-
-function headers(): CFBDHeaders {
+function headers(): Record<string, string> {
   return {
     Authorization: `Bearer ${CFBD_KEY}`,
     Accept: 'application/json',
