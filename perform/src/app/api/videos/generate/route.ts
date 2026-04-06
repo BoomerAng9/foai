@@ -45,7 +45,20 @@ export async function POST(req: NextRequest) {
     }
 
     // Full request
-    const { useCase, prompt, imageUrl, duration, aspectRatio, tier, audioPrompt } = body;
+    const {
+      useCase,
+      prompt,
+      sourceImageUrl,
+      referenceImages,
+      referenceVideoUrl,
+      duration,
+      aspectRatio,
+      resolution,
+      tier,
+      withAudio,
+      voicePrompt,
+      cameraFixed,
+    } = body;
 
     if (!useCase || !prompt) {
       return NextResponse.json({ error: 'useCase and prompt required' }, { status: 400 });
@@ -54,11 +67,16 @@ export async function POST(req: NextRequest) {
     const result = await generateVideo({
       useCase: useCase as VideoUseCase,
       prompt,
-      imageUrl,
+      sourceImageUrl,
+      referenceImages,
+      referenceVideoUrl,
       duration,
       aspectRatio,
+      resolution,
       tier,
-      audioPrompt,
+      withAudio,
+      voicePrompt,
+      cameraFixed,
     });
 
     if (!result) {
