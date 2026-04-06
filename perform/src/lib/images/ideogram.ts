@@ -12,6 +12,7 @@
 
 const IDEOGRAM_KEY = process.env.IDEOGRAM_API_KEY || '';
 const BASE = 'https://api.ideogram.ai';
+// V3 endpoints: /v1/ideogram-v3/generate, /v1/ideogram-v3/remix, /v1/ideogram-v3/edit
 
 export interface IdeogramOptions {
   prompt: string;
@@ -37,22 +38,20 @@ export async function generateIdeogramImage(
   if (!IDEOGRAM_KEY) return null;
 
   try {
-    const res = await fetch(`${BASE}/generate`, {
+    // Use V3 endpoint for best text rendering
+    const formData = new FormData();
+    formData.append('prompt', opts.prompt);
+    formData.append('rendering_speed', 'TURBO');
+    formData.append('style_type', opts.styleType || 'DESIGN');
+    if (opts.aspectRatio) formData.append('aspect_ratio', opts.aspectRatio);
+    if (opts.negativePrompt) formData.append('negative_prompt', opts.negativePrompt);
+
+    const res = await fetch(`${BASE}/v1/ideogram-v3/generate`, {
       method: 'POST',
       headers: {
         'Api-Key': IDEOGRAM_KEY,
-        'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        image_request: {
-          prompt: opts.prompt,
-          aspect_ratio: opts.aspectRatio || '3:4',
-          model: opts.model || 'V_3',
-          magic_prompt_option: opts.magicPromptOption || 'AUTO',
-          negative_prompt: opts.negativePrompt,
-          style_type: opts.styleType || 'DESIGN',
-        },
-      }),
+      body: formData,
       signal: AbortSignal.timeout(60000),
     });
 
