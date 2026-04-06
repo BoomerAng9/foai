@@ -64,8 +64,15 @@ export default function BadgesShowcasePage() {
               <div className="text-white/20 text-6xl font-black tracking-tighter">CARD</div>
             </div>
 
-            {/* The stamp */}
-            <GradeStamp score={demoScore} trigger={stampTrigger} size={110} corner="tr" delay={200} />
+            {/* The stamp — with ghost for dual-grade demo */}
+            <GradeStamp
+              score={demoScore}
+              ghostScore={demoScore >= 88 ? demoScore + 3.3 : undefined}
+              trigger={stampTrigger}
+              size={110}
+              corner="tr"
+              delay={200}
+            />
           </div>
 
           <div className="text-center mt-6">

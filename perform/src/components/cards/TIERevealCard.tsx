@@ -29,7 +29,8 @@ export interface TIERevealPlayer {
   name: string;
   position: string;
   school: string;
-  grade: number;           // 0-100
+  grade: number;           // 0-100 (ACTUAL — with medical)
+  gradeClean?: number;     // 0-100 (CLEAN — hypothetical no medical) — triggers ghost stamp
   tieGrade: string;        // e.g. "Generational", "Blue Chip"
   rank: number;            // Overall Per|Form rank
   // Component sub-scores (from the TIE engine)
@@ -215,7 +216,14 @@ export function TIERevealCard({ player, lockedImageUrl, revealedImageUrl, autoPl
       </AnimatePresence>
 
       {/* Press stamp — slammed onto top-right on reveal */}
-      <GradeStamp score={player.grade} trigger={state === 'revealed'} size={100} corner="tr" delay={500} />
+      <GradeStamp
+        score={player.grade}
+        ghostScore={player.gradeClean}
+        trigger={state === 'revealed'}
+        size={100}
+        corner="tr"
+        delay={500}
+      />
 
       {/* REVEALED overlay — player info + grade */}
       <AnimatePresence>

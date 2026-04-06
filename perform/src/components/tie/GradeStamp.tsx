@@ -25,6 +25,7 @@ interface GradeStampProps {
   corner?: 'tl' | 'tr' | 'bl' | 'br';
   delay?: number;          // ms before impact
   onImpact?: () => void;   // callback when stamp hits
+  ghostScore?: number;     // If set, renders a ghost "clean" stamp behind the actual
 }
 
 export function GradeStamp({
@@ -34,7 +35,9 @@ export function GradeStamp({
   corner = 'tr',
   delay = 400,
   onImpact,
+  ghostScore,
 }: GradeStampProps) {
+  const hasGhost = typeof ghostScore === 'number' && Math.abs(ghostScore - score) >= 0.3;
   const [phase, setPhase] = useState<'idle' | 'entering' | 'impact' | 'settled'>('idle');
   const style = getTierStyle(score);
   const band = getGradeBand(score);
@@ -135,6 +138,56 @@ export function GradeStamp({
             )}
           </AnimatePresence>
 
+          {/* Ghost "clean" stamp — appears first, behind the actual stamp */}
+          {hasGhost && (
+            <motion.div
+              className="absolute inset-0 flex items-center justify-center pointer-events-none"
+              initial={{ scale: 1, opacity: 0, x: 0, y: 0, rotate: -6 }}
+              animate={{
+                scale: phase === 'settled' ? 0.78 : 1,
+                opacity: phase === 'settled' ? 0.35 : 0,
+                x: phase === 'settled' ? -size * 0.22 : 0,
+                y: phase === 'settled' ? size * 0.18 : 0,
+                rotate: -14,
+              }}
+              transition={{
+                duration: 0.6,
+                delay: 0.3,
+                ease: 'easeOut',
+              }}
+              style={{
+                filter: 'grayscale(0.3) drop-shadow(0 2px 8px rgba(0,0,0,0.6))',
+              }}
+            >
+              <GradeBadge score={ghostScore!} size={size} variant="stamp" showScore={true} />
+            </motion.div>
+          )}
+
+          {/* Delta arrow between ghost and actual */}
+          {hasGhost && phase === 'settled' && (
+            <motion.div
+              className="absolute pointer-events-none"
+              style={{
+                top: size * 0.42,
+                left: size * 0.1,
+                color: style.accent,
+              }}
+              initial={{ opacity: 0, scale: 0.6 }}
+              animate={{ opacity: 0.9, scale: 1 }}
+              transition={{ duration: 0.4, delay: 0.7 }}
+            >
+              <svg width="18" height="14" viewBox="0 0 18 14" fill="none">
+                <path
+                  d="M2 7h12M10 3l4 4-4 4"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </motion.div>
+          )}
+
           {/* The stamp itself */}
           <motion.div
             className="absolute inset-0 flex items-center justify-center"
@@ -204,7 +257,7 @@ export function GradeStamp({
           {/* Tier label caption under stamp */}
           {phase === 'settled' && (
             <motion.div
-              className="absolute left-1/2 -translate-x-1/2 whitespace-nowrap"
+              className="absolute left-1/2 -translate-x-1/2 whitespace-nowrap text-center"
               style={{
                 top: size + 4,
                 color: style.accent,
@@ -220,6 +273,14 @@ export function GradeStamp({
               >
                 {band.label}
               </div>
+              {hasGhost && (
+                <div
+                  className="text-[7px] font-semibold mt-0.5 opacity-70"
+                  style={{ fontFamily: "'JetBrains Mono', monospace", color: '#B8B8C0' }}
+                >
+                  CLEAN {ghostScore!.toFixed(0)} · Δ{(ghostScore! - score).toFixed(1)}
+                </div>
+              )}
             </motion.div>
           )}
         </motion.div>
