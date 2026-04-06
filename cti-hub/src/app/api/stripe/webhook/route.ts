@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
-import { determinePlanFromPriceId } from '@/lib/billing/plans';
+import { determinePlanFromPriceId, determineSqwaadrunTierFromPriceId, SQWAADRUN_TIERS } from '@/lib/billing/plans';
 import { sql } from '@/lib/insforge';
 
 function toIsoFromUnix(timestamp?: number | null) {
@@ -38,13 +38,13 @@ export async function POST(request: NextRequest) {
       case 'checkout.session.completed': {
         const session = event.data.object as Stripe.Checkout.Session;
         const userId = session.metadata?.user_id;
+        const product = session.metadata?.product || 'deploy';
         const customerId = typeof session.customer === 'string' ? session.customer : session.customer?.id;
         const subscriptionId = typeof session.subscription === 'string' ? session.subscription : session.subscription?.id;
 
         if (!userId) break;
 
         let priceId = session.metadata?.price_id || null;
-        let plan = determinePlanFromPriceId(priceId);
         let subscriptionStatus = 'active';
         let currentPeriodStart = toIsoFromUnix(session.created) || new Date().toISOString();
         let currentPeriodEnd = toIsoFromUnix(session.expires_at) || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
@@ -52,12 +52,32 @@ export async function POST(request: NextRequest) {
         if (subscriptionId) {
           const subscription = await stripe.subscriptions.retrieve(subscriptionId);
           priceId = subscription.items.data[0]?.price?.id || priceId;
-          plan = determinePlanFromPriceId(priceId);
           subscriptionStatus = subscription.status;
           currentPeriodStart = toIsoFromUnix(subscription.items.data[0]?.current_period_start) || currentPeriodStart;
           currentPeriodEnd = toIsoFromUnix(subscription.items.data[0]?.current_period_end) || currentPeriodEnd;
         }
 
+        // ── Sqwaadrun add-on subscription ──
+        if (product === 'sqwaadrun') {
+          const tierId = determineSqwaadrunTierFromPriceId(priceId);
+          if (tierId) {
+            const tier = SQWAADRUN_TIERS[tierId];
+            await sql`
+              UPDATE profiles SET
+                stripe_customer_id = ${customerId ?? null},
+                sqwaadrun_tier = ${tierId},
+                sqwaadrun_status = ${subscriptionStatus},
+                sqwaadrun_monthly_quota = ${tier.monthly_missions},
+                sqwaadrun_period_start = ${currentPeriodStart},
+                sqwaadrun_period_end = ${currentPeriodEnd}
+              WHERE user_id = ${userId}
+            `;
+          }
+          break;
+        }
+
+        // ── Deploy Platform subscription (default) ──
+        const plan = determinePlanFromPriceId(priceId);
         await sql`UPDATE profiles SET stripe_customer_id = ${customerId ?? null}, tier = ${plan} WHERE user_id = ${userId}`;
         await sql`
           UPDATE subscriptions SET
@@ -75,8 +95,28 @@ export async function POST(request: NextRequest) {
       case 'customer.subscription.updated': {
         const subscription = event.data.object as Stripe.Subscription;
         const priceId = subscription.items.data[0]?.price?.id || null;
-        const plan = determinePlanFromPriceId(priceId);
+        const product = subscription.metadata?.product || 'deploy';
+        const userIdMeta = subscription.metadata?.user_id;
 
+        // Sqwaadrun add-on update
+        if (product === 'sqwaadrun' && userIdMeta) {
+          const tierId = determineSqwaadrunTierFromPriceId(priceId);
+          if (tierId) {
+            const tier = SQWAADRUN_TIERS[tierId];
+            await sql`
+              UPDATE profiles SET
+                sqwaadrun_tier = ${tierId},
+                sqwaadrun_status = ${subscription.status},
+                sqwaadrun_monthly_quota = ${tier.monthly_missions},
+                sqwaadrun_period_start = ${toIsoFromUnix(subscription.items.data[0]?.current_period_start)},
+                sqwaadrun_period_end = ${toIsoFromUnix(subscription.items.data[0]?.current_period_end)}
+              WHERE user_id = ${userIdMeta}
+            `;
+          }
+          break;
+        }
+
+        const plan = determinePlanFromPriceId(priceId);
         await sql`
           UPDATE subscriptions SET
             status = ${subscription.status},
@@ -97,6 +137,20 @@ export async function POST(request: NextRequest) {
 
       case 'customer.subscription.deleted': {
         const subscription = event.data.object as Stripe.Subscription;
+        const product = subscription.metadata?.product || 'deploy';
+        const userIdMeta = subscription.metadata?.user_id;
+
+        // Sqwaadrun add-on cancellation
+        if (product === 'sqwaadrun' && userIdMeta) {
+          await sql`
+            UPDATE profiles SET
+              sqwaadrun_tier = NULL,
+              sqwaadrun_status = 'canceled',
+              sqwaadrun_monthly_quota = 0
+            WHERE user_id = ${userIdMeta}
+          `;
+          break;
+        }
 
         await sql`
           UPDATE subscriptions SET status = 'canceled', plan = 'free', cancel_at_period_end = true

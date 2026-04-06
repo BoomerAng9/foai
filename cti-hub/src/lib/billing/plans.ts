@@ -160,3 +160,108 @@ export function determinePlanFromPriceId(priceId?: string | null): string {
 // Re-export for consumers that import PlanFeature
 export type PlanFeature = Plan;
 export const PLAN_CONFIG = PLANS;
+
+// ═══════════════════════════════════════════════════════════════════
+//  SQWAADRUN ADD-ON TIERS — separate fee from Deploy Platform plans
+// ═══════════════════════════════════════════════════════════════════
+//
+// Customers can subscribe to Sqwaadrun independently. Deploy Platform
+// subscribers get 20% off applied at checkout. Each tier gates which
+// mission types are unlockable and how many missions per month.
+
+export type SqwaadrunTierId = 'lil_hawk_solo' | 'sqwaad' | 'sqwaadrun_commander';
+
+export interface SqwaadrunTier {
+  id: SqwaadrunTierId;
+  name: string;
+  tagline: string;
+  price_monthly: number;
+  monthly_missions: number;
+  allowed_mission_types: string[];   // 'recon', 'sweep', etc.
+  hawks_unlocked: number;            // 6 = core only, 17 = full fleet
+  features: string[];
+  color: string;
+  recommended?: boolean;
+}
+
+export const SQWAADRUN_TIERS: Record<SqwaadrunTierId, SqwaadrunTier> = {
+  lil_hawk_solo: {
+    id: 'lil_hawk_solo',
+    name: 'Lil_Hawk Solo',
+    tagline: 'Solo operators, prototyping, lightweight research',
+    price_monthly: 19,
+    monthly_missions: 2_000,
+    allowed_mission_types: ['recon', 'survey'],
+    hawks_unlocked: 6,
+    features: [
+      '2,000 missions / month',
+      'RECON & SURVEY missions only',
+      '6 Core Hawks unlocked',
+      '24-hour result retention',
+      'REST API access',
+      'Community support',
+    ],
+    color: '#22D3EE',
+  },
+  sqwaad: {
+    id: 'sqwaad',
+    name: 'Sqwaad',
+    tagline: 'Production teams, monitoring, structured extraction',
+    price_monthly: 79,
+    monthly_missions: 25_000,
+    allowed_mission_types: ['recon', 'survey', 'harvest', 'patrol', 'intercept'],
+    hawks_unlocked: 17,
+    features: [
+      '25,000 missions / month',
+      'All mission types except SWEEP & BATCH_OPS',
+      'All 17 Hawks unlocked',
+      'Scheduled jobs via Sched_Hawk',
+      'Change monitoring via Diff_Hawk',
+      '30-day result retention',
+      'Priority support',
+    ],
+    color: '#F5A623',
+    recommended: true,
+  },
+  sqwaadrun_commander: {
+    id: 'sqwaadrun_commander',
+    name: 'Sqwaadrun Commander',
+    tagline: 'Enterprise data factory, white-label, dedicated',
+    price_monthly: 299,
+    monthly_missions: 250_000,
+    allowed_mission_types: ['recon', 'survey', 'harvest', 'patrol', 'intercept', 'sweep', 'batch_ops'],
+    hawks_unlocked: 17,
+    features: [
+      '250,000 missions / month',
+      'All mission types — SWEEP, HARVEST, BATCH_OPS',
+      'Custom Hawk requests',
+      'Indefinite retention',
+      'Dedicated gateway instance',
+      '99.9% SLA',
+      'White-label dashboard',
+      'Slack + dedicated engineer',
+    ],
+    color: '#F97316',
+  },
+};
+
+export const SQWAADRUN_TIER_LIST: SqwaadrunTier[] = Object.values(SQWAADRUN_TIERS);
+
+/** Stripe price ID lookup for Sqwaadrun tiers */
+export function getSqwaadrunPriceId(tierId: SqwaadrunTierId): string | null {
+  const key = `NEXT_PUBLIC_STRIPE_SQWAADRUN_${tierId.toUpperCase()}_PRICE_ID`;
+  return (typeof process !== 'undefined' && process.env?.[key]) || null;
+}
+
+/** Determine Sqwaadrun tier from Stripe price ID (for webhook handling) */
+export function determineSqwaadrunTierFromPriceId(priceId?: string | null): SqwaadrunTierId | null {
+  if (!priceId) return null;
+  for (const tierId of Object.keys(SQWAADRUN_TIERS) as SqwaadrunTierId[]) {
+    const key = `NEXT_PUBLIC_STRIPE_SQWAADRUN_${tierId.toUpperCase()}_PRICE_ID`;
+    if (typeof process !== 'undefined' && process.env?.[key] === priceId) return tierId;
+  }
+  return null;
+}
+
+/** Sqwaadrun discount for active Deploy Platform subscribers */
+export const SQWAADRUN_DEPLOY_DISCOUNT_PERCENT = 20;
