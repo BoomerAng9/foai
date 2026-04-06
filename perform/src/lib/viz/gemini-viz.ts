@@ -20,7 +20,9 @@
  */
 
 const getApiKey = () => process.env.GEMINI_API_KEY || '';
-const getModel = () => process.env.GEMINI_VIZ_MODEL || 'gemini-3-pro-preview';
+// Default to 2.5-pro (stable, high quota). Override to gemini-3-pro-preview
+// via env var once the Gemini 3 preview quota opens up.
+const getModel = () => process.env.GEMINI_VIZ_MODEL || 'gemini-2.5-pro';
 
 export interface VegaLiteSpec {
   $schema?: string;
