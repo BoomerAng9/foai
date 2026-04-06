@@ -18,8 +18,10 @@
 import { useEffect, useState, use } from 'react';
 import { motion } from 'framer-motion';
 import { VegaEmbed } from 'react-vega';
-import { GradeBadge } from '@/components/tie/GradeBadge';
-import { GradeStamp } from '@/components/tie/GradeStamp';
+import { TIEShield } from '@/components/tie/TIEShield';
+import { TIELoader } from '@/components/tie/TIELoader';
+import { PillarRadar } from '@/components/tie/PillarRadar';
+import { CompLandscape } from '@/components/tie/CompLandscape';
 import Link from 'next/link';
 
 interface ForecastResponse {
@@ -99,23 +101,7 @@ export default function ForecastPage({ params }: { params: Promise<{ name: strin
   }, [playerName]);
 
   if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: 'var(--pf-bg)' }}>
-        <div className="text-center">
-          <div className="text-[10px] font-mono tracking-[0.3em]" style={{ color: 'var(--pf-gold)' }}>
-            ANALYZING
-          </div>
-          <motion.div
-            className="text-6xl font-black mt-4"
-            style={{ color: 'var(--pf-gold)' }}
-            animate={{ opacity: [0.4, 1, 0.4] }}
-            transition={{ duration: 1.5, repeat: Infinity }}
-          >
-            TIE
-          </motion.div>
-        </div>
-      </div>
-    );
+    return <TIELoader subtitle={`Calibrating forecast for ${playerName.replace(/-/g, ' ')}`} />;
   }
 
   if (error || !data) {
@@ -186,26 +172,30 @@ export default function ForecastPage({ params }: { params: Promise<{ name: strin
             </div>
           </div>
 
-          {/* Dual Grade Badges */}
-          <div className="flex items-center gap-8">
+          {/* Dual TIE Shields */}
+          <div className="flex items-end gap-10">
             <div className="text-center">
-              <div className="text-[8px] font-mono tracking-[0.3em] opacity-50 mb-2">ACTUAL GRADE</div>
-              <GradeBadge score={p.grade.actual.score} size={180} />
-              <div className="text-[9px] font-mono tracking-[0.2em] mt-3 opacity-70">
+              <div className="text-[8px] font-mono tracking-[0.3em] opacity-50 mb-3">ACTUAL TIE GRADE</div>
+              <TIEShield score={p.grade.actual.score} size={200} showLabel />
+              <div className="text-[9px] font-mono tracking-[0.2em] mt-4 opacity-70 max-w-[200px] mx-auto">
                 {p.grade.actual.projection}
               </div>
             </div>
             {delta > 0 && (
               <div className="text-center">
-                <div className="text-[8px] font-mono tracking-[0.3em] opacity-50 mb-2">CLEAN GRADE</div>
-                <div style={{ filter: 'grayscale(0.4) opacity(0.55)' }}>
-                  <GradeBadge score={p.grade.clean.score} size={140} />
+                <div className="text-[8px] font-mono tracking-[0.3em] opacity-50 mb-3">CLEAN TIE GRADE</div>
+                <div style={{ opacity: 0.55, filter: 'grayscale(0.5)' }}>
+                  <TIEShield score={p.grade.clean.score} size={150} showLabel />
                 </div>
                 <div
-                  className="text-[10px] font-mono font-bold mt-3"
-                  style={{ color: '#FF6B2B' }}
+                  className="mt-3 inline-block px-3 py-1 rounded-full text-[10px] font-bold tracking-[0.15em]"
+                  style={{
+                    color: '#FF6B2B',
+                    background: 'rgba(255,107,43,0.1)',
+                    border: '1px solid rgba(255,107,43,0.4)',
+                  }}
                 >
-                  Δ −{delta.toFixed(1)} medical tax
+                  Δ −{delta.toFixed(1)} MEDICAL TAX
                 </div>
               </div>
             )}
@@ -296,42 +286,83 @@ export default function ForecastPage({ params }: { params: Promise<{ name: strin
         </div>
       </section>
 
-      {/* ═══ PILLAR RADAR VIZ ═══ */}
-      {viz?.pillarRadar && (
-        <section className="max-w-7xl mx-auto px-6 py-8 border-t" style={{ borderColor: 'var(--pf-divider)' }}>
-          <div className="text-[10px] font-mono tracking-[0.3em] opacity-50 mb-6">
+      {/* ═══ PILLAR RADAR — deterministic SVG ═══ */}
+      <section className="max-w-7xl mx-auto px-6 py-12 border-t" style={{ borderColor: 'var(--pf-divider)' }}>
+        <div className="flex items-baseline justify-between mb-2">
+          <div className="text-[10px] font-mono tracking-[0.3em] opacity-50">
             / PILLAR RADAR · ACTUAL VS CLEAN
           </div>
-          <div className="p-6 rounded-xl border" style={{ borderColor: 'var(--pf-divider)', background: 'var(--pf-bg-secondary)' }}>
-            <VegaEmbed
-              spec={viz.pillarRadar as Parameters<typeof VegaEmbed>[0]['spec']}
-              options={{ actions: false, renderer: 'svg' }}
+          <div className="text-[9px] font-mono opacity-40">CANONICAL 40·30·30 FORMULA</div>
+        </div>
+        <h2 className="text-3xl md:text-4xl font-black tracking-tight mb-1">
+          {p.identity.name}: <span style={{ color: 'var(--pf-gold)' }}>Performance Pillars</span>
+        </h2>
+        <p className="text-sm opacity-60 mb-8">
+          Gold = actual grade · Silver dotted = hypothetical grade with no medical history
+        </p>
+        <div className="rounded-2xl p-8 border" style={{
+          borderColor: 'rgba(212,168,83,0.15)',
+          background: 'linear-gradient(180deg, rgba(212,168,83,0.04), rgba(0,0,0,0.4))',
+        }}>
+          <div className="flex justify-center">
+            <PillarRadar
+              actual={{
+                gamePerformance: p.pillars.actual.gamePerformance,
+                athleticism: p.pillars.actual.athleticism,
+                intangibles: p.pillars.actual.intangibles,
+              }}
+              clean={delta > 0.1 ? {
+                gamePerformance: p.pillars.clean.gamePerformance,
+                athleticism: p.pillars.clean.athleticism,
+                intangibles: p.pillars.clean.intangibles,
+              } : undefined}
+              size={520}
             />
           </div>
-        </section>
-      )}
+        </div>
+      </section>
 
-      {/* ═══ COMP OVERLAY VIZ ═══ */}
-      {viz?.compOverlay && (
-        <section className="max-w-7xl mx-auto px-6 py-8 border-t" style={{ borderColor: 'var(--pf-divider)' }}>
-          <div className="text-[10px] font-mono tracking-[0.3em] opacity-50 mb-6">
+      {/* ═══ HISTORICAL COMP LANDSCAPE — branded scatter ═══ */}
+      <section className="max-w-7xl mx-auto px-6 py-12 border-t" style={{ borderColor: 'var(--pf-divider)' }}>
+        <div className="flex items-baseline justify-between mb-2">
+          <div className="text-[10px] font-mono tracking-[0.3em] opacity-50">
             / HISTORICAL COMP LANDSCAPE
           </div>
-          <div className="p-6 rounded-xl border" style={{ borderColor: 'var(--pf-divider)', background: 'var(--pf-bg-secondary)' }}>
-            <VegaEmbed
-              spec={viz.compOverlay as Parameters<typeof VegaEmbed>[0]['spec']}
-              options={{ actions: false, renderer: 'svg' }}
-            />
-          </div>
-        </section>
-      )}
-
-      {/* ═══ DEMO STAMP REVEAL ═══ */}
-      <section className="max-w-7xl mx-auto px-6 py-12 border-t" style={{ borderColor: 'var(--pf-divider)' }}>
-        <div className="text-[10px] font-mono tracking-[0.3em] opacity-50 mb-6">
-          / TIE ENGINE STAMP · DUAL GRADE PRESS
+          <div className="text-[9px] font-mono opacity-40">CAREER YEARS × PEAK GRADE</div>
         </div>
-        <StampDemo score={p.grade.actual.score} ghostScore={delta > 0.3 ? p.grade.clean.score : undefined} />
+        <h2 className="text-3xl md:text-4xl font-black tracking-tight mb-1">
+          Where <span style={{ color: 'var(--pf-gold)' }}>{p.identity.name.split(' ')[0]}</span> lands historically
+        </h2>
+        <p className="text-sm opacity-60 mb-8">
+          The position of comparable RBs from the historical record. Bubble size = Pro Bowls.
+        </p>
+        <div className="rounded-2xl p-6 md:p-10 border" style={{
+          borderColor: 'rgba(212,168,83,0.15)',
+          background: 'linear-gradient(180deg, rgba(212,168,83,0.04), rgba(0,0,0,0.4))',
+        }}>
+          <CompLandscape
+            playerName={p.identity.name}
+            playerGrade={p.grade.actual.score}
+            upside={p.longevity.comps.upside as Parameters<typeof CompLandscape>[0]['upside']}
+            baseline={p.longevity.comps.baseline as Parameters<typeof CompLandscape>[0]['baseline']}
+            downside={p.longevity.comps.downside as Parameters<typeof CompLandscape>[0]['downside']}
+            size={840}
+          />
+        </div>
+      </section>
+
+      {/* ═══ TIE BRAND MARK ═══ */}
+      <section className="max-w-7xl mx-auto px-6 py-16 border-t text-center" style={{ borderColor: 'var(--pf-divider)' }}>
+        <div className="text-[10px] font-mono tracking-[0.3em] opacity-50 mb-8">
+          / CERTIFIED BY THE TALENT &amp; INNOVATION ENGINE
+        </div>
+        <div className="flex justify-center mb-6">
+          <TIEShield score={p.grade.actual.score} size={240} showLabel />
+        </div>
+        <p className="text-xs font-mono tracking-[0.15em] opacity-50 max-w-md mx-auto">
+          Every grade is run through the canonical 40·30·30 formula and stamped by the TIE Engine.
+          Per|Form does not pick favorites — the formula does.
+        </p>
       </section>
 
       {/* Footer */}
@@ -424,29 +455,3 @@ function CompCard({
   );
 }
 
-function StampDemo({ score, ghostScore }: { score: number; ghostScore?: number }) {
-  const [trigger, setTrigger] = useState(false);
-
-  useEffect(() => {
-    const t = setTimeout(() => setTrigger(true), 600);
-    return () => clearTimeout(t);
-  }, []);
-
-  return (
-    <div className="relative w-[360px] aspect-[3/4] rounded-2xl overflow-hidden mx-auto bg-gradient-to-br from-zinc-900 via-zinc-800 to-black border" style={{ borderColor: 'var(--pf-divider)' }}>
-      <div className="absolute inset-0 flex items-center justify-center text-white/20 text-7xl font-black tracking-tighter">
-        CARD
-      </div>
-      <GradeStamp score={score} ghostScore={ghostScore} trigger={trigger} size={130} corner="tr" delay={200} />
-      <button
-        className="absolute bottom-4 left-1/2 -translate-x-1/2 px-4 py-2 rounded bg-white text-black font-bold text-xs tracking-wider"
-        onClick={() => {
-          setTrigger(false);
-          setTimeout(() => setTrigger(true), 50);
-        }}
-      >
-        ▸ REPLAY
-      </button>
-    </div>
-  );
-}
