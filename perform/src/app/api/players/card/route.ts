@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@/lib/db';
 import { generateImage } from '@/lib/images/gateway';
+import { savePlayerCard } from '@/lib/images/storage';
 import {
   buildCardPrompt,
   pickStyleByGrade,
@@ -92,9 +93,18 @@ export async function POST(req: NextRequest) {
           aspectRatio: spec.aspectRatio,
           negativePrompt: spec.negativePrompt,
         });
+
+        // Persist to public/generated/card/
+        let publicUrl: string | null = null;
+        if (result?.url) {
+          const slug = `${player.name}-${v.id}`.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+          const savedPath = await savePlayerCard(result.url, slug);
+          publicUrl = savedPath ? `https://perform.foai.cloud${savedPath}` : result.url;
+        }
+
         results.push({
           variation: v.id,
-          url: result?.url || null,
+          url: publicUrl,
           cost: result?.cost || 'failed',
         });
       }
@@ -131,10 +141,15 @@ export async function POST(req: NextRequest) {
       }, { status: 503 });
     }
 
+    // Save card to permanent storage — URLs from Ideogram/Recraft are ephemeral
+    const slug = `${player.name}-${chosenVariation}`.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+    const savedPath = await savePlayerCard(result.url, slug);
+    const publicUrl = savedPath ? `https://perform.foai.cloud${savedPath}` : result.url;
+
     // Save card URL to player record
     await sql`
       UPDATE perform_players
-      SET analyst_notes = COALESCE(analyst_notes, '') || ${'\n[card:' + chosenVariation + '] ' + result.url},
+      SET analyst_notes = COALESCE(analyst_notes, '') || ${'\n[card:' + chosenVariation + '] ' + publicUrl},
           updated_at = NOW()
       WHERE id = ${player.id}
     `;
@@ -145,7 +160,7 @@ export async function POST(req: NextRequest) {
       school: player.school,
       grade: player.grade,
       variation: chosenVariation,
-      card: result,
+      card: { ...result, url: publicUrl, savedPath, originalUrl: result.url },
     });
   } catch (error) {
     const msg = error instanceof Error ? error.message : 'Card generation failed';

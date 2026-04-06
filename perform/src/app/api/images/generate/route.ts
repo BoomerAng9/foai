@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { generateImage, getGatewayStatus } from '@/lib/images/gateway';
+import { saveGenerated } from '@/lib/images/storage';
 
 /* ──────────────────────────────────────────────────────────────
  *  POST /api/images/generate
@@ -72,7 +73,17 @@ Style: Nike football campaign aesthetic, premium sports photography, square form
         );
       }
 
-      return NextResponse.json({ ...result, type: body.type });
+      // Save to permanent storage — URLs from Recraft/Ideogram are ephemeral
+      const savedPath = await saveGenerated(result.url, body.type, body.subject);
+      const publicUrl = savedPath ? `https://perform.foai.cloud${savedPath}` : result.url;
+
+      return NextResponse.json({
+        ...result,
+        type: body.type,
+        url: publicUrl,
+        savedPath,
+        originalUrl: result.url,
+      });
     }
 
     // Direct prompt
@@ -98,7 +109,16 @@ Style: Nike football campaign aesthetic, premium sports photography, square form
       );
     }
 
-    return NextResponse.json(result);
+    // Save to permanent storage
+    const savedPath = await saveGenerated(result.url, 'misc', body.prompt.slice(0, 40));
+    const publicUrl = savedPath ? `https://perform.foai.cloud${savedPath}` : result.url;
+
+    return NextResponse.json({
+      ...result,
+      url: publicUrl,
+      savedPath,
+      originalUrl: result.url,
+    });
   } catch (error) {
     const msg = error instanceof Error ? error.message : 'Image generation failed';
     return NextResponse.json({ error: msg }, { status: 500 });

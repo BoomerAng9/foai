@@ -3,6 +3,9 @@ services:
     build: .
     restart: unless-stopped
     env_file: .env.local
+    volumes:
+      # Persist generated images outside the container so rebuilds don't wipe them
+      - /opt/foai-data/perform/generated:/app/public/generated
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.perform.rule=Host(`perform.foai.cloud`)"
