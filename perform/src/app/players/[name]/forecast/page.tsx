@@ -12,9 +12,11 @@ import { TIELoader } from '@/components/tie/TIELoader';
 import { TIEShield } from '@/components/tie/TIEShield';
 import { PillarRadar } from '@/components/tie/PillarRadar';
 import { CompLandscape } from '@/components/tie/CompLandscape';
+import { C1Renderer } from '@/components/c1/C1Renderer';
 import Link from 'next/link';
 
 interface ForecastResponse {
+  c1Card?: { spec: unknown; model?: string; error?: string } | null;
   player: {
     identity: {
       name: string;
@@ -88,7 +90,7 @@ export default function ForecastPage({ params }: { params: Promise<{ name: strin
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    fetch(`/api/players/forecast?name=${encodeURIComponent(playerName)}`)
+    fetch(`/api/players/forecast?name=${encodeURIComponent(playerName)}&c1=1`)
       .then((r) => r.json())
       .then((json) => {
         if (json.error) setError(json.error);
@@ -322,6 +324,28 @@ export default function ForecastPage({ params }: { params: Promise<{ name: strin
           </div>
         </div>
       </section>
+
+      {/* ═══ C1 GENERATIVE INTELLIGENCE CARD ═══ */}
+      {data.c1Card?.spec ? (
+        <section className="border-b" style={{ background: '#070C16', borderColor: T.border }}>
+          <div className="max-w-7xl mx-auto px-6 py-12">
+            <div className="text-center mb-8">
+              <div className="text-[10px] font-bold tracking-[0.25em] uppercase mb-2" style={{ color: '#22D3EE' }}>
+                ◢ Generative Intelligence Layer · C1 Thesys
+              </div>
+              <h2 className="text-3xl md:text-4xl font-black leading-tight" style={{ color: '#FFFFFF', fontFamily: "'Outfit', sans-serif" }}>
+                Portable Player Card
+              </h2>
+              <p className="text-sm mt-2 max-w-xl mx-auto" style={{ color: '#A8B2C8' }}>
+                One JSON spec. Renders here as a web card, also as native mobile, NFT metadata, marketplace listing, or share image.
+              </p>
+            </div>
+            <div className="max-w-3xl mx-auto">
+              <C1Renderer spec={data.c1Card.spec} />
+            </div>
+          </div>
+        </section>
+      ) : null}
 
       {/* ═══ TIE BRAND CERTIFICATION ═══ */}
       <section className="border-b" style={{ background: T.bg, borderColor: T.border }}>

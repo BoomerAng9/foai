@@ -8,6 +8,7 @@ import {
   vizAvailable,
   vizMode,
 } from '@/lib/viz/gemini-viz';
+import { generatePlayerCardSpec, c1Available } from '@/lib/viz/thesys-c1';
 
 /* ──────────────────────────────────────────────────────────────
  *  GET /api/players/forecast?name=<player>
@@ -27,6 +28,7 @@ export async function GET(req: NextRequest) {
   const url = new URL(req.url);
   const name = url.searchParams.get('name');
   const includeViz = url.searchParams.get('viz') === '1';
+  const useC1 = url.searchParams.get('c1') === '1';
 
   if (!name) {
     return NextResponse.json({ error: 'name query param required' }, { status: 400 });
@@ -174,5 +176,55 @@ export async function GET(req: NextRequest) {
     }
   }
 
-  return NextResponse.json({ player: payload, visualizations });
+  // C1 Thesys generative card spec — portable JSON for web/mobile/NFT/marketplace
+  let c1Card = null;
+  if (useC1) {
+    if (!c1Available()) {
+      c1Card = { error: 'C1_API_KEY not set', spec: null };
+    } else {
+      const result = await generatePlayerCardSpec({
+        name: player.name,
+        position: player.position,
+        school: player.school,
+        performRank: player.performRank,
+        consensusRank: player.consensusRank,
+        projectedRound: player.projectedRound,
+        trend: player.trend,
+        gradeActual: player.grade,
+        gradeLetter: player.gradeLetter,
+        gradeClean: player.gradeClean,
+        medicalDelta: player.medicalDelta,
+        pillars: {
+          gp: player.gamePerformance,
+          ath: player.athleticism,
+          int: player.intangibles,
+        },
+        pillarsClean: {
+          gp: player.gamePerformanceClean,
+          ath: player.athleticismClean,
+          int: player.intangiblesClean,
+        },
+        medical: player.medicalFlag
+          ? {
+              severity: player.medicalFlag.severity,
+              currentStatus: player.medicalFlag.currentStatus,
+              notes: player.medicalFlag.notes,
+              comps: player.medicalFlag.historicalComps,
+            }
+          : null,
+        longevity: {
+          expectedYears: player.longevity.expectedCareerYears,
+          peakWindow: player.longevity.peakWindowYears,
+          declineRisk: player.longevity.declineRisk,
+          outlook: player.longevity.careerOutlookLabel,
+          upside: player.longevity.comps.upside,
+          baseline: player.longevity.comps.baseline,
+          downside: player.longevity.comps.downside,
+        },
+      });
+      c1Card = result ? { spec: result.spec, model: 'c1/anthropic/claude-sonnet-4.5' } : { error: 'C1 generation failed', spec: null };
+    }
+  }
+
+  return NextResponse.json({ player: payload, visualizations, c1Card });
 }
