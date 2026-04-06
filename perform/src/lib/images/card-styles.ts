@@ -49,13 +49,17 @@ export interface CardPromptInput {
   state?: 'locked' | 'reveal'; // Two-state card system
 }
 
-/* ── Brand colors per tier (for LOCKED state) ── */
+/* ── Brand colors per canonical tier (for LOCKED state) ── */
 function brandColorsForGrade(grade: number): string {
-  if (grade >= 95) return 'pure gold and deep black';
-  if (grade >= 88) return 'royal blue and electric orange';
-  if (grade >= 83) return 'brushed silver and charcoal';
-  if (grade >= 75) return 'matte black and bronze';
-  return 'cream and navy';
+  if (grade >= 101) return 'iridescent holographic chrome and obsidian black'; // Prime 🛸
+  if (grade >= 90)  return 'pure gold and deep black';                         // A+ 🚀
+  if (grade >= 85)  return 'ember red and molten gold';                        // A 🔥
+  if (grade >= 80)  return 'brushed silver and charcoal';                      // A- ⭐
+  if (grade >= 75)  return 'antique bronze and matte black';                   // B+ ⏳
+  if (grade >= 70)  return 'saddle leather brown and cream';                   // B 🏈
+  if (grade >= 65)  return 'electric cyan and midnight navy';                  // B- ⚡
+  if (grade >= 60)  return 'gunmetal steel and graphite';                      // C+ 🔧
+  return 'slate gray and bone';                                                // UDFA ❌
 }
 
 /* ── SHARED ATHLETE SPEC — differs by state ── */
@@ -88,6 +92,7 @@ CENTER SUBJECT: A ${athleteVisual(p)}, facing camera in heroic three-quarter pos
 TOP RIGHT CORNER: Large silver chrome numeral "${p.jerseyNumber || '7'}" as a decorative element (not on the jersey)
 BOTTOM NAMEPLATE: Silver gradient banner with dark text "${p.name.toUpperCase()}" in bold modern sans serif
 BELOW NAMEPLATE: "${p.position.toUpperCase()}" in slightly smaller silver metallic text
+TOP RIGHT AREA: Leave a clean empty zone (no badges, no seals, no text) — this space is reserved for a stamp overlay applied later
 Style: Premium sports trading card, hyper-realistic rendering, cinematic lighting, professional photography quality. All text must be sharp, properly spelled, and centered. No fake logos anywhere.`,
     negativePrompt: 'team logos, mascot logos, conference logos, NFL logo, NCAA logo, letters on helmet, letters on jersey, no helmet, blurry text, misspelled, distorted, cartoon, amateur, watermark, garbled letters, text on chest, team name on uniform',
   },
@@ -106,7 +111,7 @@ CENTER SUBJECT: An epic ${athleteVisual(p)}, hero pose, dramatic backlight with 
 TOP BANNER: "${isLocked ? 'CLASSIFIED' : 'GENERATIONAL'}" in gold letterpress type, clean and legible
 BOTTOM NAMEPLATE: Large bold "${isLocked ? '████████████' : p.name.toUpperCase()}" in gold metallic foil typography
 BELOW NAMEPLATE: "${isLocked ? '???' : p.position}" in refined gold serif
-CIRCULAR BADGE TOP LEFT: Gold TIE grade medallion displaying the ${isLocked ? 'text "?"' : `number "${p.grade}"`} in elegant engraved typography
+TOP RIGHT AREA: Leave a clean empty zone (no badges, no seals, no medallions, no text) — this space is reserved for a stamp overlay applied later
 Style: Legendary museum-quality trading card, gold and obsidian black palette, cinematic rim lighting, prestige sports aesthetic. Every text element sharp and legible.`;
     },
     negativePrompt: 'team logos, mascot logos, conference marks, letters on helmet, letters on jersey, no helmet, visible face full on, open visor, blurry text, amateur, watermark, generic, flat lighting, misspelled, cartoon',
@@ -125,7 +130,7 @@ CENTER SUBJECT: A ${athleteVisual(p).replace(/deep crimson and black|[^,]* helme
 TOP: Orange banner with "BLUE CHIP" text in bold white
 BOTTOM NAMEPLATE: Large bold "${p.name.toUpperCase()}" in clean white serif on dark blue plate
 BELOW NAMEPLATE: "${p.position}" in orange refined text
-CORNER DIAMOND: Orange diamond-shaped TIE badge with the number "${p.grade}" centered
+TOP RIGHT AREA: Leave a clean empty zone (no badges, no diamonds, no seals, no text) — reserved for a stamp overlay applied later
 Style: Premium trading card quality, royal blue and orange palette only, cinematic sports photography. Crisp text, no distortion, no fake logos.`,
     negativePrompt: 'gold, silver, team logos, mascot logos, letters on helmet, letters on jersey, no helmet, open visor, blurry text, amateur, generic, misspelled',
   },
@@ -158,7 +163,7 @@ CENTER SUBJECT: A ${athleteVisual(p)}, dynamic action pose, chrome and neon rim 
 TOP BANNER: Glowing cyan "RISING" label with upward triangle arrow
 BOTTOM NAMEPLATE: Bold chrome "${p.name.toUpperCase()}" with cyan and magenta edge glow
 BELOW NAMEPLATE: "${p.position}" in smaller neon magenta text
-HEXAGONAL BADGE: Cyan hexagon showing "${p.grade}" in bright digital typography
+TOP RIGHT AREA: Leave a clean empty zone (no hexagons, no badges, no text) — reserved for a stamp overlay applied later
 Style: Blade Runner sports card, synthwave aesthetic, neon grid, chrome surfaces, cyberpunk mood. All text razor sharp against the neon glow.`,
     negativePrompt: 'daytime, washed out, team logos, letters on helmet, letters on jersey, no helmet, open visor, blurry text, amateur',
   },
@@ -191,7 +196,7 @@ LEFT SIDE: Large portrait cutout of a ${athleteVisual(p)}, dramatic broadcast st
 RIGHT SIDE: Statistics panel with clean white text on dark background
 MAIN TITLE: "${p.name.toUpperCase()}" in huge white 3D extruded broadcast typography
 SUBTITLE: "${p.position}" in cyan broadcast font
-STAT BOX: Gold "TIE ${p.grade}" badge prominently displayed
+TOP RIGHT AREA: Leave a clean empty zone (no badges, no stat boxes, no TIE text) — reserved for a stamp overlay applied later
 Background: Dark broadcast studio with subtle team-color gradient accent
 Style: ESPN College GameDay title card production quality, 3D extruded typography, dramatic sports broadcast aesthetic. All text sharp, properly kerned, network legible. No team logos or conference marks.`,
     negativePrompt: 'amateur graphics, team logos, conference marks, letters on helmet, no helmet, open visor, blurry text, cartoon, vintage',
@@ -210,7 +215,7 @@ CENTERPIECE: A ${athleteVisual(p)} stepping forward into the spotlight, gold rim
 TOP BANNER: "2026 NFL DRAFT" in bold gold typography (clean, no fake league marks)
 BOTTOM NAMEPLATE: Black leather plate with "${p.name.toUpperCase()}" in gold foil
 BELOW NAMEPLATE: "${p.position}" in elegant sans serif
-CORNER STAMP: Gold circular "ROUND ${p.projectedRound}" wax seal
+TOP RIGHT AREA: Leave a clean empty zone (no wax seals, no badges, no round numbers) — reserved for a stamp overlay applied later
 Style: Draft day photojournalism, broadcast quality, cinematic lighting, emotional sports moment. All text sharp and legible. No fake NFL shield or conference marks.`,
     negativePrompt: 'daytime, bright, cartoon, NFL shield logo, team logos, conference marks, letters on helmet, no helmet, open visor, blurry text, amateur',
   },
@@ -227,7 +232,8 @@ TOP 60%: A ${athleteVisual(p)}, professional headshot-style crop, blurred backgr
 OVERLAY: Subtle grid lines and data points, chart-style graphics floating around the subject
 BOTTOM 40%: Dark panel with stat readouts in monospace font, percentile bars
 HEADER TEXT: "${p.name.toUpperCase()}" in clean bold sans serif
-STAT LABELS: "TIE GRADE ${p.grade}", "PROJ RD ${p.projectedRound}", "${p.position}"
+STAT LABELS: "PROJ RD ${p.projectedRound}", "${p.position}"
+TOP RIGHT AREA: Leave a clean empty zone (no badges, no grade numbers) — reserved for a stamp overlay applied later
 Style: Bloomberg Terminal meets sports card, data-forward, minimal, monochromatic with single accent color. All numbers and text razor sharp.`,
     negativePrompt: 'cartoon, busy, team logos, letters on helmet, no helmet, open visor, blurry text, washed out',
   },
@@ -288,11 +294,16 @@ Style: Olympic broadcast quality, dynamic sports photography, authentic 5v5 flag
 export function pickStyleByGrade(grade: number, preferredVariation?: CardVariation): CardVariation {
   if (preferredVariation) return preferredVariation;
 
-  if (grade >= 95) return 'mythic_gold';
-  if (grade >= 88) return 'blue_chip';
-  if (grade >= 83) return 'classic_silver';
-  if (grade >= 75) return 'obsidian';
-  return 'retro_topps';
+  // Aligned to canonical TIE scale tiers
+  if (grade >= 101) return 'mythic_gold';    // Prime 🛸
+  if (grade >= 90)  return 'mythic_gold';    // A+ 🚀 Elite
+  if (grade >= 85)  return 'blue_chip';      // A 🔥 First Round Lock
+  if (grade >= 80)  return 'classic_silver'; // A- ⭐ Late First Round
+  if (grade >= 75)  return 'obsidian';       // B+ ⏳ High Ceiling
+  if (grade >= 70)  return 'draft_night';    // B 🏈 Solid Contributor
+  if (grade >= 65)  return 'neon_future';    // B- ⚡ Developmental
+  if (grade >= 60)  return 'performance_stat'; // C+ 🔧 Depth
+  return 'retro_topps';                      // UDFA ❌
 }
 
 /* ── Helper: Build prompt for a specific style ── */
