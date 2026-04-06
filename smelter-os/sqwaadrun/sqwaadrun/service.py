@@ -226,13 +226,50 @@ async def on_startup(app: web.Application) -> None:
     )
     bridge = AcheevyBridge(general)
 
+    # ── TRCC pipeline + scheduled jobs ──
+    # The pipeline registers default jobs with Lil_Sched_Hawk and
+    # launches a background loop that dispatches them on cadence.
+    # Disabled when SQWAADRUN_DISABLE_TRCC=1 (e.g. for ad-hoc gateway
+    # instances that don't need the data factory running).
+    sched_task = None
+    pipeline = None
+    if os.environ.get("SQWAADRUN_DISABLE_TRCC", "0") != "1":
+        try:
+            from sqwaadrun.trcc_pipeline import TRCCPipeline
+            from sqwaadrun.trcc_jobs import all_jobs
+
+            pipeline = TRCCPipeline(squad, general)
+            for job in all_jobs():
+                pipeline.register(job)
+            await pipeline.register_with_sched_hawk()
+
+            sched_task = asyncio.create_task(
+                squad.sched_hawk.run_loop(
+                    handler=pipeline.sched_handler,
+                    check_interval=15.0,
+                )
+            )
+            logger.info(f"TRCC pipeline online — {len(pipeline.jobs)} jobs registered")
+        except Exception as e:
+            logger.warning(f"TRCC pipeline failed to start: {e}")
+
     app["squad"] = squad
     app["general"] = general
     app["bridge"] = bridge
+    app["pipeline"] = pipeline
+    app["sched_task"] = sched_task
     logger.info("Sqwaadrun gateway ready.")
 
 
 async def on_cleanup(app: web.Application) -> None:
+    sched_task = app.get("sched_task")
+    if sched_task is not None:
+        sched_task.cancel()
+        try:
+            await sched_task
+        except (asyncio.CancelledError, Exception):
+            pass
+
     squad: FullScrappHawkSquadrun = app["squad"]
     await squad.shutdown()
 
