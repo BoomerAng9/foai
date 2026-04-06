@@ -25,10 +25,9 @@ const getProjectId = () => process.env.GCP_PROJECT_ID || '';
 const getLocation = () => process.env.GCP_LOCATION || 'us-central1';
 const getCredsPath = () => process.env.GOOGLE_APPLICATION_CREDENTIALS || '';
 const getApiKey = () => process.env.GEMINI_API_KEY || '';
-// Default to 2.5-flash — high quota, fast, excellent at structured JSON.
-// Override to gemini-2.5-pro or gemini-3-pro-preview for deep-dive mode
-// if you have the RPM headroom.
-const getModel = () => process.env.GEMINI_VIZ_MODEL || 'gemini-2.5-flash';
+// Default to gemini-flash-latest — auto-tracks newest flash release,
+// high quota, fast, excellent at structured JSON. Override via env var.
+const getModel = () => process.env.GEMINI_VIZ_MODEL || 'gemini-flash-latest';
 
 /* ── Auth mode detection ── */
 function vertexEnabled(): boolean {
@@ -87,12 +86,16 @@ const PERFORM_THEME = {
 
 /* ── Low-level Gemini call — routes Vertex first, API key fallback ── */
 async function callGemini(prompt: string): Promise<string | null> {
+  // 2.5-flash/pro have "thinking" mode on by default which burns the output
+  // budget before generating the actual response. We don't need thinking for
+  // structured JSON viz specs — disable it and give generous output budget.
   const body = {
     contents: [{ role: 'user', parts: [{ text: prompt }] }],
     generationConfig: {
       responseMimeType: 'application/json',
       temperature: 0.2,
-      maxOutputTokens: 4096,
+      maxOutputTokens: 16384,
+      thinkingConfig: { thinkingBudget: 0 },
     },
   };
 
@@ -183,14 +186,31 @@ Return ONLY the Vega-Lite v5 JSON spec. Include the data inline in data.values. 
   const raw = await callGemini(prompt);
   if (!raw) return null;
 
+  // Extract JSON defensively — Gemini sometimes wraps in ```json fences
+  // or prepends explanation text despite responseMimeType=application/json.
+  const extractJson = (s: string): string => {
+    const trimmed = s.trim();
+    // Strip ```json ... ``` fences
+    const fenced = trimmed.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
+    if (fenced) return fenced[1].trim();
+    // Find first { to last matching }
+    const firstBrace = trimmed.indexOf('{');
+    const lastBrace = trimmed.lastIndexOf('}');
+    if (firstBrace >= 0 && lastBrace > firstBrace) {
+      return trimmed.slice(firstBrace, lastBrace + 1);
+    }
+    return trimmed;
+  };
+
   try {
-    const spec = JSON.parse(raw) as VegaLiteSpec;
-    // Merge default theme if not already set
+    const cleaned = extractJson(raw);
+    const spec = JSON.parse(cleaned) as VegaLiteSpec;
     spec.config = { ...PERFORM_THEME, ...(spec.config || {}) };
     if (!spec.$schema) spec.$schema = 'https://vega.github.io/schema/vega-lite/v5.json';
     return spec;
   } catch (err) {
-    console.warn('[gemini-viz] Gemini returned non-JSON:', err);
+    const preview = raw.slice(0, 200).replace(/\n/g, ' ');
+    console.warn(`[gemini-viz] Non-JSON response (${(err as Error).message}): ${preview}...`);
     return null;
   }
 }
