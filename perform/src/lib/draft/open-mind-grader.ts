@@ -1,71 +1,57 @@
 /**
- * Per|Form Open Mind Grading Engine
- * ----------------------------------
- * Independent talent evaluation. Grades reflect WHAT WE SEE,
- * not where the consensus says a player will be drafted.
+ * Per|Form Open Mind Grading Engine v2
+ * =======================================
+ * CANONICAL FORMULA (from perform-talent-intelligence-skill-v2-final.md):
  *
- * A Round 5 consensus pick can earn an 85 if the tape says starter.
- * A Round 1 consensus pick can drop to 80 if the ceiling is capped.
+ *   Player Grade Score = (Game Performance × 0.40)
+ *                      + (Athleticism × 0.30)
+ *                      + (Intangibles × 0.30)
+ *                      + Multi-Position Bonus (0-7)
  *
- * TIE = Talent + Intangibles + Execution
+ * Grade Scale (max 107):
+ *   101+   Prime Player 🛸  Generational Talent
+ *   90-100 A+           🚀  Elite Prospect
+ *   85-89  A            🔥  First Round Lock
+ *   80-84  A-           ⭐  Late First Round
+ *   75-79  B+           ⏳  High Ceiling Day 2
+ *   70-74  B            🏈  Solid Contributor
+ *   65-69  B-           ⚡  Developmental
+ *   60-64  C+           🔧  Depth Player
+ *   <60    C or Below   ❌  UDFA
+ *
+ * The three-pillar sub-scores come from:
+ *   1. Consensus rank → base athleticism (size/speed/combine expectations)
+ *   2. School/conference → game performance context
+ *   3. Position value + sleeper overrides → intangibles (IQ/work ethic/leadership)
+ *
+ * Weights NEVER exposed to end users.
  */
 
 import { type DraftTekProspect, DRAFTTEK_BOARD_2026 } from './drafttek-board';
+import {
+  calculatePerFormGrade,
+  getGradeBand,
+  type GradeResult,
+  type PrimeSubTag,
+  PRIME_SUB_TAGS,
+} from './tie-scale';
 
-/* ── TIE Grade Labels ── */
-export function tieGradeLabel(grade: number): string {
-  if (grade >= 95) return 'Generational';
-  if (grade >= 93) return 'Blue Chip';
-  if (grade >= 88) return 'First Round Lock';
-  if (grade >= 83) return 'Day 1 Starter';
-  if (grade >= 80) return 'Solid Starter';
-  if (grade >= 77) return 'Quality Starter';
-  if (grade >= 74) return 'Rotational Starter';
-  if (grade >= 70) return 'Rotational Player';
-  if (grade >= 66) return 'Developmental';
-  if (grade >= 62) return 'Backup / Special Teams';
-  return 'Camp Body';
-}
-
-export function tieTierLabel(grade: number): string {
-  if (grade >= 95) return 'ELITE';
-  if (grade >= 90) return 'BLUE CHIP';
-  if (grade >= 85) return 'STARTER';
-  if (grade >= 80) return 'SOLID';
-  if (grade >= 74) return 'CONTRIBUTOR';
-  if (grade >= 68) return 'DEVELOPMENTAL';
-  return 'DEPTH';
-}
-
-export function gradeToProjectedRound(grade: number): number {
-  if (grade >= 90) return 1;
-  if (grade >= 83) return 2;
-  if (grade >= 78) return 3;
-  if (grade >= 73) return 4;
-  if (grade >= 67) return 5;
-  if (grade >= 62) return 6;
-  if (grade >= 55) return 7;
+/* ── Projected round from final score ── */
+export function gradeToProjectedRound(score: number): number {
+  if (score >= 95) return 1;       // Top 5
+  if (score >= 88) return 1;       // First round lock
+  if (score >= 83) return 2;
+  if (score >= 78) return 3;
+  if (score >= 73) return 4;
+  if (score >= 68) return 5;
+  if (score >= 63) return 6;
+  if (score >= 58) return 7;
   return 8; // UDFA
 }
 
-export function gradeToFilmGrade(grade: number): string {
-  if (grade >= 93) return 'A+';
-  if (grade >= 90) return 'A';
-  if (grade >= 87) return 'A-';
-  if (grade >= 84) return 'B+';
-  if (grade >= 81) return 'B';
-  if (grade >= 78) return 'B-';
-  if (grade >= 75) return 'C+';
-  if (grade >= 72) return 'C';
-  if (grade >= 69) return 'C-';
-  if (grade >= 66) return 'D+';
-  return 'D';
-}
-
-/* ── Position Value Multipliers ──
- * Premium positions get a slight boost because NFL value is higher.
- * This isn't about draft position — it's about how much a position
- * impacts winning at the next level. */
+/* ── Position value multipliers ──
+ * Applied to the GAME PERFORMANCE pillar only — reflects how much a
+ * position impacts winning at the next level. */
 const POSITION_VALUE: Record<string, number> = {
   QB: 1.08,
   EDGE: 1.06,
@@ -86,8 +72,7 @@ const POSITION_VALUE: Record<string, number> = {
   LS: 0.88,
 };
 
-/* ── Conference / Competition Level ──
- * Playing against better competition raises the floor. */
+/* ── Power conference schools ── */
 const POWER_SCHOOLS = new Set([
   'Ohio State', 'Georgia', 'Alabama', 'Michigan', 'Texas', 'USC', 'Oregon',
   'Penn State', 'Notre Dame', 'Clemson', 'LSU', 'Tennessee', 'Oklahoma',
@@ -103,197 +88,284 @@ const POWER_SCHOOLS = new Set([
   'Georgia Tech', 'SMU', 'Vanderbilt', 'Mississippi State', 'Memphis',
 ]);
 
-function schoolBonus(school: string): number {
-  if (POWER_SCHOOLS.has(school)) return 0;
-  // Small-school prospects get a slight discount for competition level
-  // but can overcome it with tape (reflected in sleeper boosts)
-  return -1.5;
-}
-
-/* ── Deterministic Seed ──
- * We use a simple hash of the player name to generate consistent
- * "variance" — so the same player always gets the same grade,
- * but different players get different amounts of deviation.
- * This creates sleepers and drops without randomness. */
+/* ── Deterministic variance by name hash ── */
 function nameHash(name: string): number {
   let hash = 0;
   for (let i = 0; i < name.length; i++) {
-    const chr = name.charCodeAt(i);
-    hash = ((hash << 5) - hash) + chr;
+    hash = ((hash << 5) - hash) + name.charCodeAt(i);
     hash |= 0;
   }
   return hash;
 }
 
-function deterministicVariance(name: string, range: number): number {
-  const h = Math.abs(nameHash(name));
-  // Map to -range..+range
+function variance(name: string, range: number, seed: number = 0): number {
+  const h = Math.abs(nameHash(name) + seed);
   return ((h % (range * 200 + 1)) - range * 100) / 100;
 }
 
-/* ── Per|Form Open Mind Sleeper / Overrated Overrides ──
- * These are the prospects where our evaluation DISAGREES
- * with consensus. This is what makes Open Mind valuable. */
+/* ── Rank → Game Performance base ──
+ * Maps consensus rank to an expected performance level (0-100 scale).
+ * Top prospects had elite college production.
+ */
+function rankToGamePerformance(rank: number): number {
+  if (rank <= 3) return 95 - (rank - 1) * 1;      // 95-93
+  if (rank <= 10) return 93 - (rank - 3) * 0.7;    // 93-88.1
+  if (rank <= 25) return 88 - (rank - 10) * 0.45;  // 88-81.25
+  if (rank <= 50) return 81 - (rank - 25) * 0.35;  // 81-72.25
+  if (rank <= 100) return 72 - (rank - 50) * 0.2;  // 72-62
+  if (rank <= 200) return 62 - (rank - 100) * 0.12; // 62-50
+  if (rank <= 400) return 50 - (rank - 200) * 0.07; // 50-36
+  return Math.max(20, 36 - (rank - 400) * 0.05);
+}
+
+/* ── Rank → Athleticism base ──
+ * High-ranked prospects typically have better combine numbers. */
+function rankToAthleticism(rank: number): number {
+  if (rank <= 5) return 92 - (rank - 1) * 0.5;
+  if (rank <= 20) return 90 - (rank - 5) * 0.4;
+  if (rank <= 50) return 84 - (rank - 20) * 0.3;
+  if (rank <= 100) return 75 - (rank - 50) * 0.2;
+  if (rank <= 200) return 65 - (rank - 100) * 0.1;
+  if (rank <= 400) return 55 - (rank - 200) * 0.07;
+  return Math.max(30, 41 - (rank - 400) * 0.05);
+}
+
+/* ── Rank → Intangibles base ──
+ * Leadership/IQ/work ethic reputation — rough correlation to rank
+ * but with more variance since it's the least visible pillar. */
+function rankToIntangibles(rank: number): number {
+  if (rank <= 10) return 88 - (rank - 1) * 0.3;
+  if (rank <= 50) return 85 - (rank - 10) * 0.25;
+  if (rank <= 100) return 75 - (rank - 50) * 0.2;
+  if (rank <= 200) return 65 - (rank - 100) * 0.12;
+  if (rank <= 400) return 53 - (rank - 200) * 0.08;
+  return Math.max(30, 37 - (rank - 400) * 0.05);
+}
+
+/* ── Sleeper / Overrated Overrides ──
+ * Applied to Game Performance pillar only (that's where consensus disagrees). */
 const SLEEPER_BOOSTS: Record<string, number> = {
-  // Players we grade HIGHER than consensus
-  'Jadarian Price': +6,      // Elite vision, contact balance — RB1B not RB2
-  'Emmett Johnson': +5,      // Nebraska film shows complete back
-  'Jonah Coleman': +5,       // Washington workhorse, underrated hands
-  'Eli Stowers': +5,         // TE with WR route tree, Vanderbilt scheme limited him
-  'Ted Hurst': +7,           // Georgia State but the tape is ELITE separation
-  'Germie Bernard': +4,      // Alabama WR room kept targets low, route savant
-  'Jake Golday': +5,         // Cincinnati LB with rare coverage skills
-  'Emmanuel McNeil-Warren': +3, // Toledo safety, already in our top 30
-  'Kaytron Allen': +6,       // Penn State shared backfield, full workload = RB1
-  'Nadame Tucker': +6,       // Western Michigan edge, 4.4 speed at 255
-  'Charles Demmings': +7,    // Stephen F Austin CB, best ball skills in the class
-  'Oscar Delp': +4,          // Georgia TE, elite contested catch radius
-  'Harold Perkins Jr.': +5,  // LSU OLB, most explosive off-ball rusher in class
-  'Desmond Reid': +6,        // Pittsburgh dual-threat, Sproles comp
-  'Chip Trayanum': +5,       // Toledo RB, underrated power + receiving
-  'Demond Claiborne': +4,    // Wake Forest, vision and patience elite
-  'Robert Henry Jr.': +5,    // UTSA workhorse, bowling ball runner
-  'Barion Brown': +5,        // LSU speed demon, top-5 YAC in class
-  'Anthony Hankerson': +4,   // Oregon State, patient one-cut runner
-  'Coleman Bennett': +5,     // Kennesaw State, FCS dominance translates
-  'Jamal Haynes': +4,        // Georgia Tech speed back, 4.35 verified
-  'Kaden Wetjen': +4,        // Iowa return specialist + slot weapon
-  'Bryce Lance': +5,         // NDSU pipeline WR, big-game producer
-  'Michael Trigg': +4,       // Baylor TE, freakish athleticism
-  'Caleb Tiernan': +4,       // Northwestern OT, technique over athleticism
-  'Domonique Orange': +3,    // Iowa State DL, dominant at POA
-  'Max Klare': +3,           // Ohio State TE, red zone weapon
-  'Sam Roush': +4,           // Stanford TE, complete player
-  'Deion Burks': +4,         // Oklahoma slot, separation king
-  'Skyler Bell': +5,         // UConn WR, outplays competition level
-  'Kage Casey': +4,          // Boise State OG, mauler in run game
-  'Le\'Veon Moss': +3,       // Texas A&M RB, patient runner
-  'Dontay Corleone': +3,     // Cincinnati DL, anchor strength
-  'Kevin Coleman Jr.': +4,   // Missouri WR, elite after catch
-  'Domani Jackson': +3,      // Alabama CB, 5-star talent finally clicking
-  'Nick Singleton': +3,      // Penn State RB, speed + power combo
-  'Kaelon Black': +3,        // Indiana RB, breakaway speed
-  'J\'Mari Taylor': +3,      // Virginia RB, underrated pass catcher
-  'Roman Hemby': +3,         // Indiana RB, vision and decisiveness
-  'Jaydn Ott': +3,           // Oklahoma RB, contact balance
-  'Jam Miller': +3,          // Alabama RB, physical downhill runner
-  'Noah Whittington': +3,    // Oregon RB, patient zone runner
-  'Rahsul Faison': +3,       // South Carolina RB, tackle-breaking ability
-  'Adam Randall': +3,        // Clemson RB, versatile skill set
-  'Eli Heidenreich': +3,     // Navy RB, option offense translates
-  'Mike Washington Jr.': +3, // Arkansas RB, complete back
-  'Seth McGowan': +3,        // Kentucky RB, north-south runner
+  'Jadarian Price': +8,
+  'Emmett Johnson': +7,
+  'Jonah Coleman': +7,
+  'Eli Stowers': +7,
+  'Ted Hurst': +9,
+  'Germie Bernard': +6,
+  'Jake Golday': +7,
+  'Emmanuel McNeil-Warren': +5,
+  'Kaytron Allen': +8,
+  'Nadame Tucker': +8,
+  'Charles Demmings': +9,
+  'Oscar Delp': +6,
+  'Harold Perkins Jr.': +7,
+  'Desmond Reid': +8,
+  'Chip Trayanum': +7,
+  'Demond Claiborne': +6,
+  'Robert Henry Jr.': +7,
+  'Barion Brown': +7,
+  'Anthony Hankerson': +6,
+  'Coleman Bennett': +7,
+  'Jamal Haynes': +6,
+  'Kaden Wetjen': +6,
+  'Bryce Lance': +7,
+  'Michael Trigg': +6,
+  'Caleb Tiernan': +6,
+  'Domonique Orange': +5,
+  'Max Klare': +5,
+  'Sam Roush': +6,
+  'Deion Burks': +6,
+  'Skyler Bell': +7,
+  'Kage Casey': +6,
+  "Le'Veon Moss": +5,
+  'Dontay Corleone': +5,
+  'Kevin Coleman Jr.': +6,
+  'Domani Jackson': +5,
+  'Nick Singleton': +5,
+  'Kaelon Black': +5,
+  "J'Mari Taylor": +5,
+  'Roman Hemby': +5,
+  'Jaydn Ott': +5,
+  'Jam Miller': +5,
+  'Noah Whittington': +5,
+  'Rahsul Faison': +5,
+  'Adam Randall': +5,
+  'Eli Heidenreich': +5,
+  'Mike Washington Jr.': +5,
+  'Seth McGowan': +5,
 };
 
 const OVERRATED_DROPS: Record<string, number> = {
-  // Players we grade LOWER than consensus
-  'Carson Beck': -4,         // Miami QB, decision-making under pressure concerns
-  'Drew Allar': -3,          // Penn State, system QB questions
-  'Kadyn Proctor': -2,       // Alabama OT, athleticism ceiling
-  'Keldric Faulk': -2,       // Auburn EDGE, production vs. tools gap
-  'Diego Pavia': -3,         // Vanderbilt, age + arm strength
-  'Jalon Daniels': -3,       // Kansas, injury history too long
-  'Cade Klubnik': -3,        // Clemson, inconsistency game to game
-  'Luke Altmyer': -2,        // Illinois, limited arm talent
-  'Taylen Green': -2,        // Arkansas, raw mechanics
-  'Garrett Nussmeier': -2,   // LSU, turnover-prone
+  'Carson Beck': -6,
+  'Drew Allar': -4,
+  'Kadyn Proctor': -3,
+  'Keldric Faulk': -3,
+  'Diego Pavia': -5,
+  'Jalon Daniels': -5,
+  'Cade Klubnik': -4,
+  'Luke Altmyer': -3,
+  'Taylen Green': -3,
+  'Garrett Nussmeier': -3,
 };
 
-/* ── Trend Detection ──
- * Based on where our grade diverges from consensus rank */
-function detectTrend(grade: number, consensusRank: number): string {
-  const expectedGrade = rankToBaseGrade(consensusRank);
-  const diff = grade - expectedGrade;
-  if (diff >= 4) return 'rising';
-  if (diff <= -3) return 'falling';
-  return 'steady';
+/* ── Multi-position bonus overrides ──
+ * A small set of prospects are known two-way or flex threats. */
+const MULTI_POSITION_BONUS: Record<string, number> = {
+  // No two-way players in current 2026 class identified as unicorn
+  // Situational flex +3 for proven specialists
+};
+
+/* ── Prime Player sub-tag assignment (101+ only) ── */
+function assignPrimeSubTags(name: string, gamePerf: number, intangibles: number): PrimeSubTag[] {
+  const tags: PrimeSubTag[] = [];
+  if (gamePerf >= 95 && intangibles >= 92) tags.push('franchise_cornerstone');
+  if (intangibles >= 95) tags.push('ultra_competitive');
+  return tags;
 }
 
-/* ── Core Grading Function ── */
-function rankToBaseGrade(rank: number): number {
-  // Non-linear curve: tight at top, wider spread through mid-rounds
-  // Designed so ~32 players are Round 1-2, ~100 are Day 2, rest are Day 3
-  if (rank <= 5) return 94 - (rank - 1) * 0.6;       // 94.0 → 91.6
-  if (rank <= 15) return 91.5 - (rank - 5) * 0.35;    // 91.5 → 88.0
-  if (rank <= 32) return 88 - (rank - 15) * 0.3;      // 88.0 → 82.9
-  if (rank <= 64) return 82.9 - (rank - 32) * 0.18;   // 82.9 → 77.1
-  if (rank <= 100) return 77.1 - (rank - 64) * 0.12;  // 77.1 → 72.8
-  if (rank <= 150) return 72.8 - (rank - 100) * 0.09; // 72.8 → 68.3
-  if (rank <= 225) return 68.3 - (rank - 150) * 0.06; // 68.3 → 63.8
-  if (rank <= 325) return 63.8 - (rank - 225) * 0.04; // 63.8 → 59.8
-  if (rank <= 450) return 59.8 - (rank - 325) * 0.03; // 59.8 → 56.1
-  return 56.1 - (rank - 450) * 0.025;                 // 56.1 → 52.4
-}
-
+/* ── Full Graded Prospect ── */
 export interface GradedProspect {
   name: string;
   school: string;
   position: string;
   classYear: string;
   consensusRank: number;
-  performRank: number;       // Our rank (by grade)
+  performRank: number;
   positionRank: number;
   projectedRound: number;
-  grade: number;
-  tieGrade: string;
-  tieTier: string;
-  filmGrade: string;
-  trend: string;
+
+  // The three pillars (shown to users in breakdown)
+  gamePerformance: number;
+  athleticism: number;
+  intangibles: number;
+  multiPositionBonus: number;
+
+  // Final grade
+  grade: number;       // 0-107
+  gradeLetter: string; // "A+", "Prime Player", etc.
+  gradeIcon: string;   // Emoji
+  gradeLabel: string;  // "ELITE", "FIRST ROUND LOCK", etc.
+  gradeProjection: string;
+  primeSubTags: PrimeSubTag[];
+  primeSubTagIcons: string[];
+
+  trend: 'rising' | 'falling' | 'steady';
 }
 
+/* ── Grade one prospect using the canonical 40/30/30 formula ── */
+function gradeProspect(p: DraftTekProspect): GradedProspect {
+  const posKey = p.position.replace(/[0-9T]/g, '').replace('WRS', 'WR');
+  const positionMultiplier = POSITION_VALUE[posKey] ?? 1.0;
+  const isPower = POWER_SCHOOLS.has(p.school);
+
+  // ── Pillar 1: Game Performance (40%) ──
+  let gamePerf = rankToGamePerformance(p.rank);
+  gamePerf *= positionMultiplier;
+  if (!isPower) gamePerf -= 2.5;
+  gamePerf += variance(p.name, 4, 1);
+  if (SLEEPER_BOOSTS[p.name]) gamePerf += SLEEPER_BOOSTS[p.name];
+  if (OVERRATED_DROPS[p.name]) gamePerf += OVERRATED_DROPS[p.name];
+  gamePerf = Math.round(Math.max(20, Math.min(99, gamePerf)) * 10) / 10;
+
+  // ── Pillar 2: Athleticism (30%) ──
+  let athleticism = rankToAthleticism(p.rank);
+  if (['QB', 'P', 'PK', 'LS'].includes(posKey)) athleticism -= 3; // Pocket/specialist penalty
+  if (['WR', 'CB', 'S', 'RB'].includes(posKey)) athleticism += 2;  // Speed positions
+  athleticism += variance(p.name, 5, 2);
+  athleticism = Math.round(Math.max(20, Math.min(99, athleticism)) * 10) / 10;
+
+  // ── Pillar 3: Intangibles (30%) ──
+  let intangibles = rankToIntangibles(p.rank);
+  if (isPower) intangibles += 2; // Power conference = more battle-tested
+  if (['QB', 'OC', 'ILB'].includes(posKey)) intangibles += 2; // Leadership positions
+  intangibles += variance(p.name, 5, 3);
+  if (OVERRATED_DROPS[p.name]) intangibles -= 2; // Character/consistency concerns
+  intangibles = Math.round(Math.max(20, Math.min(99, intangibles)) * 10) / 10;
+
+  // ── Multi-position bonus ──
+  const multiBonus = MULTI_POSITION_BONUS[p.name] || 0;
+
+  // ── Apply canonical formula ──
+  const result: GradeResult = calculatePerFormGrade({
+    gamePerformance: gamePerf,
+    athleticism,
+    intangibles,
+    multiPositionBonus: multiBonus,
+  });
+
+  const band = result.band;
+  const projectedRound = gradeToProjectedRound(result.finalScore);
+
+  // ── Prime Player sub-tags ──
+  const primeSubTags = result.finalScore >= 101
+    ? assignPrimeSubTags(p.name, gamePerf, intangibles)
+    : [];
+  const primeSubTagIcons = primeSubTags.map(t => PRIME_SUB_TAGS[t].icon);
+
+  // ── Trend detection vs consensus ──
+  const expectedScore = rankToGamePerformance(p.rank) * 0.4
+    + rankToAthleticism(p.rank) * 0.3
+    + rankToIntangibles(p.rank) * 0.3;
+  const diff = result.finalScore - expectedScore;
+  const trend: 'rising' | 'falling' | 'steady' =
+    diff >= 3.5 ? 'rising' : diff <= -3 ? 'falling' : 'steady';
+
+  return {
+    name: p.name,
+    school: p.school,
+    position: p.position,
+    classYear: '2026',
+    consensusRank: p.rank,
+    performRank: 0, // assigned after sort
+    positionRank: 0, // assigned after sort
+    projectedRound,
+
+    gamePerformance: gamePerf,
+    athleticism,
+    intangibles,
+    multiPositionBonus: multiBonus,
+
+    grade: result.finalScore,
+    gradeLetter: band.grade,
+    gradeIcon: band.icon,
+    gradeLabel: band.label,
+    gradeProjection: band.projection,
+    primeSubTags,
+    primeSubTagIcons,
+
+    trend,
+  };
+}
+
+/* ── Grade all 600 prospects + assign ranks ── */
 export function gradeAllProspects(): GradedProspect[] {
-  const raw: { prospect: DraftTekProspect; grade: number }[] = [];
+  const graded = DRAFTTEK_BOARD_2026.map(gradeProspect);
 
-  for (const p of DRAFTTEK_BOARD_2026) {
-    // 1. Base grade from consensus rank (starting point, not final)
-    let grade = rankToBaseGrade(p.rank);
+  // Sort by final grade descending (Per|Form rank)
+  graded.sort((a, b) => b.grade - a.grade || a.consensusRank - b.consensusRank);
 
-    // 2. Position value adjustment
-    const posKey = p.position.replace(/[0-9T]/g, '').replace('WRS', 'WR');
-    const posMultiplier = POSITION_VALUE[posKey] ?? 1.0;
-    grade *= posMultiplier;
-
-    // 3. School / competition level
-    grade += schoolBonus(p.school);
-
-    // 4. Deterministic variance (±3 points) — creates natural spread
-    grade += deterministicVariance(p.name, 3);
-
-    // 5. Open Mind overrides — where we disagree with consensus
-    if (SLEEPER_BOOSTS[p.name]) grade += SLEEPER_BOOSTS[p.name];
-    if (OVERRATED_DROPS[p.name]) grade += OVERRATED_DROPS[p.name];
-
-    // 6. Clamp to valid range
-    grade = Math.round(Math.min(97, Math.max(45, grade)) * 10) / 10;
-
-    raw.push({ prospect: p, grade });
-  }
-
-  // Sort by grade DESC — this is Per|Form's ranking, not consensus
-  raw.sort((a, b) => b.grade - a.grade || a.prospect.rank - b.prospect.rank);
-
-  // Assign Per|Form rank and position ranks
+  // Assign Per|Form rank + position rank
   const posCount: Record<string, number> = {};
-
-  return raw.map((entry, idx) => {
-    const p = entry.prospect;
-    const pos = p.position.replace(/[0-9T]/g, '').replace('WRS', 'WR');
-    posCount[pos] = (posCount[pos] || 0) + 1;
-
+  return graded.map((g, idx) => {
+    const posKey = g.position.replace(/[0-9T]/g, '').replace('WRS', 'WR');
+    posCount[posKey] = (posCount[posKey] || 0) + 1;
     return {
-      name: p.name,
-      school: p.school,
-      position: p.position,
-      classYear: '2026',
-      consensusRank: p.rank,
+      ...g,
       performRank: idx + 1,
-      positionRank: posCount[pos],
-      projectedRound: gradeToProjectedRound(entry.grade),
-      grade: entry.grade,
-      tieGrade: tieGradeLabel(entry.grade),
-      tieTier: tieTierLabel(entry.grade),
-      filmGrade: gradeToFilmGrade(entry.grade),
-      trend: detectTrend(entry.grade, p.rank),
+      positionRank: posCount[posKey],
     };
   });
+}
+
+/* ── Legacy label helpers for backward compatibility ── */
+export function tieGradeLabel(grade: number): string {
+  return getGradeBand(grade).label;
+}
+
+export function tieTierLabel(grade: number): string {
+  return getGradeBand(grade).label;
+}
+
+export function gradeToFilmGrade(grade: number): string {
+  const band = getGradeBand(grade);
+  return band.grade;
 }
