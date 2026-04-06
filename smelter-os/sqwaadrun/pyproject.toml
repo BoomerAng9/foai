@@ -1,0 +1,65 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "sqwaadrun"
+version = "2.0.0"
+description = "ACHIEVEMOR Sqwaadrun — 17-Hawk swarm web scraping framework with Chicken Hawk command layer. Pure Python, no LLM, Firecrawl replacement."
+readme = { text = "Sqwaadrun is the ACHIEVEMOR Smelter OS scraping swarm. 17 Lil_Hawks + Chicken Hawk dispatcher in a single file. Pure Python, no API keys, no inference costs.", content-type = "text/plain" }
+requires-python = ">=3.10"
+license = { text = "Proprietary - ACHIEVEMOR Internal" }
+authors = [
+  { name = "ACHIEVEMOR", email = "ops@achievemor.io" },
+]
+keywords = ["scraping", "crawler", "hawk", "achievemor", "smelter-os", "firecrawl-alternative"]
+classifiers = [
+  "Development Status :: 5 - Production/Stable",
+  "Environment :: Console",
+  "Intended Audience :: Developers",
+  "Operating System :: OS Independent",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Topic :: Internet :: WWW/HTTP",
+  "Topic :: Software Development :: Libraries",
+]
+
+dependencies = [
+  "aiohttp>=3.9",
+  "aiofiles>=23.2",
+  "beautifulsoup4>=4.12",
+  "lxml>=4.9",
+  "html2text>=2024.2.26",
+  "tldextract>=5.1",
+]
+
+[project.optional-dependencies]
+js = [
+  "playwright>=1.42",
+]
+dev = [
+  "pytest>=8.0",
+  "pytest-asyncio>=0.23",
+  "ruff>=0.3",
+  "mypy>=1.8",
+]
+
+[project.scripts]
+sqwaadrun = "sqwaadrun.lil_scrapp_hawk:main"
+
+[project.urls]
+Homepage = "https://deploy.foai.cloud/sqwaadrun"
+Repository = "https://github.com/BoomerAng9/foai"
+
+[tool.setuptools]
+package-dir = { "" = "." }
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["sqwaadrun*"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]

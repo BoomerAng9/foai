@@ -1,0 +1,2 @@
+# Sqwaadrun persistence dir — SQLite cache, scrape results, change logs, scheduled jobs.
+# Smelter OS file system tracks everything written here.

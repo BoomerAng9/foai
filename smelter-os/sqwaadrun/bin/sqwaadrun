@@ -1,0 +1,8 @@
+#!/usr/bin/env python3
+"""Sqwaadrun CLI entry point — delegates to the packaged main()."""
+import sys
+from sqwaadrun.lil_scrapp_hawk import main
+import asyncio
+
+if __name__ == "__main__":
+    sys.exit(asyncio.run(main()))
