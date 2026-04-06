@@ -10,8 +10,10 @@
  * Access via fal.ai (FAL_KEY) and Kie AI (KIE_AI_API_KEY)
  */
 
+const RECRAFT_KEY = process.env.RECRAFT_API_KEY || '';
 const FAL_KEY = process.env.FAL_KEY || process.env.FAL_API_KEY || '';
 const KIE_KEY = process.env.KIE_AI_API_KEY || '';
+const RECRAFT_BASE = 'https://external.api.recraft.ai/v1';
 const FAL_BASE = 'https://fal.run';
 const KIE_BASE = 'https://api.kie.ai/v1';
 
@@ -59,24 +61,69 @@ export interface RecraftResponse {
 }
 
 /**
- * Generate an image via Recraft V4 (fal.ai → Kie AI fallback)
+ * Generate an image via Recraft V4
+ * Priority: Direct Recraft API → fal.ai → Kie AI
  */
 export async function generateImage(
   opts: RecraftGenerateOptions,
 ): Promise<RecraftImage | null> {
-  // Try fal.ai first (Recraft V4 model)
+  // Try direct Recraft API first (cheapest, native support)
+  if (RECRAFT_KEY) {
+    const result = await _generateViaRecraftDirect(opts);
+    if (result) return result;
+  }
+
+  // Fallback 1: fal.ai
   if (FAL_KEY) {
     const result = await _generateViaFal(opts);
     if (result) return result;
   }
 
-  // Fallback to Kie AI
+  // Fallback 2: Kie AI
   if (KIE_KEY) {
     const result = await _generateViaKie(opts);
     if (result) return result;
   }
 
   return null;
+}
+
+async function _generateViaRecraftDirect(opts: RecraftGenerateOptions): Promise<RecraftImage | null> {
+  try {
+    const body: Record<string, unknown> = {
+      prompt: opts.prompt,
+      model: opts.model || 'recraftv4',
+      n: opts.n || 1,
+    };
+    if (opts.style) body.style = opts.style;
+    if (opts.size) body.size = opts.size;
+    if (opts.styleId) body.style_id = opts.styleId;
+
+    const res = await fetch(`${RECRAFT_BASE}/images/generations`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${RECRAFT_KEY}`,
+      },
+      body: JSON.stringify(body),
+      signal: AbortSignal.timeout(90000),
+    });
+
+    if (!res.ok) {
+      const errText = await res.text().catch(() => '');
+      console.error(`[Recraft/direct] ${res.status}: ${errText}`);
+      return null;
+    }
+
+    const data = await res.json();
+    const img = data.data?.[0];
+    if (!img) return null;
+
+    return { url: img.url, id: img.id };
+  } catch (err) {
+    console.error('[Recraft/direct] Failed:', err);
+    return null;
+  }
 }
 
 async function _generateViaFal(opts: RecraftGenerateOptions): Promise<RecraftImage | null> {
@@ -232,7 +279,7 @@ export async function removeBackground(
   }
 }
 
-/** Check if Recraft API is configured (via fal.ai or Kie) */
+/** Check if Recraft API is configured (direct, fal.ai, or Kie) */
 export function isRecraftConfigured(): boolean {
-  return FAL_KEY.length > 0 || KIE_KEY.length > 0;
+  return RECRAFT_KEY.length > 0 || FAL_KEY.length > 0 || KIE_KEY.length > 0;
 }
