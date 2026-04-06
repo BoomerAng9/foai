@@ -15,12 +15,13 @@
  * - Veo 3 — Google cinematic with native audio ($2.00/5s)
  * - Wan 2.5 — cheapest bulk ($0.25/5s)
  *
- * All via fal.ai (FAL_KEY) → Kie.ai fallback (KIE_AI_API_KEY)
+ * All via fal.ai (getFalKey()) → Kie.ai fallback (KIE_AI_API_KEY)
  */
 
-const FAL_KEY = process.env.FAL_KEY || process.env.FAL_API_KEY || '';
-const KIE_KEY = process.env.KIE_AI_API_KEY || '';
-const BRAVE_KEY = process.env.BRAVE_API_KEY || '';
+// Runtime-safe env getters (Next.js standalone bundles module-level consts at build time)
+const getFalKey = () => process.env.FAL_KEY || process.env.FAL_API_KEY || '';
+const getKieKey = () => process.env.KIE_AI_API_KEY || '';
+const getBraveKey = () => process.env.BRAVE_API_KEY || '';
 const FAL_QUEUE = 'https://queue.fal.run';
 
 export type VideoModel =
@@ -74,7 +75,7 @@ export async function braveSearchReference(
   query: string,
   type: 'video' | 'image' = 'video',
 ): Promise<string | null> {
-  if (!BRAVE_KEY) return null;
+  if (!getBraveKey()) return null;
 
   try {
     const endpoint = type === 'video'
@@ -83,7 +84,7 @@ export async function braveSearchReference(
 
     const res = await fetch(endpoint, {
       headers: {
-        'X-Subscription-Token': BRAVE_KEY,
+        'X-Subscription-Token': getBraveKey(),
         Accept: 'application/json',
       },
       signal: AbortSignal.timeout(15000),
@@ -242,7 +243,7 @@ function buildBody(model: VideoModel, req: VideoRequest): Record<string, unknown
 
 /* ── Generate Video via fal.ai queue ── */
 export async function generateVideo(req: VideoRequest): Promise<VideoResult | null> {
-  if (!FAL_KEY) return null;
+  if (!getFalKey()) return null;
 
   // If no reference provided, auto-search Brave for one
   if (!req.referenceImages && !req.referenceVideoUrl && !req.sourceImageUrl) {
@@ -270,7 +271,7 @@ export async function generateVideo(req: VideoRequest): Promise<VideoResult | nu
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Key ${FAL_KEY}`,
+        Authorization: `Key ${getFalKey()}`,
       },
       body: JSON.stringify(body),
       signal: AbortSignal.timeout(30000),
@@ -289,14 +290,14 @@ export async function generateVideo(req: VideoRequest): Promise<VideoResult | nu
       await new Promise(r => setTimeout(r, 5000));
 
       const statusRes = await fetch(status_url, {
-        headers: { Authorization: `Key ${FAL_KEY}` },
+        headers: { Authorization: `Key ${getFalKey()}` },
       });
       if (!statusRes.ok) continue;
       const status = await statusRes.json();
 
       if (status.status === 'COMPLETED') {
         const resultRes = await fetch(`${FAL_QUEUE}/${endpoint}/requests/${request_id}`, {
-          headers: { Authorization: `Key ${FAL_KEY}` },
+          headers: { Authorization: `Key ${getFalKey()}` },
         });
         const result = await resultRes.json();
 
@@ -394,5 +395,5 @@ export async function generateCharacterSeries(
 }
 
 export function isVideoConfigured(): boolean {
-  return FAL_KEY.length > 0;
+  return getFalKey().length > 0;
 }

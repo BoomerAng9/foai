@@ -7,12 +7,15 @@
  * - Platform hero visuals
  * - Brand-consistent design assets
  *
- * Access via fal.ai (FAL_KEY) and Kie AI (KIE_AI_API_KEY)
+ * Access via fal.ai (getFalKey()) and Kie AI (KIE_AI_API_KEY)
  */
 
-const RECRAFT_KEY = process.env.RECRAFT_API_KEY || '';
-const FAL_KEY = process.env.FAL_KEY || process.env.FAL_API_KEY || '';
-const KIE_KEY = process.env.KIE_AI_API_KEY || '';
+// Read env vars at CALL TIME, not module load time
+// (Next.js standalone bundles module-level consts at build time, freezing empty strings)
+const getRecraftKey = () => process.env.RECRAFT_API_KEY || '';
+const getFalKey = () => process.env.FAL_KEY || process.env.FAL_API_KEY || '';
+const getKieKey = () => process.env.KIE_AI_API_KEY || '';
+
 const RECRAFT_BASE = 'https://external.api.recraft.ai/v1';
 const FAL_BASE = 'https://fal.run';
 const KIE_BASE = 'https://api.kie.ai/v1';
@@ -68,19 +71,19 @@ export async function generateImage(
   opts: RecraftGenerateOptions,
 ): Promise<RecraftImage | null> {
   // Try direct Recraft API first (cheapest, native support)
-  if (RECRAFT_KEY) {
+  if (getRecraftKey()) {
     const result = await _generateViaRecraftDirect(opts);
     if (result) return result;
   }
 
   // Fallback 1: fal.ai
-  if (FAL_KEY) {
+  if (getFalKey()) {
     const result = await _generateViaFal(opts);
     if (result) return result;
   }
 
   // Fallback 2: Kie AI
-  if (KIE_KEY) {
+  if (getKieKey()) {
     const result = await _generateViaKie(opts);
     if (result) return result;
   }
@@ -103,7 +106,7 @@ async function _generateViaRecraftDirect(opts: RecraftGenerateOptions): Promise<
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${RECRAFT_KEY}`,
+        Authorization: `Bearer ${getRecraftKey()}`,
       },
       body: JSON.stringify(body),
       signal: AbortSignal.timeout(90000),
@@ -132,7 +135,7 @@ async function _generateViaFal(opts: RecraftGenerateOptions): Promise<RecraftIma
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Key ${FAL_KEY}`,
+        Authorization: `Key ${getFalKey()}`,
       },
       body: JSON.stringify({
         prompt: opts.prompt,
@@ -165,7 +168,7 @@ async function _generateViaKie(opts: RecraftGenerateOptions): Promise<RecraftIma
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${KIE_KEY}`,
+        Authorization: `Bearer ${getKieKey()}`,
       },
       body: JSON.stringify({
         prompt: opts.prompt,
@@ -258,14 +261,14 @@ export async function generateVector(
 export async function removeBackground(
   imageUrl: string,
 ): Promise<string | null> {
-  if (!FAL_KEY) return null;
+  if (!getFalKey()) return null;
 
   try {
     const res = await fetch(`${FAL_BASE}/fal-ai/birefnet`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Key ${FAL_KEY}`,
+        Authorization: `Key ${getFalKey()}`,
       },
       body: JSON.stringify({ image_url: imageUrl }),
       signal: AbortSignal.timeout(30000),
@@ -279,7 +282,7 @@ export async function removeBackground(
   }
 }
 
-/** Check if Recraft API is configured (direct, fal.ai, or Kie) */
+/** Check if Recraft API is configured — runtime-safe env read */
 export function isRecraftConfigured(): boolean {
-  return RECRAFT_KEY.length > 0 || FAL_KEY.length > 0 || KIE_KEY.length > 0;
+  return getRecraftKey().length > 0 || getFalKey().length > 0 || getKieKey().length > 0;
 }

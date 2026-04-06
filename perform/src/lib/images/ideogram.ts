@@ -10,7 +10,8 @@
  * API: https://api.ideogram.ai
  */
 
-const IDEOGRAM_KEY = process.env.IDEOGRAM_API_KEY || '';
+// Runtime-safe: Next.js bundles module-level consts at build time
+const getIdeogramKey = () => process.env.IDEOGRAM_API_KEY || '';
 const BASE = 'https://api.ideogram.ai';
 // V3 endpoints: /v1/ideogram-v3/generate, /v1/ideogram-v3/remix, /v1/ideogram-v3/edit
 
@@ -35,7 +36,7 @@ export interface IdeogramImage {
 export async function generateIdeogramImage(
   opts: IdeogramOptions,
 ): Promise<IdeogramImage | null> {
-  if (!IDEOGRAM_KEY) return null;
+  if (!getIdeogramKey()) return null;
 
   try {
     // Use V3 endpoint for best text rendering
@@ -49,7 +50,7 @@ export async function generateIdeogramImage(
     const res = await fetch(`${BASE}/v1/ideogram-v3/generate`, {
       method: 'POST',
       headers: {
-        'Api-Key': IDEOGRAM_KEY,
+        'Api-Key': getIdeogramKey(),
       },
       body: formData,
       signal: AbortSignal.timeout(60000),
@@ -115,5 +116,5 @@ Style: Premium sports trading card, matte finish, cinematic lighting, broadcast 
 
 /** Check if Ideogram API is configured */
 export function isIdeogramConfigured(): boolean {
-  return IDEOGRAM_KEY.length > 0;
+  return getIdeogramKey().length > 0;
 }
