@@ -14,6 +14,7 @@ import {
   heroItem,
 } from '@/lib/motion';
 import PaywallGate from '@/components/PaywallGate';
+import { ANALYSTS } from '@/lib/analysts/personas';
 
 interface AnalystTake {
   analyst: string;
@@ -26,33 +27,6 @@ interface FeedItem {
   title?: string;
   summary?: string;
 }
-
-const ANALYSTS = [
-  {
-    id: 'analyst-1',
-    name: 'The Anchor',
-    descriptor: 'Breaking news and headline analysis',
-    color: '#D4A853',
-  },
-  {
-    id: 'analyst-2',
-    name: 'The Scout',
-    descriptor: 'Player evaluations and recruiting',
-    color: '#60A5FA',
-  },
-  {
-    id: 'analyst-3',
-    name: 'The Coach',
-    descriptor: 'Film breakdown and scheme analysis',
-    color: '#34D399',
-  },
-  {
-    id: 'analyst-4',
-    name: 'The Contrarian',
-    descriptor: 'Hot takes and debate',
-    color: '#F97316',
-  },
-];
 
 const SEGMENTS = [
   {
@@ -92,7 +66,7 @@ export default function StudioPage() {
   useEffect(() => {
     ANALYSTS.forEach(async (analyst) => {
       try {
-        const res = await fetch(`/api/analysts/${analyst.name.toLowerCase().replace(/\s+/g, '-')}/feed`);
+        const res = await fetch(`/api/analysts/${analyst.id}/feed`);
         if (res.ok) {
           const data = await res.json();
           if (data && (data.title || data.summary)) {

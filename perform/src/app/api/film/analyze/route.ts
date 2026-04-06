@@ -11,6 +11,13 @@ const BRAVE_KEY = process.env.BRAVE_API_KEY || '';
 
 export async function POST(req: NextRequest) {
   try {
+    const PIPELINE_KEY = process.env.PIPELINE_AUTH_KEY || '';
+    const authHeader = req.headers.get('authorization') || '';
+    const token = authHeader.replace('Bearer ', '');
+    if (!PIPELINE_KEY || token !== PIPELINE_KEY) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     const body: FilmRequest = await req.json();
     const { playerName, source = 'youtube' } = body;
 

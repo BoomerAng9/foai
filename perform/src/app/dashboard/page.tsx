@@ -64,7 +64,7 @@ const SECTIONS = [
   },
   {
     title: 'ANALYSTS',
-    description: 'Four autonomous voices delivering daily coverage',
+    description: 'Five autonomous voices delivering daily coverage',
     href: '/analysts',
     accent: '#F97316',
     span: 'col-span-1',

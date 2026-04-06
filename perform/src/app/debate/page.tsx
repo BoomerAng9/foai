@@ -32,12 +32,12 @@ export default function DebatePage() {
 
     try {
       const [bullRes, bearRes] = await Promise.all([
-        fetch('/api/analysts/analyst-4', {
+        fetch('/api/analysts/void-caster', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ contentType: 'debate_bull', context: topic }),
         }),
-        fetch('/api/analysts/analyst-2', {
+        fetch('/api/analysts/the-colonel', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ contentType: 'debate_bear', context: topic }),

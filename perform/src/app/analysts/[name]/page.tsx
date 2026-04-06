@@ -43,7 +43,7 @@ function renderMarkdown(text: string): string {
     .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
     .replace(/\*(.+?)\*/g, '<em>$1</em>')
     .replace(/^### (.+)$/gm, '<h3 class="font-outfit text-lg font-bold text-white/90 mt-6 mb-2">$1</h3>')
-    .replace(/^## (.+)$/gm, '<h2 class="font-outfit text-xl font-bold text-white/90 mt-6 mb-3">$2</h2>')
+    .replace(/^## (.+)$/gm, '<h2 class="font-outfit text-xl font-bold text-white/90 mt-6 mb-3">$1</h2>')
     .replace(/\n\n/g, '</p><p class="mb-4">')
     .replace(/\n/g, '<br/>');
 }

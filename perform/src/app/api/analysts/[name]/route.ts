@@ -3,6 +3,13 @@ import { generateAnalystContent, type ContentType } from '@/lib/analysts/content
 
 export async function POST(req: NextRequest, { params }: { params: Promise<{ name: string }> }) {
   try {
+    const PIPELINE_KEY = process.env.PIPELINE_AUTH_KEY || '';
+    const authHeader = req.headers.get('authorization') || '';
+    const token = authHeader.replace('Bearer ', '');
+    if (!PIPELINE_KEY || token !== PIPELINE_KEY) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     const { name } = await params;
     const { contentType, context } = await req.json() as {
       contentType: ContentType;

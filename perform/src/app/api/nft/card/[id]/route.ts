@@ -22,7 +22,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
     const { id } = await params;
     if (!sql) return new Response('DB not configured', { status: 503 });
 
-    const players = await sql`SELECT * FROM perform_players WHERE id = ${parseInt(id)} AND class = '2026'`;
+    const players = await sql`SELECT * FROM perform_players WHERE id = ${parseInt(id)} AND class_year = '2026'`;
     if (players.length === 0) return new Response('Player not found', { status: 404 });
 
     const p = players[0];

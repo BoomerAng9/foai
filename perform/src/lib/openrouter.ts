@@ -1,7 +1,7 @@
 const OPENROUTER_KEY = process.env.OPENROUTER_API_KEY || '';
 const BASE_URL = 'https://openrouter.ai/api/v1/chat/completions';
 
-export const GEMMA4_MODEL = 'qwen/qwen3.5-flash-02-23';
+export const DEFAULT_MODEL = 'qwen/qwen3.5-flash-02-23';
 
 export async function chatCompletion(opts: {
   model?: string;
@@ -18,7 +18,7 @@ export async function chatCompletion(opts: {
       'X-Title': 'Per|Form Platform',
     },
     body: JSON.stringify({
-      model: opts.model || GEMMA4_MODEL,
+      model: opts.model || DEFAULT_MODEL,
       messages: opts.messages,
       temperature: opts.temperature ?? 0.7,
       max_tokens: opts.max_tokens ?? 2000,

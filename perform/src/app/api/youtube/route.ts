@@ -10,7 +10,7 @@ export async function GET(req: NextRequest) {
   try {
     let videos;
 
-    if (type === 'player' && player) {
+    if (player) {
       videos = await searchPlayerHighlights(player);
     } else if (type === 'draft') {
       videos = await searchDraftCoverage(limit);

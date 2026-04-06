@@ -5,12 +5,12 @@
  * for all 600 prospects.
  */
 
-import { chatCompletion, GEMMA4_MODEL } from '@/lib/openrouter';
+import { chatCompletion, DEFAULT_MODEL } from '@/lib/openrouter';
 
 // Primary: Llama 3.3 70B free. Fallback: default model from openrouter.ts
 const MODELS = [
   'meta-llama/llama-3.3-70b-instruct:free',
-  GEMMA4_MODEL,
+  DEFAULT_MODEL,
 ];
 
 interface ScoutingReport {

@@ -3,7 +3,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { ANALYSTS } from '@/lib/analysts/personas';
 import { searchDraftNews, type ScrapedArticle } from '@/lib/data-pipeline/scraper';
-import { generateText, GEMMA4_MODEL } from '@/lib/openrouter';
+import { generateText, DEFAULT_MODEL } from '@/lib/openrouter';
 import { sql } from '@/lib/db';
 
 const CONTENT_TYPES = ['hot_take', 'scouting_report', 'ranking_update', 'film_breakdown'] as const;

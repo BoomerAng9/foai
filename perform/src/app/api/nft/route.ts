@@ -65,7 +65,7 @@ export async function GET(req: NextRequest) {
 
     if (playerId) {
       // Single player NFT metadata
-      const players = await sql`SELECT * FROM perform_players WHERE id = ${parseInt(playerId)} AND class = '2026'`;
+      const players = await sql`SELECT * FROM perform_players WHERE id = ${parseInt(playerId)} AND class_year = '2026'`;
       if (players.length === 0) return NextResponse.json({ error: 'Player not found' }, { status: 404 });
       return NextResponse.json(buildNFTMetadata(players[0], parseInt(playerId)));
     }

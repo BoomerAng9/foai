@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
+import { ANALYSTS } from '@/lib/analysts/personas';
 
 interface AnalystTake {
   analyst: string;
@@ -11,12 +12,12 @@ interface AnalystTake {
   content: string;
 }
 
-const ANALYSTS_STATIC = [
-  { id: 'analyst-1', name: 'Analyst 1', archetype: 'Stuart Scott energy', color: '#D4A853' },
-  { id: 'analyst-2', name: 'Analyst 2', archetype: 'Deion Sanders swagger', color: '#60A5FA' },
-  { id: 'analyst-3', name: 'Analyst 3', archetype: 'Film room grinder', color: '#34D399' },
-  { id: 'analyst-4', name: 'Analyst 4', archetype: 'Hot-take debate energy', color: '#F97316' },
-];
+const ANALYSTS_STATIC = ANALYSTS.map((a) => ({
+  id: a.id,
+  name: a.name,
+  archetype: a.archetype,
+  color: a.color,
+}));
 
 function TimerBar({ active, color, duration }: { active: boolean; color: string; duration: number }) {
   return (

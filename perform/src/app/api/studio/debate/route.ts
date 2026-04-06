@@ -62,6 +62,13 @@ async function getAnalystTake(
 
 export async function POST(request: NextRequest) {
   try {
+    const PIPELINE_KEY = process.env.PIPELINE_AUTH_KEY || '';
+    const authHeader = request.headers.get('authorization') || '';
+    const token = authHeader.replace('Bearer ', '');
+    if (!PIPELINE_KEY || token !== PIPELINE_KEY) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     const body: DebateRequest = await request.json();
     const { topic, format } = body;
 
