@@ -120,36 +120,54 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    // Single variation mode
+    // Single variation mode — generates BOTH locked and reveal states
     const chosenVariation = variation && variation !== 'auto'
       ? variation
       : pickStyleByGrade(input.grade);
 
-    const spec = buildCardPrompt(chosenVariation, input);
+    const slugBase = `${player.name}-${chosenVariation}`.toLowerCase().replace(/[^a-z0-9]+/g, '-');
 
-    const result = await generateImage({
-      prompt: spec.prompt,
-      engine: spec.engine === 'ideogram' ? 'ideogram' : 'recraft',
-      preferText: spec.engine === 'ideogram',
-      aspectRatio: spec.aspectRatio,
-      negativePrompt: spec.negativePrompt,
+    // Generate LOCKED state (classified dossier aesthetic, brand colors, no identity)
+    const lockedSpec = buildCardPrompt(chosenVariation, { ...input, state: 'locked' });
+    const lockedResult = await generateImage({
+      prompt: lockedSpec.prompt,
+      engine: lockedSpec.engine === 'ideogram' ? 'ideogram' : 'recraft',
+      preferText: lockedSpec.engine === 'ideogram',
+      aspectRatio: lockedSpec.aspectRatio,
+      negativePrompt: lockedSpec.negativePrompt,
     });
 
-    if (!result) {
+    // Generate REVEAL state (actual team colors, identity shown)
+    const revealSpec = buildCardPrompt(chosenVariation, { ...input, state: 'reveal' });
+    const revealResult = await generateImage({
+      prompt: revealSpec.prompt,
+      engine: revealSpec.engine === 'ideogram' ? 'ideogram' : 'recraft',
+      preferText: revealSpec.engine === 'ideogram',
+      aspectRatio: revealSpec.aspectRatio,
+      negativePrompt: revealSpec.negativePrompt,
+    });
+
+    if (!lockedResult && !revealResult) {
       return NextResponse.json({
-        error: 'Card generation failed on all engines',
+        error: 'Card generation failed on all engines for both states',
       }, { status: 503 });
     }
 
-    // Save card to permanent storage — URLs from Ideogram/Recraft are ephemeral
-    const slug = `${player.name}-${chosenVariation}`.toLowerCase().replace(/[^a-z0-9]+/g, '-');
-    const savedPath = await savePlayerCard(result.url, slug);
-    const publicUrl = savedPath ? `https://perform.foai.cloud${savedPath}` : result.url;
+    // Save both to permanent storage
+    const lockedPath = lockedResult
+      ? await savePlayerCard(lockedResult.url, `${slugBase}-locked`)
+      : null;
+    const revealPath = revealResult
+      ? await savePlayerCard(revealResult.url, `${slugBase}-reveal`)
+      : null;
 
-    // Save card URL to player record
+    const lockedUrl = lockedPath ? `https://perform.foai.cloud${lockedPath}` : lockedResult?.url;
+    const revealUrl = revealPath ? `https://perform.foai.cloud${revealPath}` : revealResult?.url;
+
+    // Save card URLs to player record
     await sql`
       UPDATE perform_players
-      SET analyst_notes = COALESCE(analyst_notes, '') || ${'\n[card:' + chosenVariation + '] ' + publicUrl},
+      SET analyst_notes = COALESCE(analyst_notes, '') || ${'\n[card:' + chosenVariation + '] locked=' + lockedUrl + ' reveal=' + revealUrl},
           updated_at = NOW()
       WHERE id = ${player.id}
     `;
@@ -160,7 +178,20 @@ export async function POST(req: NextRequest) {
       school: player.school,
       grade: player.grade,
       variation: chosenVariation,
-      card: { ...result, url: publicUrl, savedPath, originalUrl: result.url },
+      card: {
+        locked: {
+          url: lockedUrl,
+          savedPath: lockedPath,
+          engine: lockedResult?.engine,
+          cost: lockedResult?.cost,
+        },
+        reveal: {
+          url: revealUrl,
+          savedPath: revealPath,
+          engine: revealResult?.engine,
+          cost: revealResult?.cost,
+        },
+      },
     });
   } catch (error) {
     const msg = error instanceof Error ? error.message : 'Card generation failed';
