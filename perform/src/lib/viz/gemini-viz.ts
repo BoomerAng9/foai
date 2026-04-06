@@ -2,27 +2,46 @@
  * Per|Form Generative Visualization — Gemini + Vega-Lite
  * =========================================================
  * Keeps the entire viz stack inside the GCP / Vertex AI ecosystem.
- * Gemini 3 emits Vega-Lite JSON specs for any data payload; client
- * renders with react-vega. No vendor lock-in: Vega-Lite is the
- * industry-standard declarative viz grammar (Olocip-style dashboards,
- * Observable, Apple, Uber, etc. all use it).
+ * Gemini emits Vega-Lite JSON specs for any data payload; client
+ * renders with react-vega. No vendor lock-in.
  *
- * Why Vega-Lite instead of a closed generative-UI product:
- *   - Open JSON schema, no proprietary format
- *   - Renders deterministically from the spec (no AI at render time)
- *   - Composable: one Gemini call per viz, spec cached per player
- *   - Gemini 3 is excellent at structured JSON output
+ * DUAL AUTH PATH:
+ *   1. Vertex AI (preferred — bills to your GCP project + credits)
+ *      Requires: GCP_PROJECT_ID + GOOGLE_APPLICATION_CREDENTIALS
+ *   2. Public Gemini API key (fallback — free tier quotas)
+ *      Requires: GEMINI_API_KEY
  *
  * Env (runtime-safe getters):
- *   GEMINI_API_KEY      — AI Studio key
- *   GEMINI_VIZ_MODEL    — override model (default gemini-3-pro)
- *   VERTEX_PROJECT_ID   — optional, if switching to true Vertex SDK
+ *   GCP_PROJECT_ID                 — your GCP project (Vertex path)
+ *   GCP_LOCATION                   — default: us-central1
+ *   GOOGLE_APPLICATION_CREDENTIALS — path to service account JSON
+ *   GEMINI_API_KEY                 — AI Studio fallback
+ *   GEMINI_VIZ_MODEL               — override model name
  */
 
+import { GoogleAuth } from 'google-auth-library';
+
+const getProjectId = () => process.env.GCP_PROJECT_ID || '';
+const getLocation = () => process.env.GCP_LOCATION || 'us-central1';
+const getCredsPath = () => process.env.GOOGLE_APPLICATION_CREDENTIALS || '';
 const getApiKey = () => process.env.GEMINI_API_KEY || '';
-// Default to 2.5-pro (stable, high quota). Override to gemini-3-pro-preview
-// via env var once the Gemini 3 preview quota opens up.
 const getModel = () => process.env.GEMINI_VIZ_MODEL || 'gemini-2.5-pro';
+
+/* ── Auth mode detection ── */
+function vertexEnabled(): boolean {
+  return Boolean(getProjectId() && getCredsPath());
+}
+
+/* ── Cached auth client (Vertex path) ── */
+let cachedAuth: GoogleAuth | null = null;
+function getAuth(): GoogleAuth {
+  if (!cachedAuth) {
+    cachedAuth = new GoogleAuth({
+      scopes: ['https://www.googleapis.com/auth/cloud-platform'],
+    });
+  }
+  return cachedAuth;
+}
 
 export interface VegaLiteSpec {
   $schema?: string;
@@ -63,11 +82,59 @@ const PERFORM_THEME = {
   },
 };
 
-/* ── Low-level Gemini call ── */
+/* ── Low-level Gemini call — routes Vertex first, API key fallback ── */
 async function callGemini(prompt: string): Promise<string | null> {
+  const body = {
+    contents: [{ role: 'user', parts: [{ text: prompt }] }],
+    generationConfig: {
+      responseMimeType: 'application/json',
+      temperature: 0.2,
+      maxOutputTokens: 4096,
+    },
+  };
+
+  // ── Path 1: Vertex AI (bills to your GCP project + credits) ──
+  if (vertexEnabled()) {
+    try {
+      const project = getProjectId();
+      const location = getLocation();
+      const model = getModel();
+      const url = `https://${location}-aiplatform.googleapis.com/v1/projects/${project}/locations/${location}/publishers/google/models/${model}:generateContent`;
+
+      const client = await getAuth().getClient();
+      const token = await client.getAccessToken();
+      if (!token.token) {
+        console.warn('[gemini-viz] Vertex auth: no token');
+        return null;
+      }
+
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token.token}`,
+        },
+        body: JSON.stringify(body),
+      });
+
+      if (!res.ok) {
+        console.warn(`[gemini-viz vertex] ${res.status}: ${await res.text().catch(() => '')}`);
+        return null;
+      }
+
+      const json = await res.json();
+      const text = json.candidates?.[0]?.content?.parts?.[0]?.text;
+      return text || null;
+    } catch (err) {
+      console.warn('[gemini-viz vertex] failed:', err);
+      return null;
+    }
+  }
+
+  // ── Path 2: Public Gemini API key fallback ──
   const apiKey = getApiKey();
   if (!apiKey) {
-    console.warn('[gemini-viz] GEMINI_API_KEY not set');
+    console.warn('[gemini-viz] Neither Vertex creds nor GEMINI_API_KEY set');
     return null;
   }
 
@@ -76,18 +143,11 @@ async function callGemini(prompt: string): Promise<string | null> {
     const res = await fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        contents: [{ role: 'user', parts: [{ text: prompt }] }],
-        generationConfig: {
-          responseMimeType: 'application/json',
-          temperature: 0.2,
-          maxOutputTokens: 4096,
-        },
-      }),
+      body: JSON.stringify(body),
     });
 
     if (!res.ok) {
-      console.warn(`[gemini-viz] ${res.status}: ${await res.text().catch(() => '')}`);
+      console.warn(`[gemini-viz apikey] ${res.status}: ${await res.text().catch(() => '')}`);
       return null;
     }
 
@@ -95,7 +155,7 @@ async function callGemini(prompt: string): Promise<string | null> {
     const text = json.candidates?.[0]?.content?.parts?.[0]?.text;
     return text || null;
   } catch (err) {
-    console.warn('[gemini-viz] fetch failed:', err);
+    console.warn('[gemini-viz apikey] failed:', err);
     return null;
   }
 }
@@ -186,5 +246,12 @@ export async function renderCompOverlayChart(payload: {
 
 /* ── Availability check ── */
 export function vizAvailable(): boolean {
-  return getApiKey().length > 0;
+  return vertexEnabled() || getApiKey().length > 0;
+}
+
+/* ── Which path is active (for logging / debug) ── */
+export function vizMode(): 'vertex' | 'apikey' | 'none' {
+  if (vertexEnabled()) return 'vertex';
+  if (getApiKey()) return 'apikey';
+  return 'none';
 }

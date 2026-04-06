@@ -6,6 +6,8 @@ services:
     volumes:
       # Persist generated images outside the container so rebuilds don't wipe them
       - /opt/foai-data/perform/generated:/app/public/generated
+      # GCP service account for Vertex AI (bills to your GCP credits)
+      - /opt/foai-data/perform/secrets:/app/secrets:ro
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.perform.rule=Host(`perform.foai.cloud`)"

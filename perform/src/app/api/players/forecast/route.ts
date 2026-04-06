@@ -6,6 +6,7 @@ import {
   renderMedicalTimelineChart,
   renderCompOverlayChart,
   vizAvailable,
+  vizMode,
 } from '@/lib/viz/gemini-viz';
 
 /* ──────────────────────────────────────────────────────────────
@@ -150,6 +151,7 @@ export async function GET(req: NextRequest) {
 
       visualizations = {
         engine: 'gemini-vega-lite',
+        authMode: vizMode(),
         careerArc,
         pillarRadar,
         medicalTimeline,
