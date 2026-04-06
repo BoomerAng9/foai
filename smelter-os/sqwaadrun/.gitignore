@@ -11,3 +11,11 @@ data/*.jsonl
 data/schedule.json
 data/output/
 !data/.gitkeep
+
+# Runtime state at root (created by gateway daemon when run locally)
+schedule.json
+scrape_cache.db
+scrape_cache.db-shm
+scrape_cache.db-wal
+doctrine.jsonl
+sqwaadrun.log

@@ -1,0 +1,32 @@
+[Unit]
+Description=ACHIEVEMOR Sqwaadrun Gateway (17-Hawk fleet)
+Documentation=https://deploy.foai.cloud/plug/sqwaadrun
+After=network-online.target docker.service
+Wants=network-online.target
+Requires=docker.service
+
+[Service]
+Type=simple
+Restart=always
+RestartSec=10
+TimeoutStartSec=60
+
+# Pull latest image and run. Image is built+pushed via cloud build
+# from foai/smelter-os/sqwaadrun/. Replace TAG with the production tag.
+Environment=IMAGE=us-east4-docker.pkg.dev/foai-aims/sqwaadrun/gateway:latest
+
+ExecStartPre=-/usr/bin/docker stop sqwaadrun-gateway
+ExecStartPre=-/usr/bin/docker rm sqwaadrun-gateway
+ExecStartPre=/usr/bin/docker pull ${IMAGE}
+
+ExecStart=/usr/bin/docker run --rm \
+  --name sqwaadrun-gateway \
+  --network host \
+  -v /var/lib/sqwaadrun:/var/lib/sqwaadrun \
+  --env-file /etc/sqwaadrun/env \
+  ${IMAGE}
+
+ExecStop=/usr/bin/docker stop sqwaadrun-gateway
+
+[Install]
+WantedBy=multi-user.target

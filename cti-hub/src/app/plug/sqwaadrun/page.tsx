@@ -291,6 +291,7 @@ export default function SqwaadrunPage() {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
           <TierCard
+            tierId="lil_hawk_solo"
             name="Lil_Hawk Solo"
             tagline="Solo operators, prototyping, lightweight research"
             price="$19"
@@ -306,6 +307,7 @@ export default function SqwaadrunPage() {
             color="#22D3EE"
           />
           <TierCard
+            tierId="sqwaad"
             name="Sqwaad"
             tagline="Production teams, monitoring, structured extraction"
             price="$79"
@@ -323,6 +325,7 @@ export default function SqwaadrunPage() {
             color="#F5A623"
           />
           <TierCard
+            tierId="sqwaadrun_commander"
             name="Sqwaadrun Commander"
             tagline="Enterprise data factory, white-label, dedicated"
             price="$299"
@@ -499,6 +502,7 @@ function RosterRow({
 }
 
 function TierCard({
+  tierId,
   name,
   tagline,
   price,
@@ -507,6 +511,7 @@ function TierCard({
   cta,
   color,
 }: {
+  tierId: 'lil_hawk_solo' | 'sqwaad' | 'sqwaadrun_commander';
   name: string;
   tagline: string;
   price: string;
@@ -515,6 +520,31 @@ function TierCard({
   cta: string;
   color: string;
 }) {
+  const [loading, setLoading] = useState(false);
+
+  async function handleCheckout() {
+    setLoading(true);
+    try {
+      const res = await fetch('/api/stripe/sqwaadrun/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tier: tierId }),
+      });
+      const data = await res.json();
+      if (data?.url) {
+        window.location.href = data.url;
+      } else if (res.status === 401) {
+        window.location.href = '/auth/login?next=/plug/sqwaadrun';
+      } else {
+        alert(data?.error || 'Checkout failed. Try again.');
+      }
+    } catch {
+      alert('Checkout failed. Try again.');
+    } finally {
+      setLoading(false);
+    }
+  }
+
   return (
     <div
       className={`p-7 border relative ${featured ? 'md:scale-105' : ''}`}
@@ -559,7 +589,9 @@ function TierCard({
         ))}
       </ul>
       <button
-        className="w-full py-3 font-bold text-[11px] tracking-[0.15em]"
+        className="w-full py-3 font-bold text-[11px] tracking-[0.15em] disabled:opacity-50"
+        onClick={handleCheckout}
+        disabled={loading}
         style={{
           background: featured ? color : 'transparent',
           color: featured ? '#050810' : color,
@@ -567,7 +599,7 @@ function TierCard({
           borderRadius: '2px',
         }}
       >
-        {cta}
+        {loading ? 'OPENING CHECKOUT...' : cta}
       </button>
     </div>
   );
