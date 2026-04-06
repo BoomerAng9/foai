@@ -1,19 +1,19 @@
 /**
- * Recraft V4 API Client
- * ---------------------
+ * Recraft V4 via fal.ai + Kie AI
+ * --------------------------------
  * Primary image engine for Per|Form:
  * - Hyper-realistic imagery
  * - Marketing mockups
  * - Platform hero visuals
  * - Brand-consistent design assets
  *
- * Base URL: https://external.api.recraft.ai/v1
- * Auth: Bearer token
- * Cost: $0.04/image (V4), $0.08/vector, $0.25/V4 Pro
+ * Access via fal.ai (FAL_KEY) and Kie AI (KIE_AI_API_KEY)
  */
 
-const RECRAFT_KEY = process.env.RECRAFT_API_KEY || '';
-const BASE = 'https://external.api.recraft.ai/v1';
+const FAL_KEY = process.env.FAL_KEY || process.env.FAL_API_KEY || '';
+const KIE_KEY = process.env.KIE_AI_API_KEY || '';
+const FAL_BASE = 'https://fal.run';
+const KIE_BASE = 'https://api.kie.ai/v1';
 
 export type RecraftModel =
   | 'recraftv4'         // $0.04 — standard raster ~1024x1024, ~10s
@@ -59,44 +59,89 @@ export interface RecraftResponse {
 }
 
 /**
- * Generate an image via Recraft V4
+ * Generate an image via Recraft V4 (fal.ai → Kie AI fallback)
  */
 export async function generateImage(
   opts: RecraftGenerateOptions,
 ): Promise<RecraftImage | null> {
-  if (!RECRAFT_KEY) return null;
+  // Try fal.ai first (Recraft V4 model)
+  if (FAL_KEY) {
+    const result = await _generateViaFal(opts);
+    if (result) return result;
+  }
 
-  const body: Record<string, unknown> = {
-    prompt: opts.prompt,
-    model: opts.model || 'recraftv4',
-    n: opts.n || 1,
-  };
+  // Fallback to Kie AI
+  if (KIE_KEY) {
+    const result = await _generateViaKie(opts);
+    if (result) return result;
+  }
 
-  if (opts.style) body.style = opts.style;
-  if (opts.size) body.size = opts.size;
-  if (opts.styleId) body.style_id = opts.styleId;
+  return null;
+}
 
+async function _generateViaFal(opts: RecraftGenerateOptions): Promise<RecraftImage | null> {
   try {
-    const res = await fetch(`${BASE}/images/generations`, {
+    const res = await fetch(`${FAL_BASE}/fal-ai/recraft-v3`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${RECRAFT_KEY}`,
+        Authorization: `Key ${FAL_KEY}`,
       },
-      body: JSON.stringify(body),
-      signal: AbortSignal.timeout(60000),
+      body: JSON.stringify({
+        prompt: opts.prompt,
+        image_size: opts.size ? { width: parseInt(opts.size.split('x')[0]), height: parseInt(opts.size.split('x')[1]) } : { width: 1024, height: 1024 },
+        style: opts.style?.toLowerCase().replace(/[^a-z_]/g, '_') || 'realistic_image',
+        num_images: opts.n || 1,
+      }),
+      signal: AbortSignal.timeout(90000),
     });
 
     if (!res.ok) {
-      const err = await res.text().catch(() => '');
-      console.error(`[Recraft] ${res.status}: ${err}`);
+      console.error(`[Recraft/fal] ${res.status}`);
       return null;
     }
 
-    const data: RecraftResponse = await res.json();
-    return data.data?.[0] ?? null;
+    const data = await res.json();
+    const img = data.images?.[0] || data.data?.[0];
+    if (!img) return null;
+
+    return { url: img.url || img, id: data.request_id };
   } catch (err) {
-    console.error('[Recraft] Generation failed:', err);
+    console.error('[Recraft/fal] Failed:', err);
+    return null;
+  }
+}
+
+async function _generateViaKie(opts: RecraftGenerateOptions): Promise<RecraftImage | null> {
+  try {
+    const res = await fetch(`${KIE_BASE}/images/generations`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${KIE_KEY}`,
+      },
+      body: JSON.stringify({
+        prompt: opts.prompt,
+        model: opts.model || 'recraftv4',
+        size: opts.size || '1024x1024',
+        style: opts.style || 'realistic_image',
+        n: opts.n || 1,
+      }),
+      signal: AbortSignal.timeout(90000),
+    });
+
+    if (!res.ok) {
+      console.error(`[Recraft/kie] ${res.status}`);
+      return null;
+    }
+
+    const data = await res.json();
+    const img = data.data?.[0];
+    if (!img) return null;
+
+    return { url: img.url, id: img.id };
+  } catch (err) {
+    console.error('[Recraft/kie] Failed:', err);
     return null;
   }
 }
@@ -161,73 +206,33 @@ export async function generateVector(
 }
 
 /**
- * Create a custom style from a reference image
- * Returns the style UUID for reuse across generations
- */
-export async function createCustomStyle(
-  imageUrl: string,
-  baseStyle: RecraftStyle = 'digital_illustration',
-): Promise<string | null> {
-  if (!RECRAFT_KEY) return null;
-
-  try {
-    // Download the reference image first
-    const imgRes = await fetch(imageUrl);
-    if (!imgRes.ok) return null;
-    const imgBlob = await imgRes.blob();
-
-    const form = new FormData();
-    form.append('style', baseStyle);
-    form.append('file', imgBlob, 'reference.png');
-
-    const res = await fetch(`${BASE}/styles`, {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${RECRAFT_KEY}`,
-      },
-      body: form,
-    });
-
-    if (!res.ok) return null;
-    const data = await res.json();
-    return data.id ?? null;
-  } catch {
-    return null;
-  }
-}
-
-/**
- * Remove background from an image
+ * Remove background from an image via fal.ai
  */
 export async function removeBackground(
   imageUrl: string,
 ): Promise<string | null> {
-  if (!RECRAFT_KEY) return null;
+  if (!FAL_KEY) return null;
 
   try {
-    const imgRes = await fetch(imageUrl);
-    if (!imgRes.ok) return null;
-    const imgBlob = await imgRes.blob();
-
-    const form = new FormData();
-    form.append('file', imgBlob, 'image.png');
-    form.append('response_format', 'url');
-
-    const res = await fetch(`${BASE}/images/removeBackground`, {
+    const res = await fetch(`${FAL_BASE}/fal-ai/birefnet`, {
       method: 'POST',
-      headers: { Authorization: `Bearer ${RECRAFT_KEY}` },
-      body: form,
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Key ${FAL_KEY}`,
+      },
+      body: JSON.stringify({ image_url: imageUrl }),
+      signal: AbortSignal.timeout(30000),
     });
 
     if (!res.ok) return null;
     const data = await res.json();
-    return data.data?.[0]?.url ?? null;
+    return data.image?.url ?? null;
   } catch {
     return null;
   }
 }
 
-/** Check if Recraft API is configured */
+/** Check if Recraft API is configured (via fal.ai or Kie) */
 export function isRecraftConfigured(): boolean {
-  return RECRAFT_KEY.length > 0;
+  return FAL_KEY.length > 0 || KIE_KEY.length > 0;
 }
