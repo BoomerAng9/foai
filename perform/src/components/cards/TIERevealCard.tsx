@@ -23,6 +23,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { GradeStamp } from '@/components/tie/GradeStamp';
 
 export interface TIERevealPlayer {
   name: string;
@@ -213,6 +214,9 @@ export function TIERevealCard({ player, lockedImageUrl, revealedImageUrl, autoPl
         )}
       </AnimatePresence>
 
+      {/* Press stamp — slammed onto top-right on reveal */}
+      <GradeStamp score={player.grade} trigger={state === 'revealed'} size={100} corner="tr" delay={500} />
+
       {/* REVEALED overlay — player info + grade */}
       <AnimatePresence>
         {state === 'revealed' && (
@@ -222,27 +226,12 @@ export function TIERevealCard({ player, lockedImageUrl, revealedImageUrl, autoPl
             animate={{ opacity: 1 }}
             transition={{ duration: 0.8, delay: 0.2 }}
           >
-            {/* Grade medallion — top left */}
+            {/* Rank badge — top left (moved to make room for stamp) */}
             <motion.div
-              className="absolute top-4 left-4 w-16 h-16 rounded-full flex flex-col items-center justify-center"
-              style={{
-                background: 'linear-gradient(135deg, #D4A853, #8B6914)',
-                boxShadow: '0 0 30px rgba(212,168,83,0.6), 0 4px 16px rgba(0,0,0,0.5)',
-              }}
-              initial={{ scale: 0, rotate: -180 }}
-              animate={{ scale: 1, rotate: 0 }}
-              transition={{ duration: 0.6, delay: 0.3, type: 'spring', stiffness: 140 }}
-            >
-              <span className="text-[8px] font-mono text-black/70 tracking-wider">TIE</span>
-              <span className="text-xl font-bold text-black leading-none">{player.grade}</span>
-            </motion.div>
-
-            {/* Rank badge — top right */}
-            <motion.div
-              className="absolute top-4 right-4 px-3 py-1.5 rounded bg-black/80 backdrop-blur border border-white/20"
-              initial={{ x: 80, opacity: 0 }}
+              className="absolute top-4 left-4 px-3 py-1.5 rounded bg-black/80 backdrop-blur border border-white/20"
+              initial={{ x: -80, opacity: 0 }}
               animate={{ x: 0, opacity: 1 }}
-              transition={{ duration: 0.5, delay: 0.5 }}
+              transition={{ duration: 0.5, delay: 0.3 }}
             >
               <div className="text-[8px] font-mono text-white/50 uppercase tracking-wider">Rank</div>
               <div className="text-lg font-bold text-white leading-none">#{player.rank}</div>
