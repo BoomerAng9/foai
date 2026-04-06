@@ -6,7 +6,7 @@ const OWNER_ONLY_ROUTES = ['/live', '/plug-bin', '/open-seats', '/enrollments', 
 const OWNER_EMAILS = (process.env.OWNER_EMAILS || '').split(',').map(e => e.trim()).filter(Boolean);
 
 // Routes available on deploy.foai.cloud (customer-facing product)
-const DEPLOY_ROUTES = ['/chat', '/agents', '/meet', '/deploy-agent', '/projects', '/assets', '/settings', '/profile', '/billing', '/auth', '/grammar', '/deploy-landing', '/about', '/plug', '/broadcast', '/create', '/pipeline', '/process', '/how-to'];
+const DEPLOY_ROUTES = ['/chat', '/agents', '/meet', '/deploy-agent', '/projects', '/assets', '/settings', '/profile', '/billing', '/auth', '/grammar', '/deploy-landing', '/about', '/plug', '/broadcast', '/create', '/pipeline', '/process', '/how-to', '/sqwaadrun'];
 
 export function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;

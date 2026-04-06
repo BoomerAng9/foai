@@ -575,23 +575,71 @@ class TRCCPipeline:
         Hand each registered job to Lil_Sched_Hawk so the daemon's
         background loop runs them on the configured interval. Caller
         must keep the squad alive (e.g. inside the gateway daemon).
+
+        Also registers the special "trcc::promotion" job that calls
+        sqwaadrun_staging.promote_all() every 30 minutes — no scrape,
+        just a SQL function call.
         """
         from sqwaadrun.lil_scrapp_hawk import ScheduledJob
 
+        # ── TRCC enrichment jobs ──
         for job in self.jobs.values():
             scheduled = ScheduledJob(
                 job_id=f"trcc::{job.job_id}",
                 url=job.sources[0],
                 interval_seconds=job.interval_seconds,
-                job_type="scrape",
+                job_type="trcc_enrichment",
                 payload={
-                    "trcc": True,
+                    "trcc_job_id": job.job_id,
                     "all_sources": job.sources,
                     "target_athlete": job.target_athlete,
                     "description": job.description,
                 },
             )
             await self.squad.sched_hawk.execute(job=scheduled)
+
+        # ── Promotion job — runs promote_all() on a schedule ──
+        promotion = ScheduledJob(
+            job_id="trcc::promotion",
+            url="postgres://promote_all",  # synthetic URL marker
+            interval_seconds=1800,  # 30 minutes
+            job_type="trcc_promotion",
+            payload={"description": "Run sqwaadrun_staging.promote_all()"},
+        )
+        await self.squad.sched_hawk.execute(job=promotion)
+        self.logger.info("Registered trcc::promotion (every 30 min)")
+
+    async def sched_handler(self, job) -> None:
+        """
+        Handler for Lil_Sched_Hawk's run_loop. Routes scheduled jobs
+        based on job_type:
+          - trcc_enrichment → run the matching TRCCJob
+          - trcc_promotion  → call promote_all()
+          - other           → skip (not ours)
+        """
+        job_type = getattr(job, "job_type", "")
+
+        if job_type == "trcc_promotion":
+            try:
+                athletes, nil = await _run_async(run_promotion)
+                self.logger.info(
+                    f"Promotion run: {athletes} athletes, {nil} NIL signals merged"
+                )
+            except Exception as e:
+                self.logger.warning(f"Promotion run failed: {e}")
+            return
+
+        if job_type == "trcc_enrichment":
+            payload = getattr(job, "payload", {}) or {}
+            trcc_job_id = payload.get("trcc_job_id")
+            if not trcc_job_id or trcc_job_id not in self.jobs:
+                self.logger.warning(f"Unknown trcc job: {trcc_job_id}")
+                return
+            await self.run_job(trcc_job_id)
+            return
+
+        # Not a TRCC job — leave it for whoever else handles it
+        self.logger.debug(f"sched_handler: skipping non-TRCC job_type={job_type}")
 
 
 def _result_from_dict(d: Dict[str, Any]) -> Optional[ScrapeResult]:
@@ -636,13 +684,10 @@ async def _cli_main():
     )
     pipeline = TRCCPipeline(squad, general)
 
-    # Default starter jobs — replace with real source list later
-    pipeline.register(TRCCJob(
-        job_id="example_athlete_enrichment",
-        sources=["https://example.com/"],
-        description="Smoke-test enrichment job",
-        interval_seconds=21600,
-    ))
+    # Register all real production jobs from the registry
+    from sqwaadrun.trcc_jobs import all_jobs
+    for job in all_jobs():
+        pipeline.register(job)
 
     try:
         if args.command == "run-once":
