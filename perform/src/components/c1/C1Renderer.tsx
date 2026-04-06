@@ -87,6 +87,8 @@ function renderNode(node: unknown, key?: React.Key): React.ReactNode {
     case 'BarChartV2':     return <C1BarChart {...(props as BarChartProps)} key={key} />;
     case 'CalloutV2':      return <C1Callout {...(props as CalloutProps)} key={key} />;
     case 'TextContent':    return <C1TextContent {...(props as TextContentProps)} key={key} />;
+    case 'ProfileTile':    return <C1ProfileTile {...(props as ProfileTileProps)} key={key} />;
+    case 'Stats':          return <C1Stats {...(props as StatsProps)} key={key} />;
     default:
       // Fallback: render children if any
       if (props.children) return <>{renderNode(props.children, key)}</>;
@@ -477,5 +479,107 @@ function C1TextContent({ text, content, variant }: TextContentProps) {
     <p className="text-sm leading-relaxed" style={{ color: TONE.text }}>
       {value}
     </p>
+  );
+}
+
+interface ProfileTileProps {
+  title?: string;
+  subtitle?: string;
+  description?: string;
+  imageUrl?: string;
+  iconName?: string;
+  badge?: unknown;
+  child?: unknown;
+}
+function C1ProfileTile({ title, subtitle, description, imageUrl, iconName, badge, child }: ProfileTileProps) {
+  return (
+    <div
+      className="relative p-5 rounded-xl flex items-center gap-4"
+      style={{
+        background: TONE.surfaceAlt,
+        border: `1px solid ${TONE.border}`,
+        boxShadow: `inset 0 0 30px rgba(34,211,238,0.04)`,
+      }}
+    >
+      {imageUrl ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={imageUrl}
+          alt={title || ''}
+          className="w-14 h-14 rounded-full object-cover"
+          style={{ border: `2px solid ${TONE.cyan}`, boxShadow: `0 0 12px ${TONE.cyanGlow}` }}
+        />
+      ) : iconName ? (
+        <div
+          className="w-14 h-14 rounded-full flex items-center justify-center"
+          style={{
+            background: `${TONE.cyan}15`,
+            border: `2px solid ${TONE.cyan}`,
+            boxShadow: `0 0 12px ${TONE.cyanGlow}`,
+          }}
+        >
+          <C1Icon name={iconName} size={26} />
+        </div>
+      ) : null}
+      <div className="flex-1 min-w-0">
+        {title && <div className="text-base font-bold" style={{ color: TONE.text }}>{title}</div>}
+        {subtitle && (
+          <div className="text-[11px] tracking-wider uppercase mt-0.5" style={{ color: TONE.cyan }}>
+            {subtitle}
+          </div>
+        )}
+        {description && (
+          <div className="text-xs mt-1" style={{ color: TONE.textMuted }}>{description}</div>
+        )}
+        {child !== undefined && <div className="mt-2">{renderNode(child)}</div>}
+      </div>
+      {badge !== undefined && <div>{renderNode(badge)}</div>}
+    </div>
+  );
+}
+
+interface StatsProps {
+  stats?: Array<{ label?: string; value?: string | number; change?: string; trend?: 'up' | 'down' | 'flat' }>;
+}
+function C1Stats({ stats = [] }: StatsProps) {
+  return (
+    <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+      {stats.map((s, i) => (
+        <div
+          key={i}
+          className="p-4 rounded-xl"
+          style={{
+            background: TONE.surfaceAlt,
+            border: `1px solid ${TONE.border}`,
+          }}
+        >
+          {s.label && (
+            <div className="text-[9px] font-bold tracking-[0.22em] uppercase" style={{ color: TONE.cyan }}>
+              {s.label}
+            </div>
+          )}
+          <div className="flex items-baseline gap-2 mt-1">
+            <span
+              className="text-3xl font-black tabular-nums"
+              style={{
+                color: TONE.gold,
+                fontFamily: "'Outfit', sans-serif",
+                textShadow: `0 0 16px rgba(255,215,0,0.4)`,
+              }}
+            >
+              {s.value}
+            </span>
+            {s.change && (
+              <span
+                className="text-xs font-bold"
+                style={{ color: s.trend === 'down' ? TONE.red : s.trend === 'up' ? TONE.green : TONE.textMuted }}
+              >
+                {s.trend === 'up' ? '↑' : s.trend === 'down' ? '↓' : '→'} {s.change}
+              </span>
+            )}
+          </div>
+        </div>
+      ))}
+    </div>
   );
 }
