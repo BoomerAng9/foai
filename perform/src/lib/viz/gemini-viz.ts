@@ -20,7 +20,7 @@
  */
 
 const getApiKey = () => process.env.GEMINI_API_KEY || '';
-const getModel = () => process.env.GEMINI_VIZ_MODEL || 'gemini-3-pro';
+const getModel = () => process.env.GEMINI_VIZ_MODEL || 'gemini-3-pro-preview';
 
 export interface VegaLiteSpec {
   $schema?: string;
