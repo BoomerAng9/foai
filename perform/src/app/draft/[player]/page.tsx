@@ -381,11 +381,7 @@ export default function PlayerDetailPage({ params }: { params: Promise<{ player:
 
             {/* ── PER|FORM TAKE — editorial callout for top-15 picks ── */}
             {data.overall_rank != null && data.overall_rank <= 15 && (() => {
-              const takes: Record<string, string> = {
-                'Jeremiyah Love': "Our #1 overall. Bigger and faster than Jeanty. The Raiders signed Kirk Cousins \u2014 they need a game-changer at Running Back, not another Quarterback.",
-                'Fernando Mendoza': "Consensus #1, but we disagree. Elite talent, but the Raiders addressed Quarterback in free agency.",
-              };
-              const take = takes[data.name];
+              const take = data.scouting_summary || data.analyst_notes;
               if (!take) return null;
               return (
                 <motion.div
