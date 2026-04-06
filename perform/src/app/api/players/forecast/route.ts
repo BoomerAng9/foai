@@ -32,10 +32,16 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'name query param required' }, { status: 400 });
   }
 
+  // Normalize slug-style URLs ("jeremiyah-love") and spaced ("Jeremiyah Love")
+  const normalize = (s: string) =>
+    s.toLowerCase().replace(/[-_]+/g, ' ').replace(/\s+/g, ' ').trim();
+  const target = normalize(name);
+
   const graded = gradeAllProspects();
-  const player = graded.find(
-    p => p.name.toLowerCase() === name.toLowerCase(),
-  );
+  const player = graded.find(p => normalize(p.name) === target)
+    // Fallback: partial match (handles "jeremiyah-love" vs "Jeremiyah J. Love")
+    ?? graded.find(p => normalize(p.name).includes(target))
+    ?? graded.find(p => target.includes(normalize(p.name)));
 
   if (!player) {
     return NextResponse.json({ error: `Player "${name}" not found` }, { status: 404 });
