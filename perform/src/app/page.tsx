@@ -47,6 +47,26 @@ interface TopProspect {
 }
 
 /* ─────────────────────────────────────────
+   Draft Countdown — LIVE calculation
+   ───────────────────────────────────────── */
+const DRAFT_DATE = new Date('2026-04-23T20:00:00-04:00'); // 8 PM ET
+
+function useDraftCountdown(): number {
+  const [days, setDays] = useState(() => {
+    const diff = DRAFT_DATE.getTime() - Date.now();
+    return Math.max(0, Math.ceil(diff / (1000 * 60 * 60 * 24)));
+  });
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const diff = DRAFT_DATE.getTime() - Date.now();
+      setDays(Math.max(0, Math.ceil(diff / (1000 * 60 * 60 * 24))));
+    }, 60000); // update every minute
+    return () => clearInterval(interval);
+  }, []);
+  return days;
+}
+
+/* ─────────────────────────────────────────
    Scroll Progress Bar
    ───────────────────────────────────────── */
 function ScrollProgress() {
@@ -319,6 +339,7 @@ export default function HomePage() {
   const [heroIdx, setHeroIdx] = useState(0);
   const [draftVideos, setDraftVideos] = useState<{ videoId: string; title: string; thumbnailUrl: string; url: string; channelTitle: string }[]>([]);
   const [overlayOpen, setOverlayOpen] = useState(false);
+  const draftDays = useDraftCountdown();
 
   // Scroll-based parallax for hero
   const { scrollY } = useScroll();
@@ -442,7 +463,7 @@ export default function HomePage() {
             <motion.div className="flex justify-center mt-10 mb-8" variants={heroItem}>
               <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full" style={{ background: 'var(--pf-gold-glow)', border: '1px solid var(--pf-gold-border)' }}>
                 <div className="w-2 h-2 rounded-full live-pulse" style={{ background: '#22C55E' }} />
-                <span className="text-[10px] font-mono tracking-wider" style={{ color: 'var(--pf-gold)' }}>19 DAYS UNTIL DRAFT NIGHT</span>
+                <span className="text-[10px] font-mono tracking-wider" style={{ color: 'var(--pf-gold)' }}>{draftDays} {draftDays === 1 ? 'DAY' : 'DAYS'} UNTIL DRAFT NIGHT</span>
               </div>
             </motion.div>
 
@@ -649,7 +670,7 @@ export default function HomePage() {
       {/* Broadcast Overlay */}
       <BroadcastOverlay
         open={overlayOpen}
-        headline="2026 NFL Draft is 19 days away"
+        headline={`2026 NFL Draft is ${draftDays} days away`}
         subtext="Pittsburgh | April 23-25 | Full coverage on Per|Form"
         autoHideMs={10000}
         onClose={() => setOverlayOpen(false)}

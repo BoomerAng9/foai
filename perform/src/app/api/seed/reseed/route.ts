@@ -63,6 +63,7 @@ export async function POST(req: NextRequest) {
     const graded = gradeAllProspects();
 
     let inserted = 0;
+    const errors: string[] = [];
     for (const p of graded) {
       try {
         await sql`
@@ -88,8 +89,8 @@ export async function POST(req: NextRequest) {
             updated_at = NOW()
         `;
         inserted++;
-      } catch {
-        // Skip on error
+      } catch (err) {
+        errors.push(p.name);
       }
     }
 
@@ -116,9 +117,11 @@ export async function POST(req: NextRequest) {
       }));
 
     return NextResponse.json({
-      message: `Reseed complete. ${inserted} prospects graded by Open Mind.`,
+      message: `Reseed complete. ${inserted} prospects graded by Open Mind.${errors.length > 0 ? ` ${errors.length} failed.` : ''}`,
       deleted: deleted.length,
       inserted,
+      failed: errors.length,
+      failedNames: errors.slice(0, 10),
       top10,
       biggestSleepers: sleepers,
     });

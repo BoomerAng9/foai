@@ -5,7 +5,7 @@
  * for all 600 prospects.
  */
 
-import { generateText } from '@/lib/openrouter';
+import { chatCompletion } from '@/lib/openrouter';
 
 const LLAMA_MODEL = 'meta-llama/llama-3.3-70b-instruct:free';
 
@@ -50,7 +50,17 @@ Projected Round: ${projectedRound}${statsStr}
 Return JSON only.`;
 
   try {
-    const raw = await generateText(systemPrompt, userPrompt);
+    const res = await chatCompletion({
+      model: LLAMA_MODEL,
+      messages: [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: userPrompt },
+      ],
+      temperature: 0.4,
+      max_tokens: 1000,
+    });
+    const data = await res.json();
+    const raw: string = data.choices?.[0]?.message?.content ?? '';
     // Strip markdown fences
     const cleaned = raw.replace(/```(?:json)?\n?/g, '').trim();
     const parsed = JSON.parse(cleaned);

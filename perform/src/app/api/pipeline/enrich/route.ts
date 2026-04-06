@@ -78,10 +78,18 @@ export async function POST(req: NextRequest) {
                 weaknesses = ${report.weaknesses},
                 nfl_comparison = ${report.nflComparison},
                 analyst_notes = ${report.analystNotes},
+                grade = CASE WHEN ${tieScore}::numeric IS NOT NULL THEN ${tieScore} ELSE grade END,
                 updated_at = NOW()
               WHERE id = ${p.id}
             `;
             results.reportsGenerated++;
+          } else if (tieScore !== null) {
+            await sql`
+              UPDATE perform_players SET
+                grade = ${tieScore},
+                updated_at = NOW()
+              WHERE id = ${p.id}
+            `;
           }
         }
 

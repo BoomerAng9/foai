@@ -16,9 +16,9 @@ export const DRAFT_2026 = {
     rounds2_3: '2026-04-24T19:00:00-04:00', // 7 PM ET
     rounds4_7: '2026-04-25T12:00:00-04:00', // Noon ET
   },
-  totalPicks: 257,
+  totalPicks: 258,
   standardPicks: 224,
-  compensatoryPicks: 33,
+  compensatoryPicks: 34, // 33 traditional + 1 Resolution JC-2A (DEN)
   rounds: 7,
   pickTimers: {
     1: 8,  // NEW: reduced from 10 minutes (first change since 2008)
