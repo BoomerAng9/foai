@@ -1,119 +1,98 @@
 /**
- * The Sqwaadrun — canonical 17-Hawk roster profiles
- * =====================================================
- * User-facing agent metadata for the Deploy Platform.
- * Colors and tier assignments match the Python upstream.
+ * The Sqwaadrun roster — pairs character profiles with operational
+ * metadata (role, capabilities, sample mission). The UI consumes
+ * this directly via HawkCardData.
  */
 
-import type { HawkProfile } from '@/components/hawks/HawkCard';
+import type { HawkCardData } from '@/components/hawks/HawkCard';
+import { HAWK_PROFILES, getHawkBySlug } from '@/lib/hawks/characters';
 
-export const SQWAADRUN_ROSTER: HawkProfile[] = [
-  // ═══ CORE HAWKS ═══
+interface OpsMeta {
+  slug: string;
+  role: string;
+  capabilities: string[];
+  sampleMission: string;
+}
+
+const OPS: OpsMeta[] = [
+  // ─── Core ───
   {
-    name: 'Lil_Guard_Hawk',
-    displayName: 'Guard',
-    color: '#FF4444',
-    tier: 'core',
-    glyph: '🛡️',
+    slug: 'lil_guard_hawk',
     role: 'Gatekeeper — robots.txt, rate limiting, proxy rotation',
     capabilities: [
       'Enforces robots.txt and crawl delays',
       'User-agent rotation across real browser strings',
-      'Per-domain allow/denylists',
+      'Per-domain allow / denylists',
       'Proxy pool management',
       'Block detection and graceful retreat',
     ],
     sampleMission: 'Check if this domain allows scraping and pace the next 50 requests.',
   },
   {
-    name: 'Lil_Scrapp_Hawk',
-    displayName: 'Scrapp',
-    color: '#00E676',
-    tier: 'core',
-    glyph: '⚡',
-    role: 'Squad Lead — async fetching, retries, encoding',
+    slug: 'lil_scrapp_hawk',
+    role: 'Squad Lead — async fetching with retries and encoding',
     capabilities: [
       'High-concurrency HTTP fetching',
-      'Automatic retries on 429/5xx with exponential backoff',
-      'Encoding auto-detection (UTF-8, Latin-1, etc.)',
-      'Connection pooling and reuse',
+      'Automatic retries on 429 / 5xx with exponential backoff',
+      'Encoding auto-detection',
+      'Connection pooling',
       'Squad coordination across all other Hawks',
     ],
-    sampleMission: 'Fetch the front page with 3 retries and return clean bytes.',
+    sampleMission: 'Fetch the front page with three retries and return clean bytes.',
   },
   {
-    name: 'Lil_Parse_Hawk',
-    displayName: 'Parse',
-    color: '#448AFF',
-    tier: 'core',
-    glyph: '📄',
+    slug: 'lil_parse_hawk',
     role: 'Parser — title, meta, links, markdown conversion',
     capabilities: [
       'Title / meta description / OG tag extraction',
       'Link and image harvesting with URL resolution',
-      'Clean text extraction (scripts/styles stripped)',
-      'Markdown conversion via html2text',
+      'Clean text extraction',
+      'Markdown conversion',
       'Language detection',
     ],
     sampleMission: 'Convert this page to clean markdown with all links resolved.',
   },
   {
-    name: 'Lil_Crawl_Hawk',
-    displayName: 'Crawl',
-    color: '#FFAB00',
-    tier: 'core',
-    glyph: '🕸️',
-    role: 'Crawler — BFS frontier, link discovery',
+    slug: 'lil_crawl_hawk',
+    role: 'Crawler — BFS frontier and link discovery',
     capabilities: [
       'Breadth-first site traversal',
-      'Include/exclude pattern filtering',
+      'Include / exclude pattern filtering',
       'Depth and page count limits',
       'Duplicate URL detection',
       'Domain boundary enforcement',
     ],
-    sampleMission: 'Crawl the docs section up to depth 3, skip /api/ routes.',
+    sampleMission: 'Crawl the docs section up to depth three, skip /api/ routes.',
   },
   {
-    name: 'Lil_Snap_Hawk',
-    displayName: 'Snap',
-    color: '#E040FB',
-    tier: 'core',
-    glyph: '📸',
-    role: 'Screenshot specialist — Playwright, JS rendering',
+    slug: 'lil_snap_hawk',
+    role: 'Screenshot specialist — JS rendering for SPAs',
     capabilities: [
       'Full-page screenshots',
       'JavaScript rendering for SPAs',
       'Viewport customization',
       'PDF export',
-      'Graceful standby when Playwright unavailable',
+      'Graceful standby when renderer offline',
     ],
-    sampleMission: 'Capture a 1920×1080 screenshot of this React dashboard after JS hydration.',
+    sampleMission: 'Capture a 1920×1080 screenshot of this dashboard after JS hydration.',
   },
   {
-    name: 'Lil_Store_Hawk',
-    displayName: 'Store',
-    color: '#00BCD4',
-    tier: 'core',
-    glyph: '💾',
+    slug: 'lil_store_hawk',
     role: 'Persistence — SQLite WAL, dedup, caching',
     capabilities: [
       'SQLite storage with WAL mode',
       'Content-hash deduplication',
-      'TTL-based cache invalidation',
-      'Export to JSON / JSONL / Markdown',
+      'TTL cache invalidation',
+      'JSON / JSONL / Markdown export',
       'Query by URL, date, or tag',
     ],
-    sampleMission: 'Cache this result for 6 hours, dedup by content hash.',
+    sampleMission: 'Cache this result for six hours, dedup by content hash.',
   },
 
-  // ═══ EXPANSION HAWKS ═══
+  // ─── Expansion ───
   {
-    name: 'Lil_Extract_Hawk',
-    displayName: 'Extract',
-    color: '#FF9100',
-    tier: 'expansion',
-    glyph: '🎯',
-    role: 'Schema-driven CSS/XPath/regex extraction',
+    slug: 'lil_extract_hawk',
+    role: 'Surgical extraction — CSS / XPath / regex schemas',
     capabilities: [
       'Declarative extraction rules',
       'CSS, XPath, and regex selectors',
@@ -121,17 +100,13 @@ export const SQWAADRUN_ROSTER: HawkProfile[] = [
       'HTML table extraction',
       'CSV export',
     ],
-    sampleMission: 'Pull name, price, and rating from every .product-card on this page.',
+    sampleMission: 'Pull name, price, and rating from every product card on this page.',
   },
   {
-    name: 'Lil_Feed_Hawk',
-    displayName: 'Feed',
-    color: '#76FF03',
-    tier: 'expansion',
-    glyph: '📡',
-    role: 'RSS / Atom / JSON Feed discovery',
+    slug: 'lil_feed_hawk',
+    role: 'RSS / Atom / JSON Feed dispatcher',
     capabilities: [
-      'Auto-discover feeds from HTML <link> tags',
+      'Feed auto-discovery from HTML link tags',
       'Parse RSS 2.0, Atom, JSON Feed',
       'Entry deduplication by GUID',
       'Publication date filtering',
@@ -140,12 +115,8 @@ export const SQWAADRUN_ROSTER: HawkProfile[] = [
     sampleMission: 'Find all feeds on this blog and pull the last 25 entries.',
   },
   {
-    name: 'Lil_Diff_Hawk',
-    displayName: 'Diff',
-    color: '#FF6D00',
-    tier: 'expansion',
-    glyph: '🔍',
-    role: 'Change detection — hashing, unified diffs',
+    slug: 'lil_diff_hawk',
+    role: 'Change detection — hashing, unified diffs, alerts',
     capabilities: [
       'SHA-256 content hashing',
       'Unified diff generation',
@@ -156,44 +127,32 @@ export const SQWAADRUN_ROSTER: HawkProfile[] = [
     sampleMission: 'Alert me when the pricing page changes by more than 5%.',
   },
   {
-    name: 'Lil_Clean_Hawk',
-    displayName: 'Clean',
-    color: '#B2FF59',
-    tier: 'expansion',
-    glyph: '🧹',
-    role: 'Boilerplate removal, text normalization, quality',
+    slug: 'lil_clean_hawk',
+    role: 'Boilerplate removal, normalization, quality scoring',
     capabilities: [
-      'Unicode normalization (NFC)',
-      '17-pattern boilerplate removal (navs, footers, cookie banners)',
-      'Quality scoring (0-100)',
+      'Unicode normalization',
+      '17-pattern boilerplate removal',
+      'Quality scoring (0–100)',
       'Repetition and dedup filtering',
       'Readability calibration',
     ],
-    sampleMission: 'Strip nav/footer/ads from this article and score the remaining content quality.',
+    sampleMission: 'Strip nav and footer from this article and score what remains.',
   },
   {
-    name: 'Lil_API_Hawk',
-    displayName: 'API',
-    color: '#7C4DFF',
-    tier: 'expansion',
-    glyph: '🔌',
+    slug: 'lil_api_hawk',
     role: 'REST / GraphQL with auth and pagination',
     capabilities: [
       'Bearer, API key, and Basic auth',
       'Cursor, offset, and URL pagination',
       'Rate limit awareness',
-      'Response schema validation',
+      'Schema validation',
       'Multi-endpoint orchestration',
     ],
-    sampleMission: 'Page through this authenticated REST endpoint until there are no more results.',
+    sampleMission: 'Page through this authenticated REST endpoint until exhausted.',
   },
   {
-    name: 'Lil_Queue_Hawk',
-    displayName: 'Queue',
-    color: '#18FFFF',
-    tier: 'expansion',
-    glyph: '📥',
-    role: 'Priority queue, retry scheduling',
+    slug: 'lil_queue_hawk',
+    role: 'Priority queue with retry scheduling',
     capabilities: [
       'Priority-based job ordering',
       'Worker pool management',
@@ -201,16 +160,12 @@ export const SQWAADRUN_ROSTER: HawkProfile[] = [
       'Job status persistence',
       'Deadline enforcement',
     ],
-    sampleMission: 'Queue 1,000 URLs with priority 5, run 8 workers in parallel.',
+    sampleMission: 'Queue 1,000 URLs with priority 5 across 8 workers in parallel.',
   },
 
-  // ═══ SPECIALIST HAWKS ═══
+  // ─── Specialist ───
   {
-    name: 'Lil_Sitemap_Hawk',
-    displayName: 'Sitemap',
-    color: '#FFC107',
-    tier: 'specialist',
-    glyph: '🗺️',
+    slug: 'lil_sitemap_hawk',
     role: 'Deep XML sitemap specialist',
     capabilities: [
       'robots.txt sitemap auto-discovery',
@@ -222,11 +177,7 @@ export const SQWAADRUN_ROSTER: HawkProfile[] = [
     sampleMission: 'Pull every URL modified in the last 7 days from this 500-page sitemap.',
   },
   {
-    name: 'Lil_Stealth_Hawk',
-    displayName: 'Stealth',
-    color: '#607D8B',
-    tier: 'specialist',
-    glyph: '👤',
+    slug: 'lil_stealth_hawk',
     role: 'Anti-detection — fingerprints, timing, referrers',
     capabilities: [
       '4 full browser fingerprint profiles',
@@ -235,58 +186,59 @@ export const SQWAADRUN_ROSTER: HawkProfile[] = [
       'Referrer chain construction',
       'Bot-detection scanner (Cloudflare, Akamai, captcha)',
     ],
-    sampleMission: 'Scrape this site with realistic Chrome-Mac headers and detect any challenge pages.',
+    sampleMission: 'Scrape this site with realistic Chrome-Mac headers and detect challenge pages.',
   },
   {
-    name: 'Lil_Schema_Hawk',
-    displayName: 'Schema',
-    color: '#E91E63',
-    tier: 'specialist',
-    glyph: '🧬',
+    slug: 'lil_schema_hawk',
     role: 'Structured data — JSON-LD, microdata, RDFa, OG',
     capabilities: [
       'JSON-LD with @graph flattening',
       'Microdata recursive tree parsing',
       'RDFa type / property / about',
-      'Extended Open Graph with nested props',
-      'Schema.org type detection across all formats',
+      'Open Graph with nested properties',
+      'Schema.org type detection',
     ],
     sampleMission: 'Extract every structured data block on this athlete profile page.',
   },
   {
-    name: 'Lil_Pipe_Hawk',
-    displayName: 'Pipe',
-    color: '#795548',
-    tier: 'specialist',
-    glyph: '⚙️',
-    role: 'ETL pipeline — map, filter, coerce, dedup, sort',
+    slug: 'lil_pipe_hawk',
+    role: 'ETL — map / filter / coerce / dedup / sort',
     capabilities: [
       'Field mapping and renaming',
-      'Type coercion (str → int/float/bool/case)',
-      '11 filter operators (eq/gt/contains/regex/...)',
+      'Type coercion (str → int / float / bool / case)',
+      '11 filter operators',
       'Deduplication by key',
       'SQL INSERT / CSV export',
     ],
-    sampleMission: 'Rename these fields, cast prices to float, dedup by SKU, export as SQL.',
+    sampleMission: 'Rename fields, cast prices to float, dedup by SKU, export as SQL.',
   },
   {
-    name: 'Lil_Sched_Hawk',
-    displayName: 'Sched',
-    color: '#9C27B0',
-    tier: 'specialist',
-    glyph: '⏰',
-    role: 'Scheduled scraping manager',
+    slug: 'lil_sched_hawk',
+    role: 'Scheduled missions — recurring jobs and persistence',
     capabilities: [
       'Interval-based job registration',
       'Automatic next-run scheduling',
       'Max-run limits',
       'Disk persistence across restarts',
-      'Change-only callback integration with Diff',
+      'Change-only callbacks via Diff_Hawk',
     ],
-    sampleMission: 'Re-scrape this page every 6 hours and notify me only if it changes.',
+    sampleMission: 'Re-scrape this page every six hours and notify only if it changes.',
   },
 ];
 
-export const CORE_HAWKS = SQWAADRUN_ROSTER.filter((h) => h.tier === 'core');
-export const EXPANSION_HAWKS = SQWAADRUN_ROSTER.filter((h) => h.tier === 'expansion');
-export const SPECIALIST_HAWKS = SQWAADRUN_ROSTER.filter((h) => h.tier === 'specialist');
+export const SQWAADRUN_ROSTER: HawkCardData[] = OPS.map((op) => {
+  const profile = getHawkBySlug(op.slug);
+  if (!profile) {
+    throw new Error(`No character profile for ${op.slug}`);
+  }
+  return {
+    profile,
+    role: op.role,
+    capabilities: op.capabilities,
+    sampleMission: op.sampleMission,
+  };
+});
+
+export const CORE_HAWKS = SQWAADRUN_ROSTER.filter((h) => h.profile.rank === 'core');
+export const EXPANSION_HAWKS = SQWAADRUN_ROSTER.filter((h) => h.profile.rank === 'expansion');
+export const SPECIALIST_HAWKS = SQWAADRUN_ROSTER.filter((h) => h.profile.rank === 'specialist');

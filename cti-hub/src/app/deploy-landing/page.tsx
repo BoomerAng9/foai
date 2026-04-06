@@ -134,7 +134,7 @@ export default function DeployLanding() {
             <span className="font-bold">This one runs like a real <span style={{ color: '#E8A020', fontFamily: "'Permanent Marker', cursive" }}>company</span>.</span>
           </h2>
           <p className="text-sm text-white/40 leading-relaxed">
-            22 live services. 6 Boomer_Angs. 11 Lil_Hawks. A Digital CEO that delegates, not generates.
+            22 live services. 6 Boomer_Angs. 17 Lil_Hawks in the Sqwaadrun. A Digital CEO that delegates, not generates.
             Agents that plan before they act, remember what worked, and are measured against KPIs —
             the same way a Fortune 500 manages its workforce. The difference is this workforce never sleeps,
             scales infinitely, and improves through semantic memory.

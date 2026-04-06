@@ -12,6 +12,30 @@ export function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
   const hostname = request.headers.get('host') || '';
   const isDeployDomain = hostname.includes('deploy.foai.cloud');
+  const isSqwaadrunDomain = hostname.includes('sqwaadrun.foai.cloud');
+
+  // sqwaadrun.foai.cloud — dedicated subdomain for the Sqwaadrun.
+  // Root and any non-plug path rewrites into /plug/sqwaadrun.
+  if (isSqwaadrunDomain) {
+    const isAllowed =
+      pathname === '/' ||
+      pathname.startsWith('/plug/sqwaadrun') ||
+      pathname.startsWith('/api/sqwaadrun') ||
+      pathname.startsWith('/auth/') ||
+      pathname.startsWith('/billing') ||
+      pathname.startsWith('/_next/') ||
+      pathname.startsWith('/hawks/');
+
+    if (pathname === '/') {
+      return NextResponse.rewrite(new URL('/plug/sqwaadrun', request.url));
+    }
+
+    if (!isAllowed) {
+      return NextResponse.redirect(new URL('/plug/sqwaadrun', request.url));
+    }
+
+    return NextResponse.next();
+  }
 
   // On deploy.foai.cloud — block owner-only routes entirely
   if (isDeployDomain) {

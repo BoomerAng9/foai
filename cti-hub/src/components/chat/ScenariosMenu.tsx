@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import {
   Presentation, FileText, BarChart3, PenTool, Palette, Search,
-  Workflow, Trophy, Code2, Sparkles, Mic, Database,
+  Workflow, Trophy, Code2, Sparkles, Mic, Database, Bird,
 } from 'lucide-react';
 
 export interface ScenarioSelection {
@@ -18,6 +18,7 @@ interface ScenariosMenuProps {
 }
 
 const PLUGIN_TILES = [
+  { id: 'sqwaadrun', label: 'The Sqwaadrun', icon: Bird, desc: 'Deploy the 17-Hawk fleet for web intel' },
   { id: 'slides', label: 'Slide Builder', icon: Presentation, desc: 'Pitch decks, presentations' },
   { id: 'docs', label: 'Doc Writer', icon: FileText, desc: 'Reports, memos, proposals' },
   { id: 'data', label: 'Data Pipeline', icon: Database, desc: 'Dashboards, analysis' },
@@ -41,6 +42,7 @@ const SCENARIO_CATEGORIES = [
   { id: 'research', label: 'Research', subs: ['Market Research', 'Competitive Analysis', 'Deep Brief'] },
   { id: 'automation', label: 'Automation', subs: ['Workflow', 'Triggers', 'Scheduled Tasks'] },
   { id: 'sports', label: 'Sports / Per|Form', subs: ['Scouting Report', 'Player Comparison', 'Game Analysis', 'Podcast Script'] },
+  { id: 'sqwaadrun', label: 'Web Intel / Sqwaadrun', subs: ['Recon a page', 'Crawl a site', 'Harvest fields', 'Patrol for changes', 'Survey sitemap', 'Hit an API endpoint'] },
   { id: 'code', label: 'Code & Deploy', subs: ['API', 'Web App', 'Mobile App', 'Deployment'] },
   { id: 'custom', label: 'Custom', subs: [] },
 ];
