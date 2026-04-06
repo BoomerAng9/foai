@@ -99,15 +99,49 @@ export async function generateImage(req: GatewayImageRequest): Promise<GatewayIm
 
 /* ── Recraft V4 style support ──
  * V4 has a different (undocumented) style enum than V3.
- * V3 accepts: realistic_image, digital_illustration, vector_illustration
- * V4 rejects these and works fine with NO style (uses its own design taste).
+ * V4 rejects V3 style names. Omit for V4 — uses its own design taste.
  * Only pass style when caller uses V3 models explicitly. */
 function recraftStyleFor(model: string, style?: string): string | undefined {
   if (!style) return undefined;
-  // V4 and V4 Pro: don't pass style (lets Recraft's own taste drive output)
   if (model.startsWith('recraftv4')) return undefined;
-  // V3 and V2: pass through the style
   return style;
+}
+
+/* ── Recraft V4 size normalizer ──
+ * V4 only accepts SDXL-native sizes (verified 2026-04-06).
+ * Map arbitrary input sizes to the nearest valid V4 size. */
+const RECRAFT_V4_SIZES = {
+  square: '1024x1024',
+  landscape_16_9: '1536x768',
+  portrait_9_16: '768x1536',
+  landscape_wide: '1344x768',
+  portrait_tall: '768x1344',
+  landscape_5_4: '1152x896',
+  portrait_4_5: '896x1152',
+} as const;
+
+function normalizeRecraftSize(model: string, size?: string): string {
+  // V3 and V2 accept more sizes
+  if (!model.startsWith('recraftv4')) return size || '1024x1024';
+
+  if (!size) return RECRAFT_V4_SIZES.square;
+
+  // If already a valid V4 size, use as-is
+  const validSizes = Object.values(RECRAFT_V4_SIZES);
+  if (validSizes.includes(size as typeof validSizes[number])) return size;
+
+  // Parse and snap to nearest valid ratio
+  const [w, h] = size.split('x').map(Number);
+  if (!w || !h) return RECRAFT_V4_SIZES.square;
+  const ratio = w / h;
+
+  if (ratio > 1.8) return RECRAFT_V4_SIZES.landscape_16_9;  // wide landscape
+  if (ratio > 1.5) return RECRAFT_V4_SIZES.landscape_wide;  // 16:9-ish
+  if (ratio > 1.2) return RECRAFT_V4_SIZES.landscape_5_4;   // 5:4 landscape
+  if (ratio > 0.85) return RECRAFT_V4_SIZES.square;         // ~square
+  if (ratio > 0.65) return RECRAFT_V4_SIZES.portrait_4_5;   // 4:5 portrait
+  if (ratio > 0.55) return RECRAFT_V4_SIZES.portrait_tall;  // 9:16-ish
+  return RECRAFT_V4_SIZES.portrait_9_16;                     // tall portrait
 }
 
 /* ── Recraft Direct API ── */
@@ -121,7 +155,7 @@ async function _tryRecraftDirect(req: GatewayImageRequest, key: string): Promise
     };
     const style = recraftStyleFor(model, req.style);
     if (style) body.style = style;
-    if (req.size) body.size = req.size;
+    body.size = normalizeRecraftSize(model, req.size);
 
     const res = await fetch('https://external.api.recraft.ai/v1/images/generations', {
       method: 'POST',
