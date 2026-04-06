@@ -16,7 +16,10 @@
     "next": "^15.1.0",
     "postgres": "^3.4.5",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "react-dom": "^19.0.0",
+    "react-vega": "^8.0.0",
+    "vega": "^6.2.0",
+    "vega-lite": "^6.4.2"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",

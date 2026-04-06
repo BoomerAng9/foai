@@ -70,6 +70,33 @@ export async function POST(req: NextRequest) {
         ADD COLUMN IF NOT EXISTS prime_sub_tags TEXT
     `);
 
+    // Dual-grade + longevity columns
+    await sql.unsafe(`
+      ALTER TABLE perform_players
+        ADD COLUMN IF NOT EXISTS grade_clean NUMERIC(5,1),
+        ADD COLUMN IF NOT EXISTS grade_letter_clean TEXT,
+        ADD COLUMN IF NOT EXISTS grade_icon_clean TEXT,
+        ADD COLUMN IF NOT EXISTS medical_delta NUMERIC(4,1) DEFAULT 0,
+        ADD COLUMN IF NOT EXISTS game_performance_clean NUMERIC(4,1),
+        ADD COLUMN IF NOT EXISTS athleticism_clean NUMERIC(4,1),
+        ADD COLUMN IF NOT EXISTS intangibles_clean NUMERIC(4,1),
+        ADD COLUMN IF NOT EXISTS medical_severity TEXT,
+        ADD COLUMN IF NOT EXISTS medical_current_status TEXT,
+        ADD COLUMN IF NOT EXISTS medical_injury_types TEXT,
+        ADD COLUMN IF NOT EXISTS medical_year INTEGER,
+        ADD COLUMN IF NOT EXISTS medical_notes TEXT,
+        ADD COLUMN IF NOT EXISTS medical_comps TEXT,
+        ADD COLUMN IF NOT EXISTS longevity_expected_years INTEGER,
+        ADD COLUMN IF NOT EXISTS longevity_peak_start INTEGER,
+        ADD COLUMN IF NOT EXISTS longevity_peak_end INTEGER,
+        ADD COLUMN IF NOT EXISTS longevity_decline_risk TEXT,
+        ADD COLUMN IF NOT EXISTS longevity_outlook TEXT,
+        ADD COLUMN IF NOT EXISTS longevity_upside_comp TEXT,
+        ADD COLUMN IF NOT EXISTS longevity_baseline_comp TEXT,
+        ADD COLUMN IF NOT EXISTS longevity_downside_comp TEXT,
+        ADD COLUMN IF NOT EXISTS longevity_confidence NUMERIC(3,2)
+    `);
+
     // Widen grade column to hold 101+ Prime Player scores
     await sql.unsafe(`
       ALTER TABLE perform_players
@@ -92,14 +119,39 @@ export async function POST(req: NextRequest) {
             overall_rank, position_rank, projected_round,
             grade, tie_grade, tie_tier, trend, film_grade,
             game_performance, athleticism, intangibles, multi_position_bonus,
-            grade_letter, grade_icon, grade_label, grade_projection, prime_sub_tags
+            grade_letter, grade_icon, grade_label, grade_projection, prime_sub_tags,
+            grade_clean, grade_letter_clean, grade_icon_clean, medical_delta,
+            game_performance_clean, athleticism_clean, intangibles_clean,
+            medical_severity, medical_current_status, medical_injury_types,
+            medical_year, medical_notes, medical_comps,
+            longevity_expected_years, longevity_peak_start, longevity_peak_end,
+            longevity_decline_risk, longevity_outlook,
+            longevity_upside_comp, longevity_baseline_comp, longevity_downside_comp,
+            longevity_confidence
           ) VALUES (
             ${p.name}, ${p.school}, ${p.position}, ${p.classYear},
             ${p.performRank}, ${p.positionRank}, ${p.projectedRound},
             ${p.grade}, ${p.gradeLetter}, ${p.gradeLabel}, ${p.trend}, ${p.gradeLetter},
             ${p.gamePerformance}, ${p.athleticism}, ${p.intangibles}, ${p.multiPositionBonus},
             ${p.gradeLetter}, ${p.gradeIcon}, ${p.gradeLabel}, ${p.gradeProjection},
-            ${p.primeSubTags.join(',') || null}
+            ${p.primeSubTags.join(',') || null},
+            ${p.gradeClean}, ${p.gradeLetterClean}, ${p.gradeIconClean}, ${p.medicalDelta},
+            ${p.gamePerformanceClean}, ${p.athleticismClean}, ${p.intangiblesClean},
+            ${p.medicalFlag?.severity || null},
+            ${p.medicalFlag?.currentStatus || null},
+            ${p.medicalFlag?.injuryTypes.join(',') || null},
+            ${p.medicalFlag?.year || null},
+            ${p.medicalFlag?.notes || null},
+            ${p.medicalFlag?.historicalComps?.join(',') || null},
+            ${p.longevity.expectedCareerYears},
+            ${p.longevity.peakWindowYears[0]},
+            ${p.longevity.peakWindowYears[1]},
+            ${p.longevity.declineRisk},
+            ${p.longevity.careerOutlookLabel},
+            ${p.longevity.comps.upside?.name || null},
+            ${p.longevity.comps.baseline?.name || null},
+            ${p.longevity.comps.downside?.name || null},
+            ${p.longevity.confidence}
           )
           ON CONFLICT (name, school, class_year) DO UPDATE SET
             position = EXCLUDED.position,
@@ -120,6 +172,28 @@ export async function POST(req: NextRequest) {
             grade_label = EXCLUDED.grade_label,
             grade_projection = EXCLUDED.grade_projection,
             prime_sub_tags = EXCLUDED.prime_sub_tags,
+            grade_clean = EXCLUDED.grade_clean,
+            grade_letter_clean = EXCLUDED.grade_letter_clean,
+            grade_icon_clean = EXCLUDED.grade_icon_clean,
+            medical_delta = EXCLUDED.medical_delta,
+            game_performance_clean = EXCLUDED.game_performance_clean,
+            athleticism_clean = EXCLUDED.athleticism_clean,
+            intangibles_clean = EXCLUDED.intangibles_clean,
+            medical_severity = EXCLUDED.medical_severity,
+            medical_current_status = EXCLUDED.medical_current_status,
+            medical_injury_types = EXCLUDED.medical_injury_types,
+            medical_year = EXCLUDED.medical_year,
+            medical_notes = EXCLUDED.medical_notes,
+            medical_comps = EXCLUDED.medical_comps,
+            longevity_expected_years = EXCLUDED.longevity_expected_years,
+            longevity_peak_start = EXCLUDED.longevity_peak_start,
+            longevity_peak_end = EXCLUDED.longevity_peak_end,
+            longevity_decline_risk = EXCLUDED.longevity_decline_risk,
+            longevity_outlook = EXCLUDED.longevity_outlook,
+            longevity_upside_comp = EXCLUDED.longevity_upside_comp,
+            longevity_baseline_comp = EXCLUDED.longevity_baseline_comp,
+            longevity_downside_comp = EXCLUDED.longevity_downside_comp,
+            longevity_confidence = EXCLUDED.longevity_confidence,
             updated_at = NOW()
         `;
         inserted++;
