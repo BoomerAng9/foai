@@ -13,14 +13,15 @@ export default function PlugPage() {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {[
-            { href: '/plug/perform', name: 'Per|Form', desc: 'Sports grading & ranking', icon: '&#x1F3C8;' },
-            { href: '/plug/smb-marketing', name: 'Marketing Agency', desc: 'Research + strategy + content', icon: '&#x1F4C8;' },
-            { href: '/plug/finance', name: 'Finance Analyst', desc: 'Cash flow + budget + pricing', icon: '&#x1F4B0;' },
-            { href: '/plug/teacher', name: 'Digital Twin Teacher', desc: 'Multilingual classroom', icon: '&#x1F393;' },
+            { href: '/plug/sqwaadrun', name: 'The Sqwaadrun', desc: '17-Hawk web intelligence fleet', icon: '&#x1F985;', accent: '#F5A623' },
+            { href: '/plug/perform', name: 'Per|Form', desc: 'Sports grading & ranking', icon: '&#x1F3C8;', accent: '#E8A020' },
+            { href: '/plug/smb-marketing', name: 'Marketing Agency', desc: 'Research + strategy + content', icon: '&#x1F4C8;', accent: '#E8A020' },
+            { href: '/plug/finance', name: 'Finance Analyst', desc: 'Cash flow + budget + pricing', icon: '&#x1F4B0;', accent: '#E8A020' },
+            { href: '/plug/teacher', name: 'Digital Twin Teacher', desc: 'Multilingual classroom', icon: '&#x1F393;', accent: '#E8A020' },
           ].map(plug => (
-            <Link key={plug.href} href={plug.href} className="border border-white/10 p-6 text-left hover:border-[#E8A020]/40 transition-all" style={{ background: 'rgba(232,160,32,0.03)' }}>
+            <Link key={plug.href} href={plug.href} className="border border-white/10 p-6 text-left transition-all hover:border-opacity-40" style={{ background: `${plug.accent}08`, borderColor: `${plug.accent}20` }}>
               <span className="text-2xl block mb-2" dangerouslySetInnerHTML={{ __html: plug.icon }} />
-              <span className="text-sm font-bold text-[#E8A020] block">{plug.name}</span>
+              <span className="text-sm font-bold block" style={{ color: plug.accent }}>{plug.name}</span>
               <span className="text-[10px] text-white/40 font-mono">{plug.desc}</span>
             </Link>
           ))}
