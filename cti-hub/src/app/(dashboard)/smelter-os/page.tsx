@@ -596,14 +596,29 @@ function EmberLayer() {
 function OwnerGate() {
   return (
     <div
-      className="min-h-screen flex items-center justify-center px-4 smelter-ember-bg"
-      style={{ fontFamily: "'Inter', sans-serif" }}
+      className="min-h-screen w-full text-white flex items-center justify-center px-4 sm:px-6 smelter-ember-bg relative overflow-hidden selection:bg-[#ff5722] selection:text-white"
+      style={{ fontFamily: "'Inter', system-ui, sans-serif", background: '#050505' }}
     >
-      <div className="text-center max-w-md">
+      {/* Furnace radial — same vocabulary as the Bridge hero */}
+      <div
+        className="absolute inset-0 z-0 opacity-30 pointer-events-none"
+        style={{
+          background:
+            'radial-gradient(ellipse at 70% 50%, rgba(255,87,34,0.35) 0%, transparent 55%), radial-gradient(ellipse at 30% 80%, rgba(255,87,34,0.18) 0%, transparent 45%)',
+        }}
+      />
+      <EmberLayer />
+
+      <div className="relative z-10 max-w-2xl w-full text-center">
+        {/* Status pill */}
         <div
-          className="inline-flex items-center gap-3 smelter-glass px-4 py-1.5 rounded-full border mb-6"
+          className="inline-flex items-center gap-3 smelter-glass px-4 py-1.5 rounded-full border mb-8"
           style={{ borderColor: 'rgba(255,87,34,0.4)' }}
         >
+          <div
+            className="w-1.5 h-1.5 rounded-full smelter-ember-pulse"
+            style={{ background: '#ff5722' }}
+          />
           <Flame className="w-3 h-3" style={{ color: '#ff5722' }} />
           <span
             className="text-[10px] font-bold tracking-[0.3em] uppercase"
@@ -612,24 +627,62 @@ function OwnerGate() {
             Owner Access Required
           </span>
         </div>
-        <h1 className="font-doto font-black text-4xl md:text-5xl mb-4 uppercase leading-tight">
-          SMELTER<span style={{ color: '#ff5722' }}>OS</span>
+
+        {/* Hero headline — matches the Bridge's FORGE THE FUTURE treatment */}
+        <h1 className="font-doto font-black text-5xl sm:text-7xl md:text-8xl mb-2 uppercase leading-[0.95] tracking-tight text-white">
+          SMELTER
+          <span className="smelter-glow" style={{ color: '#ff5722' }}>
+            OS
+          </span>
         </h1>
-        <p className="text-sm text-white/60 mb-8">
-          The foundry is owner-only. Sign in with an allowlisted email to access the fleet, the
-          memory stores, and the doctrine audit.
-        </p>
-        <Link
-          href="/auth/login?next=/smelter-os"
-          className="inline-flex items-center gap-2 font-bold text-sm tracking-wider px-7 py-3.5"
-          style={{
-            background: '#ff5722',
-            color: 'white',
-            boxShadow: '0 0 30px rgba(255,87,34,0.35)',
-          }}
+        <div className="text-[10px] font-mono tracking-[0.3em] uppercase opacity-60 mb-8" style={{ color: '#ff5722' }}>
+          / The Foundry · v2.4
+        </div>
+
+        {/* Tagline */}
+        <div className="flex gap-5 items-start justify-center max-w-xl mx-auto mb-10">
+          <div
+            className="w-0.5 h-16 shrink-0 hidden sm:block"
+            style={{
+              background: 'linear-gradient(180deg, #ff5722 0%, transparent 100%)',
+              opacity: 0.6,
+            }}
+          />
+          <p className="text-sm sm:text-base text-white/70 leading-relaxed text-left">
+            The foundry is owner-only. Sign in with an{' '}
+            <span className="text-white font-semibold">allowlisted email</span> to access the
+            fleet, memory stores, doctrine audit, and TIE engine.
+          </p>
+        </div>
+
+        {/* CTAs */}
+        <div className="flex flex-wrap items-center justify-center gap-3">
+          <Link
+            href="/auth/login?next=/smelter-os"
+            className="font-bold tracking-wider text-sm flex items-center gap-3 px-8 py-4 transition-all"
+            style={{
+              background: '#ff5722',
+              color: 'white',
+              boxShadow: '0 0 30px rgba(255,87,34,0.45), 0 0 60px rgba(255,87,34,0.18)',
+            }}
+          >
+            <Flame className="w-5 h-5" /> SIGN IN <ArrowRight className="w-4 h-4" />
+          </Link>
+          <Link
+            href="/chat"
+            className="smelter-glass smelter-glass-hover font-bold tracking-wider text-sm flex items-center gap-3 px-7 py-4 transition-all text-white"
+          >
+            <Bot className="w-5 h-5" /> TALK TO ACHEEVY
+          </Link>
+        </div>
+
+        {/* Footer line */}
+        <div
+          className="text-[9px] font-mono tracking-[0.35em] uppercase opacity-30 mt-12"
+          style={{ color: '#ff5722' }}
         >
-          SIGN IN <ArrowRight className="w-4 h-4" />
-        </Link>
+          ACHIEVEMOR · Smelter OS v2.4 · Forge the Future
+        </div>
       </div>
     </div>
   );
