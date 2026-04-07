@@ -22,6 +22,7 @@
 import { stripReasoningArtifacts } from '@/lib/openrouter';
 import type { AnalystPersona } from '@/lib/analysts/personas';
 import { synthesizeElevenLabs, elevenLabsAvailable } from './elevenlabs-client';
+import { synthesizeGeminiTts, geminiTtsAvailable } from './gemini-tts-client';
 
 export interface SpeakRequest {
   analyst: AnalystPersona;
@@ -163,12 +164,23 @@ async function dispatchSynthesis(payload: EnginePayload): Promise<{ audioUrl: st
       return { audioUrl: result.audioUrl, error: result.error };
     }
 
+    case 'gemini-live': {
+      if (!geminiTtsAvailable()) {
+        return { audioUrl: null, error: 'GEMINI_API_KEY not set' };
+      }
+      const result = await synthesizeGeminiTts({
+        text: body,
+        voiceId: firstSpeaker?.voiceId || 'idris-broadcast',
+        styleHint: firstSpeaker?.style ?? payload.style,
+      });
+      return { audioUrl: result.audioUrl, error: result.error };
+    }
+
     case 'vibevoice':
     case 'playht':
     case 'chatterbox':
     case 'personaplex':
     case 'grok-voice':
-    case 'gemini-live':
     default: {
       // Stub — log and return null so the client shows "VOICE COMING SOON"
       console.log(`[tts-router] stub synthesis for engine=${payload.engine}`, {

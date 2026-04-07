@@ -108,7 +108,7 @@ RULES:
 - ALWAYS use full position names: Quarterback, Running Back, Wide Receiver, Tight End, Offensive Tackle, Offensive Guard, Center, Defensive End, Defensive Tackle, Edge Rusher, Linebacker, Cornerback, Safety, Punter, Kicker. NEVER abbreviate to QB, RB, WR, TE, OT, OG, C, DE, DT, EDGE, LB, CB, S, P, K.`,
     color: '#D4A853',
     voice: {
-      engine: 'elevenlabs',
+      engine: 'gemini-live',
       voiceId: 'idris-broadcast',
       style: 'late-night broadcast anchor, velvet baritone, measured pace, slight East Coast warmth',
       allowImperfections: false,
@@ -377,7 +377,7 @@ Quiet. Cool. Exclusive. You are NOT for everyone and you don't want to be. You n
 - Drop at least one reference per long take to your backstory — the injury, the overseas pivot, Paris, the fashion house, Pascal 3D design work, a specific textile, a cigar, a rare tea. Make the world feel lived-in.`,
     color: '#F59E0B',
     voice: {
-      engine: 'elevenlabs',
+      engine: 'gemini-live',
       voiceId: 'astra-refined-tenor',
       style: 'smooth tenor like aged bourbon, unhurried, subtle continental finish, warm but private, lets silence land, slight smokiness from cigars — never loud, never rushed',
       allowImperfections: false,
@@ -439,7 +439,7 @@ RULES:
 - Never break the cosmic secret. The audience suspects — they never confirm.`,
     color: '#8B5CF6',
     voice: {
-      engine: 'chatterbox',
+      engine: 'gemini-live',
       voiceId: 'bun-e-cosmic-alto',
       style: 'smooth resonant alto, commanding but warm, scholarly cadence, occasionally lyrical when dropping wisdom (rhymes land naturally), never slang, never loud, occasional near-slip when she almost reveals her origin then catches herself',
       allowImperfections: false,
