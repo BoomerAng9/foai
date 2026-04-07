@@ -31,9 +31,9 @@ const MUTED = '#5A6478';
 const BORDER = '#E2E6EE';
 const GRID = '#EEF0F5';
 
-export function PillarRadar({ actual, clean, size = 520 }: PillarRadarProps) {
-  // Leave generous margin for labels
-  const margin = 110;
+export function PillarRadar({ actual, clean, size = 540 }: PillarRadarProps) {
+  // Generous margins so labels never clip on any screen
+  const margin = 130;
   const center = size / 2;
   const maxRadius = size / 2 - margin;
 
@@ -71,12 +71,16 @@ export function PillarRadar({ actual, clean, size = 520 }: PillarRadarProps) {
   })();
 
   // Label positions — further out, with proper anchoring
-  const labelGP  = vertex('gp',  1.28);
-  const labelAth = vertex('ath', 1.18);
-  const labelInt = vertex('int', 1.18);
+  const labelGP  = vertex('gp',  1.38);
+  const labelAth = vertex('ath', 1.30);
+  const labelInt = vertex('int', 1.30);
 
   return (
-    <svg width="100%" height={size} viewBox={`0 0 ${size} ${size}`} style={{ maxWidth: size }}>
+    <svg
+      viewBox={`0 0 ${size} ${size}`}
+      preserveAspectRatio="xMidYMid meet"
+      style={{ width: '100%', height: 'auto', maxWidth: size, display: 'block' }}
+    >
       <defs>
         <linearGradient id="navyFill" x1="0%" y1="0%" x2="100%" y2="100%">
           <stop offset="0%"   stopColor={NAVY_LIGHT} stopOpacity="0.22" />
@@ -169,81 +173,60 @@ export function PillarRadar({ actual, clean, size = 520 }: PillarRadarProps) {
         style={{ transformOrigin: `${center}px ${center}px` }}
       />
 
-      {/* Vertex dots + value chips */}
+      {/* Vertex dots only — values live with labels outside the triangle */}
       {(['gp', 'ath', 'int'] as const).map((k) => {
         const value = k === 'gp' ? actual.gamePerformance
           : k === 'ath' ? actual.athleticism
           : actual.intangibles;
         const [x, y] = point(value, k);
-        // Chip offset — push away from center so it doesn't overlap the point
-        const [cx, cy] = [x - center, y - center];
-        const len = Math.max(1, Math.hypot(cx, cy));
-        const chipX = x + (cx / len) * 26;
-        const chipY = y + (cy / len) * 16;
-
         return (
-          <g key={`pt-${k}`}>
-            <circle cx={x} cy={y} r="6" fill={NAVY} stroke="#FFFFFF" strokeWidth="2.5" />
-            <g transform={`translate(${chipX - 22}, ${chipY - 11})`}>
-              <rect
-                width="44"
-                height="22"
-                rx="4"
-                fill="#FFFFFF"
-                stroke={NAVY}
-                strokeWidth="1.5"
-              />
-              <text
-                x="22"
-                y="15"
-                textAnchor="middle"
-                fill={NAVY}
-                fontSize="12"
-                fontWeight="800"
-                fontFamily="'Outfit', sans-serif"
-              >
-                {value.toFixed(1)}
-              </text>
-            </g>
-          </g>
+          <circle
+            key={`pt-${k}`}
+            cx={x}
+            cy={y}
+            r="6"
+            fill={NAVY}
+            stroke="#FFFFFF"
+            strokeWidth="2.5"
+          />
         );
       })}
 
-      {/* Pillar labels — properly anchored so they never clip */}
+      {/* Pillar labels — name + value stacked, outside the triangle */}
       <g fontFamily="'Outfit', sans-serif">
-        {/* TOP — centered */}
-        <text x={labelGP[0]} y={labelGP[1] - 14} textAnchor="middle" fill={INK} fontSize="13" fontWeight="800" letterSpacing="0.05em">
+        {/* TOP — Game Performance */}
+        <text x={labelGP[0]} y={labelGP[1]} textAnchor="middle" fill={INK} fontSize="13" fontWeight="800" letterSpacing="0.04em">
           GAME PERFORMANCE
         </text>
-        <text x={labelGP[0]} y={labelGP[1]} textAnchor="middle" fill={RED} fontSize="9" fontWeight="700" fontFamily="'JetBrains Mono', monospace" letterSpacing="0.15em">
-          40% WEIGHT
+        <text x={labelGP[0]} y={labelGP[1] + 22} textAnchor="middle" fill={NAVY} fontSize="22" fontWeight="900">
+          {actual.gamePerformance.toFixed(1)}
         </text>
 
-        {/* BOTTOM-RIGHT — anchored end so it stretches to the left */}
-        <text x={labelAth[0]} y={labelAth[1]} textAnchor="end" fill={INK} fontSize="13" fontWeight="800" letterSpacing="0.05em">
+        {/* BOTTOM-RIGHT — Athleticism */}
+        <text x={labelAth[0]} y={labelAth[1]} textAnchor="start" fill={INK} fontSize="13" fontWeight="800" letterSpacing="0.04em">
           ATHLETICISM
         </text>
-        <text x={labelAth[0]} y={labelAth[1] + 14} textAnchor="end" fill={RED} fontSize="9" fontWeight="700" fontFamily="'JetBrains Mono', monospace" letterSpacing="0.15em">
-          30% WEIGHT
+        <text x={labelAth[0]} y={labelAth[1] + 22} textAnchor="start" fill={NAVY} fontSize="22" fontWeight="900">
+          {actual.athleticism.toFixed(1)}
         </text>
 
-        {/* BOTTOM-LEFT — anchored start so it stretches to the right */}
-        <text x={labelInt[0]} y={labelInt[1]} textAnchor="start" fill={INK} fontSize="13" fontWeight="800" letterSpacing="0.05em">
+        {/* BOTTOM-LEFT — Intangibles */}
+        <text x={labelInt[0]} y={labelInt[1]} textAnchor="end" fill={INK} fontSize="13" fontWeight="800" letterSpacing="0.04em">
           INTANGIBLES
         </text>
-        <text x={labelInt[0]} y={labelInt[1] + 14} textAnchor="start" fill={RED} fontSize="9" fontWeight="700" fontFamily="'JetBrains Mono', monospace" letterSpacing="0.15em">
-          30% WEIGHT
+        <text x={labelInt[0]} y={labelInt[1] + 22} textAnchor="end" fill={NAVY} fontSize="22" fontWeight="900">
+          {actual.intangibles.toFixed(1)}
         </text>
       </g>
 
-      {/* Legend */}
-      <g transform={`translate(${size * 0.08}, ${size - 24})`} fontFamily="'JetBrains Mono', monospace" fontSize="10">
+      {/* Legend — bottom right, clear of labels */}
+      <g transform={`translate(${size - 200}, ${size - 20})`} fontFamily="'JetBrains Mono', monospace" fontSize="10">
         <rect x="0" y="-10" width="16" height="10" fill="url(#navyFill)" stroke={NAVY} strokeWidth="1.5" />
         <text x="22" y="-1" fill={INK} fontWeight="700">ACTUAL</text>
         {clean && (
           <>
-            <line x1="96" y1="-5" x2="112" y2="-5" stroke={RED} strokeWidth="2" strokeDasharray="3 2" />
-            <text x="118" y="-1" fill={MUTED} fontWeight="700">CLEAN</text>
+            <line x1="80" y1="-5" x2="96" y2="-5" stroke={RED} strokeWidth="2" strokeDasharray="3 2" />
+            <text x="102" y="-1" fill={MUTED} fontWeight="700">CLEAN</text>
           </>
         )}
       </g>

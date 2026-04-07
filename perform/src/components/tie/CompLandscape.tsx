@@ -91,17 +91,18 @@ export function CompLandscape({
     const cx = x(comp.careerYears);
     const cy = y(synthPeak(comp));
     let dx = 0, dy = 0;
-    // Walk the prior placed items and offset if too close
+    // Extra breathing room so name labels above + outcome labels below
+    // never collide with the next bubble's labels.
+    const labelRoom = 70;
     for (const p of placed) {
       const px = x(p.comp.careerYears) + p.dx;
       const py = y(synthPeak(p.comp)) + p.dy;
       const dist = Math.hypot(cx + dx - px, cy + dy - py);
-      const minDist = bubble(comp.proBowls) + bubble(p.comp.proBowls) + 24;
+      const minDist = bubble(comp.proBowls) + bubble(p.comp.proBowls) + labelRoom;
       if (dist < minDist) {
-        // Push this new one up-and-right by the shortfall
         const needed = minDist - dist;
-        dx += needed * 0.7;
-        dy -= needed * 0.7;
+        // Horizontal-only push keeps labels aligned cleanly
+        dx += needed * 0.95;
       }
     }
     placed.push({ comp, kind, dx, dy });
@@ -112,10 +113,9 @@ export function CompLandscape({
 
   return (
     <svg
-      width="100%"
-      height={height}
       viewBox={`0 0 ${width} ${height}`}
       preserveAspectRatio="xMidYMid meet"
+      style={{ width: '100%', height: 'auto', display: 'block' }}
     >
       <defs>
         <radialGradient id="playerStarGlow" cx="50%" cy="50%" r="50%">
@@ -247,32 +247,20 @@ export function CompLandscape({
                 strokeDasharray="3 3"
               />
             )}
-            <circle cx={cx} cy={cy} r={r + 4} fill={color} fillOpacity="0.1" />
+            <circle cx={cx} cy={cy} r={r + 5} fill={color} fillOpacity="0.12" />
             <circle
               cx={cx}
               cy={cy}
               r={r}
               fill={color}
-              fillOpacity="0.9"
+              fillOpacity="0.88"
               stroke="#FFFFFF"
               strokeWidth="3"
             />
-            {/* Pro bowl count centered in bubble */}
+            {/* Name label above bubble — with breathing room */}
             <text
               x={cx}
-              y={cy + 4}
-              textAnchor="middle"
-              fill="#FFFFFF"
-              fontSize="12"
-              fontWeight="900"
-              fontFamily="'Outfit', sans-serif"
-            >
-              {c.proBowls}
-            </text>
-            {/* Name label above bubble */}
-            <text
-              x={cx}
-              y={cy - r - 8}
+              y={cy - r - 12}
               textAnchor="middle"
               fill={INK}
               fontSize="13"
@@ -281,28 +269,18 @@ export function CompLandscape({
             >
               {c.name}
             </text>
-            {/* Outcome + stats below */}
+            {/* Single-line stat summary below bubble */}
             <text
               x={cx}
-              y={cy + r + 16}
+              y={cy + r + 18}
               textAnchor="middle"
               fill={color}
-              fontSize="9"
+              fontSize="10"
               fontWeight="700"
               fontFamily="'JetBrains Mono', monospace"
-              letterSpacing="0.12em"
+              letterSpacing="0.1em"
             >
-              {OUTCOME_LABEL[c.outcome]}
-            </text>
-            <text
-              x={cx}
-              y={cy + r + 28}
-              textAnchor="middle"
-              fill={MUTED}
-              fontSize="9"
-              fontFamily="'JetBrains Mono', monospace"
-            >
-              {c.careerYears}yr
+              {c.careerYears}yr · {c.proBowls}× PB
             </text>
           </motion.g>
         );
@@ -314,14 +292,14 @@ export function CompLandscape({
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.6, delay: 0.9, ease: 'backOut' }}
       >
-        <circle cx={playerX} cy={playerY} r="42" fill="url(#playerStarGlow)" />
-        <Star cx={playerX} cy={playerY} size={22} fill={RED} stroke={NAVY_DEEP} />
+        <circle cx={playerX} cy={playerY} r="36" fill="url(#playerStarGlow)" />
+        <Star cx={playerX} cy={playerY} size={18} fill={RED} stroke={NAVY_DEEP} />
         <text
           x={playerX}
-          y={playerY - 42}
+          y={playerY - 30}
           textAnchor="middle"
           fill={NAVY}
-          fontSize="14"
+          fontSize="13"
           fontWeight="900"
           fontFamily="'Outfit', sans-serif"
         >
@@ -329,10 +307,10 @@ export function CompLandscape({
         </text>
         <text
           x={playerX}
-          y={playerY + 40}
+          y={playerY + 34}
           textAnchor="middle"
           fill={INK}
-          fontSize="11"
+          fontSize="10"
           fontWeight="800"
           fontFamily="'JetBrains Mono', monospace"
         >
