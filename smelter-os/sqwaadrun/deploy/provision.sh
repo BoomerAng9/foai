@@ -57,8 +57,8 @@ fi
 
 SA_EMAIL="${SA_NAME}@${PROJECT}.iam.gserviceaccount.com"
 
-# Grant secret access
-for SECRET in NEON_INGEST_DSN SQWAADRUN_API_KEY; do
+# Grant secret access — PUTER_API_KEY added per storage wiring directive
+for SECRET in NEON_INGEST_DSN NEON_DATABASE_URL SQWAADRUN_API_KEY PUTER_API_KEY; do
   if gcloud secrets describe "$SECRET" --project="$PROJECT" &>/dev/null; then
     gcloud secrets add-iam-policy-binding "$SECRET" \
       --member="serviceAccount:${SA_EMAIL}" \
@@ -66,6 +66,19 @@ for SECRET in NEON_INGEST_DSN SQWAADRUN_API_KEY; do
       --project="$PROJECT" >/dev/null
   else
     echo "  WARN: secret $SECRET does not exist — create it before running the gateway"
+  fi
+done
+
+# Storage buckets access — needed for the Sqwaadrun gateway to write
+# to GCS from the VM's attached service account
+for BUCKET in foai-sqwaadrun-artifacts foai-ingots foai-media foai-backups; do
+  if gcloud storage buckets describe "gs://${BUCKET}" --project="$PROJECT" &>/dev/null; then
+    gcloud storage buckets add-iam-policy-binding "gs://${BUCKET}" \
+      --member="serviceAccount:${SA_EMAIL}" \
+      --role="roles/storage.objectAdmin" \
+      --project="$PROJECT" >/dev/null 2>&1 || true
+  else
+    echo "  WARN: bucket gs://${BUCKET} does not exist — run deploy/create-gcs-buckets.sh first"
   fi
 done
 

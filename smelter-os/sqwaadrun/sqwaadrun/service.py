@@ -29,12 +29,14 @@ import asyncio
 import logging
 import os
 from pathlib import Path
-from typing import Any, Dict
+from datetime import datetime, timezone
+from typing import Any, Dict, Optional
 
 from aiohttp import web
 
-from sqwaadrun.lil_scrapp_hawk import FullScrappHawkSquadrun, MissionType
+from sqwaadrun.lil_scrapp_hawk import FullScrappHawkSquadrun, Mission, MissionType
 from sqwaadrun.general_ang import GeneralAng, AcheevyBridge, Policy
+from sqwaadrun.storage import SmelterStorage, get_storage
 
 logger = logging.getLogger("Sqwaadrun.Service")
 
@@ -106,6 +108,9 @@ async def roster(request: web.Request) -> web.Response:
 
 async def scrape_intent(request: web.Request) -> web.Response:
     bridge: AcheevyBridge = request.app["bridge"]
+    squad: FullScrappHawkSquadrun = request.app["squad"]
+    storage: SmelterStorage = request.app["storage"]
+
     try:
         body = await request.json()
     except Exception:
@@ -122,15 +127,75 @@ async def scrape_intent(request: web.Request) -> web.Response:
 
     try:
         result = await bridge.scrape_intent(intent, targets, **config)
+
+        # ── Write-through to Puter + GCS if the mission actually ran ──
+        mission_id = result.get("mission_id")
+        if mission_id and result.get("status") in ("completed", "failed"):
+            mission_obj = _find_mission(squad, mission_id)
+            await _persist_mission(storage, mission_id, mission_obj, result)
+
         return web.json_response(result)
     except Exception as e:
         logger.exception("scrape_intent failed")
         return web.json_response({"error": str(e)}, status=500)
 
 
+def _find_mission(squad: FullScrappHawkSquadrun, mission_id: str) -> Optional[Mission]:
+    """Look up a full Mission object from Chicken Hawk's in-memory log."""
+    try:
+        for m in squad.chicken_hawk._mission_log:  # type: ignore[attr-defined]
+            if m.mission_id == mission_id:
+                return m
+    except Exception:
+        pass
+    return None
+
+
+async def _persist_mission(
+    storage: SmelterStorage,
+    mission_id: str,
+    mission_obj: Optional[Mission],
+    api_result: Dict[str, Any],
+) -> None:
+    """
+    Fire-and-log the mission persistence. Never raises — storage
+    failures are logged but don't break the API response.
+    """
+    try:
+        # Manifest (intent + targets + config)
+        manifest: Dict[str, Any] = {
+            "mission_id": mission_id,
+            "intent": api_result.get("type") or (mission_obj.mission_type.value if mission_obj else None),
+            "targets": mission_obj.targets if mission_obj else [],
+            "config": mission_obj.config if mission_obj else {},
+            "created_at": mission_obj.created_at if mission_obj else None,
+        }
+        await storage.store_mission_manifest(mission_id, manifest)
+
+        # Full result payload — includes all scraped artifacts
+        payload: Dict[str, Any] = {
+            "mission_id": mission_id,
+            "status": api_result.get("status"),
+            "target_count": api_result.get("target_count"),
+            "results_count": api_result.get("results_count"),
+            "kpis": api_result.get("kpis", {}),
+            "results": mission_obj.results if mission_obj else [],
+            "error": api_result.get("error"),
+        }
+        storage_result = await storage.store_mission_result(mission_id, payload)
+        logger.info(
+            f"Mission {mission_id} persistence: "
+            f"puter={storage_result['puter']} gcs={storage_result['gcs']}"
+        )
+    except Exception as e:
+        logger.warning(f"Mission {mission_id} persistence failed: {e}")
+
+
 async def mission(request: web.Request) -> web.Response:
     """Typed mission dispatch — bypasses NL intent routing."""
     squad: FullScrappHawkSquadrun = request.app["squad"]
+    storage: SmelterStorage = request.app["storage"]
+
     try:
         body = await request.json()
     except Exception:
@@ -151,7 +216,8 @@ async def mission(request: web.Request) -> web.Response:
 
     try:
         m = await squad.mission(mtype_str, targets, **config)
-        return web.json_response({
+
+        api_result = {
             "mission_id": m.mission_id,
             "type": m.mission_type.value,
             "status": m.status,
@@ -160,7 +226,13 @@ async def mission(request: web.Request) -> web.Response:
             "results": m.results[:50],  # cap to keep response size sane
             "kpis": m.kpis,
             "error": m.error,
-        })
+        }
+
+        # ── Write-through to Puter + GCS ──
+        if m.status in ("completed", "failed"):
+            await _persist_mission(storage, m.mission_id, m, api_result)
+
+        return web.json_response(api_result)
     except Exception as e:
         logger.exception("mission failed")
         return web.json_response({"error": str(e)}, status=500)
@@ -208,6 +280,10 @@ async def on_startup(app: web.Application) -> None:
     data_dir = Path(os.environ.get("SQWAADRUN_DATA_DIR", "./data"))
     data_dir.mkdir(parents=True, exist_ok=True)
 
+    # ── Dual-backend storage (Puter + GCS) ──
+    storage = get_storage()
+    app["storage"] = storage
+
     squad = FullScrappHawkSquadrun(
         output_dir=str(data_dir / "output"),
         schedule_file=str(data_dir / "schedule.json"),
@@ -224,6 +300,9 @@ async def on_startup(app: web.Application) -> None:
         policy=policy,
         doctrine_path=str(data_dir / "doctrine.jsonl"),
     )
+    # Inject storage so General_Ang's _log_doctrine fires a dual-write
+    general.storage = storage  # type: ignore[attr-defined]
+
     bridge = AcheevyBridge(general)
 
     # ── TRCC pipeline + scheduled jobs ──
@@ -253,22 +332,71 @@ async def on_startup(app: web.Application) -> None:
         except Exception as e:
             logger.warning(f"TRCC pipeline failed to start: {e}")
 
+    # ── Heartbeat loop ──
+    # Writes a Chronicle Ledger entry to Puter every 90 seconds with
+    # the gateway's current state. Puter-only per the directive —
+    # never GCS, never customer-facing.
+    heartbeat_interval = int(os.environ.get("SQWAADRUN_HEARTBEAT_INTERVAL_SECONDS", "90"))
+    heartbeat_task = asyncio.create_task(
+        _heartbeat_loop(storage, squad, heartbeat_interval)
+    )
+
     app["squad"] = squad
     app["general"] = general
     app["bridge"] = bridge
     app["pipeline"] = pipeline
     app["sched_task"] = sched_task
+    app["heartbeat_task"] = heartbeat_task
     logger.info("Sqwaadrun gateway ready.")
 
 
-async def on_cleanup(app: web.Application) -> None:
-    sched_task = app.get("sched_task")
-    if sched_task is not None:
-        sched_task.cancel()
+async def _heartbeat_loop(
+    storage: SmelterStorage,
+    squad: FullScrappHawkSquadrun,
+    interval_seconds: int,
+) -> None:
+    """
+    Write a gateway heartbeat to Puter (/chronicle/ledger/) on a
+    fixed cadence. If Puter is unavailable, log a warning and keep
+    trying — never crashes the daemon.
+    """
+    logger.info(f"Heartbeat loop started ({interval_seconds}s interval)")
+    while True:
         try:
-            await sched_task
-        except (asyncio.CancelledError, Exception):
-            pass
+            active_hawks = sum(1 for h in squad._hawks if _hawk_status(h) == "active")
+            report = {
+                "timestamp": datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ"),
+                "gateway": "sqwaadrun",
+                "version": "2.0.0",
+                "hawks_online": active_hawks,
+                "hawks_total": len(squad._hawks),
+                "mission_log_size": len(squad.chicken_hawk._mission_log),  # type: ignore[attr-defined]
+                "uptime_note": "heartbeat",
+            }
+            ok = await storage.log_heartbeat(report)
+            if not ok:
+                logger.debug("Heartbeat write skipped (Puter unavailable)")
+        except Exception as e:
+            logger.warning(f"Heartbeat error: {e}")
+
+        try:
+            await asyncio.sleep(interval_seconds)
+        except asyncio.CancelledError:
+            logger.info("Heartbeat loop cancelled")
+            return
+
+
+async def on_cleanup(app: web.Application) -> None:
+    # Stop background tasks before the squad shuts down so their
+    # next wakeups find the app still present.
+    for key in ("heartbeat_task", "sched_task"):
+        task = app.get(key)
+        if task is not None:
+            task.cancel()
+            try:
+                await task
+            except (asyncio.CancelledError, Exception):
+                pass
 
     squad: FullScrappHawkSquadrun = app["squad"]
     await squad.shutdown()
