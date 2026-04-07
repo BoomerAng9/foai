@@ -50,14 +50,22 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: `Player "${name}" not found` }, { status: 404 });
   }
 
-  // Resolve player headshot from ESPN (cached after first lookup)
-  let headshotUrl: string | null = null;
-  try {
-    const result = await getPlayerHeadshot(player.name, player.school);
-    headshotUrl = result.url || null;
-  } catch {
-    headshotUrl = null;
-  }
+  // Resolve player headshot + top 5 headshots in parallel (ESPN lookups are cached)
+  const top5Source = graded.slice(0, 5);
+  const [headshotResult, ...topHeadshots] = await Promise.all([
+    getPlayerHeadshot(player.name, player.school).catch(() => ({ url: null })),
+    ...top5Source.map(p => getPlayerHeadshot(p.name, p.school).catch(() => ({ url: null }))),
+  ]);
+  const headshotUrl: string | null = headshotResult.url || null;
+  const top5 = top5Source.map((p, i) => ({
+    rank: p.performRank,
+    name: p.name,
+    position: p.position,
+    school: p.school,
+    grade: p.grade,
+    gradeLetter: p.gradeLetter,
+    headshotUrl: topHeadshots[i]?.url || null,
+  }));
 
   const payload = {
     identity: {
@@ -237,5 +245,5 @@ export async function GET(req: NextRequest) {
     }
   }
 
-  return NextResponse.json({ player: payload, visualizations, c1Card });
+  return NextResponse.json({ player: payload, visualizations, c1Card, top5 });
 }
