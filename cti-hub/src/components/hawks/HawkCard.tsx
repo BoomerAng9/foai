@@ -269,7 +269,7 @@ export function HawkCard({ data, size = 'md' }: Props) {
               color: '#E2E8F0',
             }}
           >
-            "{profile.catchphrase}"
+            &ldquo;{profile.catchphrase}&rdquo;
           </div>
 
           {/* Sample mission + stats */}
@@ -277,7 +277,7 @@ export function HawkCard({ data, size = 'md' }: Props) {
             SAMPLE MISSION
           </div>
           <div className="text-[9px] opacity-70 italic leading-snug mb-2" style={{ color: '#94A3B8' }}>
-            "{sampleMission}"
+            &ldquo;{sampleMission}&rdquo;
           </div>
 
           <div className="flex justify-between items-center text-[9px] font-mono pt-2 border-t"

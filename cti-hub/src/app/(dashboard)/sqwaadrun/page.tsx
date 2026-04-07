@@ -14,8 +14,9 @@
  *   - /api/sqwaadrun/recent      → last N missions for this user
  */
 
-import { useEffect, useMemo, useState, useCallback } from 'react';
+import { useEffect, useMemo, useState, useCallback, useRef } from 'react';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import {
   SQWAADRUN_TIERS,
@@ -49,11 +50,13 @@ interface LiveRoster {
 
 export default function SqwaadrunDashboardPage() {
   const { user, profile } = useAuth();
+  const searchParams = useSearchParams();
   const [recent, setRecent] = useState<RecentMission[] | null>(null);
   const [live, setLive] = useState<LiveRoster | null>(null);
   const [healthy, setHealthy] = useState<boolean | null>(null);
   const [loading, setLoading] = useState(true);
   const [builderOpen, setBuilderOpen] = useState(false);
+  const liveAbortRef = useRef<AbortController | null>(null);
 
   const slice: ProfileSqwaadrunSlice = useMemo(() => {
     const p = (profile || {}) as Record<string, unknown>;
@@ -69,22 +72,74 @@ export default function SqwaadrunDashboardPage() {
   const tier = slice.sqwaadrun_tier ? SQWAADRUN_TIERS[slice.sqwaadrun_tier] : null;
   const isActive = slice.sqwaadrun_status === 'active' && tier !== null;
 
-  const refresh = useCallback(() => {
-    if (!user) return;
-    Promise.all([
-      fetch('/api/sqwaadrun/live').then((r) => r.json()).catch(() => null),
-      fetch('/api/sqwaadrun/recent').then((r) => r.json()).catch(() => ({ missions: [] })),
-    ]).then(([liveData, recentData]) => {
-      setHealthy(liveData?.healthy ?? false);
-      setLive(liveData?.roster ?? null);
-      setRecent(recentData?.missions ?? []);
-      setLoading(false);
-    });
+  const refresh = useCallback(async (): Promise<RecentMission[]> => {
+    if (!user) return [];
+
+    // Cancel any in-flight refresh
+    liveAbortRef.current?.abort();
+    const controller = new AbortController();
+    liveAbortRef.current = controller;
+
+    const [liveData, recentData] = await Promise.all([
+      fetch('/api/sqwaadrun/live', { signal: controller.signal })
+        .then((r) => r.json())
+        .catch(() => null),
+      fetch('/api/sqwaadrun/recent', { signal: controller.signal })
+        .then((r) => r.json())
+        .catch(() => ({ missions: [] })),
+    ]);
+
+    if (controller.signal.aborted) return [];
+    const missions = (recentData?.missions ?? []) as RecentMission[];
+    setHealthy(liveData?.healthy ?? false);
+    setLive(liveData?.roster ?? null);
+    setRecent(missions);
+    setLoading(false);
+    return missions;
   }, [user]);
 
   useEffect(() => {
     refresh();
+    return () => {
+      liveAbortRef.current?.abort();
+    };
   }, [refresh]);
+
+  // ── Profile refresh after Stripe success ──
+  // The webhook updates profile.sqwaadrun_* server-side, but the
+  // in-memory profile from the Firebase listener is stale. Force a
+  // hard reload to a clean URL so the profile gets re-fetched fresh.
+  // Sessionstorage flag prevents reload loops.
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    if (searchParams?.get('success') !== 'true') return;
+    if (sessionStorage.getItem('sqwaadrun_post_checkout_reload') === '1') return;
+    sessionStorage.setItem('sqwaadrun_post_checkout_reload', '1');
+    window.location.replace('/sqwaadrun');
+  }, [searchParams]);
+
+  // Clear the reload flag once the page has rendered with fresh data
+  useEffect(() => {
+    if (typeof window !== 'undefined' && profile) {
+      sessionStorage.removeItem('sqwaadrun_post_checkout_reload');
+    }
+  }, [profile]);
+
+  // ── Poll-until-found for new mission after dispatch ──
+  // Replaces the old setTimeout(refresh, 500) race. Polls /recent
+  // up to 5 times until the new mission_id appears in the freshly
+  // returned data (NOT the closure-captured state, which would be
+  // stale and never match).
+  const waitForMission = useCallback(
+    async (missionId: string) => {
+      for (let attempt = 0; attempt < 5; attempt++) {
+        const missions = await refresh();
+        if (missions.some((m) => m.mission_id === missionId)) return;
+        await new Promise((r) => setTimeout(r, 1000));
+      }
+    },
+    [refresh],
+  );
 
   if (!user) {
     return (
@@ -138,9 +193,14 @@ export default function SqwaadrunDashboardPage() {
           open={builderOpen}
           onClose={() => setBuilderOpen(false)}
           tierId={slice.sqwaadrun_tier}
-          onComplete={() => {
-            // Refresh recent missions + fleet stats after a successful dispatch
-            setTimeout(refresh, 500);
+          onComplete={(result) => {
+            if (result.mission_id) {
+              waitForMission(result.mission_id).catch(() => {
+                refresh();
+              });
+            } else {
+              refresh();
+            }
           }}
         />
 
@@ -159,7 +219,7 @@ export default function SqwaadrunDashboardPage() {
             </div>
             <h2 className="text-2xl font-black mb-3">The Sqwaadrun is grounded.</h2>
             <p className="text-sm mb-6 max-w-2xl" style={{ color: '#94A3B8' }}>
-              You don't have an active Sqwaadrun subscription. Pick a tier on the
+              You do not have an active Sqwaadrun subscription. Pick a tier on the
               landing page to deploy the fleet for missions.
             </p>
             <Link

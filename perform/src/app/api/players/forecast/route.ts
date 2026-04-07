@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { gradeAllProspects } from '@/lib/draft/open-mind-grader';
+import { getPlayerHeadshot } from '@/lib/players/headshots';
 import {
   renderCareerArcChart,
   renderPillarRadarChart,
@@ -49,6 +50,15 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: `Player "${name}" not found` }, { status: 404 });
   }
 
+  // Resolve player headshot from ESPN (cached after first lookup)
+  let headshotUrl: string | null = null;
+  try {
+    const result = await getPlayerHeadshot(player.name, player.school);
+    headshotUrl = result.url || null;
+  } catch {
+    headshotUrl = null;
+  }
+
   const payload = {
     identity: {
       name: player.name,
@@ -58,6 +68,7 @@ export async function GET(req: NextRequest) {
       consensusRank: player.consensusRank,
       positionRank: player.positionRank,
       projectedRound: player.projectedRound,
+      headshotUrl,
     },
     grade: {
       actual: {

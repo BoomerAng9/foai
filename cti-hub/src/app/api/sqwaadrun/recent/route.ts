@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@/lib/insforge';
 import { requireAuthenticatedRequest } from '@/lib/server-auth';
+import { applyRateLimit } from '@/lib/rate-limit';
 
 /**
  * GET /api/sqwaadrun/recent
  * Returns the last N missions for the authenticated user. Reads from
- * sqwaadrun_staging.mission_log filtered by the user's quota period.
+ * sqwaadrun_staging.mission_log filtered by user_id attribution.
  *
  * Query:
  *   limit  — default 20, max 100
@@ -13,6 +14,13 @@ import { requireAuthenticatedRequest } from '@/lib/server-auth';
 export async function GET(req: NextRequest) {
   const auth = await requireAuthenticatedRequest(req);
   if (!auth.ok) return auth.response;
+
+  const rateLimitResponse = applyRateLimit(req, 'sqwaadrun-recent', {
+    maxRequests: 60,
+    windowMs: 60 * 1000,
+    subject: auth.context.user.uid,
+  });
+  if (rateLimitResponse) return rateLimitResponse;
 
   if (!sql) {
     return NextResponse.json({ missions: [] });
