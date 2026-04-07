@@ -1,15 +1,18 @@
 /**
- * Per|Form TTS Router
- * ======================
+ * Per|Form TTS Router — Universal Voice Stack
+ * ==============================================
  * Dispatches analyst speech generation to the right engine per the
  * analyst.voice config. Pre-processes scripts to inject expressive
  * cues, strip reasoning artifacts, and split multi-speaker turns.
  *
- * Engines:
- *   - vibevoice  — Microsoft VibeVoice 7B (duos, expressive)
- *   - elevenlabs — ElevenLabs Turbo v2 (refined solos)
- *   - playht     — Play.ht v3 (regional accents)
- *   - chatterbox — Resemble Chatterbox (expressive single)
+ * Engine stack (April 2026):
+ *   - personaplex — NVIDIA PersonaPlex (Vertex AI, free, 170ms)
+ *   - grok-voice  — xAI Grok 4.20 Voice Agent (real-time WebSocket)
+ *   - gemini-live — Google Gemini 3.1 Flash Live (barge-in, <500ms)
+ *   - vibevoice   — Microsoft VibeVoice 7B (duos, MIT license)
+ *   - elevenlabs  — ElevenLabs Turbo v2 (refined solos + cloning)
+ *   - playht      — Play.ht v3 (regional accents)
+ *   - chatterbox  — Resemble Chatterbox (expressive single)
  *
  * All engines respect `allowImperfections` — when true, natural
  * stutters/laughter/cursing pass through; when false, they're
