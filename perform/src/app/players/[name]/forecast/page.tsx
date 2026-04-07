@@ -9,7 +9,6 @@
 
 import { useEffect, useState, use } from 'react';
 import { TIELoader } from '@/components/tie/TIELoader';
-import { TIEShield } from '@/components/tie/TIEShield';
 import { PillarRadar } from '@/components/tie/PillarRadar';
 import { CompLandscape } from '@/components/tie/CompLandscape';
 import { C1Renderer } from '@/components/c1/C1Renderer';
@@ -303,9 +302,10 @@ export default function ForecastPage({ params }: { params: Promise<{ name: strin
           <div className="rounded-2xl p-8" style={{ background: T.surface, border: `1px solid ${T.border}`, boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
             <SectionHeader kicker="PERFORMANCE PILLARS" title="Actual vs Clean" tight />
             <div className="flex justify-center mt-4">
-              <PillarRadarLight
+              <PillarRadar
                 actual={p.pillars.actual}
                 clean={delta > 0.1 ? p.pillars.clean : undefined}
+                size={520}
               />
             </div>
           </div>
@@ -313,12 +313,13 @@ export default function ForecastPage({ params }: { params: Promise<{ name: strin
           <div className="rounded-2xl p-8" style={{ background: T.surface, border: `1px solid ${T.border}`, boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
             <SectionHeader kicker="HISTORICAL COMP LANDSCAPE" title="Career × Ceiling" tight />
             <div className="mt-4">
-              <CompLandscapeLight
+              <CompLandscape
                 playerName={p.identity.name}
                 playerGrade={p.grade.actual.score}
-                upside={p.longevity.comps.upside}
-                baseline={p.longevity.comps.baseline}
-                downside={p.longevity.comps.downside}
+                upside={p.longevity.comps.upside as Parameters<typeof CompLandscape>[0]['upside']}
+                baseline={p.longevity.comps.baseline as Parameters<typeof CompLandscape>[0]['baseline']}
+                downside={p.longevity.comps.downside as Parameters<typeof CompLandscape>[0]['downside']}
+                size={700}
               />
             </div>
           </div>
@@ -349,14 +350,30 @@ export default function ForecastPage({ params }: { params: Promise<{ name: strin
 
       {/* ═══ TIE BRAND CERTIFICATION ═══ */}
       <section className="border-b" style={{ background: T.bg, borderColor: T.border }}>
-        <div className="max-w-3xl mx-auto px-6 py-12 text-center">
-          <div className="flex justify-center mb-4 opacity-90">
-            <TIEShield score={p.grade.actual.score} size={140} background="transparent" showLabel={false} />
+        <div className="max-w-3xl mx-auto px-6 py-14 text-center">
+          <div className="inline-flex items-center gap-4 mb-5">
+            <div className="h-px w-12" style={{ background: T.borderStrong }} />
+            <div
+              className="inline-flex items-center justify-center px-5 py-2 rounded-md"
+              style={{ background: T.navyDeep }}
+            >
+              <span
+                className="text-3xl font-black tracking-tight"
+                style={{
+                  color: '#FFFFFF',
+                  fontFamily: "'Outfit', sans-serif",
+                  letterSpacing: '-0.02em',
+                }}
+              >
+                T<span style={{ color: T.red }}>I</span>E
+              </span>
+            </div>
+            <div className="h-px w-12" style={{ background: T.borderStrong }} />
           </div>
           <div className="text-[10px] font-bold tracking-[0.25em] uppercase mb-3" style={{ color: T.textMuted }}>
             Certified by the Talent &amp; Innovation Engine
           </div>
-          <p className="text-xs leading-relaxed" style={{ color: T.textMuted }}>
+          <p className="text-xs leading-relaxed max-w-md mx-auto" style={{ color: T.textMuted }}>
             Every Per|Form grade runs through the canonical 40·30·30 formula. Per|Form does not pick favorites — the formula does.
           </p>
         </div>
@@ -575,41 +592,3 @@ function CompCard({
   );
 }
 
-/* ── Light-themed wrappers for the existing dark radar/landscape ── */
-function PillarRadarLight({ actual, clean }: {
-  actual: { gamePerformance: number; athleticism: number; intangibles: number };
-  clean?: { gamePerformance: number; athleticism: number; intangibles: number };
-}) {
-  return (
-    <div style={{ filter: 'invert(1) hue-rotate(180deg)' }}>
-      <PillarRadar actual={actual} clean={clean} size={460} />
-    </div>
-  );
-}
-
-function CompLandscapeLight({
-  playerName,
-  playerGrade,
-  upside,
-  baseline,
-  downside,
-}: {
-  playerName: string;
-  playerGrade: number;
-  upside: ForecastResponse['player']['longevity']['comps']['upside'];
-  baseline: ForecastResponse['player']['longevity']['comps']['baseline'];
-  downside: ForecastResponse['player']['longevity']['comps']['downside'];
-}) {
-  return (
-    <div style={{ filter: 'invert(1) hue-rotate(180deg)' }}>
-      <CompLandscape
-        playerName={playerName}
-        playerGrade={playerGrade}
-        upside={upside as Parameters<typeof CompLandscape>[0]['upside']}
-        baseline={baseline as Parameters<typeof CompLandscape>[0]['baseline']}
-        downside={downside as Parameters<typeof CompLandscape>[0]['downside']}
-        size={520}
-      />
-    </div>
-  );
-}

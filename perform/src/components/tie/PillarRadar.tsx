@@ -1,13 +1,11 @@
 'use client';
 
 /**
- * Pillar Radar Chart — deterministic SVG triangle radar
- * =======================================================
- * Three-pillar radar showing actual vs clean (medical-adjusted)
- * pillars overlaid. Hand-built SVG so it ALWAYS renders correctly
- * (Vega-Lite from Gemini was producing broken layouts with text
- * collisions). Three vertices: Game Performance (top), Athleticism
- * (bottom-right), Intangibles (bottom-left).
+ * Pillar Radar — broadcast theme (light)
+ * =========================================
+ * Navy + red ESPN/PFF aesthetic, deterministic SVG. Proper padding
+ * around the triangle so pillar labels never clip, value chips
+ * positioned with collision-safe offsets.
  */
 
 import { motion } from 'framer-motion';
@@ -24,23 +22,30 @@ interface PillarRadarProps {
   size?: number;
 }
 
-export function PillarRadar({ actual, clean, size = 480 }: PillarRadarProps) {
-  const center = size / 2;
-  const maxRadius = size * 0.36;
+const NAVY = '#0B1E3F';
+const NAVY_LIGHT = '#1A4ECC';
+const NAVY_GLOW = 'rgba(11,30,63,0.18)';
+const RED = '#D40028';
+const INK = '#0A0E1A';
+const MUTED = '#5A6478';
+const BORDER = '#E2E6EE';
+const GRID = '#EEF0F5';
 
-  // Three vertices (Game Perf top, Athleticism bottom-right, Intangibles bottom-left)
+export function PillarRadar({ actual, clean, size = 520 }: PillarRadarProps) {
+  // Leave generous margin for labels
+  const margin = 110;
+  const center = size / 2;
+  const maxRadius = size / 2 - margin;
+
   const angles = {
-    gp: -Math.PI / 2,                  // top
-    ath: -Math.PI / 2 + (2 * Math.PI) / 3,  // 30°
-    int: -Math.PI / 2 - (2 * Math.PI) / 3,  // 150°
+    gp:  -Math.PI / 2,                     // top
+    ath: -Math.PI / 2 + (2 * Math.PI) / 3, // bottom-right
+    int: -Math.PI / 2 - (2 * Math.PI) / 3, // bottom-left
   };
 
   function point(value: number, angleKey: keyof typeof angles): [number, number] {
     const r = (Math.max(0, Math.min(100, value)) / 100) * maxRadius;
-    return [
-      center + r * Math.cos(angles[angleKey]),
-      center + r * Math.sin(angles[angleKey]),
-    ];
+    return [center + r * Math.cos(angles[angleKey]), center + r * Math.sin(angles[angleKey])];
   }
 
   function vertex(angleKey: keyof typeof angles, scale = 1): [number, number] {
@@ -57,10 +62,7 @@ export function PillarRadar({ actual, clean, size = 480 }: PillarRadarProps) {
     return `M ${a} ${b} L ${c} ${d} L ${e} ${f} Z`;
   }
 
-  // Grid rings (25, 50, 75, 100)
   const rings = [0.25, 0.5, 0.75, 1.0];
-
-  // Outer triangle for axis
   const outerPath = (() => {
     const [a, b] = vertex('gp');
     const [c, d] = vertex('ath');
@@ -68,20 +70,20 @@ export function PillarRadar({ actual, clean, size = 480 }: PillarRadarProps) {
     return `M ${a} ${b} L ${c} ${d} L ${e} ${f} Z`;
   })();
 
-  // Label positions (push out from vertices)
-  const labelGP = vertex('gp', 1.18);
-  const labelAth = vertex('ath', 1.22);
-  const labelInt = vertex('int', 1.22);
+  // Label positions — further out, with proper anchoring
+  const labelGP  = vertex('gp',  1.28);
+  const labelAth = vertex('ath', 1.18);
+  const labelInt = vertex('int', 1.18);
 
   return (
-    <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
+    <svg width="100%" height={size} viewBox={`0 0 ${size} ${size}`} style={{ maxWidth: size }}>
       <defs>
-        <radialGradient id="radarGoldFill" cx="50%" cy="50%" r="50%">
-          <stop offset="0%" stopColor="#FFD700" stopOpacity="0.55" />
-          <stop offset="100%" stopColor="#8B6914" stopOpacity="0.25" />
-        </radialGradient>
-        <filter id="radarGlow">
-          <feGaussianBlur stdDeviation="3" result="blur" />
+        <linearGradient id="navyFill" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%"   stopColor={NAVY_LIGHT} stopOpacity="0.22" />
+          <stop offset="100%" stopColor={NAVY}       stopOpacity="0.32" />
+        </linearGradient>
+        <filter id="navyGlow">
+          <feGaussianBlur stdDeviation="2" result="blur" />
           <feMerge>
             <feMergeNode in="blur" />
             <feMergeNode in="SourceGraphic" />
@@ -89,9 +91,9 @@ export function PillarRadar({ actual, clean, size = 480 }: PillarRadarProps) {
         </filter>
       </defs>
 
-      {/* Concentric grid rings (triangles) */}
+      {/* Grid rings */}
       {rings.map((scale, i) => {
-        const [a, b] = vertex('gp', scale);
+        const [a, b] = vertex('gp',  scale);
         const [c, d] = vertex('ath', scale);
         const [e, f] = vertex('int', scale);
         return (
@@ -99,42 +101,40 @@ export function PillarRadar({ actual, clean, size = 480 }: PillarRadarProps) {
             key={i}
             points={`${a},${b} ${c},${d} ${e},${f}`}
             fill="none"
-            stroke="rgba(255,255,255,0.07)"
+            stroke={GRID}
             strokeWidth="1"
           />
         );
       })}
 
-      {/* Axis lines from center to each vertex */}
+      {/* Axis lines */}
       {(['gp', 'ath', 'int'] as const).map((k) => {
         const [x, y] = vertex(k);
         return (
           <line
             key={k}
-            x1={center}
-            y1={center}
-            x2={x}
-            y2={y}
-            stroke="rgba(255,255,255,0.1)"
+            x1={center} y1={center}
+            x2={x} y2={y}
+            stroke={BORDER}
             strokeWidth="1"
           />
         );
       })}
 
       {/* Outer triangle */}
-      <path d={outerPath} fill="none" stroke="rgba(212,168,83,0.25)" strokeWidth="1.5" />
+      <path d={outerPath} fill="none" stroke={BORDER} strokeWidth="1.5" />
 
-      {/* Scale tick numbers along the GP axis */}
+      {/* Scale ticks */}
       {rings.map((scale, i) => {
         const value = Math.round(scale * 100);
         const [x, y] = vertex('gp', scale);
         return (
           <text
             key={`tick-${i}`}
-            x={x + 6}
+            x={x + 8}
             y={y + 4}
-            fill="rgba(255,255,255,0.25)"
-            fontSize="8"
+            fill="#8B94A8"
+            fontSize="9"
             fontFamily="'JetBrains Mono', monospace"
           >
             {value}
@@ -142,138 +142,108 @@ export function PillarRadar({ actual, clean, size = 480 }: PillarRadarProps) {
         );
       })}
 
-      {/* CLEAN triangle (silver dotted, behind) */}
+      {/* CLEAN triangle (behind) */}
       {clean && (
         <motion.path
           d={trianglePath(clean)}
-          fill="rgba(192,192,200,0.08)"
-          stroke="#C0C8D8"
-          strokeWidth="1.5"
-          strokeDasharray="4 4"
-          initial={{ opacity: 0, scale: 0.6 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.8, delay: 0.1, ease: 'easeOut' }}
-          style={{ transformOrigin: `${center}px ${center}px` }}
+          fill="none"
+          stroke={RED}
+          strokeWidth="2"
+          strokeDasharray="5 4"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 0.9 }}
+          transition={{ duration: 0.6, delay: 0.1 }}
         />
       )}
 
-      {/* ACTUAL triangle (gold filled) */}
+      {/* ACTUAL triangle */}
       <motion.path
         d={trianglePath(actual)}
-        fill="url(#radarGoldFill)"
-        stroke="#D4A853"
-        strokeWidth="2.5"
-        filter="url(#radarGlow)"
-        initial={{ opacity: 0, scale: 0.6 }}
+        fill="url(#navyFill)"
+        stroke={NAVY}
+        strokeWidth="3"
+        filter="url(#navyGlow)"
+        initial={{ opacity: 0, scale: 0.7 }}
         animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.9, delay: 0.4, ease: 'easeOut' }}
+        transition={{ duration: 0.7, delay: 0.3, ease: 'easeOut' }}
         style={{ transformOrigin: `${center}px ${center}px` }}
       />
 
-      {/* Vertex points + value labels on actual */}
+      {/* Vertex dots + value chips */}
       {(['gp', 'ath', 'int'] as const).map((k) => {
-        const value =
-          k === 'gp' ? actual.gamePerformance
+        const value = k === 'gp' ? actual.gamePerformance
           : k === 'ath' ? actual.athleticism
           : actual.intangibles;
         const [x, y] = point(value, k);
+        // Chip offset — push away from center so it doesn't overlap the point
+        const [cx, cy] = [x - center, y - center];
+        const len = Math.max(1, Math.hypot(cx, cy));
+        const chipX = x + (cx / len) * 26;
+        const chipY = y + (cy / len) * 16;
+
         return (
           <g key={`pt-${k}`}>
-            <circle
-              cx={x}
-              cy={y}
-              r="5"
-              fill="#FFD700"
-              stroke="#1A0F00"
-              strokeWidth="2"
-              filter="url(#radarGlow)"
-            />
-            <text
-              x={x}
-              y={y - 12}
-              textAnchor="middle"
-              fill="#FFD700"
-              fontSize="13"
-              fontWeight="800"
-              fontFamily="'Outfit', sans-serif"
-            >
-              {value.toFixed(1)}
-            </text>
+            <circle cx={x} cy={y} r="6" fill={NAVY} stroke="#FFFFFF" strokeWidth="2.5" />
+            <g transform={`translate(${chipX - 22}, ${chipY - 11})`}>
+              <rect
+                width="44"
+                height="22"
+                rx="4"
+                fill="#FFFFFF"
+                stroke={NAVY}
+                strokeWidth="1.5"
+              />
+              <text
+                x="22"
+                y="15"
+                textAnchor="middle"
+                fill={NAVY}
+                fontSize="12"
+                fontWeight="800"
+                fontFamily="'Outfit', sans-serif"
+              >
+                {value.toFixed(1)}
+              </text>
+            </g>
           </g>
         );
       })}
 
-      {/* Pillar labels (outside the triangle) */}
-      <g fontFamily="'Outfit', sans-serif" fontWeight="700">
-        <text
-          x={labelGP[0]}
-          y={labelGP[1]}
-          textAnchor="middle"
-          fill="#FFFFFF"
-          fontSize="14"
-        >
+      {/* Pillar labels — properly anchored so they never clip */}
+      <g fontFamily="'Outfit', sans-serif">
+        {/* TOP — centered */}
+        <text x={labelGP[0]} y={labelGP[1] - 14} textAnchor="middle" fill={INK} fontSize="13" fontWeight="800" letterSpacing="0.05em">
           GAME PERFORMANCE
         </text>
-        <text
-          x={labelGP[0]}
-          y={labelGP[1] + 14}
-          textAnchor="middle"
-          fill="rgba(212,168,83,0.7)"
-          fontSize="9"
-          fontFamily="'JetBrains Mono', monospace"
-        >
+        <text x={labelGP[0]} y={labelGP[1]} textAnchor="middle" fill={RED} fontSize="9" fontWeight="700" fontFamily="'JetBrains Mono', monospace" letterSpacing="0.15em">
           40% WEIGHT
         </text>
 
-        <text
-          x={labelAth[0]}
-          y={labelAth[1]}
-          textAnchor="start"
-          fill="#FFFFFF"
-          fontSize="14"
-        >
+        {/* BOTTOM-RIGHT — anchored end so it stretches to the left */}
+        <text x={labelAth[0]} y={labelAth[1]} textAnchor="end" fill={INK} fontSize="13" fontWeight="800" letterSpacing="0.05em">
           ATHLETICISM
         </text>
-        <text
-          x={labelAth[0]}
-          y={labelAth[1] + 14}
-          textAnchor="start"
-          fill="rgba(212,168,83,0.7)"
-          fontSize="9"
-          fontFamily="'JetBrains Mono', monospace"
-        >
+        <text x={labelAth[0]} y={labelAth[1] + 14} textAnchor="end" fill={RED} fontSize="9" fontWeight="700" fontFamily="'JetBrains Mono', monospace" letterSpacing="0.15em">
           30% WEIGHT
         </text>
 
-        <text
-          x={labelInt[0]}
-          y={labelInt[1]}
-          textAnchor="end"
-          fill="#FFFFFF"
-          fontSize="14"
-        >
+        {/* BOTTOM-LEFT — anchored start so it stretches to the right */}
+        <text x={labelInt[0]} y={labelInt[1]} textAnchor="start" fill={INK} fontSize="13" fontWeight="800" letterSpacing="0.05em">
           INTANGIBLES
         </text>
-        <text
-          x={labelInt[0]}
-          y={labelInt[1] + 14}
-          textAnchor="end"
-          fill="rgba(212,168,83,0.7)"
-          fontSize="9"
-          fontFamily="'JetBrains Mono', monospace"
-        >
+        <text x={labelInt[0]} y={labelInt[1] + 14} textAnchor="start" fill={RED} fontSize="9" fontWeight="700" fontFamily="'JetBrains Mono', monospace" letterSpacing="0.15em">
           30% WEIGHT
         </text>
       </g>
 
       {/* Legend */}
-      <g transform={`translate(${size * 0.05}, ${size * 0.92})`} fontFamily="'JetBrains Mono', monospace" fontSize="10">
-        <rect x="0" y="-9" width="14" height="9" fill="url(#radarGoldFill)" stroke="#D4A853" />
-        <text x="20" y="0" fill="#FFFFFF">ACTUAL</text>
+      <g transform={`translate(${size * 0.08}, ${size - 24})`} fontFamily="'JetBrains Mono', monospace" fontSize="10">
+        <rect x="0" y="-10" width="16" height="10" fill="url(#navyFill)" stroke={NAVY} strokeWidth="1.5" />
+        <text x="22" y="-1" fill={INK} fontWeight="700">ACTUAL</text>
         {clean && (
           <>
-            <rect x="80" y="-9" width="14" height="9" fill="rgba(192,192,200,0.08)" stroke="#C0C8D8" strokeDasharray="2 2" />
-            <text x="100" y="0" fill="rgba(255,255,255,0.7)">CLEAN</text>
+            <line x1="96" y1="-5" x2="112" y2="-5" stroke={RED} strokeWidth="2" strokeDasharray="3 2" />
+            <text x="118" y="-1" fill={MUTED} fontWeight="700">CLEAN</text>
           </>
         )}
       </g>
