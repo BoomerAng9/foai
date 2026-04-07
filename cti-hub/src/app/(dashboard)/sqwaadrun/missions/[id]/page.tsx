@@ -9,7 +9,7 @@
  * produced.
  */
 
-import { useEffect, useState, use } from 'react';
+import { useEffect, useState, use, useRef } from 'react';
 import Link from 'next/link';
 import { ArtifactViewer, type ArtifactData } from '@/components/sqwaadrun/ArtifactViewer';
 
@@ -25,13 +25,31 @@ interface MissionData {
   throughput_pps: number;
   error: string | null;
   created_at: string;
-  completed_at: string | null;
 }
 
-interface ApiResponse {
-  mission: MissionData | null;
+interface PaginationInfo {
+  total_artifacts: number;
+  returned: number;
+  capped_at: number;
+  more_available: boolean;
+}
+
+interface ApiSuccess {
+  mission: MissionData;
   artifacts: ArtifactData[];
-  error?: string;
+  pagination: PaginationInfo;
+}
+
+interface ApiError {
+  error: string;
+}
+
+function safeDecode(raw: string): string {
+  try {
+    return decodeURIComponent(raw);
+  } catch {
+    return raw;
+  }
 }
 
 export default function MissionDetailPage({
@@ -40,28 +58,51 @@ export default function MissionDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const resolved = use(params);
-  const missionId = decodeURIComponent(resolved.id);
+  const missionId = safeDecode(resolved.id);
 
-  const [data, setData] = useState<ApiResponse | null>(null);
+  const [data, setData] = useState<ApiSuccess | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [errorStatus, setErrorStatus] = useState<number | null>(null);
+  const abortRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
-    fetch(`/api/sqwaadrun/mission/${encodeURIComponent(missionId)}`)
+    const controller = new AbortController();
+    abortRef.current = controller;
+
+    setLoading(true);
+    setError(null);
+    setErrorStatus(null);
+
+    fetch(`/api/sqwaadrun/mission/${encodeURIComponent(missionId)}`, {
+      signal: controller.signal,
+    })
       .then(async (res) => {
-        const body = (await res.json()) as ApiResponse;
         if (!res.ok) {
-          setError(body.error || `Mission fetch failed (${res.status})`);
+          const body = (await res.json().catch(() => null)) as ApiError | null;
+          setError(body?.error || `Mission fetch failed (${res.status})`);
+          setErrorStatus(res.status);
+          setData(null);
         } else {
+          const body = (await res.json()) as ApiSuccess;
           setData(body);
         }
         setLoading(false);
       })
       .catch((e) => {
+        // Ignore cancellations — they fire when the user navigates away.
+        if ((e as Error)?.name === 'AbortError') return;
         setError(e instanceof Error ? e.message : 'Network error');
         setLoading(false);
       });
+
+    return () => {
+      controller.abort();
+    };
   }, [missionId]);
+
+  const forbidden = errorStatus === 403;
+  const notFound = errorStatus === 404;
 
   return (
     <div
@@ -95,7 +136,7 @@ export default function MissionDetailPage({
         )}
 
         {/* Error */}
-        {!loading && (error || !data?.mission) && (
+        {!loading && error && (
           <div
             className="p-8 border-2 max-w-xl"
             style={{
@@ -108,11 +149,25 @@ export default function MissionDetailPage({
               className="text-[9px] font-mono tracking-[0.25em] mb-2"
               style={{ color: '#EF4444' }}
             >
-              MISSION NOT FOUND
+              {forbidden
+                ? 'ACCESS DENIED'
+                : notFound
+                ? 'MISSION NOT FOUND'
+                : 'MISSION UNAVAILABLE'}
             </div>
-            <div className="text-xl font-bold mb-2">{error || 'No mission with this ID.'}</div>
+            <div className="text-xl font-bold mb-2">
+              {forbidden
+                ? 'This mission belongs to another operator.'
+                : notFound
+                ? 'No mission with this ID.'
+                : error}
+            </div>
             <div className="text-[11px] opacity-60 font-mono mb-5">
-              The mission may not exist, or it may belong to another operator.
+              {forbidden
+                ? 'You can only view missions dispatched from your own Sqwaadrun account.'
+                : notFound
+                ? 'Check the mission ID and try again.'
+                : 'Please try again in a moment.'}
             </div>
             <Link
               href="/sqwaadrun"
@@ -125,7 +180,7 @@ export default function MissionDetailPage({
         )}
 
         {/* Success */}
-        {!loading && data?.mission && (
+        {!loading && !error && data && (
           <>
             {/* Mission hero */}
             <div
@@ -188,7 +243,7 @@ export default function MissionDetailPage({
                 <div className="mb-5 pb-5 border-b" style={{ borderColor: 'rgba(245,166,35,0.15)' }}>
                   <div className="text-[9px] font-mono tracking-[0.25em] opacity-60 mb-1">INTENT</div>
                   <div className="text-sm italic" style={{ color: '#CBD5E1' }}>
-                    "{data.mission.intent}"
+                    &ldquo;{data.mission.intent}&rdquo;
                   </div>
                 </div>
               )}
@@ -228,13 +283,22 @@ export default function MissionDetailPage({
 
             {/* Artifacts */}
             <div>
-              <div className="flex items-baseline justify-between mb-4">
+              <div className="flex items-baseline justify-between mb-4 flex-wrap gap-2">
                 <h2 className="text-xl font-black tracking-tight">
                   Artifacts
                   <span className="text-sm font-mono opacity-50 ml-3">
-                    {data.artifacts.length} result{data.artifacts.length === 1 ? '' : 's'}
+                    {data.pagination.returned} of {data.pagination.total_artifacts} result
+                    {data.pagination.total_artifacts === 1 ? '' : 's'}
                   </span>
                 </h2>
+                {data.pagination.more_available && (
+                  <div
+                    className="text-[10px] font-mono"
+                    style={{ color: '#F5A623' }}
+                  >
+                    Showing first {data.pagination.capped_at} · download JSON for full set
+                  </div>
+                )}
               </div>
 
               {data.artifacts.length === 0 && (
@@ -253,9 +317,8 @@ export default function MissionDetailPage({
                     NO ARTIFACTS
                   </div>
                   <div className="text-sm opacity-80">
-                    This mission did not produce any persisted artifacts.
-                    {data.mission.status === 'completed' &&
-                      ' (Results may have been in-memory only — check that the ingest DB is configured.)'}
+                    This mission did not return any artifacts. Contact support if you expected
+                    results.
                   </div>
                 </div>
               )}

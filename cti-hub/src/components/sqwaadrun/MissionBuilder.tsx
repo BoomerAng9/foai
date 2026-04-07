@@ -63,14 +63,14 @@ export function MissionBuilder({ open, onClose, tierId, onComplete }: MissionBui
   const allowed = tier?.allowed_mission_types || [];
 
   useEffect(() => {
-    if (!open) {
-      // Reset state on close
-      setTimeout(() => {
-        setResult(null);
-        setError(null);
-        setIntent('');
-        setTargetsText('');
-      }, 300);
+    if (open) {
+      // Reset on OPEN — guarantees a fresh modal regardless of how
+      // recently it was closed. Avoids the 300ms reset race where
+      // rapid reopen could clobber new state.
+      setResult(null);
+      setError(null);
+      setIntent('');
+      setTargetsText('');
     }
   }, [open]);
 

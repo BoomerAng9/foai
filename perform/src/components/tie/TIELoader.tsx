@@ -172,7 +172,7 @@ export function TIELoader({
             <PulseDots />
           </div>
           <div
-            className="text-xs md:text-sm mt-3 tracking-[0.15em]"
+            className="text-xs md:text-sm mt-3 tracking-[0.15em] uppercase"
             style={{
               color: 'rgba(255,255,255,0.5)',
               fontFamily: "'JetBrains Mono', monospace",

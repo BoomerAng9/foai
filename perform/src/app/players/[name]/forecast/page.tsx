@@ -26,6 +26,7 @@ interface ForecastResponse {
       consensusRank: number;
       positionRank: number;
       projectedRound: number;
+      headshotUrl?: string | null;
     };
     grade: {
       actual: { score: number; letter: string; icon: string; label: string; projection: string };
@@ -104,7 +105,8 @@ export default function ForecastPage({ params }: { params: Promise<{ name: strin
   }, [playerName]);
 
   if (loading) {
-    return <TIELoader subtitle={`Calibrating forecast for ${playerName.replace(/-/g, ' ')}`} />;
+    const upperName = playerName.replace(/-/g, ' ').toUpperCase();
+    return <TIELoader subtitle={`CALIBRATING FORECAST FOR ${upperName}`} />;
   }
 
   if (error || !data) {
@@ -165,7 +167,7 @@ export default function ForecastPage({ params }: { params: Promise<{ name: strin
                   {p.identity.school} · Class of 2026
                 </span>
               </div>
-              <h1 className="text-5xl md:text-7xl font-black leading-[0.92] tracking-tight">
+              <h1 className="text-5xl md:text-7xl font-black leading-[0.92] tracking-tight uppercase">
                 {p.identity.name}
               </h1>
               <div className="flex items-center gap-6 mt-6 flex-wrap">
@@ -199,26 +201,54 @@ export default function ForecastPage({ params }: { params: Promise<{ name: strin
               </div>
             </div>
 
-            {/* RIGHT — TIE engine character (hero visual) */}
-            <div className="relative flex-shrink-0 hidden lg:flex items-center justify-center" style={{ width: 340, height: 360 }}>
+            {/* RIGHT — actual player headshot */}
+            <div className="relative flex-shrink-0 hidden lg:flex items-end justify-center" style={{ width: 340, height: 380 }}>
+              {/* Backdrop circle + glow */}
               <div
-                className="absolute inset-0 rounded-full"
+                className="absolute inset-x-0 bottom-0 rounded-full"
                 style={{
-                  background: 'radial-gradient(circle, rgba(249,115,22,0.25) 0%, transparent 60%)',
-                  filter: 'blur(24px)',
+                  height: 340,
+                  background: 'radial-gradient(circle at center 60%, rgba(212,0,40,0.18) 0%, rgba(11,30,63,0.4) 50%, transparent 80%)',
+                  filter: 'blur(20px)',
                 }}
               />
-              <Image
-                src="/brand/tie-engine-hero.png"
-                alt="TIE Engine"
-                width={340}
-                height={360}
-                priority
-                className="object-contain relative"
+              {/* Stadium-style portrait frame */}
+              <div
+                className="relative rounded-full overflow-hidden"
                 style={{
-                  filter: 'drop-shadow(0 16px 32px rgba(0,0,0,0.6)) drop-shadow(0 0 40px rgba(249,115,22,0.3))',
+                  width: 320,
+                  height: 320,
+                  border: '3px solid rgba(255,255,255,0.18)',
+                  boxShadow: '0 24px 60px rgba(0,0,0,0.55), 0 0 0 1px rgba(255,215,0,0.25)',
+                  background: 'radial-gradient(circle at 50% 30%, #1A2A4A 0%, #06122A 100%)',
                 }}
-              />
+              >
+                {p.identity.headshotUrl ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={p.identity.headshotUrl}
+                    alt={p.identity.name}
+                    className="absolute inset-0 w-full h-full object-cover object-top"
+                    onError={(e) => {
+                      (e.currentTarget as HTMLImageElement).style.display = 'none';
+                    }}
+                  />
+                ) : (
+                  <div
+                    className="absolute inset-0 flex items-center justify-center"
+                    style={{ color: 'rgba(255,255,255,0.2)' }}
+                  >
+                    <span className="text-7xl font-black tracking-tight">
+                      {p.identity.name.split(' ').map(s => s[0]).join('').slice(0, 2)}
+                    </span>
+                  </div>
+                )}
+                {/* Subtle bottom gradient */}
+                <div
+                  className="absolute inset-x-0 bottom-0 h-24 pointer-events-none"
+                  style={{ background: 'linear-gradient(180deg, transparent, rgba(6,18,42,0.7))' }}
+                />
+              </div>
             </div>
           </div>
         </div>
@@ -230,19 +260,16 @@ export default function ForecastPage({ params }: { params: Promise<{ name: strin
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <PillarStatBar
               label="Game Performance"
-              weight="40%"
               actual={p.pillars.actual.gamePerformance}
               clean={p.pillars.clean.gamePerformance}
             />
             <PillarStatBar
               label="Athleticism"
-              weight="30%"
               actual={p.pillars.actual.athleticism}
               clean={p.pillars.clean.athleticism}
             />
             <PillarStatBar
               label="Intangibles"
-              weight="30%"
               actual={p.pillars.actual.intangibles}
               clean={p.pillars.clean.intangibles}
             />
@@ -356,19 +383,19 @@ export default function ForecastPage({ params }: { params: Promise<{ name: strin
         </div>
       </section>
 
-      {/* ═══ C1 GENERATIVE INTELLIGENCE CARD ═══ */}
+      {/* ═══ INTELLIGENCE BRIEFING (C1) ═══ */}
       {data.c1Card?.spec ? (
         <section className="border-b" style={{ background: T.bg, borderColor: T.border }}>
           <div className="max-w-7xl mx-auto px-6 py-14">
             <div className="mb-8">
               <div className="text-[10px] font-bold tracking-[0.22em] uppercase mb-2" style={{ color: T.red }}>
-                Generative Intelligence Layer
+                Front Office Briefing
               </div>
-              <h2 className="text-3xl md:text-4xl font-black leading-tight" style={{ color: T.text, fontFamily: "'Outfit', sans-serif" }}>
-                Portable Player Card
+              <h2 className="text-3xl md:text-4xl font-black leading-tight uppercase" style={{ color: T.text, fontFamily: "'Outfit', sans-serif" }}>
+                {p.identity.name} · The Read
               </h2>
               <p className="text-sm mt-2 max-w-xl" style={{ color: T.textMuted }}>
-                One spec. Renders as a web card, native mobile, NFT metadata, marketplace listing, or share image.
+                What scouts, NIL agencies, and front offices need to know — composed live from the canonical TIE record. PFF gives you grades. We give you the read.
               </p>
             </div>
             <div className="max-w-3xl">
@@ -401,10 +428,10 @@ export default function ForecastPage({ params }: { params: Promise<{ name: strin
             <div className="h-px w-12" style={{ background: T.borderStrong }} />
           </div>
           <div className="text-[10px] font-bold tracking-[0.25em] uppercase mb-3" style={{ color: T.textMuted }}>
-            Certified by the Talent &amp; Innovation Engine
+            Stamped by the Talent &amp; Innovation Engine
           </div>
           <p className="text-xs leading-relaxed max-w-md mx-auto" style={{ color: T.textMuted }}>
-            Every Per|Form grade runs through the canonical 40·30·30 formula. Per|Form does not pick favorites — the formula does.
+            Opinion-agnostic. Pillar-driven. Built to grade what wins on the field, not what wins on draft Twitter.
           </p>
         </div>
       </section>
@@ -488,24 +515,19 @@ function GradeHero({
 
 function PillarStatBar({
   label,
-  weight,
   actual,
   clean,
 }: {
   label: string;
-  weight: string;
   actual: number;
   clean: number;
 }) {
   const delta = clean - actual;
   return (
     <div>
-      <div className="flex items-baseline justify-between mb-2">
+      <div className="mb-2">
         <div className="text-[10px] font-bold tracking-[0.18em] uppercase" style={{ color: '#5A6478' }}>
           {label}
-        </div>
-        <div className="text-[9px] font-mono" style={{ color: '#8B94A8' }}>
-          {weight}
         </div>
       </div>
       <div className="flex items-baseline gap-3 mb-3">

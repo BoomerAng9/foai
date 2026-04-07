@@ -501,6 +501,7 @@ function gradeProspect(p: DraftTekProspect): GradedProspect {
     currentStatus,
     baseAthleticism: athleticismClean,
     baseIntangibles: intangiblesClean,
+    preferredComps: flag?.historicalComps,
   });
 
   return {
