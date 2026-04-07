@@ -229,7 +229,7 @@ export function useAccessLevel(): AccessLevel {
 
 | File | Current Behavior | isOwner() Present? | Action Required |
 |------|------------------|--------------------|-----------------|
-| `src/app/(dashboard)/billing/page.tsx` | Has owner check, silent-return handler, small owner banner | **PARTIAL ⚠** | Upgrade banner to full stamp + replace silent return with positive owner feedback (see Annotation G) |
+| `src/app/(dashboard)/billing/page.tsx` | Has owner check, silent-return handler, small owner banner | **PARTIAL ⚠** | Upgrade banner to full stamp + replace silent return with positive owner feedback (see Annotation F) |
 
 The Section 2 audit table should be updated before the agent runs Step 1 of the execution sequence. Do **not** treat billing as a from-scratch add.
 
@@ -348,7 +348,7 @@ export function agentLimit(level: AccessLevel): number {
 ```ts
 // src/lib/server-access-level.ts
 import type { NextRequest } from 'next/server';
-import { headers, cookies } from 'next/headers';
+import { cookies } from 'next/headers';
 import { requireAuthenticatedRequest } from '@/lib/server-auth';
 import { getAdminAuth } from '@/lib/firebase-admin';
 import { isOwner } from '@/lib/allowlist';
