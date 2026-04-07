@@ -5,11 +5,15 @@ import { Check, Coffee, Shield, ExternalLink, CreditCard, Users } from 'lucide-r
 import { toast } from 'sonner';
 import { PLAN_LIST, type CommitmentWindow, getTotalPrice, getSavingsPercent } from '@/lib/billing/plans';
 import { useAuth } from '@/hooks/useAuth';
+import { isOwner } from '@/lib/allowlist';
+import { OwnerClearanceStamp } from '@/components/billing/OwnerClearanceStamp';
 
 export default function PricingPage() {
-  const { profile } = useAuth();
+  const { user, profile } = useAuth();
   const [pendingPlan, setPendingPlan] = useState<string | null>(null);
   const [commitment] = useState<CommitmentWindow>('6-month');
+
+  const ownerAccess = isOwner(user?.email);
 
   const handleUpgrade = async (planId: string) => {
     setPendingPlan(planId);
@@ -20,6 +24,15 @@ export default function PricingPage() {
         body: JSON.stringify({ plan: planId, commitment }),
       });
       const payload = await response.json();
+
+      // Owner bypass — server returns owner_bypass:true and we redirect to
+      // the dashboard without ever touching Stripe.
+      if (payload?.owner_bypass) {
+        toast.success(payload.message ?? 'Owner clearance — no checkout required');
+        window.location.href = payload.redirect_url ?? '/dashboard?owner_unlimited=1';
+        return;
+      }
+
       if (!response.ok) throw new Error(payload?.error || 'Unable to start checkout.');
       if (!payload?.url) throw new Error('Checkout URL not available.');
       window.location.href = payload.url;
@@ -43,6 +56,9 @@ export default function PricingPage() {
           Subscribers get more credits and the best rates. Pay Per Use is always available for everyone.
         </p>
       </div>
+
+      {/* Owner Clearance Stamp — replaces tier flow for owner accounts */}
+      {ownerAccess && <OwnerClearanceStamp variant="banner" />}
 
       {/* Community Message */}
       <div className="card bg-bg-elevated border-accent/20">
