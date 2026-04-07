@@ -45,7 +45,9 @@ export async function getBudget(): Promise<BudgetStatus> {
   }
 }
 
-export async function checkBudget(): Promise<void> {
+export async function checkBudget(email?: string | null): Promise<void> {
+  // Owner bypass — platform budget never blocks owners
+  if (isOwner(email)) return;
   const budget = await getBudget();
   if (budget.exhausted || budget.remaining <= 0) {
     throw new BudgetExhaustedError();
@@ -168,7 +170,10 @@ export async function deductUserCredits(
   userId: string,
   credits: number,
   action: string,
+  email?: string | null,
 ): Promise<void> {
+  // Owner bypass — never deduct from owner accounts
+  if (isOwner(email)) return;
   if (!sql || credits <= 0) return;
 
   try {

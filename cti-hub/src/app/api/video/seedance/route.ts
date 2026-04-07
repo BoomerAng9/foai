@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth-guard';
 import { generateVideo, getTaskStatus, getCredits } from '@/lib/video/kie-ai';
+import { isOwner } from '@/lib/allowlist';
 
 export async function POST(req: NextRequest) {
   try {
@@ -15,7 +16,8 @@ export async function POST(req: NextRequest) {
     }
 
     const credits = await getCredits();
-    if (credits <= 0) {
+    // Owner bypass — credit balance never blocks owners
+    if (!isOwner(auth.email) && credits <= 0) {
       return NextResponse.json({ error: 'Insufficient video credits' }, { status: 402 });
     }
 

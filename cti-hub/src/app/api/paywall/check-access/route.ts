@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth-guard';
+import { isOwner } from '@/lib/allowlist';
 import { sql } from '@/lib/insforge';
 
 interface TierLimits {
@@ -27,6 +28,11 @@ export async function GET(request: NextRequest) {
 
   if (!userId || !feature) {
     return NextResponse.json({ error: 'userId and feature are required' }, { status: 400 });
+  }
+
+  // Owner bypass — every feature allowed, unlimited
+  if (isOwner(auth.email)) {
+    return NextResponse.json({ allowed: true, tier: 'owner', feature, value: -1 });
   }
 
   // Look up user tier from profiles table

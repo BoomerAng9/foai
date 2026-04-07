@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@/lib/insforge';
 import { requireAuthenticatedRequest } from '@/lib/server-auth';
 import { applyRateLimit } from '@/lib/rate-limit';
+import { isOwner } from '@/lib/allowlist';
 import {
   SQWAADRUN_TIERS,
   type SqwaadrunTierId,
@@ -34,6 +35,7 @@ export async function POST(req: NextRequest) {
   }
 
   const userId = auth.context.user.uid;
+  const ownerBypass = isOwner(auth.context.user.email);
 
   // ── Load profile + quota state ──
   const profileRows = await sql`
@@ -48,7 +50,7 @@ export async function POST(req: NextRequest) {
   `;
   const profile = profileRows[0];
 
-  if (!profile || profile.sqwaadrun_status !== 'active' || !profile.sqwaadrun_tier) {
+  if (!ownerBypass && (!profile || profile.sqwaadrun_status !== 'active' || !profile.sqwaadrun_tier)) {
     return NextResponse.json(
       {
         error: 'No active Sqwaadrun subscription. Choose a tier at /plug/sqwaadrun#deploy.',
@@ -58,15 +60,18 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const tierId = profile.sqwaadrun_tier as SqwaadrunTierId;
-  const tier = SQWAADRUN_TIERS[tierId];
+  // Owners get the highest tier implicitly so every mission type unlocks
+  const tierId = (ownerBypass
+    ? ('enterprise' as SqwaadrunTierId)
+    : (profile.sqwaadrun_tier as SqwaadrunTierId));
+  const tier = SQWAADRUN_TIERS[tierId] ?? Object.values(SQWAADRUN_TIERS).slice(-1)[0];
   if (!tier) {
     return NextResponse.json({ error: 'Unknown tier' }, { status: 500 });
   }
 
-  const used = Number(profile.sqwaadrun_missions_used || 0);
-  const quota = Number(profile.sqwaadrun_monthly_quota || 0);
-  if (used >= quota) {
+  const used = Number(profile?.sqwaadrun_missions_used || 0);
+  const quota = Number(profile?.sqwaadrun_monthly_quota || 0);
+  if (!ownerBypass && used >= quota) {
     return NextResponse.json(
       {
         error: `Monthly quota exhausted (${used}/${quota}). Upgrade at /plug/sqwaadrun#deploy or wait for reset.`,
@@ -106,7 +111,7 @@ export async function POST(req: NextRequest) {
   }
 
   // ── Tier-gate the mission type ──
-  if (!tier.allowed_mission_types.includes(missionType)) {
+  if (!ownerBypass && !tier.allowed_mission_types.includes(missionType)) {
     return NextResponse.json(
       {
         error: `Mission type "${missionType}" not available on ${tier.name}. Upgrade to unlock.`,
@@ -155,8 +160,8 @@ export async function POST(req: NextRequest) {
     });
     const result = await res.json();
 
-    // ── Increment quota on successful dispatch ──
-    if (res.ok && result.status !== 'failed' && result.status !== 'rejected') {
+    // ── Increment quota on successful dispatch (skip for owners) ──
+    if (!ownerBypass && res.ok && result.status !== 'failed' && result.status !== 'rejected') {
       try {
         await sql`
           UPDATE profiles
