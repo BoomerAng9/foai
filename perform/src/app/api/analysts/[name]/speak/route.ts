@@ -3,7 +3,7 @@ import { getAnalyst } from '@/lib/analysts/personas';
 import { speakAnalystContent } from '@/lib/voice/tts-router';
 
 /* ──────────────────────────────────────────────────────────────
- *  POST /api/analysts/[id]/speak
+ *  POST /api/analysts/[name]/speak
  *  Body: { text: string, engineOverride?: string }
  *  Returns: { audioUrl, engine, contentHash, error? }
  *
@@ -11,11 +11,11 @@ import { speakAnalystContent } from '@/lib/voice/tts-router';
  *  Phase 1 returns null audioUrl (stub); Phase 2 wires real engines.
  * ────────────────────────────────────────────────────────────── */
 
-export async function POST(req: NextRequest, ctx: { params: Promise<{ id: string }> }) {
-  const { id } = await ctx.params;
-  const analyst = getAnalyst(id);
+export async function POST(req: NextRequest, ctx: { params: Promise<{ name: string }> }) {
+  const { name } = await ctx.params;
+  const analyst = getAnalyst(name);
   if (!analyst) {
-    return NextResponse.json({ error: `Analyst ${id} not found` }, { status: 404 });
+    return NextResponse.json({ error: `Analyst ${name} not found` }, { status: 404 });
   }
 
   try {
