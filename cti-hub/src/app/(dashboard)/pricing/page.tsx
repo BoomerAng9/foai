@@ -29,7 +29,7 @@ export default function PricingPage() {
       // the dashboard without ever touching Stripe.
       if (payload?.owner_bypass) {
         toast.success(payload.message ?? 'Owner clearance — no checkout required');
-        window.location.href = payload.redirect_url ?? '/dashboard?owner_unlimited=1';
+        window.location.href = payload.redirect_url ?? '/smelter-os?owner_unlimited=1';
         return;
       }
 

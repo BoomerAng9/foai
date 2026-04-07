@@ -18,6 +18,8 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
+import { useAuth } from '@/hooks/useAuth';
+import { isOwner } from '@/lib/allowlist';
 import { HawkCard, type HawkCardData } from '@/components/hawks/HawkCard';
 import {
   CORE_HAWKS,
@@ -40,8 +42,17 @@ interface LiveRoster {
 }
 
 export default function SqwaadrunPage() {
+  const { user } = useAuth();
   const [live, setLive] = useState<LiveRoster | null>(null);
   const [healthy, setHealthy] = useState<boolean | null>(null);
+
+  // Owner short-circuit — never show the pricing tiles to the owner.
+  // Send straight to the authenticated control surface.
+  useEffect(() => {
+    if (user && isOwner(user.email)) {
+      window.location.replace('/sqwaadrun');
+    }
+  }, [user]);
 
   useEffect(() => {
     fetch('/api/sqwaadrun/live')
@@ -536,7 +547,7 @@ function TierCard({
       // Owner bypass — server returns owner_bypass:true and we redirect
       // to the dashboard without any Stripe interaction (Phase 0).
       if (data?.owner_bypass) {
-        window.location.href = data.redirect_url ?? '/dashboard?owner_unlimited=1';
+        window.location.href = data.redirect_url ?? '/smelter-os?owner_unlimited=1';
         return;
       }
 
