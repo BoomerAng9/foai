@@ -54,21 +54,20 @@ export default function TIELandingPage() {
 
       {/* ═══ HERO ═══ */}
       <section className="relative overflow-hidden min-h-[92vh] flex items-center">
-        {/* Embossed wall logo background */}
+        {/* TIE HQ lobby scene */}
         <div
           className="absolute inset-0"
           style={{
-            backgroundImage: "url('/brand/tie-shield-stripes.png')",
+            backgroundImage: "url('/brand/scenes/tie-hq-lobby.png')",
             backgroundSize: 'cover',
             backgroundPosition: 'center',
-            opacity: 0.5,
           }}
         />
         {/* Dark gradient wash */}
         <div
           className="absolute inset-0"
           style={{
-            background: 'linear-gradient(135deg, rgba(6,10,20,0.75) 0%, rgba(6,10,20,0.35) 50%, rgba(6,10,20,0.92) 100%)',
+            background: 'linear-gradient(135deg, rgba(6,10,20,0.88) 0%, rgba(6,10,20,0.6) 50%, rgba(6,10,20,0.92) 100%)',
           }}
         />
         {/* Vignette for depth */}

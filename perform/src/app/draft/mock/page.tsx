@@ -86,14 +86,40 @@ export default function MockDraftPage() {
     <div className="min-h-screen flex flex-col" style={{ background: '#0A0A0F', color: '#fff' }}>
       <Header />
 
+      {/* Hero — draft stage background */}
+      <section className="relative overflow-hidden" style={{ minHeight: 360 }}>
+        <div
+          className="absolute inset-0"
+          style={{
+            backgroundImage: "url('/brand/scenes/draft-stage.png')",
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+          }}
+        />
+        <div
+          className="absolute inset-0"
+          style={{
+            background:
+              'linear-gradient(135deg, rgba(10,10,15,0.88) 0%, rgba(10,10,15,0.55) 50%, rgba(10,10,15,0.92) 100%)',
+          }}
+        />
+        <div className="relative max-w-5xl mx-auto w-full px-4 py-14 text-center">
+          <div className="inline-flex items-center gap-2 mb-3">
+            <span className="px-2 py-0.5 text-[10px] font-bold tracking-[0.2em] rounded" style={{ background: '#D40028', color: '#FFFFFF' }}>
+              DRAFT NIGHT
+            </span>
+            <span className="text-[10px] font-mono tracking-[0.18em] uppercase opacity-60">Mock Simulator</span>
+          </div>
+          <h1 className="text-5xl md:text-6xl font-black tracking-tight uppercase" style={{ fontFamily: "'Outfit', sans-serif" }}>
+            On the Clock
+          </h1>
+          <p className="text-sm md:text-base opacity-70 mt-3 max-w-xl mx-auto">
+            Run the TIE engine across seven rounds. Consensus order or Per|Form&rsquo;s take — your call.
+          </p>
+        </div>
+      </section>
+
       <main className="flex-1 max-w-5xl mx-auto w-full px-4 py-8">
-        {/* Title */}
-        <h1 className="text-2xl md:text-3xl font-extrabold tracking-widest text-center mb-1" style={{ color: '#D4A853' }}>
-          MOCK DRAFT SIMULATOR
-        </h1>
-        <p className="text-center text-xs text-white/30 font-mono mb-6">
-          TIE-POWERED DRAFT ENGINE
-        </p>
 
         {/* Mode Toggle */}
         <div className="flex items-center justify-center gap-1 mb-8">
