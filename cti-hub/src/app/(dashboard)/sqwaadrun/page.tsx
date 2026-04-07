@@ -295,9 +295,10 @@ export default function SqwaadrunDashboardPage() {
                 {!loading && recent && recent.length > 0 && (
                   <div className="space-y-2">
                     {recent.slice(0, 8).map((m) => (
-                      <div
+                      <Link
                         key={m.mission_id}
-                        className="flex items-center justify-between gap-3 px-3 py-2 border-l-2"
+                        href={`/sqwaadrun/missions/${encodeURIComponent(m.mission_id)}`}
+                        className="flex items-center justify-between gap-3 px-3 py-2 border-l-2 hover:bg-white/[0.04] transition"
                         style={{
                           borderLeftColor:
                             m.status === 'completed' ? '#22D3EE' : m.status === 'failed' ? '#EF4444' : '#F5A623',
@@ -305,7 +306,9 @@ export default function SqwaadrunDashboardPage() {
                         }}
                       >
                         <div className="flex-1 min-w-0">
-                          <div className="text-[11px] font-mono truncate">{m.mission_id}</div>
+                          <div className="text-[11px] font-mono truncate" style={{ color: '#F5A623' }}>
+                            {m.mission_id}
+                          </div>
                           <div className="text-[9px] font-mono opacity-50 mt-0.5">
                             {m.mission_type.toUpperCase()} · {m.primary_domain || '—'}
                           </div>
@@ -318,7 +321,8 @@ export default function SqwaadrunDashboardPage() {
                             {m.throughput_pps?.toFixed(1) || '—'} pps
                           </div>
                         </div>
-                      </div>
+                        <div className="text-[12px] opacity-40 shrink-0 ml-1">→</div>
+                      </Link>
                     ))}
                   </div>
                 )}

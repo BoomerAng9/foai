@@ -12,6 +12,7 @@
  */
 
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
 import {
   SQWAADRUN_TIERS,
   type SqwaadrunTierId,
@@ -358,6 +359,20 @@ export function MissionBuilder({ open, onClose, tierId, onComplete }: MissionBui
             >
               {submitting ? 'DISPATCHING...' : 'DEPLOY →'}
             </button>
+          )}
+          {result?.mission_id && (
+            <Link
+              href={`/sqwaadrun/missions/${encodeURIComponent(result.mission_id)}`}
+              onClick={onClose}
+              className="px-6 py-2 text-[11px] font-mono tracking-wider font-bold"
+              style={{
+                background: '#22D3EE',
+                color: '#050810',
+                borderRadius: '2px',
+              }}
+            >
+              VIEW RESULTS →
+            </Link>
           )}
         </div>
       </div>
