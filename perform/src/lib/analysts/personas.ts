@@ -28,22 +28,30 @@ export interface AnalystPersona {
   };
   /**
    * TTS voice configuration. Each analyst is routed to the engine
-   * best suited to their accent/texture. Microsoft VibeVoice is the
-   * new default for expressive multi-speaker podcasts.
+   * best suited to their accent/texture.
    *
    * Engines:
-   *   - 'vibevoice' — Microsoft VibeVoice 1.5B / 7B. Best for
-   *     expressive multi-speaker (Haze+Smoke), emotional range,
-   *     laughter, stutters, regional accents.
-   *   - 'elevenlabs' — ElevenLabs Turbo v2 multilingual. Best for
-   *     refined single voices (Astra).
-   *   - 'playht' — Play.ht v3. Strong for regional accents (Colonel
-   *     + Gino Jersey Italian).
-   *   - 'chatterbox' — Resemble Chatterbox open source. Best for
-   *     expressive single-speaker with emotion tags.
+   *   - 'personaplex' — NVIDIA PersonaPlex on Vertex AI (free,
+   *     self-hosted, 16 voices, full-duplex, 170ms latency). Best
+   *     default for solo analyst voices that need low latency.
+   *   - 'grok-voice' — xAI Grok 4.20 Voice Agent (real-time
+   *     WebSocket, 5 voices Ara/Eve/Leo/Rex/Sal, <1s latency, tool
+   *     calling). Great for live conversational ACHEEVY chats.
+   *   - 'gemini-live' — Google Gemini 3.1 Flash Live (real-time
+   *     audio-to-audio, <500ms, barge-in). Best for barge-in
+   *     interactive podcast.
+   *   - 'vibevoice' — Microsoft VibeVoice 7B (MIT license, multi-
+   *     speaker, expressive, laughter, stutters). BEST for duo
+   *     shows like The Haze (Haze+Smoke).
+   *   - 'elevenlabs' — ElevenLabs Turbo v2 multilingual. Refined
+   *     single voices + native voice cloning.
+   *   - 'playht' — Play.ht v3. Strong for regional accents
+   *     (Jersey Italian for Colonel+Gino).
+   *   - 'chatterbox' — Resemble Chatterbox open source. Expressive
+   *     single-speaker with emotion tags.
    */
   voice: {
-    engine: 'vibevoice' | 'elevenlabs' | 'playht' | 'chatterbox';
+    engine: 'personaplex' | 'grok-voice' | 'gemini-live' | 'vibevoice' | 'elevenlabs' | 'playht' | 'chatterbox';
     /** Model or voice ID specific to the engine */
     voiceId?: string;
     /** Speakers for duo/co-host shows, keyed by tag (e.g. "HAZE", "SMOKE") */

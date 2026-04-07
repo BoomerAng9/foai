@@ -1,6 +1,7 @@
 import { generateText } from '@/lib/openrouter';
 import { getAnalyst, type AnalystPersona } from './personas';
 import { gradeAllProspects, type GradedProspect } from '@/lib/draft/open-mind-grader';
+import { searchKnowledge, getLibrarySummary } from '@/lib/knowledge';
 
 export type ContentType =
   | 'scouting_report'
@@ -50,6 +51,26 @@ function buildBoardContext(): string {
   ].join('\n');
 }
 
+/* ── Pull knowledge-library citations for the analyst ── */
+function buildKnowledgeContext(analystId: string, context: string): string {
+  // Smoke (from The Haze) is the Mastering the NIL expert — always
+  // give him the book context. Bun-E gets workforce + women-in-tech
+  // sources. Other analysts get whatever the context matches.
+  const query = context.slice(0, 200);
+  const hits = searchKnowledge(query, { limit: 3, windowChars: 500 });
+  if (hits.length === 0) return '';
+
+  const lines = ['KNOWLEDGE LIBRARY CITATIONS (reference these authoritative sources):'];
+  for (const hit of hits) {
+    lines.push(`\n--- ${hit.title} ---`);
+    lines.push(hit.snippet);
+  }
+  lines.push('');
+  lines.push(`Available library: ${getLibrarySummary().split('\n').length} sources indexed.`);
+  lines.push('If an NIL or workforce topic comes up, draw from these sources verbatim. Smoke especially — you are the Mastering the NIL expert.');
+  return lines.join('\n');
+}
+
 export async function generateAnalystContent(
   analystId: string,
   contentType: ContentType,
@@ -59,7 +80,19 @@ export async function generateAnalystContent(
   if (!analyst) throw new Error(`Analyst ${analystId} not found`);
 
   const board = buildBoardContext();
-  const userMessage = `${TYPE_PROMPTS[contentType]}\n\n${board}\n\nCONTEXT FOR THIS SEGMENT:\n${context}`;
+  const knowledge = buildKnowledgeContext(analystId, context);
+  const userMessage = [
+    TYPE_PROMPTS[contentType],
+    '',
+    board,
+    '',
+    knowledge,
+    '',
+    'CONTEXT FOR THIS SEGMENT:',
+    context,
+  ]
+    .filter(Boolean)
+    .join('\n');
   const content = await generateText(analyst.systemPrompt, userMessage);
 
   return { content, analyst };
