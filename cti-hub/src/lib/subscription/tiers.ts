@@ -49,7 +49,7 @@ export const TIERS: SubscriptionTier[] = [
       'nvidia/nemotron-nano-9b-v2:free',
       'qwen/qwen3-coder:free',
       'qwen/qwen3-next-80b-a3b-instruct:free',
-      'qwen/qwen3.6-plus-preview:free',
+      'qwen/qwen3.6-plus:free',
       'meta-llama/llama-3.3-70b-instruct:free',
       'google/gemma-3-27b-it:free',
     ],

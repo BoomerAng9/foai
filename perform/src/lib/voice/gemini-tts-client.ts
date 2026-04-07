@@ -31,6 +31,10 @@ import fs from 'fs';
 import path from 'path';
 
 const getApiKey = () => process.env.GEMINI_API_KEY || '';
+// Newest Live-tier model first; the legacy 2.5 ID is kept ONLY as
+// an absolute last resort if the router has nowhere else to fall.
+const DEFAULT_MODEL = 'gemini-3.1-flash-live-preview';
+const LEGACY_FALLBACK = 'gemini-2.5-pro-preview-tts';
 const DEFAULT_MODEL = 'gemini-2.5-pro-preview-tts';
 const FALLBACK_MODEL = 'gemini-2.5-flash-preview-tts';
 const BASE_URL = 'https://generativelanguage.googleapis.com/v1beta';

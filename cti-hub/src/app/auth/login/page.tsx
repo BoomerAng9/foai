@@ -1,25 +1,53 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect, Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { authService } from '@/lib/auth-paywall';
 import { useAuth } from '@/hooks/useAuth';
 import { Shield } from 'lucide-react';
 
 export default function LoginPage() {
-  const router = useRouter();
+  // useSearchParams() requires a Suspense boundary in Next 15 prerender
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-[#0a0a0f]" />}>
+      <LoginInner />
+    </Suspense>
+  );
+}
+
+function LoginInner() {
+  const searchParams = useSearchParams();
   const { user, denied, loading: authLoading } = useAuth();
   const [signingIn, setSigningIn] = useState(false);
   const [error, setError] = useState('');
 
-  // Redirect to home once auth resolves and cookie is set
-  // Use window.location for full page reload so middleware picks up the new cookie
+  // Honor ?next=... so the OwnerGate (and any other gated surface) can
+  // bring the user back where they came from after sign-in. Default to /chat.
+  // Only allow same-origin paths to prevent open-redirect.
+  const rawNext = searchParams?.get('next') || '';
+  const nextPath = rawNext.startsWith('/') && !rawNext.startsWith('//') ? rawNext : '/chat';
+
+  // ?force=1 disables the auto-redirect so a stuck/stale Firebase session
+  // can sign out and re-authenticate without bouncing.
+  const forceReauth = searchParams?.get('force') === '1';
+
+  // Redirect once auth resolves and cookie is set
   useEffect(() => {
+    if (forceReauth) return;
     if (!authLoading && user && !denied) {
-      // Use window.location for full reload — ensures cookies are sent on next request
-      window.location.replace('/chat');
+      window.location.replace(nextPath);
     }
-  }, [user, authLoading, denied]);
+  }, [user, authLoading, denied, nextPath, forceReauth]);
+
+  async function handleForceSignOut() {
+    try {
+      await authService.signOut();
+    } catch {
+      /* ignore */
+    }
+    document.cookie = 'firebase-auth-token=; Path=/; Max-Age=0';
+    window.location.href = '/auth/login?force=1';
+  }
 
   async function handleGoogleSignIn() {
     setError('');
@@ -82,6 +110,14 @@ export default function LoginPage() {
           Have an invitation?{' '}
           <a href="/auth/redeem" className="text-[#00A3FF] font-bold hover:underline">Redeem here</a>
         </p>
+        {(user || forceReauth) && (
+          <p className="text-center text-xs text-slate-500 mt-3">
+            Stuck on the wrong account?{' '}
+            <button onClick={handleForceSignOut} className="text-[#00A3FF] font-bold hover:underline">
+              Sign out and start over
+            </button>
+          </p>
+        )}
         <p className="text-center text-[10px] text-slate-600 mt-3">The Deploy Platform &mdash; Authorized personnel only</p>
       </div>
     </div>
