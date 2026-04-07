@@ -358,20 +358,20 @@ export default function ForecastPage({ params }: { params: Promise<{ name: strin
 
       {/* ═══ C1 GENERATIVE INTELLIGENCE CARD ═══ */}
       {data.c1Card?.spec ? (
-        <section className="border-b" style={{ background: '#070C16', borderColor: T.border }}>
-          <div className="max-w-7xl mx-auto px-6 py-12">
-            <div className="text-center mb-8">
-              <div className="text-[10px] font-bold tracking-[0.25em] uppercase mb-2" style={{ color: '#22D3EE' }}>
-                ◢ Generative Intelligence Layer · C1 Thesys
+        <section className="border-b" style={{ background: T.bg, borderColor: T.border }}>
+          <div className="max-w-7xl mx-auto px-6 py-14">
+            <div className="mb-8">
+              <div className="text-[10px] font-bold tracking-[0.22em] uppercase mb-2" style={{ color: T.red }}>
+                Generative Intelligence Layer
               </div>
-              <h2 className="text-3xl md:text-4xl font-black leading-tight" style={{ color: '#FFFFFF', fontFamily: "'Outfit', sans-serif" }}>
+              <h2 className="text-3xl md:text-4xl font-black leading-tight" style={{ color: T.text, fontFamily: "'Outfit', sans-serif" }}>
                 Portable Player Card
               </h2>
-              <p className="text-sm mt-2 max-w-xl mx-auto" style={{ color: '#A8B2C8' }}>
-                One JSON spec. Renders here as a web card, also as native mobile, NFT metadata, marketplace listing, or share image.
+              <p className="text-sm mt-2 max-w-xl" style={{ color: T.textMuted }}>
+                One spec. Renders as a web card, native mobile, NFT metadata, marketplace listing, or share image.
               </p>
             </div>
-            <div className="max-w-3xl mx-auto">
+            <div className="max-w-3xl">
               <C1Renderer spec={data.c1Card.spec} />
             </div>
           </div>

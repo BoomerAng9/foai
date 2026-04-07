@@ -28,24 +28,24 @@ interface C1Node {
 }
 
 const TONE = {
-  bg: '#070C16',
-  surface: '#0E1525',
-  surfaceAlt: '#141C2F',
-  border: '#1F2A45',
-  borderGlow: '#22D3EE',
-  borderAccent: '#F97316',
-  text: '#FFFFFF',
-  textMuted: '#A8B2C8',
-  textSubtle: '#6B7589',
-  cyan: '#22D3EE',
-  cyanGlow: 'rgba(34,211,238,0.4)',
-  orange: '#F97316',
-  orangeGlow: 'rgba(249,115,22,0.4)',
-  gold: '#FFD700',
-  goldDim: '#D4A853',
-  green: '#34D399',
-  red: '#F87171',
-  amber: '#FBBF24',
+  bg: '#FFFFFF',
+  surface: '#FFFFFF',
+  surfaceAlt: '#F6F8FC',
+  border: '#E2E6EE',
+  borderStrong: '#CDD3DF',
+  text: '#0A0E1A',
+  textMuted: '#5A6478',
+  textSubtle: '#8B94A8',
+  navy: '#0B1E3F',
+  navyDeep: '#06122A',
+  red: '#D40028',
+  redSoft: '#FFE9ED',
+  green: '#00874C',
+  greenSoft: '#E0F5EB',
+  amber: '#DC6B19',
+  amberSoft: '#FFF1E0',
+  blue: '#0A66E8',
+  blueSoft: '#E0EDFF',
 };
 
 /* ── Top-level entry point ── */
@@ -104,53 +104,33 @@ function C1Card({ children }: CardProps) {
     <div
       className="relative rounded-2xl overflow-hidden"
       style={{
-        background: `linear-gradient(180deg, ${TONE.surface} 0%, ${TONE.bg} 100%)`,
+        background: TONE.surface,
         border: `1px solid ${TONE.border}`,
-        boxShadow: `0 0 0 1px ${TONE.cyan}33, 0 20px 60px rgba(0,0,0,0.6), inset 0 0 80px rgba(34,211,238,0.04)`,
+        boxShadow: '0 1px 3px rgba(10,14,26,0.04), 0 20px 50px rgba(10,14,26,0.08)',
       }}
     >
-      {/* corner brackets — gaming card energy */}
-      <CornerBrackets />
-      <div className="relative p-6 space-y-5">{renderNode(children)}</div>
+      {/* Top accent stripe — navy to red */}
+      <div
+        className="absolute top-0 left-0 right-0 h-1 pointer-events-none"
+        style={{ background: `linear-gradient(90deg, ${TONE.navy} 0%, ${TONE.red} 100%)` }}
+      />
+      <div className="relative p-6 md:p-8 space-y-6">{renderNode(children)}</div>
     </div>
-  );
-}
-
-function CornerBrackets() {
-  const corner = (style: React.CSSProperties) => (
-    <div
-      className="absolute w-5 h-5 pointer-events-none"
-      style={{
-        ...style,
-        borderColor: TONE.cyan,
-        boxShadow: `0 0 8px ${TONE.cyanGlow}`,
-      }}
-    />
-  );
-  return (
-    <>
-      {corner({ top: 8, left: 8, borderTop: '2px solid', borderLeft: '2px solid' })}
-      {corner({ top: 8, right: 8, borderTop: '2px solid', borderRight: '2px solid' })}
-      {corner({ bottom: 8, left: 8, borderBottom: '2px solid', borderLeft: '2px solid' })}
-      {corner({ bottom: 8, right: 8, borderBottom: '2px solid', borderRight: '2px solid' })}
-    </>
   );
 }
 
 interface HeaderProps { title?: string; subtitle?: string }
 function C1Header({ title, subtitle }: HeaderProps) {
   return (
-    <div className="pb-4 border-b" style={{ borderColor: TONE.border }}>
+    <div className="pb-5 border-b" style={{ borderColor: TONE.border }}>
       <div
-        className="inline-block px-3 py-1 rounded-md text-[10px] font-bold tracking-[0.22em] uppercase mb-3"
+        className="inline-block px-2.5 py-0.5 rounded text-[10px] font-bold tracking-[0.2em] uppercase mb-3"
         style={{
-          color: TONE.orange,
-          background: `${TONE.orange}15`,
-          border: `1px solid ${TONE.orange}40`,
-          boxShadow: `0 0 12px ${TONE.orangeGlow}`,
+          color: '#FFFFFF',
+          background: TONE.red,
         }}
       >
-        ◢ Per|Form Intel
+        Per|Form Intel
       </div>
       <h2
         className="text-3xl md:text-4xl font-black leading-tight tracking-tight"
@@ -159,7 +139,7 @@ function C1Header({ title, subtitle }: HeaderProps) {
         {title}
       </h2>
       {subtitle && (
-        <p className="text-sm mt-1" style={{ color: TONE.cyan, fontFamily: "'JetBrains Mono', monospace" }}>
+        <p className="text-sm mt-2 font-semibold" style={{ color: TONE.textMuted }}>
           {subtitle}
         </p>
       )}
@@ -170,17 +150,15 @@ function C1Header({ title, subtitle }: HeaderProps) {
 interface InlineHeaderProps { heading?: string; subheading?: string }
 function C1InlineHeader({ heading, subheading }: InlineHeaderProps) {
   return (
-    <div className="flex items-center gap-3 mb-3">
-      <div className="h-px flex-1" style={{ background: `linear-gradient(90deg, ${TONE.cyan}, transparent)` }} />
+    <div className="mb-4">
       <div
-        className="text-[10px] font-bold tracking-[0.25em] uppercase whitespace-nowrap"
-        style={{ color: TONE.cyan, fontFamily: "'JetBrains Mono', monospace" }}
+        className="text-[10px] font-bold tracking-[0.22em] uppercase"
+        style={{ color: TONE.red }}
       >
         {heading}
       </div>
-      <div className="h-px flex-1" style={{ background: `linear-gradient(90deg, transparent, ${TONE.cyan})` }} />
       {subheading && (
-        <div className="text-[10px] opacity-60" style={{ color: TONE.textMuted }}>{subheading}</div>
+        <div className="text-xs mt-0.5" style={{ color: TONE.textMuted }}>{subheading}</div>
       )}
     </div>
   );
@@ -195,11 +173,10 @@ interface MiniCardProps { lhs?: unknown; rhs?: unknown; title?: string; descript
 function C1MiniCard({ lhs, rhs, title, description }: MiniCardProps) {
   return (
     <div
-      className="relative p-4 rounded-xl"
+      className="relative p-4 rounded-lg"
       style={{
         background: TONE.surfaceAlt,
         border: `1px solid ${TONE.border}`,
-        boxShadow: `inset 0 0 30px rgba(34,211,238,0.04)`,
       }}
     >
       {(title || description) && (
@@ -220,16 +197,15 @@ interface DataTileProps { amount?: string | number; description?: string; child?
 function C1DataTile({ amount, description, child }: DataTileProps) {
   return (
     <div>
-      <div className="text-[9px] font-bold tracking-[0.22em] uppercase" style={{ color: TONE.cyan }}>
+      <div className="text-[9px] font-bold tracking-[0.22em] uppercase" style={{ color: TONE.textMuted }}>
         {description}
       </div>
       <div className="flex items-end gap-2 mt-1">
         <span
           className="text-4xl font-black leading-none tabular-nums"
           style={{
-            color: TONE.gold,
+            color: TONE.navy,
             fontFamily: "'Outfit', sans-serif",
-            textShadow: `0 0 18px rgba(255,215,0,0.4)`,
           }}
         >
           {amount}
@@ -242,20 +218,20 @@ function C1DataTile({ amount, description, child }: DataTileProps) {
 
 interface TagProps { text?: string; variant?: 'success' | 'danger' | 'warning' | 'info' | 'neutral' }
 function C1Tag({ text, variant = 'neutral' }: TagProps) {
-  const color = {
-    success: TONE.green,
-    danger: TONE.red,
-    warning: TONE.amber,
-    info: TONE.cyan,
-    neutral: TONE.textMuted,
+  const tones = {
+    success: { color: TONE.green, bg: TONE.greenSoft },
+    danger:  { color: TONE.red,   bg: TONE.redSoft },
+    warning: { color: TONE.amber, bg: TONE.amberSoft },
+    info:    { color: TONE.blue,  bg: TONE.blueSoft },
+    neutral: { color: TONE.textMuted, bg: TONE.surfaceAlt },
   }[variant];
   return (
     <span
-      className="inline-block px-2 py-0.5 text-[10px] font-bold tracking-[0.15em] uppercase rounded"
+      className="inline-block px-2 py-0.5 text-[10px] font-bold tracking-[0.12em] uppercase rounded"
       style={{
-        color,
-        background: `${color}18`,
-        border: `1px solid ${color}50`,
+        color: tones.color,
+        background: tones.bg,
+        border: `1px solid ${tones.color}33`,
       }}
     >
       {text}
@@ -276,7 +252,7 @@ interface IconProps { name?: string; category?: string; size?: number }
 function C1Icon({ name, size = 18 }: IconProps) {
   const icon = ICON_MAP[name || ''] || <Sparkles size={size} />;
   return (
-    <span style={{ color: TONE.cyan, display: 'inline-flex' }}>
+    <span style={{ color: TONE.navy, display: 'inline-flex' }}>
       {React.cloneElement(icon as React.ReactElement<{ size?: number }>, { size })}
     </span>
   );
@@ -326,7 +302,7 @@ function C1List({ items = [] }: ListProps) {
           {item.amount !== undefined && (
             <span
               className="text-2xl font-black tabular-nums"
-              style={{ color: TONE.gold, fontFamily: "'Outfit', sans-serif" }}
+              style={{ color: TONE.navy, fontFamily: "'Outfit', sans-serif" }}
             >
               {item.amount}
             </span>
@@ -342,18 +318,17 @@ interface Section { value?: string; trigger?: string; content?: unknown }
 interface SectionBlockProps { sections?: Section[]; isFoldable?: boolean }
 function C1SectionBlock({ sections = [] }: SectionBlockProps) {
   return (
-    <div className="space-y-5">
+    <div className="space-y-6">
       {sections.map((s, i) => (
         <div key={i}>
           {s.trigger && (
-            <div className="flex items-center gap-3 mb-3">
+            <div className="mb-3">
               <div
                 className="text-[10px] font-bold tracking-[0.22em] uppercase"
-                style={{ color: TONE.orange, fontFamily: "'JetBrains Mono', monospace" }}
+                style={{ color: TONE.red }}
               >
-                ◢ {s.trigger}
+                {s.trigger}
               </div>
-              <div className="flex-1 h-px" style={{ background: `linear-gradient(90deg, ${TONE.orange}80, transparent)` }} />
             </div>
           )}
           <div>{renderNode(s.content)}</div>
@@ -372,40 +347,29 @@ function C1BarChart({ data = [], title }: BarChartProps) {
   return (
     <div>
       {title && (
-        <div className="text-[10px] font-bold tracking-[0.22em] uppercase mb-3" style={{ color: TONE.cyan }}>
+        <div className="text-[10px] font-bold tracking-[0.22em] uppercase mb-3" style={{ color: TONE.textMuted }}>
           {title}
         </div>
       )}
-      <div className="space-y-3">
+      <div className="space-y-4">
         {data.map((row, i) => {
           const pct = ((row.value || 0) / max) * 100;
-          const ghostPct = row.secondaryValue ? (row.secondaryValue / max) * 100 : 0;
           return (
             <div key={i}>
               <div className="flex items-baseline justify-between mb-1.5">
                 <span className="text-xs font-bold uppercase tracking-wider" style={{ color: TONE.text }}>
                   {row.label}
                 </span>
-                <span className="text-lg font-black tabular-nums" style={{ color: TONE.gold, fontFamily: "'Outfit', sans-serif" }}>
+                <span className="text-2xl font-black tabular-nums" style={{ color: TONE.navy, fontFamily: "'Outfit', sans-serif" }}>
                   {row.value?.toFixed(1)}
                 </span>
               </div>
-              <div className="relative h-2 rounded-full overflow-hidden" style={{ background: TONE.border }}>
-                {row.secondaryValue && (
-                  <div
-                    className="absolute top-0 left-0 h-full"
-                    style={{
-                      width: `${ghostPct}%`,
-                      background: `repeating-linear-gradient(90deg, transparent, transparent 4px, rgba(255,255,255,0.15) 4px, rgba(255,255,255,0.15) 6px)`,
-                    }}
-                  />
-                )}
+              <div className="relative h-2 rounded-full overflow-hidden" style={{ background: '#EAEDF3' }}>
                 <div
                   className="absolute top-0 left-0 h-full rounded-full"
                   style={{
                     width: `${pct}%`,
-                    background: `linear-gradient(90deg, ${TONE.cyan}, ${TONE.gold})`,
-                    boxShadow: `0 0 12px ${TONE.cyanGlow}`,
+                    background: `linear-gradient(90deg, ${TONE.navy}, ${TONE.blue})`,
                   }}
                 />
               </div>
@@ -424,11 +388,11 @@ interface CalloutProps {
   children?: unknown;
 }
 function C1Callout({ variant = 'info', title, description, children }: CalloutProps) {
-  const color = {
-    info: TONE.cyan,
-    warning: TONE.amber,
-    danger: TONE.red,
-    success: TONE.green,
+  const tones = {
+    info:    { color: TONE.blue,  bg: TONE.blueSoft },
+    warning: { color: TONE.amber, bg: TONE.amberSoft },
+    danger:  { color: TONE.red,   bg: TONE.redSoft },
+    success: { color: TONE.green, bg: TONE.greenSoft },
   }[variant];
   const icon = {
     info: <Info size={20} />,
@@ -441,18 +405,17 @@ function C1Callout({ variant = 'info', title, description, children }: CalloutPr
     <div
       className="relative p-5 rounded-xl"
       style={{
-        background: `${color}0D`,
-        border: `1px solid ${color}50`,
-        boxShadow: `0 0 20px ${color}20, inset 0 0 30px ${color}08`,
+        background: tones.bg,
+        border: `1px solid ${tones.color}40`,
       }}
     >
       <div className="flex items-start gap-3">
-        <div style={{ color }}>{icon}</div>
+        <div style={{ color: tones.color }}>{icon}</div>
         <div className="flex-1 min-w-0">
           {title && (
             <div
               className="text-[11px] font-bold tracking-[0.18em] uppercase mb-1"
-              style={{ color, fontFamily: "'JetBrains Mono', monospace" }}
+              style={{ color: tones.color }}
             >
               {title}
             </div>
@@ -507,15 +470,14 @@ function C1ProfileTile({ title, subtitle, description, imageUrl, iconName, badge
           src={imageUrl}
           alt={title || ''}
           className="w-14 h-14 rounded-full object-cover"
-          style={{ border: `2px solid ${TONE.cyan}`, boxShadow: `0 0 12px ${TONE.cyanGlow}` }}
+          style={{ border: `2px solid ${TONE.navy}` }}
         />
       ) : iconName ? (
         <div
           className="w-14 h-14 rounded-full flex items-center justify-center"
           style={{
-            background: `${TONE.cyan}15`,
-            border: `2px solid ${TONE.cyan}`,
-            boxShadow: `0 0 12px ${TONE.cyanGlow}`,
+            background: '#FFFFFF',
+            border: `2px solid ${TONE.navy}`,
           }}
         >
           <C1Icon name={iconName} size={26} />
@@ -524,7 +486,7 @@ function C1ProfileTile({ title, subtitle, description, imageUrl, iconName, badge
       <div className="flex-1 min-w-0">
         {title && <div className="text-base font-bold" style={{ color: TONE.text }}>{title}</div>}
         {subtitle && (
-          <div className="text-[11px] tracking-wider uppercase mt-0.5" style={{ color: TONE.cyan }}>
+          <div className="text-[10px] font-bold tracking-[0.15em] uppercase mt-0.5" style={{ color: TONE.textMuted }}>
             {subtitle}
           </div>
         )}
@@ -547,14 +509,14 @@ function C1Stats({ stats = [] }: StatsProps) {
       {stats.map((s, i) => (
         <div
           key={i}
-          className="p-4 rounded-xl"
+          className="p-4 rounded-lg"
           style={{
             background: TONE.surfaceAlt,
             border: `1px solid ${TONE.border}`,
           }}
         >
           {s.label && (
-            <div className="text-[9px] font-bold tracking-[0.22em] uppercase" style={{ color: TONE.cyan }}>
+            <div className="text-[9px] font-bold tracking-[0.22em] uppercase" style={{ color: TONE.textMuted }}>
               {s.label}
             </div>
           )}
@@ -562,9 +524,8 @@ function C1Stats({ stats = [] }: StatsProps) {
             <span
               className="text-3xl font-black tabular-nums"
               style={{
-                color: TONE.gold,
+                color: TONE.navy,
                 fontFamily: "'Outfit', sans-serif",
-                textShadow: `0 0 16px rgba(255,215,0,0.4)`,
               }}
             >
               {s.value}
