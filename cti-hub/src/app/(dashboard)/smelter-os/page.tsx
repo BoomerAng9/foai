@@ -32,6 +32,7 @@ import {
   Brain,
   ClipboardList,
   Palette,
+  Award,
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { isOwner } from '@/lib/allowlist';
@@ -321,9 +322,9 @@ export default function SmelterOSLanding() {
             <SurfaceCard
               href="/smelter-os/create"
               icon={Brain}
-              label="OPEN MIND"
+              label="OPEN MIND · SPECIALIST"
               title="Creation Harness"
-              description="Prompt-layer skill for creating something new. 8-stage FDH loop — FOSTER evidence, DEVELOP 3 approaches, HONE via 7 gates."
+              description="Only for building what doesn't exist yet — new systems, architectures, products, strategies. NOT for routine work, bug fixes, config changes, or data retrieval — those go straight to ACHEEVY."
               accent="#ffc49a"
             />
             <SurfaceCard
@@ -341,6 +342,14 @@ export default function SmelterOSLanding() {
               title="Creative Studio"
               description="13 output categories — player cards, broadcast graphics, character art, NFT cards, motion landing pages."
               accent="#ff8340"
+            />
+            <SurfaceCard
+              href="/smelter-os/tie"
+              icon={Award}
+              label="TIE ENGINE"
+              title="Talent & Innovation Engine"
+              description="Platform-wide talent grading framework. Three pillars (T/I/E) across six domains — Sports, Workforce, Student, Contractor, Founder, Creative. One canonical scale: Prime 🛸 to UDFA."
+              accent="#ffb078"
             />
           </div>
         </div>
