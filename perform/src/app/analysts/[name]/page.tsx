@@ -6,6 +6,7 @@ import { motion } from 'framer-motion';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { getAnalyst } from '@/lib/analysts/personas';
+import { SpeakButton } from '@/components/analysts/SpeakButton';
 
 const cardReveal = {
   hidden: { opacity: 0, y: 24 },
@@ -180,9 +181,17 @@ export default function AnalystFeedPage({ params }: { params: Promise<{ name: st
                     {estimateReadTime(article.content)} min read
                   </span>
                 </div>
-                <h2 className="font-outfit text-xl md:text-2xl font-bold text-white/90 mb-6 leading-tight">
+                <h2 className="font-outfit text-xl md:text-2xl font-bold text-white/90 mb-4 leading-tight">
                   {article.title}
                 </h2>
+                <div className="mb-6">
+                  <SpeakButton
+                    analystId={analyst.id}
+                    text={article.content}
+                    color={analyst.color}
+                    label="Play Podcast"
+                  />
+                </div>
                 <div
                   className="text-sm font-mono text-white/60 leading-relaxed"
                   dangerouslySetInnerHTML={{ __html: `<p class="mb-4">${renderMarkdown(article.content)}</p>` }}

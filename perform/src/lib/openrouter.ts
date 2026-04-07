@@ -29,6 +29,29 @@ export async function chatCompletion(opts: {
   return res;
 }
 
+/**
+ * Strip reasoning-model artifacts from generated content:
+ * - `<think>...</think>` blocks (Qwen / DeepSeek R1 / o1-style models)
+ * - Stray `<think>` or `</think>` tags left after partial streams
+ * - Leading "Thought:" or "Reasoning:" prefixes some models emit
+ * - XML-like scaffolding that leaked from the prompt template
+ */
+export function stripReasoningArtifacts(text: string): string {
+  if (!text) return '';
+  let cleaned = text;
+
+  // Full think blocks (greedy across newlines)
+  cleaned = cleaned.replace(/<think>[\s\S]*?<\/think>/gi, '');
+  // Orphan open/close tags
+  cleaned = cleaned.replace(/<\/?think>/gi, '');
+  // Leading "Thought:" / "Reasoning:" labels
+  cleaned = cleaned.replace(/^\s*(Thought|Reasoning|Thinking)\s*:\s*/i, '');
+  // Collapse 3+ consecutive newlines
+  cleaned = cleaned.replace(/\n{3,}/g, '\n\n');
+
+  return cleaned.trim();
+}
+
 export async function generateText(systemPrompt: string, userMessage: string): Promise<string> {
   const res = await chatCompletion({
     messages: [
@@ -37,7 +60,8 @@ export async function generateText(systemPrompt: string, userMessage: string): P
     ],
   });
   const data = await res.json();
-  return data.choices?.[0]?.message?.content || '';
+  const raw = data.choices?.[0]?.message?.content || '';
+  return stripReasoningArtifacts(raw);
 }
 
 export async function streamCompletion(opts: {
