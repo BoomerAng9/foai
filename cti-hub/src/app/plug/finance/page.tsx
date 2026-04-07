@@ -1,13 +1,13 @@
 'use client';
 
 import { useState } from 'react';
-import Link from 'next/link';
 import {
-  ArrowLeft, DollarSign, TrendingUp, TrendingDown, CreditCard,
+  DollarSign, TrendingUp, TrendingDown, CreditCard,
   AlertTriangle, MessageSquare, RefreshCw, PiggyBank, Wallet,
   ShieldAlert, Calendar,
 } from 'lucide-react';
 import { PlugChat } from '@/components/plug/PlugChat';
+import { PlugChrome } from '@/components/plug/PlugChrome';
 
 // ─── Synthetic Data ──────────────────────────────────────────────────────────
 
@@ -82,19 +82,12 @@ export default function FinancePage() {
 
   return (
     <div className="min-h-screen bg-[#0A0A0A] text-white">
-      {/* Header */}
-      <header className="border-b border-white/10 px-6 py-4">
-        <div className="max-w-7xl mx-auto flex items-center gap-4">
-          <Link href="/chat" className="text-white/40 hover:text-[#E8A020] transition-colors">
-            <ArrowLeft className="w-5 h-5" />
-          </Link>
-          <Wallet className="w-6 h-6 text-[#E8A020]" />
-          <div>
-            <h1 className="text-xl font-bold tracking-tight">Finance Command Center</h1>
-            <p className="text-xs text-white/40 font-mono">Personal CFO Dashboard</p>
-          </div>
-        </div>
-      </header>
+      <PlugChrome
+        title="Finance Command Center"
+        tagline="Personal CFO Dashboard"
+        icon={<Wallet className="w-6 h-6" />}
+        accentColor="#E8A020"
+      />
 
       <main className="max-w-7xl mx-auto px-6 py-6 space-y-6">
         {/* Anomaly Alert */}

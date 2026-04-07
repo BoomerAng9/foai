@@ -3,10 +3,11 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import {
-  ArrowLeft, Star, TrendingUp, Award, MessageSquare,
+  Star, TrendingUp, Award, MessageSquare,
   ChevronDown, ChevronUp, Filter, Search, Zap, Mic, Film, FileText,
 } from 'lucide-react';
 import { PlugChat } from '@/components/plug/PlugChat';
+import { PlugChrome } from '@/components/plug/PlugChrome';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -265,28 +266,20 @@ export default function PerFormPage() {
 
   return (
     <div className="min-h-screen bg-[#0A0A0A] text-white">
-      {/* Header */}
-      <nav className="h-14 flex items-center justify-between px-4 sm:px-6 border-b border-white/10">
-        <div className="flex items-center gap-3">
-          <Link href="/chat" className="p-1.5 hover:bg-white/5 transition-colors" title="Home">
-            <svg className="w-4 h-4 text-white/40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg>
-          </Link>
-          <Link href="/plug-bin" className="p-1.5 hover:bg-white/5 transition-colors" title="Back to Plugs">
-            <ArrowLeft className="w-4 h-4 text-white/40" />
-          </Link>
-          <div className="border-l border-white/10 pl-3">
-            <span className="font-mono text-xs font-bold tracking-wider text-[#E8A020]">PER|FORM</span>
-            <span className="font-mono text-[9px] text-white/30 ml-2">2026 NFL DRAFT</span>
+      <PlugChrome
+        title="PER|FORM"
+        tagline="2026 NFL DRAFT"
+        accentColor="#E8A020"
+        rightSlot={
+          <div className="flex items-center gap-3">
+            <Link href="/broadcast" className="font-mono text-[9px] text-white/30 hover:text-[#D4A853] transition-colors">BROAD|CAST</Link>
+            <div className="flex items-center gap-1.5">
+              <span className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse" />
+              <span className="font-mono text-[9px] text-white/40">LIVE</span>
+            </div>
           </div>
-        </div>
-        <div className="flex items-center gap-3">
-          <Link href="/broadcast" className="font-mono text-[9px] text-white/30 hover:text-[#D4A853] transition-colors">BROAD|CAST</Link>
-          <div className="flex items-center gap-1.5">
-            <span className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse" />
-            <span className="font-mono text-[9px] text-white/40">LIVE</span>
-          </div>
-        </div>
-      </nav>
+        }
+      />
 
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8">
         {/* Hero */}
