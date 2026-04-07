@@ -14,7 +14,7 @@
  *   - /api/sqwaadrun/recent      → last N missions for this user
  */
 
-import { useEffect, useMemo, useState, useCallback, useRef } from 'react';
+import { useEffect, useMemo, useState, useCallback, useRef, Suspense } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
@@ -48,7 +48,7 @@ interface LiveRoster {
   hawks: Array<{ name: string; status: 'active' | 'standby'; tasks_completed: number }>;
 }
 
-export default function SqwaadrunDashboardPage() {
+function SqwaadrunDashboardPageInner() {
   const { user, profile } = useAuth();
   const searchParams = useSearchParams();
   const [recent, setRecent] = useState<RecentMission[] | null>(null);
@@ -474,5 +474,18 @@ function Stat({ label, value, accent }: { label: string; value: string; accent: 
         {value}
       </div>
     </div>
+  );
+}
+
+/**
+ * Next.js 14/15 requires that any client component using useSearchParams()
+ * be wrapped in a Suspense boundary so the page can be statically rendered.
+ * The inner component does the work; this default export is the boundary.
+ */
+export default function SqwaadrunDashboardPage() {
+  return (
+    <Suspense fallback={null}>
+      <SqwaadrunDashboardPageInner />
+    </Suspense>
   );
 }
