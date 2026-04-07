@@ -21,6 +21,7 @@
 
 import { stripReasoningArtifacts } from '@/lib/openrouter';
 import type { AnalystPersona } from '@/lib/analysts/personas';
+import { synthesizeElevenLabs, elevenLabsAvailable } from './elevenlabs-client';
 
 export interface SpeakRequest {
   analyst: AnalystPersona;
@@ -143,15 +144,40 @@ function buildPayload(req: SpeakRequest): EnginePayload {
   return { engine, speakers, style: req.analyst.voice.style };
 }
 
-/* ── Engine stubs — return placeholder until production keys are wired ── */
-async function synthesizeStub(payload: EnginePayload): Promise<string | null> {
-  console.log(`[tts-router] stub synthesis for engine=${payload.engine}`, {
-    turns: payload.speakers.length,
-    totalChars: payload.speakers.reduce((a, s) => a + s.text.length, 0),
-  });
-  // In Phase 2 this hits the real engine and returns a cached URL.
-  // For now return null so the client shows the "coming soon" state.
-  return null;
+/* ── Engine dispatch ── */
+async function dispatchSynthesis(payload: EnginePayload): Promise<{ audioUrl: string | null; error?: string }> {
+  // Concatenate all turns into a single body for single-voice engines.
+  // Multi-speaker engines (VibeVoice, once wired) get the turns array instead.
+  const body = payload.speakers.map(s => s.text).join('\n\n');
+  const firstSpeaker = payload.speakers[0];
+
+  switch (payload.engine) {
+    case 'elevenlabs': {
+      if (!elevenLabsAvailable()) {
+        return { audioUrl: null, error: 'ELEVENLABS_API_KEY not set' };
+      }
+      const result = await synthesizeElevenLabs({
+        text: body,
+        voiceId: firstSpeaker?.voiceId || 'idris-broadcast',
+      });
+      return { audioUrl: result.audioUrl, error: result.error };
+    }
+
+    case 'vibevoice':
+    case 'playht':
+    case 'chatterbox':
+    case 'personaplex':
+    case 'grok-voice':
+    case 'gemini-live':
+    default: {
+      // Stub — log and return null so the client shows "VOICE COMING SOON"
+      console.log(`[tts-router] stub synthesis for engine=${payload.engine}`, {
+        turns: payload.speakers.length,
+        totalChars: payload.speakers.reduce((a, s) => a + s.text.length, 0),
+      });
+      return { audioUrl: null };
+    }
+  }
 }
 
 /* ── Main entry point ── */
@@ -160,11 +186,12 @@ export async function speakAnalystContent(req: SpeakRequest): Promise<SpeakResul
   const payload = buildPayload(req);
 
   try {
-    const audioUrl = await synthesizeStub(payload);
+    const { audioUrl, error } = await dispatchSynthesis(payload);
     return {
       audioUrl,
       engine: payload.engine,
       contentHash: hash,
+      error,
     };
   } catch (err) {
     return {
