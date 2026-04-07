@@ -1,17 +1,19 @@
 'use client';
 
 import { useState } from 'react';
-import Link from 'next/link';
 import {
-  ArrowLeft, BookOpen, Users, MessageSquare, GraduationCap,
-  ClipboardCheck, BarChart3, Globe, Send,
+  BookOpen, Users, GraduationCap,
+  ClipboardCheck, BarChart3, Globe,
 } from 'lucide-react';
 import { PlugChat } from '@/components/plug/PlugChat';
+import { PlugChrome } from '@/components/plug/PlugChrome';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
 interface Assignment {
   title: string;
+  /** English translation of `title`. Present for non-English classrooms. */
+  titleEnglish?: string;
   due: string;
   status: 'graded' | 'pending' | 'overdue';
   submitted: number;
@@ -20,7 +22,23 @@ interface Assignment {
 
 interface Student {
   name: string;
+  /** English transliteration / translation of `name`. Present for non-English classrooms. */
+  nameEnglish?: string;
   score: number;
+}
+
+interface QuizScore {
+  label: string;
+  /** English translation of `label`. Present for non-English classrooms. */
+  labelEnglish?: string;
+  score: number;
+}
+
+interface TwinMessage {
+  role: 'twin' | 'user';
+  text: string;
+  /** English translation of `text`. Present for non-English classrooms. */
+  textEnglish?: string;
 }
 
 interface ClassroomData {
@@ -28,11 +46,15 @@ interface ClassroomData {
   flag: string;
   studentCount: number;
   currentLesson: string;
+  /** English translation of `currentLesson`. Present for non-English classrooms. */
+  currentLessonEnglish?: string;
   assignments: Assignment[];
-  quizScores: { label: string; score: number }[];
+  quizScores: QuizScore[];
   students: Student[];
   twinGreeting: string;
-  twinMessages: { role: 'twin' | 'user'; text: string }[];
+  /** English translation of `twinGreeting`. Present for non-English classrooms. */
+  twinGreetingEnglish?: string;
+  twinMessages: TwinMessage[];
 }
 
 // ─── Synthetic Data ──────────────────────────────────────────────────────────
@@ -78,34 +100,36 @@ const CLASSROOMS: Record<string, ClassroomData> = {
     flag: '🇸🇦',
     studentCount: 75,
     currentLesson: 'الوحدة ١٢: الكتابة الإبداعية والتعبير',
+    currentLessonEnglish: 'Unit 12: Creative Writing & Expression',
     assignments: [
-      { title: 'مقال إبداعي', due: 'Apr 3', status: 'pending', submitted: 61, total: 75 },
-      { title: 'اختبار المفردات ١١', due: 'Mar 29', status: 'graded', submitted: 74, total: 75 },
-      { title: 'تحليل النص الأدبي', due: 'Apr 1', status: 'pending', submitted: 38, total: 75 },
-      { title: 'واجب القراءة ٩', due: 'Mar 25', status: 'overdue', submitted: 68, total: 75 },
+      { title: 'مقال إبداعي', titleEnglish: 'Creative Essay', due: 'Apr 3', status: 'pending', submitted: 61, total: 75 },
+      { title: 'اختبار المفردات ١١', titleEnglish: 'Vocabulary Quiz 11', due: 'Mar 29', status: 'graded', submitted: 74, total: 75 },
+      { title: 'تحليل النص الأدبي', titleEnglish: 'Literary Text Analysis', due: 'Apr 1', status: 'pending', submitted: 38, total: 75 },
+      { title: 'واجب القراءة ٩', titleEnglish: 'Reading Assignment 9', due: 'Mar 25', status: 'overdue', submitted: 68, total: 75 },
     ],
     quizScores: [
-      { label: 'اختبار ٧', score: 72 },
-      { label: 'اختبار ٨', score: 79 },
-      { label: 'اختبار ٩', score: 81 },
-      { label: 'اختبار ١٠', score: 76 },
-      { label: 'اختبار ١١', score: 83 },
+      { label: 'اختبار ٧', labelEnglish: 'Quiz 7', score: 72 },
+      { label: 'اختبار ٨', labelEnglish: 'Quiz 8', score: 79 },
+      { label: 'اختبار ٩', labelEnglish: 'Quiz 9', score: 81 },
+      { label: 'اختبار ١٠', labelEnglish: 'Quiz 10', score: 76 },
+      { label: 'اختبار ١١', labelEnglish: 'Quiz 11', score: 83 },
     ],
     students: [
-      { name: 'فاطمة الزهراء', score: 96 },
-      { name: 'أحمد محمد', score: 93 },
-      { name: 'نورة السعيد', score: 90 },
-      { name: 'يوسف الحربي', score: 88 },
-      { name: 'ليلى إبراهيم', score: 86 },
-      { name: 'عمر الشريف', score: 84 },
-      { name: 'سارة القحطاني', score: 81 },
-      { name: 'خالد الدوسري', score: 79 },
+      { name: 'فاطمة الزهراء', nameEnglish: 'Fatima Al-Zahra', score: 96 },
+      { name: 'أحمد محمد', nameEnglish: 'Ahmed Mohammed', score: 93 },
+      { name: 'نورة السعيد', nameEnglish: 'Noura Al-Saeed', score: 90 },
+      { name: 'يوسف الحربي', nameEnglish: 'Yousef Al-Harbi', score: 88 },
+      { name: 'ليلى إبراهيم', nameEnglish: 'Layla Ibrahim', score: 86 },
+      { name: 'عمر الشريف', nameEnglish: 'Omar Al-Sharif', score: 84 },
+      { name: 'سارة القحطاني', nameEnglish: 'Sarah Al-Qahtani', score: 81 },
+      { name: 'خالد الدوسري', nameEnglish: 'Khaled Al-Dosari', score: 79 },
     ],
     twinGreeting: 'صباح الخير! لاحظت تحسناً ملحوظاً في درجات اختبار المفردات. هل تريد أن أعد ورقة مراجعة للوحدة القادمة؟',
+    twinGreetingEnglish: 'Good morning! I noticed significant improvement in vocabulary quiz scores. Would you like me to prepare a review sheet for the upcoming unit?',
     twinMessages: [
-      { role: 'twin', text: 'صباح الخير! لاحظت تحسناً ملحوظاً في درجات اختبار المفردات. هل تريد أن أعد ورقة مراجعة للوحدة القادمة؟' },
-      { role: 'user', text: 'نعم، ركز على أساليب التعبير الإبداعي' },
-      { role: 'twin', text: 'تم! أعددت ملخصاً من صفحتين عن أساليب التعبير الإبداعي مع أمثلة من النصوص المقررة. كما لاحظت أن ٧ طلاب لم يسلموا واجب القراءة بعد -- هل تريد إرسال تذكير لهم؟' },
+      { role: 'twin', text: 'صباح الخير! لاحظت تحسناً ملحوظاً في درجات اختبار المفردات. هل تريد أن أعد ورقة مراجعة للوحدة القادمة؟', textEnglish: 'Good morning! I noticed significant improvement in vocabulary quiz scores. Would you like me to prepare a review sheet for the upcoming unit?' },
+      { role: 'user', text: 'نعم، ركز على أساليب التعبير الإبداعي', textEnglish: 'Yes, focus on creative expression techniques.' },
+      { role: 'twin', text: 'تم! أعددت ملخصاً من صفحتين عن أساليب التعبير الإبداعي مع أمثلة من النصوص المقررة. كما لاحظت أن ٧ طلاب لم يسلموا واجب القراءة بعد -- هل تريد إرسال تذكير لهم؟', textEnglish: 'Done! I prepared a 2-page summary on creative expression techniques with examples from the assigned texts. I also noticed 7 students haven\'t submitted the reading assignment yet — want me to send them a reminder?' },
     ],
   },
   russian: {
@@ -113,34 +137,36 @@ const CLASSROOMS: Record<string, ClassroomData> = {
     flag: '🇷🇺',
     studentCount: 75,
     currentLesson: 'Блок 12: Русская литература XIX века — Толстой',
+    currentLessonEnglish: 'Unit 12: 19th Century Russian Literature — Tolstoy',
     assignments: [
-      { title: 'Сочинение по "Войне и миру"', due: 'Apr 3', status: 'pending', submitted: 52, total: 75 },
-      { title: 'Тест по лексике гл.11', due: 'Mar 29', status: 'graded', submitted: 73, total: 75 },
-      { title: 'Анализ персонажей', due: 'Apr 1', status: 'pending', submitted: 45, total: 75 },
-      { title: 'Дневник чтения №9', due: 'Mar 25', status: 'graded', submitted: 70, total: 75 },
+      { title: 'Сочинение по "Войне и миру"', titleEnglish: 'Essay on "War and Peace"', due: 'Apr 3', status: 'pending', submitted: 52, total: 75 },
+      { title: 'Тест по лексике гл.11', titleEnglish: 'Vocabulary Test Ch. 11', due: 'Mar 29', status: 'graded', submitted: 73, total: 75 },
+      { title: 'Анализ персонажей', titleEnglish: 'Character Analysis', due: 'Apr 1', status: 'pending', submitted: 45, total: 75 },
+      { title: 'Дневник чтения №9', titleEnglish: 'Reading Journal #9', due: 'Mar 25', status: 'graded', submitted: 70, total: 75 },
     ],
     quizScores: [
-      { label: 'Тест 7', score: 69 },
-      { label: 'Тест 8', score: 75 },
-      { label: 'Тест 9', score: 80 },
-      { label: 'Тест 10', score: 77 },
-      { label: 'Тест 11', score: 84 },
+      { label: 'Тест 7', labelEnglish: 'Test 7', score: 69 },
+      { label: 'Тест 8', labelEnglish: 'Test 8', score: 75 },
+      { label: 'Тест 9', labelEnglish: 'Test 9', score: 80 },
+      { label: 'Тест 10', labelEnglish: 'Test 10', score: 77 },
+      { label: 'Тест 11', labelEnglish: 'Test 11', score: 84 },
     ],
     students: [
-      { name: 'Анастасия Иванова', score: 95 },
-      { name: 'Дмитрий Петров', score: 92 },
-      { name: 'Екатерина Смирнова', score: 89 },
-      { name: 'Алексей Козлов', score: 87 },
-      { name: 'Мария Новикова', score: 85 },
-      { name: 'Сергей Морозов', score: 83 },
-      { name: 'Ольга Волкова', score: 81 },
-      { name: 'Иван Соколов', score: 78 },
+      { name: 'Анастасия Иванова', nameEnglish: 'Anastasia Ivanova', score: 95 },
+      { name: 'Дмитрий Петров', nameEnglish: 'Dmitry Petrov', score: 92 },
+      { name: 'Екатерина Смирнова', nameEnglish: 'Ekaterina Smirnova', score: 89 },
+      { name: 'Алексей Козлов', nameEnglish: 'Alexey Kozlov', score: 87 },
+      { name: 'Мария Новикова', nameEnglish: 'Maria Novikova', score: 85 },
+      { name: 'Сергей Морозов', nameEnglish: 'Sergey Morozov', score: 83 },
+      { name: 'Ольга Волкова', nameEnglish: 'Olga Volkova', score: 81 },
+      { name: 'Иван Соколов', nameEnglish: 'Ivan Sokolov', score: 78 },
     ],
     twinGreeting: 'Доброе утро! Результаты теста 11 показали рост на 15 пунктов по сравнению с тестом 7. Подготовить обзорный лист по анализу персонажей Толстого?',
+    twinGreetingEnglish: 'Good morning! Test 11 results showed a 15-point gain over Test 7. Should I prepare a review sheet on Tolstoy character analysis?',
     twinMessages: [
-      { role: 'twin', text: 'Доброе утро! Результаты теста 11 показали рост на 15 пунктов по сравнению с тестом 7. Подготовить обзорный лист по анализу персонажей Толстого?' },
-      { role: 'user', text: 'Да, сосредоточься на мотивации Пьера Безухова.' },
-      { role: 'twin', text: 'Готово! Создан раздаточный материал на 2 страницы о трансформации Пьера Безухова с цитатами из текста. Также обнаружено, что 23 студента ещё не сдали сочинение — отправить им напоминание?' },
+      { role: 'twin', text: 'Доброе утро! Результаты теста 11 показали рост на 15 пунктов по сравнению с тестом 7. Подготовить обзорный лист по анализу персонажей Толстого?', textEnglish: 'Good morning! Test 11 results showed a 15-point gain over Test 7. Should I prepare a review sheet on Tolstoy character analysis?' },
+      { role: 'user', text: 'Да, сосредоточься на мотивации Пьера Безухова.', textEnglish: 'Yes, focus on Pierre Bezukhov\'s motivation.' },
+      { role: 'twin', text: 'Готово! Создан раздаточный материал на 2 страницы о трансформации Пьера Безухова с цитатами из текста. Также обнаружено, что 23 студента ещё не сдали сочинение — отправить им напоминание?', textEnglish: 'Done! A 2-page handout on Pierre Bezukhov\'s transformation has been prepared with quotes from the text. Also found that 23 students haven\'t submitted the essay — send them a reminder?' },
     ],
   },
 };
@@ -185,24 +211,16 @@ export default function TeacherDigitalTwinPage() {
 
   return (
     <div className="min-h-screen bg-[#0A0A0A] text-white">
-      {/* Header */}
-      <header className="border-b border-white/10 px-6 py-4">
-        <div className="max-w-7xl mx-auto flex items-center gap-4">
-          <Link href="/chat" className="text-white/40 hover:text-[#E8A020] transition-colors">
-            <ArrowLeft className="w-5 h-5" />
-          </Link>
-          <GraduationCap className="w-6 h-6 text-[#E8A020]" />
-          <div>
-            <h1 className="text-xl font-bold tracking-tight">{teacherName}&apos;s Classroom</h1>
-            <p className="text-xs text-white/40 font-mono">
-              {parentMode ? 'Parent View — Read Only' : 'Multilingual Classroom Assistant'}
-            </p>
-          </div>
-          {/* Transliteration toggle */}
-          {activeTab !== 'english' && (
+      <PlugChrome
+        title={`${teacherName}'s Classroom`}
+        tagline={parentMode ? 'Parent View — Read Only' : 'Multilingual Classroom Assistant'}
+        icon={<GraduationCap className="w-6 h-6" />}
+        accentColor="#E8A020"
+        rightSlot={
+          activeTab !== 'english' ? (
             <button
               onClick={() => setShowTransliteration(!showTransliteration)}
-              className={`ml-auto px-3 py-1 font-mono text-[10px] border transition-colors ${
+              className={`px-3 py-1 font-mono text-[10px] border transition-colors ${
                 showTransliteration
                   ? 'border-[#E8A020]/50 text-[#E8A020] bg-[#E8A020]/10'
                   : 'border-white/10 text-white/40'
@@ -210,9 +228,9 @@ export default function TeacherDigitalTwinPage() {
             >
               {showTransliteration ? 'TRANSLITERATION ON' : 'TRANSLITERATION OFF'}
             </button>
-          )}
-        </div>
-      </header>
+          ) : undefined
+        }
+      />
 
       <main className="max-w-7xl mx-auto px-6 py-6 space-y-6">
         {/* Classroom Tabs */}
@@ -245,6 +263,9 @@ export default function TeacherDigitalTwinPage() {
             <span className="font-mono text-xs text-white/40 uppercase tracking-wider">Current Lesson</span>
           </div>
           <p className="text-lg font-semibold">{classroom.currentLesson}</p>
+          {classroom.currentLessonEnglish && (
+            <p className="text-sm text-white/50 mt-1 italic">{classroom.currentLessonEnglish}</p>
+          )}
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -259,6 +280,9 @@ export default function TeacherDigitalTwinPage() {
                 <div key={i} className="flex items-center justify-between py-2 border-b border-white/5 last:border-0">
                   <div>
                     <p className="text-sm font-medium">{a.title}</p>
+                    {a.titleEnglish && (
+                      <p className="text-xs text-white/50 italic">{a.titleEnglish}</p>
+                    )}
                     <p className="text-xs text-white/40 font-mono">Due: {a.due}</p>
                   </div>
                   <div className="flex items-center gap-3">
@@ -285,6 +309,9 @@ export default function TeacherDigitalTwinPage() {
                     style={{ height: `${(q.score / maxScore) * 120}px` }}
                   />
                   <span className="text-[10px] text-white/40 font-mono text-center leading-tight">{q.label}</span>
+                  {q.labelEnglish && (
+                    <span className="text-[9px] text-white/30 italic text-center leading-tight">{q.labelEnglish}</span>
+                  )}
                 </div>
               ))}
             </div>
@@ -302,7 +329,12 @@ export default function TeacherDigitalTwinPage() {
                 <div key={i} className="flex items-center justify-between py-1.5 border-b border-white/5 last:border-0">
                   <div className="flex items-center gap-2">
                     <span className="text-xs text-white/20 font-mono w-4">{i + 1}</span>
-                    <span className="text-sm">{s.name}</span>
+                    <div className="flex flex-col">
+                      <span className="text-sm">{s.name}</span>
+                      {s.nameEnglish && (
+                        <span className="text-[10px] text-white/40 italic leading-tight">{s.nameEnglish}</span>
+                      )}
+                    </div>
                   </div>
                   <span className="text-sm font-mono text-[#E8A020]">{s.score}%</span>
                 </div>

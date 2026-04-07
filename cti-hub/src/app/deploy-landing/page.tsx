@@ -5,6 +5,7 @@ import { ArrowRight, Users, Brain, Shield, Zap, BarChart3, Globe, Mic, CreditCar
 import { LiveSandbox } from '@/components/landing/LiveSandbox';
 import { VerbSpinner } from '@/components/landing/VerbSpinner';
 import { PlugGallery } from '@/components/landing/PlugGallery';
+import { PlugChrome } from '@/components/plug/PlugChrome';
 
 const USE_CASES = [
   {
@@ -52,21 +53,22 @@ const FEATURES = [
 export default function DeployLanding() {
   return (
     <div className="min-h-screen bg-[#0A0A0A] text-white">
-      {/* Nav */}
-      <nav className="h-14 flex items-center justify-between px-4 sm:px-6 border-b border-white/10">
-        <div className="flex items-center gap-2.5">
-          <div className="w-7 h-7 bg-[#E8A020] flex items-center justify-center">
-            <Zap className="w-3.5 h-3.5 text-black" />
+      <PlugChrome
+        title="The Deploy Platform"
+        tagline="AI Managed Solutions"
+        icon={<Zap className="w-5 h-5" />}
+        accentColor="#E8A020"
+        backHref="https://foai.cloud/"
+        backLabel="Back to FOAI.CLOUD"
+        rightSlot={
+          <div className="flex items-center gap-4">
+            <Link href="/auth/login" className="text-xs text-white/50 hover:text-white transition-colors">Sign In</Link>
+            <Link href="/chat" className="h-9 px-5 bg-[#E8A020] text-black text-[10px] font-bold flex items-center gap-1.5">
+              GET STARTED <ArrowRight className="w-3 h-3" />
+            </Link>
           </div>
-          <span className="font-mono text-xs font-bold tracking-wider uppercase">The Deploy Platform</span>
-        </div>
-        <div className="flex items-center gap-4">
-          <Link href="/auth/login" className="text-xs text-white/50 hover:text-white transition-colors">Sign In</Link>
-          <Link href="/chat" className="h-9 px-5 bg-[#E8A020] text-black text-[10px] font-bold flex items-center gap-1.5">
-            GET STARTED <ArrowRight className="w-3 h-3" />
-          </Link>
-        </div>
-      </nav>
+        }
+      />
 
       {/* Hero */}
       <section className="relative py-16 sm:py-24 px-4 sm:px-6">

@@ -1,12 +1,12 @@
 'use client';
 
 import { useState, useCallback } from 'react';
-import Link from 'next/link';
 import {
-  ArrowLeft, ArrowRight, Search, TrendingUp, MessageSquare,
+  ArrowRight, Search, TrendingUp, MessageSquare,
   Users, Calendar, FileText, Loader2, Zap,
 } from 'lucide-react';
 import { PlugChat } from '@/components/plug/PlugChat';
+import { PlugChrome } from '@/components/plug/PlugChrome';
 
 /**
  * SMB Marketing Plug — Real data, real agents.
@@ -155,7 +155,14 @@ export default function SMBMarketingPage() {
   // ── Setup Screen ──
   if (step === 'setup') {
     return (
-      <div className="min-h-screen bg-[#0A0A0A] text-white flex items-center justify-center">
+      <div className="min-h-screen bg-[#0A0A0A] text-white">
+        <PlugChrome
+          title="Marketing Agency"
+          tagline="Powered by The Deploy Platform"
+          icon={<Zap className="w-5 h-5" />}
+          accentColor="#E8A020"
+        />
+        <div className="flex items-center justify-center px-4 py-12">
         <div className="max-w-lg w-full mx-4 p-8 border border-white/10">
           <div className="flex items-center gap-3 mb-6">
             <Zap className="w-6 h-6 text-[#E8A020]" />
@@ -220,6 +227,7 @@ export default function SMBMarketingPage() {
             Our agents will research your business in real-time
           </p>
         </div>
+        </div>
       </div>
     );
   }
@@ -227,25 +235,33 @@ export default function SMBMarketingPage() {
   // ── Researching Screen ──
   if (step === 'researching' && loading) {
     return (
-      <div className="min-h-screen bg-[#0A0A0A] text-white flex items-center justify-center">
-        <div className="text-center max-w-md mx-4">
-          <Loader2 className="w-8 h-8 text-[#E8A020] animate-spin mx-auto mb-4" />
-          <h2 className="text-lg font-bold mb-2">Agents Working</h2>
-          <div className="space-y-2 text-sm text-white/50">
-            <div className="flex items-center gap-2 justify-center">
-              <span className="w-2 h-2 rounded-full bg-blue-400 animate-pulse" />
-              <span>Researching {business.name}...</span>
+      <div className="min-h-screen bg-[#0A0A0A] text-white">
+        <PlugChrome
+          title="Marketing Agency"
+          tagline="Agents working..."
+          icon={<Zap className="w-5 h-5" />}
+          accentColor="#E8A020"
+        />
+        <div className="flex items-center justify-center px-4 py-20">
+          <div className="text-center max-w-md mx-4">
+            <Loader2 className="w-8 h-8 text-[#E8A020] animate-spin mx-auto mb-4" />
+            <h2 className="text-lg font-bold mb-2">Agents Working</h2>
+            <div className="space-y-2 text-sm text-white/50">
+              <div className="flex items-center gap-2 justify-center">
+                <span className="w-2 h-2 rounded-full bg-blue-400 animate-pulse" />
+                <span>Researching {business.name}...</span>
+              </div>
+              <div className="flex items-center gap-2 justify-center">
+                <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
+                <span>Analyzing market position...</span>
+              </div>
+              <div className="flex items-center gap-2 justify-center">
+                <span className="w-2 h-2 rounded-full bg-purple-400 animate-pulse" />
+                <span>Generating content calendar...</span>
+              </div>
             </div>
-            <div className="flex items-center gap-2 justify-center">
-              <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
-              <span>Analyzing market position...</span>
-            </div>
-            <div className="flex items-center gap-2 justify-center">
-              <span className="w-2 h-2 rounded-full bg-purple-400 animate-pulse" />
-              <span>Generating content calendar...</span>
-            </div>
+            <p className="text-[10px] text-white/20 font-mono mt-6">This takes 15-30 seconds</p>
           </div>
-          <p className="text-[10px] text-white/20 font-mono mt-6">This takes 15-30 seconds</p>
         </div>
       </div>
     );
@@ -254,24 +270,20 @@ export default function SMBMarketingPage() {
   // ── Dashboard (Real Data) ──
   return (
     <div className="min-h-screen bg-[#0A0A0A] text-white">
-      <header className="border-b border-white/10 px-6 py-4">
-        <div className="max-w-7xl mx-auto flex items-center gap-4">
-          <Link href="/chat" className="text-white/40 hover:text-[#E8A020] transition-colors">
-            <ArrowLeft className="w-5 h-5" />
-          </Link>
-          <Zap className="w-5 h-5 text-[#E8A020]" />
-          <div>
-            <h1 className="text-xl font-bold tracking-tight">{business.name}</h1>
-            <p className="text-xs text-white/40 font-mono">{business.industry} &middot; {business.location}</p>
-          </div>
+      <PlugChrome
+        title={business.name}
+        tagline={`${business.industry} · ${business.location}`}
+        icon={<Zap className="w-5 h-5" />}
+        accentColor="#E8A020"
+        rightSlot={
           <button
             onClick={() => { setStep('setup'); setResearch(null); setContentCalendar(''); }}
-            className="ml-auto text-xs font-mono text-white/30 hover:text-white/60 transition-colors"
+            className="text-xs font-mono text-white/30 hover:text-white/60 transition-colors"
           >
             NEW BUSINESS
           </button>
-        </div>
-      </header>
+        }
+      />
 
       {/* Agent Status — Real */}
       <div className="border-b border-white/10 px-6 py-2 bg-white/[0.02]">
