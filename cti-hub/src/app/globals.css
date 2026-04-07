@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Outfit:wght@400;600;700;800;900&family=Inter:wght@300;400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Outfit:wght@400;600;700;800;900&family=Inter:wght@300;400;500;600&family=Doto:wght@100..900&display=swap');
 
 @font-face {
   font-family: 'Permanent Marker';
@@ -280,4 +280,74 @@ body {
     filter: blur(2px) saturate(0.2);
     z-index: 0;
   }
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   SmelterOS brand — molten foundry aesthetic
+   Ported from smelteros-starter (Vite/React 19/Tailwind 4)
+   Matches the "FORGE THE FUTURE OF INTELLIGENCE" guide image
+   ══════════════════════════════════════════════════════════════════ */
+
+:root {
+  --smelter-molten: #ff5722;
+  --smelter-molten-bright: #ff7a45;
+  --smelter-molten-deep: #d94416;
+  --smelter-obsidian: #050505;
+  --smelter-charcoal: #121212;
+  --smelter-ash: #1a1a1a;
+}
+
+.font-doto {
+  font-family: 'Doto', system-ui, sans-serif;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+}
+
+.smelter-glow {
+  text-shadow:
+    0 0 20px rgba(255, 87, 34, 0.8),
+    0 0 40px rgba(255, 87, 34, 0.5),
+    0 0 80px rgba(255, 87, 34, 0.3);
+}
+
+.smelter-glow-soft {
+  text-shadow: 0 0 14px rgba(255, 87, 34, 0.4);
+}
+
+.smelter-glass {
+  background: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.smelter-glass-hover:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 87, 34, 0.3);
+}
+
+.smelter-ember-bg {
+  background:
+    radial-gradient(
+      ellipse at 80% 50%,
+      rgba(255, 87, 34, 0.12) 0%,
+      rgba(255, 87, 34, 0.04) 30%,
+      transparent 60%
+    ),
+    linear-gradient(180deg, #050505 0%, #0a0a0a 50%, #050505 100%);
+}
+
+@keyframes emberPulse {
+  0%, 100% {
+    opacity: 0.8;
+    box-shadow: 0 0 10px rgba(255, 87, 34, 0.8);
+  }
+  50% {
+    opacity: 1;
+    box-shadow: 0 0 20px rgba(255, 87, 34, 1), 0 0 40px rgba(255, 87, 34, 0.5);
+  }
+}
+
+.smelter-ember-pulse {
+  animation: emberPulse 2s ease-in-out infinite;
 }
