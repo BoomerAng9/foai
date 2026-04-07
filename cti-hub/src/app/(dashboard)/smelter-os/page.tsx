@@ -29,6 +29,9 @@ import {
   Radio,
   Database,
   Cpu,
+  Brain,
+  ClipboardList,
+  Palette,
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { isOwner } from '@/lib/allowlist';
@@ -314,6 +317,30 @@ export default function SmelterOSLanding() {
               title="Digital CEO"
               description="Delegate, don't generate. Talk to the Digital CEO of the platform."
               accent="#ffb078"
+            />
+            <SurfaceCard
+              href="/smelter-os/create"
+              icon={Brain}
+              label="OPEN MIND"
+              title="Creation Harness"
+              description="Prompt-layer skill for creating something new. 8-stage FDH loop — FOSTER evidence, DEVELOP 3 approaches, HONE via 7 gates."
+              accent="#ffc49a"
+            />
+            <SurfaceCard
+              href="/smelter-os/forms"
+              icon={ClipboardList}
+              label="FORMS"
+              title="Intake Builder"
+              description="Onboarding, needs analysis, feedback, booking, payment forms via Pipedream MCP. Tenant-scoped submission storage."
+              accent="#ffa76b"
+            />
+            <SurfaceCard
+              href="/smelter-os/creative"
+              icon={Palette}
+              label="ILLER_ANG"
+              title="Creative Studio"
+              description="13 output categories — player cards, broadcast graphics, character art, NFT cards, motion landing pages."
+              accent="#ff8340"
             />
           </div>
         </div>
