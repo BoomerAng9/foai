@@ -2,7 +2,8 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { Check, Zap, Crown, Coffee, Rocket, ExternalLink, Shield, Copy } from 'lucide-react';
+import { Check, Zap, Crown, Coffee, Rocket, ExternalLink, Copy } from 'lucide-react';
+import { toast } from 'sonner';
 import {
   PLAN_LIST,
   type Plan,
@@ -15,6 +16,7 @@ import {
 } from '@/lib/billing/plans';
 import { useAuth } from '@/hooks/useAuth';
 import { isOwner } from '@/lib/allowlist';
+import { OwnerClearanceStamp } from '@/components/billing/OwnerClearanceStamp';
 import { generateReferralCode, getReferralUrl, REFERRAL_DISCOUNT_PERCENT } from '@/lib/subscription/referral';
 
 const PLAN_ICONS: Record<string, typeof Coffee> = {
@@ -60,7 +62,14 @@ export default function BillingPage() {
   }
 
   async function handleSelectPlan(plan: Plan) {
-    if (ownerAccess) return; // Owner doesn't pay
+    // Owner short-circuit with positive feedback (Phase 0). Replaces the
+    // previous silent return so owners get a confirmation toast and a
+    // dashboard redirect instead of nothing happening on click.
+    if (ownerAccess) {
+      toast.success('Owner clearance — unlimited berth active');
+      window.location.href = '/dashboard?owner_unlimited=1';
+      return;
+    }
     try {
       const res = await fetch('/api/stripe/checkout', {
         method: 'POST',
@@ -68,10 +77,20 @@ export default function BillingPage() {
         body: JSON.stringify({ plan: plan.id, commitment }),
       });
       const data = await res.json();
+
+      // Server-side owner bypass safety net — even if a non-owner-marked
+      // session somehow reaches here as an owner, the server response
+      // will carry owner_bypass:true and we redirect cleanly.
+      if (data.owner_bypass) {
+        toast.success(data.message ?? 'Owner clearance — no checkout required');
+        window.location.href = data.redirect_url ?? '/dashboard?owner_unlimited=1';
+        return;
+      }
+
       if (data.url) window.location.href = data.url;
-      else alert(data.error || 'Checkout unavailable — Stripe integration pending.');
+      else toast.error(data.error || 'Checkout unavailable — Stripe integration pending.');
     } catch {
-      alert('Checkout unavailable — Stripe integration pending.');
+      toast.error('Checkout unavailable — Stripe integration pending.');
     }
   }
 
@@ -87,16 +106,10 @@ export default function BillingPage() {
         </p>
       </div>
 
-      {/* Owner Banner */}
-      {ownerAccess && (
-        <div className="border border-[#E8A020]/40 bg-[#E8A020]/5 px-6 py-4 flex items-center gap-3">
-          <Shield className="w-5 h-5 text-[#E8A020] shrink-0" />
-          <div>
-            <p className="font-mono text-sm font-bold text-[#E8A020]">Owner Access</p>
-            <p className="text-xs text-[#999]">All features unlocked. Payment flows are bypassed.</p>
-          </div>
-        </div>
-      )}
+      {/* Owner Clearance Stamp — replaces the prior small "Owner Access" strip
+          with the full Phase 0 visual treatment. Tier grid below remains
+          visible as a read-only preview. */}
+      {ownerAccess && <OwnerClearanceStamp variant="banner" />}
 
       {/* Sqwaadrun Add-On Panel */}
       <div

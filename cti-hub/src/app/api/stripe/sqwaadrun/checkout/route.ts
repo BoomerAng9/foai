@@ -8,6 +8,7 @@ import {
 } from '@/lib/billing/plans';
 import { applyRateLimit } from '@/lib/rate-limit';
 import { requireAuthenticatedRequest } from '@/lib/server-auth';
+import { isOwner } from '@/lib/allowlist';
 import { sql } from '@/lib/insforge';
 
 /* ──────────────────────────────────────────────────────────────
@@ -39,6 +40,18 @@ export async function POST(request: NextRequest) {
     if (!authResult.ok) {
       return authResult.response;
     }
+
+    // --- OWNER BYPASS (Phase 0) ---
+    // Owners never trigger Stripe customer or session creation on the
+    // Sqwaadrun checkout path either.
+    if (isOwner(authResult.context.user.email)) {
+      return NextResponse.json({
+        owner_bypass: true,
+        redirect_url: '/dashboard?owner_unlimited=1',
+        message: 'Owner clearance — no checkout required.',
+      });
+    }
+    // --- END OWNER BYPASS ---
 
     const rateLimitResponse = applyRateLimit(request, 'sqwaadrun-checkout', {
       maxRequests: 5,
