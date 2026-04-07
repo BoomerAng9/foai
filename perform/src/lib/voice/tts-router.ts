@@ -145,6 +145,18 @@ function buildPayload(req: SpeakRequest): EnginePayload {
   return { engine, speakers, style: req.analyst.voice.style };
 }
 
+/* ── Fallback chain for refined-solo engines ──
+ * If the primary engine fails or isn't authorized, walk this chain
+ * in order until something returns audio. ElevenLabs is intentionally
+ * NOT in the chain — quota exhausted, manual top-up required.
+ */
+const SOLO_FALLBACK_CHAIN: Array<EnginePayload['engine']> = [
+  'gemini-live',     // Gemini 3.1 Flash Live (or 2.5 Pro TTS)
+  'personaplex',     // NVIDIA on Vertex AI (free credits)
+  'grok-voice',      // xAI Grok 4.20 voice (when team auth lands)
+  'playht',          // Play.ht v3 — paid, regional accents
+];
+
 /* ── Engine dispatch ── */
 async function dispatchSynthesis(payload: EnginePayload): Promise<{ audioUrl: string | null; error?: string }> {
   // Concatenate all turns into a single body for single-voice engines.
@@ -192,16 +204,42 @@ async function dispatchSynthesis(payload: EnginePayload): Promise<{ audioUrl: st
   }
 }
 
+/* ── Walk the fallback chain for solo-voice engines ── */
+async function dispatchWithFallback(payload: EnginePayload): Promise<{ audioUrl: string | null; error?: string; engineUsed: string }> {
+  // Multi-speaker engines (vibevoice, playht duos) bypass the chain.
+  if (payload.speakers.length > 1) {
+    const r = await dispatchSynthesis(payload);
+    return { ...r, engineUsed: payload.engine };
+  }
+
+  const startIdx = SOLO_FALLBACK_CHAIN.indexOf(payload.engine);
+  const chain = startIdx >= 0
+    ? SOLO_FALLBACK_CHAIN.slice(startIdx)
+    : [payload.engine, ...SOLO_FALLBACK_CHAIN];
+
+  let lastError: string | undefined;
+  for (const engine of chain) {
+    const attempt = { ...payload, engine };
+    const result = await dispatchSynthesis(attempt);
+    if (result.audioUrl) {
+      return { ...result, engineUsed: engine };
+    }
+    lastError = result.error;
+    console.warn(`[tts-router] ${engine} failed, trying next in chain. err=${result.error}`);
+  }
+  return { audioUrl: null, error: lastError, engineUsed: payload.engine };
+}
+
 /* ── Main entry point ── */
 export async function speakAnalystContent(req: SpeakRequest): Promise<SpeakResult> {
   const hash = await contentHash(req.text);
   const payload = buildPayload(req);
 
   try {
-    const { audioUrl, error } = await dispatchSynthesis(payload);
+    const { audioUrl, error, engineUsed } = await dispatchWithFallback(payload);
     return {
       audioUrl,
-      engine: payload.engine,
+      engine: engineUsed,
       contentHash: hash,
       error,
     };

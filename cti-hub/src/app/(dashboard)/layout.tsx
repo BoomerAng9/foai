@@ -102,6 +102,13 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     return () => { document.body.style.overflow = ''; };
   }, [mobileMenuOpen]);
 
+  // Full-bleed escape hatch — /smelter-os/* runs in its own visual world
+  // (no sidebar, no header, no AccountPanel chrome). The Bridge owns its own nav.
+  // Must come AFTER all hooks to satisfy Rules of Hooks.
+  if (pathname.startsWith('/smelter-os')) {
+    return <>{children}</>;
+  }
+
   const sidebarExpanded = sidebarHovered;
 
   return (
