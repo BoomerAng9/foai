@@ -142,9 +142,266 @@ export async function getServerAccessLevel(
 
 Note: `getServerAccessLevel` now requires a `NextRequest` argument (Next.js App Router pattern), matching the rest of the codebase. Update any call sites accordingly.
 
-### ANNOTATION D — useAuth hook return shape (Section 4.1)
+### ANNOTATION D — useAuth hook return shape (Section 4.1) — VERIFIED 2026-04-07
 
-The plan's `useAccessLevel` snippet assumes `const { user, loading } = useAuth()` with `user.subscription.tier` and `user.metadata.tier`. Verify the actual return shape of `src/hooks/useAuth.tsx` at execution time. If `loading` isn't exported, drop it; if `tier` lives elsewhere, adjust the accessor. This is a 60-second verification before writing the file — no need to revise the plan in advance.
+Source spot-check performed on `src/context/auth-provider.tsx` (lines 25–48) and `src/lib/auth-paywall.ts` (line 32). Canonical `useAuth()` return shape:
+
+```ts
+interface AuthContextType {
+  user: User | null;              // Firebase User — email at user.email
+  profile: UserProfile | null;    // DB profile — tier at profile.tier
+  subscription: Subscription | null;   // TOP-LEVEL, not nested under user
+  tierLimits: TierLimits | null;
+  organization: Organization | null;
+  organizations: Organization[];
+  loading: boolean;               // ✅ exists, use it
+  denied: boolean;                // true if authed but not on allowlist
+  // + methods (signIn, signOut, canAccess, trackUsage, etc.)
+}
+```
+
+**Canonical `profile.tier` union (verified from `src/lib/auth-paywall.ts:32`):**
+```ts
+tier: 'free' | 'pro' | 'enterprise'
+```
+
+**Important:** the real 3-tier DB schema (`free` / `pro` / `enterprise`) does NOT match the architecture doc's 5-level access model (`OWNER` / `ENTERPRISE` / `GROWTH` / `STARTER` / `PUBLIC`). Phase 0 must map between them without touching the DB. Verified mapping:
+
+| `profile.tier` (DB) | `AccessLevel` (app) | Notes |
+|---------------------|---------------------|-------|
+| n/a (isOwner === true) | `OWNER` | Owner bypass takes priority over profile.tier |
+| `enterprise` | `ENTERPRISE` | Direct match |
+| `pro` | `GROWTH` | Rename in the app layer only |
+| `free` | `STARTER` | Authenticated free-tier users |
+| n/a (no user) | `PUBLIC` | Unauthenticated visitors |
+
+**Verified `useAccessLevel.ts` (use this instead of the plan's snippet in Section 4.1):**
+```ts
+// src/hooks/useAccessLevel.ts
+import { useAuth } from '@/hooks/useAuth';
+import { isOwner } from '@/lib/allowlist';
+
+export type AccessLevel =
+  | 'OWNER'
+  | 'ENTERPRISE'
+  | 'GROWTH'
+  | 'STARTER'
+  | 'PUBLIC'
+  | 'LOADING';  // see ANNOTATION F — avoid PUBLIC flicker during auth resolution
+
+export function useAccessLevel(): AccessLevel {
+  const { user, profile, loading } = useAuth();
+
+  // During auth resolution, return LOADING so consumers can render a skeleton
+  // instead of flickering from PUBLIC to the real level on first paint.
+  if (loading) return 'LOADING';
+
+  // Owner bypass takes absolute priority
+  if (isOwner(user?.email)) return 'OWNER';
+
+  // No user = public
+  if (!user) return 'PUBLIC';
+
+  // Map DB tier (`free` | `pro` | `enterprise`) to access level
+  const dbTier = profile?.tier ?? 'free';
+  const tierMap: Record<string, AccessLevel> = {
+    enterprise: 'ENTERPRISE',
+    pro: 'GROWTH',
+    free: 'STARTER',
+  };
+  return tierMap[dbTier] ?? 'STARTER';
+}
+```
+
+**Downstream impact:** any consumer that checks `level === 'STARTER'` must also handle `'LOADING'`. Helpers in `access-helpers.ts` (Section 4.2) must treat `'LOADING'` as "unknown — do not grant access" via `hasAccess()`.
+
+### ANNOTATION E — Prerequisite Audit correction for billing page (Section 2)
+
+**The Section 2 audit row for `src/app/(dashboard)/billing/page.tsx` is factually WRONG.** Re-verified against the live file 2026-04-07:
+
+- Line 17: `import { isOwner } from '@/lib/allowlist';` ✅ already imported
+- Line 41: `const ownerAccess = isOwner(userEmail);` ✅ already computed
+- Line 63: `if (ownerAccess) return;` ✅ already short-circuits `handleSelectPlan` (but as a silent no-op)
+- Line 91: `{ownerAccess && <OwnerBanner />}` ✅ small owner banner already rendered
+- Line 353: additional owner-conditional rendering block
+
+**Corrected audit row:**
+
+| File | Current Behavior | isOwner() Present? | Action Required |
+|------|------------------|--------------------|-----------------|
+| `src/app/(dashboard)/billing/page.tsx` | Has owner check, silent-return handler, small owner banner | **PARTIAL ⚠** | Upgrade banner to full stamp + replace silent return with positive owner feedback (see Annotation F) |
+
+The Section 2 audit table should be updated before the agent runs Step 1 of the execution sequence. Do **not** treat billing as a from-scratch add.
+
+### ANNOTATION F — Section 3.5 (Billing Page) rewrite — delta against current state
+
+The plan's Section 3.5 instructs the agent to add owner-check logic and an `OwnerClearanceStamp` component as if the file has no owner handling. **Ignore Section 3.5 as written. Instead, apply this delta:**
+
+1. **Delete the silent return on line 63.** Replace `if (ownerAccess) return;` with:
+   ```ts
+   if (ownerAccess) {
+     toast.success('Owner clearance — unlimited berth active');
+     return;
+   }
+   ```
+   (Note: the current billing file uses `alert()` not `toast`. If `sonner`'s `toast` is not imported in billing, add the import to match pricing page's style.)
+
+2. **Upgrade the existing owner banner (line 91–99).** The current banner is a small amber strip. Replace with the full `OwnerClearanceStamp` component per the plan's Section 3.5 visual spec, keeping the existing `{ownerAccess && (...)}` conditional wrapper.
+
+3. **Keep the tier grid visible for owners** — but render it as a read-only preview with a prominent stamp overlay. Do NOT hide the grid entirely; owners may still want to see plan options for reference. The stamp overlays the grid, it does not replace it.
+
+4. **No fetch to `/api/auth/owner-check` needed on this page.** The billing page already has `isOwner` available via `useAuth` + the direct import — the new API route is only for pages that don't already have the auth context handy. Do not add unnecessary network calls.
+
+### ANNOTATION G — Section 3.6 client-side handler fixes
+
+**Two bugs in Section 3.6's example code:**
+
+**Bug 1 — wrong response field name.** The plan's example uses `data.checkout_url`. The real Stripe checkout route (`src/app/api/stripe/checkout/route.ts:94`) returns `{ url: session.url, sessionId: session.id }`. Both live call sites consume the correct `url` field: `pricing/page.tsx:25` reads `payload.url`, `billing/page.tsx:71` reads `data.url`. **Replace every `data.checkout_url` in Section 3.6 with `data.url`.**
+
+**Bug 2 — does not address the existing silent return on billing.** The plan tells the agent to "add `owner_bypass` handling" but does not instruct them to delete the pre-existing `if (ownerAccess) return;` on `billing/page.tsx:63`. If the agent obeys Section 3.6 literally, the owner path on billing remains unreachable because the handler returns before the fetch. **See Annotation F for the required delta.**
+
+**Verified Section 3.6 example (use this instead of the plan's snippet):**
+```ts
+const res = await fetch('/api/stripe/checkout', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ plan: planId, commitment }),
+});
+const data = await res.json();
+
+// NEW: owner bypass path — handle before checking data.url
+if (data.owner_bypass) {
+  toast.success(data.message ?? 'Owner clearance — no checkout required');
+  window.location.href = data.redirect_url ?? '/dashboard';
+  return;
+}
+
+if (!res.ok) throw new Error(data?.error || 'Unable to start checkout.');
+if (!data?.url) throw new Error('Checkout URL not available.');
+window.location.href = data.url;
+```
+
+Call sites to patch (verified via grep 2026-04-07):
+- `src/app/(dashboard)/pricing/page.tsx:17` (in `handleUpgrade`)
+- `src/app/(dashboard)/billing/page.tsx:65` (in `handleSelectPlan` — after deleting the silent return per Annotation F)
+
+No third hidden call site.
+
+### ANNOTATION H — Section 4.2 `agentLimit` JSON-safe sentinel
+
+The plan's `agentLimit` returns JavaScript `Infinity` for `OWNER`. **`Infinity` is not JSON-safe:** `JSON.stringify(Infinity) === 'null'`. If this value crosses any serialization boundary (API response, DB column, log line, SSR hydration payload, SWR cache), it silently becomes `null`, and every downstream comparison like `used < limit` becomes `used < null`, which is always `false`. Owner agent limits silently break everywhere they're serialized.
+
+**Fix:** use `Number.MAX_SAFE_INTEGER` as a JSON-safe effectively-unbounded sentinel. Verified `access-helpers.ts`:
+
+```ts
+// src/lib/access-helpers.ts
+import type { AccessLevel } from '@/hooks/useAccessLevel';
+
+/** Effectively unbounded, JSON-safe sentinel for owner-tier limits. */
+export const UNLIMITED = Number.MAX_SAFE_INTEGER;
+
+const TIER_RANK: Record<AccessLevel, number> = {
+  OWNER: 100,
+  ENTERPRISE: 80,
+  GROWTH: 60,
+  STARTER: 40,
+  PUBLIC: 0,
+  LOADING: 0,  // treat unknown as no-access — fail closed
+};
+
+/** Does the user's level meet or exceed the required minimum? */
+export function hasAccess(
+  userLevel: AccessLevel,
+  requiredLevel: AccessLevel,
+): boolean {
+  if (userLevel === 'LOADING') return false;   // fail closed during auth resolution
+  return TIER_RANK[userLevel] >= TIER_RANK[requiredLevel];
+}
+
+export function isOwnerLevel(level: AccessLevel): boolean {
+  return level === 'OWNER';
+}
+
+export function canSeeInfra(level: AccessLevel): boolean {
+  return level === 'OWNER';
+}
+
+/** Agent count permitted at this tier. Owner receives UNLIMITED, which is
+ *  JSON-safe (survives JSON.stringify). Never use Infinity. */
+export function agentLimit(level: AccessLevel): number {
+  const limits: Record<AccessLevel, number> = {
+    OWNER: UNLIMITED,
+    ENTERPRISE: 99,
+    GROWTH: 10,
+    STARTER: 3,
+    PUBLIC: 0,
+    LOADING: 0,
+  };
+  return limits[level];
+}
+```
+
+### ANNOTATION I — Section 4.4 Server-side access level: split for API routes vs Server Components
+
+**Replaces Annotation C.** A single `getServerAccessLevel(request)` cannot serve both API routes (which have `NextRequest`) and Server Components (which use `next/headers`). Two helpers are needed:
+
+```ts
+// src/lib/server-access-level.ts
+import type { NextRequest } from 'next/server';
+import { cookies } from 'next/headers';
+import { requireAuthenticatedRequest } from '@/lib/server-auth';
+import { getAdminAuth } from '@/lib/firebase-admin';
+import { isOwner } from '@/lib/allowlist';
+import type { AccessLevel } from '@/hooks/useAccessLevel';
+
+const TIER_MAP: Record<string, AccessLevel> = {
+  enterprise: 'ENTERPRISE',
+  pro: 'GROWTH',
+  free: 'STARTER',
+};
+
+/** Use in API routes (NextRequest available). */
+export async function getAccessLevelFromRequest(
+  request: NextRequest,
+): Promise<AccessLevel> {
+  const authResult = await requireAuthenticatedRequest(request);
+  if (!authResult.ok) return 'PUBLIC';
+
+  if (isOwner(authResult.context.user.email)) return 'OWNER';
+
+  const tier = authResult.context.profile?.tier ?? 'free';
+  return TIER_MAP[tier] ?? 'STARTER';
+}
+
+/** Use in Server Components (no NextRequest — read cookie via next/headers). */
+export async function getAccessLevelFromHeaders(): Promise<AccessLevel> {
+  const cookieStore = await cookies();
+  const token = cookieStore.get('firebase-auth-token')?.value;
+  if (!token) return 'PUBLIC';
+
+  try {
+    const auth = getAdminAuth();
+    const decoded = await auth.verifyIdToken(token);
+    const email = decoded.email ?? null;
+
+    if (isOwner(email)) return 'OWNER';
+
+    // Load profile directly from DB — Server Components cannot share the
+    // requireAuthenticatedRequest code path because it requires a Request object.
+    // This mirrors the loadProfile() logic in src/lib/server-auth.ts.
+    // If this helper is needed, copy that logic here or export loadProfile().
+    return 'STARTER';  // safe default until profile loader is exposed
+  } catch {
+    return 'PUBLIC';
+  }
+}
+```
+
+**Note:** `getAccessLevelFromHeaders()` currently returns `'STARTER'` as a safe default for authenticated non-owner users rather than looking up `profile.tier`, because `loadProfile()` is a private function inside `server-auth.ts`. If Server Components need tier-accurate gating in Phase 0, **export `loadProfile(userId)` from `src/lib/server-auth.ts`** as part of this phase so both helpers can share it. Otherwise defer Server Component tier-gating to a follow-up cycle.
+
+### ANNOTATION J — Section 1 duration estimate
+
+The plan's "~4 hours" estimate is optimistic. Realistic scope with the corrected annotations: **6–8 hours of focused coding time**, excluding review cycles. Budget accordingly. The five-gate validation + 14 manual tests alone eat ~90 minutes. Do not rush Phase 0 to fit a 4-hour slot.
 
 ---
 
