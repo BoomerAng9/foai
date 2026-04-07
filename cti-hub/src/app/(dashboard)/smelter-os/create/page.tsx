@@ -26,6 +26,9 @@ import {
   Eye,
   DollarSign,
   FileText,
+  Check,
+  X,
+  AlertTriangle,
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { isOwner } from '@/lib/allowlist';
@@ -35,6 +38,7 @@ type UncertaintyLevel = 'LOW' | 'MEDIUM' | 'HIGH';
 
 export default function CreatePage() {
   const { user } = useAuth();
+  const [taskConfirmed, setTaskConfirmed] = useState(false);
   const [intent, setIntent] = useState('');
   const [novelty, setNovelty] = useState<NoveltyLevel>('MEDIUM');
   const [uncertainty, setUncertainty] = useState<UncertaintyLevel>('MEDIUM');
@@ -46,7 +50,7 @@ export default function CreatePage() {
   }
 
   function handleLaunch() {
-    if (!intent.trim()) return;
+    if (!intent.trim() || !taskConfirmed) return;
     setLaunching(true);
 
     // Build the Open Mind activation prompt per the SKILL.md spec
@@ -90,26 +94,181 @@ export default function CreatePage() {
           ← SMELTEROS BRIDGE
         </Link>
 
-        <div className="mb-10">
+        <div className="mb-8">
           <div className="text-[10px] font-mono tracking-[0.3em] mb-2" style={{ color: '#ff5722' }}>
-            / CREATION HARNESS
+            / CREATION HARNESS · SPECIALIST SKILL
           </div>
           <h1 className="font-doto font-black text-5xl md:text-6xl tracking-tight uppercase leading-none">
             OPEN <span style={{ color: '#ff5722' }} className="smelter-glow-soft">MIND</span>
           </h1>
           <p className="text-sm mt-4 max-w-2xl text-white/60">
-            Prompt-layer creation harness. Activates the FDH loop — FOSTER evidence, DEVELOP 3
-            radically different approaches, HONE via 7-gate verification — when an agent needs
-            to build something that doesn&apos;t exist yet.
+            <span className="text-white font-semibold">Creation-only.</span> This harness is for
+            building what doesn&apos;t exist yet — new systems, architectures, products,
+            strategies. It is <span className="text-white font-semibold">not</span> an everyday
+            tool. For routine execution, bug fixes, config changes, or data retrieval, skip
+            the harness and talk to ACHEEVY directly.
           </p>
         </div>
 
-        {/* Brief form */}
+        {/* ═══ SCOPE GATE ═══ */}
+        <div
+          className="smelter-glass p-6 mb-6"
+          style={{
+            borderLeft: `4px solid ${taskConfirmed ? '#22D3EE' : '#ff5722'}`,
+            borderRadius: '3px',
+          }}
+        >
+          <div className="flex items-start gap-3 mb-4">
+            <AlertTriangle
+              className="w-5 h-5 shrink-0 mt-0.5"
+              style={{ color: '#ff5722' }}
+            />
+            <div className="flex-1">
+              <div
+                className="text-[10px] font-mono tracking-[0.25em] mb-1"
+                style={{ color: '#ff5722' }}
+              >
+                / SCOPE CHECK
+              </div>
+              <div className="font-doto font-black text-xl uppercase leading-tight">
+                Is this actually a creation task?
+              </div>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-5">
+            <div
+              className="p-4 border"
+              style={{
+                borderColor: 'rgba(34,211,238,0.3)',
+                background: 'rgba(34,211,238,0.05)',
+                borderRadius: '2px',
+              }}
+            >
+              <div
+                className="flex items-center gap-2 text-[10px] font-mono tracking-[0.2em] uppercase mb-3 font-bold"
+                style={{ color: '#22D3EE' }}
+              >
+                <Check className="w-3.5 h-3.5" /> USE WHEN
+              </div>
+              <ul className="space-y-1.5 text-[11px]" style={{ color: '#CBD5E1' }}>
+                <li className="flex gap-2">
+                  <span style={{ color: '#22D3EE' }}>▸</span>
+                  <span>Designing a new system, architecture, product, or strategy</span>
+                </li>
+                <li className="flex gap-2">
+                  <span style={{ color: '#22D3EE' }}>▸</span>
+                  <span>Multiple valid approaches exist and you want divergent options</span>
+                </li>
+                <li className="flex gap-2">
+                  <span style={{ color: '#22D3EE' }}>▸</span>
+                  <span>Previous output was flagged as derivative / training-data recall</span>
+                </li>
+                <li className="flex gap-2">
+                  <span style={{ color: '#22D3EE' }}>▸</span>
+                  <span>Building something that does not yet exist in the org</span>
+                </li>
+                <li className="flex gap-2">
+                  <span style={{ color: '#22D3EE' }}>▸</span>
+                  <span>Innovation or novelty is the explicit goal</span>
+                </li>
+              </ul>
+            </div>
+
+            <div
+              className="p-4 border"
+              style={{
+                borderColor: 'rgba(239,68,68,0.3)',
+                background: 'rgba(239,68,68,0.05)',
+                borderRadius: '2px',
+              }}
+            >
+              <div
+                className="flex items-center gap-2 text-[10px] font-mono tracking-[0.2em] uppercase mb-3 font-bold"
+                style={{ color: '#EF4444' }}
+              >
+                <X className="w-3.5 h-3.5" /> DO NOT USE FOR
+              </div>
+              <ul className="space-y-1.5 text-[11px]" style={{ color: '#CBD5E1' }}>
+                <li className="flex gap-2">
+                  <span style={{ color: '#EF4444' }}>▸</span>
+                  <span>Bug fixes, config changes, typos — single correct answers</span>
+                </li>
+                <li className="flex gap-2">
+                  <span style={{ color: '#EF4444' }}>▸</span>
+                  <span>Running code, deploying, monitoring — that&apos;s execution</span>
+                </li>
+                <li className="flex gap-2">
+                  <span style={{ color: '#EF4444' }}>▸</span>
+                  <span>Data retrieval with no synthesis — just ask ACHEEVY</span>
+                </li>
+                <li className="flex gap-2">
+                  <span style={{ color: '#EF4444' }}>▸</span>
+                  <span>Compliance or regulatory tasks (single-path)</span>
+                </li>
+                <li className="flex gap-2">
+                  <span style={{ color: '#EF4444' }}>▸</span>
+                  <span>Routine ops, maintenance, optimization of existing systems</span>
+                </li>
+                <li className="flex gap-2">
+                  <span style={{ color: '#EF4444' }}>▸</span>
+                  <span>Time-critical work where fastest-possible beats novel</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          {!taskConfirmed ? (
+            <div className="flex items-center justify-between flex-wrap gap-3">
+              <div className="text-[11px] opacity-70" style={{ color: '#CBD5E1' }}>
+                Confirm this is a creation task before the harness activates.
+              </div>
+              <div className="flex gap-2">
+                <Link
+                  href="/chat"
+                  className="px-5 py-2.5 text-[10px] font-mono tracking-[0.15em] font-bold flex items-center gap-2"
+                  style={{
+                    border: '1px solid rgba(255,255,255,0.25)',
+                    color: '#94A3B8',
+                    borderRadius: '2px',
+                  }}
+                >
+                  NOT CREATION → ACHEEVY
+                </Link>
+                <button
+                  onClick={() => setTaskConfirmed(true)}
+                  className="px-5 py-2.5 text-[10px] font-mono tracking-[0.15em] font-bold flex items-center gap-2"
+                  style={{
+                    background: '#ff5722',
+                    color: 'white',
+                    borderRadius: '2px',
+                    boxShadow: '0 0 16px rgba(255,87,34,0.3)',
+                  }}
+                >
+                  YES — THIS IS A CREATION TASK <ArrowRight className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div
+              className="flex items-center gap-2 text-[11px] font-mono"
+              style={{ color: '#22D3EE' }}
+            >
+              <Check className="w-4 h-4" />
+              Scope confirmed — harness ready to activate
+            </div>
+          )}
+        </div>
+
+        {/* Brief form — only visible after scope is confirmed */}
         <div
           className="smelter-glass p-6 mb-8"
           style={{
             borderTop: '2px solid rgba(255,87,34,0.4)',
             borderRadius: '3px',
+            opacity: taskConfirmed ? 1 : 0.35,
+            pointerEvents: taskConfirmed ? 'auto' : 'none',
+            transition: 'opacity 0.3s ease',
           }}
         >
           <div className="text-[10px] font-mono tracking-[0.25em] mb-5" style={{ color: '#ff5722' }}>
@@ -177,12 +336,12 @@ export default function CreatePage() {
 
           <button
             onClick={handleLaunch}
-            disabled={!intent.trim() || launching}
-            className="px-7 py-3.5 font-bold text-sm tracking-wider flex items-center gap-3 disabled:opacity-40"
+            disabled={!intent.trim() || launching || !taskConfirmed}
+            className="px-7 py-3.5 font-bold text-sm tracking-wider flex items-center gap-3 disabled:opacity-40 disabled:cursor-not-allowed"
             style={{
               background: '#ff5722',
               color: 'white',
-              boxShadow: '0 0 24px rgba(255,87,34,0.35)',
+              boxShadow: taskConfirmed ? '0 0 24px rgba(255,87,34,0.35)' : 'none',
               borderRadius: '2px',
             }}
           >
