@@ -206,7 +206,7 @@ async function pickModel(task: string = 'chat', messageLength: number = 0): Prom
   } catch {}
 
   // Default: Qwen 3.6 Plus (free, 256K context, strong reasoning)
-  return 'qwen/qwen3.6-plus-preview:free';
+  return 'qwen/qwen3.6-plus:free';
 }
 
 async function recordUsage(model: string, tokensIn: number, tokensOut: number) {
