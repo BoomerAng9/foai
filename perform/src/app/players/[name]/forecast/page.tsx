@@ -8,6 +8,7 @@
  */
 
 import { useEffect, useState, use } from 'react';
+import Image from 'next/image';
 import { TIELoader } from '@/components/tie/TIELoader';
 import { PillarRadar } from '@/components/tie/PillarRadar';
 import { CompLandscape } from '@/components/tie/CompLandscape';
@@ -141,14 +142,21 @@ export default function ForecastPage({ params }: { params: Promise<{ name: strin
         </div>
       </div>
 
-      {/* ═══ HERO — ESPN-style athlete identity card ═══ */}
-      <header className="relative" style={{ background: `linear-gradient(135deg, ${T.navy} 0%, ${T.navyDeep} 100%)`, color: '#FFFFFF' }}>
+      {/* ═══ HERO — TIE character + athlete identity + dual grade ═══ */}
+      <header className="relative overflow-hidden" style={{ background: `linear-gradient(135deg, ${T.navy} 0%, ${T.navyDeep} 100%)`, color: '#FFFFFF' }}>
+        {/* Diagonal stripe background */}
         <div className="absolute inset-0 opacity-[0.08]" style={{
           backgroundImage: 'repeating-linear-gradient(45deg, transparent, transparent 80px, #FFFFFF 80px, #FFFFFF 81px)',
         }} />
+        {/* Radial orange glow behind character */}
+        <div className="absolute top-1/2 right-0 w-[600px] h-[600px] -translate-y-1/2 pointer-events-none" style={{
+          background: 'radial-gradient(circle, rgba(249,115,22,0.15) 0%, transparent 55%)',
+        }} />
+
         <div className="relative max-w-7xl mx-auto px-6 py-10">
-          <div className="grid grid-cols-1 lg:grid-cols-[1fr_auto] gap-10 items-center">
-            <div>
+          <div className="grid grid-cols-1 lg:grid-cols-[1.2fr_auto] gap-8 items-center">
+            {/* LEFT — identity + dual grades */}
+            <div className="relative z-10">
               <div className="flex items-center gap-3 mb-3">
                 <span className="px-2 py-0.5 text-[10px] font-bold tracking-[0.2em] rounded" style={{ background: T.red }}>
                   {p.identity.position}
@@ -160,35 +168,57 @@ export default function ForecastPage({ params }: { params: Promise<{ name: strin
               <h1 className="text-5xl md:text-7xl font-black leading-[0.92] tracking-tight">
                 {p.identity.name}
               </h1>
-              <div className="flex items-center gap-8 mt-6 flex-wrap">
+              <div className="flex items-center gap-6 mt-6 flex-wrap">
                 <RankBadge label="Per|Form Rank" value={`#${p.identity.performRank}`} accent />
                 <RankBadge label="Consensus" value={`#${p.identity.consensusRank}`} />
                 <RankBadge label="Position Rank" value={`${p.identity.position}${p.identity.positionRank}`} />
                 <RankBadge label="Projected" value={`R${p.identity.projectedRound}`} />
                 <RankBadge label="Trend" value={p.trend === 'rising' ? '↑ Rising' : p.trend === 'falling' ? '↓ Falling' : '→ Steady'} />
               </div>
+
+              {/* Grade panel */}
+              <div className="flex items-stretch gap-3 mt-7">
+                <GradeHero
+                  label="ACTUAL TIE GRADE"
+                  score={p.grade.actual.score}
+                  letter={p.grade.actual.letter}
+                  projection={p.grade.actual.projection}
+                  accent={T.red}
+                  primary
+                />
+                {delta > 0.1 && (
+                  <GradeHero
+                    label="CLEAN GRADE"
+                    score={p.grade.clean.score}
+                    letter={p.grade.clean.letter}
+                    projection={`Δ −${delta.toFixed(1)} medical tax`}
+                    accent={T.amber}
+                    ghost
+                  />
+                )}
+              </div>
             </div>
 
-            {/* Grade panel — large hero numbers */}
-            <div className="flex items-stretch gap-3">
-              <GradeHero
-                label="ACTUAL TIE GRADE"
-                score={p.grade.actual.score}
-                letter={p.grade.actual.letter}
-                projection={p.grade.actual.projection}
-                accent={T.red}
-                primary
+            {/* RIGHT — TIE engine character (hero visual) */}
+            <div className="relative flex-shrink-0 hidden lg:flex items-center justify-center" style={{ width: 340, height: 360 }}>
+              <div
+                className="absolute inset-0 rounded-full"
+                style={{
+                  background: 'radial-gradient(circle, rgba(249,115,22,0.25) 0%, transparent 60%)',
+                  filter: 'blur(24px)',
+                }}
               />
-              {delta > 0.1 && (
-                <GradeHero
-                  label="CLEAN GRADE"
-                  score={p.grade.clean.score}
-                  letter={p.grade.clean.letter}
-                  projection={`Δ −${delta.toFixed(1)} medical tax`}
-                  accent={T.amber}
-                  ghost
-                />
-              )}
+              <Image
+                src="/brand/tie-engine-hero.png"
+                alt="TIE Engine"
+                width={340}
+                height={360}
+                priority
+                className="object-contain relative"
+                style={{
+                  filter: 'drop-shadow(0 16px 32px rgba(0,0,0,0.6)) drop-shadow(0 0 40px rgba(249,115,22,0.3))',
+                }}
+              />
             </div>
           </div>
         </div>

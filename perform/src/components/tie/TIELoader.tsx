@@ -99,7 +99,7 @@ export function TIELoader({
               }}
             >
               <Image
-                src="/brand/tie-engine-character.png"
+                src="/brand/tie-engine-hero.png"
                 alt="TIE Engine"
                 width={320}
                 height={320}
