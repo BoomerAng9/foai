@@ -119,12 +119,21 @@ export default function TIEGradingPage() {
 
       {/* Hero */}
       <section className="relative overflow-hidden py-16 border-b" style={{ borderColor: T.border }}>
+        {/* Grading workstation scene */}
         <div
-          className="absolute inset-0 opacity-[0.12]"
+          className="absolute inset-0"
           style={{
-            backgroundImage: "url('/brand/tie-shield-stripes.png')",
+            backgroundImage: "url('/brand/scenes/tie-grading-workstation.png')",
             backgroundSize: 'cover',
             backgroundPosition: 'center',
+          }}
+        />
+        {/* Dark overlay so text stays readable */}
+        <div
+          className="absolute inset-0"
+          style={{
+            background:
+              'linear-gradient(180deg, rgba(6,10,20,0.88) 0%, rgba(6,10,20,0.72) 50%, rgba(6,10,20,0.88) 100%)',
           }}
         />
         <div className="relative max-w-5xl mx-auto px-6 text-center">
