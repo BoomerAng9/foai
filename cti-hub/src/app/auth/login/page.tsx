@@ -1,12 +1,21 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { authService } from '@/lib/auth-paywall';
 import { useAuth } from '@/hooks/useAuth';
 import { Shield } from 'lucide-react';
 
 export default function LoginPage() {
+  // useSearchParams() requires a Suspense boundary in Next 15 prerender
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-[#0a0a0f]" />}>
+      <LoginInner />
+    </Suspense>
+  );
+}
+
+function LoginInner() {
   const searchParams = useSearchParams();
   const { user, denied, loading: authLoading } = useAuth();
   const [signingIn, setSigningIn] = useState(false);
