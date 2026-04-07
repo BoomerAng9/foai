@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import { Check, Zap, Crown, Coffee, Rocket, ExternalLink, Shield, Copy } from 'lucide-react';
 import {
   PLAN_LIST,
@@ -9,6 +10,8 @@ import {
   getEffectiveMonthly,
   getTotalPrice,
   getSavingsPercent,
+  SQWAADRUN_TIERS,
+  type SqwaadrunTierId,
 } from '@/lib/billing/plans';
 import { useAuth } from '@/hooks/useAuth';
 import { isOwner } from '@/lib/allowlist';
@@ -36,6 +39,16 @@ export default function BillingPage() {
   const currentTier = (profile?.tier || 'free') as string;
   const userEmail = user?.email ?? null;
   const ownerAccess = isOwner(userEmail);
+
+  // Sqwaadrun add-on state from profile
+  const p = (profile || {}) as Record<string, unknown>;
+  const sqwaadrunTierId = (p.sqwaadrun_tier as SqwaadrunTierId | null) || null;
+  const sqwaadrunStatus = (p.sqwaadrun_status as string | null) || null;
+  const sqwaadrunUsed = Number(p.sqwaadrun_missions_used || 0);
+  const sqwaadrunQuota = Number(p.sqwaadrun_monthly_quota || 0);
+  const sqwaadrunPeriodEnd = (p.sqwaadrun_period_end as string | null) || null;
+  const sqwaadrunActive = sqwaadrunStatus === 'active' && sqwaadrunTierId !== null;
+  const sqwaadrunTier = sqwaadrunTierId ? SQWAADRUN_TIERS[sqwaadrunTierId] : null;
 
   const referralCode = user ? generateReferralCode(user.uid) : '';
   const referralUrl = referralCode ? getReferralUrl(referralCode) : '';
@@ -84,6 +97,147 @@ export default function BillingPage() {
           </div>
         </div>
       )}
+
+      {/* Sqwaadrun Add-On Panel */}
+      <div
+        className="border-2 p-5"
+        style={{
+          borderColor: sqwaadrunActive ? 'rgba(245,166,35,0.5)' : 'rgba(245,166,35,0.25)',
+          background: sqwaadrunActive
+            ? 'linear-gradient(165deg, rgba(245,166,35,0.08), transparent)'
+            : 'rgba(245,166,35,0.03)',
+          borderRadius: '3px',
+        }}
+      >
+        <div className="flex items-start justify-between gap-4 flex-wrap">
+          <div className="flex-1 min-w-[240px]">
+            <div className="flex items-center gap-2 mb-1">
+              <span className="text-[9px] font-mono tracking-[0.3em]" style={{ color: '#F5A623' }}>
+                / SQWAADRUN ADD-ON
+              </span>
+              {sqwaadrunActive && (
+                <span
+                  className="text-[8px] font-mono tracking-wider px-2 py-0.5"
+                  style={{
+                    color: '#22D3EE',
+                    background: 'rgba(34,211,238,0.1)',
+                    border: '1px solid rgba(34,211,238,0.4)',
+                    borderRadius: '2px',
+                  }}
+                >
+                  ACTIVE
+                </span>
+              )}
+            </div>
+            <h3 className="text-xl font-bold">
+              {sqwaadrunActive && sqwaadrunTier ? sqwaadrunTier.name : 'The Sqwaadrun'}
+            </h3>
+            <p className="text-xs text-[#888] mt-1">
+              {sqwaadrunActive && sqwaadrunTier
+                ? sqwaadrunTier.tagline
+                : '17-Hawk web intelligence fleet — separate add-on subscription, 20% off for active Deploy plans.'}
+            </p>
+
+            {sqwaadrunActive && (
+              <div className="mt-4 grid grid-cols-2 sm:grid-cols-4 gap-3">
+                <div>
+                  <div className="text-[8px] font-mono opacity-60 uppercase tracking-wider">Price</div>
+                  <div className="text-base font-bold mt-0.5" style={{ color: '#F5A623' }}>
+                    ${sqwaadrunTier?.price_monthly}/mo
+                  </div>
+                </div>
+                <div>
+                  <div className="text-[8px] font-mono opacity-60 uppercase tracking-wider">Used</div>
+                  <div className="text-base font-bold mt-0.5">
+                    {sqwaadrunUsed.toLocaleString()}
+                    <span className="text-[10px] opacity-50"> / {sqwaadrunQuota.toLocaleString()}</span>
+                  </div>
+                </div>
+                <div>
+                  <div className="text-[8px] font-mono opacity-60 uppercase tracking-wider">Hawks</div>
+                  <div className="text-base font-bold mt-0.5" style={{ color: '#22D3EE' }}>
+                    {sqwaadrunTier?.hawks_unlocked}/17
+                  </div>
+                </div>
+                <div>
+                  <div className="text-[8px] font-mono opacity-60 uppercase tracking-wider">Resets</div>
+                  <div className="text-base font-bold mt-0.5">
+                    {sqwaadrunPeriodEnd
+                      ? new Date(sqwaadrunPeriodEnd).toLocaleDateString(undefined, {
+                          month: 'short',
+                          day: 'numeric',
+                        })
+                      : '—'}
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+
+          <div className="flex gap-2 shrink-0">
+            {sqwaadrunActive ? (
+              <>
+                <Link
+                  href="/sqwaadrun"
+                  className="px-4 py-2 text-[10px] font-mono tracking-wider font-bold"
+                  style={{
+                    background: '#F5A623',
+                    color: '#050810',
+                    borderRadius: '2px',
+                  }}
+                >
+                  HAWK BAY →
+                </Link>
+                <Link
+                  href="/plug/sqwaadrun#deploy"
+                  className="px-4 py-2 text-[10px] font-mono tracking-wider"
+                  style={{
+                    border: '1px solid rgba(245,166,35,0.5)',
+                    color: '#F5A623',
+                    borderRadius: '2px',
+                  }}
+                >
+                  UPGRADE
+                </Link>
+              </>
+            ) : (
+              <Link
+                href="/plug/sqwaadrun#deploy"
+                className="px-5 py-2 text-[10px] font-mono tracking-wider font-bold"
+                style={{
+                  background: '#F5A623',
+                  color: '#050810',
+                  borderRadius: '2px',
+                }}
+              >
+                ADD THE SQWAADRUN →
+              </Link>
+            )}
+          </div>
+        </div>
+
+        {/* Quota progress bar */}
+        {sqwaadrunActive && sqwaadrunQuota > 0 && (
+          <div className="mt-4">
+            <div
+              className="h-1.5 w-full overflow-hidden border"
+              style={{
+                borderColor: 'rgba(245,166,35,0.3)',
+                background: 'rgba(245,166,35,0.05)',
+              }}
+            >
+              <div
+                className="h-full"
+                style={{
+                  width: `${Math.min(100, (sqwaadrunUsed / sqwaadrunQuota) * 100)}%`,
+                  background: 'linear-gradient(90deg, #F5A623, #F97316)',
+                  boxShadow: '0 0 8px rgba(245,166,35,0.5)',
+                }}
+              />
+            </div>
+          </div>
+        )}
+      </div>
 
       {/* Commitment Toggle — only for subscription plans */}
       <div className="flex items-center justify-center gap-1 p-1 bg-[#111] border border-[#222] w-fit mx-auto">

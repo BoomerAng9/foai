@@ -331,7 +331,19 @@ def write_mission_log(mission: Mission, signed_off_by: Optional[str] = "auto") -
                 mission.kpis.get("elapsed_seconds"),
                 mission.kpis.get("throughput_pages_per_sec"),
                 mission.error,
-                json.dumps(mission.kpis),
+                # Merge user attribution from mission.config into the
+                # kpi_snapshot so /api/sqwaadrun/recent can filter by
+                # kpi_snapshot->>'user_id'
+                json.dumps({
+                    **mission.kpis,
+                    "user_id": mission.config.get("user_id"),
+                    "user_email": mission.config.get("user_email"),
+                    "tier": mission.config.get("tier"),
+                    "config": {
+                        k: v for k, v in mission.config.items()
+                        if k in ("user_id", "user_email", "tier", "intent")
+                    },
+                }),
                 datetime.now(timezone.utc),
                 datetime.now(timezone.utc) if mission.status in ("completed", "failed") else None,
             ),

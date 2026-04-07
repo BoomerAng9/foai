@@ -64,7 +64,10 @@ const POSITION_COLOR: Record<string, string> = {
   LB: '#0891B2', OLB: '#0891B2', ILB: '#0891B2',
   CB: '#F59E0B', S: '#84CC16',
 };
-const posColor = (pos: string) => POSITION_COLOR[pos.toUpperCase()] || T.navy;
+const posColor = (pos: string | null | undefined): string => {
+  if (!pos) return T.navy;
+  return POSITION_COLOR[pos.toUpperCase()] || T.navy;
+};
 
 const POSITIONS = ['ALL', 'QB', 'RB', 'WR', 'TE', 'OT', 'IOL', 'EDGE', 'DT', 'LB', 'CB', 'S'];
 const SORT_OPTIONS: { key: SortKey; label: string }[] = [
@@ -121,11 +124,14 @@ export default function DraftBoardPage() {
   }, []);
 
   const filtered = useMemo(() => {
-    let list = prospects;
-    if (positionFilter !== 'ALL') list = list.filter((p) => p.position === positionFilter);
+    let list = prospects.filter((p) => p && p.name);
+    if (positionFilter !== 'ALL') list = list.filter((p) => (p.position || '').toUpperCase() === positionFilter);
     if (search.trim()) {
       const q = search.toLowerCase();
-      list = list.filter((p) => p.name.toLowerCase().includes(q) || p.school.toLowerCase().includes(q));
+      list = list.filter((p) =>
+        (p.name || '').toLowerCase().includes(q) ||
+        (p.school || '').toLowerCase().includes(q),
+      );
     }
     return list;
   }, [prospects, positionFilter, search]);
@@ -134,8 +140,8 @@ export default function DraftBoardPage() {
     return [...filtered].sort((a, b) => {
       if (sortBy === 'rank')   return (a.overall_rank ?? 999) - (b.overall_rank ?? 999);
       if (sortBy === 'grade')  return safeGrade(b.grade) - safeGrade(a.grade);
-      if (sortBy === 'school') return a.school.localeCompare(b.school);
-      return a.name.localeCompare(b.name);
+      if (sortBy === 'school') return (a.school || '').localeCompare(b.school || '');
+      return (a.name || '').localeCompare(b.name || '');
     });
   }, [filtered, sortBy]);
 
