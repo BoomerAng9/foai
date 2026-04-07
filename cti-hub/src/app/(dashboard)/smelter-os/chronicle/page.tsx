@@ -68,7 +68,7 @@ export default function ChroniclePage() {
         <Link
           href="/smelter-os"
           className="text-[10px] font-mono tracking-[0.25em] opacity-60 hover:opacity-100 inline-block mb-6"
-          style={{ color: '#F5A623' }}
+          style={{ color: '#ff5722' }}
         >
           ← SMELTEROS BRIDGE
         </Link>
@@ -89,7 +89,7 @@ export default function ChroniclePage() {
         <div
           className="flex gap-1 mb-6 p-1 border inline-flex"
           style={{
-            borderColor: 'rgba(245,166,35,0.25)',
+            borderColor: 'rgba(255,87,34,0.25)',
             background: 'rgba(11,18,32,0.5)',
             borderRadius: '2px',
           }}
@@ -129,7 +129,7 @@ export default function ChroniclePage() {
           <>
             <div className="text-[10px] font-mono opacity-60 mb-3">
               {data.returned} of {data.total} entries · newest first ·{' '}
-              <span className="font-bold" style={{ color: '#F5A623' }}>
+              <span className="font-bold" style={{ color: '#ff5722' }}>
                 {data.path}
               </span>
             </div>
@@ -138,7 +138,7 @@ export default function ChroniclePage() {
               <div
                 className="p-8 text-center border text-[11px] font-mono"
                 style={{
-                  borderColor: 'rgba(245,166,35,0.2)',
+                  borderColor: 'rgba(255,87,34,0.2)',
                   background: 'rgba(11,18,32,0.4)',
                   color: '#94A3B8',
                   borderRadius: '2px',
@@ -204,7 +204,7 @@ function ChronicleRow({
     <div
       className="border overflow-hidden"
       style={{
-        borderColor: 'rgba(245,166,35,0.2)',
+        borderColor: 'rgba(255,87,34,0.2)',
         background: 'rgba(11,18,32,0.5)',
         borderRadius: '2px',
       }}
@@ -215,7 +215,7 @@ function ChronicleRow({
       >
         <div className="flex items-center gap-3 min-w-0 flex-1">
           <span>{expanded ? '▼' : '▶'}</span>
-          <span className="text-[11px] font-mono truncate" style={{ color: '#F5A623' }}>
+          <span className="text-[11px] font-mono truncate" style={{ color: '#ff5722' }}>
             {entry.name}
           </span>
         </div>
@@ -228,7 +228,7 @@ function ChronicleRow({
         <pre
           className="p-4 text-[10px] font-mono leading-relaxed border-t overflow-x-auto max-h-96 overflow-y-auto"
           style={{
-            borderColor: 'rgba(245,166,35,0.1)',
+            borderColor: 'rgba(255,87,34,0.1)',
             background: '#050810',
             color: '#E2E8F0',
           }}
@@ -239,7 +239,7 @@ function ChronicleRow({
       {expanded && !entry.preview && (
         <div
           className="p-3 text-[10px] font-mono opacity-50 border-t"
-          style={{ borderColor: 'rgba(245,166,35,0.1)' }}
+          style={{ borderColor: 'rgba(255,87,34,0.1)' }}
         >
           (no preview available)
         </div>

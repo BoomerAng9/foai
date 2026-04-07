@@ -77,7 +77,7 @@ export default function DoctrinePage() {
         <Link
           href="/smelter-os"
           className="text-[10px] font-mono tracking-[0.25em] opacity-60 hover:opacity-100 inline-block mb-6"
-          style={{ color: '#F5A623' }}
+          style={{ color: '#ff5722' }}
         >
           ← SMELTEROS BRIDGE
         </Link>
@@ -113,7 +113,7 @@ export default function DoctrinePage() {
           <>
             {/* Stats strip */}
             <div className="grid grid-cols-2 md:grid-cols-6 gap-3 mb-8">
-              <Stat label="TOTAL" value={data.stats.total} accent="#F5A623" />
+              <Stat label="TOTAL" value={data.stats.total} accent="#ff5722" />
               <Stat label="COMPLETED" value={data.stats.completed} accent="#22D3EE" />
               <Stat label="FAILED" value={data.stats.failed} accent="#EF4444" />
               <Stat label="GEN SIGNED" value={data.stats.general_signed} accent="#F97316" />
@@ -125,7 +125,7 @@ export default function DoctrinePage() {
               <div
                 className="p-8 text-center border text-[11px] font-mono"
                 style={{
-                  borderColor: 'rgba(245,166,35,0.2)',
+                  borderColor: 'rgba(255,87,34,0.2)',
                   background: 'rgba(11,18,32,0.4)',
                   color: '#94A3B8',
                   borderRadius: '2px',
@@ -167,7 +167,7 @@ function Stat({ label, value, accent }: { label: string; value: number; accent: 
 
 function MissionRow({ entry }: { entry: DoctrineEntry }) {
   const statusColor =
-    entry.status === 'completed' ? '#22D3EE' : entry.status === 'failed' ? '#EF4444' : '#F5A623';
+    entry.status === 'completed' ? '#22D3EE' : entry.status === 'failed' ? '#EF4444' : '#ff5722';
 
   return (
     <div
@@ -184,7 +184,7 @@ function MissionRow({ entry }: { entry: DoctrineEntry }) {
           <div className="flex items-center gap-2 flex-wrap">
             <span
               className="text-[10px] font-mono tracking-wider font-bold"
-              style={{ color: '#F5A623' }}
+              style={{ color: '#ff5722' }}
             >
               {entry.mission_id}
             </span>

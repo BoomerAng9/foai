@@ -72,13 +72,13 @@ export default function FleetPage() {
         <Link
           href="/smelter-os"
           className="text-[10px] font-mono tracking-[0.25em] opacity-60 hover:opacity-100 inline-block mb-6"
-          style={{ color: '#F5A623' }}
+          style={{ color: '#ff5722' }}
         >
           ← SMELTEROS BRIDGE
         </Link>
 
         <div className="mb-8">
-          <div className="text-[10px] font-mono tracking-[0.3em] mb-2" style={{ color: '#F5A623' }}>
+          <div className="text-[10px] font-mono tracking-[0.3em] mb-2" style={{ color: '#ff5722' }}>
             / FLEET
           </div>
           <h1 className="text-4xl font-black tracking-tight">Agent Roster</h1>
@@ -130,9 +130,9 @@ export default function FleetPage() {
             </div>
 
             {/* Command tier */}
-            <FleetSection title="Command Tier" subtitle="ACHEEVY + Chicken_Hawk" accent="#F5A623">
+            <FleetSection title="Command Tier" subtitle="ACHEEVY + Chicken_Hawk" accent="#ff5722">
               {data.command.map((a) => (
-                <AgentCard key={a.callsign} agent={a} accent="#F5A623" />
+                <AgentCard key={a.callsign} agent={a} accent="#ff5722" />
               ))}
             </FleetSection>
 

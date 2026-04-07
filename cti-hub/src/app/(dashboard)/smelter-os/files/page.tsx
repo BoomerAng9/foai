@@ -102,13 +102,13 @@ export default function FilesPage() {
         <Link
           href="/smelter-os"
           className="text-[10px] font-mono tracking-[0.25em] opacity-60 hover:opacity-100 inline-block mb-6"
-          style={{ color: '#F5A623' }}
+          style={{ color: '#ff5722' }}
         >
           ← SMELTEROS BRIDGE
         </Link>
 
         <div className="mb-8">
-          <div className="text-[10px] font-mono tracking-[0.3em] mb-2" style={{ color: '#F5A623' }}>
+          <div className="text-[10px] font-mono tracking-[0.3em] mb-2" style={{ color: '#ff5722' }}>
             / FILES
           </div>
           <h1 className="text-4xl font-black tracking-tight">Puter File Tree</h1>
@@ -122,7 +122,7 @@ export default function FilesPage() {
         <div
           className="flex items-center gap-2 mb-4 p-3 border overflow-x-auto whitespace-nowrap"
           style={{
-            borderColor: 'rgba(245,166,35,0.2)',
+            borderColor: 'rgba(255,87,34,0.2)',
             background: 'rgba(11,18,32,0.5)',
             borderRadius: '2px',
           }}
@@ -133,7 +133,7 @@ export default function FilesPage() {
               <button
                 onClick={() => setPath(bc.path)}
                 className="hover:underline"
-                style={{ color: i === breadcrumbs.length - 1 ? '#F5A623' : '#22D3EE' }}
+                style={{ color: i === breadcrumbs.length - 1 ? '#ff5722' : '#22D3EE' }}
               >
                 {bc.label}
               </button>
@@ -177,14 +177,14 @@ export default function FilesPage() {
           <div
             className="border overflow-hidden"
             style={{
-              borderColor: 'rgba(245,166,35,0.2)',
+              borderColor: 'rgba(255,87,34,0.2)',
               background: 'rgba(11,18,32,0.5)',
               borderRadius: '2px',
             }}
           >
             <div
               className="px-4 py-2 text-[9px] font-mono tracking-[0.2em] border-b opacity-60"
-              style={{ borderColor: 'rgba(245,166,35,0.15)' }}
+              style={{ borderColor: 'rgba(255,87,34,0.15)' }}
             >
               {dir.count} {dir.count === 1 ? 'entry' : 'entries'} in {dir.path}
             </div>
@@ -205,12 +205,12 @@ export default function FilesPage() {
                       }
                     }}
                     className="w-full flex items-center gap-3 px-4 py-2.5 text-left hover:bg-white/[0.04] transition border-b"
-                    style={{ borderColor: 'rgba(245,166,35,0.08)' }}
+                    style={{ borderColor: 'rgba(255,87,34,0.08)' }}
                   >
                     <span className="text-base shrink-0">{e.is_dir ? '📁' : '📄'}</span>
                     <span
                       className="flex-1 text-[11px] font-mono truncate"
-                      style={{ color: e.is_dir ? '#F5A623' : '#F1F5F9' }}
+                      style={{ color: e.is_dir ? '#ff5722' : '#F1F5F9' }}
                     >
                       {e.name}
                     </span>
@@ -232,18 +232,18 @@ export default function FilesPage() {
           <div
             className="border"
             style={{
-              borderColor: 'rgba(245,166,35,0.3)',
+              borderColor: 'rgba(255,87,34,0.3)',
               background: 'rgba(11,18,32,0.6)',
               borderRadius: '2px',
             }}
           >
             <div
               className="flex items-center justify-between px-4 py-3 border-b"
-              style={{ borderColor: 'rgba(245,166,35,0.15)' }}
+              style={{ borderColor: 'rgba(255,87,34,0.15)' }}
             >
               <div className="flex items-center gap-2 min-w-0">
                 <span>📄</span>
-                <span className="text-[11px] font-mono truncate" style={{ color: '#F5A623' }}>
+                <span className="text-[11px] font-mono truncate" style={{ color: '#ff5722' }}>
                   {file.path}
                 </span>
               </div>

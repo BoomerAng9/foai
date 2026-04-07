@@ -251,8 +251,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </header>
 
         {/* Content */}
-        <div className={`flex-1 overflow-auto relative ${(pathname === '/chat' || pathname.startsWith('/broadcast')) ? '' : 'p-3 sm:p-4 md:p-6'}`}>
-          {pathname !== '/chat' && !pathname.startsWith('/broadcast') && (
+        <div className={`flex-1 overflow-auto relative ${(pathname === '/chat' || pathname.startsWith('/broadcast') || pathname.startsWith('/smelter-os')) ? '' : 'p-3 sm:p-4 md:p-6'}`}>
+          {pathname !== '/chat' && !pathname.startsWith('/broadcast') && !pathname.startsWith('/smelter-os') && (
             <>
               <CornerBracket position="tl" />
               <CornerBracket position="tr" />
@@ -260,7 +260,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               <CornerBracket position="br" />
             </>
           )}
-          <div className={(pathname === '/chat' || pathname.startsWith('/broadcast')) ? 'h-full' : 'animate-materialize'}>
+          <div className={(pathname === '/chat' || pathname.startsWith('/broadcast') || pathname.startsWith('/smelter-os')) ? 'h-full' : 'animate-materialize'}>
             {children}
           </div>
         </div>
