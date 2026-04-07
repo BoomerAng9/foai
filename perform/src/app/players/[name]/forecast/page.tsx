@@ -155,15 +155,28 @@ export default function ForecastPage({ params }: { params: Promise<{ name: strin
         </div>
       </div>
 
-      {/* ═══ HERO — TIE character + athlete identity + dual grade ═══ */}
-      <header className="relative overflow-hidden" style={{ background: `linear-gradient(135deg, ${T.navy} 0%, ${T.navyDeep} 100%)`, color: '#FFFFFF' }}>
-        {/* Diagonal stripe background */}
-        <div className="absolute inset-0 opacity-[0.08]" style={{
+      {/* ═══ HERO — film room scene + athlete identity + dual grade ═══ */}
+      <header className="relative overflow-hidden" style={{ background: T.navyDeep, color: '#FFFFFF' }}>
+        {/* Film room scene background */}
+        <div
+          className="absolute inset-0"
+          style={{
+            backgroundImage: "url('/brand/scenes/film-room.png')",
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+          }}
+        />
+        {/* Dark overlay so foreground text stays readable */}
+        <div
+          className="absolute inset-0"
+          style={{
+            background:
+              'linear-gradient(120deg, rgba(6,18,42,0.92) 0%, rgba(6,18,42,0.75) 45%, rgba(6,18,42,0.55) 100%)',
+          }}
+        />
+        {/* Subtle diagonal stripe texture */}
+        <div className="absolute inset-0 opacity-[0.05]" style={{
           backgroundImage: 'repeating-linear-gradient(45deg, transparent, transparent 80px, #FFFFFF 80px, #FFFFFF 81px)',
-        }} />
-        {/* Radial orange glow behind character */}
-        <div className="absolute top-1/2 right-0 w-[600px] h-[600px] -translate-y-1/2 pointer-events-none" style={{
-          background: 'radial-gradient(circle, rgba(249,115,22,0.15) 0%, transparent 55%)',
         }} />
 
         <div className="relative max-w-7xl mx-auto px-6 py-10">
