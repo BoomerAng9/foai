@@ -25,6 +25,7 @@ import {
   Info,
   Monitor,
   Bird,
+  Command,
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { AuthPromptTimer } from '@/components/auth/AuthPromptTimer';
@@ -38,6 +39,7 @@ interface NavItem {
 
 const NAV: NavItem[] = [
   { name: 'HOME', href: '/chat', icon: MessageSquare },
+  { name: 'SMELTER OS', href: '/smelter-os', icon: Command, ownerOnly: true },
   { name: 'AGENT HQ', href: '/agents', icon: Users },
   { name: 'SQWAADRUN', href: '/sqwaadrun', icon: Bird },
   { name: 'DEPLOY', href: '/deploy-agent', icon: Zap },

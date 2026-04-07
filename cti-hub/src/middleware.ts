@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 // Owner-only routes — beta testers and deploy.foai.cloud users cannot access these
-const OWNER_ONLY_ROUTES = ['/live', '/plug-bin', '/open-seats', '/enrollments', '/affiliates', '/team', '/pricing', '/research'];
+const OWNER_ONLY_ROUTES = ['/live', '/plug-bin', '/open-seats', '/enrollments', '/affiliates', '/team', '/pricing', '/research', '/smelter-os'];
 // Must match src/lib/allowlist.ts — cannot import in Edge Runtime middleware
 const OWNER_EMAILS = (process.env.OWNER_EMAILS || '').split(',').map(e => e.trim()).filter(Boolean);
 
