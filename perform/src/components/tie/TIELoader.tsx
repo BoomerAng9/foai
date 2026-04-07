@@ -29,29 +29,35 @@ export function TIELoader({
   return (
     <div
       className={`${fullScreen ? 'fixed inset-0 z-[9999]' : 'relative w-full min-h-[600px]'} flex items-center justify-center overflow-hidden`}
-      style={{
-        background:
-          'radial-gradient(ellipse at center, #1A1108 0%, #0A0604 60%, #000000 100%)',
-      }}
+      style={{ background: '#000000' }}
     >
-      {/* Ambient gold radial glow */}
+      {/* Full-screen TIE shield stripe background */}
+      <div
+        className="absolute inset-0"
+        style={{
+          backgroundImage: "url('/brand/tie-shield-stripes.png')",
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          opacity: 0.28,
+        }}
+      />
+      {/* Dark radial vignette to focus the center */}
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          background:
+            'radial-gradient(ellipse at center, transparent 0%, rgba(0,0,0,0.4) 50%, rgba(0,0,0,0.92) 100%)',
+        }}
+      />
+      {/* Ambient gold pulse */}
       <motion.div
         className="absolute inset-0 pointer-events-none"
         style={{
           background:
-            'radial-gradient(circle at 50% 50%, rgba(212,168,83,0.15) 0%, transparent 60%)',
+            'radial-gradient(circle at 50% 50%, rgba(212,168,83,0.12) 0%, transparent 55%)',
         }}
-        animate={{ opacity: [0.4, 0.8, 0.4] }}
+        animate={{ opacity: [0.5, 1, 0.5] }}
         transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
-      />
-
-      {/* Animated diagonal gold stripes — subtle */}
-      <div
-        className="absolute inset-0 opacity-[0.04] pointer-events-none"
-        style={{
-          backgroundImage:
-            'repeating-linear-gradient(45deg, transparent, transparent 60px, #D4A853 60px, #D4A853 62px)',
-        }}
       />
 
       <div className="relative flex flex-col items-center gap-10">
