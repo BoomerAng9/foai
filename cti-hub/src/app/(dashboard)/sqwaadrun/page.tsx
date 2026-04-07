@@ -14,13 +14,14 @@
  *   - /api/sqwaadrun/recent      → last N missions for this user
  */
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, useCallback } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/hooks/useAuth';
 import {
   SQWAADRUN_TIERS,
   type SqwaadrunTierId,
 } from '@/lib/billing/plans';
+import { MissionBuilder } from '@/components/sqwaadrun/MissionBuilder';
 
 interface ProfileSqwaadrunSlice {
   sqwaadrun_tier: SqwaadrunTierId | null;
@@ -52,6 +53,7 @@ export default function SqwaadrunDashboardPage() {
   const [live, setLive] = useState<LiveRoster | null>(null);
   const [healthy, setHealthy] = useState<boolean | null>(null);
   const [loading, setLoading] = useState(true);
+  const [builderOpen, setBuilderOpen] = useState(false);
 
   const slice: ProfileSqwaadrunSlice = useMemo(() => {
     const p = (profile || {}) as Record<string, unknown>;
@@ -67,7 +69,7 @@ export default function SqwaadrunDashboardPage() {
   const tier = slice.sqwaadrun_tier ? SQWAADRUN_TIERS[slice.sqwaadrun_tier] : null;
   const isActive = slice.sqwaadrun_status === 'active' && tier !== null;
 
-  useEffect(() => {
+  const refresh = useCallback(() => {
     if (!user) return;
     Promise.all([
       fetch('/api/sqwaadrun/live').then((r) => r.json()).catch(() => null),
@@ -79,6 +81,10 @@ export default function SqwaadrunDashboardPage() {
       setLoading(false);
     });
   }, [user]);
+
+  useEffect(() => {
+    refresh();
+  }, [refresh]);
 
   if (!user) {
     return (
@@ -99,17 +105,44 @@ export default function SqwaadrunDashboardPage() {
     <div className="min-h-screen bg-[#050810] text-white" style={{ fontFamily: "'Outfit', sans-serif" }}>
       <div className="max-w-6xl mx-auto px-6 py-12">
         {/* Header */}
-        <div className="mb-12">
-          <div className="text-[10px] font-mono tracking-[0.3em] mb-3" style={{ color: '#F5A623' }}>
-            / SQWAADRUN COMMAND
+        <div className="mb-12 flex items-start justify-between gap-6 flex-wrap">
+          <div>
+            <div className="text-[10px] font-mono tracking-[0.3em] mb-3" style={{ color: '#F5A623' }}>
+              / SQWAADRUN COMMAND
+            </div>
+            <h1 className="text-4xl md:text-5xl font-black tracking-tight mb-2">
+              Hawk Bay
+            </h1>
+            <p className="text-sm" style={{ color: '#94A3B8' }}>
+              {user.email} · your fleet status, quota, and recent missions
+            </p>
           </div>
-          <h1 className="text-4xl md:text-5xl font-black tracking-tight mb-2">
-            Hawk Bay
-          </h1>
-          <p className="text-sm" style={{ color: '#94A3B8' }}>
-            {user.email} · your fleet status, quota, and recent missions
-          </p>
+
+          {isActive && (
+            <button
+              onClick={() => setBuilderOpen(true)}
+              className="px-6 py-3 text-[11px] font-mono tracking-[0.15em] font-bold flex items-center gap-2 shrink-0"
+              style={{
+                background: '#F5A623',
+                color: '#050810',
+                borderRadius: '2px',
+                boxShadow: '0 0 24px rgba(245,166,35,0.25)',
+              }}
+            >
+              ⚡ DISPATCH MISSION
+            </button>
+          )}
         </div>
+
+        <MissionBuilder
+          open={builderOpen}
+          onClose={() => setBuilderOpen(false)}
+          tierId={slice.sqwaadrun_tier}
+          onComplete={() => {
+            // Refresh recent missions + fleet stats after a successful dispatch
+            setTimeout(refresh, 500);
+          }}
+        />
 
         {/* Inactive state */}
         {!isActive && (

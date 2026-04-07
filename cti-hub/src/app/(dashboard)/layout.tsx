@@ -24,6 +24,7 @@ import {
   Zap,
   Info,
   Monitor,
+  Bird,
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { AuthPromptTimer } from '@/components/auth/AuthPromptTimer';
@@ -38,6 +39,7 @@ interface NavItem {
 const NAV: NavItem[] = [
   { name: 'HOME', href: '/chat', icon: MessageSquare },
   { name: 'AGENT HQ', href: '/agents', icon: Users },
+  { name: 'SQWAADRUN', href: '/sqwaadrun', icon: Bird },
   { name: 'DEPLOY', href: '/deploy-agent', icon: Zap },
   { name: 'WORKFLOWS', href: '/projects', icon: FolderOpen },
   { name: 'PLUG BIN', href: '/assets', icon: FolderOpen },

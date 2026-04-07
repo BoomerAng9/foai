@@ -21,12 +21,12 @@ export async function GET(req: NextRequest) {
   const url = new URL(req.url);
   const limit = Math.min(100, Math.max(1, Number(url.searchParams.get('limit') || 20)));
 
+  const userId = auth.context.user.uid;
+
   try {
-    // The mission_log doesn't have user_id directly — we filter by the
-    // primary_domain matching domains the user has dispatched to in
-    // their current period. For MVP we just return the most recent
-    // missions globally; tighten the filter once per-user mission
-    // attribution lands.
+    // Missions are attributed via kpi_snapshot.user_id (injected by the
+    // mission proxy when the user dispatches). Falls back to the
+    // primary_domain filter for legacy rows without attribution.
     const rows = await sql`
       SELECT
         mission_id,
@@ -38,6 +38,8 @@ export async function GET(req: NextRequest) {
         created_at,
         error
       FROM sqwaadrun_staging.mission_log
+      WHERE kpi_snapshot->>'user_id' = ${userId}
+         OR kpi_snapshot->'config'->>'user_id' = ${userId}
       ORDER BY created_at DESC
       LIMIT ${limit}
     `;
