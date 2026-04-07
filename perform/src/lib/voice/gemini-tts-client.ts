@@ -33,10 +33,11 @@ import path from 'path';
 const getApiKey = () => process.env.GEMINI_API_KEY || '';
 // Newest Live-tier model first; the legacy 2.5 ID is kept ONLY as
 // an absolute last resort if the router has nowhere else to fall.
+// The tts-router walks gemini-live → personaplex → grok-voice → playht,
+// so this file does NOT fall back to Flash TTS — that would defeat the
+// purpose of the router chain.
 const DEFAULT_MODEL = 'gemini-3.1-flash-live-preview';
 const LEGACY_FALLBACK = 'gemini-2.5-pro-preview-tts';
-const DEFAULT_MODEL = 'gemini-2.5-pro-preview-tts';
-const FALLBACK_MODEL = 'gemini-2.5-flash-preview-tts';
 const BASE_URL = 'https://generativelanguage.googleapis.com/v1beta';
 
 // Logical voice name → Gemini prebuilt voice
@@ -140,10 +141,12 @@ export async function synthesizeGeminiTts(req: GeminiTtsRequest): Promise<Gemini
       });
 
     let res = await tryModel(primaryModel);
-    // If Pro TTS isn't accessible on this key (404/403), fall back to Flash TTS
-    if (!res.ok && (res.status === 404 || res.status === 403) && primaryModel !== FALLBACK_MODEL) {
-      console.warn(`[gemini-tts] ${primaryModel} ${res.status}, falling back to ${FALLBACK_MODEL}`);
-      res = await tryModel(FALLBACK_MODEL);
+    // If the 3.1 Live preview isn't on this key yet, drop to the
+    // legacy 2.5 Pro TTS once. If that also fails, return null so
+    // the router can walk to the next engine (personaplex → grok).
+    if (!res.ok && (res.status === 404 || res.status === 403) && primaryModel !== LEGACY_FALLBACK) {
+      console.warn(`[gemini-tts] ${primaryModel} ${res.status}, trying ${LEGACY_FALLBACK}`);
+      res = await tryModel(LEGACY_FALLBACK);
     }
 
     if (!res.ok) {

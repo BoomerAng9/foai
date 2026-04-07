@@ -173,14 +173,19 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    return NextResponse.json(
-      {
-        ...result,
-        quota: {
+    // Owner gets an unlimited-marker payload; tier'd users get real quota
+    const quotaPayload = ownerBypass
+      ? { used: null, limit: null, remaining: null, unlimited: true }
+      : {
           used: used + 1,
           limit: quota,
           remaining: Math.max(0, quota - used - 1),
-        },
+        };
+
+    return NextResponse.json(
+      {
+        ...result,
+        quota: quotaPayload,
       },
       { status: res.status },
     );

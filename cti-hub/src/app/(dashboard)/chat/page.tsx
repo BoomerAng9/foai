@@ -30,10 +30,12 @@ function ChatWithACHEEVY() {
   const { user } = useAuth();
   const searchParams = useSearchParams();
   const deployAgent = searchParams.get('deploy');
+  const prefillQ = searchParams.get('q');
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const deployInitRef = useRef(false);
+  const prefillInitRef = useRef(false);
 
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [activeConvId, setActiveConvId] = useState<string | null>(null);
@@ -177,6 +179,20 @@ function ChatWithACHEEVY() {
     }, 1000);
     return () => clearTimeout(timer);
   }, [deployAgent, user]);
+
+  // Pre-fill the input when ?q=... is in URL (used by SmelterOS surfaces
+  // like /smelter-os/tie and /smelter-os/create to hand off a prompt to
+  // ACHEEVY). Pre-fills only — does NOT auto-send, giving the user a
+  // chance to review and edit the dispatched prompt.
+  useEffect(() => {
+    if (!prefillQ || prefillInitRef.current || !user) return;
+    prefillInitRef.current = true;
+    const timer = setTimeout(() => {
+      setInput(prefillQ);
+      inputRef.current?.focus();
+    }, 400);
+    return () => clearTimeout(timer);
+  }, [prefillQ, user]);
 
   // Close model dropdown on outside click
   useEffect(() => {

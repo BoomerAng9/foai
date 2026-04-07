@@ -67,7 +67,7 @@ export default function BillingPage() {
     // dashboard redirect instead of nothing happening on click.
     if (ownerAccess) {
       toast.success('Owner clearance — unlimited berth active');
-      window.location.href = '/smelter-os?owner_unlimited=1';
+      window.location.href = '/smelter-os';
       return;
     }
     try {
@@ -83,7 +83,7 @@ export default function BillingPage() {
       // will carry owner_bypass:true and we redirect cleanly.
       if (data.owner_bypass) {
         toast.success(data.message ?? 'Owner clearance — no checkout required');
-        window.location.href = data.redirect_url ?? '/smelter-os?owner_unlimited=1';
+        window.location.href = data.redirect_url ?? '/smelter-os';
         return;
       }
 

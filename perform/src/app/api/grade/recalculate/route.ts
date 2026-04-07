@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@/lib/db';
 import { getGradeForScore } from '@/lib/tie/grades';
+import { getVerticalTierLabel } from '@/lib/tie/verticals';
 
 /* ──────────────────────────────────────────────────────────────
  *  POST /api/grade/recalculate
@@ -21,7 +22,8 @@ interface GradeResult {
 }
 
 function deriveTieGrade(grade: number): string {
-  return getGradeForScore(grade).label;
+  // Sports vertical — this route is the Per|Form prospect re-grader
+  return getVerticalTierLabel(getGradeForScore(grade).tier, 'SPORTS').label;
 }
 
 async function braveSearch(query: string, apiKey: string): Promise<string> {

@@ -47,7 +47,7 @@ export async function POST(request: NextRequest) {
     if (isOwner(authResult.context.user.email)) {
       return NextResponse.json({
         owner_bypass: true,
-        redirect_url: '/smelter-os?owner_unlimited=1',
+        redirect_url: '/smelter-os',
         message: 'Owner clearance — no checkout required.',
       });
     }

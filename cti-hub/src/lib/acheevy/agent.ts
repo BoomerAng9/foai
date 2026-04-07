@@ -349,12 +349,13 @@ export async function acheevyRespondStream(
   userMessage: string,
   conversationHistory: ConversationMessage[],
   modelOverride?: string,
+  email?: string | null,
 ): Promise<{ stream: ReadableStream<Uint8Array>; model: string; memories_recalled: number }> {
   const enc = new TextEncoder();
 
-  // 0a. Budget gate — check before any paid work
+  // 0a. Budget gate — check before any paid work (owner email bypasses)
   try {
-    await checkBudget();
+    await checkBudget(email);
   } catch (err) {
     if (err instanceof BudgetExhaustedError) {
       const budgetMsg = err.message;

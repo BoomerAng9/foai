@@ -10,6 +10,7 @@ export async function POST(request: NextRequest) {
     const auth = await requireAuth(request);
     if (!auth.ok) return auth.response;
     const userId = auth.userId;
+    const userEmail = auth.email;
     const body = await request.json();
     const { message, conversation_id, model, skill_context, mode } = body;
 
@@ -67,6 +68,7 @@ export async function POST(request: NextRequest) {
               `[GUIDE ME MODE — Note_Ang context: ${guideResult.notesSummary}]\n\n${enrichedMessage}`,
               history,
               ACHEEVY_MODEL,
+              userEmail,
             );
 
             // Pipe ACHEEVY's stream
@@ -104,6 +106,7 @@ export async function POST(request: NextRequest) {
       enrichedMessage,
       history,
       model,
+      userEmail,
     );
 
     return new Response(result.stream, {
