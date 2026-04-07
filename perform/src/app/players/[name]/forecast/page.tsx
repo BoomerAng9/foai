@@ -15,8 +15,19 @@ import { CompLandscape } from '@/components/tie/CompLandscape';
 import { C1Renderer } from '@/components/c1/C1Renderer';
 import Link from 'next/link';
 
+interface Top5Player {
+  rank: number;
+  name: string;
+  position: string;
+  school: string;
+  grade: number;
+  gradeLetter: string;
+  headshotUrl: string | null;
+}
+
 interface ForecastResponse {
   c1Card?: { spec: unknown; model?: string; error?: string } | null;
+  top5?: Top5Player[];
   player: {
     identity: {
       name: string;
@@ -144,15 +155,28 @@ export default function ForecastPage({ params }: { params: Promise<{ name: strin
         </div>
       </div>
 
-      {/* ═══ HERO — TIE character + athlete identity + dual grade ═══ */}
-      <header className="relative overflow-hidden" style={{ background: `linear-gradient(135deg, ${T.navy} 0%, ${T.navyDeep} 100%)`, color: '#FFFFFF' }}>
-        {/* Diagonal stripe background */}
-        <div className="absolute inset-0 opacity-[0.08]" style={{
+      {/* ═══ HERO — film room scene + athlete identity + dual grade ═══ */}
+      <header className="relative overflow-hidden" style={{ background: T.navyDeep, color: '#FFFFFF' }}>
+        {/* Film room scene background */}
+        <div
+          className="absolute inset-0"
+          style={{
+            backgroundImage: "url('/brand/scenes/film-room.png')",
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+          }}
+        />
+        {/* Dark overlay so foreground text stays readable */}
+        <div
+          className="absolute inset-0"
+          style={{
+            background:
+              'linear-gradient(120deg, rgba(6,18,42,0.92) 0%, rgba(6,18,42,0.75) 45%, rgba(6,18,42,0.55) 100%)',
+          }}
+        />
+        {/* Subtle diagonal stripe texture */}
+        <div className="absolute inset-0 opacity-[0.05]" style={{
           backgroundImage: 'repeating-linear-gradient(45deg, transparent, transparent 80px, #FFFFFF 80px, #FFFFFF 81px)',
-        }} />
-        {/* Radial orange glow behind character */}
-        <div className="absolute top-1/2 right-0 w-[600px] h-[600px] -translate-y-1/2 pointer-events-none" style={{
-          background: 'radial-gradient(circle, rgba(249,115,22,0.15) 0%, transparent 55%)',
         }} />
 
         <div className="relative max-w-7xl mx-auto px-6 py-10">
@@ -184,7 +208,6 @@ export default function ForecastPage({ params }: { params: Promise<{ name: strin
                   label="ACTUAL TIE GRADE"
                   score={p.grade.actual.score}
                   letter={p.grade.actual.letter}
-                  projection={p.grade.actual.projection}
                   accent={T.red}
                   primary
                 />
@@ -193,7 +216,7 @@ export default function ForecastPage({ params }: { params: Promise<{ name: strin
                     label="CLEAN GRADE"
                     score={p.grade.clean.score}
                     letter={p.grade.clean.letter}
-                    projection={`Δ −${delta.toFixed(1)} medical tax`}
+                    subline={`Δ −${delta.toFixed(1)} medical tax`}
                     accent={T.amber}
                     ghost
                   />
@@ -253,6 +276,129 @@ export default function ForecastPage({ params }: { params: Promise<{ name: strin
           </div>
         </div>
       </header>
+
+      {/* ═══ TOP 5 STRIP ═══ */}
+      {data.top5 && data.top5.length > 0 && (
+        <section className="border-b" style={{ background: T.surface, borderColor: T.border }}>
+          <div className="max-w-7xl mx-auto px-6 py-8">
+            <div className="flex items-baseline justify-between mb-5">
+              <div>
+                <div className="text-[10px] font-bold tracking-[0.22em] uppercase" style={{ color: T.red }}>
+                  The Top Five
+                </div>
+                <h2 className="text-2xl font-black tracking-tight" style={{ color: T.text, fontFamily: "'Outfit', sans-serif" }}>
+                  2026 Per|Form Big Board
+                </h2>
+              </div>
+              <Link
+                href="/rankings"
+                className="text-[10px] font-bold tracking-[0.18em] uppercase px-3 py-1.5 rounded border"
+                style={{ color: T.navy, borderColor: T.border }}
+              >
+                Full Board →
+              </Link>
+            </div>
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
+              {data.top5.map((t5) => {
+                const isCurrent = t5.name.toLowerCase() === p.identity.name.toLowerCase();
+                return (
+                  <Link
+                    key={t5.rank}
+                    href={`/players/${encodeURIComponent(t5.name.toLowerCase().replace(/\s+/g, '-'))}/forecast`}
+                    className="group block"
+                  >
+                    <div
+                      className="relative rounded-lg overflow-hidden transition-all group-hover:shadow-lg"
+                      style={{
+                        background: isCurrent ? T.navy : T.surfaceAlt,
+                        border: `1.5px solid ${isCurrent ? T.red : T.border}`,
+                        aspectRatio: '3 / 4',
+                      }}
+                    >
+                      {/* Rank chip */}
+                      <div
+                        className="absolute top-2 left-2 z-10 px-2 py-0.5 rounded text-[10px] font-black"
+                        style={{
+                          background: isCurrent ? T.red : '#FFFFFF',
+                          color: isCurrent ? '#FFFFFF' : T.navy,
+                          border: isCurrent ? 'none' : `1px solid ${T.border}`,
+                        }}
+                      >
+                        #{t5.rank}
+                      </div>
+                      {/* Headshot / initials */}
+                      {t5.headshotUrl ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                          src={t5.headshotUrl}
+                          alt={t5.name}
+                          className="absolute inset-0 w-full h-full object-cover object-top"
+                          onError={(e) => {
+                            (e.currentTarget as HTMLImageElement).style.display = 'none';
+                          }}
+                        />
+                      ) : (
+                        <div
+                          className="absolute inset-0 flex items-center justify-center"
+                          style={{
+                            background: isCurrent
+                              ? 'linear-gradient(180deg, #1A2A4A, #06122A)'
+                              : 'linear-gradient(180deg, #F4F6FA, #E2E6EE)',
+                          }}
+                        >
+                          <span
+                            className="text-5xl font-black tracking-tight"
+                            style={{ color: isCurrent ? 'rgba(255,255,255,0.2)' : '#CDD3DF' }}
+                          >
+                            {t5.name.split(' ').map((s) => s[0]).join('').slice(0, 2)}
+                          </span>
+                        </div>
+                      )}
+                      {/* Bottom gradient + grade */}
+                      <div
+                        className="absolute inset-x-0 bottom-0 p-2 pt-8"
+                        style={{
+                          background: 'linear-gradient(180deg, transparent, rgba(0,0,0,0.85))',
+                        }}
+                      >
+                        <div className="flex items-baseline justify-between">
+                          <span
+                            className="text-lg font-black tabular-nums leading-none"
+                            style={{
+                              color: '#FFFFFF',
+                              fontFamily: "'Outfit', sans-serif",
+                            }}
+                          >
+                            {t5.grade.toFixed(1)}
+                          </span>
+                          <span
+                            className="text-[10px] font-bold"
+                            style={{ color: T.red === '#D40028' ? '#FFB3BF' : T.red }}
+                          >
+                            {t5.gradeLetter}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                    {/* Name + position underneath the card */}
+                    <div className="mt-2 text-center">
+                      <div
+                        className="text-xs font-bold uppercase tracking-tight truncate"
+                        style={{ color: isCurrent ? T.red : T.text }}
+                      >
+                        {t5.name}
+                      </div>
+                      <div className="text-[10px] font-mono mt-0.5" style={{ color: T.textMuted }}>
+                        {t5.position} · {t5.school}
+                      </div>
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* ═══ STAT BAR — pillar breakdown ═══ */}
       <section className="border-b" style={{ background: T.surface, borderColor: T.border }}>
@@ -460,7 +606,7 @@ function GradeHero({
   label,
   score,
   letter,
-  projection,
+  subline,
   accent,
   primary,
   ghost,
@@ -468,7 +614,7 @@ function GradeHero({
   label: string;
   score: number;
   letter: string;
-  projection: string;
+  subline?: string;
   accent: string;
   primary?: boolean;
   ghost?: boolean;
@@ -503,12 +649,14 @@ function GradeHero({
           {letter}
         </span>
       </div>
-      <div
-        className="text-[10px] font-semibold mt-2"
-        style={{ color: primary ? '#5A6478' : 'rgba(255,255,255,0.7)' }}
-      >
-        {projection}
-      </div>
+      {subline && (
+        <div
+          className="text-[10px] font-semibold mt-2"
+          style={{ color: primary ? '#5A6478' : 'rgba(255,255,255,0.7)' }}
+        >
+          {subline}
+        </div>
+      )}
     </div>
   );
 }
