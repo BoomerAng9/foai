@@ -1,0 +1,63 @@
+# ═══════════════════════════════════════════════════════════════════
+#  Puter — Smelter OS native storage container
+# ═══════════════════════════════════════════════════════════════════
+#
+# Self-hosted Puter deployment for the Hostinger VPS that fronts
+# Smelter OS services. Exposes an HTTP API on port 4100 bound to
+# the internal `smelter-net` network so other containers (the
+# Sqwaadrun gateway, cti-hub, etc.) can reach it without going
+# through the public internet.
+#
+# Persistence:
+#   puter-data    — actual file content under /smelter-os/
+#   puter-config  — Puter application config
+#
+# Deploy:
+#   ssh hostinger-vps
+#   cd /opt/smelter
+#   docker compose -f docker-compose.puter.yml up -d
+#
+# Verify:
+#   curl http://localhost:4100/status
+#
+# Sqwaadrun gateway and cti-hub reference this via
+#   PUTER_BASE_URL=http://smelter-puter:4100
+
+version: "3.9"
+
+services:
+  puter:
+    image: ghcr.io/heyputer/puter:latest
+    container_name: smelter-puter
+    restart: unless-stopped
+    ports:
+      - "4100:4100"
+    volumes:
+      - puter-data:/var/puter
+      - puter-config:/etc/puter
+    environment:
+      - PUTER_DOMAIN=puter.foai.cloud
+      - PUTER_HTTP_PORT=4100
+      # Strip external telemetry per the Smelter OS + Puter integration
+      # rules — Puter must be locally self-contained
+      - PUTER_DISABLE_TELEMETRY=1
+      - PUTER_DISABLE_UPDATE_CHECK=1
+    networks:
+      - smelter-net
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:4100/status"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+
+volumes:
+  puter-data:
+    driver: local
+  puter-config:
+    driver: local
+
+networks:
+  smelter-net:
+    external: true
+    name: smelter-net

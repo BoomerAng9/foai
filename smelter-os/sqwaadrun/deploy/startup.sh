@@ -20,11 +20,38 @@ mkdir -p /var/lib/sqwaadrun
 
 # ─── Pull secrets ────────────────────────────────────────────────────
 mkdir -p /etc/sqwaadrun
+
+# Helper — pull secret if it exists, otherwise empty string
+pull_secret() {
+  local name="$1"
+  gcloud secrets versions access latest --secret="$name" --project="$PROJECT" 2>/dev/null || echo ""
+}
+
 {
-  echo "SQWAADRUN_API_KEY=$(gcloud secrets versions access latest --secret=SQWAADRUN_API_KEY --project=$PROJECT)"
-  echo "NEON_INGEST_DSN=$(gcloud secrets versions access latest --secret=NEON_INGEST_DSN --project=$PROJECT)"
+  # Gateway auth
+  echo "SQWAADRUN_API_KEY=$(pull_secret SQWAADRUN_API_KEY)"
+
+  # Neon (structured data)
+  echo "NEON_INGEST_DSN=$(pull_secret NEON_INGEST_DSN)"
+  echo "NEON_DATABASE_URL=$(pull_secret NEON_DATABASE_URL)"
+
+  # Puter (Smelter OS native storage)
+  echo "PUTER_BASE_URL=${PUTER_BASE_URL:-http://smelter-puter:4100}"
+  echo "PUTER_API_KEY=$(pull_secret PUTER_API_KEY)"
+
+  # GCS (scalable infrastructure)
+  echo "GCP_PROJECT_ID=${PROJECT}"
+  echo "GCS_ARTIFACTS_BUCKET=foai-sqwaadrun-artifacts"
+  echo "GCS_INGOTS_BUCKET=foai-ingots"
+  echo "GCS_MEDIA_BUCKET=foai-media"
+  echo "GCS_BACKUPS_BUCKET=foai-backups"
+
+  # Quotas + cadences
   echo "SQWAADRUN_QUOTA_PER_DOMAIN=2000"
   echo "SQWAADRUN_SIGNOFF_THRESHOLD=200"
+  echo "SQWAADRUN_HEARTBEAT_INTERVAL_SECONDS=90"
+
+  # Runtime
   echo "SQWAADRUN_DATA_DIR=/var/lib/sqwaadrun"
   echo "PYTHONUNBUFFERED=1"
   echo "PYTHONIOENCODING=utf-8"

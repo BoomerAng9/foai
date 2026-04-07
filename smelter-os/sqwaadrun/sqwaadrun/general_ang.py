@@ -120,6 +120,11 @@ class GeneralAng:
         self._domain_quota_used: Dict[str, int] = {}
         self.logger = logger
 
+        # Injected by the gateway on_startup so doctrine writes also
+        # fire a Puter + GCS dual-write. When None, only the local
+        # doctrine.jsonl file is written (dev mode / CLI mode).
+        self.storage: Optional[Any] = None
+
     # ── Intent intake (ACHEEVY-facing left flank) ──
 
     async def accept_intent(
@@ -317,7 +322,17 @@ class GeneralAng:
         return dispatched
 
     def _log_doctrine(self, mission: Mission, signed_off_by: Optional[str]) -> None:
-        """Append a mission to the doctrine journal."""
+        """
+        Append a mission to the doctrine journal.
+
+        Local-first: always writes to doctrine.jsonl on disk (the
+        authoritative audit trail from General_Ang's perspective).
+
+        If a SmelterStorage instance has been injected (by the gateway
+        on_startup), a Puter + GCS dual-write is scheduled as a
+        fire-and-forget background task. Failures are logged but
+        never block the local write.
+        """
         from urllib.parse import urlparse
         primary_domain = (
             urlparse(mission.targets[0]).netloc if mission.targets else "none"
@@ -333,8 +348,29 @@ class GeneralAng:
             timestamp=datetime.now(timezone.utc).isoformat(),
             kpi_snapshot=dict(mission.kpis),
         )
+        entry_dict = asdict(entry)
+
+        # Local doctrine.jsonl — always
         with self.doctrine_path.open("a", encoding="utf-8") as f:
-            f.write(json.dumps(asdict(entry)) + "\n")
+            f.write(json.dumps(entry_dict) + "\n")
+
+        # Puter primary + GCS backup — fire and forget
+        if self.storage is not None:
+            try:
+                loop = asyncio.get_running_loop()
+                loop.create_task(self._dual_write_doctrine(entry_dict))
+            except RuntimeError:
+                # Not in an async context (e.g. CLI mode) — skip dual-write
+                pass
+
+    async def _dual_write_doctrine(self, entry: Dict[str, Any]) -> None:
+        try:
+            result = await self.storage.log_doctrine(entry)  # type: ignore[union-attr]
+            self.logger.debug(
+                f"Doctrine dual-write: puter={result.get('puter')} gcs={result.get('gcs')}"
+            )
+        except Exception as e:
+            self.logger.warning(f"Doctrine dual-write failed: {e}")
 
 
 # ═════════════════════════════════════════════════════════════════════════
