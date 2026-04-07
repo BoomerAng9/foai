@@ -164,9 +164,26 @@ export default function DraftBoardPage() {
           </div>
         </div>
 
-        {/* ═══ HEADER ═══ */}
-        <header className="relative" style={{ background: `linear-gradient(135deg, ${T.navy} 0%, ${T.navyDeep} 100%)`, color: '#FFFFFF' }}>
-          <div className="absolute inset-0 opacity-[0.08]" style={{
+        {/* ═══ HEADER — war room scene ═══ */}
+        <header className="relative overflow-hidden" style={{ background: T.navyDeep, color: '#FFFFFF' }}>
+          {/* War room background */}
+          <div
+            className="absolute inset-0"
+            style={{
+              backgroundImage: "url('/brand/scenes/draft-war-room.png')",
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+            }}
+          />
+          {/* Dark overlay so foreground text stays readable */}
+          <div
+            className="absolute inset-0"
+            style={{
+              background:
+                'linear-gradient(135deg, rgba(6,18,42,0.92) 0%, rgba(6,18,42,0.78) 50%, rgba(6,18,42,0.85) 100%)',
+            }}
+          />
+          <div className="absolute inset-0 opacity-[0.05]" style={{
             backgroundImage: 'repeating-linear-gradient(45deg, transparent, transparent 80px, #FFFFFF 80px, #FFFFFF 81px)',
           }} />
           <div className="relative max-w-7xl mx-auto px-6 py-10">

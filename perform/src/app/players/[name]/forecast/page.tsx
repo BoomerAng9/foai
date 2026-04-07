@@ -15,8 +15,19 @@ import { CompLandscape } from '@/components/tie/CompLandscape';
 import { C1Renderer } from '@/components/c1/C1Renderer';
 import Link from 'next/link';
 
+interface Top5Player {
+  rank: number;
+  name: string;
+  position: string;
+  school: string;
+  grade: number;
+  gradeLetter: string;
+  headshotUrl: string | null;
+}
+
 interface ForecastResponse {
   c1Card?: { spec: unknown; model?: string; error?: string } | null;
+  top5?: Top5Player[];
   player: {
     identity: {
       name: string;
@@ -26,6 +37,7 @@ interface ForecastResponse {
       consensusRank: number;
       positionRank: number;
       projectedRound: number;
+      headshotUrl?: string | null;
     };
     grade: {
       actual: { score: number; letter: string; icon: string; label: string; projection: string };
@@ -104,7 +116,8 @@ export default function ForecastPage({ params }: { params: Promise<{ name: strin
   }, [playerName]);
 
   if (loading) {
-    return <TIELoader subtitle={`Calibrating forecast for ${playerName.replace(/-/g, ' ')}`} />;
+    const upperName = playerName.replace(/-/g, ' ').toUpperCase();
+    return <TIELoader subtitle={`CALIBRATING FORECAST FOR ${upperName}`} />;
   }
 
   if (error || !data) {
@@ -142,15 +155,28 @@ export default function ForecastPage({ params }: { params: Promise<{ name: strin
         </div>
       </div>
 
-      {/* ═══ HERO — TIE character + athlete identity + dual grade ═══ */}
-      <header className="relative overflow-hidden" style={{ background: `linear-gradient(135deg, ${T.navy} 0%, ${T.navyDeep} 100%)`, color: '#FFFFFF' }}>
-        {/* Diagonal stripe background */}
-        <div className="absolute inset-0 opacity-[0.08]" style={{
+      {/* ═══ HERO — film room scene + athlete identity + dual grade ═══ */}
+      <header className="relative overflow-hidden" style={{ background: T.navyDeep, color: '#FFFFFF' }}>
+        {/* Film room scene background */}
+        <div
+          className="absolute inset-0"
+          style={{
+            backgroundImage: "url('/brand/scenes/film-room.png')",
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+          }}
+        />
+        {/* Dark overlay so foreground text stays readable */}
+        <div
+          className="absolute inset-0"
+          style={{
+            background:
+              'linear-gradient(120deg, rgba(6,18,42,0.92) 0%, rgba(6,18,42,0.75) 45%, rgba(6,18,42,0.55) 100%)',
+          }}
+        />
+        {/* Subtle diagonal stripe texture */}
+        <div className="absolute inset-0 opacity-[0.05]" style={{
           backgroundImage: 'repeating-linear-gradient(45deg, transparent, transparent 80px, #FFFFFF 80px, #FFFFFF 81px)',
-        }} />
-        {/* Radial orange glow behind character */}
-        <div className="absolute top-1/2 right-0 w-[600px] h-[600px] -translate-y-1/2 pointer-events-none" style={{
-          background: 'radial-gradient(circle, rgba(249,115,22,0.15) 0%, transparent 55%)',
         }} />
 
         <div className="relative max-w-7xl mx-auto px-6 py-10">
@@ -165,7 +191,7 @@ export default function ForecastPage({ params }: { params: Promise<{ name: strin
                   {p.identity.school} · Class of 2026
                 </span>
               </div>
-              <h1 className="text-5xl md:text-7xl font-black leading-[0.92] tracking-tight">
+              <h1 className="text-5xl md:text-7xl font-black leading-[0.92] tracking-tight uppercase">
                 {p.identity.name}
               </h1>
               <div className="flex items-center gap-6 mt-6 flex-wrap">
@@ -182,7 +208,6 @@ export default function ForecastPage({ params }: { params: Promise<{ name: strin
                   label="ACTUAL TIE GRADE"
                   score={p.grade.actual.score}
                   letter={p.grade.actual.letter}
-                  projection={p.grade.actual.projection}
                   accent={T.red}
                   primary
                 />
@@ -191,7 +216,7 @@ export default function ForecastPage({ params }: { params: Promise<{ name: strin
                     label="CLEAN GRADE"
                     score={p.grade.clean.score}
                     letter={p.grade.clean.letter}
-                    projection={`Δ −${delta.toFixed(1)} medical tax`}
+                    subline={`Δ −${delta.toFixed(1)} medical tax`}
                     accent={T.amber}
                     ghost
                   />
@@ -199,30 +224,181 @@ export default function ForecastPage({ params }: { params: Promise<{ name: strin
               </div>
             </div>
 
-            {/* RIGHT — TIE engine character (hero visual) */}
-            <div className="relative flex-shrink-0 hidden lg:flex items-center justify-center" style={{ width: 340, height: 360 }}>
+            {/* RIGHT — actual player headshot */}
+            <div className="relative flex-shrink-0 hidden lg:flex items-end justify-center" style={{ width: 340, height: 380 }}>
+              {/* Backdrop circle + glow */}
               <div
-                className="absolute inset-0 rounded-full"
+                className="absolute inset-x-0 bottom-0 rounded-full"
                 style={{
-                  background: 'radial-gradient(circle, rgba(249,115,22,0.25) 0%, transparent 60%)',
-                  filter: 'blur(24px)',
+                  height: 340,
+                  background: 'radial-gradient(circle at center 60%, rgba(212,0,40,0.18) 0%, rgba(11,30,63,0.4) 50%, transparent 80%)',
+                  filter: 'blur(20px)',
                 }}
               />
-              <Image
-                src="/brand/tie-engine-hero.png"
-                alt="TIE Engine"
-                width={340}
-                height={360}
-                priority
-                className="object-contain relative"
+              {/* Stadium-style portrait frame */}
+              <div
+                className="relative rounded-full overflow-hidden"
                 style={{
-                  filter: 'drop-shadow(0 16px 32px rgba(0,0,0,0.6)) drop-shadow(0 0 40px rgba(249,115,22,0.3))',
+                  width: 320,
+                  height: 320,
+                  border: '3px solid rgba(255,255,255,0.18)',
+                  boxShadow: '0 24px 60px rgba(0,0,0,0.55), 0 0 0 1px rgba(255,215,0,0.25)',
+                  background: 'radial-gradient(circle at 50% 30%, #1A2A4A 0%, #06122A 100%)',
                 }}
-              />
+              >
+                {p.identity.headshotUrl ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={p.identity.headshotUrl}
+                    alt={p.identity.name}
+                    className="absolute inset-0 w-full h-full object-cover object-top"
+                    onError={(e) => {
+                      (e.currentTarget as HTMLImageElement).style.display = 'none';
+                    }}
+                  />
+                ) : (
+                  <div
+                    className="absolute inset-0 flex items-center justify-center"
+                    style={{ color: 'rgba(255,255,255,0.2)' }}
+                  >
+                    <span className="text-7xl font-black tracking-tight">
+                      {p.identity.name.split(' ').map(s => s[0]).join('').slice(0, 2)}
+                    </span>
+                  </div>
+                )}
+                {/* Subtle bottom gradient */}
+                <div
+                  className="absolute inset-x-0 bottom-0 h-24 pointer-events-none"
+                  style={{ background: 'linear-gradient(180deg, transparent, rgba(6,18,42,0.7))' }}
+                />
+              </div>
             </div>
           </div>
         </div>
       </header>
+
+      {/* ═══ TOP 5 STRIP ═══ */}
+      {data.top5 && data.top5.length > 0 && (
+        <section className="border-b" style={{ background: T.surface, borderColor: T.border }}>
+          <div className="max-w-7xl mx-auto px-6 py-8">
+            <div className="flex items-baseline justify-between mb-5">
+              <div>
+                <div className="text-[10px] font-bold tracking-[0.22em] uppercase" style={{ color: T.red }}>
+                  The Top Five
+                </div>
+                <h2 className="text-2xl font-black tracking-tight" style={{ color: T.text, fontFamily: "'Outfit', sans-serif" }}>
+                  2026 Per|Form Big Board
+                </h2>
+              </div>
+              <Link
+                href="/rankings"
+                className="text-[10px] font-bold tracking-[0.18em] uppercase px-3 py-1.5 rounded border"
+                style={{ color: T.navy, borderColor: T.border }}
+              >
+                Full Board →
+              </Link>
+            </div>
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
+              {data.top5.map((t5) => {
+                const isCurrent = t5.name.toLowerCase() === p.identity.name.toLowerCase();
+                return (
+                  <Link
+                    key={t5.rank}
+                    href={`/players/${encodeURIComponent(t5.name.toLowerCase().replace(/\s+/g, '-'))}/forecast`}
+                    className="group block"
+                  >
+                    <div
+                      className="relative rounded-lg overflow-hidden transition-all group-hover:shadow-lg"
+                      style={{
+                        background: isCurrent ? T.navy : T.surfaceAlt,
+                        border: `1.5px solid ${isCurrent ? T.red : T.border}`,
+                        aspectRatio: '3 / 4',
+                      }}
+                    >
+                      {/* Rank chip */}
+                      <div
+                        className="absolute top-2 left-2 z-10 px-2 py-0.5 rounded text-[10px] font-black"
+                        style={{
+                          background: isCurrent ? T.red : '#FFFFFF',
+                          color: isCurrent ? '#FFFFFF' : T.navy,
+                          border: isCurrent ? 'none' : `1px solid ${T.border}`,
+                        }}
+                      >
+                        #{t5.rank}
+                      </div>
+                      {/* Headshot / initials */}
+                      {t5.headshotUrl ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                          src={t5.headshotUrl}
+                          alt={t5.name}
+                          className="absolute inset-0 w-full h-full object-cover object-top"
+                          onError={(e) => {
+                            (e.currentTarget as HTMLImageElement).style.display = 'none';
+                          }}
+                        />
+                      ) : (
+                        <div
+                          className="absolute inset-0 flex items-center justify-center"
+                          style={{
+                            background: isCurrent
+                              ? 'linear-gradient(180deg, #1A2A4A, #06122A)'
+                              : 'linear-gradient(180deg, #F4F6FA, #E2E6EE)',
+                          }}
+                        >
+                          <span
+                            className="text-5xl font-black tracking-tight"
+                            style={{ color: isCurrent ? 'rgba(255,255,255,0.2)' : '#CDD3DF' }}
+                          >
+                            {t5.name.split(' ').map((s) => s[0]).join('').slice(0, 2)}
+                          </span>
+                        </div>
+                      )}
+                      {/* Bottom gradient + grade */}
+                      <div
+                        className="absolute inset-x-0 bottom-0 p-2 pt-8"
+                        style={{
+                          background: 'linear-gradient(180deg, transparent, rgba(0,0,0,0.85))',
+                        }}
+                      >
+                        <div className="flex items-baseline justify-between">
+                          <span
+                            className="text-lg font-black tabular-nums leading-none"
+                            style={{
+                              color: '#FFFFFF',
+                              fontFamily: "'Outfit', sans-serif",
+                            }}
+                          >
+                            {t5.grade.toFixed(1)}
+                          </span>
+                          <span
+                            className="text-[10px] font-bold"
+                            style={{ color: T.red === '#D40028' ? '#FFB3BF' : T.red }}
+                          >
+                            {t5.gradeLetter}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                    {/* Name + position underneath the card */}
+                    <div className="mt-2 text-center">
+                      <div
+                        className="text-xs font-bold uppercase tracking-tight truncate"
+                        style={{ color: isCurrent ? T.red : T.text }}
+                      >
+                        {t5.name}
+                      </div>
+                      <div className="text-[10px] font-mono mt-0.5" style={{ color: T.textMuted }}>
+                        {t5.position} · {t5.school}
+                      </div>
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* ═══ STAT BAR — pillar breakdown ═══ */}
       <section className="border-b" style={{ background: T.surface, borderColor: T.border }}>
@@ -230,19 +406,16 @@ export default function ForecastPage({ params }: { params: Promise<{ name: strin
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <PillarStatBar
               label="Game Performance"
-              weight="40%"
               actual={p.pillars.actual.gamePerformance}
               clean={p.pillars.clean.gamePerformance}
             />
             <PillarStatBar
               label="Athleticism"
-              weight="30%"
               actual={p.pillars.actual.athleticism}
               clean={p.pillars.clean.athleticism}
             />
             <PillarStatBar
               label="Intangibles"
-              weight="30%"
               actual={p.pillars.actual.intangibles}
               clean={p.pillars.clean.intangibles}
             />
@@ -356,22 +529,22 @@ export default function ForecastPage({ params }: { params: Promise<{ name: strin
         </div>
       </section>
 
-      {/* ═══ C1 GENERATIVE INTELLIGENCE CARD ═══ */}
+      {/* ═══ INTELLIGENCE BRIEFING (C1) ═══ */}
       {data.c1Card?.spec ? (
-        <section className="border-b" style={{ background: '#070C16', borderColor: T.border }}>
-          <div className="max-w-7xl mx-auto px-6 py-12">
-            <div className="text-center mb-8">
-              <div className="text-[10px] font-bold tracking-[0.25em] uppercase mb-2" style={{ color: '#22D3EE' }}>
-                ◢ Generative Intelligence Layer · C1 Thesys
+        <section className="border-b" style={{ background: T.bg, borderColor: T.border }}>
+          <div className="max-w-7xl mx-auto px-6 py-14">
+            <div className="mb-8">
+              <div className="text-[10px] font-bold tracking-[0.22em] uppercase mb-2" style={{ color: T.red }}>
+                Front Office Briefing
               </div>
-              <h2 className="text-3xl md:text-4xl font-black leading-tight" style={{ color: '#FFFFFF', fontFamily: "'Outfit', sans-serif" }}>
-                Portable Player Card
+              <h2 className="text-3xl md:text-4xl font-black leading-tight uppercase" style={{ color: T.text, fontFamily: "'Outfit', sans-serif" }}>
+                {p.identity.name} · The Read
               </h2>
-              <p className="text-sm mt-2 max-w-xl mx-auto" style={{ color: '#A8B2C8' }}>
-                One JSON spec. Renders here as a web card, also as native mobile, NFT metadata, marketplace listing, or share image.
+              <p className="text-sm mt-2 max-w-xl" style={{ color: T.textMuted }}>
+                What scouts, NIL agencies, and front offices need to know — composed live from the canonical TIE record. PFF gives you grades. We give you the read.
               </p>
             </div>
-            <div className="max-w-3xl mx-auto">
+            <div className="max-w-3xl">
               <C1Renderer spec={data.c1Card.spec} />
             </div>
           </div>
@@ -401,10 +574,10 @@ export default function ForecastPage({ params }: { params: Promise<{ name: strin
             <div className="h-px w-12" style={{ background: T.borderStrong }} />
           </div>
           <div className="text-[10px] font-bold tracking-[0.25em] uppercase mb-3" style={{ color: T.textMuted }}>
-            Certified by the Talent &amp; Innovation Engine
+            Stamped by the Talent &amp; Innovation Engine
           </div>
           <p className="text-xs leading-relaxed max-w-md mx-auto" style={{ color: T.textMuted }}>
-            Every Per|Form grade runs through the canonical 40·30·30 formula. Per|Form does not pick favorites — the formula does.
+            Opinion-agnostic. Pillar-driven. Built to grade what wins on the field, not what wins on draft Twitter.
           </p>
         </div>
       </section>
@@ -433,7 +606,7 @@ function GradeHero({
   label,
   score,
   letter,
-  projection,
+  subline,
   accent,
   primary,
   ghost,
@@ -441,7 +614,7 @@ function GradeHero({
   label: string;
   score: number;
   letter: string;
-  projection: string;
+  subline?: string;
   accent: string;
   primary?: boolean;
   ghost?: boolean;
@@ -476,36 +649,33 @@ function GradeHero({
           {letter}
         </span>
       </div>
-      <div
-        className="text-[10px] font-semibold mt-2"
-        style={{ color: primary ? '#5A6478' : 'rgba(255,255,255,0.7)' }}
-      >
-        {projection}
-      </div>
+      {subline && (
+        <div
+          className="text-[10px] font-semibold mt-2"
+          style={{ color: primary ? '#5A6478' : 'rgba(255,255,255,0.7)' }}
+        >
+          {subline}
+        </div>
+      )}
     </div>
   );
 }
 
 function PillarStatBar({
   label,
-  weight,
   actual,
   clean,
 }: {
   label: string;
-  weight: string;
   actual: number;
   clean: number;
 }) {
   const delta = clean - actual;
   return (
     <div>
-      <div className="flex items-baseline justify-between mb-2">
+      <div className="mb-2">
         <div className="text-[10px] font-bold tracking-[0.18em] uppercase" style={{ color: '#5A6478' }}>
           {label}
-        </div>
-        <div className="text-[9px] font-mono" style={{ color: '#8B94A8' }}>
-          {weight}
         </div>
       </div>
       <div className="flex items-baseline gap-3 mb-3">

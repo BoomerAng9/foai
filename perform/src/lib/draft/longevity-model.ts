@@ -261,8 +261,9 @@ export function forecastLongevity(params: {
   currentStatus: CurrentStatus;
   baseAthleticism: number;      // 0-99 — higher = faster recovery
   baseIntangibles: number;      // 0-99 — higher = better rehab work ethic
+  preferredComps?: string[];    // Names from medical flag historicalComps — explicit user signal
 }): LongevityForecast {
-  const { position, injuries, currentStatus, baseAthleticism, baseIntangibles } = params;
+  const { position, injuries, currentStatus, baseAthleticism, baseIntangibles, preferredComps } = params;
   const posKey = position.replace(/[0-9T]/g, '').replace('WRS', 'WR');
 
   // ── Filter comps by relevance ──
@@ -289,18 +290,56 @@ export function forecastLongevity(params: {
     ? injuryMatched
     : positionComps;
 
+  // If the player has explicit historical comps in their medical flag,
+  // those are the user's intent — use them as the source of truth.
+  const preferredSet = new Set(preferredComps || []);
+  const explicit = preferredComps && preferredComps.length > 0
+    ? relevantComps.filter(c => preferredSet.has(c.name))
+    : [];
+
   const sorted = [...relevantComps].sort((a, b) => b.careerYears - a.careerYears);
-  // Prefer non-cautionary for upside, cautionary for downside, middle for baseline
-  const upside =
-    sorted.find(c => !c.cautionaryTale) || sorted[0] || null;
-  const downside =
-    sorted.slice().reverse().find(c => c.cautionaryTale) ||
-    sorted[sorted.length - 1] ||
-    null;
-  const baseline =
-    sorted.find(c => c !== upside && c !== downside) ||
-    sorted[Math.floor(sorted.length / 2)] ||
-    null;
+
+  let upside: HistoricalComp | null;
+  let baseline: HistoricalComp | null;
+  let downside: HistoricalComp | null;
+
+  if (explicit.length >= 1) {
+    // Pick from the explicit list first by outcome tier
+    const hofExplicit = explicit.find(c => c.outcome === 'hall_of_fame');
+    const cautionaryExplicit = explicit.find(c => c.cautionaryTale);
+    const middleExplicit = explicit.find(
+      c => c !== hofExplicit && c !== cautionaryExplicit,
+    );
+
+    upside =
+      hofExplicit ||
+      explicit.find(c => !c.cautionaryTale) ||
+      sorted.find(c => !c.cautionaryTale) ||
+      sorted[0] ||
+      null;
+    downside =
+      cautionaryExplicit ||
+      sorted.slice().reverse().find(c => c.cautionaryTale) ||
+      sorted[sorted.length - 1] ||
+      null;
+    baseline =
+      middleExplicit ||
+      explicit.find(c => c !== upside && c !== downside) ||
+      sorted.find(c => c !== upside && c !== downside) ||
+      sorted[Math.floor(sorted.length / 2)] ||
+      null;
+  } else {
+    // Fallback: prefer non-cautionary for upside, cautionary for downside
+    upside = sorted.find(c => !c.cautionaryTale) || sorted[0] || null;
+    downside =
+      sorted.slice().reverse().find(c => c.cautionaryTale) ||
+      sorted[sorted.length - 1] ||
+      null;
+    baseline =
+      sorted.find(c => c !== upside && c !== downside) ||
+      sorted[Math.floor(sorted.length / 2)] ||
+      null;
+  }
 
   // ── Weighted career length ──
   // Base weight: intangibles (rehab work ethic) + athleticism (recovery capacity)

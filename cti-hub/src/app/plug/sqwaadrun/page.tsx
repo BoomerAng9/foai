@@ -20,7 +20,6 @@ import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { HawkCard, type HawkCardData } from '@/components/hawks/HawkCard';
 import {
-  SQWAADRUN_ROSTER,
   CORE_HAWKS,
   EXPANSION_HAWKS,
   SPECIALIST_HAWKS,
@@ -191,8 +190,10 @@ export default function SqwaadrunPage() {
             >
               {healthy === null
                 ? 'Pinging fleet...'
+                : healthy && live
+                ? `Fleet armed · ${live.hawks.filter((h) => h.status === 'active').length}/${live.total_hawks} active`
                 : healthy
-                ? `Fleet armed · ${live?.hawks.filter((h) => h.status === 'active').length ?? 17}/17 active`
+                ? 'Fleet armed'
                 : 'Fleet awaiting dispatch'}
             </span>
           </div>
@@ -372,7 +373,7 @@ export default function SqwaadrunPage() {
           }}
         >
           <div className="opacity-50 mb-3" style={{ color: '#22D3EE' }}>
-            // Single intent → full orchestration
+            {'// Single intent → full orchestration'}
           </div>
           <pre className="leading-relaxed" style={{ color: '#F1F5F9' }}>
 {`POST /api/sqwaadrun/mission
@@ -442,7 +443,7 @@ function CommandCard({ profile }: { profile: typeof COMMAND_PROFILES[number] }) 
         className="text-xs italic mb-4 leading-relaxed"
         style={{ color: '#94A3B8', borderLeft: `2px solid ${profile.signatureColor}`, paddingLeft: '0.75rem' }}
       >
-        "{profile.catchphrase}"
+        &ldquo;{profile.catchphrase}&rdquo;
       </p>
       <div className="flex flex-wrap gap-1.5">
         {profile.gear.map((g) => (
@@ -531,6 +532,14 @@ function TierCard({
         body: JSON.stringify({ tier: tierId }),
       });
       const data = await res.json();
+
+      // Owner bypass — server returns owner_bypass:true and we redirect
+      // to the dashboard without any Stripe interaction (Phase 0).
+      if (data?.owner_bypass) {
+        window.location.href = data.redirect_url ?? '/dashboard?owner_unlimited=1';
+        return;
+      }
+
       if (data?.url) {
         window.location.href = data.url;
       } else if (res.status === 401) {
