@@ -2,9 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getAnalyst, ANALYSTS } from '@/lib/analysts/personas';
 import { generateText } from '@/lib/openrouter';
 import { sql } from '@/lib/db';
+import { speakAnalystContent } from '@/lib/voice/tts-router';
 
 const PIPELINE_KEY = process.env.PIPELINE_AUTH_KEY || '';
-const GOOGLE_KEY = process.env.GOOGLE_KEY || '';
 
 type EpisodeType = 'daily_take' | 'player_spotlight' | 'mock_draft_update' | 'debate';
 
@@ -14,13 +14,6 @@ const TYPE_INSTRUCTIONS: Record<EpisodeType, string> = {
   mock_draft_update: 'Walk through the latest mock draft movement. Who is rising, who is falling, and why — with your unique perspective.',
   debate: 'Present both sides of a hot debate, then pick your side decisively and defend it.',
 };
-
-// Google Cloud TTS voice mapping
-// The Colonel = female, The Haze = alternates male voices for Haze/Smoke, rest = male
-function getTTSVoice(analystId: string): string {
-  if (analystId === 'the-colonel') return 'en-US-Journey-F';
-  return 'en-US-Journey-D';
-}
 
 async function ensureTable() {
   if (!sql) return;
@@ -36,30 +29,6 @@ async function ensureTable() {
       created_at TIMESTAMPTZ DEFAULT NOW()
     )
   `;
-}
-
-async function synthesizeSpeech(text: string, voiceName: string): Promise<{ audioContent: string }> {
-  if (!GOOGLE_KEY) throw new Error('GOOGLE_KEY not configured');
-
-  const res = await fetch(
-    `https://texttospeech.googleapis.com/v1/text:synthesize?key=${GOOGLE_KEY}`,
-    {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        input: { text },
-        voice: { languageCode: 'en-US', name: voiceName },
-        audioConfig: { audioEncoding: 'MP3', speakingRate: 1.0 },
-      }),
-    },
-  );
-
-  if (!res.ok) {
-    const err = await res.text();
-    throw new Error(`Google TTS failed (${res.status}): ${err}`);
-  }
-
-  return res.json();
 }
 
 async function fetchLatestNews(): Promise<string> {
@@ -147,22 +116,34 @@ Write naturally as if speaking — no stage directions, no [PAUSE] markers, no p
       .replace(/---CLOSING---\n?/g, '')
       .trim();
 
-    // Synthesize audio via Google Cloud TTS
-    let audioUrl = '';
+    // Synthesize audio via the Per|Form TTS router (walks the
+    // fallback chain: gemini-live → personaplex → grok-voice → playht)
+    let audioUrl: string | null = null;
     let durationSeconds = 0;
+    let engineUsed = 'none';
 
     try {
-      const voice = getTTSVoice(resolvedId);
-      const { audioContent } = await synthesizeSpeech(transcript, voice);
-
-      // Store as data URL for now — in production, upload to R2/GCS
-      audioUrl = `data:audio/mp3;base64,${audioContent}`;
-
-      // Estimate duration: ~150 words per minute for TTS
+      const result = await speakAnalystContent({ analyst, text: transcript });
+      audioUrl = result.audioUrl;
+      engineUsed = result.engine;
       const wordCount = transcript.split(/\s+/).length;
-      durationSeconds = Math.round((wordCount / 150) * 60);
+      durationSeconds = result.durationSeconds ?? Math.round((wordCount / 150) * 60);
+
+      if (!audioUrl) {
+        console.warn('[podcast/generate] TTS returned null audioUrl', {
+          analyst: resolvedId,
+          engine: result.engine,
+          error: result.error,
+        });
+      } else {
+        console.log('[podcast/generate] TTS ok', {
+          analyst: resolvedId,
+          engine: result.engine,
+          duration: durationSeconds,
+        });
+      }
     } catch (ttsErr) {
-      console.error('TTS synthesis failed, saving script only:', ttsErr);
+      console.error('[podcast/generate] TTS threw exception:', ttsErr);
       const wordCount = transcript.split(/\s+/).length;
       durationSeconds = Math.round((wordCount / 150) * 60);
     }
@@ -183,7 +164,8 @@ Write naturally as if speaking — no stage directions, no [PAUSE] markers, no p
       episodeId,
       title,
       duration: durationSeconds,
-      audioUrl: audioUrl || null,
+      audioUrl,
+      engine: engineUsed,
       analyst: {
         id: analyst.id,
         name: analyst.name,
