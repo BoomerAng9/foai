@@ -5,10 +5,33 @@ import { getVerticalTierLabel } from '@/lib/tie/verticals';
 
 /* ──────────────────────────────────────────────────────────────
  *  POST /api/grade/recalculate
- *  Re-grades all players using Brave Search + Gemma 4 via OpenRouter.
+ *  Re-grades players using Brave Search + Qwen 3.5 Flash via OpenRouter.
  *  Protected by PIPELINE_AUTH_KEY.
  *  Processes 5 players at a time to avoid rate limits.
+ *
+ *  Optional JSON body filters (all optional — empty body preserves
+ *  the original "re-grade every player" behavior):
+ *    { ids?: number[]       — only grade these player IDs
+ *      onlyMissing?: boolean — skip rows that already have a
+ *                              scouting_summary populated (safe
+ *                              backfill, will not clobber hand-
+ *                              curated narrative copy)
+ *      limit?: number       — cap processing to N rows (for dry runs)
+ *    }
  * ────────────────────────────────────────────────────────────── */
+
+interface RecalculateBody {
+  ids?: number[];
+  onlyMissing?: boolean;
+  limit?: number;
+}
+
+interface PlayerRow {
+  id: number;
+  name: string;
+  position: string;
+  school: string;
+}
 
 const PIPELINE_KEY = process.env.PIPELINE_AUTH_KEY || '';
 
@@ -122,9 +145,59 @@ export async function POST(req: NextRequest) {
   if (!BRAVE_KEY) return NextResponse.json({ error: 'BRAVE_API_KEY not set' }, { status: 503 });
   if (!OR_KEY) return NextResponse.json({ error: 'OPENROUTER_API_KEY not set' }, { status: 503 });
 
+  // Parse optional filter body. Empty/malformed body = original behavior.
+  let filters: RecalculateBody = {};
   try {
-    // Get all players
-    const players = await sql`SELECT id, name, position, school FROM perform_players ORDER BY overall_rank ASC NULLS LAST`;
+    const raw = await req.text();
+    if (raw.trim().length > 0) {
+      filters = JSON.parse(raw) as RecalculateBody;
+    }
+  } catch {
+    return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 });
+  }
+
+  const ids = Array.isArray(filters.ids)
+    ? filters.ids.filter((n): n is number => typeof n === 'number' && Number.isFinite(n))
+    : undefined;
+  const onlyMissing = filters.onlyMissing === true;
+  const limit =
+    typeof filters.limit === 'number' && filters.limit > 0 && filters.limit <= 1000
+      ? Math.floor(filters.limit)
+      : undefined;
+
+  try {
+    // Build player selection based on filters. Precedence:
+    //   ids[] > onlyMissing > all players
+    let players: PlayerRow[];
+    if (ids && ids.length > 0) {
+      players = (await sql`
+        SELECT id, name, position, school
+        FROM perform_players
+        WHERE id = ANY(${ids}::int[])
+        ORDER BY overall_rank ASC NULLS LAST
+      `) as PlayerRow[];
+    } else if (onlyMissing) {
+      players = (await sql`
+        SELECT id, name, position, school
+        FROM perform_players
+        WHERE scouting_summary IS NULL
+           OR scouting_summary = ''
+           OR strengths IS NULL
+           OR strengths = ''
+        ORDER BY overall_rank ASC NULLS LAST
+      `) as PlayerRow[];
+    } else {
+      players = (await sql`
+        SELECT id, name, position, school
+        FROM perform_players
+        ORDER BY overall_rank ASC NULLS LAST
+      `) as PlayerRow[];
+    }
+
+    // Apply optional limit (dry run support)
+    if (limit !== undefined) {
+      players = players.slice(0, limit);
+    }
 
     let updated = 0;
     let failed = 0;
@@ -195,7 +268,15 @@ export async function POST(req: NextRequest) {
       updated,
       failed,
       errors: errors.slice(0, 20),
-      message: `Re-graded ${updated}/${players.length} players using real scouting data.`,
+      filters: {
+        ids: ids?.length ?? 0,
+        onlyMissing,
+        limit: limit ?? null,
+      },
+      message:
+        players.length === 0
+          ? 'No players matched the filter criteria — nothing to grade.'
+          : `Re-graded ${updated}/${players.length} players using real scouting data.`,
     });
   } catch (error) {
     const msg = error instanceof Error ? error.message : 'Recalculate failed';
