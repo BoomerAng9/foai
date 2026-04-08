@@ -204,22 +204,58 @@ async function dispatchSynthesis(payload: EnginePayload): Promise<{ audioUrl: st
   }
 }
 
-/* ── Walk the fallback chain for solo-voice engines ── */
+/* ── Collapse multi-speaker turns into a single-voice script ──
+ * When the preferred multi-speaker engine (vibevoice, playht duo) is
+ * unavailable, fall back to a solo engine by concatenating the turns
+ * with inline speaker labels. Gemini TTS can interpret these labels
+ * reasonably well for duo-style delivery.
+ */
+function collapseToSoloPayload(payload: EnginePayload): EnginePayload {
+  const joined = payload.speakers
+    .map(s => (s.voiceId ? `${s.voiceId}: ${s.text}` : s.text))
+    .join('\n\n');
+  const primary = payload.speakers[0];
+  return {
+    engine: payload.engine,
+    speakers: [
+      {
+        voiceId: primary?.voiceId || 'idris-broadcast',
+        text: joined,
+        style: primary?.style ?? payload.style,
+      },
+    ],
+    style: payload.style,
+  };
+}
+
+/* ── Walk the fallback chain ──
+ * Try the analyst's preferred engine first. If it returns null (stub
+ * or unavailable), walk SOLO_FALLBACK_CHAIN. Multi-speaker payloads
+ * collapse into a single-voice script before falling back, so Haze
+ * and Colonel still get audio instead of silently dead-ending.
+ */
 async function dispatchWithFallback(payload: EnginePayload): Promise<{ audioUrl: string | null; error?: string; engineUsed: string }> {
-  // Multi-speaker engines (vibevoice, playht duos) bypass the chain.
-  if (payload.speakers.length > 1) {
-    const r = await dispatchSynthesis(payload);
-    return { ...r, engineUsed: payload.engine };
+  // Try the preferred engine first, with its original multi-speaker
+  // payload intact (vibevoice/playht would use this natively once wired).
+  const primary = await dispatchSynthesis(payload);
+  if (primary.audioUrl) {
+    return { ...primary, engineUsed: payload.engine };
   }
 
-  const startIdx = SOLO_FALLBACK_CHAIN.indexOf(payload.engine);
-  const chain = startIdx >= 0
-    ? SOLO_FALLBACK_CHAIN.slice(startIdx)
-    : [payload.engine, ...SOLO_FALLBACK_CHAIN];
+  // Preferred engine returned null. Collapse multi-speaker turns into
+  // a single-voice script for the solo fallback chain.
+  const soloPayload = payload.speakers.length > 1
+    ? collapseToSoloPayload(payload)
+    : payload;
 
-  let lastError: string | undefined;
+  const startIdx = SOLO_FALLBACK_CHAIN.indexOf(soloPayload.engine);
+  const chain = startIdx >= 0
+    ? SOLO_FALLBACK_CHAIN.slice(startIdx + 1)
+    : SOLO_FALLBACK_CHAIN.filter(e => e !== payload.engine);
+
+  let lastError: string | undefined = primary.error;
   for (const engine of chain) {
-    const attempt = { ...payload, engine };
+    const attempt = { ...soloPayload, engine };
     const result = await dispatchSynthesis(attempt);
     if (result.audioUrl) {
       return { ...result, engineUsed: engine };
