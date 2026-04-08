@@ -26,6 +26,7 @@ export * from './types.js';
 export * from './schema.js';
 export * from './loader.js';
 export * from './queries.js';
+export * from './compliance-gate.js';
 export { SEED_MODELS } from './seed-models.js';
 export { SEED_PLANS } from './seed-plans.js';
 export { SEED_PILLARS } from './seed-pillars.js';
