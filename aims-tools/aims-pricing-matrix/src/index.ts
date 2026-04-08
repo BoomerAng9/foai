@@ -25,6 +25,8 @@
 export * from './types.js';
 export * from './schema.js';
 export * from './loader.js';
+export * from './neon-loader.js';
+export * from './client.js';
 export * from './queries.js';
 export * from './compliance-gate.js';
 export { SEED_MODELS } from './seed-models.js';

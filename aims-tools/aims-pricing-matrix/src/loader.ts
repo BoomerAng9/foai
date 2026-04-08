@@ -1,11 +1,19 @@
 /**
- * In-memory loader for the A.I.M.S. Pricing Matrix.
+ * Loader for the A.I.M.S. Pricing Matrix.
  *
- * Phase 1: loads from seed files (no DB).
- * Phase 2: will switch to Neon-backed loading with hot reload via
- *          LISTEN/NOTIFY when the canonical tables exist.
+ * Phase 1: in-memory seed loader (default — no DB needed)
+ * Phase 2: Neon-backed loader with LISTEN/NOTIFY hot reload
+ *          (enabled by setting PRICING_USE_NEON=true)
  *
- * Latest-only enforcement:
+ * Both paths produce the same AimsPricingMatrix shape. Callers use
+ * the same getMatrix() / reloadMatrix() public API.
+ *
+ * Routing:
+ *   1. If PRICING_USE_NEON=true → try Neon (cached + LISTEN/NOTIFY)
+ *   2. If Neon unavailable or empty → fall back to seed
+ *   3. If seed-only → use the seed cache
+ *
+ * Latest-only enforcement (both paths):
  *   - Image/video model rows MUST have isLatest=true
  *   - Any row with supersededBy set is automatically excluded
  *   - Loader logs (does not throw) when a stale row is rejected
@@ -82,9 +90,31 @@ export function getMatrix(): AimsPricingMatrix {
   return _cache;
 }
 
+/**
+ * Async variant that prefers Neon when PRICING_USE_NEON is set,
+ * with automatic fallback to the in-memory seed loader.
+ *
+ * Use this in long-running services (SmelterOS, AIMS backend).
+ * Use the sync getMatrix() in CLI tools / tests where seed-only is fine.
+ */
+export async function getMatrixAsync(): Promise<AimsPricingMatrix> {
+  // Lazy import to avoid pulling in postgres in seed-only environments
+  const { getMatrixFromNeon } = await import('./neon-loader.js');
+  const fromNeon = await getMatrixFromNeon();
+  if (fromNeon) return fromNeon;
+  return getMatrix();
+}
+
 export function reloadMatrix(): AimsPricingMatrix {
   _cache = null;
   return getMatrix();
+}
+
+export async function reloadMatrixAsync(): Promise<AimsPricingMatrix> {
+  _cache = null;
+  const { bustNeonCache } = await import('./neon-loader.js');
+  bustNeonCache();
+  return getMatrixAsync();
 }
 
 export function getMatrixStats() {
