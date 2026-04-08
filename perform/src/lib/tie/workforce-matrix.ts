@@ -1,25 +1,30 @@
 /**
- * HIDT Training Matrix — Workforce TIE Source of Truth
- * ======================================================
- * Adopted from Rish's original 2022 HIDT (Human Investment Development
- * Training) matrix built for KSA Vision 2030 / Shareek / NTP / HCDP /
- * TVTC initiatives. This is the workforce-vertical equivalent of
- * Per|Form's sports player matrix — it powers TIE scoring across the
- * Talent / Innovation / Execution pillars for non-sports verticals
- * (Workforce, Student, Contractor, Founder).
+ * Workforce Training Matrix — TIE Workforce Seed Data
+ * ====================================================
+ * Adopted from Rish's original 2022 A.I.M.S. Training Matrix built for
+ * KSA Vision 2030 / Shareek / NTP / HCDP / TVTC initiatives. This is
+ * the workforce-vertical equivalent of Per|Form's sports player matrix
+ * — it powers TIE scoring across the Talent / Innovation / Execution
+ * pillars for non-sports verticals (Workforce, Student, Contractor,
+ * Founder).
  *
- * The raw spreadsheet lives at hidt-matrix-raw.json. This module
+ * NOTE: This file is the workforce SEED DATA only. The canonical
+ * platform pricing/catalog lives in a separate canonical package
+ * (aims-pricing-matrix). Do not add LLM/model pricing rows here — those
+ * belong in the pricing matrix package.
+ *
+ * The raw spreadsheet lives at workforce-matrix-raw.json. This module
  * lazy-parses it into typed structures and exposes accessors used by
  *   - workforce-engine.ts  → TIE scoring for learners
  *   - lead-builder.ts      → targeted lead generation per row
  *   - campaign-builder.ts  → course/cert campaigns per role × sector
  *
  * The matrix is EXPANDABLE — new sectors, courses, certs, and skills
- * can be appended to the raw JSON or written to the `hidt_matrix`
- * Smelter OS DB table without changing this module's shape.
+ * can be appended to the raw JSON or written to the `workforce_matrix`
+ * DB table without changing this module's shape.
  */
 
-import rawMatrix from './hidt-matrix-raw.json';
+import rawMatrix from './workforce-matrix-raw.json';
 
 /* ── Core enums ── */
 export type SkillLevel = 'entry' | 'mid' | 'senior' | 'executive';
@@ -28,13 +33,13 @@ export type Demand = 'High' | 'Moderate' | 'Medium' | 'Low';
 export type Currency = 'SAR' | 'AED' | 'QAR' | 'OMR' | 'USD' | 'GBP';
 
 /* ── Sectors / Initiatives (Vision 2030 program lines) ── */
-export interface HidtSector {
+export interface WorkforceSector {
   id: string;
   name: string;
   description?: string;
 }
 
-export const HIDT_SECTORS: HidtSector[] = [
+export const WORKFORCE_SECTORS: WorkforceSector[] = [
   { id: 'shareek',     name: 'Shareek',         description: 'Saudi Vision 2030 private-sector partnership program' },
   { id: 'ntp',         name: 'NTP',             description: 'National Transformation Program' },
   { id: 'vision-2030', name: 'Vision 2030',     description: 'Cross-cutting Vision 2030 initiatives' },
@@ -43,7 +48,7 @@ export const HIDT_SECTORS: HidtSector[] = [
 ];
 
 /* ── Course rows (a course offered for one sector × audience) ── */
-export interface HidtCourse {
+export interface WorkforceCourse {
   id: string;
   sectorId: string;
   topic: string;
@@ -54,7 +59,7 @@ export interface HidtCourse {
 }
 
 /* ── Soft-skill taxonomy with demand + salary signals ── */
-export interface HidtSoftSkill {
+export interface WorkforceSoftSkill {
   category: string;
   name: string;
   applicableRoles: string[];
@@ -71,7 +76,7 @@ export interface HidtSoftSkill {
 
 /* ── Certification → role → salary outcome (the workforce
  *    parallel of Per|Form's draft outcome → contract forecast) ── */
-export interface HidtCertification {
+export interface WorkforceCertification {
   name: string;
   topJobs: string[];
   prerequisites: string;
@@ -79,7 +84,7 @@ export interface HidtCertification {
 }
 
 /* ── Pricing rows (course list price + discount tiers) ── */
-export interface HidtPricingRow {
+export interface WorkforcePricingRow {
   institute: string;
   course: string;
   durationHours?: number;
@@ -117,11 +122,11 @@ function slug(s: string): string {
  * the sector and blanks below it; a Course cell on the row that introduces
  * the course and a continuation row beneath. We carry-forward both.
  */
-let _courses: HidtCourse[] | null = null;
-export function getCourses(): HidtCourse[] {
+let _courses: WorkforceCourse[] | null = null;
+export function getCourses(): WorkforceCourse[] {
   if (_courses) return _courses;
   const rows = raw['Course Matrix'] || [];
-  const out: HidtCourse[] = [];
+  const out: WorkforceCourse[] = [];
   let currentSector = '';
   let currentTopic = '';
   let currentTargetGroups: string[] = [];
@@ -178,11 +183,11 @@ export function getCourses(): HidtCourse[] {
 }
 
 /* ── Soft Skills parser (rows R2-R21 are the structured taxonomy) ── */
-let _softSkills: HidtSoftSkill[] | null = null;
-export function getSoftSkills(): HidtSoftSkill[] {
+let _softSkills: WorkforceSoftSkill[] | null = null;
+export function getSoftSkills(): WorkforceSoftSkill[] {
   if (_softSkills) return _softSkills;
   const rows = raw['Soft Skills'] || [];
-  const out: HidtSoftSkill[] = [];
+  const out: WorkforceSoftSkill[] = [];
   for (let i = 1; i < rows.length; i++) {
     const r = rows[i] || [];
     const category = clean(r[0]);
@@ -208,11 +213,11 @@ export function getSoftSkills(): HidtSoftSkill[] {
 }
 
 /* ── Certifications parser (CYBER sheet) ── */
-let _certifications: HidtCertification[] | null = null;
-export function getCertifications(): HidtCertification[] {
+let _certifications: WorkforceCertification[] | null = null;
+export function getCertifications(): WorkforceCertification[] {
   if (_certifications) return _certifications;
   const rows = raw['CYBER'] || [];
-  const out: HidtCertification[] = [];
+  const out: WorkforceCertification[] = [];
   for (let i = 1; i < rows.length; i++) {
     const r = rows[i] || [];
     const name = clean(r[0]);
@@ -235,11 +240,11 @@ export function getCertifications(): HidtCertification[] {
   return _certifications;
 }
 
-/* ── Pricing rows (HIDT Per Class Time + Eng. Adults) ── */
-let _pricing: HidtPricingRow[] | null = null;
-export function getPricing(): HidtPricingRow[] {
+/* ── Pricing rows (A.I.M.S. Per Class Time + Eng. Adults) ── */
+let _pricing: WorkforcePricingRow[] | null = null;
+export function getPricing(): WorkforcePricingRow[] {
   if (_pricing) return _pricing;
-  const out: HidtPricingRow[] = [];
+  const out: WorkforcePricingRow[] = [];
   const sheet = raw['HIDT Per Class Time'] || [];
   for (let i = 1; i < sheet.length; i++) {
     const r = sheet[i] || [];
@@ -268,29 +273,29 @@ export function getPricing(): HidtPricingRow[] {
 }
 
 /* ── Lookups for the workforce engine ── */
-export function getCoursesForSector(sectorId: string): HidtCourse[] {
+export function getCoursesForSector(sectorId: string): WorkforceCourse[] {
   return getCourses().filter(c => c.sectorId === sectorId);
 }
 
-export function getCoursesForLevel(level: SkillLevel): HidtCourse[] {
+export function getCoursesForLevel(level: SkillLevel): WorkforceCourse[] {
   return getCourses().filter(c => c.levels[level]);
 }
 
-export function getCoursesForRole(roleQuery: string): HidtCourse[] {
+export function getCoursesForRole(roleQuery: string): WorkforceCourse[] {
   const q = roleQuery.toLowerCase();
   return getCourses().filter(c =>
     c.targetGroups.some(g => g.toLowerCase().includes(q)),
   );
 }
 
-export function findSoftSkill(name: string): HidtSoftSkill | undefined {
+export function findSoftSkill(name: string): WorkforceSoftSkill | undefined {
   const q = name.toLowerCase();
   return getSoftSkills().find(s => s.name.toLowerCase().includes(q));
 }
 
 export function getMatrixStats() {
   return {
-    sectors: HIDT_SECTORS.length,
+    sectors: WORKFORCE_SECTORS.length,
     courses: getCourses().length,
     softSkills: getSoftSkills().length,
     certifications: getCertifications().length,

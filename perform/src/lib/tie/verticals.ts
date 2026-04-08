@@ -58,7 +58,7 @@ export const VERTICAL_CONFIG: Record<Vertical, VerticalConfig> = {
     datasetNamespace: 'learners',
     allowedSourceModules: [
       'src/lib/tie/workforce-engine.ts',
-      'src/lib/tie/hidt-matrix.ts',
+      'src/lib/tie/workforce-matrix.ts',
     ],
   },
   STUDENT: {
