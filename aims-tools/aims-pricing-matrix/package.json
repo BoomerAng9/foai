@@ -1,0 +1,26 @@
+{
+  "name": "@aims/pricing-matrix",
+  "version": "0.1.0",
+  "description": "Canonical pricing & catalog for the A.I.M.S. ecosystem. Single source of truth for models, plans, bundles, pillars, and workforce seed rows. HIDT-shaped cross-tab schema. Replaces scattered MODELS objects across AIMS backend, SmelterOS, and perform.",
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./types": "./src/types.ts",
+    "./schema": "./src/schema.ts",
+    "./loader": "./src/loader.ts",
+    "./queries": "./src/queries.ts"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.0"
+  },
+  "private": true
+}
