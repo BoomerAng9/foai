@@ -1,0 +1,26 @@
+{
+  "name": "@aims/tps-report-ang",
+  "version": "0.1.0",
+  "description": "TPS_Report_Ang — A.I.M.S. Pricing Overseer Node service. Real pencil pusher under Boomer_CFO. Deploys Lil_Hawk fee-watcher team. Wired into financial process. Has @SPEAKLY skill. Renamed from TPS_Ang 2026-04-08.",
+  "type": "module",
+  "main": "./src/index.ts",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc --noEmit",
+    "start": "node --experimental-strip-types src/index.ts"
+  },
+  "dependencies": {
+    "@aims/pricing-matrix": "*",
+    "@aims/pmo": "*",
+    "express": "^4.21.0",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.0",
+    "@types/node": "^22.0.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.6.0"
+  },
+  "private": true
+}
