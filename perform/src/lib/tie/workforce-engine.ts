@@ -7,8 +7,8 @@
  *
  * Sports TIE scores Prospects from the prospect database.
  * Workforce TIE scores Learners — and the seed data for the
- * workforce vertical happens to come from the HIDT Training Matrix
- * (`hidt-matrix.ts`) the same way sports seed data comes from
+ * workforce vertical comes from the Workforce Training Matrix
+ * (`workforce-matrix.ts`) the same way sports seed data comes from
  * `draft/seed-data.ts`. The matrix is DATA, not the engine.
  *
  * Routing rule (enforced by verticals.ts):
@@ -25,8 +25,8 @@ import {
   getCertifications,
   findSoftSkill,
   type SkillLevel,
-  type HidtSoftSkill,
-} from './hidt-matrix';
+  type WorkforceSoftSkill,
+} from './workforce-matrix';
 
 // PRIVATE WEIGHTS — NEVER EXPOSE
 const W_TALENT = 0.4;
@@ -149,8 +149,8 @@ function pickTopCertifications(targetRole: string | undefined): Array<{ name: st
 
 function pickSalaryForecast(level: SkillLevel | undefined, anchorSkill: string | undefined): WorkforceTIEResult['salaryForecast'] {
   if (!level) return undefined;
-  const skills: HidtSoftSkill[] = anchorSkill
-    ? [findSoftSkill(anchorSkill)].filter(Boolean) as HidtSoftSkill[]
+  const skills: WorkforceSoftSkill[] = anchorSkill
+    ? [findSoftSkill(anchorSkill)].filter(Boolean) as WorkforceSoftSkill[]
     : getSoftSkills().slice(0, 1);
   if (!skills.length) return undefined;
   const s = skills[0];
