@@ -547,7 +547,7 @@ function TierCard({
       // Owner bypass — server returns owner_bypass:true and we redirect
       // to the dashboard without any Stripe interaction (Phase 0).
       if (data?.owner_bypass) {
-        window.location.href = data.redirect_url ?? '/smelter-os?owner_unlimited=1';
+        window.location.href = data.redirect_url ?? '/smelter-os';
         return;
       }
 

@@ -23,9 +23,21 @@ function LoginInner() {
 
   // Honor ?next=... so the OwnerGate (and any other gated surface) can
   // bring the user back where they came from after sign-in. Default to /chat.
-  // Only allow same-origin paths to prevent open-redirect.
+  // Same-origin safety: URL-parse against current origin to block
+  // open-redirects like /\evil.com, /%2fevil.com, or //evil.com that
+  // naive string prefix checks would let through.
   const rawNext = searchParams?.get('next') || '';
-  const nextPath = rawNext.startsWith('/') && !rawNext.startsWith('//') ? rawNext : '/chat';
+  function isSafeNext(raw: string): boolean {
+    if (!raw || !raw.startsWith('/')) return false;
+    if (typeof window === 'undefined') return false;
+    try {
+      const resolved = new URL(raw, window.location.origin);
+      return resolved.origin === window.location.origin;
+    } catch {
+      return false;
+    }
+  }
+  const nextPath = isSafeNext(rawNext) ? rawNext : '/chat';
 
   // ?force=1 disables the auto-redirect so a stuck/stale Firebase session
   // can sign out and re-authenticate without bouncing.

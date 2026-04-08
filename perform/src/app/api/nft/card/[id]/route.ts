@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@/lib/db';
 import { getGradeForScore } from '@/lib/tie/grades';
+import { getVerticalTierLabel } from '@/lib/tie/verticals';
 
 /**
  * GET /api/nft/card/[id] — Generate SVG card image for a draft prospect NFT
@@ -14,7 +15,8 @@ function gradeColor(grade: number): string {
 }
 
 function tierLabel(grade: number): string {
-  return getGradeForScore(grade).label;
+  // NFT cards are sports-vertical only — Per|Form prospect cards
+  return getVerticalTierLabel(getGradeForScore(grade).tier, 'SPORTS').label;
 }
 
 export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {

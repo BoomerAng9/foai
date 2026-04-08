@@ -6,6 +6,7 @@ import { motion } from 'framer-motion';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { getGradeForScore } from '@/lib/tie/grades';
+import { getVerticalTierLabel } from '@/lib/tie/verticals';
 import { staggerContainer, staggerItem, heroStagger, heroItem, scrollReveal } from '@/lib/motion';
 import PaywallGate from '@/components/PaywallGate';
 
@@ -183,6 +184,8 @@ export default function PlayerDetailPage({ params }: { params: Promise<{ player:
   })();
 
   const gradeInfo = getGradeForScore(score);
+  // Sports-vertical label (Per|Form prospect detail page)
+  const tierLabels = getVerticalTierLabel(gradeInfo.tier, 'SPORTS');
   const posColor = getPositionColor(data?.position ?? '');
 
   // Component scores — derived percentages
@@ -285,7 +288,7 @@ export default function PlayerDetailPage({ params }: { params: Promise<{ player:
                     className="text-[10px] font-mono font-bold tracking-wider mt-1.5 px-3 py-0.5 rounded-full text-center"
                     style={{ background: `${getGradeColor(score)}15`, color: getGradeColor(score) }}
                   >
-                    {gradeInfo.label.toUpperCase()}
+                    {tierLabels.label.toUpperCase()}
                   </div>
                 </div>
               </div>

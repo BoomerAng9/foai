@@ -1,5 +1,6 @@
 import type { PerformanceInput, AttributesInput, IntangiblesInput, TIEResult } from './types';
 import { getGradeForScore } from './grades';
+import { getVerticalTierLabel } from './verticals';
 
 // PRIVATE WEIGHTS — NEVER EXPOSE TO FRONTEND
 const W_PERFORMANCE = 0.4;
@@ -57,13 +58,16 @@ export function calculateTIE(
   const score = Math.round(raw * 10) / 10;
 
   const gradeInfo = getGradeForScore(score);
+  const labels = getVerticalTierLabel(gradeInfo.tier, 'SPORTS');
 
   return {
+    vertical: 'SPORTS',
     score,
     grade: gradeInfo.grade,
     tier: gradeInfo.tier,
-    label: gradeInfo.label,
-    draftContext: gradeInfo.draftContext,
+    label: labels.label,
+    context: labels.context,
+    draftContext: labels.context, // legacy alias for existing callers
     badgeColor: gradeInfo.badgeColor,
     components: {
       performance: Math.round(perfScore * 10) / 10,
