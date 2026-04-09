@@ -62,6 +62,8 @@ export {
   getSession as getLiveLookInSession,
   listSessionsForUser,
   closeSession as closeLiveLookInSession,
+  markSessionReady,
+  isLiveLookInConfigured,
 } from './live-look-in.js';
 export {
   spawnPanel,
