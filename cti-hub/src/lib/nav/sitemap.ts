@@ -33,6 +33,7 @@ import {
   Monitor,
   Package,
   Radio,
+  Rocket,
   Search,
   Settings,
   ShoppingBag,
@@ -115,6 +116,15 @@ export const NAV_BRANCHES: NavBranch[] = [
     icon: Wrench,
     hosts: ['cti', 'deploy'],
     entries: [
+      {
+        id: 'build.aiplug',
+        label: 'aiPLUG & Play',
+        description: 'One-click launcher for the flagship autonomous aiPLUGs — SMB Marketing, Teacher Twin, Finance Analyst, and more.',
+        href: '/aiplug',
+        kind: 'internal',
+        icon: Rocket,
+        hosts: ['cti', 'deploy'],
+      },
       {
         id: 'build.deploy-agent',
         label: 'Deploy Agent',
