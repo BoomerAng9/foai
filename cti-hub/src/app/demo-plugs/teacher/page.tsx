@@ -1,0 +1,412 @@
+'use client';
+
+import { useState } from 'react';
+import {
+  BookOpen, Users, GraduationCap,
+  ClipboardCheck, BarChart3, Globe,
+} from 'lucide-react';
+import { PlugChat } from '@/components/plug/PlugChat';
+import { PlugChrome } from '@/components/plug/PlugChrome';
+
+// ─── Types ───────────────────────────────────────────────────────────────────
+
+interface Assignment {
+  title: string;
+  /** English translation of `title`. Present for non-English classrooms. */
+  titleEnglish?: string;
+  due: string;
+  status: 'graded' | 'pending' | 'overdue';
+  submitted: number;
+  total: number;
+}
+
+interface Student {
+  name: string;
+  /** English transliteration / translation of `name`. Present for non-English classrooms. */
+  nameEnglish?: string;
+  score: number;
+}
+
+interface QuizScore {
+  label: string;
+  /** English translation of `label`. Present for non-English classrooms. */
+  labelEnglish?: string;
+  score: number;
+}
+
+interface TwinMessage {
+  role: 'twin' | 'user';
+  text: string;
+  /** English translation of `text`. Present for non-English classrooms. */
+  textEnglish?: string;
+}
+
+interface ClassroomData {
+  language: string;
+  flag: string;
+  studentCount: number;
+  currentLesson: string;
+  /** English translation of `currentLesson`. Present for non-English classrooms. */
+  currentLessonEnglish?: string;
+  assignments: Assignment[];
+  quizScores: QuizScore[];
+  students: Student[];
+  twinGreeting: string;
+  /** English translation of `twinGreeting`. Present for non-English classrooms. */
+  twinGreetingEnglish?: string;
+  twinMessages: TwinMessage[];
+}
+
+// ─── Synthetic Data ──────────────────────────────────────────────────────────
+
+const CLASSROOMS: Record<string, ClassroomData> = {
+  english: {
+    language: 'English',
+    flag: '🇬🇧',
+    studentCount: 75,
+    currentLesson: 'Unit 12: Climate Change & Persuasive Writing',
+    assignments: [
+      { title: 'Persuasive Essay Draft', due: 'Apr 3', status: 'pending', submitted: 58, total: 75 },
+      { title: 'Vocabulary Quiz Ch.11', due: 'Mar 29', status: 'graded', submitted: 75, total: 75 },
+      { title: 'Group Debate Prep', due: 'Apr 1', status: 'pending', submitted: 42, total: 75 },
+      { title: 'Reading Response #9', due: 'Mar 25', status: 'graded', submitted: 71, total: 75 },
+    ],
+    quizScores: [
+      { label: 'Quiz 7', score: 78 },
+      { label: 'Quiz 8', score: 82 },
+      { label: 'Quiz 9', score: 74 },
+      { label: 'Quiz 10', score: 88 },
+      { label: 'Quiz 11', score: 85 },
+    ],
+    students: [
+      { name: 'Emma Richardson', score: 94 },
+      { name: 'James Okonkwo', score: 91 },
+      { name: 'Sophie Chen', score: 89 },
+      { name: 'Liam Patel', score: 87 },
+      { name: 'Olivia Martinez', score: 86 },
+      { name: 'Noah Williams', score: 84 },
+      { name: 'Ava Thompson', score: 82 },
+      { name: 'Ethan Brown', score: 80 },
+    ],
+    twinGreeting: 'Good morning! I noticed Quiz 11 scores are up 11 points from Quiz 9. The vocabulary drills are paying off. Shall I generate a review sheet for the persuasive essay unit?',
+    twinMessages: [
+      { role: 'twin', text: 'Good morning! I noticed Quiz 11 scores are up 11 points from Quiz 9. The vocabulary drills are paying off. Shall I generate a review sheet for the persuasive essay unit?' },
+      { role: 'user', text: 'Yes, focus on counterargument structure.' },
+      { role: 'twin', text: 'Done. I\'ve created a 2-page handout on counterargument frameworks with examples from the climate change readings. I also flagged 4 students who haven\'t submitted the essay draft yet -- want me to send them a reminder?' },
+    ],
+  },
+  arabic: {
+    language: 'Arabic',
+    flag: '🇸🇦',
+    studentCount: 75,
+    currentLesson: 'الوحدة ١٢: الكتابة الإبداعية والتعبير',
+    currentLessonEnglish: 'Unit 12: Creative Writing & Expression',
+    assignments: [
+      { title: 'مقال إبداعي', titleEnglish: 'Creative Essay', due: 'Apr 3', status: 'pending', submitted: 61, total: 75 },
+      { title: 'اختبار المفردات ١١', titleEnglish: 'Vocabulary Quiz 11', due: 'Mar 29', status: 'graded', submitted: 74, total: 75 },
+      { title: 'تحليل النص الأدبي', titleEnglish: 'Literary Text Analysis', due: 'Apr 1', status: 'pending', submitted: 38, total: 75 },
+      { title: 'واجب القراءة ٩', titleEnglish: 'Reading Assignment 9', due: 'Mar 25', status: 'overdue', submitted: 68, total: 75 },
+    ],
+    quizScores: [
+      { label: 'اختبار ٧', labelEnglish: 'Quiz 7', score: 72 },
+      { label: 'اختبار ٨', labelEnglish: 'Quiz 8', score: 79 },
+      { label: 'اختبار ٩', labelEnglish: 'Quiz 9', score: 81 },
+      { label: 'اختبار ١٠', labelEnglish: 'Quiz 10', score: 76 },
+      { label: 'اختبار ١١', labelEnglish: 'Quiz 11', score: 83 },
+    ],
+    students: [
+      { name: 'فاطمة الزهراء', nameEnglish: 'Fatima Al-Zahra', score: 96 },
+      { name: 'أحمد محمد', nameEnglish: 'Ahmed Mohammed', score: 93 },
+      { name: 'نورة السعيد', nameEnglish: 'Noura Al-Saeed', score: 90 },
+      { name: 'يوسف الحربي', nameEnglish: 'Yousef Al-Harbi', score: 88 },
+      { name: 'ليلى إبراهيم', nameEnglish: 'Layla Ibrahim', score: 86 },
+      { name: 'عمر الشريف', nameEnglish: 'Omar Al-Sharif', score: 84 },
+      { name: 'سارة القحطاني', nameEnglish: 'Sarah Al-Qahtani', score: 81 },
+      { name: 'خالد الدوسري', nameEnglish: 'Khaled Al-Dosari', score: 79 },
+    ],
+    twinGreeting: 'صباح الخير! لاحظت تحسناً ملحوظاً في درجات اختبار المفردات. هل تريد أن أعد ورقة مراجعة للوحدة القادمة؟',
+    twinGreetingEnglish: 'Good morning! I noticed significant improvement in vocabulary quiz scores. Would you like me to prepare a review sheet for the upcoming unit?',
+    twinMessages: [
+      { role: 'twin', text: 'صباح الخير! لاحظت تحسناً ملحوظاً في درجات اختبار المفردات. هل تريد أن أعد ورقة مراجعة للوحدة القادمة؟', textEnglish: 'Good morning! I noticed significant improvement in vocabulary quiz scores. Would you like me to prepare a review sheet for the upcoming unit?' },
+      { role: 'user', text: 'نعم، ركز على أساليب التعبير الإبداعي', textEnglish: 'Yes, focus on creative expression techniques.' },
+      { role: 'twin', text: 'تم! أعددت ملخصاً من صفحتين عن أساليب التعبير الإبداعي مع أمثلة من النصوص المقررة. كما لاحظت أن ٧ طلاب لم يسلموا واجب القراءة بعد -- هل تريد إرسال تذكير لهم؟', textEnglish: 'Done! I prepared a 2-page summary on creative expression techniques with examples from the assigned texts. I also noticed 7 students haven\'t submitted the reading assignment yet — want me to send them a reminder?' },
+    ],
+  },
+  russian: {
+    language: 'Russian',
+    flag: '🇷🇺',
+    studentCount: 75,
+    currentLesson: 'Блок 12: Русская литература XIX века — Толстой',
+    currentLessonEnglish: 'Unit 12: 19th Century Russian Literature — Tolstoy',
+    assignments: [
+      { title: 'Сочинение по "Войне и миру"', titleEnglish: 'Essay on "War and Peace"', due: 'Apr 3', status: 'pending', submitted: 52, total: 75 },
+      { title: 'Тест по лексике гл.11', titleEnglish: 'Vocabulary Test Ch. 11', due: 'Mar 29', status: 'graded', submitted: 73, total: 75 },
+      { title: 'Анализ персонажей', titleEnglish: 'Character Analysis', due: 'Apr 1', status: 'pending', submitted: 45, total: 75 },
+      { title: 'Дневник чтения №9', titleEnglish: 'Reading Journal #9', due: 'Mar 25', status: 'graded', submitted: 70, total: 75 },
+    ],
+    quizScores: [
+      { label: 'Тест 7', labelEnglish: 'Test 7', score: 69 },
+      { label: 'Тест 8', labelEnglish: 'Test 8', score: 75 },
+      { label: 'Тест 9', labelEnglish: 'Test 9', score: 80 },
+      { label: 'Тест 10', labelEnglish: 'Test 10', score: 77 },
+      { label: 'Тест 11', labelEnglish: 'Test 11', score: 84 },
+    ],
+    students: [
+      { name: 'Анастасия Иванова', nameEnglish: 'Anastasia Ivanova', score: 95 },
+      { name: 'Дмитрий Петров', nameEnglish: 'Dmitry Petrov', score: 92 },
+      { name: 'Екатерина Смирнова', nameEnglish: 'Ekaterina Smirnova', score: 89 },
+      { name: 'Алексей Козлов', nameEnglish: 'Alexey Kozlov', score: 87 },
+      { name: 'Мария Новикова', nameEnglish: 'Maria Novikova', score: 85 },
+      { name: 'Сергей Морозов', nameEnglish: 'Sergey Morozov', score: 83 },
+      { name: 'Ольга Волкова', nameEnglish: 'Olga Volkova', score: 81 },
+      { name: 'Иван Соколов', nameEnglish: 'Ivan Sokolov', score: 78 },
+    ],
+    twinGreeting: 'Доброе утро! Результаты теста 11 показали рост на 15 пунктов по сравнению с тестом 7. Подготовить обзорный лист по анализу персонажей Толстого?',
+    twinGreetingEnglish: 'Good morning! Test 11 results showed a 15-point gain over Test 7. Should I prepare a review sheet on Tolstoy character analysis?',
+    twinMessages: [
+      { role: 'twin', text: 'Доброе утро! Результаты теста 11 показали рост на 15 пунктов по сравнению с тестом 7. Подготовить обзорный лист по анализу персонажей Толстого?', textEnglish: 'Good morning! Test 11 results showed a 15-point gain over Test 7. Should I prepare a review sheet on Tolstoy character analysis?' },
+      { role: 'user', text: 'Да, сосредоточься на мотивации Пьера Безухова.', textEnglish: 'Yes, focus on Pierre Bezukhov\'s motivation.' },
+      { role: 'twin', text: 'Готово! Создан раздаточный материал на 2 страницы о трансформации Пьера Безухова с цитатами из текста. Также обнаружено, что 23 студента ещё не сдали сочинение — отправить им напоминание?', textEnglish: 'Done! A 2-page handout on Pierre Bezukhov\'s transformation has been prepared with quotes from the text. Also found that 23 students haven\'t submitted the essay — send them a reminder?' },
+    ],
+  },
+};
+
+// ─── Status Badge ────────────────────────────────────────────────────────────
+
+function StatusBadge({ status }: { status: string }) {
+  const colors: Record<string, string> = {
+    graded: 'bg-green-500/20 text-green-400',
+    pending: 'bg-yellow-500/20 text-yellow-400',
+    overdue: 'bg-red-500/20 text-red-400',
+  };
+  return (
+    <span className={`px-2 py-0.5 rounded text-xs font-mono uppercase ${colors[status] || 'text-white/40'}`}>
+      {status}
+    </span>
+  );
+}
+
+// ─── Page Component ──────────────────────────────────────────────────────────
+
+// Transliteration helper — adds romanized pronunciation for non-Latin scripts
+function transliterate(text: string, lang: string): string | null {
+  if (lang === 'english') return null;
+  // Basic transliteration hints for common Arabic/Russian (full system would use a transliteration API)
+  // In production, Learn_Ang handles this in its system prompt
+  return null; // Let the LLM handle transliteration in responses
+}
+
+export default function TeacherDigitalTwinPage() {
+  const [activeTab, setActiveTab] = useState<'english' | 'arabic' | 'russian'>('english');
+  const [showTransliteration, setShowTransliteration] = useState(true);
+  const [teacherName] = useState('Ms. Thompson'); // Would come from registration
+  const [parentMode] = useState(false); // URL param ?parent=true for parent view
+
+  const classroom = CLASSROOMS[activeTab];
+  const maxScore = 100;
+
+  function switchTab(tab: 'english' | 'arabic' | 'russian') {
+    setActiveTab(tab);
+  }
+
+  return (
+    <div className="min-h-screen bg-[#0A0A0A] text-white">
+      <PlugChrome
+        title={`${teacherName}'s Classroom`}
+        tagline={parentMode ? 'Parent View — Read Only' : 'Multilingual Classroom Assistant'}
+        icon={<GraduationCap className="w-6 h-6" />}
+        accentColor="#E8A020"
+        rightSlot={
+          activeTab !== 'english' ? (
+            <button
+              onClick={() => setShowTransliteration(!showTransliteration)}
+              className={`px-3 py-1 font-mono text-[10px] border transition-colors ${
+                showTransliteration
+                  ? 'border-[#E8A020]/50 text-[#E8A020] bg-[#E8A020]/10'
+                  : 'border-white/10 text-white/40'
+              }`}
+            >
+              {showTransliteration ? 'TRANSLITERATION ON' : 'TRANSLITERATION OFF'}
+            </button>
+          ) : undefined
+        }
+      />
+
+      <main className="max-w-7xl mx-auto px-6 py-6 space-y-6">
+        {/* Classroom Tabs */}
+        <div className="flex gap-2">
+          {(['english', 'arabic', 'russian'] as const).map((tab) => {
+            const data = CLASSROOMS[tab];
+            const isActive = activeTab === tab;
+            return (
+              <button
+                key={tab}
+                onClick={() => switchTab(tab)}
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg border font-mono text-sm transition-all ${
+                  isActive
+                    ? 'border-[#E8A020] bg-[#E8A020]/10 text-[#E8A020]'
+                    : 'border-white/10 text-white/40 hover:text-white hover:border-white/20'
+                }`}
+              >
+                <Globe className="w-4 h-4" />
+                <span>{data.flag} {data.language}</span>
+                <span className="text-xs opacity-60">{data.studentCount}</span>
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Current Lesson */}
+        <div className="border border-white/10 rounded-lg p-4">
+          <div className="flex items-center gap-2 mb-2">
+            <BookOpen className="w-4 h-4 text-[#E8A020]" />
+            <span className="font-mono text-xs text-white/40 uppercase tracking-wider">Current Lesson</span>
+          </div>
+          <p className="text-lg font-semibold">{classroom.currentLesson}</p>
+          {classroom.currentLessonEnglish && (
+            <p className="text-sm text-white/50 mt-1 italic">{classroom.currentLessonEnglish}</p>
+          )}
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Assignments */}
+          <div className="border border-white/10 rounded-lg p-4">
+            <div className="flex items-center gap-2 mb-4">
+              <ClipboardCheck className="w-4 h-4 text-[#E8A020]" />
+              <span className="font-mono text-xs text-white/40 uppercase tracking-wider">Recent Assignments</span>
+            </div>
+            <div className="space-y-3">
+              {classroom.assignments.map((a, i) => (
+                <div key={i} className="flex items-center justify-between py-2 border-b border-white/5 last:border-0">
+                  <div>
+                    <p className="text-sm font-medium">{a.title}</p>
+                    {a.titleEnglish && (
+                      <p className="text-xs text-white/50 italic">{a.titleEnglish}</p>
+                    )}
+                    <p className="text-xs text-white/40 font-mono">Due: {a.due}</p>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <span className="text-xs text-white/40 font-mono">{a.submitted}/{a.total}</span>
+                    <StatusBadge status={a.status} />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Quiz Scores Chart */}
+          <div className="border border-white/10 rounded-lg p-4">
+            <div className="flex items-center gap-2 mb-4">
+              <BarChart3 className="w-4 h-4 text-[#E8A020]" />
+              <span className="font-mono text-xs text-white/40 uppercase tracking-wider">Quiz Score Trends</span>
+            </div>
+            <div className="flex items-end gap-3 h-40">
+              {classroom.quizScores.map((q, i) => (
+                <div key={i} className="flex-1 flex flex-col items-center gap-1">
+                  <span className="text-xs font-mono text-[#E8A020]">{q.score}%</span>
+                  <div
+                    className="w-full bg-[#E8A020]/80 rounded-t"
+                    style={{ height: `${(q.score / maxScore) * 120}px` }}
+                  />
+                  <span className="text-[10px] text-white/40 font-mono text-center leading-tight">{q.label}</span>
+                  {q.labelEnglish && (
+                    <span className="text-[9px] text-white/30 italic text-center leading-tight">{q.labelEnglish}</span>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Student Roster */}
+          <div className="border border-white/10 rounded-lg p-4">
+            <div className="flex items-center gap-2 mb-4">
+              <Users className="w-4 h-4 text-[#E8A020]" />
+              <span className="font-mono text-xs text-white/40 uppercase tracking-wider">Top Students</span>
+              <span className="ml-auto text-xs text-white/40 font-mono">{classroom.studentCount} total</span>
+            </div>
+            <div className="space-y-2">
+              {classroom.students.map((s, i) => (
+                <div key={i} className="flex items-center justify-between py-1.5 border-b border-white/5 last:border-0">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs text-white/20 font-mono w-4">{i + 1}</span>
+                    <div className="flex flex-col">
+                      <span className="text-sm">{s.name}</span>
+                      {s.nameEnglish && (
+                        <span className="text-[10px] text-white/40 italic leading-tight">{s.nameEnglish}</span>
+                      )}
+                    </div>
+                  </div>
+                  <span className="text-sm font-mono text-[#E8A020]">{s.score}%</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Digital Twin Chat — Live ACHEEVY Connection */}
+          <div className="h-96">
+            <PlugChat
+              agentName="Learn_Ang"
+              agentRole={`${teacherName}'s ${classroom.language} Assistant`}
+              agentColor="#E8A020"
+              systemPrompt={`You are Learn_Ang, ${teacherName}'s teaching assistant for the ${classroom.language} classroom on The Deploy Platform.\n\nYOU ARE:\n- An expert ${classroom.language} language educator working directly for ${teacherName}\n- Familiar with the classroom: ${classroom.studentCount} students, current lesson: "${classroom.currentLesson}"\n- You can create lesson plans, grade assignments, generate quizzes, track student progress\n- Address the teacher by name (${teacherName})\n\n${activeTab !== 'english' && showTransliteration ? `TRANSLITERATION RULE (CRITICAL): When you write in ${classroom.language}, ALWAYS include transliteration (romanized pronunciation) on the next line in italics. Example:\nصباح الخير\n*Sabah al-khayr (Good morning)*\n\nThis helps teachers and parents who are learning the language follow along. NEVER skip transliteration unless the teacher turns it off.` : activeTab !== 'english' ? `Write in ${classroom.language} without transliteration (teacher has turned it off).` : `Respond in English.`}\n\nKEEP RESPONSES CONCISE. Use bullet points. Be warm and supportive. Never use the phrase "Digital Twin" — you are ${teacherName}'s assistant.`}
+              placeholder={`Message ${teacherName}'s ${classroom.language} assistant...`}
+              welcomeMessage={
+                classroom.twinGreetingEnglish &&
+                classroom.twinGreetingEnglish !== classroom.twinGreeting
+                  ? `${classroom.twinGreeting}\n\n${classroom.twinGreetingEnglish}`
+                  : classroom.twinGreeting
+              }
+            />
+          </div>
+        </div>
+      </main>
+
+      {/* Parent Portal & Registration Section */}
+      <section className="max-w-7xl mx-auto px-6 py-8">
+        <div className="border border-white/10 rounded-lg p-6">
+          <div className="flex items-center gap-2 mb-4">
+            <Users className="w-5 h-5 text-[#E8A020]" />
+            <h3 className="text-lg font-bold">Parent Portal</h3>
+          </div>
+          <p className="text-sm text-white/50 mb-6 max-w-2xl">
+            Parents get a read-only live view of their child&apos;s progress — grades, assignments, attendance, and teacher communications. All activity is real-time.
+          </p>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+            <div className="p-4 bg-white/[0.02] border border-white/10">
+              <p className="font-mono text-[10px] text-[#E8A020] font-bold tracking-wider mb-2">STEP 1</p>
+              <p className="text-sm font-semibold mb-1">Teacher Invites Student</p>
+              <p className="text-xs text-white/40">Teacher enters student name + parent email. System creates student portal account.</p>
+            </div>
+            <div className="p-4 bg-white/[0.02] border border-white/10">
+              <p className="font-mono text-[10px] text-[#E8A020] font-bold tracking-wider mb-2">STEP 2</p>
+              <p className="text-sm font-semibold mb-1">Parent Approves</p>
+              <p className="text-xs text-white/40">Email sent to parent with approval link. Parent reviews the educational extension and approves or declines.</p>
+            </div>
+            <div className="p-4 bg-white/[0.02] border border-white/10">
+              <p className="font-mono text-[10px] text-[#E8A020] font-bold tracking-wider mb-2">STEP 3</p>
+              <p className="text-sm font-semibold mb-1">Live Look-In</p>
+              <p className="text-xs text-white/40">Parent gets read-only dashboard: grades, assignments, quiz trends, teacher notes. Updated in real-time.</p>
+            </div>
+          </div>
+
+          <div className="flex gap-3">
+            <button className="px-4 py-2 text-xs font-mono font-bold tracking-wider bg-[#E8A020] text-black hover:bg-[#E8A020]/80 transition-colors">
+              INVITE STUDENTS
+            </button>
+            <button className="px-4 py-2 text-xs font-mono font-bold tracking-wider border border-white/20 text-white/60 hover:text-white hover:border-white/40 transition-colors">
+              MANAGE PARENT ACCESS
+            </button>
+          </div>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="border-t border-white/10 px-6 py-4 mt-8">
+        <p className="text-center text-xs text-white/30 font-mono">
+          Powered by The Deploy Platform
+        </p>
+      </footer>
+    </div>
+  );
+}
