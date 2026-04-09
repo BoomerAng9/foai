@@ -20,6 +20,7 @@ import { buildApp } from './server.js';
 
 // Re-export the pure service so other packages can import without HTTP
 export * from './services/pricing-overseer.js';
+export { promptToPlanWithLlm } from './services/prompt-to-plan-llm.js';
 export { buildApp } from './server.js';
 
 // HTTP entrypoint
