@@ -67,9 +67,12 @@ async function crawlWithFirecrawl(url: string, limit: number = 10): Promise<Scra
 async function scrapeWithApify(url: string): Promise<ScrapeResult> {
   if (!APIFY_API_TOKEN) throw new Error('APIFY_API_TOKEN not configured');
 
-  const res = await fetch('https://api.apify.com/v2/acts/apify~web-scraper/run-sync-get-dataset-items?token=' + APIFY_API_TOKEN, {
+  const res = await fetch('https://api.apify.com/v2/acts/apify~web-scraper/run-sync-get-dataset-items', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${APIFY_API_TOKEN}`,
+    },
     body: JSON.stringify({
       startUrls: [{ url }],
       pageFunction: `async function pageFunction(context) {
