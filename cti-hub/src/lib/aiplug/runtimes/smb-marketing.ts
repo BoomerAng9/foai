@@ -26,6 +26,7 @@
  */
 
 import { chatWithCascade } from '@/lib/aiplug/llm';
+import { scrapeQuery } from '@/lib/aiplug/sqwaadrun';
 import type { RuntimeContext, RuntimeResult } from './registry';
 
 interface SmbInputs {
@@ -68,29 +69,63 @@ export async function runSmbMarketing(ctx: RuntimeContext): Promise<RuntimeResul
     await ctx.emit('heartbeat', 'intake', 'Agent online');
 
     /* ── STAGE 2 — RESEARCH ────────────────────────────────── */
-    await ctx.emit('stage', 'research', 'Synthesizing market snapshot');
-    const researchPrompt = `Produce a concise market snapshot for ${business} in ${industry}. Target audience: ${audience}.
+    await ctx.emit('stage', 'research', 'Gathering live market intelligence');
+
+    // 2a. Sqwaadrun sweep — real competitor + industry page fetches
+    // via the 17-Hawk fleet. Fails soft on gateway error so the stage
+    // can continue with LLM-only synthesis.
+    await ctx.emit('heartbeat', 'research', 'Dispatching Sqwaadrun recon');
+    const sqwaadrunIntent = `Find current competitor pricing pages, customer review aggregators, and industry trend articles for ${business} operating in ${industry} targeting ${audience}. Return the top 5 most recent high-signal pages.`;
+    const recon = await scrapeQuery(sqwaadrunIntent, [], { timeoutMs: 45_000 });
+
+    if (recon.ok && recon.pages.length > 0) {
+      outputs.recon_pages = recon.pages.map(p => ({
+        url: p.url,
+        title: p.title,
+        preview: p.text.slice(0, 400),
+      }));
+      await ctx.emit('output', 'research', `Fetched ${recon.pages.length} live pages`, {
+        pages: recon.pages.length,
+        sources: recon.pages.map(p => p.url).slice(0, 5),
+      });
+    } else {
+      outputs.recon_pages = [];
+      outputs.recon_error = recon.error || 'Sqwaadrun returned no pages';
+      await ctx.emit('info', 'research', 'Sqwaadrun unavailable — falling back to LLM knowledge', {
+        error: recon.error ?? 'no pages returned',
+      });
+    }
+
+    // 2b. LLM synthesis — use the scraped text as context when available,
+    // otherwise fall back to the LLM's baseline knowledge.
+    const reconContext = recon.ok && recon.text
+      ? `\n\nLive intelligence from recent web sources:\n${recon.text.slice(0, 4000)}`
+      : '';
+    const researchPrompt = `Produce a concise market snapshot for ${business} in ${industry}. Target audience: ${audience}.${reconContext}
 
 Return JSON with keys:
 - positioning (one sentence)
 - top_3_pain_points (array of strings)
 - top_3_channels (array of strings — where their audience actually hangs out)
 - competitor_patterns (array of 3 strings — what competitors do well and what they miss)
+- sources (array of URLs you referenced, empty array if none)
 
 Return ONLY the JSON object, no preamble.`;
 
     const research = await chatWithCascade({
       system: SYSTEM_PROMPT,
       messages: [{ role: 'user', content: researchPrompt }],
-      maxTokens: 600,
+      maxTokens: 800,
       temperature: 0.3,
     });
     totalTokens += research.promptTokens + research.completionTokens;
     outputs.research_raw = research.text;
     outputs.research_model = research.modelUsed;
+    outputs.research_used_live_data = recon.ok && recon.pages.length > 0;
     await ctx.emit('output', 'research', 'Market snapshot ready', {
       model: research.modelUsed,
       tierIndex: research.tierIndex,
+      usedLiveData: recon.ok && recon.pages.length > 0,
       preview: research.text.slice(0, 200),
     });
     await ctx.persistOutputs(outputs);
