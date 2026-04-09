@@ -85,11 +85,19 @@ export async function synthesizeElevenLabs(req: ElevenLabsRequest): Promise<Elev
     const body = {
       text: req.text,
       model_id: req.modelId || 'eleven_v3',
+      // Raw podcast sound: lower stability = more vocal variation (not
+      // even-toned), higher style = more expressive delivery. Real
+      // podcasters breathe, drift in pace, hit emotional peaks. The
+      // defaults below make the output sound like a REAL person behind
+      // a mic, not a TTS engine. Per Rish 2026-04-09: "the speaker
+      // cannot be so smooth and perfect, and even toned. No podcaster
+      // sounds like that."
       voice_settings: {
-        stability: req.stability ?? 0.5,
-        similarity_boost: req.similarityBoost ?? 0.75,
-        style: req.style ?? 0.3,
+        stability: req.stability ?? 0.3,       // was 0.5 — lower = more natural variation
+        similarity_boost: req.similarityBoost ?? 0.7,
+        style: req.style ?? 0.55,              // was 0.3 — higher = more expressive delivery
         use_speaker_boost: true,
+        speed: 1.0,
       },
     };
 
