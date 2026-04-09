@@ -3,16 +3,16 @@ import { requireAuth } from '@/lib/auth-guard';
 import { sql } from '@/lib/insforge';
 import { ensureAiplugTables } from '@/lib/aiplug/schema';
 import type { PlugRow, PlugRunRow } from '@/lib/aiplug/types';
+import { runPlugAsync } from '@/lib/aiplug/worker';
 
 /**
  * POST /api/aiplug/[slug]/launch
  * ================================
- * Creates a new plug_runs row in `queued` state. I-1 does not
- * actually execute the runtime — it returns the queued run so
- * the UI can show a "launching..." state and the detail page can
- * link to the run. I-2 wires the real autonomous runtime that
- * picks up queued rows, runs the long-loop worker with heartbeat,
- * streams events into plug_run_events, and writes outputs.
+ * Creates a queued plug_runs row and fires the runtime worker in
+ * the background (fire-and-forget — the HTTP response returns
+ * immediately while the worker runs the agentic cycle in the Node
+ * process). The client polls /api/aiplug/runs/[runId] to see live
+ * progress.
  *
  * Body: { inputs?: Record<string, unknown> }
  */
@@ -65,12 +65,14 @@ export async function POST(
                 started_at, finished_at, last_heartbeat, cost_tokens, created_at
     `) as unknown as PlugRunRow[];
 
-    // Seed an info event so the Live Look In panel has something to show
-    // before the runtime (I-2) begins streaming real heartbeats.
+    const run = inserted[0];
+
+    // Seed an info event so the Live Look In panel has something to
+    // show before the worker transitions the run to 'running'.
     await sql`
       INSERT INTO plug_run_events (run_id, kind, stage, message, payload)
       VALUES (
-        ${inserted[0].id},
+        ${run.id},
         'info',
         'queued',
         ${`Queued ${plug.slug} launch. Runtime will begin shortly.`},
@@ -78,7 +80,15 @@ export async function POST(
       )
     `;
 
-    return NextResponse.json({ run: inserted[0] }, { status: 201 });
+    // Fire the runtime worker in the background. Do NOT await — the
+    // HTTP response returns immediately while the worker runs in
+    // the Node process. Errors inside the worker are logged and
+    // persisted to plug_runs.status = 'failed'.
+    runPlugAsync(run.id).catch(err => {
+      console.error(`[aiplug launch] worker ${run.id} threw:`, err);
+    });
+
+    return NextResponse.json({ run }, { status: 201 });
   } catch (err) {
     console.error('[aiplug launch] POST error:', err instanceof Error ? err.message : err);
     return NextResponse.json({ error: 'Failed to launch plug' }, { status: 500 });
