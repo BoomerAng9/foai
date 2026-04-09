@@ -12,6 +12,7 @@ import {
   explain,
   tokenBalance,
 } from '../services/pricing-overseer.js';
+import { promptToPlanWithLlm } from '../services/prompt-to-plan-llm.js';
 
 export const pricingRouter = Router();
 
@@ -21,14 +22,21 @@ const PromptToPlanBody = z.object({
   prompt: z.string().min(1),
   budgetUsdMonthly: z.number().positive().optional(),
   knownTaskMix: z.record(z.string(), z.number()).optional(),
+  // ?llm=false flag forces the deterministic heuristic. Default is LLM.
+  useLlm: z.boolean().optional(),
 });
 
-pricingRouter.post('/prompt-to-plan', (req: Request, res: Response) => {
+pricingRouter.post('/prompt-to-plan', async (req: Request, res: Response) => {
   const parsed = PromptToPlanBody.safeParse(req.body);
   if (!parsed.success) {
     return res.status(400).json({ error: parsed.error.flatten() });
   }
-  const result = promptToPlan(parsed.data);
+  // Default path: LLM with heuristic fallback. Set { useLlm: false } to
+  // force deterministic only.
+  const useLlm = parsed.data.useLlm !== false;
+  const result = useLlm
+    ? await promptToPlanWithLlm(parsed.data)
+    : promptToPlan(parsed.data);
   return res.json(result);
 });
 
