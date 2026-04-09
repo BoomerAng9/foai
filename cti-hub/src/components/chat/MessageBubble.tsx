@@ -6,7 +6,7 @@ import { CopyButton } from './CopyButton';
 import { LucReceipt } from './LucReceipt';
 import type { Message } from '@/lib/chat/types';
 
-function SpeakButton({ text }: { text: string }) {
+function SpeakButton({ text, agent, voiceId }: { text: string; agent?: string; voiceId?: string }) {
   const [playing, setPlaying] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
@@ -21,14 +21,39 @@ function SpeakButton({ text }: { text: string }) {
     setPlaying(true);
     try {
       // Strip markdown for cleaner speech
-      const cleanText = text.replace(/[#*`\[\]()_~>|]/g, '').replace(/\n{2,}/g, '. ').slice(0, 4000);
-      const res = await fetch('/api/tts', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text: cleanText }),
-      });
-      if (!res.ok) { setPlaying(false); return; }
-      const blob = await res.blob();
+      const cleanText = text
+        .replace(/!\[.*?\]\(.*?\)/g, '')
+        .replace(/<!--[\s\S]*?-->/g, '')
+        .replace(/```[\s\S]*?```/g, '')
+        .replace(/[#*`\[\]()_~>|]/g, '')
+        .replace(/\n{2,}/g, '. ')
+        .slice(0, 4000)
+        .trim();
+
+      // Try Grok first (agent-aware voice map: acheevy=leo, etc.)
+      let blob: Blob | null = null;
+      try {
+        const grokRes = await fetch('/api/voice', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'speak', text: cleanText, agent: agent || 'acheevy', ...(voiceId ? { voice: voiceId } : {}) }),
+        });
+        if (grokRes.ok && grokRes.headers.get('content-type')?.includes('audio')) {
+          blob = await grokRes.blob();
+        }
+      } catch { /* Grok unavailable — fall through */ }
+
+      // Fallback to Google Cloud TTS
+      if (!blob) {
+        const ttsRes = await fetch('/api/tts', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text: cleanText }),
+        });
+        if (!ttsRes.ok) { setPlaying(false); return; }
+        blob = await ttsRes.blob();
+      }
+
       const url = URL.createObjectURL(blob);
       const audio = new Audio(url);
       audioRef.current = audio;
@@ -40,7 +65,7 @@ function SpeakButton({ text }: { text: string }) {
   }
 
   return (
-    <button onClick={handleSpeak} className="p-1 hover:bg-bg-elevated transition-colors" title={playing ? 'Stop' : 'Listen'}>
+    <button onClick={handleSpeak} className="p-1 hover:bg-bg-elevated transition-colors" title={playing ? 'Stop' : 'Read aloud'}>
       <Volume2 className={`w-3.5 h-3.5 ${playing ? 'text-accent animate-pulse' : 'text-fg-tertiary hover:text-fg-secondary'}`} />
     </button>
   );
@@ -192,7 +217,7 @@ function renderContent(content: string) {
   });
 }
 
-export function MessageBubble({ msg }: { msg: Message }) {
+export function MessageBubble({ msg, voiceId }: { msg: Message; voiceId?: string }) {
   return (
     <div className="group animate-fade-in">
       <div className="flex items-center gap-2 mb-2">
@@ -211,7 +236,7 @@ export function MessageBubble({ msg }: { msg: Message }) {
         <div className="flex-1" />
         {!msg.streaming && msg.role === 'acheevy' && (
           <>
-            <SpeakButton text={msg.content} />
+            <SpeakButton text={msg.content} agent={msg.activeAgent?.toLowerCase() || 'acheevy'} voiceId={voiceId} />
             <CopyButton text={msg.content} />
           </>
         )}

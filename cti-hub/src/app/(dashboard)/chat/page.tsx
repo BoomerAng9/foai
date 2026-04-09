@@ -18,7 +18,29 @@ import { AttachmentMenu } from '@/components/chat/AttachmentMenu';
 import type { Skill } from '@/lib/skills/registry';
 import { buildGrammarPrompt, buildConfirmationPrompt, isPassthrough, GRAMMAR_DISCLAIMER } from '@/lib/grammar/converter';
 import { VoiceBar } from '@/components/voice/VoiceBar';
+import { VoicePicker } from '@/components/voice/VoicePicker';
 import { AcheevyInterview } from '@/components/onboarding/AcheevyInterview';
+
+/** Scenario/skill → agent routing. When a user activates a scenario tile,
+ *  the chat switches to the agent that owns that skill. This is the ONLY
+ *  way to add a skill to a voice model pre-loaded in the chat. */
+const SKILL_AGENT_MAP: Record<string, string> = {
+  // Skills
+  'open-mind': 'acheevy', 'speakly': 'acheevy', 'broadcast': 'acheevy',
+  'pascal': 'acheevy', 'adaptive-lang': 'acheevy', 'virtual-office': 'acheevy',
+  // Strategic Agents — selecting these activates that agent directly
+  'scout-ang': 'acheevy', 'content-ang': 'acheevy', 'edu-ang': 'acheevy',
+  'biz-ang': 'acheevy', 'ops-ang': 'acheevy',
+  'iller-ang': 'acheevy', 'cfo-ang': 'acheevy',
+  // Tactical (Lil_Hawks) — routed through Chicken Hawk
+  'lil-scout': 'chicken_hawk', 'lil-writer': 'chicken_hawk',
+  'lil-coder': 'chicken_hawk', 'lil-designer': 'chicken_hawk',
+  'lil-analyst': 'chicken_hawk', 'lil-social': 'chicken_hawk',
+  'lil-support': 'chicken_hawk', 'lil-scheduler': 'chicken_hawk',
+  // Tools — ACHEEVY dispatches
+  'research': 'acheevy', 'film-analysis': 'acheevy', 'image-gen': 'acheevy',
+  'video-gen': 'acheevy', 'voice': 'acheevy', 'custom': 'acheevy',
+};
 
 function formatFileSize(bytes: number) {
   if (bytes < 1024) return bytes + ' B';
@@ -56,7 +78,9 @@ function ChatWithACHEEVY() {
   const [budgetStarting, setBudgetStarting] = useState<number>(20);
   const [autoAccept, setAutoAccept] = useState(false);
   const [voiceEnabled, setVoiceEnabled] = useState(true); // Voice ON by default
-  const [grammarActive, setGrammarActive] = useState(false);
+  const [voiceAgent, setVoiceAgent] = useState('acheevy');
+  const [voiceId, setVoiceId] = useState('leo');
+  const [grammarActive, setGrammarActive] = useState(true); // Grammar ON by default per design spec
   const [grammarShownDisclaimer, setGrammarShownDisclaimer] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [activeSkill, setActiveSkill] = useState<Skill | null>(null);
@@ -148,11 +172,10 @@ function ChatWithACHEEVY() {
     if (activeConvId) loadMessages(activeConvId);
   }, [activeConvId, loadMessages]);
 
+  // Always scroll to bottom on new messages — chat must stay in focus
   useEffect(() => {
     if (scrollRef.current) {
-      const el = scrollRef.current;
-      const isNearBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 300;
-      if (isNearBottom) el.scrollTop = el.scrollHeight;
+      scrollRef.current.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' });
     }
   }, [messages]);
 
@@ -270,11 +293,20 @@ function ChatWithACHEEVY() {
     setMessages(prev => [...prev, tempUserMsg]);
 
     let streamId = `a-${Date.now()}`;
+    // Show the active agent's name on the response bubble when not default ACHEEVY
+    const AGENT_LABELS: Record<string, string> = {
+      acheevy: 'ACHEEVY', chicken_hawk: 'Chicken Hawk', consult_ang: 'Consult_Ang',
+      void_caster: 'Void-Caster', the_colonel: 'The Colonel', haze: 'Haze',
+      smoke: 'Smoke', astra_novatos: 'Astra Novatos', bun_e: 'Bun-E',
+      betty_anne_ang: 'Betty-Anne_Ang',
+    };
+    const activePersona = voiceAgent !== 'acheevy' ? AGENT_LABELS[voiceAgent] || voiceAgent : undefined;
     setMessages(prev => [...prev, {
       id: streamId,
       role: 'acheevy',
       content: '',
       streaming: true,
+      activeAgent: activePersona,
       created_at: new Date().toISOString(),
     }]);
 
@@ -294,6 +326,8 @@ function ChatWithACHEEVY() {
           attachments: currentAttachments.map(a => ({ name: a.name, type: a.type, size: a.size })),
           skill_context: scenarioContext || activeSkill?.systemContext || undefined,
           mode: guideMode ? 'guide' : undefined,
+          active_agent: voiceAgent,
+          voice_id: voiceId,
         }),
       });
 
@@ -448,36 +482,8 @@ function ChatWithACHEEVY() {
                 setBudgetRemaining(data.budget.remaining);
                 setBudgetStarting(data.budget.starting);
               }
-              // Auto-voice: read ACHEEVY's response aloud
-              if (fullVoiceText && fullVoiceText.length > 10) {
-                const cleanText = fullVoiceText
-                  .replace(/!\[.*?\]\(.*?\)/g, '')
-                  .replace(/<!--[\s\S]*?-->/g, '')
-                  .replace(/```[\s\S]*?```/g, '')
-                  .replace(/\*\*/g, '')
-                  .replace(/\[.*?\]\(.*?\)/g, '')
-                  .replace(/#+ /g, '')
-                  .slice(0, 400)
-                  .trim();
-                if (cleanText.length > 10) {
-                  // Use Bearer token for auth
-                  const voiceToken = user ? await user.getIdToken() : null;
-                  fetch('/api/voice/synthesize', {
-                    method: 'POST',
-                    headers: {
-                      'Content-Type': 'application/json',
-                      ...(voiceToken ? { 'Authorization': `Bearer ${voiceToken}` } : {}),
-                    },
-                    body: JSON.stringify({ text: cleanText }),
-                  }).then(r => r.json()).then(d => {
-                    if (d.audio) {
-                      const audio = new Audio(d.audio);
-                      audioRef.current = audio;
-                      audio.play().catch(() => {});
-                    }
-                  }).catch(() => {});
-                }
-              }
+              // Voice is on-demand via SpeakButton on each message bubble.
+              // Auto-TTS removed — user clicks speaker icon to read aloud.
             } else if (data.cost_update) {
               setStreamingCost(data.cost_update);
             } else if (data.thinking || data.thinking_partial) {
@@ -859,7 +865,7 @@ function ChatWithACHEEVY() {
           ) : (
             <div className="max-w-3xl mx-auto py-4 px-3 sm:py-6 sm:px-4 md:py-8 md:px-6 space-y-6">
               {messages.map(msg => (
-                <MessageBubble key={msg.id} msg={msg} />
+                <MessageBubble key={msg.id} msg={msg} voiceId={voiceId} />
               ))}
 
               {/* Spinner transition prompt — surfaces when build intent is detected */}
@@ -936,18 +942,28 @@ function ChatWithACHEEVY() {
           </button>
         )}
 
-        {/* Voice Bar */}
-        <VoiceBar
-          onTranscript={(text) => handleSend(text)}
-          voiceEnabled={voiceEnabled}
-          onVoiceToggle={() => {
-            if (voiceEnabled && audioRef.current) {
-              audioRef.current.pause();
-              audioRef.current = null;
-            }
-            setVoiceEnabled(!voiceEnabled);
-          }}
-        />
+        {/* Voice Bar + Picker */}
+        <div className="flex items-center border-t border-border bg-bg-surface">
+          <VoiceBar
+            onTranscript={(text) => handleSend(text)}
+            voiceEnabled={voiceEnabled}
+            activeAgent={voiceAgent}
+            onVoiceToggle={() => {
+              if (voiceEnabled && audioRef.current) {
+                audioRef.current.pause();
+                audioRef.current = null;
+              }
+              setVoiceEnabled(!voiceEnabled);
+            }}
+          />
+          <div className="pr-3">
+            <VoicePicker
+              activeAgent={voiceAgent}
+              onAgentChange={setVoiceAgent}
+              onVoiceChange={setVoiceId}
+            />
+          </div>
+        </div>
 
         <div className="border-t border-border bg-bg-surface p-2 sm:p-3 md:p-4">
           <div className="max-w-3xl mx-auto">
@@ -1095,6 +1111,9 @@ function ChatWithACHEEVY() {
                               key={tile.id}
                               onClick={() => {
                                 setScenarioContext(tile.name);
+                                // Route to the agent that owns this skill
+                                const agentKey = SKILL_AGENT_MAP[tile.id] || 'acheevy';
+                                setVoiceAgent(agentKey);
                                 setShowScenarios(false);
                               }}
                               className="flex flex-col gap-1 p-2.5 border transition-all text-left hover:border-accent/50"
@@ -1150,12 +1169,15 @@ function ChatWithACHEEVY() {
                     </button>
                   </>
                 )}
-                {grammarActive && (
-                  <>
-                    <span className="text-fg-ghost">|</span>
-                    <span className="text-accent font-semibold">GRAMMAR</span>
-                  </>
-                )}
+                <span className="text-fg-ghost">|</span>
+                <button
+                  onClick={() => setGrammarActive(!grammarActive)}
+                  className="flex items-center gap-1 hover:opacity-80 transition-opacity"
+                  title={grammarActive ? 'Grammar Filter ON — click to disable' : 'Grammar Filter OFF — click to enable'}
+                >
+                  <span className={`w-1.5 h-1.5 rounded-full ${grammarActive ? 'bg-green-500' : 'bg-fg-ghost'}`} />
+                  <span className={`font-semibold ${grammarActive ? 'text-accent' : 'text-fg-ghost'}`}>GRAMMAR</span>
+                </button>
                 {activeSkill && (
                   <>
                     <span className="text-fg-ghost">|</span>
