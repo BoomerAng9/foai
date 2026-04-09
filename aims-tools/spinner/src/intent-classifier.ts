@@ -153,17 +153,165 @@ export interface ClassifyOptions {
 
 export async function classify(
   message: string,
-  _opts: ClassifyOptions = {},
+  opts: ClassifyOptions = {},
 ): Promise<IntentClassification> {
   const heuristic = runHeuristic(message);
   const action = recommendAction(heuristic.category, message);
-
-  return {
+  const heuristicResult: IntentClassification = {
     category: heuristic.category,
     confidence: heuristic.confidence,
     triggerWords: heuristic.triggerWords,
     recommendedAction: action,
     reasoning: `Heuristic match: ${heuristic.triggerWords.join(', ') || '(none — defaulted to conversation)'}`,
+  };
+
+  // LLM verification only runs when:
+  //   1. Caller explicitly opts in via { llmVerify: true }
+  //   2. AND the heuristic confidence is in the borderline range
+  //      (low enough to be uncertain, not so low it's clearly chat)
+  // High-confidence calls skip the LLM (free heuristic wins) and
+  // very-low-confidence calls also skip (default to conversation,
+  // no point burning a free LLM call to confirm chitchat).
+  if (!opts.llmVerify) return heuristicResult;
+  if (heuristic.confidence < 0.2 || heuristic.confidence >= 0.8) {
+    return heuristicResult;
+  }
+
+  // Borderline — run the verification pass
+  try {
+    const verified = await verifyWithLlm(message, heuristicResult);
+    return verified;
+  } catch (e) {
+    // LLM verification is best-effort; never fail the caller. Return
+    // the heuristic result + a note in reasoning so audit logs can
+    // surface unreliability over time.
+    // eslint-disable-next-line no-console
+    console.warn(
+      '[spinner/intent-classifier] LLM verification failed, using heuristic:',
+      e instanceof Error ? e.message : e,
+    );
+    return {
+      ...heuristicResult,
+      reasoning: heuristicResult.reasoning + ' (LLM verification skipped: error)',
+    };
+  }
+}
+
+// ─── LLM verification pass ──────────────────────────────────────────
+
+const VERIFICATION_BASE_URL =
+  process.env.OPENROUTER_BASE_URL || 'https://openrouter.ai/api/v1';
+
+// Free-tier model — we never burn user tokens on classification.
+// Default GLM-5.1 per project_chat_engine_decision.md. Gemma BANNED.
+const VERIFICATION_MODEL =
+  process.env.SPINNER_VERIFY_MODEL || 'z-ai/glm-5.1';
+
+function readVerificationKey(): string {
+  return (
+    process.env.OPENROUTER_API_KEY ||
+    process.env.Openrouter_API_Key ||
+    process.env.OPENROUTER_KEY ||
+    ''
+  );
+}
+
+const VERIFICATION_SYSTEM_PROMPT = `You are a strict intent classifier for an A.I.M.S. chat. You receive a user message and a heuristic guess. Your job is to either CONFIRM the guess or CORRECT it.
+
+Output STRICT JSON only — no markdown, no preamble, no explanation. Schema:
+{
+  "category": "conversation" | "question" | "simple-task" | "build-intent" | "pricing-question" | "status-check" | "larger-project",
+  "confidence": number between 0 and 1,
+  "reasoning": "one short sentence"
+}
+
+Rules:
+- "build-intent" means the user wants to BUILD or CREATE something (an app, agent, workflow, etc.)
+- "larger-project" means build-intent at scale (enterprise, team of N, fully autonomous, whitelabel)
+- "pricing-question" means cost/price/plan/budget questions
+- "status-check" means asking about progress, status, or completion of an existing job
+- "simple-task" means a single-step action like "summarize this", "translate this"
+- "question" means an info request, no action needed
+- "conversation" means chitchat with no actionable intent
+- If unsure, return the heuristic's guess to avoid flapping
+- Confidence < 0.6 means "I disagree but weakly", 0.6-0.85 "moderately confident", > 0.85 "strongly confident"`;
+
+async function verifyWithLlm(
+  message: string,
+  heuristicResult: IntentClassification,
+): Promise<IntentClassification> {
+  const apiKey = readVerificationKey();
+  if (!apiKey) {
+    throw new Error('No OpenRouter API key for LLM verification');
+  }
+  if (/gemma/i.test(VERIFICATION_MODEL)) {
+    throw new Error('Refusing to use banned Gemma model for verification');
+  }
+
+  const userPrompt =
+    `User message:\n${message}\n\n` +
+    `Heuristic guess: ${heuristicResult.category} (confidence ${heuristicResult.confidence.toFixed(2)})\n` +
+    `Heuristic trigger words: ${heuristicResult.triggerWords.join(', ') || '(none)'}\n\n` +
+    `Confirm or correct the guess. Return STRICT JSON.`;
+
+  const res = await fetch(`${VERIFICATION_BASE_URL}/chat/completions`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      'Content-Type': 'application/json',
+      'HTTP-Referer': process.env.OPENROUTER_REFERER || 'https://aimanagedsolutions.cloud',
+      'X-Title': 'A.I.M.S. Spinner classifier',
+    },
+    body: JSON.stringify({
+      model: VERIFICATION_MODEL,
+      messages: [
+        { role: 'system', content: VERIFICATION_SYSTEM_PROMPT },
+        { role: 'user', content: userPrompt },
+      ],
+      temperature: 0,
+      max_tokens: 200,
+      response_format: { type: 'json_object' },
+    }),
+  });
+
+  if (!res.ok) {
+    const body = await res.text().catch(() => '');
+    throw new Error(`Verification HTTP ${res.status}: ${body.slice(0, 200)}`);
+  }
+
+  const data = (await res.json()) as { choices?: Array<{ message?: { content?: string } }> };
+  const raw = data.choices?.[0]?.message?.content?.trim() ?? '';
+  if (!raw) throw new Error('Empty verification response');
+
+  // Strip accidental markdown fences
+  let cleaned = raw;
+  if (cleaned.startsWith('```')) {
+    cleaned = cleaned.replace(/^```(?:json)?\s*/, '').replace(/\s*```$/, '');
+  }
+
+  const parsed = JSON.parse(cleaned) as {
+    category?: IntentCategory;
+    confidence?: number;
+    reasoning?: string;
+  };
+
+  if (!parsed.category) {
+    throw new Error('LLM verification missing category field');
+  }
+
+  // Use the verified category to recompute the action
+  const verifiedAction = recommendAction(parsed.category, message);
+
+  return {
+    category: parsed.category,
+    confidence: parsed.confidence ?? heuristicResult.confidence,
+    triggerWords: heuristicResult.triggerWords,
+    recommendedAction: verifiedAction,
+    reasoning:
+      `(LLM-verified) ${parsed.reasoning || 'no reasoning provided'}` +
+      (parsed.category !== heuristicResult.category
+        ? ` — corrected from heuristic '${heuristicResult.category}'`
+        : ' — confirmed heuristic'),
   };
 }
 
