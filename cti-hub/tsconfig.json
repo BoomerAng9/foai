@@ -24,6 +24,12 @@
     "paths": {
       "@/*": [
         "./src/*"
+      ],
+      "@aims/spinner": [
+        "../aims-tools/spinner/src/index.ts"
+      ],
+      "@aims/spinner/*": [
+        "../aims-tools/spinner/src/*"
       ]
     },
     "target": "ES2017"
@@ -32,7 +38,8 @@
     "next-env.d.ts",
     "**/*.ts",
     "**/*.tsx",
-    ".next/types/**/*.ts"
+    ".next/types/**/*.ts",
+    "../aims-tools/spinner/src/**/*.ts"
   ],
   "exclude": [
     "node_modules",
