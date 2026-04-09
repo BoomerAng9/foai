@@ -120,5 +120,36 @@ export async function ensureAiplugTables(): Promise<void> {
     `;
   }
 
+  // Seed Finance Analyst as the third flagship demo plug
+  const existingFa = await sql`SELECT id FROM plugs WHERE slug = 'finance-analyst' LIMIT 1`;
+  if (existingFa.length === 0) {
+    await sql`
+      INSERT INTO plugs (
+        slug, name, tagline, description, category, status,
+        features, tags, price_cents, runtime_key, featured
+      )
+      VALUES (
+        'finance-analyst',
+        'Finance Analyst',
+        'Autonomous CFO for small and mid-sized businesses, solo operators, and fractional engagements.',
+        'A real agentic financial analyst that ships a health snapshot, a 12-week cash flow forecast, and 5 prioritized weekly actions in one launch. Numerate, direct, no-nonsense voice. Flags missing inputs instead of fabricating numbers. Real LLM calls through the free-model cascade — no canned replies.',
+        'finance',
+        'ready',
+        ARRAY[
+          'Financial health snapshot (runway + top risks + opportunities)',
+          '12-week cash flow forecast with narrative',
+          '5 prioritized weekly actions with impact estimates',
+          'Flags missing inputs instead of fabricating numbers',
+          'Conversational Finance Analyst chat (coming in I-4b)',
+          'Owner-viewable execution logs'
+        ],
+        ARRAY['finance', 'cfo', 'cash-flow', 'forecast', 'flagship'],
+        0,
+        'finance-analyst',
+        FALSE
+      )
+    `;
+  }
+
   tablesReady = true;
 }
