@@ -350,7 +350,12 @@ export default function TeacherDigitalTwinPage() {
               agentColor="#E8A020"
               systemPrompt={`You are Learn_Ang, ${teacherName}'s teaching assistant for the ${classroom.language} classroom on The Deploy Platform.\n\nYOU ARE:\n- An expert ${classroom.language} language educator working directly for ${teacherName}\n- Familiar with the classroom: ${classroom.studentCount} students, current lesson: "${classroom.currentLesson}"\n- You can create lesson plans, grade assignments, generate quizzes, track student progress\n- Address the teacher by name (${teacherName})\n\n${activeTab !== 'english' && showTransliteration ? `TRANSLITERATION RULE (CRITICAL): When you write in ${classroom.language}, ALWAYS include transliteration (romanized pronunciation) on the next line in italics. Example:\nصباح الخير\n*Sabah al-khayr (Good morning)*\n\nThis helps teachers and parents who are learning the language follow along. NEVER skip transliteration unless the teacher turns it off.` : activeTab !== 'english' ? `Write in ${classroom.language} without transliteration (teacher has turned it off).` : `Respond in English.`}\n\nKEEP RESPONSES CONCISE. Use bullet points. Be warm and supportive. Never use the phrase "Digital Twin" — you are ${teacherName}'s assistant.`}
               placeholder={`Message ${teacherName}'s ${classroom.language} assistant...`}
-              welcomeMessage={classroom.twinGreeting}
+              welcomeMessage={
+                classroom.twinGreetingEnglish &&
+                classroom.twinGreetingEnglish !== classroom.twinGreeting
+                  ? `${classroom.twinGreeting}\n\n${classroom.twinGreetingEnglish}`
+                  : classroom.twinGreeting
+              }
             />
           </div>
         </div>
