@@ -15,11 +15,11 @@ function getDeptColor(deptId: string): string {
   return DEPARTMENTS.find(d => d.id === deptId)?.color ?? '#E8A020';
 }
 
-// ── Boomer_Ang Card ───────────────────────────────────────
+// ── Boomer_Ang Card (clickable → detail page) ────────────
 function BoomerCard({ agent }: { agent: AgentProfile }) {
   const deptColor = getDeptColor(agent.department);
   return (
-    <div className="bg-[#111] border border-[#222] hover:border-[#E8A020]/40 transition-all flex flex-col">
+    <Link href={`/deploy-agent/${agent.id}`} className="bg-[#111] border border-[#222] hover:border-[#E8A020]/40 transition-all flex flex-col group cursor-pointer">
       {/* Header */}
       <div className="p-5 pb-3 flex items-start gap-4">
         <Image
@@ -56,14 +56,11 @@ function BoomerCard({ agent }: { agent: AgentProfile }) {
         <span className="font-mono text-sm font-bold text-[#E8A020]">
           ${agent.individualPrice}/mo
         </span>
-        <Link
-          href={`/billing?hire=${agent.id}&plan=bucket_list`}
-          className="font-mono text-[11px] font-bold tracking-wider bg-[#E8A020] text-[#0A0A0A] px-4 py-1.5 hover:bg-[#F0B030] transition-colors"
-        >
-          DEPLOY
-        </Link>
+        <span className="font-mono text-[11px] font-bold tracking-wider text-[#E8A020] flex items-center gap-1 group-hover:translate-x-1 transition-transform">
+          VIEW <ArrowRight className="w-3 h-3" />
+        </span>
       </div>
-    </div>
+    </Link>
   );
 }
 
