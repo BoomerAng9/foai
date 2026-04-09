@@ -4,6 +4,7 @@ import { acheevyRespondStream } from '@/lib/acheevy/agent';
 import { createConversation, getMessages } from '@/lib/memory/store';
 import { rateLimit } from '@/lib/rate-limit-simple';
 import { processGuideMe, getAcheevyGuidePrompt, ACHEEVY_MODEL } from '@/lib/acheevy/guide-me-engine';
+import { classifyMessage, shouldTransition } from '@/lib/spinner/classifier';
 
 export async function POST(request: NextRequest) {
   try {
@@ -103,6 +104,15 @@ export async function POST(request: NextRequest) {
     // GLM-5.1 per project_chat_engine_decision.md). Gemma is banned as
     // default per Rish 2026-04-08 reliability issues. The pickModel()
     // helper in acheevy/agent.ts also rejects any Gemma id returned by LUC.
+    //
+    // Spinner sidecar runs RFP-BAMARAM intent classification on every
+    // message. When build intent is detected, we emit a transition_hint
+    // SSE event BEFORE the model response so the chat UI can offer the
+    // user Guide Me / Manage It without waiting for the full reply.
+    // Per project_chat_to_guide_me_transition.md.
+    const spinnerHint = classifyMessage(message);
+    const transitionSuggested = shouldTransition(spinnerHint);
+
     const result = await acheevyRespondStream(
       userId,
       convId || 'temp',
@@ -112,12 +122,48 @@ export async function POST(request: NextRequest) {
       userEmail,
     );
 
-    return new Response(result.stream, {
+    // Wrap the upstream stream with a transition_hint preamble when
+    // Spinner classified the message as build intent or larger project.
+    let outboundStream = result.stream;
+    if (transitionSuggested) {
+      const enc = new TextEncoder();
+      const original = result.stream;
+      outboundStream = new ReadableStream<Uint8Array>({
+        async start(controller) {
+          // 1. Emit the Spinner transition hint first
+          controller.enqueue(
+            enc.encode(
+              `data: ${JSON.stringify({
+                type: 'transition_hint',
+                hint: spinnerHint,
+              })}\n\n`,
+            ),
+          );
+
+          // 2. Pipe the upstream model stream through unchanged
+          const reader = original.getReader();
+          try {
+            while (true) {
+              const { done, value } = await reader.read();
+              if (done) break;
+              if (value) controller.enqueue(value);
+            }
+          } catch (err) {
+            controller.error(err);
+            return;
+          }
+          controller.close();
+        },
+      });
+    }
+
+    return new Response(outboundStream, {
       headers: {
         'Content-Type': 'text/event-stream',
         'Cache-Control': 'no-cache',
         Connection: 'keep-alive',
         'X-Conversation-Id': convId || '',
+        'X-Spinner-Hint': spinnerHint.category,
       },
     });
   } catch (error: unknown) {
