@@ -36,10 +36,15 @@ function CornerBracket({ position }: { position: 'tl' | 'tr' | 'bl' | 'br' }) {
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const { user, profile, organization, signOut } = useAuth();
-  // Owner detection: check email against NEXT_PUBLIC_OWNER_EMAILS (works client-side)
-  // Falls back to role check for backwards compat with profiles that have role set
-  const ownerEmails = (process.env.NEXT_PUBLIC_OWNER_EMAILS || '').split(',').map(e => e.trim().toLowerCase()).filter(Boolean);
-  const isOwnerUser = (!!user?.email && ownerEmails.includes(user.email.toLowerCase())) || profile?.role === 'admin' || profile?.role === 'operator';
+  // Owner detection via server-side /api/me — owner emails never leak to client JS
+  const [isOwnerUser, setIsOwnerUser] = useState(false);
+  useEffect(() => {
+    if (!user) return;
+    fetch('/api/me')
+      .then(r => r.ok ? r.json() : null)
+      .then(d => { if (d?.isOwner) setIsOwnerUser(true); })
+      .catch(() => {});
+  }, [user]);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
 
   // Full-bleed escape hatch — /smelter-os/* runs in its own visual world
@@ -81,11 +86,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           style={{ zIndex: 9999 }}
         >
           <Link
-            href="/settings"
+            href="/circuit-box"
             onClick={() => setUserMenuOpen(false)}
             className="flex items-center gap-2 px-4 py-2.5 text-xs font-mono text-fg-secondary hover:bg-bg-elevated hover:text-fg"
           >
-            <User className="w-3.5 h-3.5" /> ACCOUNT
+            <User className="w-3.5 h-3.5" /> CIRCUIT BOX
           </Link>
           <Link
             href="/pricing"
