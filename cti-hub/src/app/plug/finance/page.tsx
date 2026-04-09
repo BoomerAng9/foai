@@ -2,8 +2,8 @@
 
 import { useState } from 'react';
 import {
-  DollarSign, TrendingUp, TrendingDown, CreditCard,
-  AlertTriangle, MessageSquare, RefreshCw, PiggyBank, Wallet,
+  DollarSign, TrendingUp, CreditCard,
+  MessageSquare, RefreshCw, PiggyBank, Wallet,
   ShieldAlert, Calendar,
 } from 'lucide-react';
 import { PlugChat } from '@/components/plug/PlugChat';
@@ -57,28 +57,10 @@ Upcoming: your Adobe Creative Cloud renewal ($54.99) hits on April 22nd. You've 
 
 Net worth trend: up $1,840 this month. Keep it going.`;
 
-const CHAT_MESSAGES = [
-  { role: 'acheevy' as const, text: 'I flagged the $499 CryptoSwap charge. Was this intentional? It doesn\'t match your spending profile.' },
-  { role: 'user' as const, text: 'Yes, I bought some ETH. One-time thing.' },
-  { role: 'acheevy' as const, text: 'Noted — I\'ve categorized it as "Investment" and won\'t flag crypto purchases under $500 going forward. That said, your discretionary budget is now $83 under for this month. Want me to adjust the forecast?' },
-];
-
 // ─── Page Component ──────────────────────────────────────────────────────────
 
 export default function FinancePage() {
-  const [chatInput, setChatInput] = useState('');
-  const [messages, setMessages] = useState(CHAT_MESSAGES);
   const [anomalyDismissed, setAnomalyDismissed] = useState(false);
-
-  function handleSend() {
-    if (!chatInput.trim()) return;
-    setMessages((prev) => [
-      ...prev,
-      { role: 'user' as const, text: chatInput },
-      { role: 'acheevy' as const, text: 'Let me check the numbers... I\'ll update your dashboard with the latest analysis.' },
-    ]);
-    setChatInput('');
-  }
 
   return (
     <div className="min-h-screen bg-[#0A0A0A] text-white">
@@ -221,12 +203,12 @@ export default function FinancePage() {
           </div>
           <div className="h-80">
             <PlugChat
-              agentName="LUC"
-              agentRole="Financial Analyst"
-              agentColor="#84CC16"
-              systemPrompt="You are LUC, the financial analyst on The Deploy Platform. You help businesses understand their financial health and make data-driven decisions.\n\nYOU CAN:\n- Analyze cash flow patterns and identify trends\n- Create budget forecasts and projections\n- Evaluate pricing strategies and unit economics\n- Build financial models for growth scenarios\n- Flag financial risks and suggest mitigations\n- Compare revenue streams and cost centers\n- Explain financial concepts in plain language\n\nALWAYS give specific numbers, percentages, and actionable recommendations. Business owners need clarity, not jargon."
+              agentName="CFO_Ang"
+              agentRole="Chief Financial Officer"
+              agentColor="#E8A020"
+              systemPrompt="You are the Chief Financial Officer on The Deploy Platform. You help businesses understand their financial health and make data-driven decisions.\n\nYOU CAN:\n- Analyze cash flow patterns and identify trends\n- Create budget forecasts and projections\n- Evaluate pricing strategies and unit economics\n- Build financial models for growth scenarios\n- Flag financial risks and suggest mitigations\n- Compare revenue streams and cost centers\n- Explain financial concepts in plain language\n\nALWAYS give specific numbers, percentages, and actionable recommendations. Business owners need clarity, not jargon. Never mention internal service names."
               placeholder="Ask about your finances..."
-              welcomeMessage="I'm your financial analyst. I can help with cash flow analysis, budget forecasting, pricing strategy, or any financial question. What would you like to look at?"
+              welcomeMessage="I'm your Chief Financial Officer. I can help with cash flow analysis, budget forecasting, pricing strategy, or any financial question. What would you like to look at?"
             />
           </div>
         </div>
