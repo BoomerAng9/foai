@@ -99,7 +99,10 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // Standard mode — ACHEEVY responds via Gemma 4 on OpenRouter
+    // Standard mode — ACHEEVY responds via the LUC-picked model (default
+    // GLM-5.1 per project_chat_engine_decision.md). Gemma is banned as
+    // default per Rish 2026-04-08 reliability issues. The pickModel()
+    // helper in acheevy/agent.ts also rejects any Gemma id returned by LUC.
     const result = await acheevyRespondStream(
       userId,
       convId || 'temp',

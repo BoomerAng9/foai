@@ -193,7 +193,11 @@ interface ConversationMessage {
   content: string;
 }
 
-// Model routing: Mercury 2 for fast/short tasks, Nemotron free for simple chat, MiniMax for quality
+// Model routing: LUC router picks first (per task), local fallback is
+// GLM-5.1 — the canonical default per project_chat_engine_decision.md
+// memory. Gemma family is BANNED as default (Rish 2026-04-08: "I've had
+// numerous issues with the Gemma model from OpenRouter working" even
+// with a funded account).
 async function pickModel(task: string = 'chat', messageLength: number = 0): Promise<string> {
   // Try LUC router first
   try {
@@ -202,11 +206,18 @@ async function pickModel(task: string = 'chat', messageLength: number = 0): Prom
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ task, quality: 'good' }),
     });
-    if (res.ok) return (await res.json()).model;
+    if (res.ok) {
+      const picked = (await res.json()).model;
+      // Refuse Gemma defaults from LUC — known unreliable
+      if (typeof picked === 'string' && !/gemma/i.test(picked)) {
+        return picked;
+      }
+    }
   } catch {}
 
-  // Default: Qwen 3.6 Plus (free, 256K context, strong reasoning)
-  return 'qwen/qwen3.6-plus:free';
+  // Default: GLM-5.1 (open source, 202k ctx, in our pricing matrix at
+  // routingPriority=1 within open-source tier, $1/$3.20 per 1M)
+  return 'z-ai/glm-5.1';
 }
 
 async function recordUsage(model: string, tokensIn: number, tokensOut: number) {
