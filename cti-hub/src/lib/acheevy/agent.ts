@@ -193,11 +193,27 @@ interface ConversationMessage {
   content: string;
 }
 
-// Model routing: LUC router picks first (per task), local fallback is
-// GLM-5.1 — the canonical default per project_chat_engine_decision.md
-// memory. Gemma family is BANNED as default (Rish 2026-04-08: "I've had
-// numerous issues with the Gemma model from OpenRouter working" even
-// with a funded account).
+// ─── Model fallback chain ───────────────────────────────────────────
+// Per project_chat_engine_decision.md and project_chat_to_guide_me_transition.md:
+//   primary:    GLM-5.1 (open source, 202k ctx, our pricing matrix favourite)
+//   fallback 1: Gemini 3.0 Flash (Gemini-first policy, fast + cheap)
+//   fallback 2: Qwen 3.6 Plus free (current working default, last resort)
+//
+// Gemma is BANNED everywhere — Rish 2026-04-08: "I've had numerous issues
+// with the Gemma model from OpenRouter working" even with a funded account.
+const MODEL_FALLBACK_CHAIN: readonly string[] = [
+  'z-ai/glm-5.1',
+  'google/gemini-3.0-flash',
+  'qwen/qwen3.6-plus:free',
+];
+
+function isGemma(modelId: string): boolean {
+  return /gemma/i.test(modelId);
+}
+
+// Model routing: LUC router picks first (per task), then walks the fallback
+// chain on errors. The chain is the last line of defense — never returns
+// Gemma even if LUC suggests it.
 async function pickModel(task: string = 'chat', messageLength: number = 0): Promise<string> {
   // Try LUC router first
   try {
@@ -209,15 +225,29 @@ async function pickModel(task: string = 'chat', messageLength: number = 0): Prom
     if (res.ok) {
       const picked = (await res.json()).model;
       // Refuse Gemma defaults from LUC — known unreliable
-      if (typeof picked === 'string' && !/gemma/i.test(picked)) {
+      if (typeof picked === 'string' && !isGemma(picked)) {
         return picked;
       }
     }
   } catch {}
 
-  // Default: GLM-5.1 (open source, 202k ctx, in our pricing matrix at
-  // routingPriority=1 within open-source tier, $1/$3.20 per 1M)
-  return 'z-ai/glm-5.1';
+  // Default: head of the fallback chain (GLM-5.1)
+  return MODEL_FALLBACK_CHAIN[0];
+}
+
+/**
+ * Build the fallback chain to try for a given primary model. Always
+ * starts with the primary, then appends any chain entries that aren't
+ * already the primary, skipping Gemma defensively.
+ */
+function buildModelChain(primary: string): string[] {
+  const chain: string[] = [];
+  if (!isGemma(primary)) chain.push(primary);
+  for (const fallback of MODEL_FALLBACK_CHAIN) {
+    if (isGemma(fallback)) continue;
+    if (!chain.includes(fallback)) chain.push(fallback);
+  }
+  return chain;
 }
 
 async function recordUsage(model: string, tokensIn: number, tokensOut: number) {
@@ -291,31 +321,50 @@ export async function acheevyRespond(
   ];
 
   // 4. Pick model via LUC (or use client-selected model)
-  const model = modelOverride || await pickModel('chat', userMessage.length);
+  const primaryModel = modelOverride || await pickModel('chat', userMessage.length);
 
-  // 5. Call OpenRouter
+  // 5. Call OpenRouter with fallback chain — try each model in order
   if (!OPENROUTER_API_KEY) {
     throw new Error('No LLM API key configured');
   }
 
-  const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${OPENROUTER_API_KEY}`,
-      'X-OpenRouter-Title': 'The Deploy Platform',
-    },
-    body: JSON.stringify({
-      model,
-      messages,
-      temperature: 0.6,
-      max_tokens: 2000,
-    }),
-  });
+  const chain = buildModelChain(primaryModel);
+  let res: Response | null = null;
+  let completion: { choices?: Array<{ message?: { content?: string } }>; usage?: { prompt_tokens?: number; completion_tokens?: number }; model?: string; error?: { message?: string } } | null = null;
+  let model = chain[0];
+  const errors: string[] = [];
 
-  const completion = await res.json();
-  if (!res.ok) {
-    throw new Error(completion.error?.message || 'ACHEEVY response failed');
+  for (const candidate of chain) {
+    try {
+      const r = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${OPENROUTER_API_KEY}`,
+          'X-OpenRouter-Title': 'The Deploy Platform',
+        },
+        body: JSON.stringify({
+          model: candidate,
+          messages,
+          temperature: 0.6,
+          max_tokens: 2000,
+        }),
+      });
+      const data = await r.json();
+      if (r.ok && data.choices?.[0]?.message?.content) {
+        res = r;
+        completion = data;
+        model = candidate;
+        break;
+      }
+      errors.push(`${candidate}: HTTP ${r.status} ${data?.error?.message || 'no content'}`);
+    } catch (e) {
+      errors.push(`${candidate}: ${e instanceof Error ? e.message : String(e)}`);
+    }
+  }
+
+  if (!res || !completion) {
+    throw new Error(`ACHEEVY response failed across all models:\n${errors.join('\n')}`);
   }
 
   const content = completion.choices?.[0]?.message?.content?.trim() || '';
@@ -518,31 +567,54 @@ export async function acheevyRespondStream(
     return { stream: selectStream, model: 'model-selector', memories_recalled: memoriesRecalled };
   }
 
-  // 6. Call OpenRouter with stream: true
+  // 6. Call OpenRouter with stream: true — fallback chain on PRE-stream errors
+  // Mid-stream errors are NOT retried (would be confusing UX — user has
+  // already seen partial output). Only HTTP errors and missing body trigger
+  // the next model in the chain.
   if (!OPENROUTER_API_KEY) {
     throw new Error('No LLM API key configured');
   }
 
-  const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${OPENROUTER_API_KEY}`,
-      'X-OpenRouter-Title': 'The Deploy Platform',
-    },
-    body: JSON.stringify({
-      model,
-      messages,
-      temperature: 0.6,
-      max_tokens: 2000,
-      stream: true,
-    }),
-  });
+  const streamChain = buildModelChain(model);
+  let res: Response | null = null;
+  let resolvedStreamModel = streamChain[0]!;
+  const streamErrors: string[] = [];
 
-  if (!res.ok || !res.body) {
-    const errBody = await res.text().catch(() => 'unknown error');
-    throw new Error(`ACHEEVY stream failed: ${errBody}`);
+  for (const candidate of streamChain) {
+    try {
+      const r = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${OPENROUTER_API_KEY}`,
+          'X-OpenRouter-Title': 'The Deploy Platform',
+        },
+        body: JSON.stringify({
+          model: candidate,
+          messages,
+          temperature: 0.6,
+          max_tokens: 2000,
+          stream: true,
+        }),
+      });
+      if (r.ok && r.body) {
+        res = r;
+        resolvedStreamModel = candidate;
+        break;
+      }
+      const errBody = await r.text().catch(() => 'unknown error');
+      streamErrors.push(`${candidate}: HTTP ${r.status} ${errBody.slice(0, 200)}`);
+    } catch (e) {
+      streamErrors.push(`${candidate}: ${e instanceof Error ? e.message : String(e)}`);
+    }
   }
+
+  if (!res || !res.body) {
+    throw new Error(`ACHEEVY stream failed across all models:\n${streamErrors.join('\n')}`);
+  }
+
+  // Use the actually-resolved model for downstream cost tracking
+  const usedModel = resolvedStreamModel;
 
   const upstreamReader = res.body.getReader();
   const decoder = new TextDecoder();
@@ -559,7 +631,7 @@ export async function acheevyRespondStream(
       let fullContent = '';
       let tokensIn = 0;
       let tokensOut = 0;
-      let resolvedModel = model;
+      let resolvedModel = usedModel;
       let lastCostUpdateTime = 0;
       let lastCostUpdateChars = 0;
       let inThinkBlock = false;
@@ -722,5 +794,5 @@ export async function acheevyRespondStream(
     },
   });
 
-  return { stream, model, memories_recalled: memoriesRecalled };
+  return { stream, model: usedModel, memories_recalled: memoriesRecalled };
 }
