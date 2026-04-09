@@ -1,24 +1,26 @@
 /**
  * 3-Consultant Engagement
  * =======================
- * Per Rish 2026-04-08:
- *   "But if it's a larger project, then they bring in the consulting,
- *    and then they do the three consultant engagement where we have
- *    the note and ACHEEVY, and then the consultant."
+ * Source of truth: cti-hub/src/lib/acheevy/guide-me-engine.ts
  *
- * For larger projects, Spinner spawns a three-way panel:
- *   1. NOTE / AVVA NOON Guardian — validates RTCCF + V.I.B.E.
- *   2. ACHEEVY — customer-facing executive
- *   3. The Consultant — a domain-specialist Boomer_Ang or external
+ * Three Boomer_Ang-class agents already wired in production:
+ *   1. Consult_Ang — fast responder, active listener (Qwen 3.6 Plus free)
+ *   2. ACHEEVY    — senior consultant, execution model
+ *   3. Note_Ang   — session recorder, audit + pattern detection
+ *                   (NVIDIA Nemotron Nano free)
  *
- * The user watches the three-way conversation play out in the PiP
- * window. This is the differentiator that justifies the platform —
- * customers see the virtual organization actually working.
+ * Spinner spawns this 3-way panel for larger projects detected by the
+ * RFP-BAMARAM intent classifier. The user watches the three-way
+ * conversation play out in the PiP window — this is the differentiator
+ * that justifies the virtual-organization positioning.
  *
- * NOTE interpretation: best read is that NOTE is the AVVA NOON
- * Guardian half (the validation persona). If NOTE is a separate
- * persona, this module needs an update — flagged in
- * project_spinner_feature.md.
+ * CRITICAL: AVVA NOON is NOT involved in the chat or in this panel.
+ * AVVA NOON is the Brain of SmelterOS at the platform layer; SmelterOS
+ * is its own brick in the ACHIEVEMOR ecosystem. The chat surface +
+ * 3-Consultant Engagement live at the customer-company layer where
+ * ACHEEVY is the top of the chain. Earlier memory had a wrong "NOTE =
+ * NOON Guardian" interpretation — that was corrected 2026-04-08 once
+ * Note_Ang was located in the existing guide-me-engine code.
  */
 
 import { randomUUID } from 'node:crypto';
@@ -37,7 +39,9 @@ export function spawnPanel(input: SpawnPanelInput): ConsultantPanel {
   const panel: ConsultantPanel = {
     jobId: input.jobId,
     members: {
-      note: 'avva_noon',
+      // Note_Ang — the literal note-taker. NOT AVVA NOON. AVVA NOON
+      // operates at the SmelterOS platform layer and is never in chat.
+      note: 'note_ang',
       acheevy: 'acheevy',
       consultant: {
         agentId: input.consultantAgentId ?? matchConsultant(input.scope),

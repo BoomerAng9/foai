@@ -68,7 +68,7 @@ SpinnerAction returned to chat:
 | `src/background-worker.ts` | In-process job spawner + lifecycle |
 | `src/sidecar.ts` | Public sidecar interface for chat surfaces |
 | `src/live-look-in.ts` | NVIDIA Omniverse + Cosmos / Cloud Run Job adapter (stub for Phase 2) |
-| `src/three-consultant-engagement.ts` | NOTE/AVVA NOON + ACHEEVY + Consultant panel spawning |
+| `src/three-consultant-engagement.ts` | Note_Ang + ACHEEVY + Consultant panel spawning |
 | `src/index.ts` | Public API |
 
 ## The chat engine question
@@ -188,8 +188,8 @@ GCP DoD compliance gate is NOT a blocker — Cloud Run Jobs are GCP standard, no
 
 For larger projects, Spinner spawns a three-way panel:
 
-1. **NOTE / AVVA NOON Guardian half** — validates RTCCF + V.I.B.E.
-2. **ACHEEVY** — customer-facing executive, runs the conversation
+1. **Note_Ang** — session recorder, audit + pattern detection. Per `cti-hub/src/lib/acheevy/guide-me-engine.ts`. Currently backed by NVIDIA Nemotron Nano free.
+2. **ACHEEVY** — senior consultant, customer-facing executive
 3. **The Consultant** — domain-specialist Boomer_Ang matched by scope keywords (e.g. "code/build/api" → boomer_cto, "marketing/campaign" → boomer_cmo)
 
 Per Rish 2026-04-08:
@@ -197,7 +197,7 @@ Per Rish 2026-04-08:
 
 The user watches the three-way conversation in the PiP window. This is the differentiator that justifies the virtual-organization positioning — customers see the org actually working.
 
-> *NOTE interpretation:* best read is that NOTE is the AVVA NOON Guardian half. If NOTE is a separate persona, this needs an update — flagged in `project_spinner_feature.md`.
+**CRITICAL:** AVVA NOON is the Brain of SmelterOS at the platform layer. SmelterOS is its own brick in the ACHIEVEMOR ecosystem. AVVA NOON is **never** in the chat or in this 3-Consultant Engagement. The chat surface lives at the customer-company layer where ACHEEVY is the top of the chain. An earlier interpretation thought NOTE was phonetic for NOON — that was wrong. NOTE is literally **Note_Ang**, a separate Boomer_Ang-class agent already wired in `guide-me-engine.ts`.
 
 ## Phase order
 
@@ -237,7 +237,7 @@ Per Rish 2026-04-08:
 | RFP-BAMARAM always active | `feedback_rfp_bamaram_always_active.md` |
 | ACHEEVY chat engagement SOP | `project_acheevy_chat_engagement_sop.md` |
 | ACHEEVY Guide Me / Manage paths | `project_acheevy_guide_me_manage_paths.md` |
-| AVVA NOON canon (Guardian half = NOTE?) | `project_avva_noon_canon.md` |
+| AVVA NOON canon (platform layer ONLY, not in chat) | `project_avva_noon_canon.md` |
 | HR PMO Office (mission commissioning) | `project_hr_pmo_office.md` |
 | Reasoning stream UI (PiP window) | `project_reasoning_stream_ui.md` |
 | TPS_Report_Ang Pricing Overseer (handoff target) | `project_pricing_overseer_agent.md` |
