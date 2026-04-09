@@ -108,10 +108,10 @@ RULES:
 - ALWAYS use full position names: Quarterback, Running Back, Wide Receiver, Tight End, Offensive Tackle, Offensive Guard, Center, Defensive End, Defensive Tackle, Edge Rusher, Linebacker, Cornerback, Safety, Punter, Kicker. NEVER abbreviate to QB, RB, WR, TE, OT, OG, C, DE, DT, EDGE, LB, CB, S, P, K.`,
     color: '#D4A853',
     voice: {
-      engine: 'gemini-live',
+      engine: 'elevenlabs',
       voiceId: 'idris-broadcast',
-      style: 'late-night broadcast anchor, velvet baritone, measured pace, slight East Coast warmth',
-      allowImperfections: false,
+      style: 'late-night broadcast anchor, velvet baritone, measured pace, slight East Coast warmth — but NOT robotic or TTS-perfect. Natural breathing, micro-pauses between thoughts, slight vocal weight shifts. Sounds like a real anchor behind a real mic.',
+      allowImperfections: true,
     },
   },
   {
@@ -220,16 +220,16 @@ Smoke is ALSO tracking the updates to Mastering the NIL for Volume 2 — particu
     // 4-speaker, 90min) then VibeVoice becomes the scoped exception.
     // Re-evaluation trigger: next Gemini TTS release.
     voice: {
-      engine: 'gemini-live',
+      engine: 'elevenlabs',
       voiceId: 'haze-nyc-golden',
       speakers: {
         HAZE: {
-          engine: 'gemini-live',
+          engine: 'elevenlabs',
           voiceId: 'haze-nyc-golden',
           style: 'NY golden era cadence, Jadakiss/Styles P DNA, mid-range punch with slight rasp, quick rhythmic builds, natural stutters and laughter, occasional cursing, gets hyped when talking investment',
         },
         SMOKE: {
-          engine: 'gemini-live',
+          engine: 'elevenlabs',
           voiceId: 'smoke-houston-southern',
           style: 'Houston southern smooth, T.I./Big Boi/Pimp C DNA, deep chesty warmth with grain, deliberate weighty pace, patient professor energy, laughs easily, gets passionate (not angry) when teaching NIL readiness',
         },
@@ -392,10 +392,10 @@ Quiet. Cool. Exclusive. You are NOT for everyone and you don't want to be. You n
 - Drop at least one reference per long take to your backstory — the injury, the overseas pivot, Paris, the fashion house, Pascal 3D design work, a specific textile, a cigar, a rare tea. Make the world feel lived-in.`,
     color: '#F59E0B',
     voice: {
-      engine: 'gemini-live',
+      engine: 'elevenlabs',
       voiceId: 'astra-refined-tenor',
-      style: 'smooth tenor like aged bourbon, unhurried, subtle continental finish, warm but private, lets silence land, slight smokiness from cigars — never loud, never rushed',
-      allowImperfections: false,
+      style: 'smooth tenor like aged bourbon, unhurried, subtle continental finish, warm but private, lets silence land, slight smokiness from cigars — never loud, never rushed. Natural pacing with real pauses between thoughts, not metronomic TTS delivery. Sounds like a man who has all the time in the world.',
+      allowImperfections: true,
     },
   },
   {
@@ -454,10 +454,10 @@ RULES:
 - Never break the cosmic secret. The audience suspects — they never confirm.`,
     color: '#8B5CF6',
     voice: {
-      engine: 'gemini-live',
+      engine: 'elevenlabs',
       voiceId: 'bun-e-cosmic-alto',
-      style: 'smooth resonant alto, commanding but warm, scholarly cadence, occasionally lyrical when dropping wisdom (rhymes land naturally), never slang, never loud, occasional near-slip when she almost reveals her origin then catches herself',
-      allowImperfections: false,
+      style: 'smooth resonant alto, commanding but warm, scholarly cadence, occasionally lyrical when dropping wisdom (rhymes land naturally), never slang, never loud, occasional near-slip when she almost reveals her origin then catches herself. Natural breathing between thoughts, slight melodic drift in pitch, sounds like a real woman thinking out loud on mic — not a TTS engine reading a script.',
+      allowImperfections: true,
     },
   },
 ];

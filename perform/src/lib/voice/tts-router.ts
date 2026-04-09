@@ -19,6 +19,7 @@
  * stripped before synthesis.
  */
 
+import path from 'path';
 import { stripReasoningArtifacts } from '@/lib/openrouter';
 import type { AnalystPersona } from '@/lib/analysts/personas';
 import {
@@ -90,14 +91,52 @@ export function parseSpeakerTurns(text: string): SpeakerTurn[] {
   return turns.filter(t => t.text.length > 0);
 }
 
-/* ── Inject expressive cues when the analyst allows imperfections ── */
+/* ── Inject expressive cues + v3 audio tags for raw podcast feel ──
+ * Per Rish 2026-04-09: "the speaker cannot be so smooth and perfect,
+ * and even toned. No podcaster sounds like that." Real podcasts have
+ * breathing, throat clears, micro-pauses, vocal fry, laughter bleed.
+ *
+ * When allowImperfections is true AND engine is ElevenLabs (v3):
+ *   - Convert parenthetical cues (laughs) → [laughs] audio tags
+ *   - Inject [breathes] between long sentences
+ *   - Inject [clears throat] at occasional turn starts
+ *   - Keep model-emitted cues intact
+ *
+ * When allowImperfections is false (refined voices like Void-Caster):
+ *   - Still inject subtle [breathes] for natural pacing
+ *   - Strip loud cues (laughs, yelling, cursing)
+ */
 function injectExpressiveCues(text: string, allowImperfections: boolean): string {
+  // Convert parenthetical stage directions to v3 audio tags
+  // e.g. (laughs) → [laughs], (sighs) → [sighs]
+  let processed = text.replace(
+    /\(([^)]+)\)/g,
+    (_, cue: string) => `[${cue.toLowerCase().trim()}]`,
+  );
+
   if (!allowImperfections) {
-    // Strip any cue the model might have put in for refined voices
-    return text.replace(/\s*\([^)]*?(laughs|stutters|cursing|curses|yelling|raises voice)[^)]*?\)\s*/gi, ' ');
+    // Refined voices: strip loud cues but keep subtle breathing
+    processed = processed.replace(
+      /\s*\[(?:laughs|laughs harder|stutters|cursing|curses|yelling|raises voice|shouts|wheezing)[^\]]*\]\s*/gi,
+      ' ',
+    );
+    // Add subtle breathing between long sentences for natural pacing
+    processed = processed.replace(/([.!?])\s+([A-Z])/g, (_, punct, next) => {
+      return Math.random() < 0.15 ? `${punct} [breathes] ${next}` : `${punct} ${next}`;
+    });
+    return processed;
   }
-  // Keep whatever the model emitted, which may include (laughs), (pauses), etc.
-  return text;
+
+  // Raw voices: inject natural human sounds for podcast authenticity
+  // Add breathing between sentences (~20% chance per sentence break)
+  processed = processed.replace(/([.!?])\s+([A-Z])/g, (_, punct, next) => {
+    const r = Math.random();
+    if (r < 0.12) return `${punct} [breathes] ${next}`;
+    if (r < 0.18) return `${punct} [exhales] ${next}`;
+    return `${punct} ${next}`;
+  });
+
+  return processed;
 }
 
 /* ── Normalize dialect hints for regional engines ── */
@@ -153,17 +192,14 @@ function buildPayload(req: SpeakRequest): EnginePayload {
   return { engine, speakers, style: req.analyst.voice.style };
 }
 
-/* ── Fallback chain for refined-solo engines ──
- * If the primary engine fails or isn't authorized, walk this chain
- * in order until something returns audio. ElevenLabs was re-enabled
- * 2026-04-09 after the plan was topped up — it sits at the tail of
- * the chain (after all free tiers) as the premium last-resort
- * refined voice. Persona-specific assignments where ElevenLabs is
- * the PRIMARY (e.g. Void-Caster, Astra) are unaffected by this
- * chain order — those hit elevenlabs directly via analyst.voice.engine.
+/* ── Fallback chain ──
+ * ElevenLabs eleven_v3 is PRIMARY for all Per|Form analysts.
+ * Gemini 2.5 TTS is OUT — deprecated per Rish's latest-model-only
+ * rule (no "per product line" rationalization). If ElevenLabs fails,
+ * walk remaining engines as last resort.
  */
 const SOLO_FALLBACK_CHAIN: Array<EnginePayload['engine']> = [
-  'gemini-live',     // Gemini 3.1 Flash Live (or 2.5 Pro TTS) — free primary
+  'elevenlabs',      // ElevenLabs eleven_v3 — PRIMARY for all analysts
   'personaplex',     // NVIDIA on Vertex AI (free credits)
   'grok-voice',      // xAI Grok 4.20 voice (when team auth lands)
   'playht',          // Play.ht v3 — paid, regional accents
@@ -341,6 +377,41 @@ export async function speakAnalystContent(req: SpeakRequest): Promise<SpeakResul
 
   try {
     const { audioUrl, error, engineUsed } = await dispatchWithFallback(payload);
+
+    // Post-process: mix ambient background + reverb for raw podcast sound.
+    // Only runs when we have a successful audio URL AND the analyst has
+    // a post-process config. Lyria ambient is optional — when not wired,
+    // the post-processor applies reverb only. When Lyria is live, each
+    // analyst gets a custom ambient track matching their studio setting.
+    if (audioUrl) {
+      try {
+        const { postProcessPodcastAudio, generateLyriaAmbient } = await import('./post-process');
+        const audioFilePath = path.join(process.cwd(), 'public', audioUrl);
+
+        // Attempt to get or generate a Lyria ambient track
+        const ambient = await generateLyriaAmbient(req.analyst.id);
+
+        const processed = await postProcessPodcastAudio({
+          analystId: req.analyst.id,
+          ttsAudioPath: audioFilePath,
+          ambientTrackPath: ambient.filePath ?? undefined,
+        });
+
+        if (processed.outputPath) {
+          return {
+            audioUrl: processed.outputPath,
+            engine: `${engineUsed}+postprocess(${processed.applied.join(', ')})`,
+            contentHash: hash,
+          };
+        }
+        // Post-process failed — return raw TTS (still usable)
+        console.warn(`[tts-router] post-process failed for ${req.analyst.id}: ${processed.error}`);
+      } catch (ppErr) {
+        // Post-process import or execution failed — return raw TTS
+        console.warn(`[tts-router] post-process skipped: ${ppErr instanceof Error ? ppErr.message : ppErr}`);
+      }
+    }
+
     return {
       audioUrl,
       engine: engineUsed,
