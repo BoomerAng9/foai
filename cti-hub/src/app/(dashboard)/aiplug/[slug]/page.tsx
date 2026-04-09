@@ -25,6 +25,7 @@ import type {
   PlugRow,
   PlugRunRow,
 } from '@/lib/aiplug/types';
+import LiveLookIn from '@/components/aiplug/LiveLookIn';
 
 function formatCents(cents: number): string {
   if (cents === 0) return 'Free demo';
@@ -301,6 +302,12 @@ export default function PlugDetailPage({
           <div className="mt-4 text-[10px] font-mono text-fg-tertiary text-center">
             Runtime: autonomous · heartbeat 60s · owner-viewable logs
           </div>
+
+          {lastLaunchId && (
+            <div className="mt-4">
+              <LiveLookIn runId={lastLaunchId} />
+            </div>
+          )}
         </aside>
       </div>
     </div>
