@@ -388,7 +388,8 @@ export async function acheevyRespond(
   } catch (err) { console.error('[Agent] Memorize turn failed:', err instanceof Error ? err.message : err); }
 
   // Estimate cost from OpenRouter generation data, fallback to model lookup
-  const generationCost = completion.usage?.total_cost;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const generationCost = (completion.usage as any)?.total_cost as number | undefined;
   const costEstimate = generationCost != null
     ? generationCost
     : (tokensIn / 1_000_000) * 0.30 + (tokensOut / 1_000_000) * 1.20; // MiniMax M2.7 default rates
