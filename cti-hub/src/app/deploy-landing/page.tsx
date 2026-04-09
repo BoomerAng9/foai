@@ -70,9 +70,23 @@ export default function DeployLanding() {
         }
       />
 
-      {/* Hero */}
-      <section className="relative py-16 sm:py-24 px-4 sm:px-6">
-        <div className="absolute top-[20%] left-1/2 -translate-x-1/2 w-[600px] h-[600px] rounded-full opacity-[0.04]"
+      {/* Hero — night port aesthetic (#11) */}
+      <section className="relative py-16 sm:py-24 px-4 sm:px-6 overflow-hidden">
+        {/* Night port background image — drops in when /deploy/night-port-hero.jpg exists */}
+        <div
+          className="absolute inset-0 bg-cover bg-center opacity-30"
+          style={{ backgroundImage: "url('/deploy/night-port-hero.jpg')" }}
+          aria-hidden="true"
+        />
+        {/* Dark overlay for text readability */}
+        <div className="absolute inset-0 bg-[#0A0A0A]/85" aria-hidden="true" />
+        {/* Cyan circuit grid pattern */}
+        <div className="absolute inset-0 opacity-[0.03]" style={{
+          backgroundImage: 'linear-gradient(rgba(6,182,212,0.4) 1px, transparent 1px), linear-gradient(90deg, rgba(6,182,212,0.4) 1px, transparent 1px)',
+          backgroundSize: '60px 60px',
+        }} aria-hidden="true" />
+        {/* Gold radial glow behind title */}
+        <div className="absolute top-[20%] left-1/2 -translate-x-1/2 w-[600px] h-[600px] rounded-full opacity-[0.06]"
           style={{ background: 'radial-gradient(circle, #E8A020 0%, transparent 70%)' }} />
 
         <div className="relative max-w-4xl mx-auto text-center">
@@ -81,8 +95,8 @@ export default function DeployLanding() {
           </p>
 
           <h1 className="text-3xl sm:text-5xl md:text-7xl font-black tracking-tight leading-[1.05] mb-6">
-            Run a <span style={{ color: '#E8A020', fontFamily: "'Permanent Marker', cursive" }}>company</span>.<br />
-            Without the <span style={{ color: '#E8A020', fontFamily: "'Permanent Marker', cursive" }}>company</span>.
+            Run a <span className="text-[#E8A020] font-black">company</span>.<br />
+            Without the <span className="text-[#E8A020] font-black">company</span>.
           </h1>
 
           <p className="text-base sm:text-lg text-white/50 max-w-2xl mx-auto mb-4">
@@ -133,7 +147,7 @@ export default function DeployLanding() {
           <p className="font-mono text-[10px] text-[#E8A020] tracking-[0.3em] uppercase mb-4">The difference</p>
           <h2 className="text-2xl md:text-3xl font-light tracking-tight mb-6">
             Every AI platform can generate text.<br />
-            <span className="font-bold">This one runs like a real <span style={{ color: '#E8A020', fontFamily: "'Permanent Marker', cursive" }}>company</span>.</span>
+            <span className="font-bold">This one runs like a real <span className="text-[#E8A020] font-black">company</span>.</span>
           </h2>
           <p className="text-sm text-white/40 leading-relaxed">
             22 live services. 6 Boomer_Angs. 17 Lil_Hawks in the Sqwaadrun. A Digital CEO that delegates, not generates.
@@ -191,16 +205,19 @@ export default function DeployLanding() {
         </div>
       </section>
 
-      {/* The Workforce — Strategic Tier Boomer_Ang Roster */}
+      {/* The Workforce — Strategic Tier Boomer_Ang Roster (#13 sunset overlay) */}
       <section className="relative py-16 sm:py-20 px-4 sm:px-6 border-t border-white/5 overflow-hidden">
-        {/* Sunset port patrol overlay */}
+        {/* Sunset port patrol background — drops in when /deploy/sunset-port-overlay.jpg exists */}
         <div
-          className="absolute inset-0 opacity-[0.08]"
-          style={{
-            backgroundImage: "url('/boomer-angs-hero.png')",
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-          }}
+          className="absolute inset-0 opacity-[0.12] bg-cover bg-center"
+          style={{ backgroundImage: "url('/deploy/sunset-port-overlay.jpg')" }}
+          aria-hidden="true"
+        />
+        {/* Warm sunset gradient overlay — visible even without the image */}
+        <div
+          className="absolute inset-0 opacity-[0.06]"
+          style={{ background: 'linear-gradient(135deg, rgba(249,115,22,0.3) 0%, rgba(232,160,32,0.2) 40%, transparent 70%)' }}
+          aria-hidden="true"
         />
         <div className="relative max-w-6xl mx-auto">
           <div className="text-center mb-12">
