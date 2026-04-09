@@ -18,7 +18,7 @@ import { requireAuth } from '@/lib/auth-guard';
  */
 
 const OPENROUTER_KEY = process.env.OPENROUTER_API_KEY || '';
-const AUTOMATION_MODEL = 'qwen/qwen3.6-plus:free';
+const AUTOMATION_MODEL = 'qwen/qwen-2.5-72b-instruct:free';
 
 export async function POST(req: NextRequest) {
   const auth = await requireAuth(req);

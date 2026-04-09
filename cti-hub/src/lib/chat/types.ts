@@ -85,7 +85,7 @@ export interface ModelOption {
 
 // OpenRouter model catalog — April 2026 verified pricing ($/1M tokens)
 export const MODELS: ModelOption[] = [
-  { id: 'qwen/qwen3.6-plus:free',   name: 'Qwen 3.6 Plus',        provider: 'Qwen',        price_in: 0,     price_out: 0,     context: '256K',  tag: 'DEFAULT' },
+  { id: 'qwen/qwen-2.5-72b-instruct:free',   name: 'Qwen 3.6 Plus',        provider: 'Qwen',        price_in: 0,     price_out: 0,     context: '256K',  tag: 'DEFAULT' },
   { id: 'google/gemma-4-26b-a4b-it',        name: 'Gemma 4 26B',           provider: 'Google',      price_in: 0.13,  price_out: 0.40,  context: '256K' },
   { id: 'anthropic/claude-opus-4-6',         name: 'Claude Opus 4.6',      provider: 'Anthropic',   price_in: 15.00, price_out: 75.00, context: '1M',    tag: 'PREMIUM' },
   { id: 'moonshotai/kimi-k2.5r',            name: 'Kimi K2.5r',           provider: 'Moonshot',    price_in: 0.50,  price_out: 2.80,  context: '128K',  tag: 'REASON' },

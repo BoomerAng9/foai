@@ -43,7 +43,7 @@ metadata:
     top_p: 0.92
     note: "For models that do not expose min_p (Anthropic, OpenAI)"
   model_routing:
-    default: "qwen/qwen3.6-plus:free"
+    default: "qwen/qwen-2.5-72b-instruct:free"
     research_heavy: "google/gemini-3.1-pro"
     creative_heavy: "google/gemini-3.1-flash"
     instant_triage: "inception/mercury-2"

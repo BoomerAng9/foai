@@ -18,7 +18,7 @@ export interface Tutorial {
 }
 
 const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY || '';
-const MODEL = 'qwen/qwen3.6-plus:free';
+const MODEL = 'qwen/qwen-2.5-72b-instruct:free';
 
 /**
  * Generate a step-by-step tutorial from extracted content.
