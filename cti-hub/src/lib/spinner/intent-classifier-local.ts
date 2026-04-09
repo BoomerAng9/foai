@@ -21,6 +21,9 @@
 
 import type { IntentCategory, IntentClassification, SpinnerAction } from './spinner-types';
 
+// Re-export types so classifier.ts can import them from this module
+export type { IntentCategory, IntentClassification, SpinnerAction } from './spinner-types';
+
 // ─── Heuristic phase (fast, deterministic) ──────────────────────────
 
 interface HeuristicSignal {
