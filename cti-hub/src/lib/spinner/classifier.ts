@@ -19,11 +19,11 @@ import {
   type IntentCategory,
   type IntentClassification,
   type SpinnerAction,
-} from '@aims/spinner';
+} from './intent-classifier-local';
 
 // Re-export the canonical types under the names cti-hub callers
 // already use, mapped onto the upstream Spinner types.
-export type { IntentCategory } from '@aims/spinner';
+export type { IntentCategory } from './spinner-types';
 
 export type SpinnerActionType = SpinnerAction['type'];
 
