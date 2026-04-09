@@ -69,7 +69,9 @@ function SqwaadrunDashboardPageInner() {
     };
   }, [profile]);
 
-  const isOwnerUser = profile?.role === 'admin' || profile?.role === 'operator';
+  // Owner detection via email (NEXT_PUBLIC_OWNER_EMAILS) — same pattern as layout.tsx
+  const ownerEmails = (process.env.NEXT_PUBLIC_OWNER_EMAILS || '').split(',').map(e => e.trim().toLowerCase()).filter(Boolean);
+  const isOwnerUser = (!!user?.email && ownerEmails.includes(user.email.toLowerCase())) || profile?.role === 'admin' || profile?.role === 'operator';
   const tier = slice.sqwaadrun_tier ? SQWAADRUN_TIERS[slice.sqwaadrun_tier] : null;
   // Owners always active — they bypass tiers in the API (mission/route.ts) and should bypass in the UI too
   const isActive = isOwnerUser || (slice.sqwaadrun_status === 'active' && tier !== null);

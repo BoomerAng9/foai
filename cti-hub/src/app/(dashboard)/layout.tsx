@@ -35,8 +35,11 @@ function CornerBracket({ position }: { position: 'tl' | 'tr' | 'bl' | 'br' }) {
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const { profile, organization, signOut } = useAuth();
-  const isOwnerUser = profile?.role === 'admin' || profile?.role === 'operator';
+  const { user, profile, organization, signOut } = useAuth();
+  // Owner detection: check email against NEXT_PUBLIC_OWNER_EMAILS (works client-side)
+  // Falls back to role check for backwards compat with profiles that have role set
+  const ownerEmails = (process.env.NEXT_PUBLIC_OWNER_EMAILS || '').split(',').map(e => e.trim().toLowerCase()).filter(Boolean);
+  const isOwnerUser = (!!user?.email && ownerEmails.includes(user.email.toLowerCase())) || profile?.role === 'admin' || profile?.role === 'operator';
   const [userMenuOpen, setUserMenuOpen] = useState(false);
 
   // Full-bleed escape hatch — /smelter-os/* runs in its own visual world
