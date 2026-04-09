@@ -195,3 +195,21 @@ export async function synthesizeGeminiTts(req: GeminiTtsRequest): Promise<Gemini
     };
   }
 }
+
+/* ── Multi-speaker synthesis (stub — falls back to single-speaker) ── */
+export interface GeminiMultiSpeakerRequest {
+  script: string;
+  speakers: Array<{ speakerName: string; voiceId: string; styleHint?: string }>;
+  overallStyle?: string;
+}
+
+export async function synthesizeGeminiTtsMultiSpeaker(
+  req: GeminiMultiSpeakerRequest,
+): Promise<GeminiTtsResult> {
+  const primary = req.speakers[0];
+  return synthesizeGeminiTts({
+    text: req.script,
+    voiceId: primary?.voiceId || 'Kore',
+    styleHint: primary?.styleHint || req.overallStyle,
+  });
+}

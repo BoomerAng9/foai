@@ -25,6 +25,8 @@ import {
   ExternalLink,
   Home,
   Menu,
+  Pin,
+  PinOff,
   X,
 } from 'lucide-react';
 import {
@@ -95,6 +97,7 @@ export default function NavChrome({
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [sidebarHovered, setSidebarHovered] = useState(false);
+  const [sidebarPinned, setSidebarPinned] = useState(false);
   const [manuallyExpanded, setManuallyExpanded] = useState<Set<string>>(new Set());
 
   // Auto-expand the branch containing the active route
@@ -132,7 +135,7 @@ export default function NavChrome({
     };
   }, [mobileMenuOpen]);
 
-  const sidebarExpanded = sidebarHovered;
+  const sidebarExpanded = sidebarHovered || sidebarPinned;
   const canGoBack = pathname !== '/' && pathname !== '/chat';
 
   // Active entry label for the header
@@ -192,6 +195,17 @@ export default function NavChrome({
               {host === 'cti' ? 'CTI Hub' : 'Deploy'}
             </span>
           </Link>
+          {/* Pin/expand toggle for condensed/split-window mode */}
+          <button
+            onClick={() => setSidebarPinned(prev => !prev)}
+            title={sidebarPinned ? 'Collapse sidebar' : 'Pin sidebar open'}
+            className={`ml-auto hidden md:flex items-center justify-center p-1 rounded text-fg-tertiary hover:text-fg hover:bg-bg-elevated transition-all ${
+              sidebarExpanded ? '' : 'md:hidden'
+            } lg:flex`}
+          >
+            {sidebarPinned ? <PinOff className="w-3.5 h-3.5" /> : <Pin className="w-3.5 h-3.5" />}
+          </button>
+          {/* Mobile close */}
           <button
             onClick={() => setMobileMenuOpen(false)}
             className="ml-auto md:hidden text-fg-tertiary hover:text-fg"
