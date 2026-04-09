@@ -69,13 +69,13 @@ export function PlugChrome({
     : { href: backHref };
 
   return (
-    <header className="border-b border-white/10 px-6 py-4 relative z-30">
+    <header className="border-b border-border px-6 py-4 relative z-30">
       <div className="max-w-7xl mx-auto flex items-center gap-4">
         {/* Back arrow */}
         <BackEl
           {...backProps}
           aria-label={backLabel}
-          className="text-white/40 hover:text-white transition-colors shrink-0"
+          className="text-fg-tertiary hover:text-fg transition-colors shrink-0"
           onMouseEnter={(e: React.MouseEvent<HTMLElement>) =>
             (e.currentTarget.style.color = accentColor)
           }
@@ -95,9 +95,9 @@ export function PlugChrome({
 
         {/* Title + tagline */}
         <div className="min-w-0 flex-1">
-          <h1 className="text-xl font-bold tracking-tight truncate">{title}</h1>
+          <h1 className="text-xl font-bold tracking-tight truncate text-fg">{title}</h1>
           {tagline && (
-            <p className="text-xs text-white/40 font-mono truncate">{tagline}</p>
+            <p className="text-xs text-fg-tertiary font-mono truncate">{tagline}</p>
           )}
         </div>
 
@@ -110,7 +110,7 @@ export function PlugChrome({
           aria-label={menuOpen ? 'Close menu' : 'Open menu'}
           aria-expanded={menuOpen}
           onClick={() => setMenuOpen((v) => !v)}
-          className="shrink-0 p-2 -mr-2 text-white/60 hover:text-white transition-colors"
+          className="shrink-0 p-2 -mr-2 text-fg-secondary hover:text-fg transition-colors"
         >
           {menuOpen ? <CloseIcon className="w-5 h-5" /> : <MenuIcon className="w-5 h-5" />}
         </button>
@@ -128,7 +128,7 @@ export function PlugChrome({
           />
           {/* Dropdown panel */}
           <nav
-            className="absolute right-6 top-full mt-1 z-20 min-w-[220px] border border-white/10 bg-[#0A0A0A]/95 backdrop-blur shadow-2xl"
+            className="absolute right-6 top-full mt-1 z-20 min-w-[220px] border border-border bg-bg-surface/95 backdrop-blur shadow-2xl"
             role="menu"
           >
             <ul className="py-2">
@@ -137,18 +137,18 @@ export function PlugChrome({
                   <Link
                     href={item.href}
                     role="menuitem"
-                    className="block px-4 py-2.5 text-sm text-white/70 hover:bg-white/5 hover:text-white transition-colors font-mono uppercase tracking-wider"
+                    className="block px-4 py-2.5 text-sm text-fg-secondary hover:bg-bg-elevated hover:text-fg transition-colors font-mono uppercase tracking-wider"
                     onClick={() => setMenuOpen(false)}
                   >
                     {item.label}
                   </Link>
                 </li>
               ))}
-              <li className="border-t border-white/10 mt-1 pt-1">
+              <li className="border-t border-border mt-1 pt-1">
                 <Link
                   href="/auth/logout"
                   role="menuitem"
-                  className="block px-4 py-2.5 text-sm text-white/40 hover:bg-white/5 hover:text-white/80 transition-colors font-mono uppercase tracking-wider"
+                  className="block px-4 py-2.5 text-sm text-fg-tertiary hover:bg-bg-elevated hover:text-fg transition-colors font-mono uppercase tracking-wider"
                   onClick={() => setMenuOpen(false)}
                 >
                   Sign Out

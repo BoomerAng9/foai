@@ -155,7 +155,7 @@ export default function SMBMarketingPage() {
   // ── Setup Screen ──
   if (step === 'setup') {
     return (
-      <div className="min-h-screen bg-[#0A0A0A] text-white">
+      <div className="min-h-screen bg-bg text-fg">
         <PlugChrome
           title="Marketing Agency"
           tagline="Powered by The Deploy Platform"
@@ -235,7 +235,7 @@ export default function SMBMarketingPage() {
   // ── Researching Screen ──
   if (step === 'researching' && loading) {
     return (
-      <div className="min-h-screen bg-[#0A0A0A] text-white">
+      <div className="min-h-screen bg-bg text-fg">
         <PlugChrome
           title="Marketing Agency"
           tagline="Agents working..."
@@ -269,7 +269,7 @@ export default function SMBMarketingPage() {
 
   // ── Dashboard (Real Data) ──
   return (
-    <div className="min-h-screen bg-[#0A0A0A] text-white">
+    <div className="min-h-screen bg-bg text-fg">
       <PlugChrome
         title={business.name}
         tagline={`${business.industry} · ${business.location}`}

@@ -210,7 +210,7 @@ export default function TeacherDigitalTwinPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0A0A0A] text-white">
+    <div className="min-h-screen bg-bg text-fg">
       <PlugChrome
         title={`${teacherName}'s Classroom`}
         tagline={parentMode ? 'Parent View — Read Only' : 'Multilingual Classroom Assistant'}
