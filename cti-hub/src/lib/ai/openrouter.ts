@@ -40,7 +40,7 @@ function getOpenRouterHeaders() {
 }
 
 export function getOpenRouterModel(inputMode: 'text' | 'voice' = 'text') {
-  const textModel = process.env.OPENROUTER_TEXT_MODEL || 'qwen/qwen-2.5-72b-instruct:free';
+  const textModel = process.env.OPENROUTER_TEXT_MODEL || 'qwen/qwen3.6-plus-preview:free';
   const voiceModel = process.env.OPENROUTER_VOICE_MODEL || textModel;
   return inputMode === 'voice' ? voiceModel : textModel;
 }

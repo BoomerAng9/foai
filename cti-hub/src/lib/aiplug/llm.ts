@@ -30,7 +30,7 @@ export interface LlmTier {
 }
 
 export const DEMO_PLUG_CASCADE: LlmTier[] = [
-  { id: 'qwen/qwen-2.5-vl-72b-instruct:free', label: 'qwen-2.5-vl free', isFree: true },
+  { id: 'qwen/qwen3.6-plus-preview:free', label: 'qwen-2.5-vl free', isFree: true },
   { id: 'nvidia/llama-3.1-nemotron-70b-instruct:free', label: 'nemotron free', isFree: true },
   { id: 'meta-llama/llama-3.2-11b-vision-instruct:free', label: 'llama-3.2-vision free', isFree: true },
   { id: 'deepseek/deepseek-chat:free', label: 'deepseek free', isFree: true },

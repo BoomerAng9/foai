@@ -272,10 +272,10 @@ The user can also bypass Grammar by directly clicking the camera menu selectors.
 
 | Context | Default Model | Why |
 |---------|--------------|-----|
-| Chat (ACHEEVY in studio) | `qwen/qwen-2.5-72b-instruct:free` | Free, 78.8 SWE-bench, native tool calling |
+| Chat (ACHEEVY in studio) | `qwen/qwen3.6-plus-preview:free` | Free, 78.8 SWE-bench, native tool calling |
 | Chat (Consult_Ang instant) | `inception/mercury-2` | Sub-200ms response for fast acknowledgments |
 | Chat (Note_Ang background) | `nvidia/nemotron-nano-9b-v2:free` | Free background session recording |
-| Iller_Ang creative direction | `qwen/qwen-2.5-72b-instruct:free` | Free, strong reasoning for cinematic decisions |
+| Iller_Ang creative direction | `qwen/qwen3.6-plus-preview:free` | Free, strong reasoning for cinematic decisions |
 | Video generation (default) | Seedance 2.0 API | Highest quality, native audio |
 | Video generation (free/demo) | Wan 2.6 (1.3B self-hosted) | Zero cost, 8GB VRAM, decent quality |
 | Character consistency | LTX-2.3 IC-LoRA | Only model with open-source character LoRAs |

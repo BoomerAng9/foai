@@ -19,8 +19,8 @@
 const OPENROUTER_KEY = process.env.OPENROUTER_API_KEY || '';
 
 // Model assignments — Qwen 3.6 Plus (free, strong reasoning)
-const CONSULT_MODEL = 'qwen/qwen-2.5-72b-instruct:free';
-const ACHEEVY_MODEL = 'qwen/qwen-2.5-72b-instruct:free';
+const CONSULT_MODEL = 'qwen/qwen3.6-plus-preview:free';
+const ACHEEVY_MODEL = 'qwen/qwen3.6-plus-preview:free';
 const NOTE_MODEL = 'nvidia/nemotron-nano-9b-v2:free';
 
 interface SessionMessage {

@@ -21,7 +21,11 @@
 
 import { stripReasoningArtifacts } from '@/lib/openrouter';
 import type { AnalystPersona } from '@/lib/analysts/personas';
-import { synthesizeElevenLabs, elevenLabsAvailable } from './elevenlabs-client';
+import {
+  synthesizeElevenLabs,
+  synthesizeElevenLabsDialogue,
+  elevenLabsAvailable,
+} from './elevenlabs-client';
 import {
   synthesizeGeminiTts,
   synthesizeGeminiTtsMultiSpeaker,
@@ -178,6 +182,24 @@ async function dispatchSynthesis(payload: EnginePayload): Promise<{ audioUrl: st
       if (!elevenLabsAvailable()) {
         return { audioUrl: null, error: 'ELEVENLABS_API_KEY not set' };
       }
+      // Multi-speaker: use Eleven v3 dialogue mode via /v1/text-to-dialogue.
+      // Detect by counting unique voiceIds across turns (same pattern as
+      // Gemini multi-speaker wiring). Dialogue mode supports up to 10
+      // unique voices and emits one cohesive audio with natural
+      // transitions. Used by The Colonel + Gino today.
+      const uniqueVoices = Array.from(
+        new Set(payload.speakers.map(s => s.voiceId).filter(Boolean)),
+      );
+      if (uniqueVoices.length >= 2 && payload.speakers.length >= 2) {
+        const dialogueResult = await synthesizeElevenLabsDialogue({
+          turns: payload.speakers.map(s => ({
+            voiceId: s.voiceId,
+            text: s.text,
+          })),
+        });
+        return { audioUrl: dialogueResult.audioUrl, error: dialogueResult.error };
+      }
+      // Single-speaker path
       const result = await synthesizeElevenLabs({
         text: body,
         voiceId: firstSpeaker?.voiceId || 'idris-broadcast',

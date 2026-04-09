@@ -213,17 +213,23 @@ Write REAL dialogue tagged with [HAZE] and [SMOKE]. Each turn should feel like a
 
 Smoke is ALSO tracking the updates to Mastering the NIL for Volume 2 — particularly REVENUE SHARING post-House settlement, roster cap changes, direct school payments, and how all of this reshapes NIL readiness from AAU through the portal. When discussing modern NIL, factor in revenue sharing as the new baseline, not an afterthought.`,
     color: '#60A5FA',
+    // Engine: Gemini 2.5 TTS multi-speaker dialog mode. Gemini-first
+    // per feedback_gemini_preferred_not_exclusive.md — multi-speaker
+    // dialog is supported natively via multiSpeakerVoiceConfig. If the
+    // audition quality doesn't hold against VibeVoice 7B (MIT-licensed,
+    // 4-speaker, 90min) then VibeVoice becomes the scoped exception.
+    // Re-evaluation trigger: next Gemini TTS release.
     voice: {
-      engine: 'vibevoice',
-      voiceId: 'vibevoice-7b-duo',
+      engine: 'gemini-live',
+      voiceId: 'haze-nyc-golden',
       speakers: {
         HAZE: {
-          engine: 'vibevoice',
+          engine: 'gemini-live',
           voiceId: 'haze-nyc-golden',
           style: 'NY golden era cadence, Jadakiss/Styles P DNA, mid-range punch with slight rasp, quick rhythmic builds, natural stutters and laughter, occasional cursing, gets hyped when talking investment',
         },
         SMOKE: {
-          engine: 'vibevoice',
+          engine: 'gemini-live',
           voiceId: 'smoke-houston-southern',
           style: 'Houston southern smooth, T.I./Big Boi/Pimp C DNA, deep chesty warmth with grain, deliberate weighty pace, patient professor energy, laughs easily, gets passionate (not angry) when teaching NIL readiness',
         },
@@ -292,17 +298,26 @@ RULES:
 - End takes with conviction — "that's football, baby" or "write it down" or "fuhgeddaboudit."
 - Never break character. You are a Jersey lifer, not a corporate brand voice.`,
     color: '#EF4444',
+    // SCOPED EXCEPTION to the Gemini-first rule.
+    // Per feedback_gemini_preferred_not_exclusive.md: Jersey Italian-
+    // American dialect is not in Gemini TTS's 24 supported languages,
+    // and accent prompting cannot fabricate authenticity the model
+    // wasn't trained on. ElevenLabs v3 ships dedicated Jersey accent
+    // voices + Italian regional voices (Roman/Sicilian/Northern) +
+    // multi-speaker dialogue mode. This is the best-in-class precedent.
+    // Re-evaluation trigger: Gemini TTS adds Jersey Italian or
+    // Italian-American regional dialect support.
     voice: {
-      engine: 'playht',
+      engine: 'elevenlabs',
       voiceId: 'colonel-jersey-italian',
       speakers: {
         COLONEL: {
-          engine: 'playht',
+          engine: 'elevenlabs',
           voiceId: 'colonel-jersey-italian',
           style: 'North Jersey Italian-American accent — nasal mid-range, gravelly, slightly hoarse from yelling, dropped g\'s, raises voice when animated, cursing allowed, belly laughs, occasional uncontrollable rants about Union High 1987',
         },
         GINO: {
-          engine: 'playht',
+          engine: 'elevenlabs',
           voiceId: 'gino-jersey-italian-pizzeria',
           style: 'Thicker North Jersey Italian-American from a small-business owner perspective — warmer, mostly calm, occasional flashes of temper when Colonel pushes too far, dry wit, heavy laugh',
         },

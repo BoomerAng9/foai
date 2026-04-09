@@ -204,7 +204,7 @@ interface ConversationMessage {
 const MODEL_FALLBACK_CHAIN: readonly string[] = [
   'z-ai/glm-5.1',
   'google/gemini-3.0-flash',
-  'qwen/qwen-2.5-72b-instruct:free',
+  'qwen/qwen3.6-plus-preview:free',
 ];
 
 function isGemma(modelId: string): boolean {
