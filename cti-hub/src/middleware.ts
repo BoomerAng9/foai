@@ -37,6 +37,12 @@ export function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
+  // On cti.foai.cloud — root goes to ACHEEVY chat (owner's entry point)
+  const isCtiDomain = hostname.includes('cti.foai.cloud');
+  if (isCtiDomain && pathname === '/') {
+    return NextResponse.rewrite(new URL('/chat', request.url));
+  }
+
   // On deploy.foai.cloud — block owner-only routes entirely
   if (isDeployDomain) {
     const isAllowedRoute = pathname === '/' ||
