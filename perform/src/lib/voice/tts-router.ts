@@ -22,7 +22,11 @@
 import { stripReasoningArtifacts } from '@/lib/openrouter';
 import type { AnalystPersona } from '@/lib/analysts/personas';
 import { synthesizeElevenLabs, elevenLabsAvailable } from './elevenlabs-client';
-import { synthesizeGeminiTts, geminiTtsAvailable } from './gemini-tts-client';
+import {
+  synthesizeGeminiTts,
+  synthesizeGeminiTtsMultiSpeaker,
+  geminiTtsAvailable,
+} from './gemini-tts-client';
 
 export interface SpeakRequest {
   analyst: AnalystPersona;
@@ -147,14 +151,19 @@ function buildPayload(req: SpeakRequest): EnginePayload {
 
 /* ── Fallback chain for refined-solo engines ──
  * If the primary engine fails or isn't authorized, walk this chain
- * in order until something returns audio. ElevenLabs is intentionally
- * NOT in the chain — quota exhausted, manual top-up required.
+ * in order until something returns audio. ElevenLabs was re-enabled
+ * 2026-04-09 after the plan was topped up — it sits at the tail of
+ * the chain (after all free tiers) as the premium last-resort
+ * refined voice. Persona-specific assignments where ElevenLabs is
+ * the PRIMARY (e.g. Void-Caster, Astra) are unaffected by this
+ * chain order — those hit elevenlabs directly via analyst.voice.engine.
  */
 const SOLO_FALLBACK_CHAIN: Array<EnginePayload['engine']> = [
-  'gemini-live',     // Gemini 3.1 Flash Live (or 2.5 Pro TTS)
+  'gemini-live',     // Gemini 3.1 Flash Live (or 2.5 Pro TTS) — free primary
   'personaplex',     // NVIDIA on Vertex AI (free credits)
   'grok-voice',      // xAI Grok 4.20 voice (when team auth lands)
   'playht',          // Play.ht v3 — paid, regional accents
+  'elevenlabs',      // ElevenLabs Turbo v2 — paid refined last-resort
 ];
 
 /* ── Engine dispatch ── */
@@ -180,6 +189,43 @@ async function dispatchSynthesis(payload: EnginePayload): Promise<{ audioUrl: st
       if (!geminiTtsAvailable()) {
         return { audioUrl: null, error: 'GEMINI_API_KEY not set' };
       }
+      // Detect duo dialog by counting unique voiceIds across turns.
+      // buildPayload emits one entry per turn, not per speaker — so
+      // an 8-turn Haze+Smoke conversation produces 8 payload.speakers
+      // entries across 2 unique voiceIds. Gemini 2.5 TTS supports up
+      // to 2 speakers via multiSpeakerVoiceConfig — use it when we
+      // have exactly 2 unique voiceIds and at least 2 turns.
+      // Colonel+Gino are NOT routed here (scoped ElevenLabs exception
+      // for Jersey Italian dialect per feedback_gemini_preferred_not_exclusive.md).
+      const uniqueVoices = Array.from(
+        new Set(payload.speakers.map(s => s.voiceId).filter(Boolean)),
+      );
+      if (uniqueVoices.length === 2 && payload.speakers.length >= 2) {
+        const voice1Id = uniqueVoices[0];
+        const voice2Id = uniqueVoices[1];
+        const s1Name = voice1Id.toUpperCase().replace(/[^A-Z0-9_]/g, '_');
+        const s2Name = voice2Id.toUpperCase().replace(/[^A-Z0-9_]/g, '_');
+        // Rebuild the dialog script with speaker-name prefixes
+        const script = payload.speakers
+          .map(s => {
+            const name = s.voiceId === voice1Id ? s1Name : s2Name;
+            return `${name}: ${s.text}`;
+          })
+          .join('\n\n');
+        // Pick each speaker's style from the first turn where it appears
+        const s1Style = payload.speakers.find(s => s.voiceId === voice1Id)?.style;
+        const s2Style = payload.speakers.find(s => s.voiceId === voice2Id)?.style;
+        const multiResult = await synthesizeGeminiTtsMultiSpeaker({
+          script,
+          speakers: [
+            { speakerName: s1Name, voiceId: voice1Id, styleHint: s1Style },
+            { speakerName: s2Name, voiceId: voice2Id, styleHint: s2Style },
+          ],
+          overallStyle: payload.style,
+        });
+        return { audioUrl: multiResult.audioUrl, error: multiResult.error };
+      }
+      // Single-speaker path
       const result = await synthesizeGeminiTts({
         text: body,
         voiceId: firstSpeaker?.voiceId || 'idris-broadcast',
