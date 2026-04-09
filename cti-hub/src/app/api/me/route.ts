@@ -12,12 +12,10 @@ export async function GET(request: NextRequest) {
   const auth = await requireAuth(request);
   if (!auth.ok) return auth.response;
 
-  const email = auth.context?.user?.email || '';
-
   return NextResponse.json(
     {
       userId: auth.userId,
-      isOwner: isOwner(email),
+      isOwner: auth.role === 'owner',
       role: auth.role || null,
     },
     {
