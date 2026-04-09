@@ -37,6 +37,18 @@ from aiohttp import web
 from sqwaadrun.lil_scrapp_hawk import FullScrappHawkSquadrun, Mission, MissionType
 from sqwaadrun.general_ang import GeneralAng, AcheevyBridge, Policy
 from sqwaadrun.storage import SmelterStorage, get_storage
+from sqwaadrun.security import (
+    validate_targets,
+    sanitize_intent,
+    sanitize_config,
+    sanitize_output,
+    SSRFError,
+    mission_limiter,
+    scrape_limiter,
+    health_limiter,
+    audit_log,
+    check_dependencies,
+)
 
 logger = logging.getLogger("Sqwaadrun.Service")
 
@@ -111,19 +123,39 @@ async def scrape_intent(request: web.Request) -> web.Response:
     squad: FullScrappHawkSquadrun = request.app["squad"]
     storage: SmelterStorage = request.app["storage"]
 
+    # ── Rate limiting ──
+    client_ip = request.remote or "unknown"
+    allowed, remaining = scrape_limiter.check(client_ip)
+    if not allowed:
+        audit_log("rate_limited", client_ip, details={"endpoint": "/scrape"})
+        return web.json_response(
+            {"error": "rate limit exceeded. Try again in 60 seconds."},
+            status=429,
+            headers={"Retry-After": "60"},
+        )
+
     try:
         body = await request.json()
     except Exception:
         return web.json_response({"error": "invalid JSON body"}, status=400)
 
-    intent = body.get("intent", "")
-    targets = body.get("targets", [])
-    config = body.get("config", {})
+    intent = sanitize_intent(body.get("intent", ""))
+    raw_targets = body.get("targets", [])
+    config = sanitize_config(body.get("config", {}))
 
-    if not targets or not isinstance(targets, list):
+    if not raw_targets or not isinstance(raw_targets, list):
         return web.json_response({"error": "targets required (list of URLs)"}, status=400)
     if not intent:
         return web.json_response({"error": "intent required"}, status=400)
+
+    # ── SSRF validation — block internal/metadata URLs ──
+    try:
+        targets = validate_targets(raw_targets)
+    except SSRFError as e:
+        audit_log("ssrf_blocked", client_ip, targets=raw_targets[:5], details={"reason": str(e)})
+        return web.json_response({"error": f"target validation failed: {e}"}, status=400)
+
+    audit_log("scrape_start", client_ip, targets=targets[:5], details={"intent": intent[:100]})
 
     try:
         result = await bridge.scrape_intent(intent, targets, **config)
@@ -196,14 +228,25 @@ async def mission(request: web.Request) -> web.Response:
     squad: FullScrappHawkSquadrun = request.app["squad"]
     storage: SmelterStorage = request.app["storage"]
 
+    # ── Rate limiting ──
+    client_ip = request.remote or "unknown"
+    allowed, remaining = mission_limiter.check(client_ip)
+    if not allowed:
+        audit_log("rate_limited", client_ip, details={"endpoint": "/mission"})
+        return web.json_response(
+            {"error": "rate limit exceeded. Try again in 60 seconds."},
+            status=429,
+            headers={"Retry-After": "60"},
+        )
+
     try:
         body = await request.json()
     except Exception:
         return web.json_response({"error": "invalid JSON body"}, status=400)
 
     mtype_str = body.get("type", "").lower()
-    targets = body.get("targets", [])
-    config = body.get("config", {})
+    raw_targets = body.get("targets", [])
+    config = sanitize_config(body.get("config", {}))
 
     valid_types = {m.value for m in MissionType}
     if mtype_str not in valid_types:
@@ -211,8 +254,19 @@ async def mission(request: web.Request) -> web.Response:
             {"error": f"invalid mission type. valid: {sorted(valid_types)}"},
             status=400,
         )
-    if not targets:
+    if not raw_targets:
         return web.json_response({"error": "targets required"}, status=400)
+
+    # ── SSRF validation ──
+    try:
+        targets = validate_targets(raw_targets)
+    except SSRFError as e:
+        audit_log("ssrf_blocked", client_ip, targets=raw_targets[:5],
+                  details={"reason": str(e), "mission_type": mtype_str})
+        return web.json_response({"error": f"target validation failed: {e}"}, status=400)
+
+    audit_log("mission_start", client_ip, targets=targets[:5],
+              details={"mission_type": mtype_str})
 
     try:
         m = await squad.mission(mtype_str, targets, **config)
@@ -277,6 +331,18 @@ async def deny(request: web.Request) -> web.Response:
 
 async def on_startup(app: web.Application) -> None:
     logger.info("Bringing Sqwaadrun online for HTTP gateway...")
+
+    # ── Security checks at startup ──
+    dep_audit = check_dependencies()
+    if dep_audit["issues_found"] > 0:
+        for issue in dep_audit["issues"]:
+            logger.warning(
+                f"SECURITY: vulnerable package {issue['package']} "
+                f"v{issue['installed']} (min safe: {issue['minimum_safe']}, "
+                f"{issue['cve']})"
+            )
+    else:
+        logger.info(f"Security: {dep_audit['total_packages']} packages checked, no known vulnerabilities.")
     data_dir = Path(os.environ.get("SQWAADRUN_DATA_DIR", "./data"))
     data_dir.mkdir(parents=True, exist_ok=True)
 
