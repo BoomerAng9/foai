@@ -50,12 +50,16 @@ interface PaperformWebhookPayload {
 }
 
 export async function POST(request: NextRequest) {
-  // Verify shared secret if set
-  if (WEBHOOK_SECRET) {
-    const secret = request.headers.get('x-webhook-secret') || '';
-    if (secret !== WEBHOOK_SECRET) {
-      return NextResponse.json({ error: 'Invalid webhook secret' }, { status: 401 });
-    }
+  // Verify shared secret — REQUIRED in production. Never open.
+  if (!WEBHOOK_SECRET) {
+    return NextResponse.json(
+      { error: 'Webhook not configured. Set PAPERFORM_WEBHOOK_SECRET.' },
+      { status: 503 },
+    );
+  }
+  const secret = request.headers.get('x-webhook-secret') || '';
+  if (secret !== WEBHOOK_SECRET) {
+    return NextResponse.json({ error: 'Invalid webhook secret' }, { status: 401 });
   }
 
   if (!sql) {

@@ -4,7 +4,21 @@ import { sql } from '@/lib/insforge';
 /**
  * GET /api/perform/nft/card/[id] — Generate SVG card image for a draft prospect NFT
  * Returns an SVG image that can be used as the NFT artwork.
+ *
+ * SECURITY: All player data is XML-escaped before interpolation
+ * into the SVG to prevent stored XSS via crafted player names.
  */
+
+/** Escape XML/SVG special characters to prevent XSS */
+function escapeXml(s: string | null | undefined): string {
+  if (!s) return '';
+  return String(s)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&apos;');
+}
 
 function gradeColor(grade: number): string {
   if (grade >= 90) return '#D4A853'; // gold — Elite
@@ -66,10 +80,10 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
   <text x="34" y="65" font-family="monospace" font-size="9" font-weight="700" fill="${color}" letter-spacing="0.2em">${tier}</text>
 
   <!-- Player name -->
-  <text x="24" y="110" font-family="sans-serif" font-size="28" font-weight="800" fill="white" letter-spacing="-0.02em">${p.name}</text>
+  <text x="24" y="110" font-family="sans-serif" font-size="28" font-weight="800" fill="white" letter-spacing="-0.02em">${escapeXml(p.name)}</text>
 
   <!-- Position + School -->
-  <text x="24" y="136" font-family="monospace" font-size="14" fill="rgba(255,255,255,0.5)">${p.position} · ${p.school}</text>
+  <text x="24" y="136" font-family="monospace" font-size="14" fill="rgba(255,255,255,0.5)">${escapeXml(p.position)} · ${escapeXml(p.school)}</text>
 
   <!-- Grade circle -->
   <circle cx="340" cy="120" r="36" fill="none" stroke="${color}" stroke-width="3"/>
@@ -81,22 +95,22 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
 
   <!-- Stats -->
   <text x="24" y="200" font-family="monospace" font-size="9" fill="rgba(255,255,255,0.3)" letter-spacing="0.15em">KEY STATS</text>
-  <text x="24" y="220" font-family="sans-serif" font-size="12" fill="rgba(255,255,255,0.6)">${(p.key_stats || '').slice(0, 55)}</text>
-  <text x="24" y="238" font-family="sans-serif" font-size="12" fill="rgba(255,255,255,0.6)">${(p.key_stats || '').slice(55, 110)}</text>
+  <text x="24" y="220" font-family="sans-serif" font-size="12" fill="rgba(255,255,255,0.6)">${escapeXml((p.key_stats || '').slice(0, 55))}</text>
+  <text x="24" y="238" font-family="sans-serif" font-size="12" fill="rgba(255,255,255,0.6)">${escapeXml((p.key_stats || '').slice(55, 110))}</text>
 
   <!-- NFL Comparison -->
   <text x="24" y="280" font-family="monospace" font-size="9" fill="rgba(255,255,255,0.3)" letter-spacing="0.15em">NFL COMPARISON</text>
-  <text x="24" y="300" font-family="sans-serif" font-size="16" font-weight="600" fill="${color}">${p.nfl_comparison || 'N/A'}</text>
+  <text x="24" y="300" font-family="sans-serif" font-size="16" font-weight="600" fill="${color}">${escapeXml(p.nfl_comparison) || 'N/A'}</text>
 
   <!-- Projected Round -->
   <text x="24" y="340" font-family="monospace" font-size="9" fill="rgba(255,255,255,0.3)" letter-spacing="0.15em">PROJECTED</text>
-  <text x="24" y="365" font-family="sans-serif" font-size="32" font-weight="800" fill="white">Round ${p.projected_round}</text>
+  <text x="24" y="365" font-family="sans-serif" font-size="32" font-weight="800" fill="white">Round ${escapeXml(String(p.projected_round))}</text>
 
   <!-- Scouting summary -->
   ${p.scouting_summary ? `
   <text x="24" y="410" font-family="monospace" font-size="9" fill="rgba(255,255,255,0.3)" letter-spacing="0.15em">Q_ANG ASSESSMENT</text>
-  <text x="24" y="430" font-family="sans-serif" font-size="11" fill="rgba(255,255,255,0.4)">${(p.scouting_summary || '').slice(0, 60)}</text>
-  <text x="24" y="446" font-family="sans-serif" font-size="11" fill="rgba(255,255,255,0.4)">${(p.scouting_summary || '').slice(60, 120)}</text>
+  <text x="24" y="430" font-family="sans-serif" font-size="11" fill="rgba(255,255,255,0.4)">${escapeXml((p.scouting_summary || '').slice(0, 60))}</text>
+  <text x="24" y="446" font-family="sans-serif" font-size="11" fill="rgba(255,255,255,0.4)">${escapeXml((p.scouting_summary || '').slice(60, 120))}</text>
   ` : ''}
 
   <!-- Bottom branding -->
