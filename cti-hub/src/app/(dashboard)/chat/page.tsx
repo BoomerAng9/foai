@@ -76,6 +76,18 @@ function ChatWithACHEEVY() {
   const [showScenarios, setShowScenarios] = useState(false);
   const [scenarioContext, setScenarioContext] = useState<string | null>(null);
   const [showOnboarding, setShowOnboarding] = useState(false);
+  // Spinner transition hint — emitted by /api/chat when build intent is detected.
+  // Per project_chat_to_guide_me_transition.md: chat is the kiosk, not the
+  // destination. When this fires, surface a Guide Me / Manage It picker so
+  // the user can switch into the structured engagement mode without a manual
+  // button click.
+  const [transitionHint, setTransitionHint] = useState<{
+    category: 'build-intent' | 'larger-project' | 'pricing-question' | 'status-check' | 'simple-task' | 'question' | 'conversation';
+    suggestedScope: string;
+    triggerWords: string[];
+    originalMessage: string;
+    streamId: string;
+  } | null>(null);
 
   const currentTier = TIERS.find(t => t.id === activeTier) || TIERS[0];
 
@@ -473,6 +485,20 @@ function ChatWithACHEEVY() {
               setMessages(prev => prev.map(m =>
                 m.id === streamId ? { ...m, thinking: thinkText } : m
               ));
+            } else if (data.type === 'transition_hint' && data.hint) {
+              // Spinner detected build intent. Surface the Guide Me / Manage It
+              // picker on top of the streaming response. The model continues to
+              // stream in parallel — user can dismiss the picker and let the
+              // current Manage It response finish, OR switch to Guide Me which
+              // will resend with mode='guide' and start the 3-Consultant
+              // Engagement (Consult_Ang + ACHEEVY + Note_Ang).
+              setTransitionHint({
+                category: data.hint.category,
+                suggestedScope: data.hint.suggestedScope || '',
+                triggerWords: data.hint.triggerWords || [],
+                originalMessage: msg,
+                streamId,
+              });
             } else if (data.agent) {
               setMessages(prev => prev.map(m =>
                 m.id === streamId ? { ...m, activeAgent: data.agent } : m
@@ -512,6 +538,10 @@ function ChatWithACHEEVY() {
   async function handleSend(text?: string, skipEstimate?: boolean) {
     let msg = text || input.trim();
     if (!msg || sending) return;
+
+    // Clear any stale transition prompt from a previous turn so we don't
+    // confuse the user with a prompt that no longer matches the conversation.
+    if (transitionHint) setTransitionHint(null);
 
     // Grammar mode: wrap the message in a conversion prompt
     // ACHEEVY will convert, read back, and confirm before executing
@@ -831,6 +861,68 @@ function ChatWithACHEEVY() {
               {messages.map(msg => (
                 <MessageBubble key={msg.id} msg={msg} />
               ))}
+
+              {/* Spinner transition prompt — surfaces when build intent is detected */}
+              <AnimatePresence>
+                {transitionHint && (transitionHint.category === 'build-intent' || transitionHint.category === 'larger-project') && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -8 }}
+                    transition={{ duration: 0.18 }}
+                    className="border border-accent/40 bg-accent/5 rounded-lg p-4 max-w-2xl"
+                  >
+                    <div className="flex items-start gap-3">
+                      <div className="flex-shrink-0 w-8 h-8 rounded-full bg-accent/20 flex items-center justify-center text-accent text-sm font-semibold">
+                        {transitionHint.category === 'larger-project' ? '🚀' : '✨'}
+                      </div>
+                      <div className="flex-1">
+                        <p className="text-sm text-fg font-medium mb-1">
+                          {transitionHint.category === 'larger-project'
+                            ? 'This sounds like a larger project. Want a full team on it?'
+                            : 'Sounds like you want to build something. How would you like me to help?'}
+                        </p>
+                        <p className="text-xs text-fg-muted mb-3">
+                          {transitionHint.suggestedScope.length > 120
+                            ? transitionHint.suggestedScope.slice(0, 120) + '…'
+                            : transitionHint.suggestedScope}
+                        </p>
+                        <div className="flex flex-wrap gap-2">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const original = transitionHint.originalMessage;
+                              setTransitionHint(null);
+                              setGuideMode(true);
+                              // Resend the same message in Guide Me mode for the
+                              // 3-Consultant Engagement (Consult_Ang + ACHEEVY +
+                              // Note_Ang) — see project_chat_to_guide_me_transition.md
+                              handleSend(original, true);
+                            }}
+                            className="px-3 py-1.5 text-xs font-medium bg-accent text-bg rounded hover:bg-accent-hover transition-colors"
+                          >
+                            Guide Me through it
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setTransitionHint(null)}
+                            className="px-3 py-1.5 text-xs font-medium border border-accent/40 text-accent rounded hover:bg-accent/10 transition-colors"
+                          >
+                            Manage it for me (continue)
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setTransitionHint(null)}
+                            className="px-3 py-1.5 text-xs font-medium text-fg-muted hover:text-fg transition-colors"
+                          >
+                            Dismiss
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
           )}
         </div>
