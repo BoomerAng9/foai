@@ -4,11 +4,11 @@
  * /partners/[slug] — Partner workspace detail
  * ================================================
  * Owner-only partner detail view. Shows the partner header + pages
- * list + documents list. Upload flow + GUI sub-page creator ship in
- * Task H2/H3. MindEdge is the seeded first partner.
+ * list + documents list with upload form + real download/delete.
+ * GUI sub-page creator still ships in H3; webhooks in H4.
  */
 
-import { use, useEffect, useState } from 'react';
+import { use, useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
 import {
   Building2,
@@ -17,7 +17,7 @@ import {
   FolderOpen,
   Globe,
   Plus,
-  Upload,
+  Trash2,
   Webhook,
 } from 'lucide-react';
 import type {
@@ -26,6 +26,7 @@ import type {
   PartnerPageRow,
   PartnerRow,
 } from '@/lib/partners/types';
+import PartnerUploadForm from '@/components/partners/PartnerUploadForm';
 
 function formatBytes(n: number): string {
   if (!n) return '—';
@@ -56,27 +57,49 @@ export default function PartnerDetailPage({
   const [documents, setDocuments] = useState<PartnerDocumentRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+
+  const fetchDetail = useCallback(async () => {
+    try {
+      const res = await fetch(`/api/partners/${slug}`);
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        throw new Error(body.error || `HTTP ${res.status}`);
+      }
+      const data = (await res.json()) as PartnerDetailResponse;
+      setPartner(data.partner);
+      setPages(data.pages || []);
+      setDocuments(data.documents || []);
+      setError(null);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load partner');
+    } finally {
+      setLoading(false);
+    }
+  }, [slug]);
 
   useEffect(() => {
-    fetch(`/api/partners/${slug}`)
-      .then(async r => {
-        if (!r.ok) {
-          const body = await r.json().catch(() => ({}));
-          throw new Error(body.error || `HTTP ${r.status}`);
-        }
-        return r.json() as Promise<PartnerDetailResponse>;
-      })
-      .then(d => {
-        setPartner(d.partner);
-        setPages(d.pages || []);
-        setDocuments(d.documents || []);
-        setLoading(false);
-      })
-      .catch(err => {
-        setError(err instanceof Error ? err.message : 'Failed to load partner');
-        setLoading(false);
+    fetchDetail();
+  }, [fetchDetail]);
+
+  const handleDeleteDocument = async (docId: string) => {
+    if (!confirm('Delete this document? This cannot be undone.')) return;
+    setDeletingId(docId);
+    try {
+      const res = await fetch(`/api/partners/${slug}/documents/${docId}`, {
+        method: 'DELETE',
       });
-  }, [slug]);
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        throw new Error(body.error || `HTTP ${res.status}`);
+      }
+      setDocuments(prev => prev.filter(d => d.id !== docId));
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'Delete failed');
+    } finally {
+      setDeletingId(null);
+    }
+  };
 
   if (loading) {
     return (
@@ -259,21 +282,21 @@ export default function PartnerDetailPage({
             <h2 className="text-[10px] font-mono font-bold tracking-[0.18em] uppercase text-fg-tertiary">
               Documents
             </h2>
-            <button
-              type="button"
-              disabled
-              title="Upload flow (with Smelter OS dual-write) ships in H2"
-              className="inline-flex items-center gap-1 text-[10px] font-mono text-fg-tertiary opacity-50 cursor-not-allowed"
-            >
-              <Upload className="w-3 h-3" /> Upload
-            </button>
+            <span className="text-[9px] font-mono text-fg-tertiary">
+              {documents.length} file{documents.length === 1 ? '' : 's'}
+            </span>
           </div>
+
+          {/* Upload form */}
+          <div className="mb-3">
+            <PartnerUploadForm partnerSlug={slug} onUploaded={fetchDetail} />
+          </div>
+
           {documents.length === 0 ? (
             <div className="p-6 border border-border border-dashed rounded text-center">
               <FileText className="w-6 h-6 text-fg-tertiary mx-auto mb-2" />
               <div className="text-xs text-fg-tertiary">
-                No documents yet. Upload flow with Smelter OS dual-write ships in
-                H2.
+                No documents yet. Upload the first one above.
               </div>
             </div>
           ) : (
@@ -281,21 +304,54 @@ export default function PartnerDetailPage({
               {documents.map(doc => (
                 <div
                   key={doc.id}
-                  className="p-3 border border-border bg-bg-surface rounded hover:border-accent transition-colors"
+                  className="p-3 border border-border bg-bg-surface rounded hover:border-accent transition-colors group"
                 >
                   <div className="flex items-center justify-between gap-2 mb-1">
-                    <span className="text-sm font-medium text-fg truncate">
+                    <a
+                      href={doc.storage_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-sm font-medium text-fg hover:text-accent transition-colors truncate flex-1"
+                    >
                       {doc.name}
-                    </span>
+                    </a>
                     <span className="text-[9px] font-mono uppercase tracking-wider text-fg-tertiary shrink-0">
                       {doc.kind}
                     </span>
+                    <button
+                      type="button"
+                      onClick={() => handleDeleteDocument(doc.id)}
+                      disabled={deletingId === doc.id}
+                      className="opacity-0 group-hover:opacity-100 p-1 text-fg-tertiary hover:text-signal-error transition-all disabled:opacity-30"
+                      title="Delete document"
+                      aria-label={`Delete ${doc.name}`}
+                    >
+                      <Trash2 className="w-3 h-3" />
+                    </button>
                   </div>
-                  <div className="text-[10px] font-mono text-fg-tertiary flex items-center gap-2">
+                  <div className="text-[10px] font-mono text-fg-tertiary flex items-center gap-2 flex-wrap">
                     <span>{formatBytes(doc.size_bytes)}</span>
                     <span className="opacity-40">·</span>
                     <span>{formatDate(doc.uploaded_at)}</span>
+                    {doc.description && (
+                      <>
+                        <span className="opacity-40">·</span>
+                        <span className="truncate">{doc.description}</span>
+                      </>
+                    )}
                   </div>
+                  {doc.tags && doc.tags.length > 0 && (
+                    <div className="flex flex-wrap gap-1 mt-1.5">
+                      {doc.tags.map(t => (
+                        <span
+                          key={t}
+                          className="text-[9px] font-mono px-1.5 py-0.5 bg-bg-elevated text-fg-tertiary rounded"
+                        >
+                          {t}
+                        </span>
+                      ))}
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
