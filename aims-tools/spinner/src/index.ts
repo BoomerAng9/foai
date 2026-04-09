@@ -66,6 +66,31 @@ export {
   isLiveLookInConfigured,
 } from './live-look-in.js';
 export {
+  LIVE_LOOK_IN_SCENES,
+  getSceneById,
+  listScenes,
+  getDefaultSceneForSurface,
+  isActorAllowedInScene,
+} from './scenes/registry.js';
+export type {
+  LiveLookInScene,
+  ActorClass,
+  Vec3,
+} from './scenes/registry.js';
+export {
+  liveLookInChannelForUser,
+  isLiveLookInRenderEvent,
+} from './live-look-in-events.js';
+export type {
+  LiveLookInRenderEvent,
+  MissionCommissionedEvent,
+  MissionStartedEvent,
+  MissionProgressEvent,
+  MissionCompletedEvent,
+  ConsultantPanelFormedEvent,
+  SceneChangeEvent,
+} from './live-look-in-events.js';
+export {
   spawnPanel,
   getPanel as getConsultantPanel,
   appendMessage as appendConsultantMessage,
