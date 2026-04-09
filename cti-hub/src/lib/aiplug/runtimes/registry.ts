@@ -13,7 +13,7 @@
 
 import type { PlugRow, PlugRunRow } from '@/lib/aiplug/types';
 import { runSmbMarketing } from './smb-marketing';
-import { runTeacherTwin } from './teacher-twin';
+import { runFinanceAnalyst } from './finance-analyst';
 
 export interface RuntimeContext {
   /** The run row being executed */
@@ -46,7 +46,7 @@ export type RuntimeFn = (ctx: RuntimeContext) => Promise<RuntimeResult>;
 
 export const RUNTIME_REGISTRY: Record<string, RuntimeFn> = {
   'smb-marketing': runSmbMarketing,
-  'teacher-twin': runTeacherTwin,
+  'finance-analyst': runFinanceAnalyst,
 };
 
 export function getRuntime(key: string): RuntimeFn | null {
