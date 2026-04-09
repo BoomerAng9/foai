@@ -166,19 +166,195 @@ export interface ChatResponse {
 }
 
 /**
- * Stub for the actual chat call. Real implementation will:
- *   1. Look up the engine via resolveChatEngine()
- *   2. Hit the route via OpenRouter or Vertex AI (per design routing)
- *   3. Compute cost from the pricing matrix row
- *   4. On error → automatic fallback to config.fallback
+ * Live chat call via OpenRouter.
  *
- * Wired in a follow-up PR once Step 1 (verify GLM-5.1 chat works on
- * funded OpenRouter account) is complete.
+ * Behavior:
+ *   1. Look up the engine via resolveChatEngine()
+ *   2. Verify the row is active and has a routeId
+ *   3. POST to OPENROUTER_BASE_URL/chat/completions with the route id
+ *   4. Compute cost from the pricing matrix row's per-1M rates
+ *   5. On HTTP / network error → automatic fallback to the next engine
+ *      in the chain (multimodalUpgrade or fallback)
+ *   6. Refuse to use any banned engine (Gemma) — assertNotBanned()
+ *
+ * Auth: OPENROUTER_API_KEY env var (also accepts the openclaw mixed-case
+ * 'Openrouter_API_Key' per reference_openclaw_credentials.md).
+ *
+ * The chat() function is the foundation per Rish 2026-04-08:
+ *   "We have to figure out what's gonna work. ... we first establish the
+ *    working model, and then we can scaffold on top of that."
  */
-export async function chat(_request: ChatRequest): Promise<ChatResponse> {
-  throw new Error(
-    '[spinner/chat-engine] chat() is a stub. Step 1 of the Spinner build ' +
-      'requires verifying GLM-5.1 chat works on funded OpenRouter before this ' +
-      'is wired. See project_chat_engine_decision.md.',
+
+const OPENROUTER_BASE_URL =
+  process.env.OPENROUTER_BASE_URL || 'https://openrouter.ai/api/v1';
+
+function readOpenRouterKey(): string {
+  // Support both standard and openclaw mixed-case env names per
+  // reference_openclaw_credentials.md
+  return (
+    process.env.OPENROUTER_API_KEY ||
+    process.env.Openrouter_API_Key ||
+    process.env.OPENROUTER_KEY ||
+    ''
   );
+}
+
+interface OpenRouterChoice {
+  message: { role: string; content: string };
+  finish_reason?: string;
+}
+
+interface OpenRouterCompletion {
+  id?: string;
+  choices: OpenRouterChoice[];
+  usage?: {
+    prompt_tokens?: number;
+    completion_tokens?: number;
+    total_tokens?: number;
+  };
+}
+
+async function callOpenRouter(
+  routeId: string,
+  request: ChatRequest,
+  apiKey: string,
+): Promise<OpenRouterCompletion> {
+  const res = await fetch(`${OPENROUTER_BASE_URL}/chat/completions`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      'Content-Type': 'application/json',
+      'HTTP-Referer': process.env.OPENROUTER_REFERER || 'https://aimanagedsolutions.cloud',
+      'X-Title': 'A.I.M.S. Spinner',
+    },
+    body: JSON.stringify({
+      model: routeId,
+      messages: request.messages,
+      temperature: request.temperature ?? 0.7,
+      max_tokens: request.maxTokens ?? 4096,
+      stream: false,
+    }),
+  });
+
+  if (!res.ok) {
+    const body = await res.text().catch(() => 'unknown error body');
+    throw new Error(`OpenRouter HTTP ${res.status}: ${body.slice(0, 500)}`);
+  }
+
+  return (await res.json()) as OpenRouterCompletion;
+}
+
+function computeCostUsd(
+  row: PricingRow | undefined,
+  promptTokens: number,
+  completionTokens: number,
+): number {
+  if (!row) return 0;
+  const inRate = row.inputPer1M ?? 0;
+  const outRate = row.outputPer1M ?? 0;
+  const inCost = (promptTokens / 1_000_000) * inRate;
+  const outCost = (completionTokens / 1_000_000) * outRate;
+  return Math.round((inCost + outCost) * 1_000_000) / 1_000_000;
+}
+
+/**
+ * Build the fallback chain from the engine config in priority order.
+ * The chain is tried in order; if all fail, the last error is thrown.
+ */
+function buildFallbackChain(
+  engineId: ChatEngineId,
+  config: EngineConfig = DEFAULT_ENGINE_CONFIG,
+): ChatEngineId[] {
+  const chain: ChatEngineId[] = [engineId];
+  if (config.multimodalUpgrade && config.multimodalUpgrade !== engineId) {
+    chain.push(config.multimodalUpgrade);
+  }
+  if (config.fallback && !chain.includes(config.fallback)) {
+    chain.push(config.fallback);
+  }
+  return chain;
+}
+
+export async function chat(request: ChatRequest): Promise<ChatResponse> {
+  assertNotBanned(request.engineId);
+
+  const apiKey = readOpenRouterKey();
+  if (!apiKey) {
+    throw new Error(
+      '[spinner/chat-engine] No OpenRouter API key in env. Set OPENROUTER_API_KEY ' +
+        '(or Openrouter_API_Key per reference_openclaw_credentials.md).',
+    );
+  }
+
+  const chain = buildFallbackChain(request.engineId);
+  const errors: Array<{ engineId: ChatEngineId; error: string }> = [];
+
+  for (const engineId of chain) {
+    try {
+      const resolved = resolveChatEngine(engineId);
+      if (!resolved.pricingRow || !resolved.routeId) {
+        errors.push({
+          engineId,
+          error: `No pricing row or routeId for ${engineId}: ${resolved.notes.join('; ')}`,
+        });
+        continue;
+      }
+
+      const completion = await callOpenRouter(resolved.routeId, request, apiKey);
+      const choice = completion.choices?.[0];
+      if (!choice) {
+        errors.push({ engineId, error: 'no choices in completion' });
+        continue;
+      }
+
+      const promptTokens = completion.usage?.prompt_tokens ?? 0;
+      const completionTokens = completion.usage?.completion_tokens ?? 0;
+      const totalTokens =
+        completion.usage?.total_tokens ?? promptTokens + completionTokens;
+
+      return {
+        engineId,
+        content: choice.message?.content ?? '',
+        usage: { promptTokens, completionTokens, totalTokens },
+        costUsd: computeCostUsd(resolved.pricingRow, promptTokens, completionTokens),
+      };
+    } catch (e) {
+      errors.push({
+        engineId,
+        error: e instanceof Error ? e.message : String(e),
+      });
+    }
+  }
+
+  // All engines in the chain failed
+  throw new Error(
+    `[spinner/chat-engine] All engines in fallback chain failed:\n` +
+      errors.map((e) => `  - ${e.engineId}: ${e.error}`).join('\n'),
+  );
+}
+
+/**
+ * Convenience helper for one-off prompts. Skips the messages array
+ * boilerplate. Returns just the content string.
+ */
+export async function prompt(
+  text: string,
+  opts: {
+    engineId?: ChatEngineId;
+    system?: string;
+    maxTokens?: number;
+    temperature?: number;
+  } = {},
+): Promise<string> {
+  const messages: ChatRequest['messages'] = [];
+  if (opts.system) messages.push({ role: 'system', content: opts.system });
+  messages.push({ role: 'user', content: text });
+
+  const response = await chat({
+    engineId: opts.engineId ?? DEFAULT_ENGINE_CONFIG.primary,
+    messages,
+    temperature: opts.temperature,
+    maxTokens: opts.maxTokens,
+  });
+  return response.content;
 }
