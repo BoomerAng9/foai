@@ -134,9 +134,14 @@ export interface LiveLookInSession {
 export interface ConsultantPanel {
   jobId: string;
   members: {
-    /** AVVA NOON Guardian half — validates RTCCF + V.I.B.E. */
+    /**
+     * Note_Ang — session recorder, audit + pattern detection.
+     * Per cti-hub/src/lib/acheevy/guide-me-engine.ts.
+     * NOT AVVA NOON — AVVA NOON is platform-level (SmelterOS) and never
+     * appears in the chat or in this 3-Consultant Engagement.
+     */
     note: string;
-    /** ACHEEVY — customer-facing executive */
+    /** ACHEEVY — senior consultant, customer-facing executive */
     acheevy: string;
     /** Specialist consultant matched to the domain */
     consultant: {
@@ -151,7 +156,7 @@ export interface ConsultantPanel {
 
 export interface ConsultantMessage {
   ts: string;
-  speaker: 'note' | 'acheevy' | 'consultant' | 'user';
+  speaker: 'note' | 'acheevy' | 'consultant' | 'user' | 'consult_ang';
   content: string;
 }
 
