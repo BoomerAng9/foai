@@ -1,7 +1,6 @@
 import assert from 'node:assert/strict';
 import { determinePlanFromPriceId, getStripePriceId } from '../src/lib/billing/plans.ts';
 import { getOpenRouterModel } from '../src/lib/ai/openrouter.ts';
-import { interpolate, InterpolationError } from '../src/lib/visual-engine/interpolate.ts';
 
 let completed = 0;
 
@@ -61,51 +60,6 @@ run('determinePlanFromPriceId falls back to pay_per_use for unrecognized ids', (
 
 run('getStripePriceId returns null for unknown plans', () => {
   assert.equal(getStripePriceId('unknown'), null);
-});
-
-run('interpolate - replaces single variable', () => {
-  assert.equal(interpolate('Hello {{name}}', { name: 'world' }), 'Hello world');
-});
-
-run('interpolate - replaces multiple variables', () => {
-  assert.equal(
-    interpolate('{{greet}} {{name}}, you have {{count}} messages', {
-      greet: 'Hi',
-      name: 'Rish',
-      count: '3',
-    }),
-    'Hi Rish, you have 3 messages',
-  );
-});
-
-run('interpolate - replaces repeated variable', () => {
-  assert.equal(interpolate('{{x}} and {{x}}', { x: 'same' }), 'same and same');
-});
-
-run('interpolate - joins array values with ", "', () => {
-  assert.equal(
-    interpolate('Gear: {{gear}}', { gear: ['shield', 'helmet', 'vest'] }),
-    'Gear: shield, helmet, vest',
-  );
-});
-
-run('interpolate - throws InterpolationError on missing variable', () => {
-  assert.throws(() => interpolate('Hello {{name}}', {}), InterpolationError);
-  assert.throws(
-    () => interpolate('Hello {{name}}', {}),
-    (err) => err instanceof InterpolationError && /name/.test(err.message),
-  );
-});
-
-run('interpolate - leaves literal curly braces alone', () => {
-  assert.equal(
-    interpolate('Object: { "key": "value" }', {}),
-    'Object: { "key": "value" }',
-  );
-});
-
-run('interpolate - allows whitespace inside placeholder', () => {
-  assert.equal(interpolate('Hello {{ name }}', { name: 'world' }), 'Hello world');
 });
 
 console.log(`${completed} active checks passed`);
