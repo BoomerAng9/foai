@@ -191,35 +191,148 @@ export default function DeployLanding() {
         </div>
       </section>
 
-      {/* The Workforce */}
-      <section className="py-16 px-4 sm:px-6 border-t border-white/5">
-        <div className="max-w-4xl mx-auto text-center">
-          <p className="font-mono text-[10px] text-[#E8A020] tracking-[0.3em] uppercase mb-3">The workforce</p>
-          <h2 className="text-2xl md:text-3xl font-light tracking-tight mb-8">
-            <span className="font-bold">ACHEEVY</span> runs it all.
-          </h2>
+      {/* The Workforce — Strategic Tier Boomer_Ang Roster */}
+      <section className="relative py-16 sm:py-20 px-4 sm:px-6 border-t border-white/5 overflow-hidden">
+        {/* Sunset port patrol overlay */}
+        <div
+          className="absolute inset-0 opacity-[0.08]"
+          style={{
+            backgroundImage: "url('/boomer-angs-hero.png')",
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+          }}
+        />
+        <div className="relative max-w-6xl mx-auto">
+          <div className="text-center mb-12">
+            <p className="font-mono text-[10px] text-[#E8A020] tracking-[0.3em] uppercase mb-3">Deploy Your Workforce</p>
+            <h2 className="text-3xl md:text-4xl font-black tracking-tight mb-3">
+              Strategic Tier <span style={{ color: '#E8A020' }}>Boomer_Angs</span>
+            </h2>
+            <p className="text-sm text-white/40 max-w-2xl mx-auto">
+              Seven autonomous agents. Each runs on its own, plans before it acts, and reports every move. Click any agent to see the full capability sheet.
+            </p>
+          </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">
-            {[
-              { name: 'ACHEEVY', role: 'Digital CEO' },
-              { name: 'Chicken Hawk', role: 'Tactical Commander' },
-              { name: 'Scout_Ang', role: 'Research' },
-              { name: 'Content_Ang', role: 'Content' },
-              { name: 'Edu_Ang', role: 'Sales' },
-              { name: 'Biz_Ang', role: 'Growth' },
-              { name: 'Ops_Ang', role: 'Operations' },
-              { name: 'CFO_Ang', role: 'Finance' },
-            ].map(a => (
-              <div key={a.name} className="border border-white/10 p-3 text-center">
-                <p className="font-mono text-[10px] font-bold text-[#E8A020]">{a.name}</p>
-                <p className="text-[9px] text-white/30">{a.role}</p>
-              </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            {([
+              {
+                slug: 'q-ang',
+                name: 'Q_Ang',
+                role: 'Intelligence Analyst',
+                persona: 'Methodical, data-driven, always sourcing. Talks like an intelligence analyst. Finds what others miss.',
+                price: 97,
+                capabilities: ['Web intelligence', 'Opportunity sourcing', 'Competitive research', 'Data intelligence'],
+                image: '/agents/scout-ang.png',
+              },
+              {
+                slug: 'content-ang',
+                name: 'Content_Ang',
+                role: 'Creative Director',
+                persona: 'Creative, brand-aware, always on message. Talks like a CMO.',
+                price: 127,
+                capabilities: ['SEO content', 'Blog posts', 'Landing pages', 'Social media', 'Email campaigns'],
+                image: '/agents/content-ang.png',
+              },
+              {
+                slug: 'sales-ang',
+                name: 'Sales_Ang',
+                role: 'VP of Sales',
+                persona: 'Driven, numbers-focused, always closing. ABC mentality.',
+                price: 147,
+                capabilities: ['Lead qualification', 'Pipeline management', 'Revenue attribution', 'Commission tracking'],
+                image: '/agents/edu-ang.png',
+              },
+              {
+                slug: 'biz-ang',
+                name: 'Biz_Ang',
+                role: 'Growth Strategist',
+                persona: 'Big-picture, pipeline-obsessed, relationship builder. Talks like a BD director.',
+                price: 97,
+                capabilities: ['Pipeline analytics', 'Lead generation', 'Client retention', 'Campaign performance'],
+                image: '/agents/biz-ang.png',
+              },
+              {
+                slug: 'ops-ang',
+                name: 'Ops_Ang',
+                role: 'Operations Chief',
+                persona: 'Always watching, never sleeping. Talks like a NOC engineer.',
+                price: 197,
+                capabilities: ['Fleet monitoring', 'Incident detection', 'Uptime tracking', 'Historical recall'],
+                image: '/agents/ops-ang.png',
+              },
+              {
+                slug: 'iller-ang',
+                name: 'Iller_Ang',
+                role: 'Visual Director',
+                persona: "Direct. Visual-first. Doesn't explain — shows. Opinionated about typography, spacing, color.",
+                price: 197,
+                capabilities: ['Player cards', 'Broadcast graphics', 'Character art', 'NFT assets', 'Merchandise concepts'],
+                image: '/agents/iller-ang.png',
+              },
+              {
+                slug: 'cfo-ang',
+                name: 'CFO_Ang',
+                role: 'Chief Financial Officer',
+                persona: 'Every dollar tracked. Every token counted. Receivables, bookkeeping, pricing.',
+                price: 147,
+                capabilities: ['Budget tracking', 'Cost analysis', 'Revenue optimization', 'Receivables', 'Bookkeeping'],
+                image: '/agents/cfo-ang.png',
+              },
+            ] as const).map(agent => (
+              <Link
+                key={agent.slug}
+                href={`/agents#${agent.slug}`}
+                className="group block border border-white/10 bg-white/[0.02] backdrop-blur-sm rounded-lg overflow-hidden hover:border-[#E8A020]/40 hover:bg-white/[0.04] transition-all"
+              >
+                <div className="aspect-[4/3] relative overflow-hidden bg-white/[0.02]">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={agent.image}
+                    alt={agent.name}
+                    className="w-full h-full object-cover object-top opacity-80 group-hover:opacity-100 group-hover:scale-105 transition-all duration-300"
+                  />
+                  <div className="absolute bottom-0 inset-x-0 h-1/2 bg-gradient-to-t from-[#0A0A0A] to-transparent" />
+                  <div className="absolute bottom-2 left-3 right-3">
+                    <p className="font-mono text-[11px] font-bold text-[#E8A020]">{agent.name}</p>
+                    <p className="text-[10px] text-white/70 font-medium">{agent.role}</p>
+                  </div>
+                </div>
+                <div className="p-3">
+                  <p className="text-[10px] text-white/40 leading-relaxed mb-3 line-clamp-2">{agent.persona}</p>
+                  <div className="flex flex-wrap gap-1 mb-3">
+                    {agent.capabilities.slice(0, 3).map(c => (
+                      <span key={c} className="text-[8px] font-mono px-1.5 py-0.5 border border-white/10 text-white/30 rounded">
+                        {c}
+                      </span>
+                    ))}
+                    {agent.capabilities.length > 3 && (
+                      <span className="text-[8px] font-mono px-1.5 py-0.5 text-white/20">
+                        +{agent.capabilities.length - 3}
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex items-baseline justify-between border-t border-white/5 pt-2">
+                    <span className="text-lg font-black text-white" style={{ fontFamily: "'Outfit', sans-serif" }}>
+                      ${agent.price}
+                    </span>
+                    <span className="text-[9px] text-white/30 font-mono">/mo</span>
+                  </div>
+                </div>
+              </Link>
             ))}
           </div>
 
-          <p className="text-xs text-white/30">
-            + 11 Lil_Hawks for tactical execution: coding, automation, integrations, 3D, memory, and more.
-          </p>
+          <div className="mt-8 text-center">
+            <p className="text-xs text-white/30 mb-4">
+              + 17 Lil_Hawks for tactical execution: web scraping, data processing, content scheduling, and more.
+            </p>
+            <Link
+              href="/agents"
+              className="inline-flex items-center gap-2 text-[10px] font-mono font-bold text-[#E8A020] hover:text-[#F0B840] transition-colors tracking-wider uppercase"
+            >
+              VIEW FULL ROSTER <ArrowRight className="w-3 h-3" />
+            </Link>
+          </div>
         </div>
       </section>
 
