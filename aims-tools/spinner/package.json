@@ -18,7 +18,8 @@
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "typecheck": "tsc --noEmit",
-    "test": "node --experimental-strip-types --test src/__tests__/*.test.ts"
+    "test": "node --experimental-strip-types --test src/__tests__/*.test.ts",
+    "smoke:chat": "node --experimental-strip-types scripts/smoke-test-chat.ts"
   },
   "dependencies": {
     "@aims/pricing-matrix": "*",

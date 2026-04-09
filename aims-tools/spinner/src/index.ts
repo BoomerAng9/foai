@@ -47,6 +47,7 @@ export {
   resolveChatEngine,
   resolveEngineConfig,
   chat,
+  prompt,
 } from './chat-engine.js';
 export {
   startJob,
