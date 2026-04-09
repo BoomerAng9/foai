@@ -56,10 +56,13 @@ export async function POST(req: NextRequest) {
         const base64Audio = Buffer.from(arrayBuffer).toString('base64');
 
         const res = await fetch(
-          `https://speech.googleapis.com/v1/speech:recognize?key=${GOOGLE_KEY}`,
+          'https://speech.googleapis.com/v1/speech:recognize',
           {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {
+              'Content-Type': 'application/json',
+              'X-Goog-Api-Key': GOOGLE_KEY,
+            },
             body: JSON.stringify({
               config: {
                 encoding: 'WEBM_OPUS',

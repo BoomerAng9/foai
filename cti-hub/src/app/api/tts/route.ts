@@ -14,10 +14,13 @@ const VOICE_FALLBACKS = [
 
 async function synthesize(text: string, voiceName: string) {
   return fetch(
-    `https://texttospeech.googleapis.com/v1/text:synthesize?key=${GOOGLE_KEY}`,
+    'https://texttospeech.googleapis.com/v1/text:synthesize',
     {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Goog-Api-Key': GOOGLE_KEY,
+      },
       body: JSON.stringify({
         input: { text: text.slice(0, 5000) },
         voice: {

@@ -28,10 +28,13 @@ export async function POST(req: NextRequest) {
 
     // Lyria via Gemini generativelanguage API
     const res = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/lyria:generateMusic?key=${GEMINI_KEY}`,
+      'https://generativelanguage.googleapis.com/v1beta/models/lyria:generateMusic',
       {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Goog-Api-Key': GEMINI_KEY,
+        },
         body: JSON.stringify({
           prompt: `${style} music: ${prompt}`,
           config: {

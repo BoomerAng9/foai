@@ -12,9 +12,12 @@ interface SheetsRequest {
 }
 
 async function createSpreadsheet(title: string): Promise<string> {
-  const res = await fetch('https://sheets.googleapis.com/v4/spreadsheets?key=' + GOOGLE_KEY, {
+  const res = await fetch('https://sheets.googleapis.com/v4/spreadsheets', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Goog-Api-Key': GOOGLE_KEY || '',
+    },
     body: JSON.stringify({
       properties: { title },
       sheets: [{ properties: { title: 'Data' } }],
@@ -42,11 +45,14 @@ async function appendToSheet(
   ];
 
   const range = `${sheetName}!A1`;
-  const url = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${encodeURIComponent(range)}:append?valueInputOption=USER_ENTERED&insertDataOption=INSERT_ROWS&key=${GOOGLE_KEY}`;
+  const url = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${encodeURIComponent(range)}:append?valueInputOption=USER_ENTERED&insertDataOption=INSERT_ROWS`;
 
   const res = await fetch(url, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Goog-Api-Key': GOOGLE_KEY || '',
+    },
     body: JSON.stringify({ range, majorDimension: 'ROWS', values }),
   });
 

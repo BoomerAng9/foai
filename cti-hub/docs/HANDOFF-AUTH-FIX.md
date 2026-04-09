@@ -126,13 +126,27 @@ Currently set to `foai-aims.firebaseapp.com`. The popup opens on this domain. Af
 ## ENV VARS ON VPS (.env.local)
 
 ```
-NEXT_PUBLIC_FIREBASE_API_KEY=AIzaSyDEwCfdolF8PgB0X5YqNWGr189XhaVmuDQ
+NEXT_PUBLIC_FIREBASE_API_KEY=<REDACTED — pull from openclaw-sop5-openclaw-1>
 NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=foai-aims.firebaseapp.com
 NEXT_PUBLIC_FIREBASE_PROJECT_ID=foai-aims
 NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=foai-aims.firebasestorage.app
-NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=939270059361
-NEXT_PUBLIC_FIREBASE_APP_ID=1:939270059361:web:80040f6e6da7b9687dc120
+NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=<REDACTED — pull from openclaw-sop5-openclaw-1>
+NEXT_PUBLIC_FIREBASE_APP_ID=<REDACTED — pull from openclaw-sop5-openclaw-1>
 ```
+
+> **⚠️ Security note:** Prior revisions of this file committed the literal
+> Firebase API key, messaging sender ID, and app ID. Firebase web API keys
+> are public by design (shipped to browsers via `NEXT_PUBLIC_*`) but should
+> still be:
+> 1. Restricted to specific HTTP referrers in the Firebase console
+>    (foai.cloud, cti.foai.cloud, deploy.foai.cloud, localhost for dev)
+> 2. Rotated if previously committed in plaintext — the previous value
+>    sat in git history as of this file's prior revision
+> 3. Pulled from the openclaw-sop5-openclaw-1 container env via the
+>    docker-exec pattern in `reference_secrets_openclaw`, not pasted
+>    into any committed file
+> The messaging sender ID and app ID are identifying but not authorizing —
+> still worth keeping out of docs for minimum infrastructure disclosure.
 
 Firebase SA key mounted at `/app/firebase-sa-key.json` via Docker Compose volume.
 

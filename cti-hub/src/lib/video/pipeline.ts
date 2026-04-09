@@ -187,10 +187,13 @@ export async function generateShotVeo(
 
   // Veo 3.1 via Gemini generativelanguage API
   const res = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/veo-3.1:generateVideo?key=${GOOGLE_KEY}`,
+    'https://generativelanguage.googleapis.com/v1beta/models/veo-3.1:generateVideo',
     {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Goog-Api-Key': GOOGLE_KEY,
+      },
       body: JSON.stringify({
         prompt,
         config: {
@@ -219,7 +222,8 @@ export async function checkVeoStatus(operationName: string): Promise<{
   if (!GOOGLE_KEY) throw new Error('GOOGLE_KEY not configured');
 
   const res = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/${operationName}?key=${GOOGLE_KEY}`,
+    `https://generativelanguage.googleapis.com/v1beta/${operationName}`,
+    { headers: { 'X-Goog-Api-Key': GOOGLE_KEY } },
   );
   const data = await res.json();
 

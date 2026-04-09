@@ -134,9 +134,12 @@ export async function synthesizeGeminiTts(req: GeminiTtsRequest): Promise<Gemini
 
     const primaryModel = req.model || DEFAULT_MODEL;
     const tryModel = async (modelName: string) =>
-      fetch(`${BASE_URL}/models/${modelName}:generateContent?key=${key}`, {
+      fetch(`${BASE_URL}/models/${modelName}:generateContent`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Goog-Api-Key': key,
+        },
         body: JSON.stringify(body),
       });
 
