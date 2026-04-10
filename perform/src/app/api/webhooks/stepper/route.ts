@@ -87,6 +87,29 @@ export async function POST(req: NextRequest) {
         break;
       }
 
+      case 'generate-post': {
+        if (!sql) throw new Error('Database not configured');
+        const analystId = (payload.analyst_id as string) || 'void-caster';
+        const postType = (payload.post_type as string) || 'take';
+        const playerName = payload.player as string;
+        if (!playerName && postType !== 'prediction') throw new Error('payload.player required');
+
+        // Import dynamically to avoid circular deps
+        const { generateTakeFromPlayer, generateScoutingPost, generatePredictionPost } = await import('@/lib/huddle/post-generator');
+        let generated;
+        if (postType === 'prediction') generated = await generatePredictionPost(analystId);
+        else if (postType === 'scouting') generated = await generateScoutingPost(analystId, playerName);
+        else generated = await generateTakeFromPlayer(analystId, playerName);
+
+        if (!generated) throw new Error('Post generation failed');
+
+        const [post] = await sql`INSERT INTO huddle_posts (analyst_id, content, post_type, tags, player_ref)
+          VALUES (${generated.analyst_id}, ${generated.content}, ${generated.post_type}, ${generated.tags}, ${generated.player_ref})
+          RETURNING id, analyst_id, post_type, created_at`;
+        result = { post, generated: true };
+        break;
+      }
+
       case 'lookup': {
         // Look up a college player
         if (!sql) throw new Error('Database not configured');

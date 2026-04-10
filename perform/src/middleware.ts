@@ -22,6 +22,7 @@ const PUBLIC_PATHS = [
   '/reveal',
   '/access',
   '/audition/voice',
+  '/huddle',
 ];
 
 /** Path prefixes that are always public (including sub-routes). */
@@ -41,6 +42,8 @@ const PUBLIC_PREFIXES = [
   '/api/news',
   '/api/podcast/episodes',
   '/api/seed-board',
+  '/huddle/',
+  '/api/huddle/',
 ];
 
 /** API paths that allow unauthenticated GET but protect mutations. */
