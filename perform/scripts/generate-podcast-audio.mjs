@@ -3,15 +3,11 @@
 /**
  * generate-podcast-audio.mjs
  *
- * Reads all podcast_episodes with NULL audio_url from the database,
- * generates TTS audio via ElevenLabs, saves to public/audio/,
- * and updates the database row with the audio_url.
+ * Generates TTS audio for all podcast_episodes with NULL audio_url.
+ * Uses per-analyst ElevenLabs voice mapping.
+ * Saves to public/generated/audio/ (Docker volume-mounted, persists across rebuilds).
  *
- * Usage: node scripts/generate-podcast-audio.mjs
- *
- * Env vars:
- *   ELEVENLABS_API_KEY  — required
- *   DATABASE_URL        — optional, falls back to hardcoded Neon connection
+ * Usage: ELEVENLABS_API_KEY=sk_... node scripts/generate-podcast-audio.mjs
  */
 
 import postgres from 'postgres';
@@ -33,34 +29,103 @@ if (!ELEVENLABS_API_KEY) {
   process.exit(1);
 }
 
-// Rachel (default female voice)
-const VOICE_ID = '21m00Tcm4TlvDq8ikWAM';
-const TTS_URL = `https://api.elevenlabs.io/v1/text-to-speech/${VOICE_ID}`;
+// ── Per-analyst voice mapping (ElevenLabs voice IDs) ─────────────
+const VOICE_MAP = {
+  'void-caster': { id: '29vD33N1CtxCmqQRPOHJ', name: 'Drew',   style: 0.4 },  // deep authoritative male
+  'the-colonel': { id: '2EiwWnXFnvU5JabPnv8n', name: 'Clyde',  style: 0.6 },  // Jersey gruff male
+  'the-haze':    { id: 'CYw3kZ02Hs0563khs1Fj', name: 'Dave',   style: 0.5 },  // energetic casual male
+  'astra-novatos': { id: '21m00Tcm4TlvDq8ikWAM', name: 'Rachel', style: 0.3 }, // polished female
+  'bun-e':       { id: 'MF3mGyEYCl7XYWbV9V6O', name: 'Elli',   style: 0.5 },  // warm cosmic female
+};
+const DEFAULT_VOICE = { id: '21m00Tcm4TlvDq8ikWAM', name: 'Rachel', style: 0.3 };
 
-const AUDIO_DIR = resolve(PROJECT_ROOT, 'public', 'audio');
+// Audio saved to generated/ which is volume-mounted at /opt/foai-data/perform/generated
+const AUDIO_DIR = resolve(PROJECT_ROOT, 'public', 'generated', 'audio');
 
-// ── DB connection ────────────────────────────────────────────────
 const sql = postgres(DATABASE_URL, { ssl: 'require', max: 3 });
 
-// ── Ensure audio directory ───────────────────────────────────────
 if (!existsSync(AUDIO_DIR)) {
   mkdirSync(AUDIO_DIR, { recursive: true });
   console.log(`Created audio directory: ${AUDIO_DIR}`);
 }
 
+// ── Chunked TTS for long transcripts ─────────────────────────────
+async function generateAudio(text, voice) {
+  const TTS_URL = `https://api.elevenlabs.io/v1/text-to-speech/${voice.id}`;
+
+  // ElevenLabs v3 supports up to ~5000 chars per request
+  const MAX_CHUNK = 4500;
+  const chunks = [];
+
+  if (text.length <= MAX_CHUNK) {
+    chunks.push(text);
+  } else {
+    // Split on sentence boundaries
+    let remaining = text;
+    while (remaining.length > 0) {
+      if (remaining.length <= MAX_CHUNK) {
+        chunks.push(remaining);
+        break;
+      }
+      // Find last sentence end within limit
+      const slice = remaining.slice(0, MAX_CHUNK);
+      const lastPeriod = Math.max(slice.lastIndexOf('. '), slice.lastIndexOf('! '), slice.lastIndexOf('? '));
+      const splitAt = lastPeriod > 0 ? lastPeriod + 2 : MAX_CHUNK;
+      chunks.push(remaining.slice(0, splitAt));
+      remaining = remaining.slice(splitAt);
+    }
+  }
+
+  const audioBuffers = [];
+
+  for (let i = 0; i < chunks.length; i++) {
+    if (chunks.length > 1) console.log(`    Chunk ${i + 1}/${chunks.length} (${chunks[i].length} chars)`);
+
+    const res = await fetch(TTS_URL, {
+      method: 'POST',
+      headers: {
+        'xi-api-key': ELEVENLABS_API_KEY,
+        'Content-Type': 'application/json',
+        'Accept': 'audio/mpeg',
+      },
+      body: JSON.stringify({
+        text: chunks[i],
+        model_id: 'eleven_v3',
+        voice_settings: {
+          stability: 0.5,
+          similarity_boost: 0.75,
+          style: voice.style,
+        },
+      }),
+    });
+
+    if (!res.ok) {
+      const errText = await res.text();
+      throw new Error(`ElevenLabs API [${res.status}]: ${errText}`);
+    }
+
+    audioBuffers.push(Buffer.from(await res.arrayBuffer()));
+
+    // Rate limit: ~2 req/sec on free tier
+    if (i < chunks.length - 1) await new Promise(r => setTimeout(r, 600));
+  }
+
+  return Buffer.concat(audioBuffers);
+}
+
 // ── Main ─────────────────────────────────────────────────────────
 async function main() {
-  console.log('Querying for episodes with NULL audio_url...');
+  console.log('Querying for episodes with NULL audio_url...\n');
 
   const episodes = await sql`
-    SELECT id, title, transcript
+    SELECT id, title, transcript, analyst_id
     FROM podcast_episodes
     WHERE audio_url IS NULL
-    ORDER BY created_at ASC
+    ORDER BY id ASC
   `;
 
   if (episodes.length === 0) {
-    console.log('No episodes need audio generation. All done.');
+    console.log('All episodes already have audio. Nothing to do.');
     await sql.end();
     return;
   }
@@ -71,64 +136,37 @@ async function main() {
   let failCount = 0;
 
   for (const ep of episodes) {
-    const { id, title, transcript } = ep;
+    const { id, title, transcript, analyst_id } = ep;
+    const voice = VOICE_MAP[analyst_id] || DEFAULT_VOICE;
 
-    // Truncate transcript if too long (ElevenLabs has a ~5000 char limit per request)
-    const text = transcript.length > 4500
-      ? transcript.slice(0, 4500) + '...'
-      : transcript;
-
-    console.log(`[${id}] Generating audio for: ${title}`);
+    console.log(`[${id}] "${title}"`);
+    console.log(`  Analyst: ${analyst_id} → Voice: ${voice.name} (${transcript.length} chars)`);
 
     try {
-      const res = await fetch(TTS_URL, {
-        method: 'POST',
-        headers: {
-          'xi-api-key': ELEVENLABS_API_KEY,
-          'Content-Type': 'application/json',
-          'Accept': 'audio/mpeg',
-        },
-        body: JSON.stringify({
-          text,
-          model_id: 'eleven_v3',
-          voice_settings: {
-            stability: 0.5,
-            similarity_boost: 0.75,
-            style: 0.3,
-          },
-        }),
-      });
-
-      if (!res.ok) {
-        const errText = await res.text();
-        console.error(`  ERROR [${res.status}]: ${errText}`);
-        failCount++;
-        continue;
-      }
-
-      const arrayBuffer = await res.arrayBuffer();
-      const buffer = Buffer.from(arrayBuffer);
-
+      const buffer = await generateAudio(transcript, voice);
       const filename = `episode-${id}.mp3`;
       const filepath = resolve(AUDIO_DIR, filename);
       writeFileSync(filepath, buffer);
 
-      // URL path relative to public/
-      const audioUrl = `/audio/${filename}`;
+      // URL path served by Next.js from public/generated/
+      const audioUrl = `/generated/audio/${filename}`;
 
       await sql`
         UPDATE podcast_episodes
-        SET audio_url = ${audioUrl}
+        SET audio_url = ${audioUrl},
+            duration_seconds = ${Math.round(buffer.length / 16000)}
         WHERE id = ${id}
       `;
 
-      console.log(`  Generated audio for episode ${id}: ${title}`);
-      console.log(`  Saved to: ${filepath} (${(buffer.length / 1024).toFixed(1)} KB)`);
+      console.log(`  ✓ Saved ${(buffer.length / 1024).toFixed(0)} KB → ${audioUrl}\n`);
       successCount++;
     } catch (err) {
-      console.error(`  EXCEPTION for episode ${id}:`, err.message || err);
+      console.error(`  ✗ FAILED: ${err.message}\n`);
       failCount++;
     }
+
+    // Pause between episodes to stay within rate limits
+    await new Promise(r => setTimeout(r, 1000));
   }
 
   console.log(`\nDone. Success: ${successCount}, Failed: ${failCount}`);
