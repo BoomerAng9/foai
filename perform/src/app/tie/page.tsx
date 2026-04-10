@@ -15,6 +15,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
+import { BackHomeNav } from '@/components/layout/BackHomeNav';
 
 const T = {
   bg: '#060A14',
@@ -39,6 +40,7 @@ export default function TIELandingPage() {
       <div style={{ background: '#000000', borderBottom: `1px solid ${T.border}` }}>
         <div className="max-w-7xl mx-auto px-6 py-3 flex items-center justify-between text-[11px] font-bold tracking-[0.18em] uppercase">
           <div className="flex items-center gap-3">
+            <BackHomeNav />
             <span style={{ color: T.red }}>● LIVE</span>
             <span className="opacity-50">|</span>
             <span style={{ color: T.gold }}>Talent &amp; Innovation Engine</span>

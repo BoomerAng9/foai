@@ -1,33 +1,18 @@
 'use client';
 
 /**
- * Per|Form Forecast Deep Dive — Broadcast Edition
- * ===================================================
- * Modern light-theme broadcast UI competing with PFF / ESPN / On3 / 247Sports.
- * Uses C1 Thesys for the AI-generated dashboard inside a clean shell.
+ * Per|Form Forecast Deep Dive
+ * Clean, breathable layout: identity, dual grade, pillars, longevity, NFL comps.
  */
 
 import { useEffect, useState, use } from 'react';
-import Image from 'next/image';
 import { TIELoader } from '@/components/tie/TIELoader';
 import { PillarRadar } from '@/components/tie/PillarRadar';
 import { CompLandscape } from '@/components/tie/CompLandscape';
-import { C1Renderer } from '@/components/c1/C1Renderer';
 import Link from 'next/link';
-
-interface Top5Player {
-  rank: number;
-  name: string;
-  position: string;
-  school: string;
-  grade: number;
-  gradeLetter: string;
-  headshotUrl: string | null;
-}
+import { BackHomeNav } from '@/components/layout/BackHomeNav';
 
 interface ForecastResponse {
-  c1Card?: { spec: unknown; model?: string; error?: string } | null;
-  top5?: Top5Player[];
   player: {
     identity: {
       name: string;
@@ -72,7 +57,6 @@ interface ForecastResponse {
   };
 }
 
-/* ── Broadcast theme tokens ── */
 const T = {
   bg: '#F4F6FA',
   surface: '#FFFFFF',
@@ -89,7 +73,6 @@ const T = {
   green: '#00874C',
   greenSoft: '#E0F5EB',
   amber: '#DC6B19',
-  amberSoft: '#FFF1E0',
   blue: '#0A66E8',
 };
 
@@ -102,7 +85,7 @@ export default function ForecastPage({ params }: { params: Promise<{ name: strin
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    fetch(`/api/players/forecast?name=${encodeURIComponent(playerName)}&c1=1`)
+    fetch(`/api/players/forecast?name=${encodeURIComponent(playerName)}`)
       .then((r) => r.json())
       .then((json) => {
         if (json.error) setError(json.error);
@@ -116,8 +99,7 @@ export default function ForecastPage({ params }: { params: Promise<{ name: strin
   }, [playerName]);
 
   if (loading) {
-    const upperName = playerName.replace(/-/g, ' ').toUpperCase();
-    return <TIELoader subtitle={`CALIBRATING FORECAST FOR ${upperName}`} />;
+    return <TIELoader subtitle={`Loading forecast for ${playerName.replace(/-/g, ' ')}`} />;
   }
 
   if (error || !data) {
@@ -125,9 +107,7 @@ export default function ForecastPage({ params }: { params: Promise<{ name: strin
       <div className="min-h-screen flex items-center justify-center p-8" style={{ background: T.bg }}>
         <div className="text-center max-w-md">
           <div className="text-sm font-medium mb-4" style={{ color: T.red }}>{error || 'No data'}</div>
-          <Link href="/rankings" className="text-xs font-mono underline" style={{ color: T.navy }}>
-            ← Back to rankings
-          </Link>
+          <Link href="/rankings" className="text-sm underline" style={{ color: T.navy }}>Back to rankings</Link>
         </div>
       </div>
     );
@@ -139,25 +119,19 @@ export default function ForecastPage({ params }: { params: Promise<{ name: strin
 
   return (
     <div className="min-h-screen" style={{ background: T.bg, color: T.text, fontFamily: "'Inter', system-ui, sans-serif" }}>
-      {/* ═══ TOP RIBBON — broadcast scoreboard style ═══ */}
-      <div style={{ background: T.navyDeep, color: '#FFFFFF', borderBottom: `2px solid ${T.red}` }}>
-        <div className="max-w-7xl mx-auto px-6 py-3 flex items-center justify-between text-[11px] font-bold tracking-[0.18em] uppercase">
-          <div className="flex items-center gap-3">
-            <span style={{ color: T.red }}>● LIVE</span>
-            <span className="opacity-50">|</span>
-            <span>Per|Form Talent Intelligence</span>
-            <span className="opacity-50">|</span>
-            <span className="opacity-70">2026 NFL Draft Class</span>
+      {/* Navigation bar */}
+      <nav style={{ background: T.navyDeep, color: '#FFFFFF' }}>
+        <div className="max-w-6xl mx-auto px-6 py-3 flex items-center justify-between text-xs font-semibold">
+          <div className="flex items-center">
+            <BackHomeNav />
+            <span className="opacity-70">Per|Form Talent Intelligence</span>
           </div>
-          <Link href="/rankings" className="opacity-80 hover:opacity-100 transition">
-            ← All Rankings
-          </Link>
+          <Link href="/rankings" className="opacity-70 hover:opacity-100 transition">All Rankings</Link>
         </div>
-      </div>
+      </nav>
 
-      {/* ═══ HERO — film room scene + athlete identity + dual grade ═══ */}
+      {/* Hero — player identity + dual grade */}
       <header className="relative overflow-hidden" style={{ background: T.navyDeep, color: '#FFFFFF' }}>
-        {/* Film room scene background */}
         <div
           className="absolute inset-0"
           style={{
@@ -166,84 +140,54 @@ export default function ForecastPage({ params }: { params: Promise<{ name: strin
             backgroundPosition: 'center',
           }}
         />
-        {/* Dark overlay so foreground text stays readable */}
-        <div
-          className="absolute inset-0"
-          style={{
-            background:
-              'linear-gradient(120deg, rgba(6,18,42,0.92) 0%, rgba(6,18,42,0.75) 45%, rgba(6,18,42,0.55) 100%)',
-          }}
-        />
-        {/* Subtle diagonal stripe texture */}
-        <div className="absolute inset-0 opacity-[0.05]" style={{
-          backgroundImage: 'repeating-linear-gradient(45deg, transparent, transparent 80px, #FFFFFF 80px, #FFFFFF 81px)',
-        }} />
+        <div className="absolute inset-0" style={{ background: 'rgba(6,18,42,0.88)' }} />
 
-        <div className="relative max-w-7xl mx-auto px-6 py-10">
-          <div className="grid grid-cols-1 lg:grid-cols-[1.2fr_auto] gap-8 items-center">
-            {/* LEFT — identity + dual grades */}
-            <div className="relative z-10">
-              <div className="flex items-center gap-3 mb-3">
-                <span className="px-2 py-0.5 text-[10px] font-bold tracking-[0.2em] rounded" style={{ background: T.red }}>
+        <div className="relative max-w-6xl mx-auto px-6 py-12">
+          <div className="grid grid-cols-1 lg:grid-cols-[1fr_280px] gap-8 items-center">
+            <div>
+              <div className="flex items-center gap-3 mb-4">
+                <span className="px-2.5 py-1 text-xs font-bold rounded" style={{ background: T.red }}>
                   {p.identity.position}
                 </span>
-                <span className="text-[11px] font-semibold tracking-[0.15em] uppercase opacity-70">
-                  {p.identity.school} · Class of 2026
-                </span>
-              </div>
-              <h1 className="text-5xl md:text-7xl font-black leading-[0.92] tracking-tight uppercase">
-                {p.identity.name}
-              </h1>
-              <div className="flex items-center gap-6 mt-6 flex-wrap">
-                <RankBadge label="Per|Form Rank" value={`#${p.identity.performRank}`} accent />
-                <RankBadge label="Consensus" value={`#${p.identity.consensusRank}`} />
-                <RankBadge label="Position Rank" value={`${p.identity.position}${p.identity.positionRank}`} />
-                <RankBadge label="Projected" value={`R${p.identity.projectedRound}`} />
-                <RankBadge label="Trend" value={p.trend === 'rising' ? '↑ Rising' : p.trend === 'falling' ? '↓ Falling' : '→ Steady'} />
+                <span className="text-sm opacity-70">{p.identity.school}</span>
               </div>
 
-              {/* Grade panel */}
-              <div className="flex items-stretch gap-3 mt-7">
-                <GradeHero
-                  label="ACTUAL TIE GRADE"
-                  score={p.grade.actual.score}
-                  letter={p.grade.actual.letter}
-                  accent={T.red}
-                  primary
-                />
+              <h1 className="text-4xl md:text-6xl font-black leading-tight tracking-tight">
+                {p.identity.name}
+              </h1>
+
+              <div className="flex items-center gap-6 mt-6 flex-wrap text-sm">
+                <Stat label="Per|Form Rank" value={`#${p.identity.performRank}`} highlight />
+                <Stat label="Consensus" value={`#${p.identity.consensusRank}`} />
+                <Stat label="Pos. Rank" value={`${p.identity.position}${p.identity.positionRank}`} />
+                <Stat label="Projected" value={`Round ${p.identity.projectedRound}`} />
+                <Stat label="Trend" value={p.trend === 'rising' ? 'Rising' : p.trend === 'falling' ? 'Falling' : 'Steady'} />
+              </div>
+
+              {/* Dual grades */}
+              <div className="flex items-stretch gap-4 mt-8">
+                <GradeCard label="Actual TIE Grade" score={p.grade.actual.score} letter={p.grade.actual.letter} accent={T.red} primary />
                 {delta > 0.1 && (
-                  <GradeHero
-                    label="CLEAN GRADE"
+                  <GradeCard
+                    label="Clean Grade"
                     score={p.grade.clean.score}
                     letter={p.grade.clean.letter}
-                    subline={`Δ −${delta.toFixed(1)} medical tax`}
+                    subline={`-${delta.toFixed(1)} medical adjustment`}
                     accent={T.amber}
-                    ghost
                   />
                 )}
               </div>
             </div>
 
-            {/* RIGHT — actual player headshot */}
-            <div className="relative flex-shrink-0 hidden lg:flex items-end justify-center" style={{ width: 340, height: 380 }}>
-              {/* Backdrop circle + glow */}
-              <div
-                className="absolute inset-x-0 bottom-0 rounded-full"
-                style={{
-                  height: 340,
-                  background: 'radial-gradient(circle at center 60%, rgba(212,0,40,0.18) 0%, rgba(11,30,63,0.4) 50%, transparent 80%)',
-                  filter: 'blur(20px)',
-                }}
-              />
-              {/* Stadium-style portrait frame */}
+            {/* Headshot */}
+            <div className="hidden lg:flex items-center justify-center">
               <div
                 className="relative rounded-full overflow-hidden"
                 style={{
-                  width: 320,
-                  height: 320,
-                  border: '3px solid rgba(255,255,255,0.18)',
-                  boxShadow: '0 24px 60px rgba(0,0,0,0.55), 0 0 0 1px rgba(255,215,0,0.25)',
-                  background: 'radial-gradient(circle at 50% 30%, #1A2A4A 0%, #06122A 100%)',
+                  width: 240,
+                  height: 240,
+                  border: '2px solid rgba(255,255,255,0.15)',
+                  background: 'radial-gradient(circle at 50% 30%, #1A2A4A, #06122A)',
                 }}
               >
                 {p.identity.headshotUrl ? (
@@ -252,408 +196,156 @@ export default function ForecastPage({ params }: { params: Promise<{ name: strin
                     src={p.identity.headshotUrl}
                     alt={p.identity.name}
                     className="absolute inset-0 w-full h-full object-cover object-top"
-                    onError={(e) => {
-                      (e.currentTarget as HTMLImageElement).style.display = 'none';
-                    }}
+                    onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }}
                   />
                 ) : (
-                  <div
-                    className="absolute inset-0 flex items-center justify-center"
-                    style={{ color: 'rgba(255,255,255,0.2)' }}
-                  >
-                    <span className="text-7xl font-black tracking-tight">
+                  <div className="absolute inset-0 flex items-center justify-center" style={{ color: 'rgba(255,255,255,0.15)' }}>
+                    <span className="text-6xl font-black">
                       {p.identity.name.split(' ').map(s => s[0]).join('').slice(0, 2)}
                     </span>
                   </div>
                 )}
-                {/* Subtle bottom gradient */}
-                <div
-                  className="absolute inset-x-0 bottom-0 h-24 pointer-events-none"
-                  style={{ background: 'linear-gradient(180deg, transparent, rgba(6,18,42,0.7))' }}
-                />
               </div>
             </div>
           </div>
         </div>
       </header>
 
-      {/* ═══ TOP 5 STRIP ═══ */}
-      {data.top5 && data.top5.length > 0 && (
-        <section className="border-b" style={{ background: T.surface, borderColor: T.border }}>
-          <div className="max-w-7xl mx-auto px-6 py-8">
-            <div className="flex items-baseline justify-between mb-5">
-              <div>
-                <div className="text-[10px] font-bold tracking-[0.22em] uppercase" style={{ color: T.red }}>
-                  The Top Five
-                </div>
-                <h2 className="text-2xl font-black tracking-tight" style={{ color: T.text, fontFamily: "'Outfit', sans-serif" }}>
-                  2026 Per|Form Big Board
-                </h2>
-              </div>
-              <Link
-                href="/rankings"
-                className="text-[10px] font-bold tracking-[0.18em] uppercase px-3 py-1.5 rounded border"
-                style={{ color: T.navy, borderColor: T.border }}
-              >
-                Full Board →
-              </Link>
-            </div>
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
-              {data.top5.map((t5) => {
-                const isCurrent = t5.name.toLowerCase() === p.identity.name.toLowerCase();
-                return (
-                  <Link
-                    key={t5.rank}
-                    href={`/players/${encodeURIComponent(t5.name.toLowerCase().replace(/\s+/g, '-'))}/forecast`}
-                    className="group block"
-                  >
-                    <div
-                      className="relative rounded-lg overflow-hidden transition-all group-hover:shadow-lg"
-                      style={{
-                        background: isCurrent ? T.navy : T.surfaceAlt,
-                        border: `1.5px solid ${isCurrent ? T.red : T.border}`,
-                        aspectRatio: '3 / 4',
-                      }}
-                    >
-                      {/* Rank chip */}
-                      <div
-                        className="absolute top-2 left-2 z-10 px-2 py-0.5 rounded text-[10px] font-black"
-                        style={{
-                          background: isCurrent ? T.red : '#FFFFFF',
-                          color: isCurrent ? '#FFFFFF' : T.navy,
-                          border: isCurrent ? 'none' : `1px solid ${T.border}`,
-                        }}
-                      >
-                        #{t5.rank}
-                      </div>
-                      {/* Headshot / initials */}
-                      {t5.headshotUrl ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img
-                          src={t5.headshotUrl}
-                          alt={t5.name}
-                          className="absolute inset-0 w-full h-full object-cover object-top"
-                          onError={(e) => {
-                            (e.currentTarget as HTMLImageElement).style.display = 'none';
-                          }}
-                        />
-                      ) : (
-                        <div
-                          className="absolute inset-0 flex items-center justify-center"
-                          style={{
-                            background: isCurrent
-                              ? 'linear-gradient(180deg, #1A2A4A, #06122A)'
-                              : 'linear-gradient(180deg, #F4F6FA, #E2E6EE)',
-                          }}
-                        >
-                          <span
-                            className="text-5xl font-black tracking-tight"
-                            style={{ color: isCurrent ? 'rgba(255,255,255,0.2)' : '#CDD3DF' }}
-                          >
-                            {t5.name.split(' ').map((s) => s[0]).join('').slice(0, 2)}
-                          </span>
-                        </div>
-                      )}
-                      {/* Bottom gradient + grade */}
-                      <div
-                        className="absolute inset-x-0 bottom-0 p-2 pt-8"
-                        style={{
-                          background: 'linear-gradient(180deg, transparent, rgba(0,0,0,0.85))',
-                        }}
-                      >
-                        <div className="flex items-baseline justify-between">
-                          <span
-                            className="text-lg font-black tabular-nums leading-none"
-                            style={{
-                              color: '#FFFFFF',
-                              fontFamily: "'Outfit', sans-serif",
-                            }}
-                          >
-                            {t5.grade.toFixed(1)}
-                          </span>
-                          <span
-                            className="text-[10px] font-bold"
-                            style={{ color: T.red === '#D40028' ? '#FFB3BF' : T.red }}
-                          >
-                            {t5.gradeLetter}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                    {/* Name + position underneath the card */}
-                    <div className="mt-2 text-center">
-                      <div
-                        className="text-xs font-bold uppercase tracking-tight truncate"
-                        style={{ color: isCurrent ? T.red : T.text }}
-                      >
-                        {t5.name}
-                      </div>
-                      <div className="text-[10px] font-mono mt-0.5" style={{ color: T.textMuted }}>
-                        {t5.position} · {t5.school}
-                      </div>
-                    </div>
-                  </Link>
-                );
-              })}
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* ═══ STAT BAR — pillar breakdown ═══ */}
-      <section className="border-b" style={{ background: T.surface, borderColor: T.border }}>
-        <div className="max-w-7xl mx-auto px-6 py-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <PillarStatBar
-              label="Game Performance"
-              actual={p.pillars.actual.gamePerformance}
-              clean={p.pillars.clean.gamePerformance}
-            />
-            <PillarStatBar
-              label="Athleticism"
-              actual={p.pillars.actual.athleticism}
-              clean={p.pillars.clean.athleticism}
-            />
-            <PillarStatBar
-              label="Intangibles"
-              actual={p.pillars.actual.intangibles}
-              clean={p.pillars.clean.intangibles}
-            />
+      {/* Pillar breakdown */}
+      <section style={{ background: T.surface, borderBottom: `1px solid ${T.border}` }}>
+        <div className="max-w-6xl mx-auto px-6 py-8">
+          <h2 className="text-lg font-bold mb-6" style={{ color: T.text }}>Performance Pillars</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <PillarBar label="Game Performance" actual={p.pillars.actual.gamePerformance} clean={p.pillars.clean.gamePerformance} />
+            <PillarBar label="Athleticism" actual={p.pillars.actual.athleticism} clean={p.pillars.clean.athleticism} />
+            <PillarBar label="Intangibles" actual={p.pillars.actual.intangibles} clean={p.pillars.clean.intangibles} />
           </div>
         </div>
       </section>
 
-      {/* ═══ MEDICAL FLAG — alert callout ═══ */}
+      {/* Medical flag */}
       {hasMedical && p.medical && (
-        <section className="border-b" style={{ background: T.bg, borderColor: T.border }}>
-          <div className="max-w-7xl mx-auto px-6 py-8">
-            <div className="rounded-2xl overflow-hidden" style={{ background: T.surface, border: `1px solid ${T.border}`, boxShadow: '0 1px 3px rgba(0,0,0,0.04), 0 8px 24px rgba(11,30,63,0.06)' }}>
-              <div className="px-6 py-4 flex items-center justify-between" style={{ background: T.redSoft, borderBottom: `1px solid ${T.border}` }}>
-                <div className="flex items-center gap-3">
-                  <span className="w-2 h-2 rounded-full" style={{ background: T.red }} />
-                  <span className="text-[11px] font-bold tracking-[0.2em] uppercase" style={{ color: T.red }}>
-                    Medical Risk · {p.medical.severity}
-                  </span>
-                  <span className="text-[10px] tracking-[0.15em] uppercase" style={{ color: T.textMuted }}>
-                    Currently {p.medical.currentStatus}
-                  </span>
-                </div>
-                <span className="text-[10px] font-mono" style={{ color: T.textMuted }}>
-                  {p.medical.year} · {p.medical.injuryTypes.join(', ')}
+        <section style={{ background: T.bg, borderBottom: `1px solid ${T.border}` }}>
+          <div className="max-w-6xl mx-auto px-6 py-8">
+            <div className="rounded-xl p-5" style={{ background: T.redSoft, border: `1px solid ${T.border}` }}>
+              <div className="flex items-center gap-3 mb-3">
+                <span className="w-2 h-2 rounded-full" style={{ background: T.red }} />
+                <span className="text-sm font-bold" style={{ color: T.red }}>
+                  Medical Risk: {p.medical.severity}
+                </span>
+                <span className="text-xs" style={{ color: T.textMuted }}>
+                  {p.medical.currentStatus} -- {p.medical.year}
                 </span>
               </div>
-              <div className="p-6 grid grid-cols-1 md:grid-cols-[1fr_auto] gap-8">
-                <p className="text-[15px] leading-relaxed" style={{ color: T.text }}>
-                  {p.medical.notes}
-                </p>
-                {p.medical.historicalComps && p.medical.historicalComps.length > 0 && (
-                  <div className="md:border-l md:pl-8" style={{ borderColor: T.border }}>
-                    <div className="text-[10px] font-bold tracking-[0.2em] uppercase mb-3" style={{ color: T.textMuted }}>
-                      Historical Comps
-                    </div>
-                    <div className="flex flex-col gap-1.5">
-                      {p.medical.historicalComps.map((c) => (
-                        <div key={c} className="text-sm font-bold" style={{ color: T.navy }}>
-                          {c}
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
+              <p className="text-sm leading-relaxed" style={{ color: T.text }}>{p.medical.notes}</p>
+              {p.medical.historicalComps && p.medical.historicalComps.length > 0 && (
+                <div className="flex gap-3 mt-3 text-sm font-medium" style={{ color: T.navy }}>
+                  <span style={{ color: T.textMuted }}>Comps:</span>
+                  {p.medical.historicalComps.join(', ')}
+                </div>
+              )}
             </div>
           </div>
         </section>
       )}
 
-      {/* ═══ LONGEVITY FORECAST ═══ */}
-      <section className="border-b" style={{ background: T.surface, borderColor: T.border }}>
-        <div className="max-w-7xl mx-auto px-6 py-10">
-          <SectionHeader
-            kicker="LONGEVITY FORECAST · MODEL v1"
-            title="Career Projection"
-            subtitle={p.longevity.careerOutlookLabel}
-          />
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-6">
-            <ForecastTile label="Expected Career" value={`${p.longevity.expectedCareerYears}`} unit="years" />
-            <ForecastTile label="Peak Window" value={`Yr ${p.longevity.peakWindowYears[0]}–${p.longevity.peakWindowYears[1]}`} />
-            <ForecastTile
+      {/* Longevity forecast */}
+      <section style={{ background: T.surface, borderBottom: `1px solid ${T.border}` }}>
+        <div className="max-w-6xl mx-auto px-6 py-10">
+          <div className="mb-6">
+            <h2 className="text-2xl font-black" style={{ color: T.text }}>Career Projection</h2>
+            <p className="text-sm mt-1" style={{ color: T.textMuted }}>{p.longevity.careerOutlookLabel}</p>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <Tile label="Expected Career" value={`${p.longevity.expectedCareerYears}`} unit="years" />
+            <Tile label="Peak Window" value={`Yr ${p.longevity.peakWindowYears[0]}--${p.longevity.peakWindowYears[1]}`} />
+            <Tile
               label="Decline Risk"
-              value={p.longevity.declineRisk.toUpperCase()}
-              accent={
-                p.longevity.declineRisk === 'low' ? T.green
-                : p.longevity.declineRisk === 'moderate' ? T.amber
-                : p.longevity.declineRisk === 'high' ? T.red
-                : T.red
-              }
+              value={p.longevity.declineRisk}
+              accent={p.longevity.declineRisk === 'low' ? T.green : p.longevity.declineRisk === 'moderate' ? T.amber : T.red}
             />
-            <ForecastTile label="Confidence" value={`${Math.round(p.longevity.confidence * 100)}`} unit="%" />
+            <Tile label="Confidence" value={`${Math.round(p.longevity.confidence * 100)}%`} />
           </div>
 
-          {/* Comp triangle */}
+          {/* NFL comparison triangle */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-8">
-            <CompCard kind="UPSIDE" tone={T.green} comp={p.longevity.comps.upside} />
-            <CompCard kind="BASELINE" tone={T.blue} comp={p.longevity.comps.baseline} />
-            <CompCard kind="DOWNSIDE" tone={T.red} comp={p.longevity.comps.downside} />
+            <CompCard kind="Upside" tone={T.green} comp={p.longevity.comps.upside} />
+            <CompCard kind="Baseline" tone={T.blue} comp={p.longevity.comps.baseline} />
+            <CompCard kind="Downside" tone={T.red} comp={p.longevity.comps.downside} />
           </div>
         </div>
       </section>
 
-      {/* ═══ PILLAR RADAR + COMP LANDSCAPE — side by side ═══ */}
-      <section className="border-b" style={{ background: T.bg, borderColor: T.border }}>
-        <div className="max-w-7xl mx-auto px-6 py-12 grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div className="rounded-2xl p-8" style={{ background: T.surface, border: `1px solid ${T.border}`, boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
-            <SectionHeader kicker="PERFORMANCE PILLARS" title="Actual vs Clean" tight />
-            <div className="flex justify-center mt-4">
+      {/* Radar + Comp Landscape */}
+      <section style={{ background: T.bg, borderBottom: `1px solid ${T.border}` }}>
+        <div className="max-w-6xl mx-auto px-6 py-12 grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="rounded-xl p-6" style={{ background: T.surface, border: `1px solid ${T.border}` }}>
+            <h3 className="text-lg font-bold mb-4">Actual vs Clean Pillars</h3>
+            <div className="flex justify-center">
               <PillarRadar
                 actual={p.pillars.actual}
                 clean={delta > 0.1 ? p.pillars.clean : undefined}
-                size={520}
+                size={480}
               />
             </div>
           </div>
-
-          <div className="rounded-2xl p-8" style={{ background: T.surface, border: `1px solid ${T.border}`, boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
-            <SectionHeader kicker="HISTORICAL COMP LANDSCAPE" title="Career × Ceiling" tight />
-            <div className="mt-4">
-              <CompLandscape
-                playerName={p.identity.name}
-                playerGrade={p.grade.actual.score}
-                upside={p.longevity.comps.upside as Parameters<typeof CompLandscape>[0]['upside']}
-                baseline={p.longevity.comps.baseline as Parameters<typeof CompLandscape>[0]['baseline']}
-                downside={p.longevity.comps.downside as Parameters<typeof CompLandscape>[0]['downside']}
-                size={700}
-              />
-            </div>
+          <div className="rounded-xl p-6" style={{ background: T.surface, border: `1px solid ${T.border}` }}>
+            <h3 className="text-lg font-bold mb-4">Historical Comp Landscape</h3>
+            <CompLandscape
+              playerName={p.identity.name}
+              playerGrade={p.grade.actual.score}
+              upside={p.longevity.comps.upside as Parameters<typeof CompLandscape>[0]['upside']}
+              baseline={p.longevity.comps.baseline as Parameters<typeof CompLandscape>[0]['baseline']}
+              downside={p.longevity.comps.downside as Parameters<typeof CompLandscape>[0]['downside']}
+              size={640}
+            />
           </div>
         </div>
       </section>
 
-      {/* ═══ INTELLIGENCE BRIEFING (C1) ═══ */}
-      {data.c1Card?.spec ? (
-        <section className="border-b" style={{ background: T.bg, borderColor: T.border }}>
-          <div className="max-w-7xl mx-auto px-6 py-14">
-            <div className="mb-8">
-              <div className="text-[10px] font-bold tracking-[0.22em] uppercase mb-2" style={{ color: T.red }}>
-                Front Office Briefing
-              </div>
-              <h2 className="text-3xl md:text-4xl font-black leading-tight uppercase" style={{ color: T.text, fontFamily: "'Outfit', sans-serif" }}>
-                {p.identity.name} · The Read
-              </h2>
-              <p className="text-sm mt-2 max-w-xl" style={{ color: T.textMuted }}>
-                What scouts, NIL agencies, and front offices need to know — composed live from the canonical TIE record. PFF gives you grades. We give you the read.
-              </p>
-            </div>
-            <div className="max-w-3xl">
-              <C1Renderer spec={data.c1Card.spec} />
-            </div>
-          </div>
-        </section>
-      ) : null}
-
-      {/* ═══ TIE BRAND CERTIFICATION ═══ */}
-      <section className="border-b" style={{ background: T.bg, borderColor: T.border }}>
-        <div className="max-w-3xl mx-auto px-6 py-14 text-center">
-          <div className="inline-flex items-center gap-4 mb-5">
-            <div className="h-px w-12" style={{ background: T.borderStrong }} />
-            <div
-              className="inline-flex items-center justify-center px-5 py-2 rounded-md"
-              style={{ background: T.navyDeep }}
-            >
-              <span
-                className="text-3xl font-black tracking-tight"
-                style={{
-                  color: '#FFFFFF',
-                  fontFamily: "'Outfit', sans-serif",
-                  letterSpacing: '-0.02em',
-                }}
-              >
-                T<span style={{ color: T.red }}>I</span>E
-              </span>
-            </div>
-            <div className="h-px w-12" style={{ background: T.borderStrong }} />
-          </div>
-          <div className="text-[10px] font-bold tracking-[0.25em] uppercase mb-3" style={{ color: T.textMuted }}>
-            Stamped by the Talent &amp; Innovation Engine
-          </div>
-          <p className="text-xs leading-relaxed max-w-md mx-auto" style={{ color: T.textMuted }}>
-            Opinion-agnostic. Pillar-driven. Built to grade what wins on the field, not what wins on draft Twitter.
-          </p>
-        </div>
-      </section>
-
-      <footer className="py-6 text-center text-[10px] font-mono tracking-[0.25em]" style={{ background: T.navyDeep, color: 'rgba(255,255,255,0.5)' }}>
-        PER|FORM · CANONICAL FORECAST v1 · PUBLISHED BY ACHIEVEMOR
+      <footer className="py-5 text-center text-xs" style={{ background: T.navyDeep, color: 'rgba(255,255,255,0.4)' }}>
+        Per|Form -- Canonical Forecast v1 -- Published by ACHIEVEMOR
       </footer>
     </div>
   );
 }
 
-/* ═══ Sub-components — broadcast theme ═══ */
+/* ── Sub-components ── */
 
-function RankBadge({ label, value, accent }: { label: string; value: string; accent?: boolean }) {
+function Stat({ label, value, highlight }: { label: string; value: string; highlight?: boolean }) {
   return (
     <div>
-      <div className="text-[9px] font-bold tracking-[0.22em] uppercase opacity-60">{label}</div>
-      <div className={`text-2xl font-black leading-none mt-1 ${accent ? '' : 'opacity-90'}`} style={accent ? { color: '#FFD700' } : {}}>
+      <div className="text-xs opacity-60">{label}</div>
+      <div className="text-xl font-black leading-none mt-0.5" style={highlight ? { color: '#FFD700' } : {}}>
         {value}
       </div>
     </div>
   );
 }
 
-function GradeHero({
-  label,
-  score,
-  letter,
-  subline,
-  accent,
-  primary,
-  ghost,
-}: {
-  label: string;
-  score: number;
-  letter: string;
-  subline?: string;
-  accent: string;
-  primary?: boolean;
-  ghost?: boolean;
+function GradeCard({ label, score, letter, subline, accent, primary }: {
+  label: string; score: number; letter: string; subline?: string; accent: string; primary?: boolean;
 }) {
   return (
     <div
-      className="relative px-6 py-5 rounded-xl"
+      className="px-5 py-4 rounded-lg"
       style={{
         background: primary ? '#FFFFFF' : 'rgba(255,255,255,0.08)',
-        border: `1.5px solid ${primary ? accent : 'rgba(255,255,255,0.2)'}`,
-        minWidth: primary ? 220 : 170,
-        opacity: ghost ? 0.85 : 1,
+        border: `1.5px solid ${primary ? accent : 'rgba(255,255,255,0.15)'}`,
+        minWidth: primary ? 200 : 160,
       }}
     >
-      <div
-        className="text-[9px] font-bold tracking-[0.22em] uppercase mb-2"
-        style={{ color: primary ? '#5A6478' : 'rgba(255,255,255,0.6)' }}
-      >
+      <div className="text-xs mb-2" style={{ color: primary ? T.textMuted : 'rgba(255,255,255,0.5)' }}>
         {label}
       </div>
       <div className="flex items-baseline gap-2">
-        <span
-          className="text-5xl font-black leading-none tabular-nums"
-          style={{ color: primary ? '#0B1E3F' : '#FFFFFF', fontFamily: "'Outfit', sans-serif" }}
-        >
+        <span className="text-4xl font-black tabular-nums" style={{ color: primary ? T.navy : '#FFFFFF', fontFamily: "'Outfit', sans-serif" }}>
           {score.toFixed(1)}
         </span>
-        <span
-          className="text-2xl font-black"
-          style={{ color: accent }}
-        >
-          {letter}
-        </span>
+        <span className="text-xl font-black" style={{ color: accent }}>{letter}</span>
       </div>
       {subline && (
-        <div
-          className="text-[10px] font-semibold mt-2"
-          style={{ color: primary ? '#5A6478' : 'rgba(255,255,255,0.7)' }}
-        >
+        <div className="text-xs mt-1.5" style={{ color: primary ? T.textMuted : 'rgba(255,255,255,0.6)' }}>
           {subline}
         </div>
       )}
@@ -661,134 +353,62 @@ function GradeHero({
   );
 }
 
-function PillarStatBar({
-  label,
-  actual,
-  clean,
-}: {
-  label: string;
-  actual: number;
-  clean: number;
-}) {
+function PillarBar({ label, actual, clean }: { label: string; actual: number; clean: number }) {
   const delta = clean - actual;
   return (
     <div>
-      <div className="mb-2">
-        <div className="text-[10px] font-bold tracking-[0.18em] uppercase" style={{ color: '#5A6478' }}>
-          {label}
-        </div>
-      </div>
-      <div className="flex items-baseline gap-3 mb-3">
-        <span className="text-4xl font-black leading-none tabular-nums" style={{ color: '#0B1E3F', fontFamily: "'Outfit', sans-serif" }}>
+      <div className="text-xs font-semibold mb-2" style={{ color: T.textMuted }}>{label}</div>
+      <div className="flex items-baseline gap-3 mb-2">
+        <span className="text-3xl font-black tabular-nums" style={{ color: T.navy, fontFamily: "'Outfit', sans-serif" }}>
           {actual.toFixed(1)}
         </span>
         {delta > 0.1 && (
-          <span className="text-xs font-mono" style={{ color: '#8B94A8' }}>
-            clean {clean.toFixed(1)}
-          </span>
+          <span className="text-xs" style={{ color: T.textSubtle }}>clean {clean.toFixed(1)}</span>
         )}
       </div>
       <div className="relative h-2 rounded-full overflow-hidden" style={{ background: '#EAEDF3' }}>
         {delta > 0.1 && (
-          <div
-            className="absolute top-0 left-0 h-full"
-            style={{
-              width: `${clean}%`,
-              background: 'repeating-linear-gradient(90deg, transparent, transparent 4px, rgba(11,30,63,0.15) 4px, rgba(11,30,63,0.15) 6px)',
-            }}
-          />
+          <div className="absolute top-0 left-0 h-full rounded-full opacity-30" style={{ width: `${clean}%`, background: T.navy }} />
         )}
-        <div
-          className="absolute top-0 left-0 h-full rounded-full"
-          style={{
-            width: `${actual}%`,
-            background: 'linear-gradient(90deg, #0B1E3F, #1A4ECC)',
-          }}
-        />
+        <div className="absolute top-0 left-0 h-full rounded-full" style={{ width: `${actual}%`, background: T.navy }} />
       </div>
     </div>
   );
 }
 
-function SectionHeader({
-  kicker,
-  title,
-  subtitle,
-  tight,
-}: {
-  kicker: string;
-  title: string;
-  subtitle?: string;
-  tight?: boolean;
-}) {
+function Tile({ label, value, unit, accent }: { label: string; value: string; unit?: string; accent?: string }) {
   return (
-    <div>
-      <div className="text-[10px] font-bold tracking-[0.22em] uppercase" style={{ color: '#D40028' }}>
-        {kicker}
-      </div>
-      <h2 className={`${tight ? 'text-2xl' : 'text-3xl md:text-4xl'} font-black leading-tight mt-1`} style={{ color: '#0A0E1A' }}>
-        {title}
-      </h2>
-      {subtitle && (
-        <p className="text-sm mt-2" style={{ color: '#5A6478' }}>
-          {subtitle}
-        </p>
-      )}
-    </div>
-  );
-}
-
-function ForecastTile({ label, value, unit, accent }: { label: string; value: string; unit?: string; accent?: string }) {
-  return (
-    <div className="px-5 py-4 rounded-xl" style={{ background: '#FAFBFD', border: '1px solid #E2E6EE' }}>
-      <div className="text-[9px] font-bold tracking-[0.22em] uppercase" style={{ color: '#5A6478' }}>
-        {label}
-      </div>
-      <div className="flex items-baseline gap-1.5 mt-1">
-        <span className="text-3xl font-black tabular-nums" style={{ color: accent || '#0B1E3F', fontFamily: "'Outfit', sans-serif" }}>
+    <div className="px-4 py-3 rounded-lg" style={{ background: T.surfaceAlt, border: `1px solid ${T.border}` }}>
+      <div className="text-xs" style={{ color: T.textMuted }}>{label}</div>
+      <div className="flex items-baseline gap-1 mt-1">
+        <span className="text-2xl font-black tabular-nums" style={{ color: accent || T.navy, fontFamily: "'Outfit', sans-serif" }}>
           {value}
         </span>
-        {unit && (
-          <span className="text-xs font-bold" style={{ color: '#8B94A8' }}>
-            {unit}
-          </span>
-        )}
+        {unit && <span className="text-xs" style={{ color: T.textSubtle }}>{unit}</span>}
       </div>
     </div>
   );
 }
 
-function CompCard({
-  kind,
-  tone,
-  comp,
-}: {
-  kind: string;
-  tone: string;
+function CompCard({ kind, tone, comp }: {
+  kind: string; tone: string;
   comp: { name: string; careerYears: number; peakYears: number; proBowls: number; outcome: string; note: string } | null;
 }) {
   if (!comp) return null;
   return (
-    <div className="p-5 rounded-xl" style={{ background: '#FFFFFF', border: '1px solid #E2E6EE', boxShadow: '0 1px 2px rgba(0,0,0,0.03)' }}>
-      <div className="flex items-center justify-between mb-3">
-        <div className="text-[10px] font-bold tracking-[0.22em] uppercase" style={{ color: tone }}>
-          {kind}
-        </div>
-        <span className="text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded" style={{ background: `${tone}15`, color: tone }}>
+    <div className="p-4 rounded-lg" style={{ background: T.surface, border: `1px solid ${T.border}` }}>
+      <div className="flex items-center justify-between mb-2">
+        <span className="text-xs font-bold" style={{ color: tone }}>{kind}</span>
+        <span className="text-xs px-2 py-0.5 rounded" style={{ background: `${tone}15`, color: tone }}>
           {comp.outcome.replace(/_/g, ' ')}
         </span>
       </div>
-      <div className="text-2xl font-black tracking-tight" style={{ color: '#0A0E1A' }}>
-        {comp.name}
+      <div className="text-xl font-black" style={{ color: T.text }}>{comp.name}</div>
+      <div className="flex gap-4 mt-1.5 text-xs" style={{ color: T.textMuted }}>
+        <span><strong style={{ color: T.navy }}>{comp.careerYears}</strong> yrs</span>
+        <span><strong style={{ color: T.navy }}>{comp.proBowls}</strong> Pro Bowls</span>
       </div>
-      <div className="flex gap-4 mt-2 text-xs font-mono" style={{ color: '#5A6478' }}>
-        <span><strong style={{ color: '#0B1E3F' }}>{comp.careerYears}</strong> yrs</span>
-        <span><strong style={{ color: '#0B1E3F' }}>{comp.proBowls}</strong>× PB</span>
-      </div>
-      <p className="text-xs mt-3 leading-relaxed" style={{ color: '#5A6478' }}>
-        {comp.note}
-      </p>
+      <p className="text-xs mt-2 leading-relaxed" style={{ color: T.textMuted }}>{comp.note}</p>
     </div>
   );
 }
-

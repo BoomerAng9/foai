@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { hasAccess, grantAccess, checkOwnerBypass } from '@/lib/paywall';
 import { COLORS } from '@/lib/design/tokens';
+import { BackHomeNav } from '@/components/layout/BackHomeNav';
 
 const fadeUp = { hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0 } };
 
@@ -56,6 +57,10 @@ export default function AccessPage() {
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center px-6 relative" style={{ background: COLORS.bg }}>
+      {/* Back / Home */}
+      <div className="fixed top-4 left-4 z-20">
+        <BackHomeNav />
+      </div>
       {/* Radial glow */}
       <div
         className="fixed inset-0 pointer-events-none"
