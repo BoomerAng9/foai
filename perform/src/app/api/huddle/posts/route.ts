@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@/lib/db';
+import { notifyNewHuddlePost } from '@/lib/notifications/triggers';
 
 const CREATE_POSTS = `
   CREATE TABLE IF NOT EXISTS huddle_posts (
@@ -113,6 +114,9 @@ export async function POST(req: NextRequest) {
       RETURNING *`;
 
     await sql`UPDATE huddle_profiles SET post_count = post_count + 1 WHERE analyst_id = ${analyst_id}`;
+
+    // Send push notification for new huddle post (fire-and-forget)
+    notifyNewHuddlePost(post).catch(() => {});
 
     return NextResponse.json({ ok: true, post });
   } catch (err) {

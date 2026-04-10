@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@/lib/db';
+import { notifyNewHuddlePost } from '@/lib/notifications/triggers';
 
 /**
  * POST /api/webhooks/stepper — Webhook receiver for Stepper and n8n
@@ -108,6 +109,10 @@ export async function POST(req: NextRequest) {
         const [post] = await sql`INSERT INTO huddle_posts (analyst_id, content, post_type, tags, player_ref)
           VALUES (${generated.analyst_id}, ${generated.content}, ${generated.post_type}, ${generated.tags}, ${generated.player_ref})
           RETURNING id, analyst_id, post_type, created_at`;
+
+        // Push notification for new huddle post (fire-and-forget)
+        notifyNewHuddlePost({ ...post, content: generated.content }).catch(() => {});
+
         result = { post, generated: true };
         break;
       }

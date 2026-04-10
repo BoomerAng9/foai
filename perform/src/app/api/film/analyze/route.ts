@@ -5,17 +5,23 @@ interface FilmRequest {
   playerName: string;
   source?: 'youtube' | 'web' | 'upload';
   analysisType?: string;
+  youtubeUrl?: string;
 }
 
 const BRAVE_KEY = process.env.BRAVE_API_KEY || '';
 
 export async function POST(req: NextRequest) {
   try {
+    // Allow pipeline key OR authenticated user session
     const PIPELINE_KEY = process.env.PIPELINE_AUTH_KEY || '';
     const authHeader = req.headers.get('authorization') || '';
     const token = authHeader.replace('Bearer ', '');
-    if (!PIPELINE_KEY || token !== PIPELINE_KEY) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    const hasPipelineAuth = PIPELINE_KEY && token === PIPELINE_KEY;
+
+    if (!hasPipelineAuth) {
+      const { requireAuth } = await import('@/lib/auth-guard');
+      const authResult = await requireAuth(req);
+      if (!authResult.ok) return authResult.response;
     }
 
     const body: FilmRequest = await req.json();

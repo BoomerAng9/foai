@@ -141,14 +141,19 @@ function timeAgo(iso: string): string {
 export default function DashboardPage() {
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [needsAuth, setNeedsAuth] = useState(false);
 
   useEffect(() => {
     fetch('/api/dashboard/stats')
       .then((r) => {
+        if (r.status === 401 || r.status === 403) {
+          setNeedsAuth(true);
+          return null;
+        }
         if (!r.ok) throw new Error(`Status ${r.status}`);
         return r.json();
       })
-      .then(setStats)
+      .then((data) => { if (data) setStats(data); })
       .catch((e) => setError(e.message));
   }, []);
 
@@ -186,7 +191,7 @@ export default function DashboardPage() {
         </motion.div>
 
         {/* ── Metric Cards ── */}
-        <motion.div
+        {!needsAuth && <motion.div
           className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-14"
           variants={staggerContainer}
           initial="hidden"
@@ -216,9 +221,59 @@ export default function DashboardPage() {
               </Link>
             </motion.div>
           ))}
-        </motion.div>
+        </motion.div>}
 
-        {error && (
+        {needsAuth && (
+          <motion.div
+            className="mb-14 grid grid-cols-2 md:grid-cols-5 gap-4"
+            variants={staggerContainer}
+            initial="hidden"
+            animate="visible"
+          >
+            {METRICS.map((m) => (
+              <motion.div key={m.key} variants={staggerItem}>
+                <div
+                  className="rounded-xl p-5"
+                  style={{
+                    background: 'rgba(255,255,255,0.015)',
+                    border: '1px solid rgba(255,255,255,0.04)',
+                  }}
+                >
+                  <p className="text-2xl font-outfit font-black text-white/15">--</p>
+                  <p className="mt-1 text-xs font-mono tracking-wider text-white/20 uppercase">
+                    {m.label}
+                  </p>
+                </div>
+              </motion.div>
+            ))}
+            <motion.div variants={staggerItem} className="col-span-2 md:col-span-5">
+              <div
+                className="rounded-xl p-8 text-center"
+                style={{
+                  background: 'rgba(212,168,83,0.04)',
+                  border: '1px solid rgba(212,168,83,0.15)',
+                }}
+              >
+                <p className="text-sm font-mono text-white/50 mb-3">
+                  Sign in to view live stats
+                </p>
+                <Link
+                  href="/login"
+                  className="inline-block px-6 py-2 rounded-lg text-xs font-mono font-bold tracking-wider transition-colors"
+                  style={{
+                    background: 'rgba(212,168,83,0.15)',
+                    color: '#D4A853',
+                    border: '1px solid rgba(212,168,83,0.3)',
+                  }}
+                >
+                  SIGN IN
+                </Link>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+
+        {error && !needsAuth && (
           <div className="mb-8 rounded-lg p-4 text-sm font-mono text-red-400 bg-red-900/20 border border-red-800/30">
             Failed to load live stats: {error}
           </div>

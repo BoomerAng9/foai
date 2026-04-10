@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@/lib/db';
 import { generateTakeFromPlayer, generateScoutingPost, generatePredictionPost } from '@/lib/huddle/post-generator';
+import { notifyNewHuddlePost } from '@/lib/notifications/triggers';
 
 /**
  * POST /api/huddle/generate
@@ -65,6 +66,9 @@ export async function POST(req: NextRequest) {
       RETURNING *`;
 
     await sql`UPDATE huddle_profiles SET post_count = post_count + 1 WHERE analyst_id = ${generated.analyst_id}`;
+
+    // Send push notification for new huddle post (fire-and-forget)
+    notifyNewHuddlePost(post).catch(() => {});
 
     return NextResponse.json({ ok: true, post });
   } catch (err) {
