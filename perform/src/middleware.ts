@@ -32,6 +32,7 @@ const PUBLIC_PREFIXES = [
   '/rankings/',
   '/analysts/',
   '/studio/',
+  '/podcast/',
   '/api/cfb/',
   '/api/auth/',
   '/api/players',
