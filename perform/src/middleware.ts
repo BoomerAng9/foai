@@ -24,6 +24,7 @@ const PUBLIC_PATHS = [
   '/audition/voice',
   '/huddle',
   '/grading',
+  '/login',
 ];
 
 /** Path prefixes that are always public (including sub-routes). */
