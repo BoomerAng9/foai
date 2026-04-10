@@ -34,7 +34,7 @@ interface AuditionResult {
 
 const AUDITION_ROSTER = [
   { id: 'void-caster', name: 'The Void-Caster', expected: 'Gemini 2.5 TTS · Charon (deep baritone)' },
-  { id: 'astra-novatos', name: 'Astra Novatos', expected: 'Gemini 2.5 TTS · Orus (refined tenor)' },
+  { id: 'astra-novatos', name: 'Astra Novatos', expected: 'ElevenLabs Voice Design · refined tenor' },
   { id: 'bun-e', name: 'Bun-E', expected: 'Gemini 2.5 TTS · Aoede (warm alto) — AUDITION for timbre match' },
   { id: 'the-haze', name: 'The Haze (Haze + Smoke)', expected: 'Gemini 2.5 TTS multi-speaker · Puck + Schedar — AUDITION for duo quality' },
   { id: 'the-colonel', name: 'The Colonel + Gino', expected: 'ElevenLabs v3 · Jersey accent (scoped exception) — placeholder voice until real IDs land' },
