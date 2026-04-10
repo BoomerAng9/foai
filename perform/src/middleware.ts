@@ -46,6 +46,7 @@ const PUBLIC_PREFIXES = [
   '/api/seed-board',
   '/huddle/',
   '/api/health',
+  '/generated/',
 ];
 
 /** API paths that allow unauthenticated GET but protect POST/PUT/DELETE. */
