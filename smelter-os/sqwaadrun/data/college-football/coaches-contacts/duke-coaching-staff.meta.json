@@ -1,0 +1,240 @@
+{
+  "title": "2026 Football Coaches - Duke University",
+  "url": "https://goduke.com/sports/football/coaches",
+  "status_code": 200,
+  "chars": 8318,
+  "links_count": 295,
+  "scraped_at": "2026-04-09T15:02:18.420486+00:00",
+  "content_hash": "54c54e24dc03926a",
+  "file": "C:\\Users\\rishj\\foai\\smelter-os\\sqwaadrun\\data\\college-football\\coaches-contacts\\duke-coaching-staff.md",
+  "social_media": [
+    {
+      "platform": "twitter",
+      "handle": "@dukebase",
+      "url": "https://x.com/dukebase"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@dukeBASE",
+      "url": "https://instagram.com/dukeBASE"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@DukeMBB",
+      "url": "https://x.com/DukeMBB"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@dukembb",
+      "url": "https://instagram.com/dukembb"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@DukeTFXC",
+      "url": "https://x.com/DukeTFXC"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@DukeTFXC",
+      "url": "https://instagram.com/DukeTFXC"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@DukeFEN",
+      "url": "https://x.com/DukeFEN"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@dukefen",
+      "url": "https://instagram.com/dukefen"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@DukeFOOTBALL",
+      "url": "https://x.com/DukeFOOTBALL"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@dukefootball",
+      "url": "https://instagram.com/dukefootball"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@DukeMGOLF",
+      "url": "https://x.com/DukeMGOLF"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@dukemgolf",
+      "url": "https://instagram.com/dukemgolf"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@DukeMLAX",
+      "url": "https://x.com/DukeMLAX"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@dukemlax",
+      "url": "https://instagram.com/dukemlax"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@DukeMSOC",
+      "url": "https://x.com/DukeMSOC"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@dukemsoc",
+      "url": "https://instagram.com/dukemsoc"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@DukeSWIMDIVE",
+      "url": "https://x.com/DukeSWIMDIVE"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@dukeswimdive",
+      "url": "https://instagram.com/dukeswimdive"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@DukeMTEN",
+      "url": "https://x.com/DukeMTEN"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@dukemten",
+      "url": "https://instagram.com/dukemten"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@DukeWRES",
+      "url": "https://x.com/DukeWRES"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@dukewres",
+      "url": "https://instagram.com/dukewres"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@DukeWBB",
+      "url": "https://x.com/DukeWBB"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@dukewbb",
+      "url": "https://instagram.com/dukewbb"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@DukeFH",
+      "url": "https://x.com/DukeFH"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@dukefh",
+      "url": "https://instagram.com/dukefh"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@DukeWGOLF",
+      "url": "https://x.com/DukeWGOLF"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@dukewgolf",
+      "url": "https://instagram.com/dukewgolf"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@DukeWLAX",
+      "url": "https://x.com/DukeWLAX"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@dukewlax",
+      "url": "https://instagram.com/dukewlax"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@DukeROW",
+      "url": "https://x.com/DukeROW"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@dukerow",
+      "url": "https://instagram.com/dukerow"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@DukeWSOC",
+      "url": "https://x.com/DukeWSOC"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@dukewsoc",
+      "url": "https://instagram.com/dukewsoc"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@DukeSOFTBALL",
+      "url": "https://x.com/DukeSOFTBALL"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@dukesoftball",
+      "url": "https://instagram.com/dukesoftball"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@DukeWTEN",
+      "url": "https://x.com/DukeWTEN"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@dukewten",
+      "url": "https://instagram.com/dukewten"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@DukeVB",
+      "url": "https://x.com/DukeVB"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@dukevb",
+      "url": "https://instagram.com/dukevb"
+    }
+  ],
+  "emails": [
+    "annika.morris@duke.edu",
+    "rodain.delus@duke.edu",
+    "tyler.roy@duke.edu",
+    "joseph.loosemore@duke.edu",
+    "kevin.siesel@duke.edu",
+    "morgan.kelly@duke.edu",
+    "preston.pehrson@duke.edu",
+    "binuk.kodituwakku@duke.edu",
+    "justin.wells@duke.edu",
+    "jacqueline.bishop@duke.edu",
+    "gehrig.hossler@duke.edu",
+    "david.feeley@duke.edu",
+    "brendan.nave@duke.edu",
+    "brent.greenberg@duke.edu",
+    "DukeFBRecruiting@duke.edu",
+    "jacob.ferris@duke.edu",
+    "kyle.seger@duke.edu",
+    "isaiah.bishop@duke.edu"
+  ],
+  "phones": [
+    "(919) 668-5765",
+    "(919) 668-2722",
+    "(919) 668-5771",
+    "(919) 681-7420",
+    "(919) 684-2635",
+    "(919) 681-3145"
+  ]
+}

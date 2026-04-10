@@ -1,6 +1,6 @@
 import { getToken, onMessage, MessagePayload } from 'firebase/messaging';
 import { getClientMessaging } from './client';
-import { adminMessaging } from './admin';
+import { getAdminMessaging } from './admin';
 
 // ---------------------------------------------------------------------------
 // Client-side helpers (browser only)
@@ -69,7 +69,7 @@ export async function subscribeToTopic(
   topic: string,
 ): Promise<void> {
   const tokenArray = Array.isArray(tokens) ? tokens : [tokens];
-  const response = await adminMessaging.subscribeToTopic(tokenArray, topic);
+  const response = await getAdminMessaging().subscribeToTopic(tokenArray, topic);
 
   if (response.failureCount > 0) {
     console.error(
@@ -87,7 +87,7 @@ export async function unsubscribeFromTopic(
   topic: string,
 ): Promise<void> {
   const tokenArray = Array.isArray(tokens) ? tokens : [tokens];
-  const response = await adminMessaging.unsubscribeFromTopic(tokenArray, topic);
+  const response = await getAdminMessaging().unsubscribeFromTopic(tokenArray, topic);
 
   if (response.failureCount > 0) {
     console.error(

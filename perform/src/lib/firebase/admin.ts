@@ -6,19 +6,31 @@ import { getMessaging, Messaging } from 'firebase-admin/messaging';
 function getAdminApp(): App {
   if (getApps().length) return getApps()[0];
 
+  const projectId = process.env.FIREBASE_PROJECT_ID;
+  const clientEmail = process.env.FIREBASE_CLIENT_EMAIL;
+  const privateKey = process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n');
+
+  if (!projectId || !clientEmail || !privateKey) {
+    throw new Error('Firebase Admin credentials not configured');
+  }
+
   return initializeApp({
-    credential: cert({
-      projectId: process.env.FIREBASE_PROJECT_ID,
-      clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-      privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
-    }),
+    credential: cert({ projectId, clientEmail, privateKey }),
   });
 }
 
-const app = getAdminApp();
+export function getAdminAuth(): Auth {
+  return getAuth(getAdminApp());
+}
 
-export const adminAuth: Auth = getAuth(app);
-export const adminFirestore: Firestore = getFirestore(app);
-export const adminMessaging: Messaging = getMessaging(app);
+export function getAdminFirestore(): Firestore {
+  return getFirestore(getAdminApp());
+}
 
-export { app as adminApp };
+export function getAdminMessaging(): Messaging {
+  return getMessaging(getAdminApp());
+}
+
+export function getAdminAppInstance(): App {
+  return getAdminApp();
+}

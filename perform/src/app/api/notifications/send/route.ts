@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth-guard';
-import { adminAuth } from '@/lib/firebase/admin';
-import { adminMessaging } from '@/lib/firebase/admin';
+import { getAdminAuth } from '@/lib/firebase/admin';
+import { getAdminMessaging } from '@/lib/firebase/admin';
 
 /** UIDs that are allowed to send notifications (admin users). */
 const ADMIN_EMAILS = new Set([
@@ -15,7 +15,7 @@ export async function POST(request: NextRequest) {
 
   // 2. Admin check — verify custom claims or email allowlist
   try {
-    const userRecord = await adminAuth.getUser(authResult.userId);
+    const userRecord = await getAdminAuth().getUser(authResult.userId);
     const isAdmin =
       userRecord.customClaims?.admin === true ||
       ADMIN_EMAILS.has(userRecord.email ?? '');
@@ -74,7 +74,7 @@ export async function POST(request: NextRequest) {
   try {
     // 4a. Send to topic
     if (topic) {
-      const result = await adminMessaging.send({
+      const result = await getAdminMessaging().send({
         topic,
         notification,
         data: data ?? {},
@@ -84,7 +84,7 @@ export async function POST(request: NextRequest) {
 
     // 4b. Send to specific tokens
     if (tokens && tokens.length > 0) {
-      const response = await adminMessaging.sendEachForMulticast({
+      const response = await getAdminMessaging().sendEachForMulticast({
         tokens,
         notification,
         data: data ?? {},

@@ -1,0 +1,525 @@
+{
+  "title": "Football \u2013 University of Miami Athletics",
+  "url": "https://miamihurricanes.com/sports/football/coaches",
+  "status_code": 200,
+  "chars": 92403,
+  "links_count": 400,
+  "scraped_at": "2026-04-09T15:01:44.727862+00:00",
+  "content_hash": "74c1ba4a5439eb14",
+  "file": "C:\\Users\\rishj\\foai\\smelter-os\\sqwaadrun\\data\\college-football\\coaches-contacts\\miami-coaching-staff.md",
+  "social_media": [
+    {
+      "platform": "twitter",
+      "handle": "@e",
+      "url": "https://x.com/e"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@db2_era",
+      "url": "https://x.com/db2_era"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@jlyle0",
+      "url": "https://x.com/jlyle0"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@fletcherjr_mark",
+      "url": "https://x.com/fletcherjr_mark"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@juustinscott",
+      "url": "https://x.com/juustinscott"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@ElijaLofton",
+      "url": "https://x.com/ElijaLofton"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@Chasesmith2021",
+      "url": "https://x.com/Chasesmith2021"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@MarquiseL07",
+      "url": "https://x.com/MarquiseL07"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@JuddAnderson22",
+      "url": "https://x.com/JuddAnderson22"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@ArmondoBlount",
+      "url": "https://x.com/ArmondoBlount"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@BorchersJoe",
+      "url": "https://x.com/BorchersJoe"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@Terrell_Walden",
+      "url": "https://x.com/Terrell_Walden"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@bobby_pruitt",
+      "url": "https://x.com/bobby_pruitt"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@dylandayy12",
+      "url": "https://x.com/dylandayy12"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@hellcatchris",
+      "url": "https://x.com/hellcatchris"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@Ryan2Mack",
+      "url": "https://x.com/Ryan2Mack"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@isaiah_taylor4",
+      "url": "https://x.com/isaiah_taylor4"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@Ojgotfanzz3",
+      "url": "https://x.com/Ojgotfanzz3"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@pickett_booker",
+      "url": "https://x.com/pickett_booker"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@nick24_Thomas",
+      "url": "https://x.com/nick24_Thomas"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@GOjackboy",
+      "url": "https://x.com/GOjackboy"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@RizziCasey",
+      "url": "https://x.com/RizziCasey"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@TylerRowe_",
+      "url": "https://x.com/TylerRowe_"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@owenruskavich1",
+      "url": "https://x.com/owenruskavich1"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@braylonlamar23",
+      "url": "https://x.com/braylonlamar23"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@stonestroud19",
+      "url": "https://x.com/stonestroud19"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@SAMSONOKUNLOLA_",
+      "url": "https://x.com/SAMSONOKUNLOLA_"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@yeroviVA75",
+      "url": "https://x.com/yeroviVA75"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@dsbg_ryan",
+      "url": "https://x.com/dsbg_ryan"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@Juan_Minaya77",
+      "url": "https://x.com/Juan_Minaya77"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@MatthewMcCoyFB",
+      "url": "https://x.com/MatthewMcCoyFB"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@CarverHunter",
+      "url": "https://x.com/CarverHunter"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@riplyluna",
+      "url": "https://x.com/riplyluna"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@Dylan_Reiman",
+      "url": "https://x.com/Dylan_Reiman"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@JacksonCarver11",
+      "url": "https://x.com/JacksonCarver11"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@kolbyluna",
+      "url": "https://x.com/kolbyluna"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@ColeMcconathy",
+      "url": "https://x.com/ColeMcconathy"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@sam_coufal",
+      "url": "https://x.com/sam_coufal"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@TevepaughTucker",
+      "url": "https://x.com/TevepaughTucker"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@willrocha_12",
+      "url": "https://x.com/willrocha_12"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@ahmad_moten",
+      "url": "https://x.com/ahmad_moten"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@db2_era",
+      "url": "https://instagram.com/db2_era"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@jordannlyle",
+      "url": "https://instagram.com/jordannlyle"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@4qmf_",
+      "url": "https://instagram.com/4qmf_"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@juustinscott",
+      "url": "https://instagram.com/juustinscott"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@elija.lofton",
+      "url": "https://instagram.com/elija.lofton"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@chase4smith",
+      "url": "https://instagram.com/chase4smith"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@7.quise",
+      "url": "https://instagram.com/7.quise"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@JuddAnderson_22",
+      "url": "https://instagram.com/JuddAnderson_22"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@dadeboymondo50",
+      "url": "https://instagram.com/dadeboymondo50"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@joe_borchers",
+      "url": "https://instagram.com/joe_borchers"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@terrell.walden",
+      "url": "https://instagram.com/terrell.walden"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@nolimitc2m_",
+      "url": "https://instagram.com/nolimitc2m_"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@deevalid",
+      "url": "https://instagram.com/deevalid"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@_hellcatchris",
+      "url": "https://instagram.com/_hellcatchris"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@primetime_.2",
+      "url": "https://instagram.com/primetime_.2"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@isaiah_taylor4",
+      "url": "https://instagram.com/isaiah_taylor4"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@ojgotfanzz",
+      "url": "https://instagram.com/ojgotfanzz"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@b9wayy",
+      "url": "https://instagram.com/b9wayy"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@gojackboy",
+      "url": "https://instagram.com/gojackboy"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@caseyrizzi",
+      "url": "https://instagram.com/caseyrizzi"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@tylerrowe3",
+      "url": "https://instagram.com/tylerrowe3"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@owen_ruskavich",
+      "url": "https://instagram.com/owen_ruskavich"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@_stonestroud",
+      "url": "https://instagram.com/_stonestroud"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@samok.63",
+      "url": "https://instagram.com/samok.63"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@Ryanrodriguezz_",
+      "url": "https://instagram.com/Ryanrodriguezz_"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@juanminaya_",
+      "url": "https://instagram.com/juanminaya_"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@matt.mccoy._",
+      "url": "https://instagram.com/matt.mccoy._"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@hunter.carver1",
+      "url": "https://instagram.com/hunter.carver1"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@riply.luna",
+      "url": "https://instagram.com/riply.luna"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@dylan.reiman",
+      "url": "https://instagram.com/dylan.reiman"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@jcarver2004",
+      "url": "https://instagram.com/jcarver2004"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@kolby.luna",
+      "url": "https://instagram.com/kolby.luna"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@cole_mcconathy",
+      "url": "https://instagram.com/cole_mcconathy"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@sammycouff",
+      "url": "https://instagram.com/sammycouff"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@dyljoyce",
+      "url": "https://instagram.com/dyljoyce"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@tuckertevepaugh",
+      "url": "https://instagram.com/tuckertevepaugh"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@ahmadmoten",
+      "url": "https://instagram.com/ahmadmoten"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@CanesBaseball",
+      "url": "https://twitter.com/CanesBaseball"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@canesbaseball",
+      "url": "https://www.instagram.com/canesbaseball/"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@CanesHoops",
+      "url": "https://twitter.com/CanesHoops"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@caneshoops",
+      "url": "https://www.instagram.com/caneshoops/"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@CanesTrack",
+      "url": "https://twitter.com/CanesTrack"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@canestrack",
+      "url": "https://www.instagram.com/canestrack/"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@CanesSwimDive",
+      "url": "https://twitter.com/CanesSwimDive"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@canesswimdive",
+      "url": "https://www.instagram.com/canesswimdive/"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@CanesFootball",
+      "url": "https://twitter.com/CanesFootball"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@canesfootball",
+      "url": "https://www.instagram.com/canesfootball/"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@CanesMensTennis",
+      "url": "https://twitter.com/CanesMensTennis"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@canesmenstennis",
+      "url": "https://www.instagram.com/canesmenstennis/"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@CanesWBB",
+      "url": "https://twitter.com/CanesWBB"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@caneswbb",
+      "url": "https://www.instagram.com/caneswbb/"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@hurricanesgolf",
+      "url": "https://twitter.com/hurricanesgolf"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@canesgolf",
+      "url": "https://www.instagram.com/canesgolf/"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@CanesRowing",
+      "url": "https://twitter.com/CanesRowing"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@canesrowing",
+      "url": "https://www.instagram.com/canesrowing/"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@CanesFutbol",
+      "url": "https://twitter.com/CanesFutbol"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@canesfutbol",
+      "url": "https://www.instagram.com/canesfutbol/"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@CanesWTennis",
+      "url": "https://twitter.com/CanesWTennis"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@caneswtennis",
+      "url": "https://www.instagram.com/caneswtennis/"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@CanesVB",
+      "url": "https://twitter.com/CanesVB"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@canes_vb",
+      "url": "https://www.instagram.com/canes_vb/"
+    }
+  ],
+  "phones": [
+    "221793-2025"
+  ]
+}

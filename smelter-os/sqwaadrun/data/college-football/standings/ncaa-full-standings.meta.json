@@ -1,0 +1,11 @@
+{
+  "title": "NCAA College Football FBS Standings | NCAA.com",
+  "url": "https://www.ncaa.com/standings/football/fbs",
+  "status_code": 200,
+  "chars": 28752,
+  "links_count": 129,
+  "scraped_at": "2026-04-09T15:04:36.887123+00:00",
+  "content_hash": "e6e423dc7545c511",
+  "category": "standings",
+  "file": "C:\\Users\\rishj\\foai\\smelter-os\\sqwaadrun\\data\\college-football\\standings\\ncaa-full-standings.md"
+}

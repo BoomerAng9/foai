@@ -1,0 +1,239 @@
+{
+  "title": "2026 Football Coaches - University of Washington Athletics",
+  "url": "https://gohuskies.com/sports/football/coaches",
+  "status_code": 200,
+  "chars": 11166,
+  "links_count": 333,
+  "scraped_at": "2026-04-09T15:02:25.227427+00:00",
+  "content_hash": "2a6465c86f795cea",
+  "file": "C:\\Users\\rishj\\foai\\smelter-os\\sqwaadrun\\data\\college-football\\coaches-contacts\\washington-coaching-staff.md",
+  "social_media": [
+    {
+      "platform": "twitter",
+      "handle": "@UW_Baseball",
+      "url": "https://x.com/UW_Baseball"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@UW_Baseball",
+      "url": "https://instagram.com/UW_Baseball"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@UW_MBB",
+      "url": "https://x.com/UW_MBB"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@uw_mbb",
+      "url": "https://instagram.com/uw_mbb"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@UWtrack",
+      "url": "https://x.com/UWtrack"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@uwtrack",
+      "url": "https://instagram.com/uwtrack"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@UW_Football",
+      "url": "https://x.com/UW_Football"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@uw_football",
+      "url": "https://instagram.com/uw_football"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@UW_MGolf",
+      "url": "https://x.com/UW_MGolf"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@uw_mgolf",
+      "url": "https://instagram.com/uw_mgolf"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@uw_rowing",
+      "url": "https://x.com/uw_rowing"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@washingtonrowing",
+      "url": "https://instagram.com/washingtonrowing"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@UW_MSoccer",
+      "url": "https://x.com/UW_MSoccer"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@uw_msoccer",
+      "url": "https://instagram.com/uw_msoccer"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@UW_MTennis",
+      "url": "https://x.com/UW_MTennis"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@uw_mtennis",
+      "url": "https://instagram.com/uw_mtennis"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@UWTrack",
+      "url": "https://x.com/UWTrack"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@UW_WBB",
+      "url": "https://x.com/UW_WBB"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@uw_wbb",
+      "url": "https://instagram.com/uw_wbb"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@UW_BeachVB",
+      "url": "https://x.com/UW_BeachVB"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@uw_beachvb",
+      "url": "https://instagram.com/uw_beachvb"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@UW_WGolf",
+      "url": "https://x.com/UW_WGolf"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@uw_wgolf",
+      "url": "https://instagram.com/uw_wgolf"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@UWGymnastics",
+      "url": "https://x.com/UWGymnastics"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@uwgymnastics",
+      "url": "https://instagram.com/uwgymnastics"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@UW_WSoccer",
+      "url": "https://x.com/UW_WSoccer"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@uw_wsoccer",
+      "url": "https://instagram.com/uw_wsoccer"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@UWSoftball",
+      "url": "https://x.com/UWSoftball"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@uwsoftball",
+      "url": "https://instagram.com/uwsoftball"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@UW_WTennis",
+      "url": "https://x.com/UW_WTennis"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@uw_wtennis",
+      "url": "https://instagram.com/uw_wtennis"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@UWVolleyball",
+      "url": "https://x.com/UWVolleyball"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@uwvolleyball",
+      "url": "https://instagram.com/uwvolleyball"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@UWAthletics",
+      "url": "https://x.com/UWAthletics"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@UWAthletics",
+      "url": "https://instagram.com/UWAthletics"
+    }
+  ],
+  "emails": [
+    "mabrosz@uw.edu",
+    "celisara@uw.edu",
+    "akricci@uw.edu",
+    "ssteptoe@uw.edu",
+    "lthomann@uw.edu",
+    "atkarr@uw.edu",
+    "bactol34@uw.edu",
+    "egomez1@uw.edu",
+    "jotten2@uw.edu",
+    "ob905122@uw.edu",
+    "bechtold@uw.edu",
+    "bcream@uw.edu",
+    "korush@uw.edu",
+    "dom13@uw.edu",
+    "ldr12@uw.edu",
+    "mbrew501@uw.edu",
+    "lucasrad@uw.edu",
+    "mhs99@uw.edu",
+    "jwadood@uw.edu",
+    "zfox@uw.edu",
+    "jcrawf1@uw.edu",
+    "kayyykoa@uw.edu",
+    "hroe2@uw.edu",
+    "tmitch91@uw.edu",
+    "lancar@uw.edu",
+    "mirby00@uw.edu",
+    "nomb@uw.edu",
+    "mhenry7@uw.edu",
+    "jlosman@uw.edu",
+    "jss12@uw.edu",
+    "abandu@uw.edu",
+    "sklein0@uw.edu",
+    "santinof@uw.edu",
+    "towensuw@uw.edu",
+    "lnbarry8@uw.edu",
+    "ashwin@uw.edu",
+    "jcarre14@uw.edu",
+    "ehamburg@uw.edu",
+    "treed7@uw.edu",
+    "tag44@uw.edu",
+    "brich21@uw.edu",
+    "kobymac@uw.edu",
+    "gwind@uw.edu",
+    "bford5@uw.edu",
+    "sec19c@uw.edu",
+    "dagold@uw.edu",
+    "annad25@uw.edu"
+  ],
+  "phones": [
+    "(206) 685-7910"
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "title": "App State Mountaineers College Football Roster - ESPN",
+  "url": "https://www.espn.com/college-football/team/roster/_/id/2026",
+  "status_code": 200,
+  "chars": 44849,
+  "links_count": 149,
+  "scraped_at": "2026-04-09T14:57:19.130538+00:00",
+  "content_hash": "db48ace5fec848f9",
+  "category": "rosters-full",
+  "file": "C:\\Users\\rishj\\foai\\smelter-os\\sqwaadrun\\data\\college-football\\rosters-full\\espn-appalachian-state-roster.md"
+}

@@ -1,0 +1,11 @@
+{
+  "title": "College Football on ESPN - Scores, Stats and Highlights",
+  "url": "https://www.espn.com/college-football/",
+  "status_code": 200,
+  "chars": 17605,
+  "links_count": 128,
+  "scraped_at": "2026-04-09T14:48:41.049944+00:00",
+  "content_hash": "0693dbf34a6bbaa2",
+  "category": "headlines",
+  "file": "data/college-football\\headlines\\espn-cfb.md"
+}

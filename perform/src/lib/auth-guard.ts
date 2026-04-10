@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { adminAuth } from '@/lib/firebase/admin';
+import { getAdminAuth } from '@/lib/firebase/admin';
 
 const AUTH_COOKIE = 'firebase-auth-token';
 
@@ -12,7 +12,7 @@ export async function requireAuth(request: NextRequest): Promise<AuthResult | Au
     return { ok: false, response: NextResponse.json({ error: 'Auth required' }, { status: 401 }) };
   }
   try {
-    const decoded = await adminAuth.verifyIdToken(token);
+    const decoded = await getAdminAuth().verifyIdToken(token);
     return { ok: true, userId: decoded.uid, email: decoded.email || '' };
   } catch {
     return { ok: false, response: NextResponse.json({ error: 'Invalid session' }, { status: 401 }) };

@@ -1,0 +1,11 @@
+{
+  "title": "NCAAF Player Stat Leaders, 2025 Postseason - ESPN",
+  "url": "https://www.espn.com/college-football/stats",
+  "status_code": 200,
+  "chars": 15468,
+  "links_count": 88,
+  "scraped_at": "2026-04-09T14:48:14.684849+00:00",
+  "content_hash": "6f90d847aff42afc",
+  "category": "stats",
+  "file": "data/college-football\\stats\\espn-player-stats.md"
+}

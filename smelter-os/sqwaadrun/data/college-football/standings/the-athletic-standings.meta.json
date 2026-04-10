@@ -1,0 +1,11 @@
+{
+  "title": "NCAAF Standings - The Athletic",
+  "url": "https://www.theathletic.com/college-football/standings/",
+  "status_code": 200,
+  "chars": 236269,
+  "links_count": 312,
+  "scraped_at": "2026-04-09T14:48:09.471337+00:00",
+  "content_hash": "aabcc57ccdd563b1",
+  "category": "standings",
+  "file": "data/college-football\\standings\\the-athletic-standings.md"
+}

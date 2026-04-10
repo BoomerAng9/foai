@@ -1,0 +1,11 @@
+{
+  "title": "College Football News - NCAA Football Scores, Schedule, Standings, Stats, and Rumors - The Athletic",
+  "url": "https://www.theathletic.com/college-football/",
+  "status_code": 200,
+  "chars": 47439,
+  "links_count": 240,
+  "scraped_at": "2026-04-09T14:48:40.446563+00:00",
+  "content_hash": "c5bab1260026f5f8",
+  "category": "headlines",
+  "file": "data/college-football\\headlines\\the-athletic-cfb.md"
+}

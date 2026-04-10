@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth-guard';
-import { adminFirestore } from '@/lib/firebase/admin';
+import { getAdminFirestore } from '@/lib/firebase/admin';
 import { subscribeToTopic } from '@/lib/firebase/messaging';
 import { FieldValue } from 'firebase-admin/firestore';
 
@@ -28,7 +28,7 @@ export async function POST(request: NextRequest) {
 
   try {
     // Store token in Firestore under users/{uid}/fcmTokens
-    const tokenRef = adminFirestore
+    const tokenRef = getAdminFirestore()
       .collection('users')
       .doc(uid)
       .collection('fcmTokens')

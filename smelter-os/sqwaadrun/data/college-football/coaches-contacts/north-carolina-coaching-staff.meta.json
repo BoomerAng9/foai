@@ -1,0 +1,225 @@
+{
+  "title": "2026 Football Coaches - University of North Carolina Athletics",
+  "url": "https://goheels.com/sports/football/coaches",
+  "status_code": 200,
+  "chars": 5042,
+  "links_count": 263,
+  "scraped_at": "2026-04-09T15:01:51.909559+00:00",
+  "content_hash": "3e6ea2b20b4623f3",
+  "file": "C:\\Users\\rishj\\foai\\smelter-os\\sqwaadrun\\data\\college-football\\coaches-contacts\\north-carolina-coaching-staff.md",
+  "social_media": [
+    {
+      "platform": "twitter",
+      "handle": "@DiamondHeels",
+      "url": "https://x.com/DiamondHeels"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@carolinabaseball",
+      "url": "https://instagram.com/carolinabaseball"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@UNC_Basketball",
+      "url": "https://x.com/UNC_Basketball"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@UNC_Basketball",
+      "url": "https://instagram.com/UNC_Basketball"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@UNCTrack_Field",
+      "url": "https://x.com/UNCTrack_Field"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@tarheeltrack",
+      "url": "https://instagram.com/tarheeltrack"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@UNCFencing",
+      "url": "https://x.com/UNCFencing"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@uncFencing",
+      "url": "https://instagram.com/uncFencing"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@UNCFootball",
+      "url": "https://x.com/UNCFootball"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@uncfootball",
+      "url": "https://instagram.com/uncfootball"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@UNCmensGolf",
+      "url": "https://x.com/UNCmensGolf"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@uncmensgolf",
+      "url": "https://instagram.com/uncmensgolf"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@UNCMensLacrosse",
+      "url": "https://x.com/UNCMensLacrosse"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@uncmenslacrosse",
+      "url": "https://instagram.com/uncmenslacrosse"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@UNCmenssoccer",
+      "url": "https://x.com/UNCmenssoccer"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@uncmenssoccer",
+      "url": "https://instagram.com/uncmenssoccer"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@uncswimdive",
+      "url": "https://x.com/uncswimdive"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@uncswimdive",
+      "url": "https://instagram.com/uncswimdive"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@carolinatennis",
+      "url": "https://x.com/carolinatennis"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@https",
+      "url": "https://instagram.com/https://www.instagram.com/tarheeltennis/?hl=en"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@UNCWrestling",
+      "url": "https://x.com/UNCWrestling"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@UNCWrestling",
+      "url": "https://instagram.com/UNCWrestling"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@uncwbb",
+      "url": "https://x.com/uncwbb"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@uncwbb",
+      "url": "https://instagram.com/uncwbb"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@UNCFieldHockey",
+      "url": "https://x.com/UNCFieldHockey"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@uncfieldhockey",
+      "url": "https://instagram.com/uncfieldhockey"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@uncwomensgolf",
+      "url": "https://x.com/uncwomensgolf"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@uncwomensgolf",
+      "url": "https://instagram.com/uncwomensgolf"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@uncgymnastics",
+      "url": "https://x.com/uncgymnastics"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@uncgymnastics",
+      "url": "https://instagram.com/uncgymnastics"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@uncwlax",
+      "url": "https://x.com/uncwlax"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@uncwlax",
+      "url": "https://instagram.com/uncwlax"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@uncrowing",
+      "url": "https://x.com/uncrowing"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@uncrowing",
+      "url": "https://instagram.com/uncrowing"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@uncwomenssoccer",
+      "url": "https://x.com/uncwomenssoccer"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@uncwomenssoccer",
+      "url": "https://instagram.com/uncwomenssoccer"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@UNCSoftball",
+      "url": "https://x.com/UNCSoftball"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@UNCSoftball",
+      "url": "https://instagram.com/UNCSoftball"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@UNC_wtennis",
+      "url": "https://x.com/UNC_wtennis"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@UNC_wtennis",
+      "url": "https://instagram.com/UNC_wtennis"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@UNCVolleyball",
+      "url": "https://x.com/UNCVolleyball"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@UNCVolleyball",
+      "url": "https://instagram.com/UNCVolleyball"
+    }
+  ],
+  "phones": [
+    "919-966-2575"
+  ]
+}
