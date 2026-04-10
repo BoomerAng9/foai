@@ -8,7 +8,7 @@ import { getGradeForScore } from '@/lib/tie/grades';
 import {
   Database, Download, Search, Filter, ChevronDown, ChevronUp,
   Activity, Users, BarChart3, Layers, AlertTriangle, CheckCircle2,
-  TrendingUp, TrendingDown, Minus, ExternalLink, RefreshCw,
+  TrendingUp, TrendingDown, Minus, ExternalLink, RefreshCw, Play,
 } from 'lucide-react';
 
 /* ── Types ─────────────────────────────────────────── */
@@ -152,6 +152,14 @@ export default function DataCenterPage() {
   const [expandedId, setExpandedId] = useState<number | null>(null);
   const [showFilters, setShowFilters] = useState(false);
   const [activeSection, setActiveSection] = useState<'database' | 'sources' | 'quality'>('database');
+  const [pipelineRunning, setPipelineRunning] = useState(false);
+  const [pipelineResult, setPipelineResult] = useState<{
+    articlesScraped: number;
+    articlesStored: number;
+    updatesExtracted: number;
+    updatesApplied: number;
+  } | null>(null);
+  const [pipelineError, setPipelineError] = useState('');
 
   /* ── Data fetching ──────────────────────────────── */
   const fetchAll = useCallback(() => {
@@ -220,6 +228,28 @@ export default function DataCenterPage() {
   /* ── Export handler ─────────────────────────────── */
   const handleExport = () => {
     window.open('/api/data/export', '_blank');
+  };
+
+  /* ── Pipeline handler ──────────────────────────── */
+  const handleRunPipeline = async () => {
+    setPipelineRunning(true);
+    setPipelineResult(null);
+    setPipelineError('');
+    try {
+      const res = await fetch('/api/pipeline/run', { method: 'POST' });
+      const data = await res.json();
+      if (!res.ok) {
+        setPipelineError(data.error || 'Pipeline failed');
+      } else {
+        setPipelineResult(data);
+        // Refresh the data view after pipeline completes
+        fetchAll();
+      }
+    } catch {
+      setPipelineError('Network error running pipeline');
+    } finally {
+      setPipelineRunning(false);
+    }
   };
 
   /* ── Data health % ─────────────────────────────── */
@@ -373,6 +403,25 @@ export default function DataCenterPage() {
                 EXPORT CSV
               </button>
 
+              {/* Run Pipeline */}
+              <button
+                onClick={handleRunPipeline}
+                disabled={pipelineRunning}
+                className="flex items-center gap-2 px-4 py-2.5 rounded-lg font-mono text-[11px] font-bold tracking-wider transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                style={{
+                  background: pipelineRunning ? 'rgba(96,165,250,0.08)' : 'rgba(96,165,250,0.12)',
+                  border: '1px solid rgba(96,165,250,0.25)',
+                  color: '#60A5FA',
+                }}
+              >
+                {pipelineRunning ? (
+                  <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                ) : (
+                  <Play className="w-3.5 h-3.5" />
+                )}
+                {pipelineRunning ? 'RUNNING...' : 'RUN PIPELINE'}
+              </button>
+
               {/* Data Health */}
               <div
                 className="flex items-center gap-2 px-4 py-2.5 rounded-lg font-mono text-[11px]"
@@ -395,6 +444,50 @@ export default function DataCenterPage() {
                 </span>
               </div>
             </div>
+
+            {/* ── Pipeline Result / Error ────────────── */}
+            {pipelineResult && (
+              <div
+                className="mb-4 px-4 py-3 rounded-lg font-mono text-xs flex items-center gap-4 flex-wrap"
+                style={{
+                  background: 'rgba(34,197,94,0.06)',
+                  border: '1px solid rgba(34,197,94,0.2)',
+                  color: '#22C55E',
+                }}
+              >
+                <CheckCircle2 className="w-4 h-4 shrink-0" />
+                <span>Pipeline complete:</span>
+                <span className="font-bold">{pipelineResult.articlesScraped} articles scraped</span>
+                <span>{pipelineResult.articlesStored} stored</span>
+                <span>{pipelineResult.updatesExtracted} updates extracted</span>
+                <span className="font-bold">{pipelineResult.updatesApplied} players updated</span>
+                <button
+                  onClick={() => setPipelineResult(null)}
+                  className="ml-auto text-[10px] opacity-60 hover:opacity-100"
+                >
+                  DISMISS
+                </button>
+              </div>
+            )}
+            {pipelineError && (
+              <div
+                className="mb-4 px-4 py-3 rounded-lg font-mono text-xs flex items-center gap-3"
+                style={{
+                  background: 'rgba(239,68,68,0.06)',
+                  border: '1px solid rgba(239,68,68,0.2)',
+                  color: '#EF4444',
+                }}
+              >
+                <AlertTriangle className="w-4 h-4 shrink-0" />
+                <span>Pipeline error: {pipelineError}</span>
+                <button
+                  onClick={() => setPipelineError('')}
+                  className="ml-auto text-[10px] opacity-60 hover:opacity-100"
+                >
+                  DISMISS
+                </button>
+              </div>
+            )}
 
             {/* ── Filter Panel ─────────────────────────── */}
             <AnimatePresence>

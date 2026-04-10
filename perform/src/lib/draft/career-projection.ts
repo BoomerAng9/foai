@@ -8,9 +8,10 @@
  * historical outcomes from nflverse data stored in Neon.
  *
  * Match scoring weights:
- *   - Draft position similarity: 40%
- *   - Measurables similarity:    30%
- *   - Position match:            20% (exact = full, positional family = partial)
+ *   - Draft position similarity: 30%
+ *   - Measurables similarity:    25%
+ *   - Recency (draft decade):    20%
+ *   - Position match:            15% (exact = full, positional family = partial)
  *   - College conference:        10%
  */
 
@@ -187,7 +188,15 @@ function conferenceScore(prospectSchool: string | null, compSchool: string | nul
   return 30;
 }
 
-/** Composite match score with the 40/30/20/10 weighting. */
+/** Score recency of draft season (0-100). Heavily favors recent decades. */
+function recencyScore(draftSeason: number): number {
+  if (draftSeason >= 2015) return 100;  // 2015-2025: full weight
+  if (draftSeason >= 2005) return 70;   // 2005-2014: 70%
+  if (draftSeason >= 1995) return 40;   // 1995-2004: 40%
+  return 15;                             // Before 1995: 15%
+}
+
+/** Composite match score with the 30/25/20/15/10 weighting. */
 function computeMatchScore(
   prospectRound: number,
   compRound: number,
@@ -199,13 +208,17 @@ function computeMatchScore(
   prospectSchool: string | null,
   compSchool: string | null,
   positionExact: boolean,
+  compSeason: number,
 ): number {
   const draftSc = draftPositionScore(prospectRound, compRound, compPick);
   const measSc = measurablesScore(prospectForty, compForty, prospectWeight, compWeight);
   const posSc = positionExact ? 100 : 60; // Family match gets 60
   const confSc = conferenceScore(prospectSchool, compSchool);
+  const recSc = recencyScore(compSeason);
 
-  return Math.round(draftSc * 0.40 + measSc * 0.30 + posSc * 0.20 + confSc * 0.10);
+  return Math.round(
+    draftSc * 0.30 + measSc * 0.25 + recSc * 0.20 + posSc * 0.15 + confSc * 0.10
+  );
 }
 
 /* ── Core query: fetch historical comps from DB ── */
@@ -294,6 +307,7 @@ export async function getHistoricalComps(
       school ?? null,
       r.college as string | null,
       posVariants[0] === String(r.position) || getPositionFamily(String(r.position || position)) === getPositionFamily(position),
+      Number(r.season),
     );
 
     return {
