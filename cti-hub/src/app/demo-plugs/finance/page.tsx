@@ -63,7 +63,7 @@ export default function FinancePage() {
   const [anomalyDismissed, setAnomalyDismissed] = useState(false);
 
   return (
-    <div className="min-h-screen bg-bg text-fg">
+    <div className="min-h-screen bg-[#0A0A0A] text-white">
       <PlugChrome
         title="Finance Command Center"
         tagline="Personal CFO Dashboard"

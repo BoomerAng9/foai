@@ -8,3 +8,5 @@ node_modules/
 *.log
 build.log
 uploads/
+# Internal generation prompts — contain infra references
+*/_prompts.md

@@ -265,7 +265,7 @@ export default function PerFormPage() {
   const currentTake = ANALYST_TAKES[feedIndex];
 
   return (
-    <div className="min-h-screen bg-bg text-fg">
+    <div className="min-h-screen bg-[#0A0A0A] text-white">
       <PlugChrome
         title="PER|FORM"
         tagline="2026 NFL DRAFT"
