@@ -55,7 +55,7 @@ const BASE_URL = 'https://generativelanguage.googleapis.com/v1beta';
 export const GEMINI_VOICE_MAP: Record<string, string> = {
   // Void-Caster + refined solos
   'idris-broadcast': 'Charon',
-  'astra-refined-tenor': 'Orus',
+  'astra-refined-tenor': 'Orus',  // refined tenor
   'bun-e-cosmic-alto': 'Aoede',
 
   // The Colonel + Gino (Jersey Italian approximation)

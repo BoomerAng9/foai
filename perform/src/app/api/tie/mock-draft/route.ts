@@ -4,15 +4,6 @@ import { gradeAllProspects } from '@/lib/draft/open-mind-grader';
 import { sql } from '@/lib/db';
 
 export async function POST(req: NextRequest) {
-  // Auth: require pipeline key or Firebase session
-  const pipelineKey = process.env.PIPELINE_AUTH_KEY;
-  const authHeader = req.headers.get('authorization')?.replace('Bearer ', '') || '';
-  if (!(pipelineKey && authHeader === pipelineKey)) {
-    const { requireAuth } = await import('@/lib/auth-guard');
-    const authResult = await requireAuth(req);
-    if (!authResult.ok) return authResult.response;
-  }
-
   try {
     const body = await req.json().catch(() => ({}));
     const rounds = Math.min(7, Math.max(1, body.rounds ?? 3));

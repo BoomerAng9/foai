@@ -3,24 +3,30 @@ import { sql } from '@/lib/db';
 
 /**
  * GET /api/health — Health check endpoint
- * Always returns 200. Reports database connectivity in the body.
+ * Returns 200 if app and database are operational, 500 otherwise.
  */
 export async function GET() {
-  let database = false;
+  const timestamp = new Date().toISOString();
 
-  if (sql) {
-    try {
-      await sql`SELECT 1`;
-      database = true;
-    } catch {
-      // DB unreachable — reported in body
+  try {
+    if (!sql) {
+      return NextResponse.json(
+        { status: 'degraded', database: 'not_configured', timestamp },
+        { status: 500 },
+      );
     }
-  }
 
-  return NextResponse.json({
-    status: 'ok',
-    service: 'perform',
-    timestamp: new Date().toISOString(),
-    database,
-  });
+    await sql`SELECT 1`;
+
+    return NextResponse.json({
+      status: 'ok',
+      database: 'connected',
+      timestamp,
+    });
+  } catch {
+    return NextResponse.json(
+      { status: 'error', database: 'unreachable', timestamp },
+      { status: 500 },
+    );
+  }
 }
