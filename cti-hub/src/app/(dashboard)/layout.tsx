@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { AccountPanel } from '@/components/account/AccountPanel';
@@ -35,8 +35,16 @@ function CornerBracket({ position }: { position: 'tl' | 'tr' | 'bl' | 'br' }) {
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const { profile, organization, signOut } = useAuth();
-  const isOwnerUser = profile?.role === 'admin' || profile?.role === 'operator';
+  const { user, profile, organization, signOut } = useAuth();
+  // Owner detection via server-side /api/me — owner emails never leak to client JS
+  const [isOwnerUser, setIsOwnerUser] = useState(false);
+  useEffect(() => {
+    if (!user) return;
+    fetch('/api/me')
+      .then(r => r.ok ? r.json() : null)
+      .then(d => { if (d?.isOwner) setIsOwnerUser(true); })
+      .catch(() => {});
+  }, [user]);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
 
   // Full-bleed escape hatch — /smelter-os/* runs in its own visual world
@@ -48,7 +56,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const isFullBleedContent =
     pathname === '/chat' ||
     pathname.startsWith('/chat/') ||
-    pathname.startsWith('/broadcast');
+    pathname.startsWith('/broadcast') ||
+    pathname === '/circuit-box' ||
+    pathname === '/the-lab' ||
+    pathname === '/the-chamber';
 
   const contentPadding = isFullBleedContent ? '' : 'p-3 sm:p-4 md:p-6';
 
@@ -78,11 +89,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           style={{ zIndex: 9999 }}
         >
           <Link
-            href="/settings"
+            href="/circuit-box"
             onClick={() => setUserMenuOpen(false)}
             className="flex items-center gap-2 px-4 py-2.5 text-xs font-mono text-fg-secondary hover:bg-bg-elevated hover:text-fg"
           >
-            <User className="w-3.5 h-3.5" /> ACCOUNT
+            <User className="w-3.5 h-3.5" /> CIRCUIT BOX
           </Link>
           <Link
             href="/pricing"

@@ -1,0 +1,353 @@
+{
+  "title": "2026 Football Coaches - Kansas State University Athletics",
+  "url": "https://kstatesports.com/sports/football/coaches",
+  "status_code": 200,
+  "chars": 8679,
+  "links_count": 306,
+  "scraped_at": "2026-04-09T15:02:08.967773+00:00",
+  "content_hash": "2ca9f7d76604b901",
+  "file": "C:\\Users\\rishj\\foai\\smelter-os\\sqwaadrun\\data\\college-football\\coaches-contacts\\kansas-state-coaching-staff.md",
+  "social_media": [
+    {
+      "platform": "twitter",
+      "handle": "@CK_KleinCollin",
+      "url": "https://x.com/CK_KleinCollin"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@wardth09",
+      "url": "https://x.com/wardth09"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@coach__gleeson",
+      "url": "https://x.com/coach__gleeson"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@CoachJPeterson",
+      "url": "https://x.com/CoachJPeterson"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@stantonweber",
+      "url": "https://x.com/stantonweber"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@Coach_Ellsworth",
+      "url": "https://x.com/Coach_Ellsworth"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@Coach_J_Johnson",
+      "url": "https://x.com/Coach_J_Johnson"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@CoachBrianLepak",
+      "url": "https://x.com/CoachBrianLepak"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@Coach_CPatt",
+      "url": "https://x.com/Coach_CPatt"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@CoachM_Schmidt",
+      "url": "https://x.com/CoachM_Schmidt"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@coachnicktoth",
+      "url": "https://x.com/coachnicktoth"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@CoachBuddyWyatt",
+      "url": "https://x.com/CoachBuddyWyatt"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@CoachYates77",
+      "url": "https://x.com/CoachYates77"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@CoachBufordJ",
+      "url": "https://x.com/CoachBufordJ"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@TimDeRuyter",
+      "url": "https://x.com/TimDeRuyter"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@coachjdove",
+      "url": "https://x.com/coachjdove"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@CoachPMason",
+      "url": "https://x.com/CoachPMason"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@CoachKardulis",
+      "url": "https://x.com/CoachKardulis"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@coachliddle",
+      "url": "https://x.com/coachliddle"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@Coach_ScottyO",
+      "url": "https://x.com/Coach_ScottyO"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@joebobclements",
+      "url": "https://x.com/joebobclements"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@DmitriEmmanuel",
+      "url": "https://x.com/DmitriEmmanuel"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@AndrewFowler_",
+      "url": "https://x.com/AndrewFowler_"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@DamianIlalio",
+      "url": "https://x.com/DamianIlalio"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@_ArmaniLinton",
+      "url": "https://x.com/_ArmaniLinton"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@WallaceAlex0",
+      "url": "https://x.com/WallaceAlex0"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@Jeremy_Jacobs_",
+      "url": "https://x.com/Jeremy_Jacobs_"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@CoachJReid_75",
+      "url": "https://x.com/CoachJReid_75"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@Tory44Carter",
+      "url": "https://x.com/Tory44Carter"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@CoachB1llyoung",
+      "url": "https://x.com/CoachB1llyoung"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@agent_treyscott",
+      "url": "https://x.com/agent_treyscott"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@spedbraet",
+      "url": "https://x.com/spedbraet"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@CoachSvarczkopf",
+      "url": "https://x.com/CoachSvarczkopf"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@MaddiGage",
+      "url": "https://x.com/MaddiGage"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@KelsieJohnsonFB",
+      "url": "https://x.com/KelsieJohnsonFB"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@ZacCox_",
+      "url": "https://x.com/ZacCox_"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@PEllsworth_",
+      "url": "https://x.com/PEllsworth_"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@hjacobs67",
+      "url": "https://x.com/hjacobs67"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@kaceyfaith",
+      "url": "https://x.com/kaceyfaith"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@embaustert",
+      "url": "https://x.com/embaustert"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@ncrimmins2",
+      "url": "https://x.com/ncrimmins2"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@KStateSWAG",
+      "url": "https://x.com/KStateSWAG"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@kstatebsb",
+      "url": "https://x.com/kstatebsb"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@kstatebsb",
+      "url": "https://instagram.com/kstatebsb"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@kstatembb",
+      "url": "https://x.com/kstatembb"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@kstatembb",
+      "url": "https://instagram.com/kstatembb"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@kstatewbb",
+      "url": "https://x.com/kstatewbb"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@kstatewbb",
+      "url": "https://instagram.com/kstatewbb"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@kstatetfxc",
+      "url": "https://x.com/kstatetfxc"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@kstatetfxc",
+      "url": "https://instagram.com/kstatetfxc"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@kstatefb",
+      "url": "https://x.com/kstatefb"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@kstatefb",
+      "url": "https://instagram.com/kstatefb"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@KStateMGolf",
+      "url": "https://x.com/KStateMGolf"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@kstatemgolf",
+      "url": "https://instagram.com/kstatemgolf"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@kstatewgolf",
+      "url": "https://x.com/kstatewgolf"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@kstatewgolf",
+      "url": "https://instagram.com/kstatewgolf"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@kstaterow",
+      "url": "https://x.com/kstaterow"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@kstaterow",
+      "url": "https://instagram.com/kstaterow"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@kstatesoc",
+      "url": "https://x.com/kstatesoc"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@kstatesoc",
+      "url": "https://instagram.com/kstatesoc"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@kstateten",
+      "url": "https://x.com/kstateten"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@kstatetennis",
+      "url": "https://instagram.com/kstatetennis"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@kstatevb",
+      "url": "https://x.com/kstatevb"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@kstatevb",
+      "url": "https://instagram.com/kstatevb"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@kstatesports",
+      "url": "https://x.com/kstatesports"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@kstatesports",
+      "url": "https://www.instagram.com/kstatesports/"
+    }
+  ],
+  "phones": [
+    "(785) 706-1430",
+    "(785) 532-5880",
+    "(785) 532-5876",
+    "(785) 532-6384",
+    "(785) 410-9311",
+    "(785) 706-8802",
+    "(785) 532-6836",
+    "(785) 532-3449",
+    "(785) 532-5868"
+  ]
+}

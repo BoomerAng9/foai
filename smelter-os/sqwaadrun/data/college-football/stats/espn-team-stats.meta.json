@@ -1,0 +1,11 @@
+{
+  "title": "2025 College Football Offense Total Team Stat Leaders - ESPN",
+  "url": "https://www.espn.com/college-football/stats/team",
+  "status_code": 200,
+  "chars": 15251,
+  "links_count": 43,
+  "scraped_at": "2026-04-09T14:48:16.428794+00:00",
+  "content_hash": "e62b57a102f5757c",
+  "category": "stats",
+  "file": "data/college-football\\stats\\espn-team-stats.md"
+}

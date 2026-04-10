@@ -35,6 +35,7 @@ function gradeColor(grade: number): string {
 
 export default function FilmRoomPage() {
   const [playerName, setPlayerName] = useState('');
+  const [youtubeUrl, setYoutubeUrl] = useState('');
   const [source, setSource] = useState<Source>('youtube');
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<FilmResult | null>(null);
@@ -83,7 +84,7 @@ export default function FilmRoomPage() {
           playerName: playerName.trim(),
           source,
           analysisType: 'full_game',
-          youtubeUrl: selectedVideo?.url || undefined,
+          youtubeUrl: youtubeUrl.trim() || selectedVideo?.url || undefined,
         }),
       });
       const data = await res.json();
@@ -126,6 +127,19 @@ export default function FilmRoomPage() {
             style={{
               background: 'rgba(255,255,255,0.04)',
               border: '1px solid rgba(255,255,255,0.1)',
+            }}
+          />
+
+          {/* Direct YouTube URL input */}
+          <input
+            type="text"
+            value={youtubeUrl}
+            onChange={(e) => setYoutubeUrl(e.target.value)}
+            placeholder="Paste YouTube URL (optional)..."
+            className="w-full px-5 py-3 rounded-lg text-sm font-mono text-white/60 placeholder-white/20 outline-none"
+            style={{
+              background: 'rgba(255,255,255,0.02)',
+              border: '1px solid rgba(255,255,255,0.06)',
             }}
           />
 

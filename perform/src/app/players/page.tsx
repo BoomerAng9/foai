@@ -126,6 +126,22 @@ export default function PlayerIndexPage() {
             PLAYER INDEX
           </motion.h1>
 
+          {/* Nav links */}
+          <motion.div variants={heroItem} className="flex gap-3 mb-4">
+            <Link
+              href="/players/cards"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-mono font-bold tracking-wider transition-all hover:scale-[1.02]"
+              style={{
+                background: 'rgba(212,168,83,0.08)',
+                border: '1px solid rgba(212,168,83,0.25)',
+                color: '#D4A853',
+              }}
+            >
+              DRAFT CARDS
+              <span className="text-white/20">&rarr;</span>
+            </Link>
+          </motion.div>
+
           {/* Search */}
           <motion.div variants={heroItem} className="mb-2">
             <div className="relative max-w-md">

@@ -1,0 +1,58 @@
+{
+  "title": "2026 Football Coaches - Wake Forest University Athletics",
+  "url": "https://godeacs.com/sports/football/coaches",
+  "status_code": 200,
+  "chars": 10843,
+  "links_count": 102,
+  "scraped_at": "2026-04-09T15:02:19.452144+00:00",
+  "content_hash": "6f19d9e532657706",
+  "file": "C:\\Users\\rishj\\foai\\smelter-os\\sqwaadrun\\data\\college-football\\coaches-contacts\\wake-forest-coaching-staff.md",
+  "social_media": [
+    {
+      "platform": "twitter",
+      "handle": "@WakeFB",
+      "url": "https://twitter.com/WakeFB"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@wakefootball",
+      "url": "https://www.instagram.com/wakefootball/?hl=en"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@wf_fbrecruiting",
+      "url": "https://twitter.com/wf_fbrecruiting"
+    }
+  ],
+  "emails": [
+    "kieselr@wfu.edu",
+    "byrdt@wfu.edu",
+    "mitchea@wfu.edu",
+    "stevend@wfu.edu",
+    "danielbj@wfu.edu",
+    "beschow@wfu.edu",
+    "goodwiev@wfu.edu",
+    "prousei@wfu.edu",
+    "vuv@wfu.edu",
+    "holcombm@wfu.edu",
+    "brewerbr@wfu.edu",
+    "bechokp@wfu.edu",
+    "stinnek@wfu.edu",
+    "maffeir@wfu.edu",
+    "basonsc@wfu.edu",
+    "muset@wfu.edu",
+    "houckw@wfu.edu",
+    "guglien@wfu.edu",
+    "caldwejh@wfu.edu",
+    "lisowsm@wfu.edu",
+    "francot@wfu.edu"
+  ],
+  "phones": [
+    "336-758-4611",
+    "336-758-7056",
+    "336-758-4685",
+    "336-758-2416",
+    "336-758-6010",
+    "336-758-3712"
+  ]
+}

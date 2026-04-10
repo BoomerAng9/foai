@@ -1,0 +1,21 @@
+{
+  "title": "2026 Football Coaches | Wisconsin Badgers",
+  "url": "https://uwbadgers.com/sports/football/coaches",
+  "status_code": 200,
+  "chars": 9075,
+  "links_count": 267,
+  "scraped_at": "2026-04-09T15:01:44.848176+00:00",
+  "content_hash": "fd44ed1ae6745435",
+  "file": "C:\\Users\\rishj\\foai\\smelter-os\\sqwaadrun\\data\\college-football\\coaches-contacts\\wisconsin-coaching-staff.md",
+  "social_media": [
+    {
+      "platform": "twitter",
+      "handle": "@e",
+      "url": "https://publogix.com/e/25-UOWFBYB/"
+    }
+  ],
+  "emails": [
+    "smp@athletics.wisc.edu",
+    "contactus@uwbadgers.com"
+  ]
+}

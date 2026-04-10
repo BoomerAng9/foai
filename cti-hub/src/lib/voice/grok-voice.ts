@@ -9,27 +9,95 @@
  * API: wss://api.x.ai/v1/realtime
  */
 
+export type VoiceGender = 'male' | 'female';
+
 export const GROK_VOICES = {
-  ara: { id: 'ara', name: 'Ara', desc: 'Warm, confident female voice' },
-  eve: { id: 'eve', name: 'Eve', desc: 'Clear, professional female voice' },
-  leo: { id: 'leo', name: 'Leo', desc: 'Deep, authoritative male voice' },
-  rex: { id: 'rex', name: 'Rex', desc: 'Energetic, dynamic male voice' },
-  sal: { id: 'sal', name: 'Sal', desc: 'Calm, measured male voice' },
+  ara: { id: 'ara', name: 'Ara', desc: 'Warm, confident female voice', gender: 'female' as VoiceGender },
+  eve: { id: 'eve', name: 'Eve', desc: 'Clear, professional female voice', gender: 'female' as VoiceGender },
+  leo: { id: 'leo', name: 'Leo', desc: 'Deep, authoritative male voice', gender: 'male' as VoiceGender },
+  rex: { id: 'rex', name: 'Rex', desc: 'Energetic, dynamic male voice', gender: 'male' as VoiceGender },
+  sal: { id: 'sal', name: 'Sal', desc: 'Calm, measured male voice', gender: 'male' as VoiceGender },
 } as const;
 
 export type GrokVoiceId = keyof typeof GROK_VOICES;
 
-// ACHEEVY default voice mapping
-export const AGENT_VOICE_MAP: Record<string, GrokVoiceId> = {
-  acheevy: 'leo',        // Deep, authoritative — CEO energy
-  consult_ang: 'sal',    // Calm, measured — consultant
-  void_caster: 'rex',    // Energetic — broadcast anchor
-  the_colonel: 'eve',    // Professional female — military precision
-  haze: 'rex',           // Energetic — culture commentator
-  smoke: 'sal',          // Calm — analytical counter-voice
-  astra_novatos: 'leo',  // Authoritative — luxury brand
-  chicken_hawk: 'rex',   // Dynamic — tactical ops
+/** Agent persona definitions — gender-locked voice selection + traits */
+export interface AgentPersona {
+  voice: GrokVoiceId;
+  gender: VoiceGender;
+  label: string;
+  role: string;
+  allowedVoices: GrokVoiceId[];  // Only voices matching this agent's gender
+  skills: string[];
+}
+
+export const AGENT_PERSONAS: Record<string, AgentPersona> = {
+  acheevy: {
+    voice: 'leo', gender: 'male',
+    label: 'ACHEEVY', role: 'Digital CEO',
+    allowedVoices: ['leo', 'rex', 'sal'],
+    skills: ['Strategy', 'Execution', 'Dispatch', 'RFP-BAMARAM'],
+  },
+  consult_ang: {
+    voice: 'sal', gender: 'male',
+    label: 'Consult_Ang', role: 'Fast Responder',
+    allowedVoices: ['sal', 'leo', 'rex'],
+    skills: ['Clarification', 'Quick Answers', 'Triage'],
+  },
+  chicken_hawk: {
+    voice: 'rex', gender: 'male',
+    label: 'Chicken Hawk', role: 'Tactical Operator (2IC)',
+    allowedVoices: ['rex', 'leo', 'sal'],
+    skills: ['Scaffolding', 'Deployment', 'Ops'],
+  },
+  void_caster: {
+    voice: 'rex', gender: 'male',
+    label: 'Void-Caster', role: 'Broadcast Anchor',
+    allowedVoices: ['rex', 'leo', 'sal'],
+    skills: ['Analysis', 'Commentary', 'Draft Coverage'],
+  },
+  haze: {
+    voice: 'rex', gender: 'male',
+    label: 'Haze', role: 'Culture Commentator',
+    allowedVoices: ['rex', 'sal', 'leo'],
+    skills: ['Hot Takes', 'Debate', 'Culture Analysis'],
+  },
+  smoke: {
+    voice: 'sal', gender: 'male',
+    label: 'Smoke', role: 'Analytical Counter-Voice',
+    allowedVoices: ['sal', 'leo', 'rex'],
+    skills: ['Data Analysis', 'Counter-Arguments', 'Stats'],
+  },
+  the_colonel: {
+    voice: 'eve', gender: 'male',
+    label: 'The Colonel', role: 'Podcast Host — Jersey Guy',
+    allowedVoices: ['leo', 'rex', 'sal'],
+    skills: ['Podcasting', 'Commentary', 'Debate'],
+  },
+  astra_novatos: {
+    voice: 'leo', gender: 'male',
+    label: 'Astra Novatos', role: 'Luxury Brand Analyst',
+    allowedVoices: ['leo', 'rex', 'sal'],
+    skills: ['Brand Strategy', 'Market Analysis', 'Luxury Positioning'],
+  },
+  bun_e: {
+    voice: 'ara', gender: 'female',
+    label: 'Bun-E', role: 'Cosmic Polymath',
+    allowedVoices: ['ara', 'eve'],
+    skills: ['Women in Sports', 'Tech/Leadership', 'Legal Analysis'],
+  },
+  betty_anne_ang: {
+    voice: 'eve', gender: 'female',
+    label: 'Betty-Anne_Ang', role: 'HR PMO Evaluator',
+    allowedVoices: ['eve', 'ara'],
+    skills: ['Org Fit Index', 'Performance Review', 'Workforce Eval'],
+  },
 };
+
+// Legacy compat — simple voice map derived from personas
+export const AGENT_VOICE_MAP: Record<string, GrokVoiceId> = Object.fromEntries(
+  Object.entries(AGENT_PERSONAS).map(([k, v]) => [k, v.voice])
+);
 
 export interface GrokVoiceConfig {
   voice?: GrokVoiceId;

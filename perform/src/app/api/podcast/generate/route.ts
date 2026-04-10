@@ -3,6 +3,7 @@ import { getAnalyst, ANALYSTS } from '@/lib/analysts/personas';
 import { generateText } from '@/lib/openrouter';
 import { sql } from '@/lib/db';
 import { speakAnalystContent } from '@/lib/voice/tts-router';
+import { notifyNewEpisode } from '@/lib/notifications/triggers';
 
 const PIPELINE_KEY = process.env.PIPELINE_AUTH_KEY || '';
 
@@ -159,6 +160,13 @@ Write naturally as if speaking — no stage directions, no [PAUSE] markers, no p
       `;
       episodeId = rows[0]?.id ?? null;
     }
+
+    // Send push notification for new episode (fire-and-forget)
+    notifyNewEpisode({
+      id: episodeId,
+      title,
+      analyst: { id: analyst.id, name: analyst.name },
+    }).catch(() => {});
 
     return NextResponse.json({
       episodeId,

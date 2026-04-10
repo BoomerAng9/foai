@@ -1,0 +1,267 @@
+{
+  "title": "Football Coaches - California Golden Bears Athletics",
+  "url": "https://calbears.com/sports/football/coaches",
+  "status_code": 200,
+  "chars": 109,
+  "links_count": 361,
+  "scraped_at": "2026-04-09T15:02:25.143380+00:00",
+  "content_hash": "d54482af507f41d5",
+  "file": "C:\\Users\\rishj\\foai\\smelter-os\\sqwaadrun\\data\\college-football\\coaches-contacts\\california-coaching-staff.md",
+  "social_media": [
+    {
+      "platform": "twitter",
+      "handle": "@calbaseball",
+      "url": "https://x.com/calbaseball"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@calbaseball",
+      "url": "https://instagram.com/calbaseball"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@calmbball",
+      "url": "https://x.com/calmbball"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@calmbball",
+      "url": "https://instagram.com/calmbball"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@CalTFXC",
+      "url": "https://x.com/CalTFXC"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@Caltfxc",
+      "url": "https://instagram.com/Caltfxc"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@CalFootball",
+      "url": "https://x.com/CalFootball"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@cal_football",
+      "url": "https://instagram.com/cal_football"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@CalMensGolf",
+      "url": "https://x.com/CalMensGolf"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@calmensgolf",
+      "url": "https://instagram.com/calmensgolf"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@calmgym",
+      "url": "https://x.com/calmgym"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@calmgym",
+      "url": "https://instagram.com/calmgym"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@CalMRowing",
+      "url": "https://instagram.com/CalMRowing"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@CalVarsityRugby",
+      "url": "https://x.com/CalVarsityRugby"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@calvarsityrugby",
+      "url": "https://instagram.com/calvarsityrugby"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@CalMSoc",
+      "url": "https://x.com/CalMSoc"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@calmsoc",
+      "url": "https://instagram.com/calmsoc"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@CalMenSwim",
+      "url": "https://x.com/CalMenSwim"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@calmenswim",
+      "url": "https://instagram.com/calmenswim"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@CalMensTennis",
+      "url": "https://x.com/CalMensTennis"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@calmenstennis",
+      "url": "https://instagram.com/calmenstennis"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@CalWaterPolo",
+      "url": "https://x.com/CalWaterPolo"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@calmwaterpolo",
+      "url": "https://instagram.com/calmwaterpolo"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@calwbball",
+      "url": "https://x.com/calwbball"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@calwbball",
+      "url": "https://instagram.com/calwbball"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@CalBeachVB",
+      "url": "https://x.com/CalBeachVB"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@CalBeachVB",
+      "url": "https://instagram.com/CalBeachVB"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@calfieldhockey",
+      "url": "https://x.com/calfieldhockey"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@calfieldhockey",
+      "url": "https://instagram.com/calfieldhockey"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@CalWGolf",
+      "url": "https://x.com/CalWGolf"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@calwgolf",
+      "url": "https://instagram.com/calwgolf"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@Calwgym",
+      "url": "https://x.com/Calwgym"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@Calwgym",
+      "url": "https://instagram.com/Calwgym"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@CalWLax",
+      "url": "https://x.com/CalWLax"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@calwlax",
+      "url": "https://instagram.com/calwlax"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@CalWRowing",
+      "url": "https://x.com/CalWRowing"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@CalWRowing",
+      "url": "https://instagram.com/CalWRowing"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@CalWSoc",
+      "url": "https://x.com/CalWSoc"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@CalWSoc",
+      "url": "https://instagram.com/CalWSoc"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@CalSB",
+      "url": "https://x.com/CalSB"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@calsb",
+      "url": "https://instagram.com/calsb"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@CalWSwim",
+      "url": "https://x.com/CalWSwim"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@calwswim",
+      "url": "https://instagram.com/calwswim"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@CalWomensTennis",
+      "url": "https://x.com/CalWomensTennis"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@calwomenstennis",
+      "url": "https://instagram.com/calwomenstennis"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@CalVolleyball",
+      "url": "https://x.com/CalVolleyball"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@calvolleyball",
+      "url": "https://instagram.com/calvolleyball"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@CalWWpolo",
+      "url": "https://x.com/CalWWpolo"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@calwwpolo",
+      "url": "https://instagram.com/calwwpolo"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@ZacBocian",
+      "url": "https://twitter.com/ZacBocian"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@MWCherrington",
+      "url": "https://twitter.com/MWCherrington"
+    }
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "title": "2026 Football Coaches - University of Utah Athletics",
+  "url": "https://utahutes.com/sports/football/coaches",
+  "status_code": 200,
+  "chars": 5943,
+  "links_count": 181,
+  "scraped_at": "2026-04-09T15:02:35.055163+00:00",
+  "content_hash": "f2f9c47f6d45fedd",
+  "file": "C:\\Users\\rishj\\foai\\smelter-os\\sqwaadrun\\data\\college-football\\coaches-contacts\\utah-coaching-staff.md",
+  "social_media": [
+    {
+      "platform": "twitter",
+      "handle": "@Utah_Football",
+      "url": "http://twitter.com/Utah_Football"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@utahfootball",
+      "url": "http://instagram.com/utahfootball"
+    }
+  ]
+}

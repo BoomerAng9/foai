@@ -10,6 +10,7 @@ import { useState } from 'react';
 import { GradeBadge, TIER_SCORES } from '@/components/tie/GradeBadge';
 import { GradeStamp } from '@/components/tie/GradeStamp';
 import { getGradeBand } from '@/lib/draft/tie-scale';
+import { BackHomeNav } from '@/components/layout/BackHomeNav';
 
 export default function BadgesShowcasePage() {
   const [stampTrigger, setStampTrigger] = useState(false);
@@ -22,8 +23,12 @@ export default function BadgesShowcasePage() {
   }
 
   return (
-    <div className="min-h-screen bg-black text-white p-8">
-      <div className="max-w-6xl mx-auto">
+    <div className="min-h-screen bg-black text-white">
+      <div className="px-6 py-3 flex items-center text-[11px] font-bold tracking-[0.18em] uppercase" style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+        <BackHomeNav />
+        <span className="opacity-70">TIE Badge Showcase</span>
+      </div>
+      <div className="max-w-6xl mx-auto p-8">
         <h1 className="text-4xl font-extrabold tracking-tight mb-2">TIE Grade Badges</h1>
         <p className="text-white/60 font-mono text-sm mb-12">
           Canonical ACHIEVEMOR 40/30/30 scale · 9 tiers · press stamp animation

@@ -18,8 +18,7 @@ export default function PlugPage() {
         <h1 className="text-3xl font-light tracking-tight text-white mb-2">
           Demo <span className="font-bold">Plugs</span>
         </h1>
-        <p className="text-sm text-white/40 font-mono mb-12">AI-powered solutions for every vertical</p>
-
+        <p className="text-sm text-fg-tertiary font-mono mb-10">AI-powered solutions for every vertical</p>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {[
             { href: '/plug/sqwaadrun', name: 'The Sqwaadrun', desc: '17-Hawk web intelligence fleet', icon: '&#x1F985;', accent: '#F5A623', external: false },

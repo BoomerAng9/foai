@@ -1,0 +1,11 @@
+{
+  "title": "Duke Blue Devils College Football Roster - ESPN",
+  "url": "https://www.espn.com/college-football/team/roster/_/id/150",
+  "status_code": 200,
+  "chars": 41524,
+  "links_count": 140,
+  "scraped_at": "2026-04-09T14:57:47.964200+00:00",
+  "content_hash": "95435850d6481d6b",
+  "category": "rosters-full",
+  "file": "C:\\Users\\rishj\\foai\\smelter-os\\sqwaadrun\\data\\college-football\\rosters-full\\espn-duke-roster.md"
+}

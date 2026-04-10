@@ -412,23 +412,52 @@ export const NAV_BRANCHES: NavBranch[] = [
     ],
   },
 
-  // ── ACCOUNT ────────────────────────────────────────────
+  // ── TOOLS ────────────────────────────────────────────
   {
-    id: 'account',
-    label: 'Account',
-    description: 'Your profile, settings, and workspace preferences.',
-    icon: User,
+    id: 'tools',
+    label: 'Tools',
+    description: 'Model catalog, testing chamber, and system management.',
+    icon: Settings,
     hosts: ['cti', 'deploy'],
     entries: [
       {
-        id: 'account.settings',
-        label: 'Settings',
-        description: 'Account settings, integrations, and preferences.',
-        href: '/settings',
+        id: 'tools.the-lab',
+        label: 'The Lab',
+        description: 'Browse every model, MCP, service, and aiPLUG available to you.',
+        href: '/the-lab',
+        kind: 'internal',
+        icon: Sparkles,
+        hosts: ['cti', 'deploy'],
+      },
+      {
+        id: 'tools.the-chamber',
+        label: 'The Chamber',
+        description: 'Test tools, run scenarios, build persistent workbench projects.',
+        href: '/the-chamber',
+        kind: 'internal',
+        icon: Terminal,
+        hosts: ['cti', 'deploy'],
+      },
+      {
+        id: 'tools.circuit-box',
+        label: 'Circuit Box',
+        description: 'System management — agents, keys, integrations, voice, compliance.',
+        href: '/circuit-box',
         kind: 'internal',
         icon: Settings,
         hosts: ['cti', 'deploy'],
       },
+    ],
+  },
+
+  // ── ACCOUNT ────────────────────────────────────────────
+  {
+    id: 'account',
+    label: 'Account',
+    description: 'Your profile and preferences.',
+    icon: User,
+    hosts: ['cti', 'deploy'],
+    entries: [
       {
         id: 'account.profile',
         label: 'Profile',

@@ -1,0 +1,347 @@
+{
+  "title": "2026 Football Coaches | Ohio State",
+  "url": "https://ohiostatebuckeyes.com/sports/football/coaches",
+  "status_code": 200,
+  "chars": 10979,
+  "links_count": 495,
+  "scraped_at": "2026-04-09T15:01:17.702665+00:00",
+  "content_hash": "f9b9e833695c28fd",
+  "file": "C:\\Users\\rishj\\foai\\smelter-os\\sqwaadrun\\data\\college-football\\coaches-contacts\\ohio-state-coaching-staff.md",
+  "social_media": [
+    {
+      "platform": "twitter",
+      "handle": "@OhioStateBASE",
+      "url": "https://x.com/OhioStateBASE"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@ohiostatebase",
+      "url": "https://instagram.com/ohiostatebase"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@OhioStateHoops",
+      "url": "https://x.com/OhioStateHoops"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@ohiostatehoops",
+      "url": "https://instagram.com/ohiostatehoops"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@OhioStateTFXC",
+      "url": "https://x.com/OhioStateTFXC"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@ohiostatetfxc",
+      "url": "https://instagram.com/ohiostatetfxc"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@ohiostatefen",
+      "url": "https://x.com/ohiostatefen"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@ohiostatefencing",
+      "url": "https://instagram.com/ohiostatefencing"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@OhioStateFB",
+      "url": "https://x.com/OhioStateFB"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@ohiostatefb",
+      "url": "https://instagram.com/ohiostatefb"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@OhioStateMGOLF",
+      "url": "https://x.com/OhioStateMGOLF"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@ohiostatemgolf",
+      "url": "https://instagram.com/ohiostatemgolf"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@OhioStateMGYM",
+      "url": "https://x.com/OhioStateMGYM"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@ohiostatemgym",
+      "url": "https://instagram.com/ohiostatemgym"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@OhioStateMHKY",
+      "url": "https://x.com/OhioStateMHKY"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@ohiostatemhky",
+      "url": "https://instagram.com/ohiostatemhky"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@OhioStateMLAX",
+      "url": "https://x.com/OhioStateMLAX"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@ohiostatemlax",
+      "url": "https://instagram.com/ohiostatemlax"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@OSU_PISTOL",
+      "url": "https://x.com/OSU_PISTOL"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@osu_pistol",
+      "url": "https://instagram.com/osu_pistol"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@OhioStateRIFLE",
+      "url": "https://x.com/OhioStateRIFLE"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@ohiostaterifle",
+      "url": "https://instagram.com/ohiostaterifle"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@OhioStateMSOC",
+      "url": "https://x.com/OhioStateMSOC"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@ohiostatemsoc",
+      "url": "https://instagram.com/ohiostatemsoc"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@OhioStAthletics",
+      "url": "https://x.com/OhioStAthletics"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@ohiostathletics",
+      "url": "https://instagram.com/ohiostathletics"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@OhioStSwimDive",
+      "url": "https://x.com/OhioStSwimDive"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@ohiostswimdive",
+      "url": "https://instagram.com/ohiostswimdive"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@OhioStateMTEN",
+      "url": "https://x.com/OhioStateMTEN"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@ohiostatemten",
+      "url": "https://instagram.com/ohiostatemten"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@OhioStateMVB",
+      "url": "https://x.com/OhioStateMVB"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@OhioStateMVB",
+      "url": "https://instagram.com/OhioStateMVB"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@wrestlingbucks",
+      "url": "https://x.com/wrestlingbucks"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@wrestlingbucks",
+      "url": "https://instagram.com/wrestlingbucks"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@OhioStArtSwim",
+      "url": "https://x.com/OhioStArtSwim"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@ohiostartswim",
+      "url": "https://instagram.com/ohiostartswim"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@OhioStateWBB",
+      "url": "https://x.com/OhioStateWBB"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@ohiostatewbb",
+      "url": "https://instagram.com/ohiostatewbb"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@OhioStateFH",
+      "url": "https://x.com/OhioStateFH"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@ohiostatefh",
+      "url": "https://instagram.com/ohiostatefh"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@OhioStateWGOLF",
+      "url": "https://x.com/OhioStateWGOLF"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@ohiostatewgolf",
+      "url": "https://instagram.com/ohiostatewgolf"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@OhioStateWGYM",
+      "url": "https://x.com/OhioStateWGYM"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@ohiostatewgymnastics",
+      "url": "https://instagram.com/ohiostatewgymnastics"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@OhioStateWHKY",
+      "url": "https://x.com/OhioStateWHKY"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@ohiostatewhky",
+      "url": "https://instagram.com/ohiostatewhky"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@OhioStateWLAX",
+      "url": "https://x.com/OhioStateWLAX"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@ohiostatewlax",
+      "url": "https://instagram.com/ohiostatewlax"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@OhioStateWROW",
+      "url": "https://x.com/OhioStateWROW"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@ohiostatewrow",
+      "url": "https://instagram.com/ohiostatewrow"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@OhioStateWSOC",
+      "url": "https://x.com/OhioStateWSOC"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@ohiostatewsoc",
+      "url": "https://instagram.com/ohiostatewsoc"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@OhioStateSB",
+      "url": "https://x.com/OhioStateSB"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@ohiostatesb",
+      "url": "https://instagram.com/ohiostatesb"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@OhioStateWTEN",
+      "url": "https://x.com/OhioStateWTEN"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@ohiostatewten",
+      "url": "https://instagram.com/ohiostatewten"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@OhioStateWVB",
+      "url": "https://x.com/OhioStateWVB"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@ohiostatewvb",
+      "url": "https://instagram.com/ohiostatewvb"
+    }
+  ],
+  "emails": [
+    "tucker.332@osu.edu",
+    "Takach.13@osu.edu",
+    "stewart.733@osu.edu",
+    "keanu.1@osu.edu",
+    "nerl.1@osu.edu",
+    "cencerjr.1@osu.edu",
+    "hinton.49@osu.edu",
+    "jackson.3392@osu.edu",
+    "Barnhouse.12@osu.edu",
+    "parker.869@osu.edu",
+    "hankton.3@osu.edu",
+    "dudley.255@osu.edu",
+    "ries.58@osu.edu",
+    "dickey.181@osu.edu",
+    "kambui.2@osu.edu",
+    "poplawski.7@osu.edu",
+    "higgins.609@osu.edu",
+    "spencer.1041@osu.edu",
+    "normandjr.1@osu.edu",
+    "murphy.2307@osu.edu",
+    "calland.6@osu.edu",
+    "Deam.10@osu.edu",
+    "Campbell.2038@osu.edu",
+    "olson.444@osu.edu",
+    "johnson.3366@osu.edu",
+    "guerrera.10@osu.edu",
+    "castricone.16@osu.edu",
+    "walton.684@osu.edu",
+    "kim.10446@osu.edu",
+    "patrick.451@osu.edu",
+    "schlegel.27@osu.edu",
+    "tempel.2@osu.edu",
+    "kraft.179@osu.edu",
+    "yates.427@osu.edu",
+    "fields.776@osu.edu",
+    "brooks.1583@osu.edu",
+    "morton.456@osu.edu",
+    "johnson.12015@osu.edu",
+    "mcgrath.260@osu.edu"
+  ],
+  "phones": [
+    "734-634-3057",
+    "614-292-1164"
+  ]
+}

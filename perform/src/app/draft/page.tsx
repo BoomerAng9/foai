@@ -11,6 +11,7 @@ import { useEffect, useState, useMemo } from 'react';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import PaywallGate from '@/components/PaywallGate';
+import { BackHomeNav } from '@/components/layout/BackHomeNav';
 
 /* ── types ─────────────────────────────────────────────── */
 interface PlayerRow {
@@ -152,6 +153,7 @@ export default function DraftBoardPage() {
         <div style={{ background: T.navyDeep, color: '#FFFFFF', borderBottom: `2px solid ${T.red}` }}>
           <div className="max-w-7xl mx-auto px-6 py-3 flex items-center justify-between text-[11px] font-bold tracking-[0.18em] uppercase">
             <div className="flex items-center gap-3">
+              <BackHomeNav />
               <span style={{ color: T.red }}>● LIVE</span>
               <span className="opacity-50">|</span>
               <span>Per|Form Big Board</span>

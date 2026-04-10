@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth-guard';
-import { grokTextToSpeech, grokSpeechToText, GROK_VOICES, AGENT_VOICE_MAP, type GrokVoiceId } from '@/lib/voice/grok-voice';
+import { grokTextToSpeech, grokSpeechToText, GROK_VOICES, AGENT_VOICE_MAP, AGENT_PERSONAS, type GrokVoiceId } from '@/lib/voice/grok-voice';
 
 /**
  * POST /api/voice — Text-to-speech or speech-to-text
@@ -21,6 +21,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({
         voices: Object.values(GROK_VOICES),
         agentDefaults: AGENT_VOICE_MAP,
+        agents: AGENT_PERSONAS,
       });
     }
 

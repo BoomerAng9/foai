@@ -14,7 +14,24 @@ const ACHEEVY_SYSTEM = `You are ACHEEVY, the Digital CEO of The Deploy Platform.
  *   Discord:  { platform: 'discord', content, channel_id, author }
  *   Email:    { platform: 'email', from, subject, body }
  */
+const WEBHOOK_SECRET = process.env.CHANNELS_WEBHOOK_SECRET || '';
+
 export async function POST(req: NextRequest) {
+  // Verify shared secret — blocks unauthorized callers from using
+  // this endpoint as a free LLM proxy or prompt injection vector.
+  if (WEBHOOK_SECRET) {
+    const secret = req.headers.get('x-webhook-secret') || '';
+    if (secret !== WEBHOOK_SECRET) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+  } else {
+    // No secret configured — reject all requests in production
+    return NextResponse.json(
+      { error: 'Webhook not configured. Set CHANNELS_WEBHOOK_SECRET.' },
+      { status: 503 },
+    );
+  }
+
   try {
     const body = await req.json();
     const platform = body.platform || detectPlatform(body);

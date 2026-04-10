@@ -146,13 +146,13 @@ export default function DeployAgentPage() {
           }} />
           {/* Content */}
           <div className="absolute inset-0 flex flex-col items-center justify-center px-4 text-center">
-            {/* AIMS logo mark — cropped to hide text */}
-            <div className="w-20 h-20 mb-6 overflow-hidden rounded-xl" style={{ filter: 'drop-shadow(0 0 20px rgba(232,160,32,0.4))' }}>
+            {/* Deploy Platform logo */}
+            <div className="w-24 h-24 mb-6" style={{ filter: 'drop-shadow(0 0 24px rgba(232,160,32,0.5))' }}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/aims-logo-gold.png" alt="" className="w-full h-auto object-cover object-top" style={{ marginTop: '-5%', transform: 'scale(1.15)' }} />
+              <img src="/deploy-logo.svg" alt="Deploy Platform" className="w-full h-full object-contain" />
             </div>
             <p className="text-[10px] font-mono tracking-[0.5em] uppercase mb-4" style={{ color: 'rgba(232,160,32,0.5)' }}>
-              AI-Managed Solutions
+              The Deploy Platform
             </p>
             <h1 className="font-mono text-3xl sm:text-4xl md:text-5xl font-black text-white tracking-tight mb-3">
               Deploy Your Workforce

@@ -1,0 +1,238 @@
+{
+  "scraped_at": "2026-04-09T14:48:41.057526+00:00",
+  "total_files": 21,
+  "total_chars": 1047054,
+  "files": [
+    {
+      "title": "NCAAF Standings - The Athletic",
+      "url": "https://www.theathletic.com/college-football/standings/",
+      "status_code": 200,
+      "chars": 236269,
+      "links_count": 312,
+      "scraped_at": "2026-04-09T14:48:09.471337+00:00",
+      "content_hash": "aabcc57ccdd563b1",
+      "category": "standings",
+      "file": "data/college-football\\standings\\the-athletic-standings.md"
+    },
+    {
+      "title": "College Football Standings, 2025 season - ESPN",
+      "url": "https://www.espn.com/college-football/standings",
+      "status_code": 200,
+      "chars": 53974,
+      "links_count": 174,
+      "scraped_at": "2026-04-09T14:48:11.954201+00:00",
+      "content_hash": "1c3376da158bd91e",
+      "category": "standings",
+      "file": "data/college-football\\standings\\espn-standings.md"
+    },
+    {
+      "title": "NCAA College Football FBS Standings | NCAA.com",
+      "url": "https://www.ncaa.com/standings/football/fbs",
+      "status_code": 200,
+      "chars": 28752,
+      "links_count": 129,
+      "scraped_at": "2026-04-09T14:48:14.055244+00:00",
+      "content_hash": "e6e423dc7545c511",
+      "category": "standings",
+      "file": "data/college-football\\standings\\ncaa-standings.md"
+    },
+    {
+      "title": "NCAAF Player Stat Leaders, 2025 Postseason - ESPN",
+      "url": "https://www.espn.com/college-football/stats",
+      "status_code": 200,
+      "chars": 15468,
+      "links_count": 88,
+      "scraped_at": "2026-04-09T14:48:14.684849+00:00",
+      "content_hash": "6f90d847aff42afc",
+      "category": "stats",
+      "file": "data/college-football\\stats\\espn-player-stats.md"
+    },
+    {
+      "title": "2025 College Football Offense Total Team Stat Leaders - ESPN",
+      "url": "https://www.espn.com/college-football/stats/team",
+      "status_code": 200,
+      "chars": 15251,
+      "links_count": 43,
+      "scraped_at": "2026-04-09T14:48:16.428794+00:00",
+      "content_hash": "e62b57a102f5757c",
+      "category": "stats",
+      "file": "data/college-football\\stats\\espn-team-stats.md"
+    },
+    {
+      "title": "NCAA College Football FBS   Stats | NCAA.com",
+      "url": "https://www.ncaa.com/stats/football/fbs",
+      "status_code": 200,
+      "chars": 15740,
+      "links_count": 167,
+      "scraped_at": "2026-04-09T14:48:17.069831+00:00",
+      "content_hash": "04eacec241debe7f",
+      "category": "stats",
+      "file": "data/college-football\\stats\\ncaa-fbs-stats.md"
+    },
+    {
+      "title": "Air Force Falcons College Football Roster - ESPN",
+      "url": "https://www.espn.com/college-football/team/roster/_/id/2005",
+      "status_code": 200,
+      "chars": 61699,
+      "links_count": 184,
+      "scraped_at": "2026-04-09T14:48:18.826449+00:00",
+      "content_hash": "5c4a7ce810c6386d",
+      "category": "rosters",
+      "file": "data/college-football\\rosters\\espn-georgia-roster.md"
+    },
+    {
+      "title": "Alabama Crimson Tide College Football Roster - ESPN",
+      "url": "https://www.espn.com/college-football/team/roster/_/id/333",
+      "status_code": 200,
+      "chars": 53730,
+      "links_count": 162,
+      "scraped_at": "2026-04-09T14:48:20.303813+00:00",
+      "content_hash": "21e4bcc53723bbd5",
+      "category": "rosters",
+      "file": "data/college-football\\rosters\\espn-alabama-roster.md"
+    },
+    {
+      "title": "Michigan Wolverines College Football Roster - ESPN",
+      "url": "https://www.espn.com/college-football/team/roster/_/id/130",
+      "status_code": 200,
+      "chars": 51627,
+      "links_count": 156,
+      "scraped_at": "2026-04-09T14:48:21.723599+00:00",
+      "content_hash": "a0dd469689813fb9",
+      "category": "rosters",
+      "file": "data/college-football\\rosters\\espn-michigan-roster.md"
+    },
+    {
+      "title": "Ohio State Buckeyes College Football Roster - ESPN",
+      "url": "https://www.espn.com/college-football/team/roster/_/id/194",
+      "status_code": 200,
+      "chars": 52122,
+      "links_count": 157,
+      "scraped_at": "2026-04-09T14:48:23.165341+00:00",
+      "content_hash": "8574945d16d39f35",
+      "category": "rosters",
+      "file": "data/college-football\\rosters\\espn-ohio-state-roster.md"
+    },
+    {
+      "title": "Clemson Tigers College Football Roster - ESPN",
+      "url": "https://www.espn.com/college-football/team/roster/_/id/228",
+      "status_code": 200,
+      "chars": 54104,
+      "links_count": 163,
+      "scraped_at": "2026-04-09T14:48:24.379193+00:00",
+      "content_hash": "7269346d4a053773",
+      "category": "rosters",
+      "file": "data/college-football\\rosters\\espn-clemson-roster.md"
+    },
+    {
+      "title": "Texas Longhorns College Football Roster - ESPN",
+      "url": "https://www.espn.com/college-football/team/roster/_/id/251",
+      "status_code": 200,
+      "chars": 48727,
+      "links_count": 148,
+      "scraped_at": "2026-04-09T14:48:25.720868+00:00",
+      "content_hash": "6e729fe756ca1dc6",
+      "category": "rosters",
+      "file": "data/college-football\\rosters\\espn-texas-roster.md"
+    },
+    {
+      "title": "Oregon Ducks College Football Roster - ESPN",
+      "url": "https://www.espn.com/college-football/team/roster/_/id/2483",
+      "status_code": 200,
+      "chars": 49409,
+      "links_count": 150,
+      "scraped_at": "2026-04-09T14:48:27.366691+00:00",
+      "content_hash": "b2553dec4050fb2b",
+      "category": "rosters",
+      "file": "data/college-football\\rosters\\espn-oregon-roster.md"
+    },
+    {
+      "title": "Penn State Nittany Lions College Football Roster - ESPN",
+      "url": "https://www.espn.com/college-football/team/roster/_/id/213",
+      "status_code": 200,
+      "chars": 55038,
+      "links_count": 165,
+      "scraped_at": "2026-04-09T14:48:28.902713+00:00",
+      "content_hash": "a8d1af43d64c1d3e",
+      "category": "rosters",
+      "file": "data/college-football\\rosters\\espn-penn-state-roster.md"
+    },
+    {
+      "title": "Florida State Seminoles College Football Roster - ESPN",
+      "url": "https://www.espn.com/college-football/team/roster/_/id/52",
+      "status_code": 200,
+      "chars": 47203,
+      "links_count": 144,
+      "scraped_at": "2026-04-09T14:48:30.386664+00:00",
+      "content_hash": "1fd8abb6ad834c3d",
+      "category": "rosters",
+      "file": "data/college-football\\rosters\\espn-florida-state-roster.md"
+    },
+    {
+      "title": "USC Trojans College Football Roster - ESPN",
+      "url": "https://www.espn.com/college-football/team/roster/_/id/30",
+      "status_code": 200,
+      "chars": 50109,
+      "links_count": 152,
+      "scraped_at": "2026-04-09T14:48:31.996901+00:00",
+      "content_hash": "21112278e6c14a1c",
+      "category": "rosters",
+      "file": "data/college-football\\rosters\\espn-usc-roster.md"
+    },
+    {
+      "title": "2025 Recruit Football Composite Team Rankings",
+      "url": "https://247sports.com/season/2025-football/compositeteamrankings/",
+      "status_code": 200,
+      "chars": 27189,
+      "links_count": 315,
+      "scraped_at": "2026-04-09T14:48:33.769149+00:00",
+      "content_hash": "c9ead97d4e623922",
+      "category": "recruiting",
+      "file": "data/college-football\\recruiting\\247-2025-rankings.md"
+    },
+    {
+      "title": "2026 Recruit Football Composite Team Rankings",
+      "url": "https://247sports.com/season/2026-football/compositeteamrankings/",
+      "status_code": 200,
+      "chars": 27306,
+      "links_count": 314,
+      "scraped_at": "2026-04-09T14:48:35.468297+00:00",
+      "content_hash": "bbf8784229344975",
+      "category": "recruiting",
+      "file": "data/college-football\\recruiting\\247-2026-rankings.md"
+    },
+    {
+      "title": "Highest Paid College Football Coaches & Salaries - USA TODAY",
+      "url": "https://sports.usatoday.com/ncaa/salaries/",
+      "status_code": 200,
+      "chars": 38293,
+      "links_count": 332,
+      "scraped_at": "2026-04-09T14:48:38.061397+00:00",
+      "content_hash": "83bdfa6d4ed61c97",
+      "category": "coaches",
+      "file": "data/college-football\\coaches\\usa-today-coaches-salaries.md"
+    },
+    {
+      "title": "College Football News - NCAA Football Scores, Schedule, Standings, Stats, and Rumors - The Athletic",
+      "url": "https://www.theathletic.com/college-football/",
+      "status_code": 200,
+      "chars": 47439,
+      "links_count": 240,
+      "scraped_at": "2026-04-09T14:48:40.446563+00:00",
+      "content_hash": "c5bab1260026f5f8",
+      "category": "headlines",
+      "file": "data/college-football\\headlines\\the-athletic-cfb.md"
+    },
+    {
+      "title": "College Football on ESPN - Scores, Stats and Highlights",
+      "url": "https://www.espn.com/college-football/",
+      "status_code": 200,
+      "chars": 17605,
+      "links_count": 128,
+      "scraped_at": "2026-04-09T14:48:41.049944+00:00",
+      "content_hash": "0693dbf34a6bbaa2",
+      "category": "headlines",
+      "file": "data/college-football\\headlines\\espn-cfb.md"
+    }
+  ]
+}

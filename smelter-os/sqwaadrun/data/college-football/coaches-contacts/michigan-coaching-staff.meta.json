@@ -1,0 +1,242 @@
+{
+  "title": "2026 Football Coaches - University of Michigan Athletics",
+  "url": "https://mgoblue.com/sports/football/coaches",
+  "status_code": 200,
+  "chars": 3093,
+  "links_count": 352,
+  "scraped_at": "2026-04-09T15:01:17.406614+00:00",
+  "content_hash": "8755d0dd98b92aba",
+  "file": "C:\\Users\\rishj\\foai\\smelter-os\\sqwaadrun\\data\\college-football\\coaches-contacts\\michigan-coaching-staff.md",
+  "social_media": [
+    {
+      "platform": "twitter",
+      "handle": "@umichbaseball",
+      "url": "https://x.com/umichbaseball"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@umichbaseball",
+      "url": "https://instagram.com/umichbaseball"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@umichbball",
+      "url": "https://x.com/umichbball"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@umichbball",
+      "url": "https://instagram.com/umichbball"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@umichtrack",
+      "url": "https://x.com/umichtrack"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@umichtrack",
+      "url": "https://instagram.com/umichtrack"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@umichfootball",
+      "url": "https://x.com/umichfootball"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@umichfootball",
+      "url": "https://instagram.com/umichfootball"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@umichmgolf",
+      "url": "https://x.com/umichmgolf"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@umichmgolf",
+      "url": "https://instagram.com/umichmgolf"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@umichgym",
+      "url": "https://x.com/umichgym"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@umichgym",
+      "url": "https://instagram.com/umichgym"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@umichhockey",
+      "url": "https://x.com/umichhockey"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@umichhockey",
+      "url": "https://instagram.com/umichhockey"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@umichlacrosse",
+      "url": "https://x.com/umichlacrosse"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@umichlacrosse",
+      "url": "https://instagram.com/umichlacrosse"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@umichsoccer",
+      "url": "https://x.com/umichsoccer"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@umichsoccer",
+      "url": "https://instagram.com/umichsoccer"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@umichswimdive",
+      "url": "https://x.com/umichswimdive"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@umichswimdive",
+      "url": "https://instagram.com/umichswimdive"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@umichtennis",
+      "url": "https://x.com/umichtennis"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@umichmtennis",
+      "url": "https://instagram.com/umichmtennis"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@umichwrestling",
+      "url": "https://x.com/umichwrestling"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@umichwrestling",
+      "url": "https://instagram.com/umichwrestling"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@umichwbball",
+      "url": "https://x.com/umichwbball"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@umichwbball",
+      "url": "https://instagram.com/umichwbball"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@umichfldhockey",
+      "url": "https://x.com/umichfldhockey"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@umichfieldhockey",
+      "url": "https://instagram.com/umichfieldhockey"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@UMichWGolf",
+      "url": "https://x.com/UMichWGolf"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@umichwgolf",
+      "url": "https://instagram.com/umichwgolf"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@umichwgym",
+      "url": "https://x.com/umichwgym"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@umichwgym",
+      "url": "https://instagram.com/umichwgym"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@umichwlax",
+      "url": "https://x.com/umichwlax"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@umichwlax",
+      "url": "https://instagram.com/umichwlax"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@umichrowing",
+      "url": "https://x.com/umichrowing"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@umichrowing",
+      "url": "https://instagram.com/umichrowing"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@umichwsoccer",
+      "url": "https://x.com/umichwsoccer"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@umichwsoccer",
+      "url": "https://instagram.com/umichwsoccer"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@umichsoftball",
+      "url": "https://x.com/umichsoftball"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@umichsoftball",
+      "url": "https://instagram.com/umichsoftball"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@UMichWTennis",
+      "url": "https://x.com/UMichWTennis"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@umichwtennis",
+      "url": "https://instagram.com/umichwtennis"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@umichvball",
+      "url": "https://x.com/umichvball"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@umichvball",
+      "url": "https://instagram.com/umichvball"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@umichwaterpolo",
+      "url": "https://x.com/umichwaterpolo"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@umichwaterpolo",
+      "url": "https://instagram.com/umichwaterpolo"
+    }
+  ]
+}

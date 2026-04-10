@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { Header } from '@/components/layout/Header';
@@ -11,6 +12,52 @@ import {
   heroStagger,
   heroItem,
 } from '@/lib/motion';
+
+/* ── Types ── */
+
+interface DashboardStats {
+  counts: {
+    perform_players: number;
+    cfb_players: number;
+    nfl_draft_picks: number;
+    huddle_posts: number;
+    podcast_episodes: number;
+  };
+  recentHuddle: {
+    id: number;
+    title: string;
+    author_name: string;
+    created_at: string;
+    excerpt: string | null;
+  }[];
+  topProspects: {
+    name: string;
+    position: string;
+    school: string;
+    grade: number | null;
+    projected_round: number | null;
+    overall_rank: number | null;
+  }[];
+}
+
+/* ── Metric card config ── */
+
+interface MetricCard {
+  label: string;
+  key: keyof DashboardStats['counts'];
+  accent: string;
+  href: string;
+}
+
+const METRICS: MetricCard[] = [
+  { label: 'Draft Prospects', key: 'perform_players', accent: '#D4A853', href: '/draft' },
+  { label: 'CFB Players', key: 'cfb_players', accent: '#60A5FA', href: '/draft' },
+  { label: 'NFL Historical', key: 'nfl_draft_picks', accent: '#A78BFA', href: '/draft' },
+  { label: 'Huddle Posts', key: 'huddle_posts', accent: '#34D399', href: '/huddle' },
+  { label: 'Podcast Episodes', key: 'podcast_episodes', accent: '#F97316', href: '/podcast' },
+];
+
+/* ── Section nav tiles ── */
 
 const SECTIONS = [
   {
@@ -71,7 +118,45 @@ const SECTIONS = [
   },
 ];
 
+/* ── Helpers ── */
+
+function formatCount(n: number): string {
+  if (n >= 10_000) return `${(n / 1_000).toFixed(1)}K`;
+  if (n >= 1_000) return n.toLocaleString();
+  return String(n);
+}
+
+function timeAgo(iso: string): string {
+  const diff = Date.now() - new Date(iso).getTime();
+  const mins = Math.floor(diff / 60_000);
+  if (mins < 60) return `${mins}m ago`;
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return `${hrs}h ago`;
+  const days = Math.floor(hrs / 24);
+  return `${days}d ago`;
+}
+
+/* ── Component ── */
+
 export default function DashboardPage() {
+  const [stats, setStats] = useState<DashboardStats | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [needsAuth, setNeedsAuth] = useState(false);
+
+  useEffect(() => {
+    fetch('/api/dashboard/stats')
+      .then((r) => {
+        if (r.status === 401 || r.status === 403) {
+          setNeedsAuth(true);
+          return null;
+        }
+        if (!r.ok) throw new Error(`Status ${r.status}`);
+        return r.json();
+      })
+      .then((data) => { if (data) setStats(data); })
+      .catch((e) => setError(e.message));
+  }, []);
+
   return (
     <div className="min-h-screen flex flex-col" style={{ background: '#0A0A0F' }}>
       <Header />
@@ -79,7 +164,7 @@ export default function DashboardPage() {
       <main className="flex-1 px-6 py-20 max-w-7xl mx-auto w-full">
         {/* Hero Header */}
         <motion.div
-          className="mb-20"
+          className="mb-16"
           variants={heroStagger}
           initial="hidden"
           animate="visible"
@@ -105,7 +190,193 @@ export default function DashboardPage() {
           />
         </motion.div>
 
-        {/* Bento Grid */}
+        {/* ── Metric Cards ── */}
+        {!needsAuth && <motion.div
+          className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-14"
+          variants={staggerContainer}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: '-40px' }}
+        >
+          {METRICS.map((m) => (
+            <motion.div key={m.key} variants={staggerItem}>
+              <Link href={m.href} className="block">
+                <div
+                  className="rounded-xl p-5 transition-colors"
+                  style={{
+                    background: 'rgba(255,255,255,0.025)',
+                    border: `1px solid ${m.accent}25`,
+                  }}
+                >
+                  <p
+                    className="text-3xl md:text-4xl font-outfit font-black tabular-nums"
+                    style={{ color: m.accent }}
+                  >
+                    {stats ? formatCount(stats.counts[m.key]) : '--'}
+                  </p>
+                  <p className="mt-1 text-xs font-mono tracking-wider text-white/40 uppercase">
+                    {m.label}
+                  </p>
+                </div>
+              </Link>
+            </motion.div>
+          ))}
+        </motion.div>}
+
+        {needsAuth && (
+          <motion.div
+            className="mb-14 grid grid-cols-2 md:grid-cols-5 gap-4"
+            variants={staggerContainer}
+            initial="hidden"
+            animate="visible"
+          >
+            {METRICS.map((m) => (
+              <motion.div key={m.key} variants={staggerItem}>
+                <div
+                  className="rounded-xl p-5"
+                  style={{
+                    background: 'rgba(255,255,255,0.015)',
+                    border: '1px solid rgba(255,255,255,0.04)',
+                  }}
+                >
+                  <p className="text-2xl font-outfit font-black text-white/15">--</p>
+                  <p className="mt-1 text-xs font-mono tracking-wider text-white/20 uppercase">
+                    {m.label}
+                  </p>
+                </div>
+              </motion.div>
+            ))}
+            <motion.div variants={staggerItem} className="col-span-2 md:col-span-5">
+              <div
+                className="rounded-xl p-8 text-center"
+                style={{
+                  background: 'rgba(212,168,83,0.04)',
+                  border: '1px solid rgba(212,168,83,0.15)',
+                }}
+              >
+                <p className="text-sm font-mono text-white/50 mb-3">
+                  Sign in to view live stats
+                </p>
+                <Link
+                  href="/login"
+                  className="inline-block px-6 py-2 rounded-lg text-xs font-mono font-bold tracking-wider transition-colors"
+                  style={{
+                    background: 'rgba(212,168,83,0.15)',
+                    color: '#D4A853',
+                    border: '1px solid rgba(212,168,83,0.3)',
+                  }}
+                >
+                  SIGN IN
+                </Link>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+
+        {error && !needsAuth && (
+          <div className="mb-8 rounded-lg p-4 text-sm font-mono text-red-400 bg-red-900/20 border border-red-800/30">
+            Failed to load live stats: {error}
+          </div>
+        )}
+
+        {/* ── Recent Activity (Huddle + Top Prospects side by side) ── */}
+        {stats && (
+          <motion.div
+            className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-16"
+            variants={staggerContainer}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: '-40px' }}
+          >
+            {/* Latest Huddle Posts */}
+            <motion.div
+              variants={staggerItem}
+              className="rounded-2xl p-6"
+              style={{
+                background: 'rgba(255,255,255,0.025)',
+                border: '1px solid rgba(52,211,153,0.15)',
+              }}
+            >
+              <h2 className="font-outfit text-sm font-bold tracking-[0.2em] text-emerald-400 mb-5">
+                LATEST HUDDLE POSTS
+              </h2>
+              {stats.recentHuddle.length === 0 ? (
+                <p className="text-white/30 text-sm font-mono">No posts yet</p>
+              ) : (
+                <ul className="space-y-4">
+                  {stats.recentHuddle.map((post) => (
+                    <li key={post.id} className="flex items-start gap-3">
+                      <div
+                        className="mt-1.5 w-2 h-2 rounded-full shrink-0"
+                        style={{ background: '#34D399' }}
+                      />
+                      <div className="min-w-0">
+                        <p className="text-sm text-white/80 font-medium truncate">
+                          {post.title}
+                        </p>
+                        <p className="text-xs text-white/30 font-mono mt-0.5">
+                          {post.author_name} &middot; {timeAgo(post.created_at)}
+                        </p>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </motion.div>
+
+            {/* Top 5 Prospects */}
+            <motion.div
+              variants={staggerItem}
+              className="rounded-2xl p-6"
+              style={{
+                background: 'rgba(255,255,255,0.025)',
+                border: '1px solid rgba(212,168,83,0.15)',
+              }}
+            >
+              <h2 className="font-outfit text-sm font-bold tracking-[0.2em] mb-5" style={{ color: '#D4A853' }}>
+                TOP PROSPECTS
+              </h2>
+              {stats.topProspects.length === 0 ? (
+                <p className="text-white/30 text-sm font-mono">No ranked prospects</p>
+              ) : (
+                <ul className="space-y-3">
+                  {stats.topProspects.map((p, i) => (
+                    <li
+                      key={p.name}
+                      className="flex items-center gap-3"
+                    >
+                      <span
+                        className="w-7 h-7 rounded-md flex items-center justify-center text-xs font-bold font-mono shrink-0"
+                        style={{
+                          background: 'rgba(212,168,83,0.12)',
+                          color: '#D4A853',
+                        }}
+                      >
+                        {p.overall_rank ?? i + 1}
+                      </span>
+                      <div className="min-w-0 flex-1">
+                        <p className="text-sm text-white/80 font-medium truncate">
+                          {p.name}
+                        </p>
+                        <p className="text-xs text-white/30 font-mono mt-0.5">
+                          {p.position} &middot; {p.school}
+                          {p.grade ? ` \u2022 Grade ${p.grade}` : ''}
+                        </p>
+                      </div>
+                      {p.projected_round && (
+                        <span className="text-xs font-mono text-white/20 shrink-0">
+                          Rd {p.projected_round}
+                        </span>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </motion.div>
+          </motion.div>
+        )}
+
+        {/* ── Navigation Bento Grid ── */}
         <motion.div
           className="grid grid-cols-1 md:grid-cols-3 gap-5"
           variants={staggerContainer}
@@ -150,7 +421,6 @@ export default function DashboardPage() {
                     }
                   }}
                 >
-                  {/* Accent square */}
                   <div className="flex items-center gap-4">
                     <div
                       className="w-3 h-3 rounded-sm shrink-0"
@@ -164,12 +434,10 @@ export default function DashboardPage() {
                     </h2>
                   </div>
 
-                  {/* Description */}
                   <p className="text-sm font-mono text-white/40 leading-relaxed">
                     {section.description}
                   </p>
 
-                  {/* Bottom accent bar */}
                   <div className="mt-auto pt-4">
                     <div
                       className="h-[1px] w-full opacity-20"
@@ -177,7 +445,6 @@ export default function DashboardPage() {
                     />
                   </div>
 
-                  {/* Corner glow */}
                   <div
                     className="absolute -top-12 -right-12 w-32 h-32 rounded-full opacity-[0.04] pointer-events-none"
                     style={{ background: `radial-gradient(circle, ${section.accent}, transparent)` }}

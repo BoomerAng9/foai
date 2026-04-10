@@ -1,0 +1,216 @@
+{
+  "title": "2026 Football Coaches - University of Louisville Athletic",
+  "url": "https://gocards.com/sports/football/coaches",
+  "status_code": 200,
+  "chars": 5292,
+  "links_count": 242,
+  "scraped_at": "2026-04-09T15:02:25.052494+00:00",
+  "content_hash": "efa3023ef851a8eb",
+  "file": "C:\\Users\\rishj\\foai\\smelter-os\\sqwaadrun\\data\\college-football\\coaches-contacts\\louisville-coaching-staff.md",
+  "social_media": [
+    {
+      "platform": "twitter",
+      "handle": "@LouisvilleBSB",
+      "url": "https://x.com/LouisvilleBSB"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@louisvillebsb",
+      "url": "https://instagram.com/louisvillebsb"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@LouisvilleMBB",
+      "url": "https://x.com/LouisvilleMBB"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@LouisvilleMBB",
+      "url": "https://instagram.com/LouisvilleMBB"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@LouisvilleTFXC",
+      "url": "https://x.com/LouisvilleTFXC"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@LouisvilleTFXC",
+      "url": "https://instagram.com/LouisvilleTFXC"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@LouisvilleFB",
+      "url": "https://x.com/LouisvilleFB"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@LouisvilleFB",
+      "url": "https://instagram.com/LouisvilleFB"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@LouisvilleMGOLF",
+      "url": "https://x.com/LouisvilleMGOLF"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@LouisvilleMGOLF",
+      "url": "https://instagram.com/LouisvilleMGOLF"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@LouisvilleMSOC",
+      "url": "https://x.com/LouisvilleMSOC"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@LouisvilleMSOC",
+      "url": "https://instagram.com/LouisvilleMSOC"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@LouisvilleSD",
+      "url": "https://x.com/LouisvilleSD"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@LouisvilleSD",
+      "url": "https://instagram.com/LouisvilleSD"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@LouisvilleMTEN",
+      "url": "https://x.com/LouisvilleMTEN"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@LouisvilleMTEN",
+      "url": "https://instagram.com/LouisvilleMTEN"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@LouisvilleWBB",
+      "url": "https://x.com/LouisvilleWBB"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@LouisvilleWBB",
+      "url": "https://instagram.com/LouisvilleWBB"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@LouisvilleFH",
+      "url": "https://x.com/LouisvilleFH"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@LouisvilleFH",
+      "url": "https://instagram.com/LouisvilleFH"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@LouisvilleWGOLF",
+      "url": "https://x.com/LouisvilleWGOLF"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@LouisvilleWGOLF",
+      "url": "https://instagram.com/LouisvilleWGOLF"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@LouisvilleLAX",
+      "url": "https://x.com/LouisvilleLAX"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@LouisvilleLAX",
+      "url": "https://instagram.com/LouisvilleLAX"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@LouisvilleROW",
+      "url": "https://x.com/LouisvilleROW"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@LouisvilleROW",
+      "url": "https://instagram.com/LouisvilleROW"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@LouisvilleWSOC",
+      "url": "https://x.com/LouisvilleWSOC"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@LouisvilleWSOC",
+      "url": "https://instagram.com/LouisvilleWSOC"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@LouisvilleSB",
+      "url": "https://x.com/LouisvilleSB"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@LouisvilleSB",
+      "url": "https://instagram.com/LouisvilleSB"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@LouisvilleWTEN",
+      "url": "https://x.com/LouisvilleWTEN"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@LouisvilleWTEN",
+      "url": "https://instagram.com/LouisvilleWTEN"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@LouisvilleVB",
+      "url": "https://x.com/LouisvilleVB"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@LouisvilleVB",
+      "url": "https://instagram.com/LouisvilleVB"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@gocards",
+      "url": "https://www.instagram.com/gocards/"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@GoCards",
+      "url": "https://twitter.com/GoCards"
+    }
+  ],
+  "emails": [
+    "brandon@GoCards.com",
+    "shawn@GoCards.com",
+    "masonp@GoCards.com",
+    "Denise.murphy@louisville.edu",
+    "deion@GoCards.com",
+    "marks@GoCards.com",
+    "coachbarclay@GoCards.com",
+    "brian@GoCards.com",
+    "clarence@GoCards.com",
+    "ed@GoCards.com",
+    "geoff@GoCards.com",
+    "coachellis@GoCards.com",
+    "gbrohm@GoCards.com",
+    "robyn@GoCards.com",
+    "karl@GoCards.com",
+    "mark@GoCards.com",
+    "vince@GoCards.com",
+    "alec@gocards.com",
+    "bbrohm@GoCards.com",
+    "anna@gocards.com",
+    "reno@GoCards.com",
+    "brison@GoCards.com"
+  ]
+}

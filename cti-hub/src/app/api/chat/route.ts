@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth-guard';
 import { acheevyRespondStream } from '@/lib/acheevy/agent';
+import { AGENT_PERSONAS } from '@/lib/voice/grok-voice';
 import { createConversation, getMessages } from '@/lib/memory/store';
 import { rateLimit } from '@/lib/rate-limit-simple';
 import { processGuideMe, getAcheevyGuidePrompt, ACHEEVY_MODEL } from '@/lib/acheevy/guide-me-engine';
@@ -13,7 +14,7 @@ export async function POST(request: NextRequest) {
     const userId = auth.userId;
     const userEmail = auth.email;
     const body = await request.json();
-    const { message, conversation_id, model, skill_context, mode } = body;
+    const { message, conversation_id, model, skill_context, mode, active_agent, voice_id } = body;
 
     if (!message || typeof message !== 'string') {
       return NextResponse.json({ error: 'message required' }, { status: 400 });
@@ -42,10 +43,20 @@ export async function POST(request: NextRequest) {
       }));
     }
 
+    // Agent persona context — when user selects a different agent in the voice picker,
+    // the chat adapts its behavior to that agent's role and skills.
+    let agentContext = '';
+    if (active_agent && active_agent !== 'acheevy') {
+      const persona = AGENT_PERSONAS[active_agent];
+      if (persona) {
+        agentContext = `[ACTIVE AGENT: ${persona.label}]\nRole: ${persona.role}\nSkills: ${persona.skills.join(', ')}\nYou ARE ${persona.label}. Respond in this agent's persona and skill set. Stay in character. Do not break character or refer to ACHEEVY.\n\n`;
+      }
+    }
+
     // If skill context is provided, prepend it to the message as system-level context
     const enrichedMessage = skill_context
-      ? `[SKILL CONTEXT - Apply this framework to your response]\n${skill_context}\n\n[USER MESSAGE]\n${message}`
-      : message;
+      ? `${agentContext}[SKILL CONTEXT - Apply this framework to your response]\n${skill_context}\n\n[USER MESSAGE]\n${message}`
+      : `${agentContext}${message}`;
 
     // Guide Me mode — three-party consulting team
     if (mode === 'guide') {

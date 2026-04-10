@@ -33,7 +33,7 @@ export const COMMAND_PROFILES: CharacterProfile[] = [
     callsign: 'General_Ang',
     rank: 'supervisor',
     imagePath: '/hawks/general-ang.png',
-    imageReady: false,
+    imageReady: true,
     visualDescription:
       'Boomer_Ang in a tan tactical coat with brass-button collar, full black helmet visor obscuring face, "ANG" patch on chest, arms crossed in command stance, flanked by ANG operatives in matching tan suits, against a sunset-orange wall, illustrated comic-book style.',
     gear: ['Tan command coat', 'Black helmet visor', 'ANG chest patch', 'Doctrine ledger'],
@@ -45,7 +45,7 @@ export const COMMAND_PROFILES: CharacterProfile[] = [
     callsign: 'Chicken_Hawk',
     rank: 'dispatcher',
     imagePath: '/hawks/chicken-hawk.png',
-    imageReady: false,
+    imageReady: true,
     visualDescription:
       'Massive golden-armored mech with mechanical eagle wings spread wide, glowing orange chest core, hawk-beak helmet, standing on a steel platform at a working port at night, A.I.M.S. shipping containers stacked behind, cyan crane lights overhead, rain streaks, dramatic sci-fi cinematic.',
     gear: ['Golden mech armor', 'Mechanical wings', 'Chest reactor core', 'Mission HUD gauntlet'],
@@ -63,7 +63,7 @@ export const HAWK_PROFILES: CharacterProfile[] = [
     callsign: 'Lil_Guard_Hawk',
     rank: 'core',
     imagePath: '/hawks/lil_guard_hawk.png',
-    imageReady: false,
+    imageReady: true,
     visualDescription:
       'Chibi armored hawk in red tactical vest with riot shield, yellow hard hat, fierce eyes, perched on an A.I.M.S. shipping container at a port, illustrated cartoon style with cinematic lighting.',
     gear: ['Riot shield', 'Yellow hard hat', 'Red tactical vest', 'Robots.txt scroll'],
@@ -75,7 +75,7 @@ export const HAWK_PROFILES: CharacterProfile[] = [
     callsign: 'Lil_Scrapp_Hawk',
     rank: 'core',
     imagePath: '/hawks/lil_scrapp_hawk.png',
-    imageReady: false,
+    imageReady: true,
     visualDescription:
       'Chibi armored hawk with green chest core glowing, jetpack on back, captain stripes on shoulders (Squad Lead), fierce determined expression, holding a tactical tablet, port background at night.',
     gear: ['Squad Lead stripes', 'Jetpack', 'Tactical tablet', 'Async comm rig'],
@@ -87,7 +87,7 @@ export const HAWK_PROFILES: CharacterProfile[] = [
     callsign: 'Lil_Parse_Hawk',
     rank: 'core',
     imagePath: '/hawks/lil_parse_hawk.png',
-    imageReady: false,
+    imageReady: true,
     visualDescription:
       'Chibi hawk wearing rectangular blue analyst glasses, holding a glowing document scanner, surrounded by holographic markdown text, gentle blue glow, port at night.',
     gear: ['Analyst glasses', 'Document scanner', 'Markdown wand'],
@@ -99,7 +99,7 @@ export const HAWK_PROFILES: CharacterProfile[] = [
     callsign: 'Lil_Crawl_Hawk',
     rank: 'core',
     imagePath: '/hawks/lil_crawl_hawk.png',
-    imageReady: false,
+    imageReady: true,
     visualDescription:
       'Chibi hawk with eight mechanical spider-leg attachments, amber visor, climbing on a wireframe globe of links, golden trail of URLs behind, port background.',
     gear: ['Spider-leg climbers', 'URL trail beacon', 'Frontier map'],
@@ -111,7 +111,7 @@ export const HAWK_PROFILES: CharacterProfile[] = [
     callsign: 'Lil_Snap_Hawk',
     rank: 'core',
     imagePath: '/hawks/lil_snap_hawk.png',
-    imageReady: false,
+    imageReady: true,
     visualDescription:
       'Chibi hawk holding a futuristic camera with magenta lens flare, photographer vest, beret, capturing a glowing screenshot, neon magenta accents, port at night.',
     gear: ['Holo-camera', 'Photographer beret', 'Screenshot wand'],
@@ -123,7 +123,7 @@ export const HAWK_PROFILES: CharacterProfile[] = [
     callsign: 'Lil_Store_Hawk',
     rank: 'core',
     imagePath: '/hawks/lil_store_hawk.png',
-    imageReady: false,
+    imageReady: true,
     visualDescription:
       'Chibi hawk standing in front of a glowing cyan vault filled with data crystals, archivist smock, ledger in hand, organized rows of A.I.M.S. containers behind.',
     gear: ['Cyan data vault', 'Archivist smock', 'Hash ledger'],
@@ -137,7 +137,7 @@ export const HAWK_PROFILES: CharacterProfile[] = [
     callsign: 'Lil_Extract_Hawk',
     rank: 'expansion',
     imagePath: '/hawks/lil_extract_hawk.png',
-    imageReady: false,
+    imageReady: true,
     visualDescription:
       'Chibi hawk with sniper-style targeting visor, surgical extraction gloves, holding tweezers that pull glowing fields out of a holographic page, orange accents, port at night.',
     gear: ['Targeting visor', 'Surgical gloves', 'Field tweezers'],
@@ -149,7 +149,7 @@ export const HAWK_PROFILES: CharacterProfile[] = [
     callsign: 'Lil_Feed_Hawk',
     rank: 'expansion',
     imagePath: '/hawks/lil_feed_hawk.png',
-    imageReady: false,
+    imageReady: true,
     visualDescription:
       'Chibi hawk holding an antenna dish with green RSS bars radiating outward, dispatcher headset, news ticker scrolling around, port background.',
     gear: ['RSS antenna', 'Dispatcher headset', 'Feed ticker'],
@@ -161,7 +161,7 @@ export const HAWK_PROFILES: CharacterProfile[] = [
     callsign: 'Lil_Diff_Hawk',
     rank: 'expansion',
     imagePath: '/hawks/lil_diff_hawk.png',
-    imageReady: false,
+    imageReady: true,
     visualDescription:
       'Chibi hawk holding two hash tablets glowing orange, magnifying glass over a unified diff, alert bell on belt, focused stare, port background.',
     gear: ['Hash tablets', 'Diff magnifier', 'Alert bell'],
@@ -173,7 +173,7 @@ export const HAWK_PROFILES: CharacterProfile[] = [
     callsign: 'Lil_Clean_Hawk',
     rank: 'expansion',
     imagePath: '/hawks/lil_clean_hawk.png',
-    imageReady: false,
+    imageReady: true,
     visualDescription:
       'Chibi hawk in white lab coat with light-green broom and squeegee, sweeping away ad banners and cookie popups, gleaming clean text behind, port background.',
     gear: ['Lab coat', 'Boilerplate broom', 'Quality scorecard'],
@@ -185,7 +185,7 @@ export const HAWK_PROFILES: CharacterProfile[] = [
     callsign: 'Lil_API_Hawk',
     rank: 'expansion',
     imagePath: '/hawks/lil_api_hawk.png',
-    imageReady: false,
+    imageReady: true,
     visualDescription:
       'Chibi hawk with hacker hoodie in violet, holding a key card with bearer token glow, REST endpoints orbiting around like planets, port at night.',
     gear: ['Hacker hoodie', 'Bearer key card', 'Pagination rig'],
@@ -197,7 +197,7 @@ export const HAWK_PROFILES: CharacterProfile[] = [
     callsign: 'Lil_Queue_Hawk',
     rank: 'expansion',
     imagePath: '/hawks/lil_queue_hawk.png',
-    imageReady: false,
+    imageReady: true,
     visualDescription:
       'Chibi hawk traffic controller with cyan glow sticks, conveyor belt of glowing job tokens behind, hard hat with priority chevrons, port background.',
     gear: ['Glow sticks', 'Priority chevrons', 'Job conveyor'],
@@ -211,7 +211,7 @@ export const HAWK_PROFILES: CharacterProfile[] = [
     callsign: 'Lil_Sitemap_Hawk',
     rank: 'specialist',
     imagePath: '/hawks/lil_sitemap_hawk.png',
-    imageReady: false,
+    imageReady: true,
     visualDescription:
       'Chibi hawk cartographer with rolled XML sitemap scroll, amber explorer hat, holding a compass that points to glowing URLs, port + warehouse map background.',
     gear: ['Sitemap scroll', 'Explorer hat', 'URL compass'],
@@ -223,7 +223,7 @@ export const HAWK_PROFILES: CharacterProfile[] = [
     callsign: 'Lil_Stealth_Hawk',
     rank: 'specialist',
     imagePath: '/hawks/lil_stealth_hawk.png',
-    imageReady: false,
+    imageReady: true,
     visualDescription:
       'Chibi hawk in dark gray ninja outfit, smoke-bomb effect at feet, four ghost-fingerprint silhouettes orbiting (browser profiles), tactical mask, port at night.',
     gear: ['Ninja gi', 'Smoke pellets', 'Fingerprint ring'],
@@ -235,7 +235,7 @@ export const HAWK_PROFILES: CharacterProfile[] = [
     callsign: 'Lil_Schema_Hawk',
     rank: 'specialist',
     imagePath: '/hawks/lil_schema_hawk.png',
-    imageReady: false,
+    imageReady: true,
     visualDescription:
       'Chibi hawk geneticist holding a glowing pink JSON-LD double helix, lab coat with @schema badge, microdata circuits floating around, port lab background.',
     gear: ['Lab coat', 'JSON-LD helix', '@schema badge'],
@@ -247,7 +247,7 @@ export const HAWK_PROFILES: CharacterProfile[] = [
     callsign: 'Lil_Pipe_Hawk',
     rank: 'specialist',
     imagePath: '/hawks/lil_pipe_hawk.png',
-    imageReady: false,
+    imageReady: true,
     visualDescription:
       'Chibi hawk plumber with brown overalls, wrench in hand, copper ETL pipes stretching behind transforming JSON shapes mid-flow, port factory background.',
     gear: ['Brown overalls', 'ETL wrench', 'Pipe diagram'],
@@ -259,7 +259,7 @@ export const HAWK_PROFILES: CharacterProfile[] = [
     callsign: 'Lil_Sched_Hawk',
     rank: 'specialist',
     imagePath: '/hawks/lil_sched_hawk.png',
-    imageReady: false,
+    imageReady: true,
     visualDescription:
       'Chibi hawk in railway conductor outfit with purple cap, holding a stopwatch and clipboard with cron schedule, station-clock glow behind, port background.',
     gear: ['Conductor cap', 'Stopwatch', 'Cron clipboard'],

@@ -1,0 +1,328 @@
+[10:57:07] === FULL CFB SCRAPE START — 132 teams ===
+[10:57:07] 
+=== PHASE 1: ROSTERS (132 teams) ===
+[10:57:07]   Batch 1: Air Force, Akron, Alabama, Appalachian State, Arizona, Arizona State, Arkansas, Arkansas State, Army, Auburn
+[10:57:19]   SAVED [200] ESPN-Air Force-roster -- 61,699 chars
+[10:57:19]   SAVED [200] ESPN-Akron-roster -- 41,508 chars
+[10:57:19]   SAVED [200] ESPN-Alabama-roster -- 53,730 chars
+[10:57:19]   SAVED [200] ESPN-Appalachian State-roster -- 44,849 chars
+[10:57:19]   SAVED [200] ESPN-Arizona-roster -- 44,087 chars
+[10:57:19]   SAVED [200] ESPN-Arizona State-roster -- 43,426 chars
+[10:57:19]   SAVED [200] ESPN-Arkansas-roster -- 46,004 chars
+[10:57:19]   SAVED [200] ESPN-Arkansas State-roster -- 48,738 chars
+[10:57:19]   SAVED [200] ESPN-Army-roster -- 68,818 chars
+[10:57:19]   SAVED [200] ESPN-Auburn-roster -- 45,717 chars
+[10:57:19]   Batch 2: Ball State, Baylor, Boise State, Boston College, Bowling Green, Buffalo, BYU, California, Central Michigan, Charlotte
+[10:57:33]   SAVED [200] ESPN-Ball State-roster -- 43,802 chars
+[10:57:33]   SAVED [200] ESPN-Baylor-roster -- 47,354 chars
+[10:57:33]   SAVED [200] ESPN-Boise State-roster -- 43,808 chars
+[10:57:33]   SAVED [200] ESPN-Boston College-roster -- 49,405 chars
+[10:57:33]   SAVED [200] ESPN-Bowling Green-roster -- 43,455 chars
+[10:57:33]   SAVED [200] ESPN-Buffalo-roster -- 45,929 chars
+[10:57:33]   SAVED [200] ESPN-BYU-roster -- 46,451 chars
+[10:57:33]   SAVED [200] ESPN-California-roster -- 45,763 chars
+[10:57:33]   SAVED [200] ESPN-Central Michigan-roster -- 42,190 chars
+[10:57:33]   SAVED [200] ESPN-Charlotte-roster -- 43,337 chars
+[10:57:33]   Batch 3: Cincinnati, Clemson, Coastal Carolina, Colorado, Colorado State, Connecticut, Duke, East Carolina, Eastern Michigan, FIU
+[10:57:47]   SAVED [200] ESPN-Cincinnati-roster -- 44,217 chars
+[10:57:47]   SAVED [200] ESPN-Clemson-roster -- 54,104 chars
+[10:57:47]   SAVED [200] ESPN-Coastal Carolina-roster -- 43,512 chars
+[10:57:47]   SAVED [200] ESPN-Colorado-roster -- 43,201 chars
+[10:57:47]   SAVED [200] ESPN-Colorado State-roster -- 43,487 chars
+[10:57:47]   SAVED [200] ESPN-Connecticut-roster -- 47,156 chars
+[10:57:47]   SAVED [200] ESPN-Duke-roster -- 41,524 chars
+[10:57:48]   SAVED [200] ESPN-East Carolina-roster -- 49,691 chars
+[10:57:48]   SAVED [200] ESPN-Eastern Michigan-roster -- 45,080 chars
+[10:57:48]   SAVED [200] ESPN-FIU-roster -- 44,020 chars
+[10:57:48]   Batch 4: Florida, Florida Atlantic, Florida State, Fresno State, Georgia, Georgia Southern, Georgia State, Georgia Tech, Hawaii, Houston
+[10:58:02]   SAVED [200] ESPN-Florida-roster -- 48,443 chars
+[10:58:02]   SAVED [200] ESPN-Florida Atlantic-roster -- 44,747 chars
+[10:58:02]   SAVED [200] ESPN-Florida State-roster -- 47,203 chars
+[10:58:02]   SAVED [200] ESPN-Fresno State-roster -- 45,328 chars
+[10:58:02]   SAVED [200] ESPN-Georgia-roster -- 51,926 chars
+[10:58:02]   SAVED [200] ESPN-Georgia Southern-roster -- 47,906 chars
+[10:58:02]   SAVED [200] ESPN-Georgia State-roster -- 48,720 chars
+[10:58:02]   SAVED [200] ESPN-Georgia Tech-roster -- 42,365 chars
+[10:58:02]   SAVED [200] ESPN-Hawaii-roster -- 44,004 chars
+[10:58:02]   SAVED [200] ESPN-Houston-roster -- 44,677 chars
+[10:58:02]   Batch 5: Illinois, Indiana, Iowa, Iowa State, Jacksonville State, James Madison, Kansas, Kansas State, Kent State, Kentucky
+[10:58:17]   SAVED [200] ESPN-Illinois-roster -- 47,219 chars
+[10:58:17]   SAVED [200] ESPN-Indiana-roster -- 42,715 chars
+[10:58:17]   SAVED [200] ESPN-Iowa-roster -- 43,838 chars
+[10:58:17]   SAVED [200] ESPN-Iowa State-roster -- 48,170 chars
+[10:58:17]   SAVED [200] ESPN-Jacksonville State-roster -- 48,235 chars
+[10:58:17]   SAVED [200] ESPN-James Madison-roster -- 45,239 chars
+[10:58:17]   SAVED [200] ESPN-Kansas-roster -- 44,821 chars
+[10:58:17]   SAVED [200] ESPN-Kansas State-roster -- 44,141 chars
+[10:58:17]   SAVED [200] ESPN-Kent State-roster -- 42,007 chars
+[10:58:17]   SAVED [200] ESPN-Kentucky-roster -- 45,363 chars
+[10:58:17]   Batch 6: Liberty, Louisiana, Louisiana Monroe, Louisiana Tech, Louisville, LSU, Marshall, Maryland, Memphis, Miami
+[10:58:31]   SAVED [200] ESPN-Liberty-roster -- 42,667 chars
+[10:58:31]   SAVED [200] ESPN-Louisiana-roster -- 43,082 chars
+[10:58:31]   SAVED [200] ESPN-Louisiana Monroe-roster -- 41,948 chars
+[10:58:31]   SAVED [200] ESPN-Louisiana Tech-roster -- 43,044 chars
+[10:58:31]   SAVED [200] ESPN-Louisville-roster -- 43,834 chars
+[10:58:31]   SAVED [200] ESPN-LSU-roster -- 44,574 chars
+[10:58:31]   SAVED [200] ESPN-Marshall-roster -- 42,793 chars
+[10:58:31]   SAVED [200] ESPN-Maryland-roster -- 42,386 chars
+[10:58:31]   SAVED [200] ESPN-Memphis-roster -- 48,699 chars
+[10:58:31]   SAVED [200] ESPN-Miami-roster -- 47,940 chars
+[10:58:31]   Batch 7: Miami (OH), Michigan, Michigan State, Middle Tennessee, Minnesota, Mississippi State, Missouri, Navy, NC State, Nebraska
+[10:58:43]   SAVED [200] ESPN-Miami (OH)-roster -- 44,885 chars
+[10:58:43]   SAVED [200] ESPN-Michigan-roster -- 51,627 chars
+[10:58:43]   SAVED [200] ESPN-Michigan State-roster -- 47,609 chars
+[10:58:43]   SAVED [200] ESPN-Middle Tennessee-roster -- 44,340 chars
+[10:58:43]   SAVED [200] ESPN-Minnesota-roster -- 44,042 chars
+[10:58:43]   SAVED [200] ESPN-Mississippi State-roster -- 46,788 chars
+[10:58:44]   SAVED [200] ESPN-Missouri-roster -- 44,574 chars
+[10:58:44]   SAVED [200] ESPN-Navy-roster -- 75,311 chars
+[10:58:44]   SAVED [200] ESPN-NC State-roster -- 49,699 chars
+[10:58:44]   SAVED [200] ESPN-Nebraska-roster -- 49,850 chars
+[10:58:44]   Batch 8: Nevada, New Mexico, New Mexico State, North Carolina, North Texas, Northern Illinois, Northwestern, Notre Dame, Ohio, Ohio State
+[10:59:04]   SAVED [200] ESPN-Nevada-roster -- 42,675 chars
+[10:59:04]   SAVED [200] ESPN-New Mexico-roster -- 43,687 chars
+[10:59:04]   SAVED [200] ESPN-New Mexico State-roster -- 43,467 chars
+[10:59:04]   SAVED [200] ESPN-North Carolina-roster -- 43,418 chars
+[10:59:04]   SAVED [200] ESPN-North Texas-roster -- 45,497 chars
+[10:59:05]   SAVED [200] ESPN-Northern Illinois-roster -- 44,862 chars
+[10:59:05]   SAVED [200] ESPN-Northwestern-roster -- 44,547 chars
+[10:59:05]   SAVED [200] ESPN-Notre Dame-roster -- 45,662 chars
+[10:59:05]   SAVED [200] ESPN-Ohio-roster -- 44,763 chars
+[10:59:05]   SAVED [200] ESPN-Ohio State-roster -- 52,122 chars
+[10:59:05]   Batch 9: Oklahoma, Oklahoma State, Old Dominion, Ole Miss, Oregon, Oregon State, Penn State, Pittsburgh, Purdue, Rice
+[10:59:22]   SAVED [200] ESPN-Oklahoma-roster -- 44,478 chars
+[10:59:22]   SAVED [200] ESPN-Oklahoma State-roster -- 45,677 chars
+[10:59:22]   SAVED [200] ESPN-Old Dominion-roster -- 45,470 chars
+[10:59:22]   SAVED [200] ESPN-Ole Miss-roster -- 47,423 chars
+[10:59:22]   SAVED [200] ESPN-Oregon-roster -- 49,409 chars
+[10:59:22]   SAVED [200] ESPN-Oregon State-roster -- 45,922 chars
+[10:59:22]   SAVED [200] ESPN-Penn State-roster -- 55,038 chars
+[10:59:22]   SAVED [200] ESPN-Pittsburgh-roster -- 46,339 chars
+[10:59:22]   SAVED [200] ESPN-Purdue-roster -- 48,305 chars
+[10:59:22]   SAVED [200] ESPN-Rice-roster -- 42,987 chars
+[10:59:22]   Batch 10: Rutgers, Sam Houston, San Diego State, San Jose State, SMU, South Alabama, South Carolina, South Florida, Southern Miss, Stanford
+[10:59:37]   SAVED [200] ESPN-Rutgers-roster -- 52,772 chars
+[10:59:37]   SAVED [200] ESPN-Sam Houston-roster -- 42,433 chars
+[10:59:37]   SAVED [200] ESPN-San Diego State-roster -- 42,119 chars
+[10:59:37]   SAVED [200] ESPN-San Jose State-roster -- 41,376 chars
+[10:59:37]   SAVED [200] ESPN-SMU-roster -- 47,151 chars
+[10:59:37]   SAVED [200] ESPN-South Alabama-roster -- 47,187 chars
+[10:59:37]   SAVED [200] ESPN-South Carolina-roster -- 45,720 chars
+[10:59:37]   SAVED [200] ESPN-South Florida-roster -- 47,560 chars
+[10:59:38]   SAVED [200] ESPN-Southern Miss-roster -- 44,949 chars
+[10:59:38]   SAVED [200] ESPN-Stanford-roster -- 43,816 chars
+[10:59:38]   Batch 11: Syracuse, TCU, Temple, Tennessee, Texas, Texas A&M, Texas State, Texas Tech, Toledo, Troy
+[10:59:50]   SAVED [200] ESPN-Syracuse-roster -- 49,887 chars
+[10:59:50]   SAVED [200] ESPN-TCU-roster -- 46,789 chars
+[10:59:50]   SAVED [200] ESPN-Temple-roster -- 47,027 chars
+[10:59:50]   SAVED [200] ESPN-Tennessee-roster -- 44,665 chars
+[10:59:50]   SAVED [200] ESPN-Texas-roster -- 48,727 chars
+[10:59:50]   SAVED [200] ESPN-Texas A&M-roster -- 52,591 chars
+[10:59:50]   SAVED [200] ESPN-Texas State-roster -- 44,862 chars
+[10:59:50]   SAVED [200] ESPN-Texas Tech-roster -- 44,673 chars
+[10:59:50]   SAVED [200] ESPN-Toledo-roster -- 47,717 chars
+[10:59:50]   SAVED [200] ESPN-Troy-roster -- 42,958 chars
+[10:59:50]   Batch 12: Tulane, Tulsa, UAB, UCF, UCLA, UNLV, USC, Utah, Utah State, UTEP
+[11:00:02]   SAVED [200] ESPN-Tulane-roster -- 46,969 chars
+[11:00:02]   SAVED [200] ESPN-Tulsa-roster -- 42,411 chars
+[11:00:02]   SAVED [200] ESPN-UAB-roster -- 42,812 chars
+[11:00:02]   SAVED [200] ESPN-UCF-roster -- 45,030 chars
+[11:00:02]   SAVED [200] ESPN-UCLA-roster -- 43,950 chars
+[11:00:02]   SAVED [200] ESPN-UNLV-roster -- 43,924 chars
+[11:00:02]   SAVED [200] ESPN-USC-roster -- 50,109 chars
+[11:00:02]   SAVED [200] ESPN-Utah-roster -- 46,403 chars
+[11:00:02]   SAVED [200] ESPN-Utah State-roster -- 43,210 chars
+[11:00:02]   SAVED [200] ESPN-UTEP-roster -- 47,678 chars
+[11:00:02]   Batch 13: UTSA, Vanderbilt, Virginia, Virginia Tech, Wake Forest, Washington, Washington State, West Virginia, Western Kentucky, Western Michigan
+[11:00:14]   SAVED [200] ESPN-UTSA-roster -- 47,959 chars
+[11:00:14]   SAVED [200] ESPN-Vanderbilt-roster -- 46,050 chars
+[11:00:14]   SAVED [200] ESPN-Virginia-roster -- 50,054 chars
+[11:00:14]   SAVED [200] ESPN-Virginia Tech-roster -- 45,495 chars
+[11:00:14]   SAVED [200] ESPN-Wake Forest-roster -- 48,342 chars
+[11:00:14]   SAVED [200] ESPN-Washington-roster -- 42,467 chars
+[11:00:14]   SAVED [200] ESPN-Washington State-roster -- 47,484 chars
+[11:00:14]   SAVED [200] ESPN-West Virginia-roster -- 49,859 chars
+[11:00:14]   SAVED [200] ESPN-Western Kentucky-roster -- 42,073 chars
+[11:00:14]   SAVED [200] ESPN-Western Michigan-roster -- 42,428 chars
+[11:00:14]   Batch 14: Wisconsin, Wyoming
+[11:00:17]   SAVED [200] ESPN-Wisconsin-roster -- 46,438 chars
+[11:00:17]   SAVED [200] ESPN-Wyoming-roster -- 45,950 chars
+[11:00:17] 
+=== PHASE 2: TEAM STATS (132 teams) ===
+[11:00:17]   Batch 1: Air Force, Akron, Alabama, Appalachian State, Arizona, Arizona State, Arkansas, Arkansas State, Army, Auburn
+[11:00:34]   SAVED [200] ESPN-Air Force-stats -- 19,574 chars
+[11:00:34]   SAVED [200] ESPN-Akron-stats -- 19,856 chars
+[11:00:34]   SAVED [200] ESPN-Alabama-stats -- 21,706 chars
+[11:00:34]   SAVED [200] ESPN-Appalachian State-stats -- 19,481 chars
+[11:00:34]   SAVED [200] ESPN-Arizona-stats -- 19,556 chars
+[11:00:35]   SAVED [200] ESPN-Arizona State-stats -- 19,506 chars
+[11:00:35]   SAVED [200] ESPN-Arkansas-stats -- 19,962 chars
+[11:00:35]   SAVED [200] ESPN-Arkansas State-stats -- 19,286 chars
+[11:00:35]   SAVED [200] ESPN-Army-stats -- 18,537 chars
+[11:00:35]   SAVED [200] ESPN-Auburn-stats -- 18,778 chars
+[11:00:35]   Batch 2: Ball State, Baylor, Boise State, Boston College, Bowling Green, Buffalo, BYU, California, Central Michigan, Charlotte
+[11:00:57]   SAVED [200] ESPN-Ball State-stats -- 19,548 chars
+[11:00:57]   SAVED [200] ESPN-Baylor-stats -- 18,835 chars
+[11:00:57]   SAVED [200] ESPN-Boise State-stats -- 18,718 chars
+[11:00:58]   SAVED [200] ESPN-Boston College-stats -- 21,081 chars
+[11:00:58]   SAVED [200] ESPN-Bowling Green-stats -- 21,226 chars
+[11:00:58]   SAVED [200] ESPN-Buffalo-stats -- 18,060 chars
+[11:00:59]   SAVED [200] ESPN-BYU-stats -- 20,592 chars
+[11:00:59]   SAVED [200] ESPN-California-stats -- 19,939 chars
+[11:00:59]   SAVED [200] ESPN-Central Michigan-stats -- 20,967 chars
+[11:00:59]   SAVED [200] ESPN-Charlotte-stats -- 20,703 chars
+[11:00:59]   Batch 3: Cincinnati, Clemson, Coastal Carolina, Colorado, Colorado State, Connecticut, Duke, East Carolina, Eastern Michigan, FIU
+[11:01:21]   SAVED [200] ESPN-Cincinnati-stats -- 20,241 chars
+[11:01:22]   SAVED [200] ESPN-Clemson-stats -- 21,209 chars
+[11:01:22]   SAVED [200] ESPN-Coastal Carolina-stats -- 21,168 chars
+[11:01:22]   SAVED [200] ESPN-Colorado-stats -- 20,658 chars
+[11:01:22]   SAVED [200] ESPN-Colorado State-stats -- 20,604 chars
+[11:01:22]   SAVED [200] ESPN-Connecticut-stats -- 19,975 chars
+[11:01:22]   SAVED [200] ESPN-Duke-stats -- 19,162 chars
+[11:01:22]   SAVED [200] ESPN-East Carolina-stats -- 22,385 chars
+[11:01:22]   SAVED [200] ESPN-Eastern Michigan-stats -- 19,766 chars
+[11:01:22]   SAVED [200] ESPN-FIU-stats -- 21,789 chars
+[11:01:22]   Batch 4: Florida, Florida Atlantic, Florida State, Fresno State, Georgia, Georgia Southern, Georgia State, Georgia Tech, Hawaii, Houston
+[11:01:43]   SAVED [200] ESPN-Florida-stats -- 20,093 chars
+[11:01:43]   SAVED [200] ESPN-Florida Atlantic-stats -- 20,350 chars
+[11:01:43]   SAVED [200] ESPN-Florida State-stats -- 21,716 chars
+[11:01:43]   SAVED [200] ESPN-Fresno State-stats -- 20,111 chars
+[11:01:43]   SAVED [200] ESPN-Georgia-stats -- 21,788 chars
+[11:01:43]   SAVED [200] ESPN-Georgia Southern-stats -- 20,581 chars
+[11:01:43]   SAVED [200] ESPN-Georgia State-stats -- 20,212 chars
+[11:01:43]   SAVED [200] ESPN-Georgia Tech-stats -- 20,316 chars
+[11:01:43]   SAVED [200] ESPN-Hawaii-stats -- 20,973 chars
+[11:01:43]   SAVED [200] ESPN-Houston-stats -- 18,633 chars
+[11:01:43]   Batch 5: Illinois, Indiana, Iowa, Iowa State, Jacksonville State, James Madison, Kansas, Kansas State, Kent State, Kentucky
+[11:02:03]   SAVED [200] ESPN-Illinois-stats -- 18,825 chars
+[11:02:03]   SAVED [200] ESPN-Indiana-stats -- 19,124 chars
+[11:02:03]   SAVED [200] ESPN-Iowa-stats -- 19,017 chars
+[11:02:03]   SAVED [200] ESPN-Iowa State-stats -- 19,976 chars
+[11:02:03]   SAVED [200] ESPN-Jacksonville State-stats -- 20,881 chars
+[11:02:03]   SAVED [200] ESPN-James Madison-stats -- 19,428 chars
+[11:02:03]   SAVED [200] ESPN-Kansas-stats -- 19,326 chars
+[11:02:03]   SAVED [200] ESPN-Kansas State-stats -- 19,168 chars
+[11:02:04]   SAVED [200] ESPN-Kent State-stats -- 20,243 chars
+[11:02:04]   SAVED [200] ESPN-Kentucky-stats -- 20,050 chars
+[11:02:04]   Batch 6: Liberty, Louisiana, Louisiana Monroe, Louisiana Tech, Louisville, LSU, Marshall, Maryland, Memphis, Miami
+[11:02:25]   SAVED [200] ESPN-Liberty-stats -- 20,396 chars
+[11:02:25]   SAVED [200] ESPN-Louisiana-stats -- 19,731 chars
+[11:02:25]   SAVED [200] ESPN-Louisiana Monroe-stats -- 19,798 chars
+[11:02:25]   SAVED [200] ESPN-Louisiana Tech-stats -- 21,218 chars
+[11:02:25]   SAVED [200] ESPN-Louisville-stats -- 19,691 chars
+[11:02:25]   SAVED [200] ESPN-LSU-stats -- 19,715 chars
+[11:02:25]   SAVED [200] ESPN-Marshall-stats -- 19,728 chars
+[11:02:25]   SAVED [200] ESPN-Maryland-stats -- 19,531 chars
+[11:02:25]   SAVED [200] ESPN-Memphis-stats -- 19,451 chars
+[11:02:25]   SAVED [200] ESPN-Miami-stats -- 20,068 chars
+[11:02:25]   Batch 7: Miami (OH), Michigan, Michigan State, Middle Tennessee, Minnesota, Mississippi State, Missouri, Navy, NC State, Nebraska
+[11:02:46]   SAVED [200] ESPN-Miami (OH)-stats -- 18,670 chars
+[11:02:46]   SAVED [200] ESPN-Michigan-stats -- 20,076 chars
+[11:02:46]   SAVED [200] ESPN-Michigan State-stats -- 20,421 chars
+[11:02:46]   SAVED [200] ESPN-Middle Tennessee-stats -- 19,162 chars
+[11:02:46]   SAVED [200] ESPN-Minnesota-stats -- 19,080 chars
+[11:02:46]   SAVED [200] ESPN-Mississippi State-stats -- 20,975 chars
+[11:02:46]   SAVED [200] ESPN-Missouri-stats -- 20,083 chars
+[11:02:47]   SAVED [200] ESPN-Navy-stats -- 19,283 chars
+[11:02:47]   SAVED [200] ESPN-NC State-stats -- 20,033 chars
+[11:02:47]   SAVED [200] ESPN-Nebraska-stats -- 21,230 chars
+[11:02:47]   Batch 8: Nevada, New Mexico, New Mexico State, North Carolina, North Texas, Northern Illinois, Northwestern, Notre Dame, Ohio, Ohio State
+[11:03:05]   SAVED [200] ESPN-Nevada-stats -- 20,246 chars
+[11:03:05]   SAVED [200] ESPN-New Mexico-stats -- 18,497 chars
+[11:03:05]   SAVED [200] ESPN-New Mexico State-stats -- 19,229 chars
+[11:03:06]   SAVED [200] ESPN-North Carolina-stats -- 19,289 chars
+[11:03:06]   SAVED [200] ESPN-North Texas-stats -- 20,709 chars
+[11:03:06]   SAVED [200] ESPN-Northern Illinois-stats -- 19,318 chars
+[11:03:06]   SAVED [200] ESPN-Northwestern-stats -- 19,734 chars
+[11:03:06]   SAVED [200] ESPN-Notre Dame-stats -- 20,505 chars
+[11:03:06]   SAVED [200] ESPN-Ohio-stats -- 18,927 chars
+[11:03:06]   SAVED [200] ESPN-Ohio State-stats -- 19,376 chars
+[11:03:06]   Batch 9: Oklahoma, Oklahoma State, Old Dominion, Ole Miss, Oregon, Oregon State, Penn State, Pittsburgh, Purdue, Rice
+[11:03:26]   SAVED [200] ESPN-Oklahoma-stats -- 18,993 chars
+[11:03:26]   SAVED [200] ESPN-Oklahoma State-stats -- 21,074 chars
+[11:03:26]   SAVED [200] ESPN-Old Dominion-stats -- 19,655 chars
+[11:03:26]   SAVED [200] ESPN-Ole Miss-stats -- 19,860 chars
+[11:03:26]   SAVED [200] ESPN-Oregon-stats -- 20,905 chars
+[11:03:26]   SAVED [200] ESPN-Oregon State-stats -- 20,878 chars
+[11:03:26]   SAVED [200] ESPN-Penn State-stats -- 19,113 chars
+[11:03:26]   SAVED [200] ESPN-Pittsburgh-stats -- 20,941 chars
+[11:03:26]   SAVED [200] ESPN-Purdue-stats -- 19,388 chars
+[11:03:26]   SAVED [200] ESPN-Rice-stats -- 20,457 chars
+[11:03:26]   Batch 10: Rutgers, Sam Houston, San Diego State, San Jose State, SMU, South Alabama, South Carolina, South Florida, Southern Miss, Stanford
+[11:03:44]   SAVED [200] ESPN-Rutgers-stats -- 18,300 chars
+[11:03:44]   SAVED [200] ESPN-Sam Houston-stats -- 21,016 chars
+[11:03:44]   SAVED [200] ESPN-San Diego State-stats -- 19,745 chars
+[11:03:44]   SAVED [200] ESPN-San Jose State-stats -- 18,455 chars
+[11:03:44]   SAVED [200] ESPN-SMU-stats -- 20,099 chars
+[11:03:44]   SAVED [200] ESPN-South Alabama-stats -- 18,921 chars
+[11:03:45]   SAVED [200] ESPN-South Carolina-stats -- 21,345 chars
+[11:03:45]   SAVED [200] ESPN-South Florida-stats -- 21,818 chars
+[11:03:45]   SAVED [200] ESPN-Southern Miss-stats -- 19,988 chars
+[11:03:45]   SAVED [200] ESPN-Stanford-stats -- 20,385 chars
+[11:03:45]   Batch 11: Syracuse, TCU, Temple, Tennessee, Texas, Texas A&M, Texas State, Texas Tech, Toledo, Troy
+[11:04:02]   SAVED [200] ESPN-Syracuse-stats -- 21,936 chars
+[11:04:02]   SAVED [200] ESPN-TCU-stats -- 19,850 chars
+[11:04:02]   SAVED [200] ESPN-Temple-stats -- 19,456 chars
+[11:04:02]   SAVED [200] ESPN-Tennessee-stats -- 21,766 chars
+[11:04:02]   SAVED [200] ESPN-Texas-stats -- 20,646 chars
+[11:04:02]   SAVED [200] ESPN-Texas A&M-stats -- 22,014 chars
+[11:04:02]   SAVED [200] ESPN-Texas State-stats -- 19,585 chars
+[11:04:02]   SAVED [200] ESPN-Texas Tech-stats -- 22,007 chars
+[11:04:02]   SAVED [200] ESPN-Toledo-stats -- 21,236 chars
+[11:04:02]   SAVED [200] ESPN-Troy-stats -- 20,435 chars
+[11:04:02]   Batch 12: Tulane, Tulsa, UAB, UCF, UCLA, UNLV, USC, Utah, Utah State, UTEP
+[11:04:17]   SAVED [200] ESPN-Tulane-stats -- 20,128 chars
+[11:04:17]   SAVED [200] ESPN-Tulsa-stats -- 19,198 chars
+[11:04:17]   SAVED [200] ESPN-UAB-stats -- 18,664 chars
+[11:04:17]   SAVED [200] ESPN-UCF-stats -- 20,707 chars
+[11:04:17]   SAVED [200] ESPN-UCLA-stats -- 18,225 chars
+[11:04:17]   SAVED [200] ESPN-UNLV-stats -- 19,435 chars
+[11:04:17]   SAVED [200] ESPN-USC-stats -- 20,712 chars
+[11:04:17]   SAVED [200] ESPN-Utah-stats -- 19,393 chars
+[11:04:17]   SAVED [200] ESPN-Utah State-stats -- 18,582 chars
+[11:04:17]   SAVED [200] ESPN-UTEP-stats -- 20,494 chars
+[11:04:18]   Batch 13: UTSA, Vanderbilt, Virginia, Virginia Tech, Wake Forest, Washington, Washington State, West Virginia, Western Kentucky, Western Michigan
+[11:04:30]   SAVED [200] ESPN-UTSA-stats -- 21,449 chars
+[11:04:30]   SAVED [200] ESPN-Vanderbilt-stats -- 20,901 chars
+[11:04:30]   SAVED [200] ESPN-Virginia-stats -- 21,288 chars
+[11:04:30]   SAVED [200] ESPN-Virginia Tech-stats -- 20,637 chars
+[11:04:30]   SAVED [200] ESPN-Wake Forest-stats -- 19,391 chars
+[11:04:30]   SAVED [200] ESPN-Washington-stats -- 18,507 chars
+[11:04:30]   SAVED [200] ESPN-Washington State-stats -- 20,324 chars
+[11:04:30]   SAVED [200] ESPN-West Virginia-stats -- 23,134 chars
+[11:04:31]   SAVED [200] ESPN-Western Kentucky-stats -- 20,945 chars
+[11:04:31]   SAVED [200] ESPN-Western Michigan-stats -- 19,919 chars
+[11:04:31]   Batch 14: Wisconsin, Wyoming
+[11:04:33]   SAVED [200] ESPN-Wisconsin-stats -- 20,423 chars
+[11:04:33]   SAVED [200] ESPN-Wyoming-stats -- 20,304 chars
+[11:04:33] 
+=== PHASE 3: STANDINGS ===
+[11:04:35]   SAVED [200] ESPN-Full-Standings -- 53,972 chars
+[11:04:36]   SAVED [200] NCAA-Full-Standings -- 28,752 chars
+[11:04:36] 
+=== PHASE 4: STAT LEADERS ===
+[11:04:38]   SAVED [200] ESPN-passing-leaders -- 19,788 chars
+[11:04:38]   SAVED [200] ESPN-rushing-leaders -- 17,819 chars
+[11:04:39]   SAVED [200] ESPN-receiving-leaders -- 17,838 chars
+[11:04:40]   SAVED [200] ESPN-defense-leaders -- 6,526 chars
+[11:04:40]   SAVED [200] ESPN-kicking-leaders -- 6,526 chars
+[11:04:41]   SAVED [200] ESPN-returning-leaders -- 6,528 chars
+[11:04:41] 
+=== PHASE 5: RECRUITING ===
+[11:04:42]   SAVED [200] 247-2025-team-rankings -- 27,189 chars
+[11:04:42]   SAVED [200] 247-2026-team-rankings -- 27,306 chars
+[11:04:43]   SAVED [200] 247-2024-team-rankings -- 27,351 chars
+[11:04:43] 
+=== PHASE 6: COACHES ===
+[11:04:45]   SAVED [200] USA-Today-all-coaches-salaries -- 38,293 chars
+[11:04:45] 
+=== PHASE 7: HEADLINES ===
+[11:04:45]   SAVED [200] Athletic-CFB-Headlines -- 47,439 chars
+[11:04:45]   SAVED [200] ESPN-CFB-Headlines -- 17,605 chars
+[11:04:46] 
+============================================================
+[11:04:46] COMPLETE: 278 files, 9,110,451 chars
+[11:04:46] Teams with rosters: 132
+[11:04:46] Categories: {"rosters-full": 132, "team-stats": 132, "standings": 2, "stats": 6, "recruiting": 3, "coaches": 1, "headlines": 2}
+[11:04:46] Manifest: C:\Users\rishj\foai\smelter-os\sqwaadrun\data\college-football\full-manifest.json
+[11:04:46] ============================================================
