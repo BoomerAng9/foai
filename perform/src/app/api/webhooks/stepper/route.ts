@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@/lib/db';
+import { notifyNewHuddlePost } from '@/lib/notifications/triggers';
 
 /**
  * POST /api/webhooks/stepper — Webhook receiver for Stepper and n8n
@@ -35,12 +36,13 @@ async function ensureWebhookLog() {
 export async function POST(req: NextRequest) {
   const start = Date.now();
 
-  // Optional auth — if WEBHOOK_SECRET is set, require it
-  if (WEBHOOK_SECRET) {
-    const auth = req.headers.get('x-webhook-secret') || req.headers.get('authorization')?.replace('Bearer ', '');
-    if (auth !== WEBHOOK_SECRET) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+  // Webhook auth — REQUIRED. If WEBHOOK_SECRET is not configured, reject all POST requests.
+  if (!WEBHOOK_SECRET) {
+    return NextResponse.json({ error: 'Webhook not configured — WEBHOOK_SECRET env var required' }, { status: 503 });
+  }
+  const auth = req.headers.get('x-webhook-secret') || req.headers.get('authorization')?.replace('Bearer ', '');
+  if (auth !== WEBHOOK_SECRET) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
   let body: { action?: string; payload?: Record<string, unknown>; source?: string };
@@ -69,8 +71,9 @@ export async function POST(req: NextRequest) {
         if (!sql) throw new Error('Database not configured');
         const name = payload.name as string;
         if (!name) throw new Error('payload.name required');
+        const safeName = name.replace(/[%_\\]/g, '\\$&');
         const players = await sql`SELECT id, name, school, position, grade, tie_grade, tie_tier
-          FROM perform_players WHERE LOWER(name) LIKE LOWER(${`%${name}%`}) LIMIT 5`;
+          FROM perform_players WHERE LOWER(name) LIKE LOWER(${`%${safeName}%`}) LIMIT 5`;
         result = { players, count: players.length };
         break;
       }
@@ -87,13 +90,41 @@ export async function POST(req: NextRequest) {
         break;
       }
 
+      case 'generate-post': {
+        if (!sql) throw new Error('Database not configured');
+        const analystId = (payload.analyst_id as string) || 'void-caster';
+        const postType = (payload.post_type as string) || 'take';
+        const playerName = payload.player as string;
+        if (!playerName && postType !== 'prediction') throw new Error('payload.player required');
+
+        // Import dynamically to avoid circular deps
+        const { generateTakeFromPlayer, generateScoutingPost, generatePredictionPost } = await import('@/lib/huddle/post-generator');
+        let generated;
+        if (postType === 'prediction') generated = await generatePredictionPost(analystId);
+        else if (postType === 'scouting') generated = await generateScoutingPost(analystId, playerName);
+        else generated = await generateTakeFromPlayer(analystId, playerName);
+
+        if (!generated) throw new Error('Post generation failed');
+
+        const [post] = await sql`INSERT INTO huddle_posts (analyst_id, content, post_type, tags, player_ref)
+          VALUES (${generated.analyst_id}, ${generated.content}, ${generated.post_type}, ${generated.tags}, ${generated.player_ref})
+          RETURNING id, analyst_id, post_type, created_at`;
+
+        // Push notification for new huddle post (fire-and-forget)
+        notifyNewHuddlePost({ ...post, content: generated.content }).catch(() => {});
+
+        result = { post, generated: true };
+        break;
+      }
+
       case 'lookup': {
         // Look up a college player
         if (!sql) throw new Error('Database not configured');
         const search = payload.search as string;
         if (!search) throw new Error('payload.search required');
+        const safeSearch = search.replace(/[%_\\]/g, '\\$&');
         const cfbPlayers = await sql`SELECT id, name, school, position, height, weight, class, conference
-          FROM cfb_players WHERE LOWER(name) LIKE LOWER(${`%${search}%`}) AND season = '2026' LIMIT 10`;
+          FROM cfb_players WHERE LOWER(name) LIKE LOWER(${`%${safeSearch}%`}) AND season = '2026' LIMIT 10`;
         result = { players: cfbPlayers, count: cfbPlayers.length };
         break;
       }
@@ -130,7 +161,15 @@ export async function POST(req: NextRequest) {
  * GET /api/webhooks/stepper — Reliability report
  * Returns webhook call stats for monitoring.
  */
-export async function GET() {
+export async function GET(req: NextRequest) {
+  // Require webhook secret or Firebase auth to view stats
+  const secret = req.headers.get('x-webhook-secret') || req.headers.get('authorization')?.replace('Bearer ', '');
+  if (WEBHOOK_SECRET && secret !== WEBHOOK_SECRET) {
+    const { requireAuth } = await import('@/lib/auth-guard');
+    const authResult = await requireAuth(req);
+    if (!authResult.ok) return authResult.response;
+  }
+
   if (!sql) {
     return NextResponse.json({ error: 'Database not configured' }, { status: 503 });
   }

@@ -39,14 +39,87 @@ function formatDate(dateStr: string): string {
   });
 }
 
-function renderMarkdown(text: string): string {
-  return text
-    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-    .replace(/\*(.+?)\*/g, '<em>$1</em>')
-    .replace(/^### (.+)$/gm, '<h3 class="font-outfit text-lg font-bold text-white/90 mt-6 mb-2">$1</h3>')
-    .replace(/^## (.+)$/gm, '<h2 class="font-outfit text-xl font-bold text-white/90 mt-6 mb-3">$1</h2>')
-    .replace(/\n\n/g, '</p><p class="mb-4">')
-    .replace(/\n/g, '<br/>');
+function renderTextSegments(text: string): React.ReactNode[] {
+  // Split by bold and italic markers, returning React elements
+  const parts: React.ReactNode[] = [];
+  let remaining = text;
+  let key = 0;
+
+  while (remaining.length > 0) {
+    // Match bold first (**)
+    const boldMatch = remaining.match(/\*\*(.+?)\*\*/);
+    // Match italic (*)
+    const italicMatch = remaining.match(/(?<!\*)\*(?!\*)(.+?)(?<!\*)\*(?!\*)/);
+
+    const boldIndex = boldMatch?.index ?? Infinity;
+    const italicIndex = italicMatch?.index ?? Infinity;
+
+    if (boldIndex === Infinity && italicIndex === Infinity) {
+      parts.push(<span key={key++}>{remaining}</span>);
+      break;
+    }
+
+    if (boldIndex <= italicIndex && boldMatch) {
+      if (boldMatch.index! > 0) {
+        parts.push(<span key={key++}>{remaining.slice(0, boldMatch.index!)}</span>);
+      }
+      parts.push(<strong key={key++}>{boldMatch[1]}</strong>);
+      remaining = remaining.slice(boldMatch.index! + boldMatch[0].length);
+    } else if (italicMatch) {
+      if (italicMatch.index! > 0) {
+        parts.push(<span key={key++}>{remaining.slice(0, italicMatch.index!)}</span>);
+      }
+      parts.push(<em key={key++}>{italicMatch[1]}</em>);
+      remaining = remaining.slice(italicMatch.index! + italicMatch[0].length);
+    }
+  }
+
+  return parts;
+}
+
+function SafeMarkdown({ text }: { text: string }) {
+  const blocks = text.split(/\n\n+/);
+  return (
+    <>
+      {blocks.map((block, i) => {
+        const trimmed = block.trim();
+        if (!trimmed) return null;
+
+        // Heading h2
+        const h2Match = trimmed.match(/^## (.+)$/m);
+        if (h2Match) {
+          return (
+            <h2 key={i} className="font-outfit text-xl font-bold text-white/90 mt-6 mb-3">
+              {renderTextSegments(h2Match[1])}
+            </h2>
+          );
+        }
+
+        // Heading h3
+        const h3Match = trimmed.match(/^### (.+)$/m);
+        if (h3Match) {
+          return (
+            <h3 key={i} className="font-outfit text-lg font-bold text-white/90 mt-6 mb-2">
+              {renderTextSegments(h3Match[1])}
+            </h3>
+          );
+        }
+
+        // Regular paragraph — split internal single newlines into <br/>
+        const lines = trimmed.split('\n');
+        return (
+          <p key={i} className="mb-4">
+            {lines.map((line, j) => (
+              <span key={j}>
+                {j > 0 && <br />}
+                {renderTextSegments(line)}
+              </span>
+            ))}
+          </p>
+        );
+      })}
+    </>
+  );
 }
 
 export default function AnalystFeedPage({ params }: { params: Promise<{ name: string }> }) {
@@ -192,10 +265,9 @@ export default function AnalystFeedPage({ params }: { params: Promise<{ name: st
                     label="Play Podcast"
                   />
                 </div>
-                <div
-                  className="text-sm font-mono text-white/60 leading-relaxed"
-                  dangerouslySetInnerHTML={{ __html: `<p class="mb-4">${renderMarkdown(article.content)}</p>` }}
-                />
+                <div className="text-sm font-mono text-white/60 leading-relaxed">
+                  <SafeMarkdown text={article.content} />
+                </div>
                 <div
                   className="mt-8 h-px"
                   style={{ background: `linear-gradient(to right, ${analyst.color}33, transparent)` }}

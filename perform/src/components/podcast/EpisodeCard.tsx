@@ -1,7 +1,8 @@
 'use client';
 
+import { useState } from 'react';
 import Image from 'next/image';
-import { Play, Pause, Loader } from 'lucide-react';
+import { Play, Pause, FileText, ChevronDown, ChevronUp } from 'lucide-react';
 import { useAudioPlayer, type AudioEpisode } from '@/context/AudioPlayerContext';
 
 interface EpisodeCardProps {
@@ -39,6 +40,7 @@ function typeLabel(t: string): string {
 
 export function EpisodeCard({ episode, meta }: EpisodeCardProps) {
   const { currentEpisode, isPlaying, play, togglePlay } = useAudioPlayer();
+  const [transcriptOpen, setTranscriptOpen] = useState(false);
 
   const isActive = currentEpisode?.id === episode.id;
   const isCurrentlyPlaying = isActive && isPlaying;
@@ -161,30 +163,42 @@ export function EpisodeCard({ episode, meta }: EpisodeCardProps) {
             )}
           </button>
         ) : (
-          <div
-            className="shrink-0 w-10 h-10 rounded-full flex items-center justify-center"
+          <button
+            onClick={() => episode.transcript && setTranscriptOpen(!transcriptOpen)}
+            className="shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-full transition-all"
             style={{
-              background: 'rgba(255,255,255,0.02)',
-              border: '1px solid rgba(255,255,255,0.06)',
+              background: 'rgba(167,139,250,0.08)',
+              border: '1px solid rgba(167,139,250,0.2)',
             }}
-            title="Audio generating..."
+            title={transcriptOpen ? 'Collapse transcript' : 'Read transcript'}
           >
-            <Loader size={14} className="animate-spin" style={{ color: 'rgba(255,255,255,0.2)' }} />
-          </div>
+            <FileText size={12} style={{ color: 'rgba(167,139,250,0.7)' }} />
+            <span
+              className="text-[9px] font-mono font-bold tracking-wider"
+              style={{ color: 'rgba(167,139,250,0.7)' }}
+            >
+              SCRIPT ONLY
+            </span>
+            {episode.transcript && (
+              transcriptOpen
+                ? <ChevronUp size={10} style={{ color: 'rgba(167,139,250,0.5)' }} />
+                : <ChevronDown size={10} style={{ color: 'rgba(167,139,250,0.5)' }} />
+            )}
+          </button>
         )}
       </div>
 
-      {/* Generating state banner */}
-      {!hasAudio && (
+      {/* Expandable transcript when no audio */}
+      {!hasAudio && transcriptOpen && episode.transcript && (
         <div
-          className="mt-2 px-3 py-1.5 rounded text-[10px] font-mono text-center animate-pulse"
-          style={{
-            background: 'rgba(255,255,255,0.02)',
-            color: 'rgba(255,255,255,0.25)',
-            border: '1px solid rgba(255,255,255,0.04)',
-          }}
+          className="mt-3 pt-3 text-xs text-white/50 leading-relaxed font-mono max-h-64 overflow-y-auto"
+          style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}
         >
-          GENERATING AUDIO...
+          {episode.transcript.split('\n').map((line, i) => (
+            <p key={i} className="mb-1">
+              {line || '\u00A0'}
+            </p>
+          ))}
         </div>
       )}
 

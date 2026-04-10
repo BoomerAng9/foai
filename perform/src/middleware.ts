@@ -22,6 +22,9 @@ const PUBLIC_PATHS = [
   '/reveal',
   '/access',
   '/audition/voice',
+  '/huddle',
+  '/grading',
+  '/login',
 ];
 
 /** Path prefixes that are always public (including sub-routes). */
@@ -32,6 +35,7 @@ const PUBLIC_PREFIXES = [
   '/rankings/',
   '/analysts/',
   '/studio/',
+  '/podcast/',
   '/api/cfb/',
   '/api/auth/',
   '/api/players',
@@ -40,10 +44,13 @@ const PUBLIC_PREFIXES = [
   '/api/news',
   '/api/podcast/episodes',
   '/api/seed-board',
+  '/huddle/',
+  '/api/health',
 ];
 
-/** API paths that allow unauthenticated GET but protect mutations. */
+/** API paths that allow unauthenticated GET but protect POST/PUT/DELETE. */
 const PUBLIC_GET_ONLY = [
+  '/api/huddle/',
   '/api/webhooks/stepper',
 ];
 

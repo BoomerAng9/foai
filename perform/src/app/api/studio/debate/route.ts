@@ -62,11 +62,16 @@ async function getAnalystTake(
 
 export async function POST(request: NextRequest) {
   try {
+    // Allow pipeline key OR authenticated user session
     const PIPELINE_KEY = process.env.PIPELINE_AUTH_KEY || '';
     const authHeader = request.headers.get('authorization') || '';
     const token = authHeader.replace('Bearer ', '');
-    if (!PIPELINE_KEY || token !== PIPELINE_KEY) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    const hasPipelineAuth = PIPELINE_KEY && token === PIPELINE_KEY;
+
+    if (!hasPipelineAuth) {
+      const { requireAuth } = await import('@/lib/auth-guard');
+      const authResult = await requireAuth(request);
+      if (!authResult.ok) return authResult.response;
     }
 
     const body: DebateRequest = await request.json();
