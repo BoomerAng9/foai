@@ -44,12 +44,11 @@ const PUBLIC_PREFIXES = [
   '/api/seed-board',
   '/huddle/',
   '/api/huddle/',
+  '/api/webhooks/',
 ];
 
 /** API paths that allow unauthenticated GET but protect mutations. */
-const PUBLIC_GET_ONLY = [
-  '/api/webhooks/stepper',
-];
+const PUBLIC_GET_ONLY: string[] = [];
 
 const AUTH_COOKIE = 'firebase-auth-token';
 
