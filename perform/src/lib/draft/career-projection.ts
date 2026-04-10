@@ -405,7 +405,7 @@ export async function projectCareer(playerName: string): Promise<CareerProjectio
   const normalize = (s: string) =>
     s.toLowerCase().replace(/[-_]+/g, ' ').replace(/\s+/g, ' ').trim();
 
-  const target = normalize(playerName);
+  const target = normalize(playerName).replace(/[%_\\]/g, '\\$&');
 
   const prospects = await sql.unsafe(`
     SELECT name, position, school, projected_round, weight,

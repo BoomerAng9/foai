@@ -1,11 +1,15 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@/lib/db';
+import { requireAuth } from '@/lib/auth-guard';
 
 /**
  * GET /api/dashboard/stats
  * Parallel count queries across all core tables + recent activity.
+ * Requires Firebase auth — admin data.
  */
-export async function GET() {
+export async function GET(request: NextRequest) {
+  const authResult = await requireAuth(request);
+  if (!authResult.ok) return authResult.response;
   if (!sql) {
     return NextResponse.json({ error: 'Database not configured' }, { status: 503 });
   }

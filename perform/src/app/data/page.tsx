@@ -236,7 +236,7 @@ export default function DataCenterPage() {
     setPipelineResult(null);
     setPipelineError('');
     try {
-      const res = await fetch('/api/pipeline/run', { method: 'POST' });
+      const res = await fetch('/api/pipeline/trigger', { method: 'POST' });
       const data = await res.json();
       if (!res.ok) {
         setPipelineError(data.error || 'Pipeline failed');
