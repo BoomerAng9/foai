@@ -1,15 +1,11 @@
+// Client-side messaging helpers (browser only)
+// Server-side helpers are in messaging-admin.ts
+
 import { getToken, onMessage, MessagePayload } from 'firebase/messaging';
 import { getClientMessaging } from './client';
-import { getAdminMessaging } from './admin';
-
-// ---------------------------------------------------------------------------
-// Client-side helpers (browser only)
-// ---------------------------------------------------------------------------
 
 /**
  * Request notification permission and obtain an FCM registration token.
- * Returns the token string, or null if permission was denied or messaging
- * is unavailable.
  */
 export async function requestNotificationPermission(): Promise<string | null> {
   if (typeof window === 'undefined') return null;
@@ -40,7 +36,6 @@ export async function requestNotificationPermission(): Promise<string | null> {
 
 /**
  * Listen for foreground push messages.
- * Returns an unsubscribe function.
  */
 export function onMessageListener(
   callback: (payload: MessagePayload) => void,
@@ -55,44 +50,4 @@ export function onMessageListener(
   return () => {
     unsubscribe?.();
   };
-}
-
-// ---------------------------------------------------------------------------
-// Server-side helpers (Node.js only)
-// ---------------------------------------------------------------------------
-
-/**
- * Subscribe one or more FCM tokens to a topic.
- */
-export async function subscribeToTopic(
-  tokens: string | string[],
-  topic: string,
-): Promise<void> {
-  const tokenArray = Array.isArray(tokens) ? tokens : [tokens];
-  const response = await getAdminMessaging().subscribeToTopic(tokenArray, topic);
-
-  if (response.failureCount > 0) {
-    console.error(
-      '[FCM] subscribeToTopic partial failure:',
-      response.errors,
-    );
-  }
-}
-
-/**
- * Unsubscribe one or more FCM tokens from a topic.
- */
-export async function unsubscribeFromTopic(
-  tokens: string | string[],
-  topic: string,
-): Promise<void> {
-  const tokenArray = Array.isArray(tokens) ? tokens : [tokens];
-  const response = await getAdminMessaging().unsubscribeFromTopic(tokenArray, topic);
-
-  if (response.failureCount > 0) {
-    console.error(
-      '[FCM] unsubscribeFromTopic partial failure:',
-      response.errors,
-    );
-  }
 }
