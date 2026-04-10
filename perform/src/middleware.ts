@@ -12,18 +12,39 @@ const PUBLIC_PATHS = [
   '/players',
   '/rankings',
   '/flag-football',
+  '/dashboard',
+  '/analysts',
+  '/podcast',
+  '/film',
+  '/studio',
+  '/debate',
+  '/data',
+  '/reveal',
+  '/access',
+  '/audition/voice',
 ];
 
 /** Path prefixes that are always public (including sub-routes). */
 const PUBLIC_PREFIXES = [
   '/tie/',
+  '/draft/',
+  '/players/',
+  '/rankings/',
+  '/analysts/',
+  '/studio/',
   '/api/cfb/',
   '/api/auth/',
+  '/api/players',
+  '/api/tie/',
+  '/api/feed',
+  '/api/news',
+  '/api/podcast/episodes',
+  '/api/seed-board',
 ];
 
 /** API paths that allow unauthenticated GET but protect mutations. */
 const PUBLIC_GET_ONLY = [
-  '/api/players',
+  '/api/webhooks/stepper',
 ];
 
 const AUTH_COOKIE = 'firebase-auth-token';
