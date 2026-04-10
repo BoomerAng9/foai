@@ -2,8 +2,13 @@
 
 import { useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { signInWithPopup, GoogleAuthProvider, signInWithEmailAndPassword } from 'firebase/auth';
-import { auth } from '@/lib/firebase/client';
+import type { Auth } from 'firebase/auth';
+
+async function getFirebaseAuth(): Promise<{ auth: Auth; signInWithPopup: typeof import('firebase/auth').signInWithPopup; GoogleAuthProvider: typeof import('firebase/auth').GoogleAuthProvider; signInWithEmailAndPassword: typeof import('firebase/auth').signInWithEmailAndPassword }> {
+  const { auth } = await import('@/lib/firebase/client');
+  const { signInWithPopup, GoogleAuthProvider, signInWithEmailAndPassword } = await import('firebase/auth');
+  return { auth, signInWithPopup, GoogleAuthProvider, signInWithEmailAndPassword };
+}
 
 const COLORS = {
   bg: '#0A0A0F',
@@ -47,8 +52,9 @@ function LoginForm() {
     setError('');
     setLoading(true);
     try {
-      const provider = new GoogleAuthProvider();
-      const result = await signInWithPopup(auth, provider);
+      const fb = await getFirebaseAuth();
+      const provider = new fb.GoogleAuthProvider();
+      const result = await fb.signInWithPopup(fb.auth, provider);
       const idToken = await result.user.getIdToken();
       await postSession(idToken);
       router.push(redirectTo);
@@ -69,7 +75,8 @@ function LoginForm() {
     }
     setLoading(true);
     try {
-      const result = await signInWithEmailAndPassword(auth, email, password);
+      const fb = await getFirebaseAuth();
+      const result = await fb.signInWithEmailAndPassword(fb.auth, email, password);
       const idToken = await result.user.getIdToken();
       await postSession(idToken);
       router.push(redirectTo);
