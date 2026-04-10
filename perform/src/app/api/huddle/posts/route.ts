@@ -84,6 +84,18 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
+  // Auth required for POST — pipeline key or Firebase session
+  const pipelineKey = process.env.PIPELINE_AUTH_KEY;
+  const authHeader = req.headers.get('authorization')?.replace('Bearer ', '') || '';
+  const hasPipelineAuth = pipelineKey && authHeader === pipelineKey;
+
+  if (!hasPipelineAuth) {
+    // Fall back to Firebase session auth
+    const { requireAuth } = await import('@/lib/auth-guard');
+    const authResult = await requireAuth(req);
+    if (!authResult.ok) return authResult.response;
+  }
+
   try {
     await ensureTables();
     if (!sql) throw new Error('Database not configured');

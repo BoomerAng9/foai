@@ -35,12 +35,13 @@ async function ensureWebhookLog() {
 export async function POST(req: NextRequest) {
   const start = Date.now();
 
-  // Optional auth — if WEBHOOK_SECRET is set, require it
-  if (WEBHOOK_SECRET) {
-    const auth = req.headers.get('x-webhook-secret') || req.headers.get('authorization')?.replace('Bearer ', '');
-    if (auth !== WEBHOOK_SECRET) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+  // Webhook auth — REQUIRED. If WEBHOOK_SECRET is not configured, reject all POST requests.
+  if (!WEBHOOK_SECRET) {
+    return NextResponse.json({ error: 'Webhook not configured — WEBHOOK_SECRET env var required' }, { status: 503 });
+  }
+  const auth = req.headers.get('x-webhook-secret') || req.headers.get('authorization')?.replace('Bearer ', '');
+  if (auth !== WEBHOOK_SECRET) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
   let body: { action?: string; payload?: Record<string, unknown>; source?: string };

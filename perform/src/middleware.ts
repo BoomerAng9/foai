@@ -23,6 +23,7 @@ const PUBLIC_PATHS = [
   '/access',
   '/audition/voice',
   '/huddle',
+  '/grading',
 ];
 
 /** Path prefixes that are always public (including sub-routes). */
@@ -43,12 +44,14 @@ const PUBLIC_PREFIXES = [
   '/api/podcast/episodes',
   '/api/seed-board',
   '/huddle/',
-  '/api/huddle/',
-  '/api/webhooks/',
+  '/api/health',
 ];
 
-/** API paths that allow unauthenticated GET but protect mutations. */
-const PUBLIC_GET_ONLY: string[] = [];
+/** API paths that allow unauthenticated GET but protect POST/PUT/DELETE. */
+const PUBLIC_GET_ONLY = [
+  '/api/huddle/',
+  '/api/webhooks/stepper',
+];
 
 const AUTH_COOKIE = 'firebase-auth-token';
 
