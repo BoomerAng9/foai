@@ -19,6 +19,7 @@
  */
 
 import { useState } from 'react';
+import { BackHomeNav } from '@/components/layout/BackHomeNav';
 
 interface AuditionResult {
   analystId: string;
@@ -141,6 +142,9 @@ export default function VoiceAuditionPage() {
 
   return (
     <div className="mx-auto max-w-4xl px-6 py-12">
+      <div className="mb-6">
+        <BackHomeNav />
+      </div>
       <h1 className="mb-2 text-3xl font-bold text-white">Voice Audition</h1>
       <p className="mb-8 text-sm text-zinc-400">
         Parallel audition runner for all 5 Per|Form analyst voices.

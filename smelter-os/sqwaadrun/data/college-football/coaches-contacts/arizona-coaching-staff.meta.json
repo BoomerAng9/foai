@@ -1,0 +1,227 @@
+{
+  "title": "Football Coaches - University of Arizona Athletics",
+  "url": "https://arizonawildcats.com/sports/football/coaches",
+  "status_code": 200,
+  "chars": 109,
+  "links_count": 328,
+  "scraped_at": "2026-04-09T15:02:34.993646+00:00",
+  "content_hash": "d54482af507f41d5",
+  "file": "C:\\Users\\rishj\\foai\\smelter-os\\sqwaadrun\\data\\college-football\\coaches-contacts\\arizona-coaching-staff.md",
+  "social_media": [
+    {
+      "platform": "twitter",
+      "handle": "@ArizonaBaseball",
+      "url": "https://x.com/ArizonaBaseball"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@ArizonaBaseball",
+      "url": "https://instagram.com/ArizonaBaseball"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@ArizonaMBB",
+      "url": "https://instagram.com/ArizonaMBB"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@ArizonaWBB",
+      "url": "https://x.com/ArizonaWBB"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@ArizonaWBB",
+      "url": "https://instagram.com/ArizonaWBB"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@ArizonaBVB",
+      "url": "https://x.com/ArizonaBVB"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@arizonabeachvolleyball",
+      "url": "https://instagram.com/arizonabeachvolleyball"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@ArizonaTrack",
+      "url": "https://x.com/ArizonaTrack"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@ArizonaTrack",
+      "url": "https://instagram.com/ArizonaTrack"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@ArizonaFball",
+      "url": "https://x.com/ArizonaFball"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@ArizonaFootball",
+      "url": "https://instagram.com/ArizonaFootball"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@ArizonaMGolf",
+      "url": "https://x.com/ArizonaMGolf"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@ArizonaGolf",
+      "url": "https://instagram.com/ArizonaGolf"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@ArizonaWGolf",
+      "url": "https://x.com/ArizonaWGolf"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@arizonawgolf",
+      "url": "https://instagram.com/arizonawgolf"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@ArizonaGymCats",
+      "url": "https://x.com/ArizonaGymCats"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@ArizonaGymnastics",
+      "url": "https://instagram.com/ArizonaGymnastics"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@ArizonaSoccer",
+      "url": "https://x.com/ArizonaSoccer"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@arizonasoccer",
+      "url": "https://instagram.com/arizonasoccer"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@ArizonaSwimDive",
+      "url": "https://x.com/ArizonaSwimDive"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@ArizonaSwimDive",
+      "url": "https://instagram.com/ArizonaSwimDive"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@ArizonaSwimming",
+      "url": "https://x.com/ArizonaSwimming"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@ArizonaMTennis",
+      "url": "https://x.com/ArizonaMTennis"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@ArizonaMTennis",
+      "url": "https://instagram.com/ArizonaMTennis"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@ArizonaWTennis",
+      "url": "https://x.com/ArizonaWTennis"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@ArizonaWTennis",
+      "url": "https://instagram.com/ArizonaWTennis"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@ArizonaVBall",
+      "url": "https://x.com/ArizonaVBall"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@ArizonaVBall",
+      "url": "https://instagram.com/ArizonaVBall"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@tickets",
+      "url": "https://auth.govx.com/tickets/entertainer-events/11a98ead-6db5-e911-80e9-14187735bc96/?display=popup"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@AZAthletics",
+      "url": "https://twitter.com/AZAthletics"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@AZAthletics",
+      "url": "https://www.instagram.com/AZAthletics/"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@CoachDoege",
+      "url": "https://twitter.com/CoachDoege"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@CoachJ_Miller",
+      "url": "https://twitter.com/CoachJ_Miller"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@BenThienes",
+      "url": "https://twitter.com/BenThienes"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@AaronKnottsUofA",
+      "url": "https://twitter.com/AaronKnottsUofA"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@LaurenVossler",
+      "url": "https://twitter.com/LaurenVossler"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@rickyhunley",
+      "url": "https://twitter.com/rickyhunley"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@tobrukblaine_TB",
+      "url": "https://twitter.com/tobrukblaine_TB"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@coachBSanders18",
+      "url": "https://twitter.com/coachBSanders18"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@AJMorganFB",
+      "url": "https://twitter.com/AJMorganFB"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@Cholguin_psd",
+      "url": "https://twitter.com/Cholguin_psd"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@MackenzieHamil8",
+      "url": "https://twitter.com/MackenzieHamil8"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@Coach_PerezJR",
+      "url": "https://twitter.com/Coach_PerezJR"
+    }
+  ]
+}

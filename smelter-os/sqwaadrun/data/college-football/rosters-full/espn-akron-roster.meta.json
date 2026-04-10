@@ -1,0 +1,11 @@
+{
+  "title": "Akron Zips College Football Roster - ESPN",
+  "url": "https://www.espn.com/college-football/team/roster/_/id/2006",
+  "status_code": 200,
+  "chars": 41508,
+  "links_count": 140,
+  "scraped_at": "2026-04-09T14:57:19.048952+00:00",
+  "content_hash": "a98ee5fe883d29d0",
+  "category": "rosters-full",
+  "file": "C:\\Users\\rishj\\foai\\smelter-os\\sqwaadrun\\data\\college-football\\rosters-full\\espn-akron-roster.md"
+}

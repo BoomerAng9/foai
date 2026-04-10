@@ -3,6 +3,8 @@ import "./globals.css";
 import { NewsTicker } from "@/components/layout/NewsTicker";
 import { BreakingBar } from "@/components/layout/BreakingBar";
 import { ThemeProvider } from "@/components/ThemeProvider";
+import { AudioPlayerProvider } from "@/context/AudioPlayerContext";
+import { AudioPlayer } from "@/components/podcast/AudioPlayer";
 
 export const metadata: Metadata = {
   title: "Per|Form — Sports Grading & Ranking Platform",
@@ -18,11 +20,14 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
       <body className="font-sans antialiased min-h-screen flex flex-col" style={{ background: 'var(--pf-bg)' }}>
         <ThemeProvider>
-          <div className="flex-1">
-            {children}
-          </div>
-          <BreakingBar />
-          <NewsTicker />
+          <AudioPlayerProvider>
+            <div className="flex-1">
+              {children}
+            </div>
+            <AudioPlayer />
+            <BreakingBar />
+            <NewsTicker />
+          </AudioPlayerProvider>
         </ThemeProvider>
       </body>
     </html>

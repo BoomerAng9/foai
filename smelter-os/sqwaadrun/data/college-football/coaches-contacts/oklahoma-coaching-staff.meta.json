@@ -1,0 +1,21 @@
+{
+  "title": "2026 Football Coaches - University of Oklahoma",
+  "url": "https://soonersports.com/sports/football/coaches",
+  "status_code": 200,
+  "chars": 24857,
+  "links_count": 243,
+  "scraped_at": "2026-04-09T15:01:36.211923+00:00",
+  "content_hash": "1aed7b3070e65af8",
+  "file": "C:\\Users\\rishj\\foai\\smelter-os\\sqwaadrun\\data\\college-football\\coaches-contacts\\oklahoma-coaching-staff.md",
+  "social_media": [
+    {
+      "platform": "twitter",
+      "handle": "@LosSooners",
+      "url": "https://twitter.com/LosSooners"
+    }
+  ],
+  "emails": [
+    "rhflowers@ou.edu",
+    "josuematias77@ou.edu"
+  ]
+}

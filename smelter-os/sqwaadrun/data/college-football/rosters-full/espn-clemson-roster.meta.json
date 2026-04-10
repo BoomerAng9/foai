@@ -1,0 +1,11 @@
+{
+  "title": "Clemson Tigers College Football Roster - ESPN",
+  "url": "https://www.espn.com/college-football/team/roster/_/id/228",
+  "status_code": 200,
+  "chars": 54104,
+  "links_count": 163,
+  "scraped_at": "2026-04-09T14:57:47.390551+00:00",
+  "content_hash": "7269346d4a053773",
+  "category": "rosters-full",
+  "file": "C:\\Users\\rishj\\foai\\smelter-os\\sqwaadrun\\data\\college-football\\rosters-full\\espn-clemson-roster.md"
+}

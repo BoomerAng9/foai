@@ -56,7 +56,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const isFullBleedContent =
     pathname === '/chat' ||
     pathname.startsWith('/chat/') ||
-    pathname.startsWith('/broadcast');
+    pathname.startsWith('/broadcast') ||
+    pathname === '/circuit-box' ||
+    pathname === '/the-lab' ||
+    pathname === '/the-chamber';
 
   const contentPadding = isFullBleedContent ? '' : 'p-3 sm:p-4 md:p-6';
 

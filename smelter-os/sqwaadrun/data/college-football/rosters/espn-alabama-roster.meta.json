@@ -1,0 +1,11 @@
+{
+  "title": "Alabama Crimson Tide College Football Roster - ESPN",
+  "url": "https://www.espn.com/college-football/team/roster/_/id/333",
+  "status_code": 200,
+  "chars": 53730,
+  "links_count": 162,
+  "scraped_at": "2026-04-09T14:48:20.303813+00:00",
+  "content_hash": "21e4bcc53723bbd5",
+  "category": "rosters",
+  "file": "data/college-football\\rosters\\espn-alabama-roster.md"
+}

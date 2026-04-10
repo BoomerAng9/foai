@@ -1,0 +1,11 @@
+{
+  "title": "LSU Tigers College Football Roster - ESPN",
+  "url": "https://www.espn.com/college-football/team/roster/_/id/99",
+  "status_code": 200,
+  "chars": 44574,
+  "links_count": 148,
+  "scraped_at": "2026-04-09T14:58:31.603106+00:00",
+  "content_hash": "542c52bedd46721d",
+  "category": "rosters-full",
+  "file": "C:\\Users\\rishj\\foai\\smelter-os\\sqwaadrun\\data\\college-football\\rosters-full\\espn-lsu-roster.md"
+}

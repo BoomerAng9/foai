@@ -1,0 +1,11 @@
+{
+  "title": "College Football Standings, 2025 season - ESPN",
+  "url": "https://www.espn.com/college-football/standings",
+  "status_code": 200,
+  "chars": 53972,
+  "links_count": 174,
+  "scraped_at": "2026-04-09T15:04:35.407912+00:00",
+  "content_hash": "5a55565d76b18722",
+  "category": "standings",
+  "file": "C:\\Users\\rishj\\foai\\smelter-os\\sqwaadrun\\data\\college-football\\standings\\espn-full-standings.md"
+}

@@ -1,0 +1,11 @@
+{
+  "title": "NCAA College Football FBS   Stats | NCAA.com",
+  "url": "https://www.ncaa.com/stats/football/fbs",
+  "status_code": 200,
+  "chars": 15740,
+  "links_count": 167,
+  "scraped_at": "2026-04-09T14:48:17.069831+00:00",
+  "content_hash": "04eacec241debe7f",
+  "category": "stats",
+  "file": "data/college-football\\stats\\ncaa-fbs-stats.md"
+}

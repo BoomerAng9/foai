@@ -1,0 +1,105 @@
+[11:01:05] === COACHES CONTACT + SOCIAL MEDIA SCRAPE ===
+[11:01:05] Targets: 50 university staff pages + 2 directories
+[11:01:05] 
+=== PHASE 1: UNIVERSITY STAFF DIRECTORIES (50 schools) ===
+[11:01:05]   Batch 1: Alabama, Georgia, Michigan, Ohio State, Clemson
+[11:01:16]   SAVED [200] Alabama-coaching-staff -- 3,689 chars, 32 social, 0 emails
+[11:01:17]   SAVED [200] Georgia-coaching-staff -- 35,147 chars, 30 social, 0 emails
+[11:01:17]   SAVED [200] Michigan-coaching-staff -- 3,093 chars, 46 social, 0 emails
+[11:01:17]   SAVED [200] Ohio State-coaching-staff -- 10,979 chars, 58 social, 39 emails
+[11:01:17]   SKIP [404] Clemson-coaching-staff
+[11:01:17]   Batch 2: Texas, Oregon, Penn State, Florida State, USC
+[11:01:27]   SAVED [200] Texas-coaching-staff -- 6,107 chars, 0 social, 0 emails
+[11:01:27]   SAVED [200] Oregon-coaching-staff -- 8,606 chars, 31 social, 4 emails
+[11:01:27]   SKIP [404] Penn State-coaching-staff
+[11:01:27]   SAVED [200] Florida State-coaching-staff -- 2,855 chars, 31 social, 1 emails
+[11:01:27]   SAVED [200] USC-coaching-staff -- 16,354 chars, 34 social, 37 emails
+[11:01:27]   Batch 3: LSU, Notre Dame, Florida, Tennessee, Oklahoma
+[11:01:35]   SAVED [200] LSU-coaching-staff -- 3,635 chars, 30 social, 0 emails
+[11:01:35]   SAVED [200] Notre Dame-coaching-staff -- 4,443 chars, 22 social, 0 emails
+[11:01:36]   SAVED [200] Florida-coaching-staff -- 43,813 chars, 29 social, 38 emails
+[11:01:36]   SAVED [200] Tennessee-coaching-staff -- 9,397 chars, 28 social, 1 emails
+[11:01:36]   SAVED [200] Oklahoma-coaching-staff -- 24,857 chars, 1 social, 2 emails
+[11:01:36]   Batch 4: Auburn, Texas A&M, Miami, Wisconsin, Iowa
+[11:01:44]   SKIP [404] Auburn-coaching-staff
+[11:01:44]   SAVED [200] Texas A&M-coaching-staff -- 37,287 chars, 68 social, 12 emails
+[11:01:44]   SAVED [200] Miami-coaching-staff -- 92,403 chars, 102 social, 0 emails
+[11:01:44]   SAVED [200] Wisconsin-coaching-staff -- 9,075 chars, 1 social, 2 emails
+[11:01:44]   SKIP [404] Iowa-coaching-staff
+[11:01:44]   Batch 5: Michigan State, North Carolina, UCLA, Colorado, Arkansas
+[11:01:51]   SAVED [200] Michigan State-coaching-staff -- 9,424 chars, 53 social, 3 emails
+[11:01:51]   SAVED [200] North Carolina-coaching-staff -- 5,042 chars, 42 social, 0 emails
+[11:01:52]   SAVED [200] UCLA-coaching-staff -- 9,535 chars, 39 social, 20 emails
+[11:01:52]   SAVED [200] Colorado-coaching-staff -- 8,895 chars, 22 social, 23 emails
+[11:01:52]   SKIP [404] Arkansas-coaching-staff
+[11:01:52]   Batch 6: Kentucky, Ole Miss, Mississippi State, South Carolina, Baylor
+[11:01:59]   SAVED [200] Kentucky-coaching-staff -- 1,573 chars, 37 social, 0 emails
+[11:01:59]   SAVED [200] Ole Miss-coaching-staff -- 16,732 chars, 26 social, 55 emails
+[11:01:59]   SAVED [200] Mississippi State-coaching-staff -- 26,385 chars, 15 social, 22 emails
+[11:02:00]   SAVED [200] South Carolina-coaching-staff -- 6,575 chars, 34 social, 0 emails
+[11:02:00]   SAVED [200] Baylor-coaching-staff -- 5,319 chars, 28 social, 0 emails
+[11:02:00]   Batch 7: TCU, Kansas State, Oklahoma State, West Virginia, Virginia Tech
+[11:02:08]   SAVED [200] TCU-coaching-staff -- 9,875 chars, 33 social, 9 emails
+[11:02:09]   SAVED [200] Kansas State-coaching-staff -- 8,679 chars, 66 social, 0 emails
+[11:02:09]   SAVED [200] Oklahoma State-coaching-staff -- 10,144 chars, 26 social, 15 emails
+[11:02:09]   SAVED [200] West Virginia-coaching-staff -- 17,265 chars, 81 social, 37 emails
+[11:02:09]   SKIP [404] Virginia Tech-coaching-staff
+[11:02:09]   Batch 8: Duke, Syracuse, Pittsburgh, NC State, Wake Forest
+[11:02:18]   SAVED [200] Duke-coaching-staff -- 8,318 chars, 40 social, 18 emails
+[11:02:18]   SAVED [200] Syracuse-coaching-staff -- 13,787 chars, 31 social, 40 emails
+[11:02:19]   SAVED [200] Pittsburgh-coaching-staff -- 26,058 chars, 0 social, 33 emails
+[11:02:19]   SAVED [200] NC State-coaching-staff -- 8,008 chars, 32 social, 35 emails
+[11:02:19]   SAVED [200] Wake Forest-coaching-staff -- 10,843 chars, 3 social, 21 emails
+[11:02:19]   Batch 9: Louisville, Virginia, Stanford, California, Washington
+[11:02:25]   SAVED [200] Louisville-coaching-staff -- 5,292 chars, 36 social, 22 emails
+[11:02:25]   SKIP [404] Virginia-coaching-staff
+[11:02:25]   SKIP [404] Stanford-coaching-staff
+[11:02:25]   SAVED [200] California-coaching-staff -- 109 chars, 51 social, 0 emails
+[11:02:25]   SAVED [200] Washington-coaching-staff -- 11,166 chars, 35 social, 47 emails
+[11:02:25]   Batch 10: Arizona State, Arizona, Utah, BYU, Boise State
+[11:02:34]   SAVED [200] Arizona State-coaching-staff -- 46,479 chars, 87 social, 0 emails
+[11:02:35]   SAVED [200] Arizona-coaching-staff -- 109 chars, 43 social, 0 emails
+[11:02:35]   SAVED [200] Utah-coaching-staff -- 5,943 chars, 2 social, 0 emails
+[11:02:35]   SKIP [404] BYU-coaching-staff
+[11:02:35]   SAVED [200] Boise State-coaching-staff -- 24,509 chars, 28 social, 20 emails
+[11:02:35] 
+=== PHASE 2: COACH DIRECTORIES ===
+[11:02:37]   SAVED [200] ESPN-All-Coaches-Salaries -- 34,237 chars, 0 social, 0 emails
+[11:02:39]   SAVED [200] ESPN-CFB-Rankings -- 35,546 chars, 0 social, 0 emails
+[11:02:39] 
+=== PHASE 3: SOCIAL MEDIA SEARCH (Top 25 coaches) ===
+[11:02:39]   SKIP [0] search-kirby-smart-georgia
+[11:02:39]   SKIP [0] search-ryan-day-ohio-state
+[11:02:39]   SKIP [0] search-dabo-swinney-clemson
+[11:02:39]   SKIP [0] search-steve-sarkisian-texas
+[11:02:39]   SKIP [0] search-dan-lanning-oregon
+[11:02:39]   SKIP [0] search-james-franklin-penn-state
+[11:02:39]   SKIP [0] search-nick-saban-alabama
+[11:02:39]   SKIP [0] search-lincoln-riley-usc
+[11:02:39]   SKIP [0] search-mike-norvell-florida-state
+[11:02:40]   SKIP [0] search-brian-kelly-lsu
+[11:02:40]   SKIP [0] search-marcus-freeman-notre-dame
+[11:02:40]   SKIP [0] search-billy-napier-florida
+[11:02:40]   SKIP [0] search-josh-heupel-tennessee
+[11:02:40]   SKIP [0] search-brent-venables-oklahoma
+[11:02:40]   SKIP [0] search-hugh-freeze-auburn
+[11:02:40]   SKIP [0] search-jimbo-fisher-texas-a&m
+[11:02:40]   SKIP [0] search-mario-cristobal-miami
+[11:02:40]   SKIP [0] search-luke-fickell-wisconsin
+[11:02:40]   SKIP [0] search-kirk-ferentz-iowa
+[11:02:40]   SKIP [0] search-jonathan-smith-michigan-state
+[11:02:40]   SKIP [0] search-mack-brown-north-carolina
+[11:02:40]   SKIP [0] search-deion-sanders-colorado
+[11:02:40]   SKIP [0] search-sam-pittman-arkansas
+[11:02:40]   SKIP [0] search-lane-kiffin-ole-miss
+[11:02:40]   SKIP [0] search-mike-gundy-oklahoma-state
+[11:02:40] 
+=== AGGREGATING SOCIAL MEDIA HANDLES ===
+[11:02:40] 
+============================================================
+[11:02:40] COMPLETE: 43 files, 677,587 chars
+[11:02:40] Social handles found: 1433
+[11:02:40] Emails found: 556
+[11:02:40] Phones found: 123
+[11:02:40] Summary: C:\Users\rishj\foai\smelter-os\sqwaadrun\data\college-football\coaches-contacts\contacts-summary.json
+[11:02:40] ============================================================

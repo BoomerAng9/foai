@@ -1,0 +1,197 @@
+{
+  "title": "Coaches Corner \u2013 Coach Skinner 9-14-12 \u2013 UK Athletics",
+  "url": "https://ukathletics.com/sports/football/coaches",
+  "status_code": 200,
+  "chars": 1573,
+  "links_count": 241,
+  "scraped_at": "2026-04-09T15:01:59.789842+00:00",
+  "content_hash": "28daf6428861caf3",
+  "file": "C:\\Users\\rishj\\foai\\smelter-os\\sqwaadrun\\data\\college-football\\coaches-contacts\\kentucky-coaching-staff.md",
+  "social_media": [
+    {
+      "platform": "twitter",
+      "handle": "@UKAthletics",
+      "url": "https://x.com/UKAthletics"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@ukathletics",
+      "url": "https://instagram.com/ukathletics"
+    },
+    {
+      "platform": "facebook",
+      "handle": "UKAthletics",
+      "url": "https://facebook.com/UKAthletics"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@kentuckybaseball",
+      "url": "https://instagram.com/kentuckybaseball"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@KentuckyMBB",
+      "url": "https://twitter.com/KentuckyMBB"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@kentuckymbb",
+      "url": "https://instagram.com/kentuckymbb"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@KentuckyTrack",
+      "url": "https://twitter.com/KentuckyTrack"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@kentuckytrack",
+      "url": "https://instagram.com/kentuckytrack"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@UKFootball",
+      "url": "https://twitter.com/UKFootball"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@ukfootball",
+      "url": "https://instagram.com/ukfootball"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@UKmensgolf",
+      "url": "https://twitter.com/UKmensgolf"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@UKMensSoccer",
+      "url": "https://twitter.com/UKMensSoccer"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@ukmenssoccer",
+      "url": "https://instagram.com/ukmenssoccer"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@UKSwimDive",
+      "url": "https://twitter.com/UKSwimDive"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@UKSwimDive",
+      "url": "https://instagram.com/UKSwimDive"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@UKMensTennis",
+      "url": "https://twitter.com/UKMensTennis"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@kentuckymenstennis",
+      "url": "https://instagram.com/kentuckymenstennis"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@KentuckyWBB",
+      "url": "https://twitter.com/KentuckyWBB"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@kentuckywbb",
+      "url": "https://instagram.com/kentuckywbb"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@KentuckyDance",
+      "url": "https://twitter.com/KentuckyDance"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@ukdanceteam",
+      "url": "https://www.instagram.com/ukdanceteam/"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@KentuckyWGolf",
+      "url": "https://twitter.com/KentuckyWGolf"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@kentuckywgolf",
+      "url": "https://instagram.com/kentuckywgolf"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@UKGymnastics",
+      "url": "https://twitter.com/UKGymnastics"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@ukgymnastics",
+      "url": "https://instagram.com/ukgymnastics"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@UKWomensSoccer",
+      "url": "https://twitter.com/UKWomensSoccer"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@ukwomenssoccer",
+      "url": "https://instagram.com/ukwomenssoccer"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@UKsoftball",
+      "url": "https://twitter.com/UKsoftball"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@uksoftball",
+      "url": "https://instagram.com/uksoftball"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@UKWomensTennis",
+      "url": "https://twitter.com/UKWomensTennis"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@ukwomenstennis",
+      "url": "https://www.instagram.com/ukwomenstennis/"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@KentuckyVB",
+      "url": "https://twitter.com/KentuckyVB/"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@kentuckyvolleyball",
+      "url": "https://instagram.com/kentuckyvolleyball/"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@KentuckyCheer",
+      "url": "https://twitter.com/KentuckyCheer"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@kentuckycheer",
+      "url": "https://www.instagram.com/kentuckycheer/"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@UKRifle",
+      "url": "https://twitter.com/UKRifle"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@ukrifle",
+      "url": "https://instagram.com/ukrifle"
+    }
+  ]
+}

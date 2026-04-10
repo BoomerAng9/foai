@@ -1,0 +1,282 @@
+{
+  "title": "2026 Football Coaches - Michigan State University Athletics",
+  "url": "https://msuspartans.com/sports/football/coaches",
+  "status_code": 200,
+  "chars": 9424,
+  "links_count": 348,
+  "scraped_at": "2026-04-09T15:01:51.813416+00:00",
+  "content_hash": "56beffdd1bb73c75",
+  "file": "C:\\Users\\rishj\\foai\\smelter-os\\sqwaadrun\\data\\college-football\\coaches-contacts\\michigan-state-coaching-staff.md",
+  "social_media": [
+    {
+      "platform": "twitter",
+      "handle": "@coachfitz51",
+      "url": "https://x.com/coachfitz51"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@LeVarWoods",
+      "url": "https://x.com/LeVarWoods"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@JoeS_Rossi",
+      "url": "https://x.com/JoeS_Rossi"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@Bullough40",
+      "url": "https://x.com/Bullough40"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@JA_Adams06",
+      "url": "https://x.com/JA_Adams06"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@Coach_Bindel",
+      "url": "https://x.com/Coach_Bindel"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@Coach_DeBo46",
+      "url": "https://x.com/Coach_DeBo46"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@CoachHawk_5",
+      "url": "https://x.com/CoachHawk_5"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@PoteatCoach",
+      "url": "https://x.com/PoteatCoach"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@CoachSpalding_",
+      "url": "https://x.com/CoachSpalding_"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@CoachTabacca",
+      "url": "https://x.com/CoachTabacca"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@CoachWozniakTE",
+      "url": "https://x.com/CoachWozniakTE"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@jschmidt39",
+      "url": "https://x.com/jschmidt39"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@CoachBGasser",
+      "url": "https://x.com/CoachBGasser"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@SeanLevyMSU",
+      "url": "https://x.com/SeanLevyMSU"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@MotownKurtis",
+      "url": "https://x.com/MotownKurtis"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@MalikGill5",
+      "url": "https://x.com/MalikGill5"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@MSUBaseball",
+      "url": "https://x.com/MSUBaseball"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@msu_baseball",
+      "url": "https://instagram.com/msu_baseball"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@msu_basketball",
+      "url": "https://x.com/msu_basketball"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@michiganstatebasketball",
+      "url": "https://instagram.com/michiganstatebasketball"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@MSU_TFXC",
+      "url": "https://x.com/MSU_TFXC"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@msu_tfxc",
+      "url": "https://instagram.com/msu_tfxc"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@msu_football",
+      "url": "https://x.com/msu_football"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@msu_football",
+      "url": "https://instagram.com/msu_football"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@msu_mgolf",
+      "url": "https://x.com/msu_mgolf"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@msu_mgolf",
+      "url": "https://instagram.com/msu_mgolf"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@msu_hockey",
+      "url": "https://x.com/msu_hockey"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@msu_hockey",
+      "url": "https://instagram.com/msu_hockey"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@msu_msoccer",
+      "url": "https://x.com/msu_msoccer"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@msu_msoccer",
+      "url": "https://instagram.com/msu_msoccer"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@msu_mtennis",
+      "url": "https://x.com/msu_mtennis"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@msu_mtennis",
+      "url": "https://instagram.com/msu_mtennis"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@MSU_Wrestling",
+      "url": "https://x.com/MSU_Wrestling"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@MSU_Wrestling",
+      "url": "https://instagram.com/MSU_Wrestling"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@msu_wbasketball",
+      "url": "https://x.com/msu_wbasketball"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@msu_wbasketball",
+      "url": "https://instagram.com/msu_wbasketball"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@MSU_FieldHockey",
+      "url": "https://x.com/MSU_FieldHockey"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@msu_fieldhockey",
+      "url": "https://instagram.com/msu_fieldhockey"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@msu_wgolf",
+      "url": "https://x.com/msu_wgolf"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@msu_wgolf",
+      "url": "https://instagram.com/msu_wgolf"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@msu_gymnastics",
+      "url": "https://x.com/msu_gymnastics"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@msu_gymnastics",
+      "url": "https://instagram.com/msu_gymnastics"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@msu_rowing",
+      "url": "https://x.com/msu_rowing"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@msu_rowing",
+      "url": "https://instagram.com/msu_rowing"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@msu_wsoccer",
+      "url": "https://x.com/msu_wsoccer"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@msu_wsoccer",
+      "url": "https://instagram.com/msu_wsoccer"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@msu_softball",
+      "url": "https://x.com/msu_softball"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@msu_softball",
+      "url": "https://instagram.com/msu_softball"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@MSU_WTennis",
+      "url": "https://x.com/MSU_WTennis"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@msu_wtennis",
+      "url": "https://instagram.com/msu_wtennis"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@msu_volleyball",
+      "url": "https://x.com/msu_volleyball"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@msu_volleyball",
+      "url": "https://instagram.com/msu_volleyball"
+    }
+  ],
+  "emails": [
+    "weigan15@msu.edu",
+    "football@msu.edu",
+    "burghardt@ath.msu.edu"
+  ]
+}

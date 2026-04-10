@@ -13,6 +13,7 @@ import Image from 'next/image';
 import { motion, type Variants } from 'framer-motion';
 import { ANALYSTS } from '@/lib/analysts/personas';
 import PaywallGate from '@/components/PaywallGate';
+import { BackHomeNav } from '@/components/layout/BackHomeNav';
 
 const T = {
   bg:           '#F4F6FA',
@@ -45,6 +46,7 @@ export default function AnalystsPage() {
         <div style={{ background: T.navyDeep, color: '#FFFFFF', borderBottom: `2px solid ${T.red}` }}>
           <div className="max-w-7xl mx-auto px-6 py-3 flex items-center justify-between text-[11px] font-bold tracking-[0.18em] uppercase">
             <div className="flex items-center gap-3">
+              <BackHomeNav />
               <span style={{ color: T.red }}>● LIVE</span>
               <span className="opacity-50">|</span>
               <span>Per|Form Broadcast Crew</span>

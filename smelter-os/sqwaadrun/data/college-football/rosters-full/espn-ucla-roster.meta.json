@@ -1,0 +1,11 @@
+{
+  "title": "UCLA Bruins College Football Roster - ESPN",
+  "url": "https://www.espn.com/college-football/team/roster/_/id/26",
+  "status_code": 200,
+  "chars": 43950,
+  "links_count": 146,
+  "scraped_at": "2026-04-09T15:00:02.431573+00:00",
+  "content_hash": "596598830e6767d5",
+  "category": "rosters-full",
+  "file": "C:\\Users\\rishj\\foai\\smelter-os\\sqwaadrun\\data\\college-football\\rosters-full\\espn-ucla-roster.md"
+}

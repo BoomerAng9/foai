@@ -1,0 +1,11 @@
+{
+  "title": "Highest Paid College Football Coaches & Salaries - USA TODAY",
+  "url": "https://sports.usatoday.com/ncaa/salaries/",
+  "status_code": 200,
+  "chars": 38293,
+  "links_count": 332,
+  "scraped_at": "2026-04-09T15:04:45.668938+00:00",
+  "content_hash": "83bdfa6d4ed61c97",
+  "category": "coaches",
+  "file": "C:\\Users\\rishj\\foai\\smelter-os\\sqwaadrun\\data\\college-football\\coaches\\usa-today-all-coaches-salaries.md"
+}

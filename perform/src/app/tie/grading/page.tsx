@@ -17,6 +17,7 @@ import { useState, useRef } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { TIELoader } from '@/components/tie/TIELoader';
+import { BackHomeNav } from '@/components/layout/BackHomeNav';
 
 const T = {
   bg:        '#060A14',
@@ -107,7 +108,8 @@ export default function TIEGradingPage() {
       <div style={{ background: '#000000', borderBottom: `1px solid ${T.border}` }}>
         <div className="max-w-7xl mx-auto px-6 py-3 flex items-center justify-between text-[11px] font-bold tracking-[0.18em] uppercase">
           <div className="flex items-center gap-3">
-            <Link href="/tie" className="opacity-60 hover:opacity-100 transition">← TIE</Link>
+            <BackHomeNav />
+            <Link href="/tie" className="opacity-60 hover:opacity-100 transition">TIE</Link>
             <span className="opacity-50">|</span>
             <span style={{ color: T.gold }}>Grading Workbench</span>
           </div>

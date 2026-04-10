@@ -1,0 +1,234 @@
+{
+  "title": "2026 Football Coaches - USC Athletics",
+  "url": "https://usctrojans.com/sports/football/coaches",
+  "status_code": 200,
+  "chars": 16354,
+  "links_count": 299,
+  "scraped_at": "2026-04-09T15:01:27.248494+00:00",
+  "content_hash": "bb58a0e5ce7e754b",
+  "file": "C:\\Users\\rishj\\foai\\smelter-os\\sqwaadrun\\data\\college-football\\coaches-contacts\\usc-coaching-staff.md",
+  "social_media": [
+    {
+      "platform": "twitter",
+      "handle": "@USC_Baseball",
+      "url": "https://x.com/USC_Baseball"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@sctrojans_baseball",
+      "url": "https://instagram.com/sctrojans_baseball"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@USC_Hoops",
+      "url": "https://x.com/USC_Hoops"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@uschoops",
+      "url": "https://instagram.com/uschoops"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@uscfb",
+      "url": "https://x.com/uscfb"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@uscfb",
+      "url": "https://instagram.com/uscfb"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@USCMensGolf",
+      "url": "https://x.com/USCMensGolf"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@uscmensgolf",
+      "url": "https://instagram.com/uscmensgolf"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@USCswim",
+      "url": "https://x.com/USCswim"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@uscswim",
+      "url": "https://instagram.com/uscswim"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@USCMensTennis",
+      "url": "https://x.com/USCMensTennis"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@uscmenstennis",
+      "url": "https://instagram.com/uscmenstennis"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@USC_Track_Field",
+      "url": "https://x.com/USC_Track_Field"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@usc_track_field",
+      "url": "https://instagram.com/usc_track_field"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@USCmensvolley",
+      "url": "https://x.com/USCmensvolley"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@uscmensvolley",
+      "url": "https://instagram.com/uscmensvolley"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@USCWaterPolo",
+      "url": "https://x.com/USCWaterPolo"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@uscwaterpolo",
+      "url": "https://instagram.com/uscwaterpolo"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@USCWBB",
+      "url": "https://x.com/USCWBB"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@uscwbb",
+      "url": "https://instagram.com/uscwbb"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@USCBeach",
+      "url": "https://x.com/USCBeach"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@uscbeach",
+      "url": "https://instagram.com/uscbeach"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@USCWomensGolf",
+      "url": "https://x.com/USCWomensGolf"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@uscwomensgolf",
+      "url": "https://instagram.com/uscwomensgolf"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@USCTrojansLax",
+      "url": "https://x.com/USCTrojansLax"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@usctrojanslax",
+      "url": "https://instagram.com/usctrojanslax"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@USCWomensRowing",
+      "url": "https://x.com/USCWomensRowing"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@uscwomensrowing",
+      "url": "https://instagram.com/uscwomensrowing"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@USC_WSoccer",
+      "url": "https://x.com/USC_WSoccer"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@uscwsoccer",
+      "url": "https://instagram.com/uscwsoccer"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@USCWomensTennis",
+      "url": "https://x.com/USCWomensTennis"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@uscwomenstennis",
+      "url": "https://instagram.com/uscwomenstennis"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@uscwomensvolley",
+      "url": "https://x.com/uscwomensvolley"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@uscwomensvolley",
+      "url": "https://instagram.com/uscwomensvolley"
+    }
+  ],
+  "emails": [
+    "abigail.dow@med.usc.edu",
+    "lukecuel@usc.edu",
+    "lonniem@usc.edu",
+    "ericmich@usc.edu",
+    "woodmaxw@usc.edu",
+    "cmcquist@usc.edu",
+    "mtwillia@usc.edu",
+    "amaama@usc.edu",
+    "stroudc@usc.edu",
+    "trumainc@usc.edu",
+    "russ.romano@med.usc.edu",
+    "nate.simon@usc.edu",
+    "lsnead@usc.edu",
+    "dpeoples@usc.edu",
+    "katierya@usc.edu",
+    "dustinwe@usc.edu",
+    "ctaplin@usc.edu",
+    "jonesspe@usc.edu",
+    "polkjack@usc.edu",
+    "demerick@usc.edu",
+    "zerneche@usc.edu",
+    "jmohiudd@usc.edu",
+    "jennifer.camacho@med.usc.edu",
+    "gavinmor@usc.edu",
+    "jmcdonel@usc.edu",
+    "alandreb@usc.edu",
+    "caesarma@usc.edu",
+    "sean.mcmannes@med.usc.edu",
+    "csnipes@usc.edu",
+    "markkevi@usc.edu",
+    "egespino@usc.edu",
+    "lisa.noceti-dewit@med.usc.edu",
+    "subarach@usc.edu",
+    "zairetur@usc.edu",
+    "missiore@usc.edu",
+    "football@usc.edu",
+    "bakerder@usc.edu"
+  ],
+  "phones": [
+    "(213) 740-5466",
+    "(213) 821-7364",
+    "(213) 821-7370",
+    "(213) 740-0878",
+    "(213) 821-1862",
+    "(213) 740-0862",
+    "(213) 821-7375",
+    "(213) 740-7862",
+    "(213) 740-6848",
+    "(213) 740-4204",
+    "(213) 447-1156"
+  ]
+}

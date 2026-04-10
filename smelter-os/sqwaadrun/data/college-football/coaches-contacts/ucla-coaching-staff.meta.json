@@ -1,0 +1,229 @@
+{
+  "title": "2025 Football Coaches - UCLA",
+  "url": "https://uclabruins.com/sports/football/coaches",
+  "status_code": 200,
+  "chars": 9535,
+  "links_count": 299,
+  "scraped_at": "2026-04-09T15:01:51.972683+00:00",
+  "content_hash": "f59a79b3f3ea8aff",
+  "file": "C:\\Users\\rishj\\foai\\smelter-os\\sqwaadrun\\data\\college-football\\coaches-contacts\\ucla-coaching-staff.md",
+  "social_media": [
+    {
+      "platform": "twitter",
+      "handle": "@UCLABaseball",
+      "url": "https://x.com/UCLABaseball"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@uclabruinsbaseball",
+      "url": "https://instagram.com/uclabruinsbaseball"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@UCLAMBB",
+      "url": "https://x.com/UCLAMBB"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@uclambb",
+      "url": "https://instagram.com/uclambb"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@UCLAWBB",
+      "url": "https://x.com/UCLAWBB"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@uclawbb",
+      "url": "https://instagram.com/uclawbb"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@uclabeachvb",
+      "url": "https://x.com/uclabeachvb"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@uclabeachvb",
+      "url": "https://instagram.com/uclabeachvb"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@UCLATrack_Field",
+      "url": "https://x.com/UCLATrack_Field"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@uclatrackandfield",
+      "url": "https://instagram.com/uclatrackandfield"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@UCLAFootball",
+      "url": "https://x.com/UCLAFootball"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@uclafootball",
+      "url": "https://instagram.com/uclafootball"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@uclamensgolf",
+      "url": "https://x.com/uclamensgolf"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@uclamensgolf",
+      "url": "https://instagram.com/uclamensgolf"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@uclawomensgolf",
+      "url": "https://x.com/uclawomensgolf"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@uclawomensgolf",
+      "url": "https://instagram.com/uclawomensgolf"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@uclagymnastics",
+      "url": "https://x.com/uclagymnastics"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@uclagymnastics",
+      "url": "https://instagram.com/uclagymnastics"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@UCLA_Rowing",
+      "url": "https://x.com/UCLA_Rowing"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@uclarowing",
+      "url": "https://instagram.com/uclarowing"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@UCLAMSoccer",
+      "url": "https://x.com/UCLAMSoccer"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@uclamsoccer",
+      "url": "https://instagram.com/uclamsoccer"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@UCLAWSoccer",
+      "url": "https://x.com/UCLAWSoccer"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@uclawsoccer",
+      "url": "https://instagram.com/uclawsoccer"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@uclasoftball",
+      "url": "https://x.com/uclasoftball"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@uclasoftball",
+      "url": "https://instagram.com/uclasoftball"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@uclaswimanddive",
+      "url": "https://x.com/uclaswimanddive"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@uclaswimanddive",
+      "url": "https://instagram.com/uclaswimanddive"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@uclatennis",
+      "url": "https://x.com/uclatennis"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@uclamtennis",
+      "url": "https://instagram.com/uclamtennis"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@uclawtennis",
+      "url": "https://x.com/uclawtennis"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@uclatennis",
+      "url": "https://instagram.com/uclatennis"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@UCLAMVB",
+      "url": "https://x.com/UCLAMVB"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@uclamvb",
+      "url": "https://instagram.com/uclamvb"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@UCLAWomensVB",
+      "url": "https://x.com/UCLAWomensVB"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@uclawomensvb",
+      "url": "https://instagram.com/uclawomensvb"
+    },
+    {
+      "platform": "twitter",
+      "handle": "@uclawaterpolo",
+      "url": "https://x.com/uclawaterpolo"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@uclamwp",
+      "url": "https://instagram.com/uclamwp"
+    },
+    {
+      "platform": "instagram",
+      "handle": "@uclawaterpolo",
+      "url": "https://instagram.com/uclawaterpolo"
+    }
+  ],
+  "emails": [
+    "sbrisson@athletics.ucla.edu",
+    "jseales@athletics.ucla.edu",
+    "jdobbs@athletics.ucla.edu",
+    "mcordova@athletics.ucla.edu",
+    "mtransue@athletics.ucla.edu",
+    "aphrommavanh@athletics.ucla.edu",
+    "jmoala@athletics.ucla.edu",
+    "mbiondi@athletics.ucla.edu",
+    "jsmith@athletics.ucla.edu",
+    "jlake@athletics.ucla.edu",
+    "sprice@athletics.ucla.edu",
+    "jboyer@athletics.ucla.edu",
+    "jsprague@athletics.ucla.edu",
+    "cgrautski@athletics.ucla.edu",
+    "dchandler@athletics.ucla.edu",
+    "mfriloux@athletics.ucla.edu",
+    "gwandy@athletics.ucla.edu",
+    "uessang@athletics.ucla.edu",
+    "cargys@athletics.ucla.edu",
+    "cmonfiletto@athletics.ucla.edu"
+  ]
+}
