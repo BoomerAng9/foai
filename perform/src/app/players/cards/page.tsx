@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
+import { BackHomeNav } from '@/components/layout/BackHomeNav';
 import { staggerContainer, staggerItem, heroStagger, heroItem } from '@/lib/motion';
 
 interface NFTCard {
@@ -59,6 +60,11 @@ export default function PlayerCardsPage() {
       <Header />
 
       <main className="flex-1 px-4 md:px-8 py-8 max-w-7xl mx-auto w-full">
+        {/* Back + Home */}
+        <div className="mb-6">
+          <BackHomeNav />
+        </div>
+
         {/* Header */}
         <motion.div
           variants={heroStagger}
