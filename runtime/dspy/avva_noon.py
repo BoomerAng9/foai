@@ -246,14 +246,28 @@ class HeavyMode(dspy.Module):
 # ---------------------------------------------------------------------------
 
 def configure_lm() -> None:
-    """Configure DSPy LM from environment."""
-    api_key = os.environ.get("GEMINI_API_KEY", "")
-    if api_key:
-        lm = dspy.LM("gemini/gemini-2.5-flash", api_key=api_key)
+    """Configure DSPy LM from environment.
+
+    AVVA NOON uses Z.ai GLM (latest multimodal + instructor control)
+    as its reasoning engine. Routed via OpenRouter.
+    Fallback: Gemini 3.1 Flash if no OpenRouter key available.
+    """
+    openrouter_key = os.environ.get("OPENROUTER_API_KEY", "")
+    gemini_key = os.environ.get("GEMINI_API_KEY", "")
+
+    if openrouter_key:
+        lm = dspy.LM(
+            "openrouter/z-ai/glm-5-plus",
+            api_key=openrouter_key,
+            api_base="https://openrouter.ai/api/v1",
+        )
+        dspy.configure(lm=lm)
+    elif gemini_key:
+        lm = dspy.LM("gemini/gemini-3.1-flash", api_key=gemini_key)
         dspy.configure(lm=lm)
     else:
         raise RuntimeError(
-            "No LM configured. Set GEMINI_API_KEY in environment."
+            "No LM configured. Set OPENROUTER_API_KEY (preferred) or GEMINI_API_KEY."
         )
 
 
