@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@/lib/db';
-import { requireAuth } from '@/lib/auth-guard';
+import { requireAuth, isOwnerEmail } from '@/lib/auth-guard';
 
 export async function POST(req: NextRequest) {
   if (!sql) return NextResponse.json({ error: 'Database not configured' }, { status: 503 });
@@ -19,11 +19,13 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Invalid vertical' }, { status: 400 });
   }
 
+  const effectiveTier = isOwnerEmail(auth.email || '') ? 'lfg' : (plan_tier || 'free');
+
   try {
     // Create user
     const [user] = await sql`
       INSERT INTO podcaster_users (firebase_uid, email, podcast_name, podcaster_name, location, subscriber_count, primary_platforms, primary_vertical, addon_vertical, selected_team, plan_tier, huddl_name, onboarding_complete)
-      VALUES (${auth.userId}, ${auth.email || ''}, ${podcast_name.trim()}, ${podcaster_name.trim()}, ${location || null}, ${subscriber_count || 0}, ${primary_platforms || []}, ${primary_vertical}, ${addon_vertical || null}, ${selected_team || null}, ${plan_tier || 'free'}, ${huddl_name || podcast_name.trim() + ' Command Center'}, true)
+      VALUES (${auth.userId}, ${auth.email || ''}, ${podcast_name.trim()}, ${podcaster_name.trim()}, ${location || null}, ${subscriber_count || 0}, ${primary_platforms || []}, ${primary_vertical}, ${addon_vertical || null}, ${selected_team || null}, ${effectiveTier}, ${huddl_name || podcast_name.trim() + ' Command Center'}, true)
       ON CONFLICT (firebase_uid) DO UPDATE SET
         podcast_name = EXCLUDED.podcast_name, podcaster_name = EXCLUDED.podcaster_name,
         primary_vertical = EXCLUDED.primary_vertical, selected_team = EXCLUDED.selected_team,
