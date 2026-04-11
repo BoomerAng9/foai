@@ -1,9 +1,10 @@
 """
 Chicken Hawk Gateway — FastAPI application entrypoint.
 
-Exposes a single /chat endpoint that accepts natural-language requests,
-routes them to the appropriate Lil_Hawk specialist via the Router, passes
-the result through the review gate, and returns a governed response.
+Wave 2: Rewired to use DeerFlow 2.0 orchestration harness.
+Chicken Hawk is the lead agent, Lil_Hawks are sub-agents.
+DeerFlow handles task decomposition, dispatch, and coordination.
+The gateway exposes /chat, /health, /hawks, and /api/chicken-hawk/live-plan (SSE).
 """
 
 from __future__ import annotations
@@ -17,10 +18,11 @@ import structlog
 import uvicorn
 from fastapi import FastAPI, HTTPException, Request, status
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, StreamingResponse
 from pydantic import BaseModel, Field
 
 from config import get_settings
+from event_bus import EventBus, TaskEvent, TaskStatus, get_event_bus
 from router import HawkResponse, Router
 
 # ---------------------------------------------------------------------------
@@ -47,15 +49,19 @@ logger = structlog.get_logger(__name__)
 # Application lifecycle
 # ---------------------------------------------------------------------------
 _router: Router | None = None
+_event_bus: EventBus | None = None
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncIterator[None]:
-    global _router
+    global _router, _event_bus
     settings = get_settings()
-    _router = Router(settings)
+    _event_bus = get_event_bus()
+    _router = Router(settings, event_bus=_event_bus)
     logger.info("gateway_started", provider=settings.llm_provider)
     yield
+    if _event_bus:
+        await _event_bus.close()
     if _router:
         await _router.aclose()
     logger.info("gateway_stopped")
@@ -69,9 +75,9 @@ app = FastAPI(
     description=(
         "Intent-routing gateway for the Chicken Hawk AI operations platform. "
         "Classifies natural-language requests and dispatches them to the "
-        "appropriate Lil_Hawk specialist agent."
+        "appropriate Lil_Hawk specialist agent via DeerFlow 2.0 orchestration."
     ),
-    version="0.1.0",
+    version="2.0.0",
     lifespan=lifespan,
 )
 
@@ -102,6 +108,8 @@ class ChatResponse(BaseModel):
 
 class HealthResponse(BaseModel):
     status: str
+    version: str = "2.0.0"
+    orchestrator: str = "deerflow"
     hawks: dict[str, str]
 
 
@@ -115,7 +123,11 @@ async def health() -> HealthResponse:
         raise HTTPException(status_code=503, detail="Gateway not initialised")
     hawk_health = await _router.health_check()
     gateway_status = "ok" if all(v == "ok" for v in hawk_health.values()) else "degraded"
-    return HealthResponse(status=gateway_status, hawks=hawk_health)
+    return HealthResponse(
+        status=gateway_status,
+        orchestrator="deerflow-2.0",
+        hawks=hawk_health,
+    )
 
 
 @app.post("/chat", response_model=ChatResponse, tags=["Chat"])
@@ -154,6 +166,39 @@ async def list_hawks() -> dict:
     """Return the configured Lil_Hawk endpoints."""
     settings = get_settings()
     return {"hawks": list(settings.hawk_endpoints.keys())}
+
+
+# ---------------------------------------------------------------------------
+# Live Task Plan SSE endpoint
+# ---------------------------------------------------------------------------
+@app.get("/api/chicken-hawk/live-plan", tags=["LiveTaskPlan"])
+async def live_task_plan(request: Request) -> StreamingResponse:
+    """
+    SSE endpoint for the Live Task Plan.
+    Streams real-time task plan events from the DeerFlow orchestrator.
+    Each event contains: task_name, status, hawk, timestamps.
+    """
+    if _event_bus is None:
+        raise HTTPException(status_code=503, detail="Event bus not initialised")
+
+    async def event_generator() -> AsyncIterator[str]:
+        # Send initial heartbeat
+        yield "event: connected\ndata: {\"status\": \"connected\"}\n\n"
+        async for event in _event_bus.subscribe():
+            # Check if client disconnected
+            if await request.is_disconnected():
+                break
+            yield event.to_sse()
+
+    return StreamingResponse(
+        event_generator(),
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "Connection": "keep-alive",
+            "X-Accel-Buffering": "no",
+        },
+    )
 
 
 # ---------------------------------------------------------------------------

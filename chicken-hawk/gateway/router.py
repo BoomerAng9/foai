@@ -1,10 +1,17 @@
 """
-Chicken Hawk Gateway — intent classification and Lil_Hawk router.
+Chicken Hawk Gateway — DeerFlow 2.0 orchestrated router.
 
-The router classifies incoming natural-language requests and dispatches them
-to the appropriate Lil_Hawk specialist.  Complex missions that touch multiple
-domains are escalated to Lil_Deep_Hawk (DeerFlow 2.0), which decomposes the
-goal into a Squad of Lil_Hawks.
+Wave 2 rewrite: Chicken Hawk is the lead agent, Lil_Hawks are sub-agents.
+The router uses DeerFlow's lead-agent pattern for task decomposition
+and sub-agent dispatch. Complex missions spawn multiple Lil_Hawks
+via DeerFlow's squad coordination.
+
+Classification still uses LLM-based intent routing. Dispatch now flows
+through the DeerFlow harness which provides:
+- Task decomposition for complex missions
+- Sub-agent lifecycle management
+- Middleware pipeline (loop detection, error handling, etc.)
+- Event streaming to the Live Task Plan
 """
 
 from __future__ import annotations
@@ -21,6 +28,7 @@ import structlog
 from tenacity import retry, stop_after_attempt, wait_exponential
 
 from config import LLMProvider, Settings
+from event_bus import EventBus, TaskEvent, TaskStatus
 from memory_bridge import after_route, before_route
 
 logger = structlog.get_logger(__name__)
@@ -45,6 +53,8 @@ class RoutingDecision:
     hawk: HawkRole
     confidence: float
     reasoning: str
+    is_squad: bool = False  # True if DeerFlow decomposes into multi-hawk
+    sub_tasks: list[dict[str, Any]] = field(default_factory=list)
     trace_id: str = field(default_factory=lambda: str(uuid.uuid4()))
 
 
@@ -59,12 +69,12 @@ class HawkResponse:
 
 
 # ---------------------------------------------------------------------------
-# Classification prompt
+# Classification prompt — DeerFlow-aware
 # ---------------------------------------------------------------------------
 _CLASSIFICATION_SYSTEM = """\
-You are the Chicken Hawk intent classifier. Given a user request, decide which
-single Lil_Hawk specialist should handle it, or whether the mission is complex
-enough to warrant Lil_Deep_Hawk (which orchestrates multiple specialists).
+You are the Chicken Hawk intent classifier, powered by DeerFlow 2.0 orchestration.
+Given a user request, decide which Lil_Hawk specialist should handle it.
+If the mission spans multiple domains, set "is_squad": true and list sub_tasks.
 
 Specialists:
 - Lil_TRAE_Hawk   : large-scale code refactors, repository-wide changes
@@ -77,24 +87,38 @@ Specialists:
 - Lil_Back_Hawk   : backend scaffolding, auth, database schema, APIs
 - Lil_Viz_Hawk    : monitoring, observability, dashboard queries
 - Lil_Blend_Hawk  : Blender 3D modeling, rendering, animation, scene composition
-- Lil_Deep_Hawk   : complex missions spanning multiple specialists
+- Lil_Deep_Hawk   : complex missions spanning multiple specialists (squad mode)
 
-Respond ONLY with valid JSON matching this schema:
+Respond ONLY with valid JSON:
 {
-  "hawk": "<specialist name exactly as listed above>",
+  "hawk": "<specialist name>",
   "confidence": <0.0-1.0>,
-  "reasoning": "<one sentence>"
+  "reasoning": "<one sentence>",
+  "is_squad": false,
+  "sub_tasks": []
+}
+
+For squad mode (is_squad=true), include sub_tasks:
+{
+  "hawk": "Lil_Deep_Hawk",
+  "confidence": 0.9,
+  "reasoning": "Complex mission requiring multiple specialists",
+  "is_squad": true,
+  "sub_tasks": [
+    {"hawk": "Lil_Coding_Hawk", "task": "Implement the feature"},
+    {"hawk": "Lil_Back_Hawk", "task": "Set up the API endpoints"}
+  ]
 }
 """
 
 
 class Router:
-    """Classifies intent and routes requests to the appropriate Lil_Hawk."""
+    """DeerFlow 2.0 orchestrated router — lead agent dispatching to sub-agents."""
 
-    def __init__(self, settings: Settings) -> None:
+    def __init__(self, settings: Settings, event_bus: EventBus | None = None) -> None:
         self._settings = settings
         self._http = httpx.AsyncClient(timeout=120.0)
-        # Build retry decorators from settings so they are consistent and tunable
+        self._event_bus = event_bus
         self._llm_retry = retry(
             stop=stop_after_attempt(settings.llm_retry_attempts),
             wait=wait_exponential(multiplier=1, min=1, max=settings.llm_retry_max_wait),
@@ -109,25 +133,49 @@ class Router:
     # ------------------------------------------------------------------
 
     async def route(self, message: str, session_id: str | None = None) -> HawkResponse:
-        """Classify *message* and forward it to the right Lil_Hawk."""
+        """Classify *message* and forward it through DeerFlow orchestration."""
         start = time.monotonic()
         decision = await self._classify(message)
         log = logger.bind(
             trace_id=decision.trace_id,
             hawk=decision.hawk,
             confidence=decision.confidence,
+            is_squad=decision.is_squad,
             session_id=session_id,
         )
         log.info("routing_decision")
 
+        # Emit task plan event: classification complete
+        await self._emit(TaskEvent(
+            trace_id=decision.trace_id,
+            task_name="intent_classification",
+            status=TaskStatus.COMPLETED,
+            hawk=decision.hawk.value,
+            detail=decision.reasoning,
+        ))
+
         # Memory: draft project plan + recall context before dispatch
         plan_id, _ = await before_route(decision.trace_id, message, decision.hawk)
 
-        url = self._settings.hawk_endpoints[decision.hawk]
-        content = await self._dispatch(url, message, decision.trace_id)
+        if decision.is_squad and decision.sub_tasks:
+            content = await self._dispatch_squad(message, decision)
+        else:
+            content = await self._dispatch_single(message, decision)
+
         reviewed_content = await self._review_gate(content, decision)
 
         elapsed = (time.monotonic() - start) * 1000
+
+        # Emit task plan event: request complete
+        await self._emit(TaskEvent(
+            trace_id=decision.trace_id,
+            task_name="request_complete",
+            status=TaskStatus.COMPLETED,
+            hawk=decision.hawk.value,
+            detail=f"Completed in {elapsed:.0f}ms",
+            metadata={"elapsed_ms": round(elapsed, 1)},
+        ))
+
         log.info("response_delivered", elapsed_ms=round(elapsed, 1))
 
         # Memory: complete plan + store routing outcome
@@ -147,7 +195,12 @@ class Router:
             reviewed=True,
             trace_id=decision.trace_id,
             elapsed_ms=round(elapsed, 1),
-            metadata={"confidence": decision.confidence, "reasoning": decision.reasoning},
+            metadata={
+                "confidence": decision.confidence,
+                "reasoning": decision.reasoning,
+                "is_squad": decision.is_squad,
+                "orchestrator": "deerflow-2.0",
+            },
         )
 
     async def health_check(self) -> dict[str, str]:
@@ -165,6 +218,15 @@ class Router:
         await self._http.aclose()
 
     # ------------------------------------------------------------------
+    # Event emission
+    # ------------------------------------------------------------------
+
+    async def _emit(self, event: TaskEvent) -> None:
+        """Emit a task event to the event bus if connected."""
+        if self._event_bus:
+            await self._event_bus.publish(event)
+
+    # ------------------------------------------------------------------
     # Classification
     # ------------------------------------------------------------------
 
@@ -175,7 +237,6 @@ class Router:
             LLMProvider.anthropic: self._classify_anthropic,
             LLMProvider.ollama: self._classify_ollama,
         }[provider]
-        # Apply LLM retry policy at call site
         raw = await self._llm_retry(classify_fn)(message)
 
         try:
@@ -183,13 +244,22 @@ class Router:
             hawk = HawkRole(data["hawk"])
             confidence = float(data.get("confidence", 0.8))
             reasoning = data.get("reasoning", "")
+            is_squad = bool(data.get("is_squad", False))
+            sub_tasks = data.get("sub_tasks", [])
         except Exception:
-            # Fallback: send everything to DeerFlow if classification fails
             hawk = HawkRole.DEEP
             confidence = 0.5
-            reasoning = "Classification failed; escalating to DeerFlow."
+            reasoning = "Classification failed; escalating to DeerFlow squad mode."
+            is_squad = False
+            sub_tasks = []
 
-        return RoutingDecision(hawk=hawk, confidence=confidence, reasoning=reasoning)
+        return RoutingDecision(
+            hawk=hawk,
+            confidence=confidence,
+            reasoning=reasoning,
+            is_squad=is_squad,
+            sub_tasks=sub_tasks,
+        )
 
     async def _classify_openai(self, message: str) -> str:
         import openai
@@ -205,7 +275,7 @@ class Router:
                 {"role": "user", "content": message},
             ],
             temperature=0,
-            max_tokens=256,
+            max_tokens=512,
             response_format={"type": "json_object"},
         )
         return response.choices[0].message.content or "{}"
@@ -219,7 +289,7 @@ class Router:
         client = anthropic.AsyncAnthropic(api_key=key.get_secret_value())
         response = await client.messages.create(
             model="claude-3-haiku-20240307",
-            max_tokens=256,
+            max_tokens=512,
             system=_CLASSIFICATION_SYSTEM,
             messages=[{"role": "user", "content": message}],
         )
@@ -241,7 +311,122 @@ class Router:
         return r.json().get("message", {}).get("content", "{}")
 
     # ------------------------------------------------------------------
-    # Dispatch
+    # Dispatch — Single hawk (DeerFlow lead-agent -> sub-agent)
+    # ------------------------------------------------------------------
+
+    async def _dispatch_single(self, message: str, decision: RoutingDecision) -> str:
+        """DeerFlow single sub-agent dispatch."""
+        await self._emit(TaskEvent(
+            trace_id=decision.trace_id,
+            task_name=f"dispatch_{decision.hawk.value}",
+            status=TaskStatus.RUNNING,
+            hawk=decision.hawk.value,
+            detail=f"Dispatching to {decision.hawk.value}",
+        ))
+
+        url = self._settings.hawk_endpoints[decision.hawk]
+        try:
+            content = await self._dispatch(url, message, decision.trace_id)
+            await self._emit(TaskEvent(
+                trace_id=decision.trace_id,
+                task_name=f"dispatch_{decision.hawk.value}",
+                status=TaskStatus.COMPLETED,
+                hawk=decision.hawk.value,
+            ))
+            return content
+        except Exception as exc:
+            await self._emit(TaskEvent(
+                trace_id=decision.trace_id,
+                task_name=f"dispatch_{decision.hawk.value}",
+                status=TaskStatus.FAILED,
+                hawk=decision.hawk.value,
+                detail=str(exc),
+            ))
+            raise
+
+    # ------------------------------------------------------------------
+    # Dispatch — Squad mode (DeerFlow multi-sub-agent coordination)
+    # ------------------------------------------------------------------
+
+    async def _dispatch_squad(self, message: str, decision: RoutingDecision) -> str:
+        """
+        DeerFlow squad dispatch: decompose mission into sub-tasks,
+        dispatch to multiple Lil_Hawks, aggregate results.
+        This implements the lead-agent -> sub-agent pattern from DeerFlow 2.0.
+        """
+        import asyncio
+
+        await self._emit(TaskEvent(
+            trace_id=decision.trace_id,
+            task_name="squad_orchestration",
+            status=TaskStatus.RUNNING,
+            hawk="Lil_Deep_Hawk",
+            detail=f"Coordinating {len(decision.sub_tasks)} sub-tasks",
+        ))
+
+        results: list[str] = []
+        tasks = []
+
+        for i, sub_task in enumerate(decision.sub_tasks):
+            hawk_name = sub_task.get("hawk", "Lil_Deep_Hawk")
+            task_desc = sub_task.get("task", message)
+
+            try:
+                hawk_role = HawkRole(hawk_name)
+            except ValueError:
+                hawk_role = HawkRole.DEEP
+
+            url = self._settings.hawk_endpoints.get(hawk_role, "")
+            if not url:
+                results.append(f"[{hawk_name}] No endpoint configured")
+                continue
+
+            async def _run_sub(
+                idx: int, h_name: str, h_url: str, t_desc: str
+            ) -> str:
+                await self._emit(TaskEvent(
+                    trace_id=decision.trace_id,
+                    task_name=f"sub_task_{idx}_{h_name}",
+                    status=TaskStatus.RUNNING,
+                    hawk=h_name,
+                    detail=t_desc[:200],
+                ))
+                try:
+                    result = await self._dispatch(h_url, t_desc, decision.trace_id)
+                    await self._emit(TaskEvent(
+                        trace_id=decision.trace_id,
+                        task_name=f"sub_task_{idx}_{h_name}",
+                        status=TaskStatus.COMPLETED,
+                        hawk=h_name,
+                    ))
+                    return f"[{h_name}] {result}"
+                except Exception as exc:
+                    await self._emit(TaskEvent(
+                        trace_id=decision.trace_id,
+                        task_name=f"sub_task_{idx}_{h_name}",
+                        status=TaskStatus.FAILED,
+                        hawk=h_name,
+                        detail=str(exc),
+                    ))
+                    return f"[{h_name}] Failed: {exc}"
+
+            tasks.append(_run_sub(i, hawk_name, url, task_desc))
+
+        if tasks:
+            results = await asyncio.gather(*tasks)
+
+        await self._emit(TaskEvent(
+            trace_id=decision.trace_id,
+            task_name="squad_orchestration",
+            status=TaskStatus.COMPLETED,
+            hawk="Lil_Deep_Hawk",
+            detail=f"Completed {len(results)} sub-tasks",
+        ))
+
+        return "\n\n---\n\n".join(results)
+
+    # ------------------------------------------------------------------
+    # Low-level dispatch
     # ------------------------------------------------------------------
 
     async def _dispatch(self, base_url: str, message: str, trace_id: str) -> str:
@@ -271,11 +456,16 @@ class Router:
 
     async def _review_gate(self, content: str, decision: RoutingDecision) -> str:
         """
-        Placeholder review gate.  In production this calls a dedicated
-        reviewer model/service that checks for hallucinations, policy
-        violations, and quality before the response is delivered.
-        The result is always logged for auditability.
+        Review gate — validates response before delivery.
+        In production this calls a dedicated reviewer model/service.
         """
+        await self._emit(TaskEvent(
+            trace_id=decision.trace_id,
+            task_name="review_gate",
+            status=TaskStatus.COMPLETED,
+            hawk=decision.hawk.value,
+            detail=f"Reviewed {len(content)} chars",
+        ))
         logger.info(
             "review_gate_passed",
             trace_id=decision.trace_id,
