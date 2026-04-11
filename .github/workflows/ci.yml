@@ -1,0 +1,123 @@
+name: FOAI Monorepo CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # -----------------------------------------------------------------------
+  # Node.js projects — build check
+  # -----------------------------------------------------------------------
+  node-build:
+    name: "Node.js Build (${{ matrix.project }})"
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - project: perform
+            path: perform
+          - project: cti-hub
+            path: cti-hub
+          - project: GRAMMAR
+            path: GRAMMAR
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Install dependencies
+        working-directory: ${{ matrix.path }}
+        run: |
+          if [ -f "pnpm-lock.yaml" ]; then
+            corepack enable
+            pnpm install --frozen-lockfile
+          elif [ -f "package-lock.json" ]; then
+            npm ci
+          else
+            npm install
+          fi
+
+      - name: Build
+        working-directory: ${{ matrix.path }}
+        run: npm run build
+        env:
+          # Suppress Next.js telemetry
+          NEXT_TELEMETRY_DISABLED: "1"
+
+  # -----------------------------------------------------------------------
+  # Python runtime — tests
+  # -----------------------------------------------------------------------
+  python-tests:
+    name: "Python Runtime Tests"
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pytest
+          if [ -f runtime/requirements.txt ]; then
+            pip install -r runtime/requirements.txt
+          fi
+
+      - name: Run tests
+        working-directory: runtime
+        run: python -m pytest tests/ -v --tb=short
+        env:
+          PYTHONPATH: "${{ github.workspace }}"
+
+  # -----------------------------------------------------------------------
+  # Rust — conditional on changes (optional, needs rustup)
+  # -----------------------------------------------------------------------
+  rust-check:
+    name: "Rust Check (if changed)"
+    runs-on: ubuntu-latest
+    # Only run if Rust files changed
+    if: |
+      github.event_name == 'push' ||
+      contains(github.event.pull_request.title, 'rust') ||
+      contains(github.event.pull_request.title, 'claw')
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Check for Rust changes
+        id: rust-changes
+        run: |
+          if git diff --name-only HEAD~1 HEAD 2>/dev/null | grep -qE '\.(rs|toml)$'; then
+            echo "changed=true" >> $GITHUB_OUTPUT
+          else
+            echo "changed=false" >> $GITHUB_OUTPUT
+          fi
+
+      - uses: dtolnay/rust-toolchain@stable
+        if: steps.rust-changes.outputs.changed == 'true'
+
+      - name: Cargo test
+        if: steps.rust-changes.outputs.changed == 'true'
+        run: |
+          for dir in claw-code-vendored/crates/*/; do
+            if [ -f "$dir/Cargo.toml" ]; then
+              echo "Testing $dir"
+              cd "$dir" && cargo test --quiet && cd -
+            fi
+          done
+        working-directory: runtime
