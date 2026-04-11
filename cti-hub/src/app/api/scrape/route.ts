@@ -1,107 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth-guard';
 import { rateLimit } from '@/lib/rate-limit-simple';
+import { scrapeUrl, scrapeQuery } from '@/lib/aiplug/sqwaadrun';
 
-const FIRECRAWL_API_KEY = process.env.FIRECRAWL_API_KEY;
-const APIFY_API_TOKEN = process.env.APIFY_API_TOKEN;
-
-interface ScrapeResult {
-  source: 'firecrawl' | 'apify';
-  url: string;
-  title: string;
-  content: string;
-  metadata: Record<string, unknown>;
-  scraped_at: string;
-}
-
-async function scrapeWithFirecrawl(url: string): Promise<ScrapeResult> {
-  const res = await fetch('https://api.firecrawl.dev/v1/scrape', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${FIRECRAWL_API_KEY}`,
-    },
-    body: JSON.stringify({
-      url,
-      formats: ['markdown', 'html'],
-      onlyMainContent: true,
-    }),
-  });
-
-  const data = await res.json();
-  if (!res.ok) throw new Error(data.error || 'Firecrawl scrape failed');
-
-  return {
-    source: 'firecrawl',
-    url,
-    title: data.data?.metadata?.title || url,
-    content: data.data?.markdown || data.data?.html || '',
-    metadata: data.data?.metadata || {},
-    scraped_at: new Date().toISOString(),
-  };
-}
-
-async function crawlWithFirecrawl(url: string, limit: number = 10): Promise<ScrapeResult[]> {
-  const res = await fetch('https://api.firecrawl.dev/v1/crawl', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${FIRECRAWL_API_KEY}`,
-    },
-    body: JSON.stringify({ url, limit, scrapeOptions: { formats: ['markdown'], onlyMainContent: true } }),
-  });
-
-  const data = await res.json();
-  if (!res.ok) throw new Error(data.error || 'Firecrawl crawl failed');
-
-  // Crawl is async — return the job ID for polling
-  return [{
-    source: 'firecrawl',
-    url,
-    title: `Crawl job: ${data.id}`,
-    content: JSON.stringify({ jobId: data.id, status: data.status }),
-    metadata: { jobId: data.id, limit },
-    scraped_at: new Date().toISOString(),
-  }];
-}
-
-async function scrapeWithApify(url: string): Promise<ScrapeResult> {
-  if (!APIFY_API_TOKEN) throw new Error('APIFY_API_TOKEN not configured');
-
-  const res = await fetch('https://api.apify.com/v2/acts/apify~web-scraper/run-sync-get-dataset-items', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${APIFY_API_TOKEN}`,
-    },
-    body: JSON.stringify({
-      startUrls: [{ url }],
-      pageFunction: `async function pageFunction(context) {
-        const { page, request } = context;
-        const title = await page.title();
-        const text = await page.$eval('body', el => el.innerText);
-        return { url: request.url, title, text: text.slice(0, 50000) };
-      }`,
-      maxPagesPerCrawl: 1,
-    }),
-  });
-
-  const items = await res.json();
-  if (!res.ok || !Array.isArray(items) || items.length === 0) {
-    throw new Error('Apify scrape returned no results');
-  }
-
-  const item = items[0];
-  return {
-    source: 'apify',
-    url,
-    title: item.title || url,
-    content: item.text || '',
-    metadata: { pageCount: items.length },
-    scraped_at: new Date().toISOString(),
-  };
-}
-
+/**
+ * POST /api/scrape — Web scraping via Sqwaadrun 17-Hawk fleet.
+ *
+ * Sqwaadrun is the sole scraping engine. Pure Python, Brave API powered,
+ * zero cost. Routes through the Sqwaadrun gateway (SQWAADRUN_GATEWAY_URL).
+ *
+ * Body:
+ *   { urls: string[] }                    — scrape specific URLs
+ *   { intent: string, targets?: string[] } — NL intent, Chicken_Hawk auto-routes
+ */
 export async function POST(request: NextRequest) {
   const auth = await requireAuth(request);
   if (!auth.ok) return auth.response;
@@ -110,14 +21,34 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const { urls, engine, mode } = await request.json() as {
-      urls: string[];
-      engine?: 'firecrawl' | 'apify' | 'both';
-      mode?: 'scrape' | 'crawl';
+    const body = await request.json() as {
+      urls?: string[];
+      intent?: string;
+      targets?: string[];
     };
 
+    // Intent-based scraping — Chicken_Hawk routes to the right Hawk
+    if (body.intent) {
+      const result = await scrapeQuery(body.intent, body.targets || [], { timeoutMs: 60_000 });
+      if (!result.ok) {
+        return NextResponse.json({ error: result.error || 'Scrape failed' }, { status: 502 });
+      }
+      return NextResponse.json({
+        results: result.pages.map(p => ({
+          url: p.url,
+          title: p.title || p.url,
+          content: p.text,
+          scraped_at: new Date().toISOString(),
+        })),
+        total: result.pages.length,
+        failed: 0,
+      });
+    }
+
+    // URL-based scraping
+    const urls = body.urls;
     if (!urls || urls.length === 0) {
-      return NextResponse.json({ error: 'urls array required' }, { status: 400 });
+      return NextResponse.json({ error: 'urls array or intent string required' }, { status: 400 });
     }
 
     if (urls.length > 5) {
@@ -131,33 +62,20 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    const results: ScrapeResult[] = [];
+    const results: Array<{ url: string; title: string; content: string; scraped_at: string }> = [];
     const errors: Array<{ url: string; error: string }> = [];
 
     for (const url of urls) {
-      try {
-        if (mode === 'crawl' && FIRECRAWL_API_KEY) {
-          const crawled = await crawlWithFirecrawl(url);
-          results.push(...crawled);
-        } else if (engine === 'apify' && APIFY_API_TOKEN) {
-          results.push(await scrapeWithApify(url));
-        } else if (engine === 'both' && FIRECRAWL_API_KEY && APIFY_API_TOKEN) {
-          const [fc, ap] = await Promise.allSettled([
-            scrapeWithFirecrawl(url),
-            scrapeWithApify(url),
-          ]);
-          if (fc.status === 'fulfilled') results.push(fc.value);
-          if (ap.status === 'fulfilled') results.push(ap.value);
-          if (fc.status === 'rejected' && ap.status === 'rejected') {
-            errors.push({ url, error: 'Both engines failed' });
-          }
-        } else if (FIRECRAWL_API_KEY) {
-          results.push(await scrapeWithFirecrawl(url));
-        } else {
-          errors.push({ url, error: 'No scraping engine configured' });
-        }
-      } catch (err: unknown) {
-        errors.push({ url, error: err instanceof Error ? err.message : 'Scrape failed' });
+      const result = await scrapeUrl(url, { timeoutMs: 30_000 });
+      if (result.ok && result.pages.length > 0) {
+        results.push({
+          url,
+          title: result.pages[0].title || url,
+          content: result.text,
+          scraped_at: new Date().toISOString(),
+        });
+      } else {
+        errors.push({ url, error: result.error || 'Scrape returned no content' });
       }
     }
 

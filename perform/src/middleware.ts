@@ -26,6 +26,7 @@ const PUBLIC_PATHS = [
   '/grading',
   '/login',
   '/teams',
+  '/podcasters',
 ];
 
 /** Path prefixes that are always public (including sub-routes). */
@@ -38,6 +39,7 @@ const PUBLIC_PREFIXES = [
   '/studio/',
   '/podcast/',
   '/api/cfb/',
+  '/api/nfl/',
   '/api/auth/',
   '/api/players',
   '/api/tie/',
@@ -47,6 +49,7 @@ const PUBLIC_PREFIXES = [
   '/api/seed-board',
   '/teams/',
   '/huddle/',
+  '/podcasters/',
   '/api/health',
   '/generated/',
 ];
