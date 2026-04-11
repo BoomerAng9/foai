@@ -95,7 +95,7 @@ ${raw_data.slice(0, 30000)}`;
 
     const completion = await res.json();
     if (!res.ok) {
-      return NextResponse.json({ error: completion.error?.message || 'OpenRouter failed' }, { status: 502 });
+      return NextResponse.json({ error: completion.error?.message || 'AI service temporarily unavailable' }, { status: 502 });
     }
 
     // Record usage in LUC

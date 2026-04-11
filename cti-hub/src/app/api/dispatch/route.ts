@@ -13,6 +13,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth-guard';
+import { rateLimit } from '@/lib/rate-limit-simple';
 
 // AIMS VPS OpenClaw access — via Cloud Run proxy or direct SSH
 // In production, this should be a dedicated service. For now, we proxy via
@@ -38,6 +39,9 @@ interface DispatchResult {
 export async function POST(request: NextRequest) {
   const auth = await requireAuth(request);
   if (!auth.ok) return auth.response;
+  if (!rateLimit(auth.userId, 15, 60000)) {
+    return NextResponse.json({ error: 'Too many requests. Please slow down.', code: 'RATE_LIMITED' }, { status: 429 });
+  }
 
   const body = await request.json();
   const { task, agent, priority, context } = body as Partial<DispatchRequest>;

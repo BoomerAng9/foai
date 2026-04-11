@@ -118,6 +118,9 @@ export async function POST(req: NextRequest) {
         if (!isPassthrough(grammarOutput)) {
           enrichedMessage = buildConfirmationPrompt(message, grammarOutput);
         }
+      } else {
+        console.error(`[Broadcast] Grammar call failed: ${grammarRes.status} ${grammarRes.statusText}`);
+        // Continue with raw message — Grammar failure shouldn't block the conversation
       }
     }
 

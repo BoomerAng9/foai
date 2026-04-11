@@ -28,7 +28,7 @@ const LUC_URL = process.env.LUC_URL || 'http://localhost:8081';
 function getOpenRouterHeaders() {
   const apiKey = process.env.OPENROUTER_API_KEY || process.env.OPENROUTER_KEY || process.env.OPENAI_API_KEY;
   if (!apiKey) {
-    throw new Error('OpenRouter is not configured. Set OPENROUTER_API_KEY.');
+    throw new Error('AI service is not configured.');
   }
 
   return {
@@ -78,12 +78,12 @@ export async function createOpenRouterChatCompletion(input: {
 
   const payload = (await response.json()) as OpenRouterResponse;
   if (!response.ok) {
-    throw new Error(payload.error?.message || `OpenRouter request failed with status ${response.status}`);
+    throw new Error(payload.error?.message || `AI service temporarily unavailable (${response.status})`);
   }
 
   const content = payload.choices?.[0]?.message?.content?.trim();
   if (!content) {
-    throw new Error('OpenRouter returned an empty response.');
+    throw new Error('AI service returned an empty response.');
   }
 
   // Record usage in LUC

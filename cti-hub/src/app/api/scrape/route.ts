@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth-guard';
+import { rateLimit } from '@/lib/rate-limit-simple';
 
 const FIRECRAWL_API_KEY = process.env.FIRECRAWL_API_KEY;
 const APIFY_API_TOKEN = process.env.APIFY_API_TOKEN;
@@ -104,6 +105,9 @@ async function scrapeWithApify(url: string): Promise<ScrapeResult> {
 export async function POST(request: NextRequest) {
   const auth = await requireAuth(request);
   if (!auth.ok) return auth.response;
+  if (!rateLimit(auth.userId, 10, 60000)) {
+    return NextResponse.json({ error: 'Too many requests. Please slow down.', code: 'RATE_LIMITED' }, { status: 429 });
+  }
 
   try {
     const { urls, engine, mode } = await request.json() as {
