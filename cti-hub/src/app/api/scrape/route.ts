@@ -2,11 +2,11 @@ import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth-guard';
 import { rateLimit } from '@/lib/rate-limit-simple';
 
-const FIRECRAWL_API_KEY = process.env.FIRECRAWL_API_KEY;
+const BRAVE_API_KEY = process.env.BRAVE_API_KEY;
 const APIFY_API_TOKEN = process.env.APIFY_API_TOKEN;
 
 interface ScrapeResult {
-  source: 'firecrawl' | 'apify';
+  source: 'brave' | 'apify';
   url: string;
   title: string;
   content: string;
@@ -14,59 +14,61 @@ interface ScrapeResult {
   scraped_at: string;
 }
 
-async function scrapeWithFirecrawl(url: string): Promise<ScrapeResult> {
-  const res = await fetch('https://api.firecrawl.dev/v1/scrape', {
-    method: 'POST',
+/**
+ * Scrape a URL using Brave Web Search API (summarizer mode).
+ * Returns cleaned text content from the page.
+ */
+async function scrapeWithBrave(url: string): Promise<ScrapeResult> {
+  if (!BRAVE_API_KEY) throw new Error('Web search not configured');
+
+  // Use Brave's web search with the URL as query to get page summary + content
+  const searchUrl = new URL('https://api.search.brave.com/res/v1/web/search');
+  searchUrl.searchParams.set('q', url);
+  searchUrl.searchParams.set('count', '1');
+  searchUrl.searchParams.set('summary', '1');
+  searchUrl.searchParams.set('extra_snippets', '1');
+
+  const res = await fetch(searchUrl.toString(), {
     headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${FIRECRAWL_API_KEY}`,
+      'Accept': 'application/json',
+      'Accept-Encoding': 'gzip',
+      'X-Subscription-Token': BRAVE_API_KEY,
     },
-    body: JSON.stringify({
-      url,
-      formats: ['markdown', 'html'],
-      onlyMainContent: true,
-    }),
+    signal: AbortSignal.timeout(15000),
   });
 
   const data = await res.json();
-  if (!res.ok) throw new Error(data.error || 'Firecrawl scrape failed');
+  if (!res.ok) throw new Error(data.message || 'Web search failed');
+
+  const result = data.web?.results?.[0];
+  const snippets = result?.extra_snippets || [];
+  const summary = data.summarizer?.results?.[0]?.text || '';
+  const content = [
+    result?.description || '',
+    ...snippets,
+    summary,
+  ].filter(Boolean).join('\n\n');
 
   return {
-    source: 'firecrawl',
+    source: 'brave',
     url,
-    title: data.data?.metadata?.title || url,
-    content: data.data?.markdown || data.data?.html || '',
-    metadata: data.data?.metadata || {},
+    title: result?.title || url,
+    content: content || 'No content extracted',
+    metadata: {
+      age: result?.age,
+      language: result?.language,
+      family_friendly: data.query?.is_safe_search,
+    },
     scraped_at: new Date().toISOString(),
   };
 }
 
-async function crawlWithFirecrawl(url: string, limit: number = 10): Promise<ScrapeResult[]> {
-  const res = await fetch('https://api.firecrawl.dev/v1/crawl', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${FIRECRAWL_API_KEY}`,
-    },
-    body: JSON.stringify({ url, limit, scrapeOptions: { formats: ['markdown'], onlyMainContent: true } }),
-  });
-
-  const data = await res.json();
-  if (!res.ok) throw new Error(data.error || 'Firecrawl crawl failed');
-
-  // Crawl is async — return the job ID for polling
-  return [{
-    source: 'firecrawl',
-    url,
-    title: `Crawl job: ${data.id}`,
-    content: JSON.stringify({ jobId: data.id, status: data.status }),
-    metadata: { jobId: data.id, limit },
-    scraped_at: new Date().toISOString(),
-  }];
-}
-
+/**
+ * Full page scrape using Apify (JS-rendered, more complete).
+ * Fallback for when Brave summary is insufficient.
+ */
 async function scrapeWithApify(url: string): Promise<ScrapeResult> {
-  if (!APIFY_API_TOKEN) throw new Error('APIFY_API_TOKEN not configured');
+  if (!APIFY_API_TOKEN) throw new Error('Full-page scraper not configured');
 
   const res = await fetch('https://api.apify.com/v2/acts/apify~web-scraper/run-sync-get-dataset-items', {
     method: 'POST',
@@ -84,11 +86,12 @@ async function scrapeWithApify(url: string): Promise<ScrapeResult> {
       }`,
       maxPagesPerCrawl: 1,
     }),
+    signal: AbortSignal.timeout(30000),
   });
 
   const items = await res.json();
   if (!res.ok || !Array.isArray(items) || items.length === 0) {
-    throw new Error('Apify scrape returned no results');
+    throw new Error('Full-page scrape returned no results');
   }
 
   const item = items[0];
@@ -110,9 +113,9 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const { urls, engine, mode } = await request.json() as {
+    const { urls, engine, mode: _mode } = await request.json() as {
       urls: string[];
-      engine?: 'firecrawl' | 'apify' | 'both';
+      engine?: 'brave' | 'apify' | 'both';
       mode?: 'scrape' | 'crawl';
     };
 
@@ -136,23 +139,22 @@ export async function POST(request: NextRequest) {
 
     for (const url of urls) {
       try {
-        if (mode === 'crawl' && FIRECRAWL_API_KEY) {
-          const crawled = await crawlWithFirecrawl(url);
-          results.push(...crawled);
-        } else if (engine === 'apify' && APIFY_API_TOKEN) {
+        if (engine === 'apify' && APIFY_API_TOKEN) {
           results.push(await scrapeWithApify(url));
-        } else if (engine === 'both' && FIRECRAWL_API_KEY && APIFY_API_TOKEN) {
-          const [fc, ap] = await Promise.allSettled([
-            scrapeWithFirecrawl(url),
+        } else if (engine === 'both' && BRAVE_API_KEY && APIFY_API_TOKEN) {
+          const [br, ap] = await Promise.allSettled([
+            scrapeWithBrave(url),
             scrapeWithApify(url),
           ]);
-          if (fc.status === 'fulfilled') results.push(fc.value);
+          if (br.status === 'fulfilled') results.push(br.value);
           if (ap.status === 'fulfilled') results.push(ap.value);
-          if (fc.status === 'rejected' && ap.status === 'rejected') {
+          if (br.status === 'rejected' && ap.status === 'rejected') {
             errors.push({ url, error: 'Both engines failed' });
           }
-        } else if (FIRECRAWL_API_KEY) {
-          results.push(await scrapeWithFirecrawl(url));
+        } else if (BRAVE_API_KEY) {
+          results.push(await scrapeWithBrave(url));
+        } else if (APIFY_API_TOKEN) {
+          results.push(await scrapeWithApify(url));
         } else {
           errors.push({ url, error: 'No scraping engine configured' });
         }
