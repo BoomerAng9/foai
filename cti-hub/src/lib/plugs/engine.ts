@@ -50,7 +50,7 @@ export async function createPlug(
       ${data.slug},
       ${data.description || null},
       ${data.system_prompt},
-      ${data.model || 'qwen/qwen3.6-plus-preview:free'},
+      ${data.model || 'google/gemini-3.1-flash'},
       ${data.category || 'general'},
       ${data.icon_url || null},
       ${JSON.stringify(data.tools || [])},

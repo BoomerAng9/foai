@@ -4,9 +4,11 @@
  * The world's first two-party chatbot system with a note-taker.
  * No precedent exists. This is the competitive moat.
  *
- * CONSULT_ANG (Mercury 2) — Fast responder, active listener
- * ACHEEVY (GLM5 Turbo) — Senior consultant, execution model
- * NOTE_ANG (Nemotron Nano free) — Session recorder, inference layer
+ * CONSULT_ANG — Fast responder, active listener
+ * ACHEEVY — Senior consultant, execution model
+ * NOTE_ANG — Session recorder, inference layer
+ *
+ * All three use Gemini 3.1 Flash (paid, direct Google AI — no OpenRouter).
  *
  * Flow:
  * 1. User speaks/types → Note_Ang transcribes + logs
@@ -16,12 +18,12 @@
  * 5. Note_Ang captures everything for audit + pattern detection
  */
 
-const OPENROUTER_KEY = process.env.OPENROUTER_API_KEY || '';
+import { geminiChatCompletion, GEMINI_CHAT_MODEL } from '@/lib/ai/gemini';
 
-// Model assignments — Qwen 3.6 Plus (free, strong reasoning)
-const CONSULT_MODEL = 'qwen/qwen3.6-plus-preview:free';
-const ACHEEVY_MODEL = 'qwen/qwen3.6-plus-preview:free';
-const NOTE_MODEL = 'nvidia/nemotron-nano-9b-v2:free';
+// Model assignments — Gemini 3.1 Flash (paid, direct Google AI, no data training)
+const CONSULT_MODEL = GEMINI_CHAT_MODEL;
+const ACHEEVY_MODEL = GEMINI_CHAT_MODEL;
+const NOTE_MODEL = GEMINI_CHAT_MODEL;
 
 interface SessionMessage {
   role: 'user' | 'consult_ang' | 'acheevy' | 'note_ang';
@@ -51,26 +53,19 @@ function getSession(sessionId: string): SessionContext {
   return sessions.get(sessionId)!;
 }
 
-async function callModel(model: string, systemPrompt: string, messages: Array<{role: string; content: string}>, maxTokens: number = 2000): Promise<string> {
-  const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${OPENROUTER_KEY}`,
-      'Content-Type': 'application/json',
-      'X-OpenRouter-Title': 'FOAI Guide Me',
-    },
-    body: JSON.stringify({
-      model,
-      messages: [{ role: 'system', content: systemPrompt }, ...messages],
-      temperature: 0.6,
-      max_tokens: maxTokens,
-      stream: false,
-    }),
+async function callModel(_model: string, systemPrompt: string, messages: Array<{role: string; content: string}>, maxTokens: number = 2000): Promise<string> {
+  const result = await geminiChatCompletion({
+    messages: [
+      { role: 'system', content: systemPrompt },
+      ...messages.map(m => ({
+        role: (m.role === 'assistant' ? 'assistant' : m.role) as 'user' | 'assistant' | 'system',
+        content: m.content,
+      })),
+    ],
+    maxTokens,
+    temperature: 0.6,
   });
-
-  if (!res.ok) throw new Error(`Model ${model} returned ${res.status}`);
-  const data = await res.json();
-  return data.choices?.[0]?.message?.content || '';
+  return result.content;
 }
 
 // ── CONSULT_ANG — Fast Responder ──

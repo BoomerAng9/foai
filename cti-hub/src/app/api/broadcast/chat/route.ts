@@ -4,8 +4,8 @@ import { buildGrammarPrompt, buildConfirmationPrompt, isPassthrough, NTNTN_SYSTE
 import { checkMIMGate } from '@/lib/acheevy/mim-gate';
 
 const OPENROUTER_KEY = process.env.OPENROUTER_API_KEY || '';
-const ILLER_ANG_MODEL = 'qwen/qwen3.6-plus-preview:free';
-const CONSULT_MODEL = 'qwen/qwen3.6-plus-preview:free';
+const ILLER_ANG_MODEL = 'google/gemini-3.1-flash';
+const CONSULT_MODEL = 'google/gemini-3.1-flash';
 
 const ILLA_SYSTEM = `You are ILLA, the Head of Broad|Cast Studio — The Deploy Platform's video production suite.
 

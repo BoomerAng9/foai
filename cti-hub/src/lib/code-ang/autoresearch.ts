@@ -7,7 +7,7 @@
 
 import { createOpenRouterChatCompletion } from '@/lib/ai/openrouter';
 
-const CODE_ANG_MODEL = 'qwen/qwen3-235b-a22b:free';
+const CODE_ANG_MODEL = 'google/gemini-3.1-flash';
 const BRAVE_API_KEY = process.env.BRAVE_API_KEY;
 
 export interface ResearchFinding {
