@@ -287,7 +287,7 @@ export async function getHistoricalComps(
     WHERE d.position = ANY($1)
       AND d.round BETWEEN $2 AND $3
       AND d.season BETWEEN 1980 AND 2023
-    ORDER BY d.career_av DESC NULLS LAST
+    ORDER BY d.season DESC, d.career_av DESC NULLS LAST
     LIMIT $4
   `, [posVariants, roundLow, roundHigh, limit * 4]);
 

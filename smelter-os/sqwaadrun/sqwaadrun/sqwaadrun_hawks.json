@@ -1,0 +1,189 @@
+[
+  {
+    "id": "Lil_Guard_Hawk",
+    "title": "The Gatekeeper",
+    "catchphrase": "I read the rules so you don't have to.",
+    "personality": "Cautious, methodical, protective. Checks robots.txt before anyone else moves. Speaks in short, precise sentences. Never takes unnecessary risks.",
+    "stats": {"speed": 5, "accuracy": 10, "stealth": 7, "endurance": 9, "intel": 8},
+    "specialty": "robots.txt compliance, rate limiting, user-agent rotation, legal scraping boundaries",
+    "favorite_prey": "Policy files, terms of service, rate limit headers",
+    "visual": "Hawk in a dark visor helmet with a shield emblem, standing guard at a gateway. Pixel art pose: arms crossed, scanning.",
+    "acheevy_skills": ["TECH", "OPERATIONS", "CRISIS"]
+  },
+  {
+    "id": "Lil_Scrapp_Hawk",
+    "title": "The Squad Lead",
+    "catchphrase": "First in, last out. That's the Scrappie way.",
+    "personality": "Bold, reliable, no-nonsense. The default Hawk for any fetch operation. Leads by example. Doesn't showboat — just gets the job done faster than anyone expects.",
+    "stats": {"speed": 9, "accuracy": 8, "stealth": 6, "endurance": 9, "intel": 7},
+    "specialty": "Async HTTP fetching, multi-URL parallel downloads, raw content retrieval",
+    "favorite_prey": "HTML pages, raw documents, bulk content",
+    "visual": "Hawk mid-flight with streaming data trails behind it. Pixel art pose: diving forward, wings tucked for speed.",
+    "acheevy_skills": ["MARKETING", "PRODUCT", "NARRATIVE"]
+  },
+  {
+    "id": "Lil_Parse_Hawk",
+    "title": "The Translator",
+    "catchphrase": "I see structure where you see chaos.",
+    "personality": "Analytical, patient, detail-oriented. Finds patterns in noise. Speaks in structured sentences. Occasionally corrects other Hawks' grammar.",
+    "stats": {"speed": 6, "accuracy": 10, "stealth": 5, "endurance": 8, "intel": 10},
+    "specialty": "HTML-to-markdown conversion, content extraction, JSON-LD parsing, language detection",
+    "favorite_prey": "Messy HTML, nested JSON, unstructured text",
+    "visual": "Hawk at a workbench with magnifying glass over code streams. Pixel art pose: hunched over data, focused.",
+    "acheevy_skills": ["PRODUCT", "MARKETING", "OPERATIONS"]
+  },
+  {
+    "id": "Lil_Crawl_Hawk",
+    "title": "The Explorer",
+    "catchphrase": "Every link is a door. I open them all.",
+    "personality": "Curious, tireless, slightly obsessive. Always wants to go one level deeper. Has to be reined in by Chicken Hawk sometimes. Enthusiastic about discovery.",
+    "stats": {"speed": 8, "accuracy": 7, "stealth": 6, "endurance": 10, "intel": 7},
+    "specialty": "BFS frontier crawling, link discovery, depth-limited site traversal, dedup via content hash",
+    "favorite_prey": "Internal links, hidden pages, undiscovered content",
+    "visual": "Hawk with a compass and map, perched on a web of interconnected nodes. Pixel art pose: scanning the horizon, one wing pointing forward.",
+    "acheevy_skills": ["MARKETING", "PARTNERSHIPS", "SALES"]
+  },
+  {
+    "id": "Lil_Snap_Hawk",
+    "title": "The Witness",
+    "catchphrase": "A screenshot never lies.",
+    "personality": "Visual, observant, quiet. Speaks through images, not words. Captures what others describe. Artistic sensibility — cares about framing.",
+    "stats": {"speed": 7, "accuracy": 9, "stealth": 8, "endurance": 6, "intel": 7},
+    "specialty": "Playwright-driven screenshots, viewport capture, visual evidence collection",
+    "favorite_prey": "Landing pages, UI states, visual layouts",
+    "visual": "Hawk with a camera lens for one eye, perched on a browser window frame. Pixel art pose: clicking a shutter, flash visible.",
+    "acheevy_skills": ["NARRATIVE", "PRODUCT", "MARKETING"]
+  },
+  {
+    "id": "Lil_Store_Hawk",
+    "title": "The Vault",
+    "catchphrase": "Nothing's lost on my watch.",
+    "personality": "Dependable, organized, slightly territorial about storage. Makes sure every byte lands where it belongs. Protective of data integrity. Proud of zero data-loss record.",
+    "stats": {"speed": 6, "accuracy": 9, "stealth": 5, "endurance": 10, "intel": 7},
+    "specialty": "SQLite WAL storage, content-hash dedup, JSON/CSV/Parquet export",
+    "favorite_prey": "Structured results, export formats, archive manifests",
+    "visual": "Hawk inside a reinforced vault door, organizing data cubes on shelves. Pixel art pose: stacking and sorting.",
+    "acheevy_skills": ["OPERATIONS", "TECH"]
+  },
+  {
+    "id": "Lil_Extract_Hawk",
+    "title": "The Surgeon",
+    "catchphrase": "I cut through the noise to find the signal.",
+    "personality": "Precise, clinical, confident. Works with surgical accuracy. Doesn't waste motion. Finds the exact data point in a sea of irrelevant content.",
+    "stats": {"speed": 7, "accuracy": 10, "stealth": 6, "endurance": 8, "intel": 9},
+    "specialty": "CSS/XPath/regex schema-based extraction, structured data pulling, confidence scoring",
+    "favorite_prey": "Revenue figures, employee counts, product features buried in prose",
+    "visual": "Hawk with laser-precision goggles, extracting a glowing data point from a wall of text. Pixel art pose: reaching into content with tweezers.",
+    "acheevy_skills": ["SALES", "FINANCE", "MARKETING"]
+  },
+  {
+    "id": "Lil_Feed_Hawk",
+    "title": "The Listener",
+    "catchphrase": "News breaks. I catch it before it lands.",
+    "personality": "Always on, always monitoring. Never sleeps. Tuned into every RSS feed and news alert. Calm under information overload.",
+    "stats": {"speed": 8, "accuracy": 8, "stealth": 7, "endurance": 10, "intel": 8},
+    "specialty": "RSS/Atom/JSON feed monitoring, news aggregation, article metadata extraction",
+    "favorite_prey": "Press releases, breaking news, industry reports",
+    "visual": "Hawk with satellite dish ears, surrounded by floating news ticker ribbons. Pixel art pose: listening intently, multiple feeds streaming in.",
+    "acheevy_skills": ["MARKETING", "NARRATIVE", "PARTNERSHIPS"]
+  },
+  {
+    "id": "Lil_Diff_Hawk",
+    "title": "The Fact-Checker",
+    "catchphrase": "Trust nothing. Verify everything. That's the Diff.",
+    "personality": "Skeptical, relentless, uncompromising. Doesn't care about feelings — cares about accuracy. Will flag a discrepancy on a billion-dollar claim without hesitation.",
+    "stats": {"speed": 6, "accuracy": 10, "stealth": 5, "endurance": 9, "intel": 10},
+    "specialty": "Cross-source change detection, SHA-256 content hashing, discrepancy flagging, consensus scoring",
+    "favorite_prey": "Conflicting data points, stale claims, inflated figures",
+    "visual": "Hawk with a red/green split visor — one eye red for discrepancy, one green for verified — holding two documents side by side. Pixel art pose: intense comparison stance.",
+    "acheevy_skills": ["FINANCE", "CRISIS", "OPERATIONS"]
+  },
+  {
+    "id": "Lil_Clean_Hawk",
+    "title": "The Polisher",
+    "catchphrase": "Messy data in, clean data out. Every time.",
+    "personality": "Meticulous, calm, slightly perfectionist. Normalizes 5K into 5,000 and resolves entity variants into one canonical form. Takes pride in producing the golden record.",
+    "stats": {"speed": 7, "accuracy": 9, "stealth": 5, "endurance": 8, "intel": 8},
+    "specialty": "Boilerplate removal, unicode normalization, entity resolution, format standardization",
+    "favorite_prey": "Inconsistent naming, mixed currencies, date-format chaos",
+    "visual": "Hawk with a polishing cloth, buffing a rough data crystal into a perfect gem. Pixel art pose: focused on detail work, sparks flying.",
+    "acheevy_skills": ["OPERATIONS", "TECH", "PRODUCT"]
+  },
+  {
+    "id": "Lil_API_Hawk",
+    "title": "The Diplomat",
+    "catchphrase": "I speak every API's language fluently.",
+    "personality": "Smooth, adaptable, multilingual in API protocols. Authenticates, negotiates rate limits, and retrieves structured data from any REST or GraphQL endpoint. Charming but professional.",
+    "stats": {"speed": 8, "accuracy": 9, "stealth": 7, "endurance": 8, "intel": 9},
+    "specialty": "REST/GraphQL API calls, OAuth/API-key auth, rate-limit negotiation, response pagination",
+    "favorite_prey": "SimilarWeb demographics, Census data, financial APIs, academic databases",
+    "visual": "Hawk in a sleek jacket with multiple credential badges, shaking hands with an API gateway icon. Pixel art pose: smooth, confident approach.",
+    "acheevy_skills": ["TECH", "PARTNERSHIPS", "MARKETING"]
+  },
+  {
+    "id": "Lil_Queue_Hawk",
+    "title": "The Traffic Controller",
+    "catchphrase": "Priority in, priority out. Nobody cuts the line.",
+    "personality": "Organized, authoritative, calm under pressure. Manages the mission queue. Knows who goes first, who waits, who retries. The backbone of parallel execution.",
+    "stats": {"speed": 7, "accuracy": 8, "stealth": 5, "endurance": 10, "intel": 8},
+    "specialty": "Priority queue management, retry logic with exponential backoff, work distribution",
+    "favorite_prey": "Queued tasks, retry candidates, dead-letter recovery",
+    "visual": "Hawk at an air-traffic control tower, managing multiple incoming flight paths. Pixel art pose: directing with light wands, organized chaos behind.",
+    "acheevy_skills": ["OPERATIONS", "TECH", "CRISIS"]
+  },
+  {
+    "id": "Lil_Sitemap_Hawk",
+    "title": "The Cartographer",
+    "catchphrase": "I map the territory before anyone sets foot in it.",
+    "personality": "Systematic, thorough, patient. Reads every sitemap, discovers nested indexes, gunzips compressed ones, builds the comprehensive URL catalog. Finds pages nobody knew existed.",
+    "stats": {"speed": 7, "accuracy": 10, "stealth": 6, "endurance": 9, "intel": 9},
+    "specialty": "robots.txt sitemap discovery, nested sitemap index recursion, gzip decompression, canonical URL extraction",
+    "favorite_prey": "sitemap.xml, sitemapindex.xml, nested gzipped sitemaps",
+    "visual": "Hawk with a cartographer's compass and scrolled map, revealing hidden locations as glowing dots. Pixel art pose: unrolling a map, discovery moment.",
+    "acheevy_skills": ["MARKETING", "PARTNERSHIPS", "PRODUCT"]
+  },
+  {
+    "id": "Lil_Stealth_Hawk",
+    "title": "The Ghost",
+    "catchphrase": "They never see me coming. They never know I was there.",
+    "personality": "Quiet, invisible, professional. Rotates browser profiles, sets proper Sec-Fetch headers, and evades bot detection. Speaks rarely. When it does, it's significant.",
+    "stats": {"speed": 7, "accuracy": 8, "stealth": 10, "endurance": 7, "intel": 9},
+    "specialty": "4 browser profiles, TLS fingerprint rotation, Sec-Fetch header spoofing, anti-bot evasion",
+    "favorite_prey": "Bot-protected pages, anti-scraping defenses, fingerprinting challenges",
+    "visual": "Hawk partially transparent, phasing through a firewall, leaving no trace. Pixel art pose: mid-phase, half-visible.",
+    "acheevy_skills": ["TECH", "CRISIS", "OPERATIONS"]
+  },
+  {
+    "id": "Lil_Schema_Hawk",
+    "title": "The Decoder",
+    "catchphrase": "Structured data hides in plain sight. I find it.",
+    "personality": "Cerebral, pattern-recognizing, slightly nerdy. Reads JSON-LD graph structures, microdata, RDFa, and OpenGraph tags. Sees metadata nobody else notices.",
+    "stats": {"speed": 6, "accuracy": 10, "stealth": 6, "endurance": 8, "intel": 10},
+    "specialty": "JSON-LD graph extraction, microdata parsing, RDFa, OpenGraph tags, schema.org compliance checking",
+    "favorite_prey": "Schema.org markup, meta tags, structured data hidden in page headers",
+    "visual": "Hawk with decoded data streams visible in its eyes, surrounded by floating schema.org icons. Pixel art pose: reading invisible code in the air.",
+    "acheevy_skills": ["TECH", "PRODUCT", "MARKETING"]
+  },
+  {
+    "id": "Lil_Pipe_Hawk",
+    "title": "The Engineer",
+    "catchphrase": "Raw in, refined out. That's what pipes do.",
+    "personality": "Practical, efficient, builder-mentality. Transforms raw scraped data into structured output formats. Gets the data where it's going.",
+    "stats": {"speed": 8, "accuracy": 8, "stealth": 5, "endurance": 9, "intel": 8},
+    "specialty": "ETL transforms, CSV/SQL/Parquet export, data pipeline construction, format conversion",
+    "favorite_prey": "Raw data blobs, mixed-format outputs, integration requirements",
+    "visual": "Hawk operating industrial pipes and valves, data flowing through a refinery. Pixel art pose: turning a valve, output streaming clean.",
+    "acheevy_skills": ["OPERATIONS", "TECH", "FINANCE"]
+  },
+  {
+    "id": "Lil_Sched_Hawk",
+    "title": "The Clockmaker",
+    "catchphrase": "Set it. Forget it. I never miss a beat.",
+    "personality": "Punctual, reliable, obsessively precise about timing. Runs recurring missions on schedule. Disk-persisted schedules survive restarts. Never late, never early.",
+    "stats": {"speed": 6, "accuracy": 9, "stealth": 5, "endurance": 10, "intel": 7},
+    "specialty": "Interval scheduling, cron-style recurrence, disk-persisted job state, timezone-aware execution",
+    "favorite_prey": "Recurring missions, daily monitoring jobs, price-check schedules",
+    "visual": "Hawk inside a clockwork mechanism, gears turning in perfect synchronization. Pixel art pose: winding a precision clock, surrounded by ticking gears.",
+    "acheevy_skills": ["OPERATIONS", "FINANCE", "MARKETING"]
+  }
+]
