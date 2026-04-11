@@ -16,10 +16,11 @@ from typing import AsyncIterator
 
 import structlog
 import uvicorn
-from fastapi import FastAPI, HTTPException, Request, status
+from fastapi import Depends, FastAPI, HTTPException, Request, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, StreamingResponse
 from pydantic import BaseModel, Field
+from starlette.middleware.base import BaseHTTPMiddleware
 
 from config import get_settings
 from event_bus import EventBus, TaskEvent, TaskStatus, get_event_bus
@@ -70,6 +71,8 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
 # ---------------------------------------------------------------------------
 # FastAPI app
 # ---------------------------------------------------------------------------
+_is_production = os.getenv("ENVIRONMENT", "production").lower() == "production"
+
 app = FastAPI(
     title="Chicken Hawk Gateway",
     description=(
@@ -79,14 +82,84 @@ app = FastAPI(
     ),
     version="2.0.0",
     lifespan=lifespan,
+    # Disable Swagger/OpenAPI docs in production
+    docs_url=None if _is_production else "/docs",
+    redoc_url=None if _is_production else "/redoc",
+    openapi_url=None if _is_production else "/openapi.json",
 )
+
+_ALLOWED_ORIGINS = [
+    "https://perform.foai.cloud",
+    "https://cti.foai.cloud",
+    "https://deploy.foai.cloud",
+    "https://foai.cloud",
+    "https://hawk.foai.cloud",
+]
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=os.getenv("CORS_ALLOW_ORIGINS", "").split(",") if os.getenv("CORS_ALLOW_ORIGINS") else ["*"],
+    allow_origins=os.getenv("CORS_ALLOW_ORIGINS", "").split(",") if os.getenv("CORS_ALLOW_ORIGINS") else _ALLOWED_ORIGINS,
     allow_methods=["GET", "POST"],
     allow_headers=["*"],
 )
+
+
+# ---------------------------------------------------------------------------
+# Security headers middleware
+# ---------------------------------------------------------------------------
+class SecurityHeadersMiddleware(BaseHTTPMiddleware):
+    """Add security headers to every response."""
+
+    async def dispatch(self, request: Request, call_next):
+        response = await call_next(request)
+        response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
+        response.headers["X-Content-Type-Options"] = "nosniff"
+        response.headers["X-Frame-Options"] = "DENY"
+        response.headers["X-XSS-Protection"] = "1; mode=block"
+        response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+        response.headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=()"
+        response.headers["Server"] = "ACHEEVY"
+        return response
+
+
+app.add_middleware(SecurityHeadersMiddleware)
+
+
+# ---------------------------------------------------------------------------
+# Auth dependency
+# ---------------------------------------------------------------------------
+def _get_gateway_secret() -> str:
+    """Return the GATEWAY_SECRET from settings."""
+    return get_settings().gateway_secret.get_secret_value()
+
+
+async def require_auth(request: Request) -> None:
+    """
+    Require a valid Bearer token (GATEWAY_SECRET) or session cookie.
+    Raises 401 if authentication fails.
+    """
+    secret = _get_gateway_secret()
+
+    # Check Authorization header
+    auth_header = request.headers.get("authorization", "")
+    if auth_header.startswith("Bearer ") and auth_header[7:] == secret:
+        return
+
+    # Check query param fallback (for internal tools)
+    token_param = request.query_params.get("token")
+    if token_param and token_param == secret:
+        return
+
+    # Check session cookie
+    session_token = request.cookies.get("session_token")
+    if session_token and session_token == secret:
+        return
+
+    raise HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Missing or invalid authentication",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -116,9 +189,15 @@ class HealthResponse(BaseModel):
 # ---------------------------------------------------------------------------
 # Routes
 # ---------------------------------------------------------------------------
-@app.get("/health", response_model=HealthResponse, tags=["Observability"])
-async def health() -> HealthResponse:
-    """Return the health status of the gateway and all Lil_Hawk endpoints."""
+@app.get("/health", tags=["Observability"])
+async def health() -> dict:
+    """Return minimal public health status."""
+    return {"status": "ok"}
+
+
+@app.get("/internal/health", response_model=HealthResponse, tags=["Observability"])
+async def internal_health(_: None = Depends(require_auth)) -> HealthResponse:
+    """Return detailed health status (requires GATEWAY_SECRET auth)."""
     if _router is None:
         raise HTTPException(status_code=503, detail="Gateway not initialised")
     hawk_health = await _router.health_check()
@@ -131,7 +210,7 @@ async def health() -> HealthResponse:
 
 
 @app.post("/chat", response_model=ChatResponse, tags=["Chat"])
-async def chat(request: ChatRequest) -> ChatResponse:
+async def chat(request: ChatRequest, _: None = Depends(require_auth)) -> ChatResponse:
     """
     Accept a natural-language message, route it to the best Lil_Hawk,
     and return a reviewed, evidence-backed response.
