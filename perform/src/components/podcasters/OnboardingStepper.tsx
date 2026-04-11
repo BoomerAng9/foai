@@ -33,9 +33,11 @@ const PLATFORMS = [
   'Other',
 ];
 
-const TIER_ORDER: PlanTier[] = ['free', 'bmc', 'premium', 'bucket_list', 'lfg'];
+type DisplayTier = PlanTier | 'free';
 
-const TIER_ACCENT: Record<PlanTier, string> = {
+const TIER_ORDER: DisplayTier[] = ['free', 'bmc', 'premium', 'bucket_list', 'lfg'];
+
+const TIER_ACCENT: Record<DisplayTier, string> = {
   free: '#8B94A8',
   bmc: '#22D3EE',
   premium: '#FFD700',
@@ -43,7 +45,25 @@ const TIER_ACCENT: Record<PlanTier, string> = {
   lfg: '#D40028',
 };
 
-const FEATURE_LABELS: { key: keyof typeof PLAN_FEATURES.free; label: string }[] = [
+const FREE_PLAN = {
+  name: 'Free',
+  description: 'Limited preview. Upgrade to BMC for full access.',
+  warRoom: false,
+  workbench: false,
+  distribution: false,
+  customHawks: false,
+  whiteLabel: false,
+  maxScriptsPerMonth: 0,
+  maxClipsPerMonth: 0,
+  maxEpisodePackages: 0,
+  hawkScrapesPerMonth: 0,
+  dailyBriefing: false,
+  guestResearch: false,
+  sponsorScan: false,
+  clipsPerEpisode: 0,
+};
+
+const FEATURE_LABELS: { key: keyof typeof FREE_PLAN; label: string }[] = [
   { key: 'warRoom', label: 'War Room' },
   { key: 'workbench', label: 'Workbench' },
   { key: 'distribution', label: 'Distribution' },
@@ -64,7 +84,7 @@ interface FormData {
   objectives: [string, string, string];
   needs_analysis: string;
   selected_team: string | null;
-  plan_tier: PlanTier;
+  plan_tier: DisplayTier;
 }
 
 function sanitize(val: string): string {
@@ -647,7 +667,7 @@ export default function OnboardingStepper() {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
           {TIER_ORDER.map((tier) => {
-            const plan = PLAN_FEATURES[tier];
+            const plan = tier === 'free' ? FREE_PLAN : PLAN_FEATURES[tier as PlanTier];
             const accent = TIER_ACCENT[tier];
             const isSelected = form.plan_tier === tier;
 
@@ -713,7 +733,7 @@ export default function OnboardingStepper() {
   /* ── Step 7: Confirmation ────────────────────────────── */
   function Step7() {
     const team = NFL_TEAMS.find((t) => t.abbrev === form.selected_team);
-    const plan = PLAN_FEATURES[form.plan_tier];
+    const plan = form.plan_tier === 'free' ? FREE_PLAN : PLAN_FEATURES[form.plan_tier as PlanTier];
 
     return (
       <div className="space-y-6">

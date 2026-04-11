@@ -16,14 +16,26 @@ const T = {
   cyan: '#22D3EE',
 };
 
-const TIER_ORDER: PlanTier[] = ['free', 'bmc', 'premium', 'bucket_list', 'lfg'];
+type DisplayTier = PlanTier | 'free';
 
-const TIER_ACCENT: Record<PlanTier, string> = {
+const TIER_ORDER: DisplayTier[] = ['free', 'bmc', 'premium', 'bucket_list', 'lfg'];
+
+const TIER_ACCENT: Record<DisplayTier, string> = {
   free: '#8B94A8',
   bmc: '#22D3EE',
   premium: '#FFD700',
   bucket_list: '#F97316',
   lfg: '#D40028',
+};
+
+const FREE_PLAN = {
+  name: 'Free',
+  description: 'Limited preview. Upgrade to BMC for full access.',
+  warRoom: false,
+  workbench: false,
+  distribution: false,
+  customHawks: false,
+  whiteLabel: false,
 };
 
 const FEATURES = [
@@ -201,7 +213,7 @@ export default function PodcastersLandingPage() {
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
             {TIER_ORDER.map((tier) => {
-              const plan = PLAN_FEATURES[tier];
+              const plan = tier === 'free' ? FREE_PLAN : PLAN_FEATURES[tier];
               const accent = TIER_ACCENT[tier];
               return (
                 <div
