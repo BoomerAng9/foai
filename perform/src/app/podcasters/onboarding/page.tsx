@@ -2,8 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { onAuthStateChanged, type User } from 'firebase/auth';
-import { auth } from '@/lib/firebase/client';
+import type { User } from 'firebase/auth';
 import { BackHomeNav } from '@/components/layout/BackHomeNav';
 import OnboardingStepper from '@/components/podcasters/OnboardingStepper';
 
@@ -23,15 +22,20 @@ export default function OnboardingPage() {
   const [checking, setChecking] = useState(true);
 
   useEffect(() => {
-    const unsub = onAuthStateChanged(auth, (fbUser) => {
-      if (!fbUser) {
-        router.replace('/login?redirect=/podcasters/onboarding');
-        return;
-      }
-      setUser(fbUser);
-      setChecking(false);
-    });
-    return () => unsub();
+    let unsub: (() => void) | undefined;
+    (async () => {
+      const { onAuthStateChanged } = await import('firebase/auth');
+      const { auth } = await import('@/lib/firebase/client');
+      unsub = onAuthStateChanged(auth, (fbUser) => {
+        if (!fbUser) {
+          router.replace('/login?redirect=/podcasters/onboarding');
+          return;
+        }
+        setUser(fbUser);
+        setChecking(false);
+      });
+    })();
+    return () => unsub?.();
   }, [router]);
 
   if (checking || !user) {
