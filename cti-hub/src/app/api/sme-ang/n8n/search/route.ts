@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { requireAuth } from '@/lib/auth-guard';
+import { rateLimit } from '@/lib/rate-limit-simple';
 import fs from 'node:fs';
 import path from 'node:path';
 
@@ -62,7 +64,13 @@ function matchesQuery(entry: CatalogEntry, q: string): boolean {
   );
 }
 
-export function GET(request: NextRequest) {
+export async function GET(request: NextRequest) {
+  const auth = await requireAuth(request);
+  if (!auth.ok) return auth.response;
+  if (!rateLimit(auth.userId, 20, 60000)) {
+    return NextResponse.json({ error: 'Too many requests. Please slow down.', code: 'RATE_LIMITED' }, { status: 429 });
+  }
+
   const url = new URL(request.url);
   const q = url.searchParams.get('q') || '';
   const category = url.searchParams.get('category') || '';

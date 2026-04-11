@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth-guard';
+import { rateLimit } from '@/lib/rate-limit-simple';
 import { generateShotUniversal, checkShotStatus, checkVeoStatus, estimateVideoCost } from '@/lib/video/pipeline';
 import type { ShotPlan, VideoEngine } from '@/lib/video/pipeline';
 
@@ -11,6 +12,9 @@ export async function POST(req: NextRequest) {
   try {
     const auth = await requireAuth(req);
     if (!auth.ok) return auth.response;
+    if (!rateLimit(auth.userId, 5, 60000)) {
+      return NextResponse.json({ error: 'Too many requests. Please slow down.', code: 'RATE_LIMITED' }, { status: 429 });
+    }
 
     const body = await req.json();
     const {

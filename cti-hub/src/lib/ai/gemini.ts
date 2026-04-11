@@ -80,7 +80,7 @@ export async function geminiChatCompletion(input: {
   const result = await chat.sendMessage(lastMessage.content);
   const text = result.response.text();
 
-  if (!text) throw new Error('Gemini returned an empty response');
+  if (!text) throw new Error('AI service returned an empty response');
 
   return { content: text, model: modelName };
 }

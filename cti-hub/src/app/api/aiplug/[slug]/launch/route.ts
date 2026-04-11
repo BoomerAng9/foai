@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth-guard';
+import { rateLimit } from '@/lib/rate-limit-simple';
 import { sql } from '@/lib/insforge';
 import { ensureAiplugTables } from '@/lib/aiplug/schema';
 import type { PlugRow, PlugRunRow } from '@/lib/aiplug/types';
@@ -22,6 +23,9 @@ export async function POST(
 ) {
   const auth = await requireAuth(request);
   if (!auth.ok) return auth.response;
+  if (!rateLimit(auth.userId, 5, 60000)) {
+    return NextResponse.json({ error: 'Too many requests. Please slow down.', code: 'RATE_LIMITED' }, { status: 429 });
+  }
 
   const { slug } = await params;
   if (!sql) {

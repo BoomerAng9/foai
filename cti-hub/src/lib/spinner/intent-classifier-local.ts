@@ -245,7 +245,7 @@ async function verifyWithLlm(
 ): Promise<IntentClassification> {
   const apiKey = readVerificationKey();
   if (!apiKey) {
-    throw new Error('No OpenRouter API key for LLM verification');
+    throw new Error('AI verification service not configured');
   }
   if (/gemma/i.test(VERIFICATION_MODEL)) {
     throw new Error('Refusing to use banned Gemma model for verification');
