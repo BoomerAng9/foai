@@ -52,11 +52,15 @@ const BOARD_2026 = [
 
 export async function POST(req: NextRequest) {
   try {
-    // Allow internal seeding via secret header (for VPS-to-VPS calls)
-    const internalKey = req.headers.get('x-internal-key');
-    if (internalKey !== process.env.OPENROUTER_API_KEY?.slice(-10)) {
+    // Allow internal seeding via dedicated pipeline key (for VPS-to-VPS calls)
+    const internalKey = req.headers.get('x-pipeline-key');
+    const pipelineKey = process.env.PIPELINE_AUTH_KEY;
+    if (!internalKey || !pipelineKey || internalKey !== pipelineKey) {
       const auth = await requireAuth(req);
       if (!auth.ok) return auth.response;
+      if (auth.role !== 'owner') {
+        return NextResponse.json({ error: 'Owner access required' }, { status: 403 });
+      }
     }
     if (!sql) return NextResponse.json({ error: 'Database not configured' }, { status: 503 });
 
