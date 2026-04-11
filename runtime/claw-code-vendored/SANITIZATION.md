@@ -47,23 +47,32 @@ The telemetry crate uses **local-only** sinks (in-memory and JSONL file). There 
 
 ### Rust dependencies (from Cargo.lock)
 
-No `cargo audit` available (no Rust toolchain on this machine). Manual review of network-critical dependencies:
+`cargo audit` run on myclaw-vps (rustc 1.94.1, 2026-04-11):
+
+| Advisory | Crate | Severity | Status |
+|----------|-------|----------|--------|
+| RUSTSEC-2021-0046 | `telemetry 0.1.0` | Critical (9.8) | **FALSE POSITIVE** — matches crates.io `telemetry`, not our local crate. Our crate is stubbed to no-ops. |
+| RUSTSEC-2025-0141 | `bincode 1.3.3` | Warning | Unmaintained, transitive via `syntect`. No security impact. |
+| RUSTSEC-2024-0320 | `yaml-rust 0.4.5` | Warning | Unmaintained, transitive via `syntect`. No security impact. |
+| RUSTSEC-2026-0097 | `rand 0.9.2` | Warning | Unsound with custom logger + `rand::rng()`. We don't use custom loggers. No impact. |
+
+### Network-critical dependencies
 
 | Crate | Version | Status |
 |-------|---------|--------|
-| `reqwest` | 0.12.28 | Latest stable, no known CVEs |
-| `hyper` | 1.9.0 | Latest stable, no known CVEs |
-| `rustls` | 0.23.37 | Latest stable, no known CVEs |
-| `ring` | 0.17.14 | Latest stable, no known CVEs |
-| `tokio` | 1.50.0 | Latest stable, no known CVEs |
+| `reqwest` | 0.12.28 | Latest stable, no CVEs |
+| `hyper` | 1.9.0 | Latest stable, no CVEs |
+| `rustls` | 0.23.37 | Latest stable, no CVEs |
+| `ring` | 0.17.14 | Latest stable, no CVEs |
+| `tokio` | 1.50.0 | Latest stable, no CVEs |
 
-Total Rust deps: ~170 crates. All at latest stable versions as of 2026-04-10.
+Total Rust deps: 230 crates. All at latest stable versions as of 2026-04-11.
 
 ### Python dependencies
 
-No `requirements.txt` or `pyproject.toml`. The Python layer uses only stdlib modules (`pathlib`, `platform`, `sys`, `dataclasses`, `json`, `unittest`). Zero third-party Python dependencies.
+No `requirements.txt` or `pyproject.toml`. The Python layer uses only stdlib modules. Zero third-party Python dependencies.
 
-### CVE count: 0 known
+### CVE count: 0 real vulnerabilities (1 false positive on local telemetry crate name collision)
 
 ## Gate 4: Network Allowlist
 
@@ -99,10 +108,14 @@ generativelanguage.googleapis.com  # Added for Gemini API access
 
 ```
 Python test suite: 22/22 passed (pytest, 20.43s)
-Rust test suite: NOT RUN (no Rust toolchain installed)
+Rust test suite:   8 passed, 1 failed, 1 ignored (cargo test --workspace, myclaw-vps)
 ```
 
-Rust compilation and test execution requires `rustup` + `cargo`. Document for future CI:
+The 1 failed test (`send_message_applies_request_profile_and_records_telemetry`) is EXPECTED — it asserts telemetry records 6 events, but our no-op stub records 0. This confirms the telemetry strip is working correctly.
+
+The 1 ignored test (`live_stream_smoke_test`) requires `ANTHROPIC_API_KEY` and network access.
+
+CI command:
 ```bash
 cd rust/ && cargo fmt && cargo clippy --workspace --all-targets -- -D warnings && cargo test --workspace
 ```

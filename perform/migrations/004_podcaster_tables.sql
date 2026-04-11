@@ -12,7 +12,7 @@ CREATE TABLE IF NOT EXISTS podcaster_users (
   primary_vertical TEXT NOT NULL,
   addon_vertical TEXT,
   selected_team TEXT,
-  plan_tier TEXT DEFAULT 'free',
+  plan_tier TEXT DEFAULT 'bmc',
   huddl_name TEXT,
   onboarding_complete BOOLEAN DEFAULT FALSE,
   created_at TIMESTAMPTZ DEFAULT NOW(),

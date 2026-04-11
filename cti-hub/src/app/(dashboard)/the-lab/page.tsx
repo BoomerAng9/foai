@@ -88,7 +88,7 @@ export default function TheLabPage() {
   const [filterOpen, setFilterOpen] = useState(false);
 
   const filtered = useMemo(() => {
-    let list = TOOLS.filter(t => {
+    const list = TOOLS.filter(t => {
       if (sectorFilter !== 'all' && t.sector !== sectorFilter) return false;
       if (tierFilter !== 'all' && t.tier !== tierFilter) return false;
       if (search) {
