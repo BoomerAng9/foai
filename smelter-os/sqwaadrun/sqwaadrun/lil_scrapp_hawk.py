@@ -429,7 +429,7 @@ class LilScrappHawk(BaseLilHawk):
                 async with self._session.get(
                     target.url, headers=headers, proxy=proxy,
                     allow_redirects=True, max_redirects=5,
-                    ssl=False,
+                    ssl=True,
                 ) as response:
                     result.status_code = response.status
                     result.headers = dict(response.headers)
@@ -2423,7 +2423,7 @@ class LilAPIHawk(BaseLilHawk):
 
             async with session.post(
                 endpoint, json=body, headers=headers,
-                timeout=aiohttp.ClientTimeout(total=30), ssl=False,
+                timeout=aiohttp.ClientTimeout(total=30), ssl=True,
             ) as resp:
                 data = await self._handle_response(resp, endpoint)
                 self.stats["tasks_completed"] += 1
@@ -3027,7 +3027,7 @@ class LilSitemapHawk(BaseLilHawk):
             headers = guard.get_headers()
             async with session.get(
                 robots_url, headers=headers,
-                timeout=aiohttp.ClientTimeout(total=10), ssl=False,
+                timeout=aiohttp.ClientTimeout(total=10), ssl=True,
             ) as resp:
                 if resp.status == 200:
                     text = await resp.text()
@@ -3057,7 +3057,7 @@ class LilSitemapHawk(BaseLilHawk):
             headers = guard.get_headers()
             async with session.get(
                 url, headers=headers,
-                timeout=aiohttp.ClientTimeout(total=20), ssl=False,
+                timeout=aiohttp.ClientTimeout(total=20), ssl=True,
             ) as resp:
                 if resp.status != 200:
                     return entries

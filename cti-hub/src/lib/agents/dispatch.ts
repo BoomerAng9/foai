@@ -6,20 +6,17 @@
  */
 
 const AGENT_ENDPOINTS: Record<string, string> = {
-  q_ang: process.env.SCOUT_ANG_URL || 'https://scout-ang-apbgyi35aq-uc.a.run.app',
-  sales_ang: process.env.EDU_ANG_URL || 'https://edu-ang-apbgyi35aq-uc.a.run.app',
-  content_ang: process.env.CONTENT_ANG_URL || 'https://content-ang-apbgyi35aq-uc.a.run.app',
-  biz_ang: process.env.BIZ_ANG_URL || 'https://biz-ang-apbgyi35aq-uc.a.run.app',
-  ops_ang: process.env.OPS_ANG_URL || 'https://ops-ang-apbgyi35aq-uc.a.run.app',
-  iller_ang: process.env.ILLER_ANG_URL || 'https://iller-ang-apbgyi35aq-uc.a.run.app',
-  cfo_ang: process.env.CFO_ANG_URL || 'https://cfo-ang-apbgyi35aq-uc.a.run.app',
-  // Tactical layer — Chicken Hawk dispatches via AIMS OpenClaw (aims-vps)
-  chicken_hawk: process.env.CHICKEN_HAWK_URL || 'http://chicken-hawk-gateway-gateway-1:8000',
-  // Supporting services
-  hermes: process.env.HERMES_URL || 'https://hermes-agent-apbgyi35aq-uc.a.run.app',
-  nemoclaw: process.env.NEMOCLAW_URL || 'https://nemoclaw-service-apbgyi35aq-uc.a.run.app',
-  // AIMS OpenClaw — production execution engine (aims-vps, NOT personal myclaw)
-  openclaw: process.env.OPENCLAW_URL || 'https://openclaw-service-apbgyi35aq-uc.a.run.app',
+  q_ang: process.env.SCOUT_ANG_URL || '',
+  sales_ang: process.env.EDU_ANG_URL || '',
+  content_ang: process.env.CONTENT_ANG_URL || '',
+  biz_ang: process.env.BIZ_ANG_URL || '',
+  ops_ang: process.env.OPS_ANG_URL || '',
+  iller_ang: process.env.ILLER_ANG_URL || '',
+  cfo_ang: process.env.CFO_ANG_URL || '',
+  chicken_hawk: process.env.CHICKEN_HAWK_URL || '',
+  hermes: process.env.HERMES_URL || '',
+  nemoclaw: process.env.NEMOCLAW_URL || '',
+  openclaw: process.env.OPENCLAW_URL || '',
 };
 
 export interface DispatchResult {
@@ -42,7 +39,7 @@ export async function dispatchToAgent(agentId: string, instruction: string): Pro
     return {
       success: false,
       agent: agentId,
-      response: `${agentId} is not currently deployed. The task has been queued.`,
+      response: 'This team member is not currently deployed. The task has been queued.',
       elapsed_ms: Date.now() - start,
       error: 'Agent endpoint not configured',
     };
@@ -82,7 +79,7 @@ export async function dispatchToAgent(agentId: string, instruction: string): Pro
       return {
         success: false,
         agent: agentId,
-        response: `${agentId} returned status ${res.status}. Task queued for retry.`,
+        response: 'Team member temporarily unavailable. Task queued for retry.',
         elapsed_ms: Date.now() - start,
         error: `HTTP ${res.status}`,
       };
@@ -99,7 +96,7 @@ export async function dispatchToAgent(agentId: string, instruction: string): Pro
     return {
       success: false,
       agent: agentId,
-      response: `${agentId} is temporarily unavailable. Task queued.`,
+      response: 'Team member is temporarily unavailable. Task queued.',
       elapsed_ms: Date.now() - start,
       error: err instanceof Error ? err.message : 'Connection failed',
     };

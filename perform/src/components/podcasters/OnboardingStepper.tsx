@@ -3,7 +3,7 @@
 import { useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { NFL_TEAMS } from '@/lib/podcasters/team-assets';
-import { PLAN_FEATURES, type PlanTier } from '@/lib/podcasters/plans';
+import { PLAN_FEATURES, type PlanTier, type PlanConfig } from '@/lib/podcasters/plans';
 import TeamSelector from './TeamSelector';
 
 /* ── Theme tokens ──────────────────────────────────────── */
@@ -33,37 +33,24 @@ const PLATFORMS = [
   'Other',
 ];
 
-type DisplayTier = PlanTier | 'free';
+const TIER_ORDER: PlanTier[] = ['bmc', 'premium', 'bucket_list', 'lfg'];
 
-const TIER_ORDER: DisplayTier[] = ['free', 'bmc', 'premium', 'bucket_list', 'lfg'];
-
-const TIER_ACCENT: Record<DisplayTier, string> = {
-  free: '#8B94A8',
+const TIER_ACCENT: Record<PlanTier, string> = {
   bmc: '#22D3EE',
   premium: '#FFD700',
   bucket_list: '#F97316',
   lfg: '#D40028',
 };
 
-const FREE_PLAN = {
-  name: 'Free',
-  description: 'Limited preview. Upgrade to BMC for full access.',
-  warRoom: false,
-  workbench: false,
-  distribution: false,
-  customHawks: false,
-  whiteLabel: false,
-  maxScriptsPerMonth: 0,
-  maxClipsPerMonth: 0,
-  maxEpisodePackages: 0,
-  hawkScrapesPerMonth: 0,
-  dailyBriefing: false,
-  guestResearch: false,
-  sponsorScan: false,
-  clipsPerEpisode: 0,
+const PRICING: Record<PlanTier, number> = {
+  bmc: 7,
+  premium: 47,
+  bucket_list: 87,
+  lfg: 147,
 };
 
-const FEATURE_LABELS: { key: keyof typeof FREE_PLAN; label: string }[] = [
+type BooleanFeatureKey = 'warRoom' | 'workbench' | 'distribution' | 'customHawks' | 'whiteLabel';
+const FEATURE_LABELS: { key: BooleanFeatureKey; label: string }[] = [
   { key: 'warRoom', label: 'War Room' },
   { key: 'workbench', label: 'Workbench' },
   { key: 'distribution', label: 'Distribution' },
@@ -84,7 +71,7 @@ interface FormData {
   objectives: [string, string, string];
   needs_analysis: string;
   selected_team: string | null;
-  plan_tier: DisplayTier;
+  plan_tier: PlanTier;
 }
 
 function sanitize(val: string): string {
@@ -111,7 +98,7 @@ export default function OnboardingStepper() {
     objectives: ['', '', ''],
     needs_analysis: '',
     selected_team: null,
-    plan_tier: 'free',
+    plan_tier: 'bmc',
   });
 
   const updateField = useCallback(
@@ -661,13 +648,13 @@ export default function OnboardingStepper() {
             Choose Your Plan
           </h2>
           <p className="text-sm mt-1" style={{ color: T.textMuted }}>
-            Start free. Scale when you are ready.
+            Start at $7/mo. Scale when you are ready.
           </p>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
           {TIER_ORDER.map((tier) => {
-            const plan = tier === 'free' ? FREE_PLAN : PLAN_FEATURES[tier as PlanTier];
+            const plan = PLAN_FEATURES[tier];
             const accent = TIER_ACCENT[tier];
             const isSelected = form.plan_tier === tier;
 
@@ -695,10 +682,13 @@ export default function OnboardingStepper() {
                   </div>
                 )}
                 <div
-                  className="text-[10px] font-bold tracking-[0.2em] uppercase mb-2"
+                  className="text-[10px] font-bold tracking-[0.2em] uppercase mb-1"
                   style={{ color: accent }}
                 >
                   {plan.name}
+                </div>
+                <div className="text-lg font-black mb-2" style={{ color: T.text }}>
+                  ${PRICING[tier]}<span className="text-xs font-normal" style={{ color: T.textMuted }}>/mo</span>
                 </div>
                 <p className="text-xs leading-relaxed mb-4 flex-1" style={{ color: T.textMuted }}>
                   {plan.description}
@@ -733,7 +723,7 @@ export default function OnboardingStepper() {
   /* ── Step 7: Confirmation ────────────────────────────── */
   function Step7() {
     const team = NFL_TEAMS.find((t) => t.abbrev === form.selected_team);
-    const plan = form.plan_tier === 'free' ? FREE_PLAN : PLAN_FEATURES[form.plan_tier as PlanTier];
+    const plan = PLAN_FEATURES[form.plan_tier as PlanTier];
 
     return (
       <div className="space-y-6">

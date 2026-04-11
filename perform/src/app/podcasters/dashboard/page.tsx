@@ -41,6 +41,22 @@ interface NewsItem {
   url?: string;
 }
 
+interface Delivery {
+  id: number;
+  deliverable_id: string;
+  deliverable_type: string;
+  final_score: number;
+  grade: string;
+  graded_at: string;
+}
+
+interface TeamDetail {
+  wins_2025: number;
+  losses_2025: number;
+  roster_count: number;
+  draft_picks_2026: unknown[];
+}
+
 const NAV_CARDS = [
   {
     title: 'War Room',
@@ -75,16 +91,15 @@ const NAV_CARDS = [
     ),
   },
   {
-    title: 'Settings',
-    desc: 'Coming Soon',
-    href: '#',
+    title: 'Delivery Settings',
+    desc: 'Schedule, format, notifications',
+    href: '/podcasters/settings',
     icon: (
       <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#D4A853" strokeWidth="1.5">
         <circle cx="12" cy="12" r="3" />
         <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 01-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z" />
       </svg>
     ),
-    comingSoon: true,
   },
 ];
 
@@ -92,6 +107,8 @@ export default function PodcasterDashboardPage() {
   const router = useRouter();
   const [user, setUser] = useState<UserProfile | null>(null);
   const [news, setNews] = useState<NewsItem[]>([]);
+  const [deliveries, setDeliveries] = useState<Delivery[]>([]);
+  const [teamDetail, setTeamDetail] = useState<TeamDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [editingName, setEditingName] = useState(false);
   const [nameValue, setNameValue] = useState('');
@@ -116,11 +133,31 @@ export default function PodcasterDashboardPage() {
         setNameValue(data.user.huddl_name || '');
         setLoading(false);
 
-        // Fetch team news
         if (data.user.selected_team) {
-          fetch(`/api/nfl/news?team=${encodeURIComponent(data.user.selected_team)}&limit=5`)
+          const team = encodeURIComponent(data.user.selected_team);
+          // Fetch team news
+          fetch(`/api/nfl/news?team=${team}&limit=5`)
             .then((r) => r.json())
             .then((d) => setNews(d.news || d.articles || []))
+            .catch(() => {});
+          // Fetch team detail (wins, losses, roster count, draft picks)
+          fetch(`/api/nfl/teams/${team}`)
+            .then((r) => r.json())
+            .then((d) => {
+              if (d.team) {
+                setTeamDetail({
+                  wins_2025: d.team.wins_2025 || 0,
+                  losses_2025: d.team.losses_2025 || 0,
+                  roster_count: d.roster_count || 0,
+                  draft_picks_2026: d.team.draft_picks_2026 || [],
+                });
+              }
+            })
+            .catch(() => {});
+          // Fetch recent deliveries
+          fetch(`/api/podcasters/deliveries?limit=5`)
+            .then((r) => r.ok ? r.json() : { deliveries: [] })
+            .then((d) => setDeliveries(d.deliveries || []))
             .catch(() => {});
         }
       })
@@ -176,10 +213,10 @@ export default function PodcasterDashboardPage() {
             secondaryColor={teamData.secondaryColor}
             conference={teamData.conference}
             division={teamData.division}
-            wins={0}
-            losses={0}
-            rosterCount={0}
-            draftPicks={0}
+            wins={teamDetail?.wins_2025 ?? 0}
+            losses={teamDetail?.losses_2025 ?? 0}
+            rosterCount={teamDetail?.roster_count ?? 0}
+            draftPicks={teamDetail?.draft_picks_2026?.length ?? 0}
           />
         )}
 
@@ -228,8 +265,6 @@ export default function PodcasterDashboardPage() {
               style={{
                 background: T.surface,
                 border: `1px solid ${T.border}`,
-                pointerEvents: card.comingSoon ? 'none' : undefined,
-                opacity: card.comingSoon ? 0.5 : 1,
               }}
             >
               <div className="mb-4">{card.icon}</div>
@@ -237,31 +272,69 @@ export default function PodcasterDashboardPage() {
                 <h3 className="text-lg font-bold" style={{ color: T.text }}>
                   {card.title}
                 </h3>
-                {card.comingSoon && (
-                  <span
-                    className="px-2 py-0.5 text-[9px] font-bold tracking-wider rounded"
-                    style={{ background: T.border, color: T.textMuted }}
-                  >
-                    SOON
-                  </span>
-                )}
               </div>
               <p className="text-xs mt-1" style={{ color: T.textMuted }}>
                 {card.desc}
               </p>
-              {!card.comingSoon && (
-                <div
-                  className="absolute top-6 right-6 opacity-0 group-hover:opacity-100 transition-opacity"
-                  style={{ color: T.gold }}
-                >
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                    <path d="M5 12h14M12 5l7 7-7 7" />
-                  </svg>
-                </div>
-              )}
+              <div
+                className="absolute top-6 right-6 opacity-0 group-hover:opacity-100 transition-opacity"
+                style={{ color: T.gold }}
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                  <path d="M5 12h14M12 5l7 7-7 7" />
+                </svg>
+              </div>
             </Link>
           ))}
         </div>
+
+        {/* ═══ RECENT DELIVERIES ═══ */}
+        <section>
+          <h2 className="text-lg font-bold tracking-wide mb-4" style={{ color: T.text }}>
+            Recent Deliveries
+          </h2>
+          {deliveries.length === 0 ? (
+            <div
+              className="rounded-xl p-6 text-center"
+              style={{ background: T.surface, border: `1px solid ${T.border}` }}
+            >
+              <p className="text-sm" style={{ color: T.textMuted }}>
+                No deliveries yet. Your Producer will generate briefings based on your delivery schedule.
+              </p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              {deliveries.map((d) => {
+                const gradeColors: Record<string, string> = {
+                  S: '#FFD700', A: '#22C55E', B: '#3B82F6', C: '#F59E0B', D: '#EF4444',
+                };
+                return (
+                  <div
+                    key={d.deliverable_id}
+                    className="rounded-xl p-4 text-center"
+                    style={{ background: T.surface, border: `1px solid ${T.border}` }}
+                  >
+                    <div
+                      className="text-2xl font-black mb-1"
+                      style={{ color: gradeColors[d.grade] || T.textMuted }}
+                    >
+                      {d.grade}
+                    </div>
+                    <div className="text-xs font-bold uppercase tracking-wider" style={{ color: T.textMuted }}>
+                      {d.deliverable_type.replace('_', ' ')}
+                    </div>
+                    <div className="text-[10px] mt-1" style={{ color: T.textMuted }}>
+                      {d.final_score}/100
+                    </div>
+                    <div className="text-[9px] mt-1 opacity-50">
+                      {new Date(d.graded_at).toLocaleDateString()}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </section>
 
         {/* ═══ RECENT NEWS ═══ */}
         <section>
