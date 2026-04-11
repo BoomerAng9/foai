@@ -6,7 +6,7 @@ import { safeCompare } from '@/lib/auth-guard';
 
 /* ──────────────────────────────────────────────────────────────
  *  POST /api/grade/recalculate
- *  Re-grades players using Brave Search + Qwen 3.5 Flash via OpenRouter.
+ *  Re-grades players using Brave Search + Gemini 3.1 Flash via OpenRouter.
  *  Protected by PIPELINE_AUTH_KEY.
  *  Processes 5 players at a time to avoid rate limits.
  *
@@ -92,7 +92,7 @@ Return ONLY a JSON object: {"grade": number, "tie_grade": "string", "strengths":
       'Authorization': `Bearer ${openrouterKey}`,
     },
     body: JSON.stringify({
-      model: 'qwen/qwen3.5-flash-02-23',
+      model: 'google/gemini-3.1-flash',
       messages: [
         { role: 'system', content: systemPrompt },
         { role: 'user', content: userPrompt },

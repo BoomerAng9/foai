@@ -1,7 +1,7 @@
 const OPENROUTER_KEY = process.env.OPENROUTER_API_KEY || '';
 const BASE_URL = 'https://openrouter.ai/api/v1/chat/completions';
 
-export const DEFAULT_MODEL = 'qwen/qwen3.5-flash-02-23';
+export const DEFAULT_MODEL = 'google/gemini-3.1-flash';
 
 export async function chatCompletion(opts: {
   model?: string;

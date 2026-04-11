@@ -123,7 +123,7 @@ No markdown fences, no explanation.`;
       'Authorization': `Bearer ${apiKey}`,
     },
     body: JSON.stringify({
-      model: 'qwen/qwen3.5-flash-02-23',
+      model: 'google/gemini-3.1-flash',
       messages: [
         { role: 'system', content: systemPrompt },
         { role: 'user', content: userPrompt },
