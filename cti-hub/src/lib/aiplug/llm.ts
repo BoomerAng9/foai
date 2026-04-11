@@ -36,7 +36,7 @@ export const DEMO_PLUG_CASCADE: LlmTier[] = [
   { id: 'deepseek/deepseek-chat:free', label: 'deepseek free', isFree: true },
   // Last resort paid tier — cheapest current Gemini Flash via OpenRouter.
   // Review periodically as pricing/model availability changes.
-  { id: 'google/gemini-2.0-flash-001', label: 'gemini-2.0-flash paid-last-resort', isFree: false },
+  { id: 'google/gemini-3.1-flash', label: 'gemini-3.1-flash paid-last-resort', isFree: false },
 ];
 
 export interface LlmMessage {

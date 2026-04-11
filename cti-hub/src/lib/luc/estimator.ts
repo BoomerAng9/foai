@@ -1,6 +1,6 @@
 import type { LucEstimate, LucLineItem } from './types';
 
-const ESTIMATION_MODEL = 'qwen/qwen3.5-flash-02-23';
+const ESTIMATION_MODEL = 'google/gemini-3.1-flash';
 const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY || process.env.OPENROUTER_KEY;
 
 interface EstimateInput {
