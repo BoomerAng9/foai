@@ -46,6 +46,12 @@ class HawkRole(str, Enum):
     VIZ = "Lil_Viz_Hawk"
     DEEP = "Lil_Deep_Hawk"
     BLEND = "Lil_Blend_Hawk"
+    # Lil_Forge_Hawks Sqwaadrun (SMLT-FORGE-HARNESS-001)
+    PLAN = "Lil_Plan_Hawk"
+    WORKTREE = "Lil_Worktree_Hawk"
+    EXEC = "Lil_Exec_Hawk"
+    GATE = "Lil_Gate_Hawk"
+    CHRONICLE = "Lil_Chronicle_Hawk"
 
 
 @dataclass
