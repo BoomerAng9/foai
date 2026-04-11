@@ -2,6 +2,7 @@
 
 import { useEffect, useId, useRef, useState } from 'react';
 import { FileText, Image as ImageIcon, Brain, Bot, Volume2 } from 'lucide-react';
+import DOMPurify from 'dompurify';
 import { CopyButton } from './CopyButton';
 import { LucReceipt } from './LucReceipt';
 import type { Message } from '@/lib/chat/types';
@@ -149,7 +150,7 @@ function MermaidBlock({ code }: { code: string }) {
 
   if (error) return <div className="text-xs text-signal-error p-2 border border-signal-error/20 my-2">{error}</div>;
   if (!svg) return <div className="text-xs text-fg-ghost p-4 text-center my-2">Rendering diagram...</div>;
-  return <div ref={ref} className="my-3 overflow-x-auto" dangerouslySetInnerHTML={{ __html: svg }} />;
+  return <div ref={ref} className="my-3 overflow-x-auto" dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(svg, { USE_PROFILES: { svg: true, svgFilters: true }, ADD_TAGS: ['foreignObject'] }) }} />;
 }
 
 // Chart data renderer — uses inline SVG bar chart (no dependency needed)
