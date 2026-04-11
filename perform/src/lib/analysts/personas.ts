@@ -110,7 +110,7 @@ RULES:
     color: '#D4A853',
     voice: {
       engine: 'elevenlabs',
-      voiceId: 'U7IrMz7btOogZMMksrKF',
+      voiceId: 'CGwQbqtvs7tmGnCcGS8C',
       style: 'late-night broadcast anchor, velvet baritone, measured pace, slight East Coast warmth — but NOT robotic or TTS-perfect. Natural breathing, micro-pauses between thoughts, slight vocal weight shifts. Sounds like a real anchor behind a real mic.',
       allowImperfections: true,
     },
