@@ -2,8 +2,12 @@ import { NextRequest, NextResponse } from 'next/server';
 import { generateMockDraft, type ProspectInput, type MockDraftMode } from '@/lib/draft/mock-engine';
 import { gradeAllProspects } from '@/lib/draft/open-mind-grader';
 import { sql } from '@/lib/db';
+import { requireAuth } from '@/lib/auth-guard';
 
 export async function POST(req: NextRequest) {
+  const auth = await requireAuth(req);
+  if (!auth.ok) return auth.response;
+
   try {
     const body = await req.json().catch(() => ({}));
     const rounds = Math.min(7, Math.max(1, body.rounds ?? 3));

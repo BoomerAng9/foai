@@ -1,7 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { timingSafeEqual } from 'crypto';
 import { getAdminAuth } from '@/lib/firebase/admin';
 
 const AUTH_COOKIE = 'firebase-auth-token';
+
+/** Timing-safe string comparison to prevent timing attacks on auth tokens. */
+export function safeCompare(a: string, b: string): boolean {
+  if (a.length !== b.length) return false;
+  return timingSafeEqual(Buffer.from(a), Buffer.from(b));
+}
 
 export interface AuthResult { ok: true; userId: string; email: string; }
 export interface AuthFailure { ok: false; response: NextResponse; }

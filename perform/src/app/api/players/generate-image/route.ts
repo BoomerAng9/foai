@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@/lib/db';
+import { safeCompare } from '@/lib/auth-guard';
 
 /**
  * POST /api/players/generate-image
@@ -33,7 +34,7 @@ export async function POST(req: NextRequest) {
     const PIPELINE_KEY = process.env.PIPELINE_AUTH_KEY || '';
     const authHeader = req.headers.get('authorization') || '';
     const token = authHeader.replace('Bearer ', '');
-    if (!PIPELINE_KEY || token !== PIPELINE_KEY) {
+    if (!PIPELINE_KEY || !safeCompare(token, PIPELINE_KEY)) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 

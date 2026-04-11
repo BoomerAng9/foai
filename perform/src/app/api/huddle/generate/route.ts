@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@/lib/db';
 import { generateTakeFromPlayer, generateScoutingPost, generatePredictionPost } from '@/lib/huddle/post-generator';
 import { notifyNewHuddlePost } from '@/lib/notifications/triggers';
+import { safeCompare } from '@/lib/auth-guard';
 
 /**
  * POST /api/huddle/generate
@@ -16,7 +17,7 @@ export async function POST(req: NextRequest) {
   const token = authHeader.replace('Bearer ', '');
   const pipelineKey = process.env.PIPELINE_AUTH_KEY;
 
-  if (pipelineKey && token !== pipelineKey) {
+  if (!pipelineKey || !safeCompare(token, pipelineKey)) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 

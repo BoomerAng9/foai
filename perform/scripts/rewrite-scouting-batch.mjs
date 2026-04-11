@@ -1,9 +1,11 @@
 import postgres from 'postgres';
 
-const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY || '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';
+const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY || '';
+if (!OPENROUTER_API_KEY) { console.error('OPENROUTER_API_KEY required'); process.exit(1); }
 const MODEL = 'anthropic/claude-haiku-4-5';
 
-const sql = postgres('postgresql://neondb_owner:npg_25fRtnTYlpsr@ep-dawn-bar-a4orhend-pooler.us-east-1.aws.neon.tech/performdb?sslmode=require');
+const sql = postgres(process.env.DATABASE_URL || '');
+if (!process.env.DATABASE_URL) { console.error('DATABASE_URL required'); process.exit(1); }
 
 // AI slop patterns — case insensitive
 const SLOP_PATTERNS = [

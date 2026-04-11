@@ -7,6 +7,7 @@ import {
 } from '@/lib/stitch-mcp/client';
 import { curateDesign } from '@/lib/stitch-mcp/iller-ang-curator';
 import type { DesignBrief, DesignVariant } from '@/lib/stitch-mcp/types';
+import { requireAuth } from '@/lib/auth-guard';
 
 /* ──────────────────────────────────────────────────────────────
  *  POST /api/stitch/generate
@@ -33,6 +34,9 @@ const APPROACH_PRIORITY: DesignVariant['approach'][] = [
 ];
 
 export async function POST(req: NextRequest) {
+  const auth = await requireAuth(req);
+  if (!auth.ok) return auth.response;
+
   try {
     const brief = (await req.json()) as DesignBrief;
 

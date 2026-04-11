@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { ANALYSTS, type AnalystPersona } from '@/lib/analysts/personas';
+import { safeCompare } from '@/lib/auth-guard';
 
 interface DebateRequest {
   topic: string;
@@ -66,7 +67,7 @@ export async function POST(request: NextRequest) {
     const PIPELINE_KEY = process.env.PIPELINE_AUTH_KEY || '';
     const authHeader = request.headers.get('authorization') || '';
     const token = authHeader.replace('Bearer ', '');
-    const hasPipelineAuth = PIPELINE_KEY && token === PIPELINE_KEY;
+    const hasPipelineAuth = PIPELINE_KEY && safeCompare(token, PIPELINE_KEY);
 
     if (!hasPipelineAuth) {
       const { requireAuth } = await import('@/lib/auth-guard');

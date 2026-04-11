@@ -74,6 +74,9 @@ function isPublic(pathname: string, method: string): boolean {
   return false;
 }
 
+// TODO: Add rate limiting (e.g. Upstash @upstash/ratelimit) to protect
+// POST endpoints from abuse. Apply per-IP limits on public routes and
+// per-user limits on authenticated routes.
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const method = request.method;

@@ -5,6 +5,7 @@ import { ANALYSTS } from '@/lib/analysts/personas';
 import { searchDraftNews, type ScrapedArticle } from '@/lib/data-pipeline/scraper';
 import { generateText, DEFAULT_MODEL } from '@/lib/openrouter';
 import { sql } from '@/lib/db';
+import { safeCompare } from '@/lib/auth-guard';
 
 const CONTENT_TYPES = ['hot_take', 'scouting_report', 'ranking_update', 'film_breakdown'] as const;
 
@@ -28,7 +29,7 @@ export async function POST(req: NextRequest) {
   const token = authHeader.replace('Bearer ', '');
   const pipelineKey = process.env.PIPELINE_AUTH_KEY;
 
-  if (!pipelineKey || token !== pipelineKey) {
+  if (!pipelineKey || !safeCompare(token, pipelineKey)) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 

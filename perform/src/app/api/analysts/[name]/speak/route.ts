@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAnalyst } from '@/lib/analysts/personas';
 import { speakAnalystContent } from '@/lib/voice/tts-router';
+import { requireAuth } from '@/lib/auth-guard';
 
 /* ──────────────────────────────────────────────────────────────
  *  POST /api/analysts/[name]/speak
@@ -12,6 +13,9 @@ import { speakAnalystContent } from '@/lib/voice/tts-router';
  * ────────────────────────────────────────────────────────────── */
 
 export async function POST(req: NextRequest, ctx: { params: Promise<{ name: string }> }) {
+  const auth = await requireAuth(req);
+  if (!auth.ok) return auth.response;
+
   const { name } = await ctx.params;
   const analyst = getAnalyst(name);
   if (!analyst) {

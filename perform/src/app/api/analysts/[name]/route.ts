@@ -1,12 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { generateAnalystContent, type ContentType } from '@/lib/analysts/content-gen';
+import { safeCompare } from '@/lib/auth-guard';
 
 export async function POST(req: NextRequest, { params }: { params: Promise<{ name: string }> }) {
   try {
     const PIPELINE_KEY = process.env.PIPELINE_AUTH_KEY || '';
     const authHeader = req.headers.get('authorization') || '';
     const token = authHeader.replace('Bearer ', '');
-    if (!PIPELINE_KEY || token !== PIPELINE_KEY) {
+    if (!PIPELINE_KEY || !safeCompare(token, PIPELINE_KEY)) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
