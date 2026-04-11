@@ -90,6 +90,8 @@ export default function WorkbenchPage() {
   const [saving, setSaving] = useState(false);
   const [lastSaved, setLastSaved] = useState<string | null>(null);
   const [warRoomNotice, setWarRoomNotice] = useState(false);
+  const [userTeam, setUserTeam] = useState<string | null>(null);
+  const [warRoomLoading, setWarRoomLoading] = useState(false);
 
   // Auth check
   useEffect(() => {
@@ -101,6 +103,7 @@ export default function WorkbenchPage() {
       })
       .then((data) => {
         if (!data) return;
+        setUserTeam(data.user?.selected_team || null);
         setLoading(false);
       })
       .catch(() => setLoading(false));
@@ -315,28 +318,50 @@ export default function WorkbenchPage() {
           {/* Insert from War Room */}
           <div className="px-6 pb-4">
             <button
-              onClick={() => {
-                setWarRoomNotice(true);
-                setTimeout(() => setWarRoomNotice(false), 3000);
+              disabled={warRoomLoading || !userTeam}
+              onClick={async () => {
+                if (!userTeam) { setWarRoomNotice(true); setTimeout(() => setWarRoomNotice(false), 3000); return; }
+                setWarRoomLoading(true);
+                try {
+                  const [teamRes, rosterRes, newsRes] = await Promise.all([
+                    fetch(`/api/nfl/teams/${userTeam}`).then(r => r.json()),
+                    fetch(`/api/nfl/teams/${userTeam}/roster?position=`).then(r => r.json()),
+                    fetch(`/api/nfl/news?team=${userTeam}&limit=5`).then(r => r.json()),
+                  ]);
+                  const team = teamRes;
+                  const starters = (rosterRes.roster || []).filter((p: Record<string, unknown>) => p.depth_chart_rank === 1).slice(0, 10);
+                  const headlines = (newsRes.news || []).map((n: Record<string, unknown>) => n.headline).slice(0, 5);
+
+                  const injection = [
+                    `\n\n--- WAR ROOM DATA: ${team.city} ${team.name} (${team.abbrev}) ---`,
+                    `Record: ${team.wins_2025}-${team.losses_2025} | HC: ${team.head_coach || 'TBD'} | OC: ${team.offensive_coordinator || 'TBD'} | DC: ${team.defensive_coordinator || 'TBD'}`,
+                    `Top Needs: ${(team.top_needs || []).join(', ') || 'N/A'}`,
+                    `\nKey Players:`,
+                    ...starters.map((p: Record<string, unknown>) => `  ${p.position} #${p.jersey_number || '?'} ${p.player_name} (${p.college}, ${p.experience || '?'} yrs)`),
+                    `\nLatest News:`,
+                    ...headlines.map((h: string) => `  - ${h}`),
+                    `\n--- END WAR ROOM DATA ---\n`,
+                  ].join('\n');
+
+                  setBody(prev => prev + injection);
+                } catch {
+                  setWarRoomNotice(true);
+                  setTimeout(() => setWarRoomNotice(false), 3000);
+                } finally {
+                  setWarRoomLoading(false);
+                }
               }}
               className="flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold tracking-wider uppercase transition-colors hover:bg-white/[0.03]"
-              style={{ border: `1px solid ${T.border}`, color: T.textMuted }}
+              style={{ border: `1px solid ${T.border}`, color: warRoomLoading ? T.gold : T.textMuted }}
             >
-              <svg
-                width="14"
-                height="14"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-              >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
               </svg>
-              Insert from War Room
+              {warRoomLoading ? 'Loading...' : 'Insert from War Room'}
             </button>
             {warRoomNotice && (
               <p className="text-xs mt-2 px-1" style={{ color: T.gold }}>
-                War Room data injection coming soon
+                {userTeam ? 'Failed to fetch War Room data' : 'Select a team in onboarding first'}
               </p>
             )}
           </div>
