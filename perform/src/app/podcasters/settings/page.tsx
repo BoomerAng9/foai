@@ -64,7 +64,7 @@ export default function DeliverySettingsPage() {
 
   useEffect(() => {
     if (!profile || settingsLoaded) return;
-    const u = profile as Record<string, unknown>;
+    const u = profile as unknown as Record<string, unknown>;
     setSettings({
       delivery_interval: (u.delivery_interval as string) || 'daily',
       delivery_time: (u.delivery_time as string) || '05:00',
