@@ -1,0 +1,29 @@
+# git+https://github.com/huggingface/transformers.git
+accelerate
+boto3
+bs4
+dotenv
+flash-attn
+google-cloud-storage
+google-genai
+imageio_ffmpeg
+nltk
+openAI
+opencv-python
+pandas
+pgvector
+pillow_heif
+psycopg
+psycopg-binary
+psycopg-pool
+pyarrow
+pymediainfo
+pysrt
+requests
+scenedetect
+scipy
+sentence_transformers
+torchvision
+transformers
+# vllm
+yt-dlp

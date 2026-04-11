@@ -1,0 +1,11 @@
+python-dotenv
+uvicorn
+pydantic
+transformers==4.51.3
+xformers==v0.0.29.post2
+torch
+torchvision
+fastapi
+google-genai
+opencv-python
+python-multipart

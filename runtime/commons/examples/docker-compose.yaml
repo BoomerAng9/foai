@@ -1,0 +1,47 @@
+services:
+  model_server:
+    build:
+      context: model_server
+      dockerfile: Dockerfile
+    container_name: model_server
+    ports:
+      - "8001:8001"
+    env_file:
+      - .env
+    restart: unless-stopped
+    deploy:
+        resources:
+            reservations:
+                devices:
+                    - driver: "nvidia"
+                      count: "all"
+                      capabilities: ["gpu"]
+    volumes:
+      - ./model_server/hf_cache:/cache/huggingface # Mount host cache directory to container
+
+  api_server:
+    build:
+      context: api_server
+      dockerfile: Dockerfile
+    container_name: api_server
+    ports:
+      - "8080:8080"
+      - "8081:8081"
+    env_file:
+      - .env
+    depends_on:
+      - model_server
+    restart: unless-stopped
+
+  demosite:
+    build:
+      context: demosite
+      dockerfile: Dockerfile
+    container_name: demosite
+    ports:
+      - "5001:5001"
+    env_file:
+      - .env
+    depends_on:
+      - api_server
+    restart: unless-stopped
