@@ -9,15 +9,20 @@ The gateway tracks itself (Chicken_Hawk, tier=2ic) and each Lil_Hawk
 that handles a request gets a memory entry too.
 """
 
+from __future__ import annotations
+
 import os
 import sys
 
 import structlog
 
-# Add aims-memory to path
+# Add aims-memory to path (optional — not available in standalone Docker deploys)
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "..", "aims-memory"))
 
-from aims_memory.agent_mixin import AgentMemoryMixin
+try:
+    from aims_memory.agent_mixin import AgentMemoryMixin
+except ImportError:
+    AgentMemoryMixin = None  # type: ignore[misc,assignment]
 
 logger = structlog.get_logger("chicken_hawk.memory")
 
@@ -29,7 +34,9 @@ _gateway_mixin: AgentMemoryMixin | None = None
 _hawk_mixins: dict[str, AgentMemoryMixin] = {}
 
 
-def get_gateway_mixin(tenant_id: str = DEFAULT_TENANT) -> AgentMemoryMixin:
+def get_gateway_mixin(tenant_id: str = DEFAULT_TENANT) -> "AgentMemoryMixin | None":
+    if AgentMemoryMixin is None:
+        return None
     global _gateway_mixin
     if _gateway_mixin is None or _gateway_mixin.tenant_id != tenant_id:
         _gateway_mixin = AgentMemoryMixin(
@@ -41,7 +48,7 @@ def get_gateway_mixin(tenant_id: str = DEFAULT_TENANT) -> AgentMemoryMixin:
     return _gateway_mixin
 
 
-def get_hawk_mixin(hawk_name: str, tenant_id: str = DEFAULT_TENANT) -> AgentMemoryMixin:
+def get_hawk_mixin(hawk_name: str, tenant_id: str = DEFAULT_TENANT) -> "AgentMemoryMixin | None":
     key = f"{hawk_name}:{tenant_id}"
     if key not in _hawk_mixins:
         _hawk_mixins[key] = AgentMemoryMixin(
@@ -59,6 +66,8 @@ async def before_route(
     """Draft a routing project plan and recall context. Returns (plan_id, memory_context)."""
     try:
         gw = get_gateway_mixin()
+        if gw is None:
+            return "", ""
         plan_id = await gw.plans.draft(
             task_id=trace_id,
             title=f"Route request to {hawk_name}",
@@ -92,6 +101,8 @@ async def after_route(
         return
     try:
         gw = get_gateway_mixin()
+        if gw is None:
+            return
         score = int(confidence * 100)
         grade = "A" if score >= 90 else "B" if score >= 70 else "C" if score >= 50 else "F"
 
