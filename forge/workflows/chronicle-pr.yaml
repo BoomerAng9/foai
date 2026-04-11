@@ -1,0 +1,30 @@
+id: chronicle-pr
+version: 1.0
+owner: Code_Ang
+description: Standalone Chronicle dual-emission for externally-produced code
+
+inputs:
+  pr_id:
+    type: string
+    required: true
+  target_repo_path:
+    type: string
+    required: true
+  summary:
+    type: string
+    required: false
+    default: ""
+
+steps:
+  - id: plan
+    hawk: Lil_Plan_Hawk
+    action: plan_chronicle
+    output: chronicle_plan
+
+  - id: gate
+    hawk: Lil_Gate_Hawk
+    gates: [ruff, mypy]
+
+  - id: chronicle
+    hawk: Lil_Chronicle_Hawk
+    emit: [charter, ledger]

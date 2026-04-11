@@ -1,0 +1,55 @@
+id: smelt-ingot
+version: 1.0
+owner: Buildsmith
+description: RFP fragment -> code Ingot, five-gate enforced, BAMARAM on Forged tier
+
+inputs:
+  rfp_fragment_id:
+    type: string
+    required: true
+  target_repo_path:
+    type: string
+    required: true
+  ingot_tier_target:
+    type: enum
+    values: [Raw, Refined, Forged]
+    default: Forged
+
+steps:
+  - id: plan
+    hawk: Lil_Plan_Hawk
+    action: decompose_rfp
+    output: task_dag
+
+  - id: isolate
+    hawk: Lil_Worktree_Hawk
+    action: create_worktree
+    branch: forge/smelt-{run_id}
+    auto_prune_on_exit: true
+
+  - id: implement
+    hawk: Lil_Exec_Hawk
+    action: execute_dag
+    adapter: ${FORGE_ADAPTER}
+    iterate_until_gate_passes: true
+    max_iterations: 5
+
+  - id: gate
+    hawk: Lil_Gate_Hawk
+    gates: [pytest, mypy, ruff, pip-audit, integration]
+    on_failure: "return_to: implement"
+
+  - id: ingot_promote
+    hawk: Buildsmith
+    action: promote_ingot
+    from_tier: Raw
+    to_tier: Forged
+
+  - id: chronicle
+    hawk: Lil_Chronicle_Hawk
+    emit: [charter, ledger]
+
+  - id: bamaram
+    hawk: Buildsmith
+    when: ingot_promote.tier == Forged
+    action: fire_bamaram_event

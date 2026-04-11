@@ -1,0 +1,51 @@
+id: leanstral-verify
+version: 1.0
+owner: Code_Ang
+description: Tier-3 formal verification for smart contracts, mandatory on contracts/ changes
+
+inputs:
+  contract_path:
+    type: string
+    required: true
+  target_repo_path:
+    type: string
+    required: true
+
+steps:
+  - id: plan
+    hawk: Lil_Plan_Hawk
+    action: plan_verification
+    output: verification_plan
+
+  - id: isolate
+    hawk: Lil_Worktree_Hawk
+    action: create_worktree
+    branch: forge/leanstral-{run_id}
+    auto_prune_on_exit: true
+
+  - id: implement
+    hawk: Lil_Exec_Hawk
+    action: run_formal_verification
+    adapter: ${FORGE_ADAPTER}
+    iterate_until_gate_passes: true
+    max_iterations: 3
+
+  - id: gate
+    hawk: Lil_Gate_Hawk
+    gates: [pytest, mypy, ruff, integration]
+    on_failure: "return_to: implement"
+
+  - id: promote
+    hawk: Code_Ang
+    action: promote_ingot
+    from_tier: Raw
+    to_tier: Forged
+
+  - id: chronicle
+    hawk: Lil_Chronicle_Hawk
+    emit: [charter, ledger]
+
+  - id: bamaram
+    hawk: Code_Ang
+    when: promote.tier == Forged
+    action: fire_bamaram_event
