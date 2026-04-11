@@ -194,17 +194,14 @@ interface ConversationMessage {
 }
 
 // ─── Model fallback chain ───────────────────────────────────────────
-// Per project_chat_engine_decision.md and project_chat_to_guide_me_transition.md:
-//   primary:    GLM-5.1 (open source, 202k ctx, our pricing matrix favourite)
-//   fallback 1: Gemini 3.0 Flash (Gemini-first policy, fast + cheap)
-//   fallback 2: Qwen 3.6 Plus free (current working default, last resort)
+// Per Rish 2026-04-10: Gemini 3.1 Flash (paid) is now PRIMARY.
+// No free models in the main chat — free-tier providers train on content.
+// Gemini-first policy (paid Google API = no data training per ToS).
 //
-// Gemma is BANNED everywhere — Rish 2026-04-08: "I've had numerous issues
-// with the Gemma model from OpenRouter working" even with a funded account.
+// Gemma is BANNED everywhere — Rish 2026-04-08.
 const MODEL_FALLBACK_CHAIN: readonly string[] = [
+  'google/gemini-3.1-flash',
   'z-ai/glm-5.1',
-  'google/gemini-3.0-flash',
-  'qwen/qwen3.6-plus-preview:free',
 ];
 
 function isGemma(modelId: string): boolean {

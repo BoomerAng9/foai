@@ -45,13 +45,10 @@ export const TIERS: SubscriptionTier[] = [
     ],
     agents: ['acheevy', 'visual_engine'],
     models: [
+      'google/gemini-3.1-flash',
       'nvidia/nemotron-3-super-120b-a12b:free',
       'nvidia/nemotron-nano-9b-v2:free',
-      'qwen/qwen3-coder:free',
-      'qwen/qwen3-next-80b-a3b-instruct:free',
-      'qwen/qwen3.6-plus-preview:free',
       'meta-llama/llama-3.3-70b-instruct:free',
-      'google/gemma-3-27b-it:free',
     ],
     tokenAllocation: 50000, // Starting package
     nurdCardIncluded: false,
@@ -75,7 +72,7 @@ export const TIERS: SubscriptionTier[] = [
     ],
     agents: ['acheevy', 'q_ang', 'content_ang', 'sales_ang', 'visual_engine', 'cfo_ang'],
     models: [
-      'nvidia/nemotron-3-super-120b-a12b:free',
+      'google/gemini-3.1-flash',
       'inception/mercury-2',
       'minimax/minimax-m2.7',
       'deepseek/deepseek-v3.2',
@@ -106,12 +103,12 @@ export const TIERS: SubscriptionTier[] = [
              'lil_coding_hawk', 'lil_trae_hawk', 'lil_agent_hawk', 'lil_flow_hawk',
              'lil_memory_hawk', 'lil_back_hawk', 'lil_viz_hawk'],
     models: [
-      'nvidia/nemotron-3-super-120b-a12b:free',
+      'google/gemini-3.1-flash',
+      'google/gemini-3.1-pro-preview',
       'inception/mercury-2',
       'minimax/minimax-m2.7',
       'anthropic/claude-sonnet-4.6',
       'openai/gpt-5.4',
-      'google/gemini-3.1-pro-preview',
     ],
     tokenAllocation: 2000000,
     nurdCardIncluded: true,
