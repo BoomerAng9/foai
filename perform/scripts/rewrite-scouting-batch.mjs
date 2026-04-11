@@ -1,6 +1,8 @@
 import postgres from 'postgres';
 
-const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY || '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';
+const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY || '';
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY || 'AIzaSyDnmfLwkDV4CLV9zMa-hyjuwSBMHtdqcv0';
+const USE_GEMINI = !OPENROUTER_API_KEY; // Fallback to Gemini if no OpenRouter key
 const MODEL = 'anthropic/claude-haiku-4-5';
 
 const sql = postgres('postgresql://neondb_owner:npg_25fRtnTYlpsr@ep-dawn-bar-a4orhend-pooler.us-east-1.aws.neon.tech/performdb?sslmode=require');
@@ -45,7 +47,32 @@ function needsRewrite(player) {
 
 const SYSTEM_PROMPT = `You are a Per|Form Platform scout writing a scouting report. Write like a real NFL scout talking to another scout — direct, specific, honest. 2-3 sentences max. Reference the player's position, school, specific strengths and weaknesses. Give ONE honest NFL comparison. Never use: 'projects as', 'profiles as', 'elite' (unless in grade tier name), 'showcases', 'comprehensive', 'demonstrates', 'prowess', 'in conclusion', 'versatile'. Never start with the player's name. Start with what makes them interesting or what their tape shows.`;
 
-async function generateSummary(player) {
+async function generateSummaryGemini(player) {
+  const userPrompt = `${SYSTEM_PROMPT}\n\nWrite a 2-3 sentence scout report for ${player.name}, ${player.position} from ${player.school}. Grade: ${player.grade || 'N/A'}. Projected round: ${player.projected_round || 'N/A'}. Strengths: ${player.strengths || 'N/A'}. Weaknesses: ${player.weaknesses || 'N/A'}. NFL comparison: ${player.nfl_comparison || 'N/A'}.`;
+
+  const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      contents: [{ parts: [{ text: userPrompt }] }],
+      generationConfig: { maxOutputTokens: 500, temperature: 0.8 },
+    }),
+  });
+
+  if (!res.ok) {
+    const body = await res.text();
+    throw new Error(`Gemini ${res.status}: ${body.slice(0, 200)}`);
+  }
+
+  const data = await res.json();
+  const text = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
+  if (!text) throw new Error('Empty response from Gemini');
+  const cleaned = text.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
+  if (!cleaned) throw new Error('Response was only thinking tags');
+  return cleaned;
+}
+
+async function generateSummaryOpenRouter(player) {
   const userPrompt = `Write a 2-3 sentence scout report for ${player.name}, ${player.position} from ${player.school}. Grade: ${player.grade || 'N/A'}. Projected round: ${player.projected_round || 'N/A'}. Strengths: ${player.strengths || 'N/A'}. Weaknesses: ${player.weaknesses || 'N/A'}. NFL comparison: ${player.nfl_comparison || 'N/A'}.`;
 
   const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
@@ -75,12 +102,14 @@ async function generateSummary(player) {
   const data = await res.json();
   const text = data.choices?.[0]?.message?.content?.trim();
   if (!text) throw new Error('Empty response from model');
-
-  // Strip any thinking tags the model might produce
   const cleaned = text.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
   if (!cleaned) throw new Error('Response was only thinking tags');
-
   return cleaned;
+}
+
+async function generateSummary(player) {
+  if (USE_GEMINI) return generateSummaryGemini(player);
+  return generateSummaryOpenRouter(player);
 }
 
 function sleep(ms) {
