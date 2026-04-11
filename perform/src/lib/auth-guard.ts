@@ -13,6 +13,16 @@ export function safeCompare(a: string, b: string): boolean {
 export interface AuthResult { ok: true; userId: string; email: string; }
 export interface AuthFailure { ok: false; response: NextResponse; }
 
+/** Owner emails — unlimited access, auto-LFG, never prompted to pay. */
+const OWNER_EMAILS: ReadonlySet<string> = new Set([
+  'jarrett.risher@gmail.com',
+  'bpo@achievemor.io',
+]);
+
+export function isOwnerEmail(email: string): boolean {
+  return OWNER_EMAILS.has(email.toLowerCase());
+}
+
 export async function requireAuth(request: NextRequest): Promise<AuthResult | AuthFailure> {
   const token = request.cookies.get(AUTH_COOKIE)?.value;
   if (!token) {
