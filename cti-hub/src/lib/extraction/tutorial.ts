@@ -18,7 +18,7 @@ export interface Tutorial {
 }
 
 const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY || '';
-const MODEL = 'qwen/qwen3.6-plus-preview:free';
+const MODEL = 'google/gemini-3.1-flash';
 
 /**
  * Generate a step-by-step tutorial from extracted content.

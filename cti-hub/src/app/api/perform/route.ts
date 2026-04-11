@@ -3,7 +3,7 @@ import { requireAuth } from '@/lib/auth-guard';
 
 const OPENROUTER_KEY = process.env.OPENROUTER_API_KEY || '';
 const GEMINI_KEY = process.env.GEMINI_API_KEY || '';
-const ANALYSIS_MODEL = 'qwen/qwen3.5-flash-02-23';
+const ANALYSIS_MODEL = 'google/gemini-3.1-flash';
 
 /**
  * POST /api/perform — Per|Form sports analytics endpoint

@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth-guard';
 
 const OPENROUTER_KEY = process.env.OPENROUTER_API_KEY || '';
-const MODEL = 'qwen/qwen3.5-flash-02-23';
+const MODEL = 'google/gemini-3.1-flash';
 
 /**
  * POST /api/perform/seed — Use Scout_Ang to research and generate real player data

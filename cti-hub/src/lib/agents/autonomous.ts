@@ -10,7 +10,7 @@
 
 import { AGENTS, type AgentProfile } from './registry';
 
-const FREE_MODEL = 'nvidia/nemotron-nano-9b-v2:free';
+const FREE_MODEL = 'google/gemini-3.1-flash';
 const OPENROUTER_KEY = process.env.OPENROUTER_API_KEY || '';
 
 export interface AgentMessage {

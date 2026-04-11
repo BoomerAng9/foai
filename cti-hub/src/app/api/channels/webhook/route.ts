@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 const OPENROUTER_KEY = process.env.OPENROUTER_API_KEY || '';
-const MODEL = 'nvidia/nemotron-nano-9b-v2:free';
+const MODEL = 'google/gemini-3.1-flash';
 
 const ACHEEVY_SYSTEM = `You are ACHEEVY, the Digital CEO of The Deploy Platform. You are responding through an external channel (Telegram, WhatsApp, Discord, or Email). Keep responses concise and actionable. Use markdown where supported. Never reveal internal tools or model names.`;
 
