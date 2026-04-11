@@ -1,14 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { createRemoteJWKSet, jwtVerify } from 'jose';
 
 // Owner-only routes — beta testers and deploy.foai.cloud users cannot access these
 const OWNER_ONLY_ROUTES = ['/live', '/plug-bin', '/open-seats', '/enrollments', '/affiliates', '/team', '/pricing', '/research', '/smelter-os', '/partners'];
 // Must match src/lib/allowlist.ts — cannot import in Edge Runtime middleware
 const OWNER_EMAILS = (process.env.OWNER_EMAILS || '').split(',').map(e => e.trim()).filter(Boolean);
 
+// Firebase public JWKS for JWT verification (Edge Runtime compatible)
+const FIREBASE_JWKS = createRemoteJWKSet(
+  new URL('https://www.googleapis.com/service_accounts/v1/jwk/securetoken@system.gserviceaccount.com')
+);
+const FIREBASE_PROJECT_ID = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || process.env.FIREBASE_PROJECT_ID || '';
+
 // Routes available on deploy.foai.cloud (customer-facing product)
 const DEPLOY_ROUTES = ['/chat', '/agents', '/meet', '/deploy-agent', '/projects', '/assets', '/settings', '/profile', '/billing', '/auth', '/grammar', '/deploy-landing', '/about', '/plug', '/broadcast', '/create', '/pipeline', '/process', '/how-to', '/sqwaadrun'];
 
-export function middleware(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
   const hostname = request.headers.get('host') || '';
   const isDeployDomain = hostname.includes('deploy.foai.cloud');
@@ -67,21 +74,23 @@ export function middleware(request: NextRequest) {
   const isRestricted = OWNER_ONLY_ROUTES.some(route => pathname === route || pathname.startsWith(route + '/'));
   if (!isRestricted) return NextResponse.next();
 
-  // Check the auth cookie — extract email from the JWT payload
+  // Check the auth cookie — verify JWT signature against Firebase JWKS
   const token = request.cookies.get('firebase-auth-token')?.value;
   if (!token) {
     return NextResponse.redirect(new URL('/chat', request.url));
   }
 
-  // Decode JWT payload (middle segment) to get email — no verification needed here
   try {
-    const payload = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString());
-    const email = payload.email || '';
+    const { payload } = await jwtVerify(token, FIREBASE_JWKS, {
+      issuer: `https://securetoken.google.com/${FIREBASE_PROJECT_ID}`,
+      audience: FIREBASE_PROJECT_ID,
+    });
+    const email = (payload.email as string) || '';
     if (OWNER_EMAILS.includes(email.toLowerCase())) {
       return NextResponse.next();
     }
   } catch {
-    // Malformed token — redirect
+    // Invalid/expired token — redirect
   }
 
   return NextResponse.redirect(new URL('/chat', request.url));

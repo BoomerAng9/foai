@@ -65,7 +65,8 @@ async def auth_middleware(request: web.Request, handler):
 
     expected = os.environ.get("SQWAADRUN_API_KEY", "")
     if not expected:
-        return await handler(request)  # dev mode
+        logger.warning("SQWAADRUN_API_KEY not set — rejecting request. Set it to enable the gateway.")
+        return web.json_response({"error": "gateway not configured"}, status=503)
 
     got = request.headers.get("Authorization", "").replace("Bearer ", "")
     if got != expected:
@@ -145,6 +146,8 @@ async def scrape_intent(request: web.Request) -> web.Response:
 
     if not raw_targets or not isinstance(raw_targets, list):
         return web.json_response({"error": "targets required (list of URLs)"}, status=400)
+    if len(raw_targets) > 100:
+        return web.json_response({"error": "too many targets per request (max 100)"}, status=400)
     if not intent:
         return web.json_response({"error": "intent required"}, status=400)
 
@@ -169,7 +172,7 @@ async def scrape_intent(request: web.Request) -> web.Response:
         return web.json_response(result)
     except Exception as e:
         logger.exception("scrape_intent failed")
-        return web.json_response({"error": str(e)}, status=500)
+        return web.json_response({"error": "internal error"}, status=500)
 
 
 def _find_mission(squad: FullScrappHawkSquadrun, mission_id: str) -> Optional[Mission]:
@@ -289,7 +292,7 @@ async def mission(request: web.Request) -> web.Response:
         return web.json_response(api_result)
     except Exception as e:
         logger.exception("mission failed")
-        return web.json_response({"error": str(e)}, status=500)
+        return web.json_response({"error": "internal error"}, status=500)
 
 
 async def status_handler(request: web.Request) -> web.Response:
@@ -307,7 +310,7 @@ async def approve(request: web.Request) -> web.Response:
         return web.json_response({"error": str(e)}, status=404)
     except Exception as e:
         logger.exception("approve failed")
-        return web.json_response({"error": str(e)}, status=500)
+        return web.json_response({"error": "internal error"}, status=500)
 
 
 async def deny(request: web.Request) -> web.Response:

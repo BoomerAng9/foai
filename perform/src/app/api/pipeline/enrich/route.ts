@@ -4,6 +4,7 @@ import { isCFBDConfigured, getPlayerFullStats } from '@/lib/data-pipeline/cfbd';
 import { buildTIEInputs } from '@/lib/data-pipeline/stats-bridge';
 import { calculateTIE } from '@/lib/tie/engine';
 import { generateScoutingReport } from '@/lib/data-pipeline/content-gen';
+import { safeCompare } from '@/lib/auth-guard';
 
 /* ──────────────────────────────────────────────────────────────
  *  POST /api/pipeline/enrich
@@ -18,7 +19,7 @@ export async function POST(req: NextRequest) {
     const PIPELINE_KEY = process.env.PIPELINE_AUTH_KEY || '';
     const authHeader = req.headers.get('authorization') || '';
     const token = authHeader.replace('Bearer ', '');
-    if (!PIPELINE_KEY || token !== PIPELINE_KEY) {
+    if (!PIPELINE_KEY || !safeCompare(token, PIPELINE_KEY)) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 

@@ -10,6 +10,10 @@ import { getVerticalTierLabel } from '@/lib/tie/verticals';
  * TIE Brand Colors: gold=#D4A853, silver=#C0C0C0, dark=#0A0A0F
  */
 
+function escapeXml(str: string): string {
+  return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
 function gradeColor(grade: number): string {
   return getGradeForScore(grade).badgeColor;
 }
@@ -59,17 +63,17 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
 
   <!-- Tier badge -->
   <rect x="24" y="50" width="${tier.length * 10 + 20}" height="22" fill="${color}20" rx="2"/>
-  <text x="34" y="65" font-family="monospace" font-size="9" font-weight="700" fill="${color}" letter-spacing="0.2em">${tier}</text>
+  <text x="34" y="65" font-family="monospace" font-size="9" font-weight="700" fill="${color}" letter-spacing="0.2em">${escapeXml(tier)}</text>
 
   <!-- Player name -->
-  <text x="24" y="110" font-family="sans-serif" font-size="28" font-weight="800" fill="white" letter-spacing="-0.02em">${p.name}</text>
+  <text x="24" y="110" font-family="sans-serif" font-size="28" font-weight="800" fill="white" letter-spacing="-0.02em">${escapeXml(p.name)}</text>
 
   <!-- Position + School -->
-  <text x="24" y="136" font-family="monospace" font-size="14" fill="rgba(255,255,255,0.5)">${p.position} · ${p.school}</text>
+  <text x="24" y="136" font-family="monospace" font-size="14" fill="rgba(255,255,255,0.5)">${escapeXml(p.position)} · ${escapeXml(p.school)}</text>
 
   <!-- Grade circle -->
   <circle cx="340" cy="120" r="36" fill="none" stroke="${color}" stroke-width="3"/>
-  <text x="340" y="126" font-family="sans-serif" font-size="24" font-weight="800" fill="${color}" text-anchor="middle">${grade}</text>
+  <text x="340" y="126" font-family="sans-serif" font-size="24" font-weight="800" fill="${color}" text-anchor="middle">${escapeXml(String(grade))}</text>
   <text x="340" y="142" font-family="monospace" font-size="8" fill="rgba(255,255,255,0.3)" text-anchor="middle">GRADE</text>
 
   <!-- Divider -->
@@ -77,12 +81,12 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
 
   <!-- Stats -->
   <text x="24" y="200" font-family="monospace" font-size="9" fill="rgba(255,255,255,0.3)" letter-spacing="0.15em">KEY STATS</text>
-  <text x="24" y="220" font-family="sans-serif" font-size="12" fill="rgba(255,255,255,0.6)">${(p.key_stats || '').slice(0, 55)}</text>
-  <text x="24" y="238" font-family="sans-serif" font-size="12" fill="rgba(255,255,255,0.6)">${(p.key_stats || '').slice(55, 110)}</text>
+  <text x="24" y="220" font-family="sans-serif" font-size="12" fill="rgba(255,255,255,0.6)">${escapeXml((p.key_stats || '').slice(0, 55))}</text>
+  <text x="24" y="238" font-family="sans-serif" font-size="12" fill="rgba(255,255,255,0.6)">${escapeXml((p.key_stats || '').slice(55, 110))}</text>
 
   <!-- NFL Comparison -->
   <text x="24" y="280" font-family="monospace" font-size="9" fill="rgba(255,255,255,0.3)" letter-spacing="0.15em">NFL COMPARISON</text>
-  <text x="24" y="300" font-family="sans-serif" font-size="16" font-weight="600" fill="${color}">${p.nfl_comparison || 'N/A'}</text>
+  <text x="24" y="300" font-family="sans-serif" font-size="16" font-weight="600" fill="${color}">${escapeXml(p.nfl_comparison || 'N/A')}</text>
 
   <!-- Projected Round -->
   <text x="24" y="340" font-family="monospace" font-size="9" fill="rgba(255,255,255,0.3)" letter-spacing="0.15em">PROJECTED</text>
@@ -91,8 +95,8 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
   <!-- Scouting summary -->
   ${p.scouting_summary ? `
   <text x="24" y="410" font-family="monospace" font-size="9" fill="rgba(255,255,255,0.3)" letter-spacing="0.15em">PER|FORM ANALYST ASSESSMENT</text>
-  <text x="24" y="430" font-family="sans-serif" font-size="11" fill="rgba(255,255,255,0.4)">${(p.scouting_summary || '').slice(0, 60)}</text>
-  <text x="24" y="446" font-family="sans-serif" font-size="11" fill="rgba(255,255,255,0.4)">${(p.scouting_summary || '').slice(60, 120)}</text>
+  <text x="24" y="430" font-family="sans-serif" font-size="11" fill="rgba(255,255,255,0.4)">${escapeXml((p.scouting_summary || '').slice(0, 60))}</text>
+  <text x="24" y="446" font-family="sans-serif" font-size="11" fill="rgba(255,255,255,0.4)">${escapeXml((p.scouting_summary || '').slice(60, 120))}</text>
   ` : ''}
 
   <!-- Bottom branding -->

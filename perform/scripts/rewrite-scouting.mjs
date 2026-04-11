@@ -1,6 +1,7 @@
 import postgres from 'postgres';
 
-const sql = postgres('postgresql://neondb_owner:npg_25fRtnTYlpsr@ep-dawn-bar-a4orhend-pooler.us-east-1.aws.neon.tech/performdb?sslmode=require');
+const sql = postgres(process.env.DATABASE_URL || '');
+if (!process.env.DATABASE_URL) { console.error('DATABASE_URL required'); process.exit(1); }
 
 // Hand-written scouting rewrites for top 50 players
 // Rules: no "elite", no "projects as"/"profiles as", scout-to-scout tone,

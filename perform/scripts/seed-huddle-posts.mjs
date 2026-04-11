@@ -9,8 +9,8 @@
 
 import postgres from 'postgres';
 
-const DATABASE_URL =
-  'postgresql://neondb_owner:npg_25fRtnTYlpsr@ep-dawn-bar-a4orhend-pooler.us-east-1.aws.neon.tech/performdb?sslmode=require';
+const DATABASE_URL = process.env.DATABASE_URL || '';
+if (!DATABASE_URL) { console.error('DATABASE_URL required'); process.exit(1); }
 
 const sql = postgres(DATABASE_URL, { ssl: 'require', max: 5 });
 

@@ -18,6 +18,17 @@ import { createHash } from 'crypto';
 const PUBLIC_IMAGES_DIR = join(process.cwd(), 'public', 'generated');
 const PUBLIC_URL_PREFIX = '/generated';
 
+/** Validate URL to prevent SSRF attacks against internal/private networks. */
+function validateUrl(url: string): boolean {
+  try {
+    const parsed = new URL(url);
+    if (!['https:', 'http:'].includes(parsed.protocol)) return false;
+    const host = parsed.hostname;
+    if (host === 'localhost' || host === '127.0.0.1' || host.startsWith('10.') || host.startsWith('192.168.') || host.startsWith('172.') || host === '169.254.169.254' || host.endsWith('.internal')) return false;
+    return true;
+  } catch { return false; }
+}
+
 /**
  * Download an image URL and save it to the public directory.
  * Returns the public URL path (relative to the site root).
@@ -28,6 +39,11 @@ export async function saveImageFromUrl(
   filename?: string,
 ): Promise<string | null> {
   try {
+    if (!validateUrl(sourceUrl)) {
+      console.error(`[Storage] Blocked URL (SSRF protection): ${sourceUrl}`);
+      return null;
+    }
+
     const res = await fetch(sourceUrl, {
       signal: AbortSignal.timeout(60000),
     });

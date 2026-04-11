@@ -4,6 +4,7 @@ import { generateText } from '@/lib/openrouter';
 import { sql } from '@/lib/db';
 import { speakAnalystContent } from '@/lib/voice/tts-router';
 import { notifyNewEpisode } from '@/lib/notifications/triggers';
+import { safeCompare } from '@/lib/auth-guard';
 
 const PIPELINE_KEY = process.env.PIPELINE_AUTH_KEY || '';
 
@@ -55,7 +56,8 @@ async function fetchLatestNews(): Promise<string> {
 export async function POST(req: NextRequest) {
   // Auth check
   const authHeader = req.headers.get('authorization') || '';
-  if (PIPELINE_KEY && authHeader !== `Bearer ${PIPELINE_KEY}`) {
+  const token = authHeader.replace('Bearer ', '');
+  if (!PIPELINE_KEY || !safeCompare(token, PIPELINE_KEY)) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 

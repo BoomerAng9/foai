@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@/lib/db';
 import { getGradeForScore } from '@/lib/tie/grades';
 import { getVerticalTierLabel } from '@/lib/tie/verticals';
+import { safeCompare } from '@/lib/auth-guard';
 
 /* ──────────────────────────────────────────────────────────────
  *  POST /api/grade/recalculate
@@ -131,7 +132,7 @@ export async function POST(req: NextRequest) {
   // Auth check
   const authHeader = req.headers.get('authorization') || '';
   const token = authHeader.replace('Bearer ', '');
-  if (!PIPELINE_KEY || token !== PIPELINE_KEY) {
+  if (!PIPELINE_KEY || !safeCompare(token, PIPELINE_KEY)) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 

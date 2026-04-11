@@ -27,19 +27,25 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized email' }, { status: 403 });
     }
 
-    // Verify via session cookie if available (cookie may not exist during first login)
-    const token = request.cookies.get('firebase-auth-token')?.value;
-    if (token) {
-      try {
-        const auth = getAdminAuth();
-        const decoded = await auth.verifyIdToken(token);
-        if (decoded.uid !== firebaseUid) {
-          return NextResponse.json({ error: 'Token UID mismatch' }, { status: 403 });
-        }
-      } catch {
-        // Cookie exists but token is invalid — proceed anyway for first-login
-        // The allowlist check above already gates access
+    // Verify Firebase ID token — REQUIRED. Never trust client-supplied firebaseUid alone.
+    // The client sends the ID token in the Authorization header during first login,
+    // or it's available as a cookie on subsequent requests.
+    const bearerToken = request.headers.get('authorization')?.replace('Bearer ', '');
+    const cookieToken = request.cookies.get('firebase-auth-token')?.value;
+    const token = bearerToken || cookieToken;
+
+    if (!token) {
+      return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
+    }
+
+    try {
+      const auth = getAdminAuth();
+      const decoded = await auth.verifyIdToken(token);
+      if (decoded.uid !== firebaseUid) {
+        return NextResponse.json({ error: 'Token UID mismatch' }, { status: 403 });
       }
+    } catch {
+      return NextResponse.json({ error: 'Invalid or expired token' }, { status: 401 });
     }
 
     // Provision user in Neon: creates profile + free subscription if not exists

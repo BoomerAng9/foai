@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { generateText } from '@/lib/openrouter';
+import { safeCompare } from '@/lib/auth-guard';
 
 interface FilmRequest {
   playerName: string;
@@ -16,7 +17,7 @@ export async function POST(req: NextRequest) {
     const PIPELINE_KEY = process.env.PIPELINE_AUTH_KEY || '';
     const authHeader = req.headers.get('authorization') || '';
     const token = authHeader.replace('Bearer ', '');
-    const hasPipelineAuth = PIPELINE_KEY && token === PIPELINE_KEY;
+    const hasPipelineAuth = PIPELINE_KEY && safeCompare(token, PIPELINE_KEY);
 
     if (!hasPipelineAuth) {
       const { requireAuth } = await import('@/lib/auth-guard');

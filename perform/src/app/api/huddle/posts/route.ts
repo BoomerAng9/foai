@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@/lib/db';
 import { notifyNewHuddlePost } from '@/lib/notifications/triggers';
+import { safeCompare } from '@/lib/auth-guard';
 
 const CREATE_POSTS = `
   CREATE TABLE IF NOT EXISTS huddle_posts (
@@ -88,7 +89,7 @@ export async function POST(req: NextRequest) {
   // Auth required for POST — pipeline key or Firebase session
   const pipelineKey = process.env.PIPELINE_AUTH_KEY;
   const authHeader = req.headers.get('authorization')?.replace('Bearer ', '') || '';
-  const hasPipelineAuth = pipelineKey && authHeader === pipelineKey;
+  const hasPipelineAuth = pipelineKey && safeCompare(authHeader, pipelineKey);
 
   if (!hasPipelineAuth) {
     // Fall back to Firebase session auth

@@ -19,9 +19,8 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const PROJECT_ROOT = resolve(__dirname, '..');
 
 // ── Config ───────────────────────────────────────────────────────
-const DATABASE_URL =
-  process.env.DATABASE_URL ||
-  'postgresql://neondb_owner:npg_25fRtnTYlpsr@ep-dawn-bar-a4orhend-pooler.us-east-1.aws.neon.tech/performdb?sslmode=require';
+const DATABASE_URL = process.env.DATABASE_URL || '';
+if (!DATABASE_URL) { console.error('DATABASE_URL required'); process.exit(1); }
 
 const ELEVENLABS_API_KEY = process.env.ELEVENLABS_API_KEY;
 if (!ELEVENLABS_API_KEY) {

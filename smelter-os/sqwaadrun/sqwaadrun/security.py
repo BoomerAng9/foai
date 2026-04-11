@@ -127,7 +127,7 @@ def validate_target_url(url: str) -> str:
 
     # Port check (allow standard + high ports, block internal service ports)
     port = parsed.port
-    if port and port < 80 and port not in (80, 443):
+    if port and port not in (80, 443):
         raise SSRFError(f"blocked port: {port}")
 
     # DNS resolution check — resolve hostname and verify IP isn't internal
@@ -151,8 +151,8 @@ def validate_target_url(url: str) -> str:
         raise SSRFError(f"DNS resolution failed for {hostname}")
     except Exception as e:
         logger.warning(f"SSRF DNS check error for {hostname}: {e}")
-        # Fail open on DNS errors — the request will fail anyway
-        pass
+        # Fail closed on DNS errors — block unknown hostnames
+        raise SSRFError(f"DNS check failed for {hostname}: {e}")
 
     return url
 

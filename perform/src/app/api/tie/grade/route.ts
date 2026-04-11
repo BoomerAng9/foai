@@ -3,6 +3,7 @@ import { calculateTIE } from '@/lib/tie/engine';
 import type { PerformanceInput, AttributesInput, IntangiblesInput } from '@/lib/tie/types';
 import { calculatePerFormGrade, getGradeBand } from '@/lib/draft/tie-scale';
 import { gradeToProjectedRound } from '@/lib/draft/open-mind-grader';
+import { requireAuth } from '@/lib/auth-guard';
 
 /* ──────────────────────────────────────────────────────────────
  *  POST /api/tie/grade
@@ -13,6 +14,9 @@ import { gradeToProjectedRound } from '@/lib/draft/open-mind-grader';
  * ────────────────────────────────────────────────────────────── */
 
 export async function POST(req: NextRequest) {
+  const auth = await requireAuth(req);
+  if (!auth.ok) return auth.response;
+
   const contentType = req.headers.get('content-type') || '';
 
   // ── MODE 1: legacy single-athlete structured input ──

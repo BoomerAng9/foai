@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { generateImage, getGatewayStatus } from '@/lib/images/gateway';
 import { saveGenerated } from '@/lib/images/storage';
+import { safeCompare } from '@/lib/auth-guard';
 
 /* ──────────────────────────────────────────────────────────────
  *  POST /api/images/generate
@@ -14,7 +15,7 @@ export async function POST(req: NextRequest) {
   const PIPELINE_KEY = process.env.PIPELINE_AUTH_KEY || '';
   const authHeader = req.headers.get('authorization') || '';
   const token = authHeader.replace('Bearer ', '');
-  if (!PIPELINE_KEY || token !== PIPELINE_KEY) {
+  if (!PIPELINE_KEY || !safeCompare(token, PIPELINE_KEY)) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
