@@ -202,3 +202,32 @@ export async function scrapeQuery(
     };
   }
 }
+
+// ── Live Look In Heartbeat Types ──────────────────────────────────
+
+export type AcheevySkill =
+  | 'MARKETING' | 'TECH' | 'SALES' | 'OPERATIONS' | 'FINANCE'
+  | 'TALENT' | 'PARTNERSHIPS' | 'PRODUCT' | 'NARRATIVE' | 'CRISIS';
+
+export type PersonalityProviderName =
+  | 'crystal' | 'humantic' | 'receptiviti' | 'sentino';
+
+export type LiveLookInHeartbeat = {
+  mission_id: string;
+  phase: 'SCRAPE' | 'VERIFY' | 'ANALYZE' | 'FORGE';
+  hawks_active: string[];
+  hawks_returning: string[];
+  hawks_idle: string[];
+  urls_scraped: number;
+  urls_total: number;
+  datapoints_extracted: number;
+  discrepancies_found: number;
+  phase_progress: number;
+  estimated_remaining_seconds: number;
+  primary_skill: AcheevySkill;
+  secondary_skills: AcheevySkill[];
+  business_engine: string;
+  personality_providers_active?: PersonalityProviderName[];
+  personality_profiles_completed?: number;
+  personality_profiles_pending?: number;
+};

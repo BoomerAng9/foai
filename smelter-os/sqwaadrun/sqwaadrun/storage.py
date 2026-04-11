@@ -116,9 +116,17 @@ class PuterStorage:
         return h
 
     def _full(self, path: str) -> str:
-        """Normalize a relative path to the full Puter path under /smelter-os/."""
+        """Normalize a relative path to the full Puter path under /smelter-os/.
+        Prevents path traversal attacks via ../ sequences."""
         clean = path.lstrip("/")
-        return f"{self.SMELTER_ROOT}/{clean}"
+        if ".." in clean or clean.startswith("/"):
+            raise ValueError(f"path traversal blocked: {path}")
+        full = f"{self.SMELTER_ROOT}/{clean}"
+        from posixpath import normpath
+        normalized = normpath(full)
+        if not normalized.startswith(self.SMELTER_ROOT):
+            raise ValueError(f"path traversal blocked: {path}")
+        return normalized
 
     async def write(
         self,
@@ -290,8 +298,20 @@ class GCSStorage:
 
         return await asyncio.to_thread(_download)
 
-    def get_public_url(self, bucket_name: str, blob_path: str) -> str:
-        return f"https://storage.googleapis.com/{bucket_name}/{blob_path}"
+    def get_public_url(self, bucket_name: str, blob_path: str, expiry_minutes: int = 60) -> str:
+        """Generate a signed URL for secure, time-limited access. Never returns raw public URLs."""
+        try:
+            from datetime import timedelta
+            bucket = self._client.bucket(bucket_name)
+            blob = bucket.blob(blob_path)
+            return blob.generate_signed_url(
+                version="v4",
+                expiration=timedelta(minutes=expiry_minutes),
+                method="GET",
+            )
+        except Exception as e:
+            logger.warning(f"Signed URL generation failed for {bucket_name}/{blob_path}: {e}")
+            return ""
 
 
 # ═════════════════════════════════════════════════════════════════════════

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth-guard';
 
-const SCOUT_ANG_BASE = process.env.SCOUT_ANG_URL || 'https://scout-ang-939270059361.us-central1.run.app';
+const SCOUT_ANG_BASE = process.env.SCOUT_ANG_URL || '';
 
 /**
  * GET /api/seats — Proxy to Scout_Ang /seats?tenant_id=cti

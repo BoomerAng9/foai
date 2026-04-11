@@ -23,13 +23,30 @@ export async function PUT(req: NextRequest) {
   if (!users.length) return NextResponse.json({ error: 'Not registered' }, { status: 404 });
 
   const body = await req.json();
-  const { mission, vision, objectives, needs_analysis, selected_team, huddl_name } = body;
+  const {
+    mission, vision, objectives, needs_analysis, selected_team, huddl_name,
+    delivery_interval, delivery_time, delivery_timezone,
+    email_delivery, delivery_email, delivery_format, notification_channels,
+  } = body;
 
   // Update user fields if provided
-  if (selected_team !== undefined || huddl_name !== undefined) {
+  const hasUserFields = selected_team !== undefined || huddl_name !== undefined
+    || delivery_interval !== undefined || delivery_time !== undefined
+    || delivery_timezone !== undefined || email_delivery !== undefined
+    || delivery_email !== undefined || delivery_format !== undefined
+    || notification_channels !== undefined;
+
+  if (hasUserFields) {
     await sql`UPDATE podcaster_users SET
-      selected_team = COALESCE(${selected_team}, selected_team),
-      huddl_name = COALESCE(${huddl_name}, huddl_name),
+      selected_team = COALESCE(${selected_team ?? null}, selected_team),
+      huddl_name = COALESCE(${huddl_name ?? null}, huddl_name),
+      delivery_interval = COALESCE(${delivery_interval ?? null}, delivery_interval),
+      delivery_time = COALESCE(${delivery_time ?? null}, delivery_time),
+      delivery_timezone = COALESCE(${delivery_timezone ?? null}, delivery_timezone),
+      email_delivery = COALESCE(${email_delivery ?? null}, email_delivery),
+      delivery_email = COALESCE(${delivery_email ?? null}, delivery_email),
+      delivery_format = COALESCE(${delivery_format ?? null}, delivery_format),
+      notification_channels = COALESCE(${notification_channels ?? null}, notification_channels),
       updated_at = NOW()
       WHERE id = ${users[0].id}`;
   }

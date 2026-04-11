@@ -31,12 +31,12 @@ MCP_GATEWAY_URL = os.getenv("MCP_GATEWAY_URL", "http://localhost:8090")
 
 # Agent endpoints for function calling dispatch
 AGENT_ENDPOINTS = {
-    "scout_ang": os.getenv("SCOUT_ANG_URL", "https://scout-ang-apbgyi35aq-uc.a.run.app"),
-    "content_ang": os.getenv("CONTENT_ANG_URL", "https://content-ang-apbgyi35aq-uc.a.run.app"),
-    "edu_ang": os.getenv("EDU_ANG_URL", "https://edu-ang-apbgyi35aq-uc.a.run.app"),
-    "biz_ang": os.getenv("BIZ_ANG_URL", "https://biz-ang-apbgyi35aq-uc.a.run.app"),
-    "ops_ang": os.getenv("OPS_ANG_URL", "https://ops-ang-apbgyi35aq-uc.a.run.app"),
-    "cfo_ang": os.getenv("CFO_ANG_URL", "https://cfo-ang-apbgyi35aq-uc.a.run.app"),
+    "scout_ang": os.getenv("SCOUT_ANG_URL", ""),
+    "content_ang": os.getenv("CONTENT_ANG_URL", ""),
+    "edu_ang": os.getenv("EDU_ANG_URL", ""),
+    "biz_ang": os.getenv("BIZ_ANG_URL", ""),
+    "ops_ang": os.getenv("OPS_ANG_URL", ""),
+    "cfo_ang": os.getenv("CFO_ANG_URL", ""),
 }
 
 ACHEEVY_SYSTEM_PROMPT = """You are ACHEEVY, the Digital CEO of The Deploy Platform by ACHIEVEMOR.

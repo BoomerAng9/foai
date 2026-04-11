@@ -101,7 +101,7 @@ export function resetCounter() {
 
 // ── Hermes Integration (LearnAng) ──────────────────────────────────────────
 
-const HERMES_URL = process.env.HERMES_URL || 'https://hermes-agent-939270059361.us-central1.run.app';
+const HERMES_URL = process.env.HERMES_URL || '';
 
 interface HermesEvaluation {
   evaluation_id: string;
