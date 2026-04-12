@@ -297,7 +297,11 @@ function ChamberContent() {
 
 export default function TheChamberPage() {
   return (
-    <Suspense fallback={<div className="flex items-center justify-center h-full text-fg-ghost font-mono text-sm">Loading The Chamber...</div>}>
+    <Suspense fallback={
+      <div className="flex items-center justify-center h-full text-fg-ghost font-mono text-sm">
+        Loading The Chamber...
+      </div>
+    }>
       <ChamberContent />
     </Suspense>
   );

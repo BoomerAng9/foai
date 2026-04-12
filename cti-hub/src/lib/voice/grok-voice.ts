@@ -176,7 +176,7 @@ export async function grokSpeechToText(
 
   try {
     const formData = new FormData();
-    formData.append('file', new Blob([audioBuffer], { type: 'audio/webm' }), 'audio.webm');
+    formData.append('file', new Blob([new Uint8Array(audioBuffer)], { type: 'audio/webm' }), 'audio.webm');
     formData.append('model', 'grok-4.20-beta');
 
     const res = await fetch('https://api.x.ai/v1/audio/transcriptions', {

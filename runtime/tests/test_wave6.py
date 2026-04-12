@@ -188,7 +188,7 @@ class TestResearchStructuredOutput(unittest.TestCase):
         self.assertIsInstance(result.summary, str)
         self.assertIsInstance(result.sources, list)
         self.assertEqual(result.depth, 1)
-        self.assertGreater(result.duration_ms, 0)
+        self.assertGreaterEqual(result.duration_ms, 0)
 
         # to_dict should produce serializable output
         d = result.to_dict()

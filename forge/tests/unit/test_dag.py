@@ -5,7 +5,7 @@ from __future__ import annotations
 import pytest
 
 from forge.core.dag import CycleDetectedError, TaskDAG
-from forge.core.schema import GateType, StepDefinition
+from forge.core.schema import StepDefinition
 
 
 class TestTaskDAG:
