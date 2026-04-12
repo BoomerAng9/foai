@@ -229,6 +229,29 @@ export default function DraftBoardPage() {
           </div>
         </header>
 
+        {/* SIM EXPERIENCE CARDS */}
+        <div style={{ background: T.navyDeep, color: '#FFFFFF', borderBottom: `1px solid ${T.border}` }}>
+          <div className="max-w-7xl mx-auto px-6 py-8">
+            <div className="flex items-center gap-2 mb-4">
+              <span className="text-[10px] font-bold tracking-[0.2em] uppercase" style={{ color: T.red }}>NEW</span>
+              <span className="text-[11px] font-bold tracking-[0.15em] uppercase opacity-70">Draft Simulation Experience</span>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+              {[
+                { title: 'Full Auto', desc: 'Watch all 7 rounds unfold', href: '/draft/simulate', accent: '#D4A853' },
+                { title: 'War Room', desc: 'Pick your team, control every decision', href: '/draft/war-room', accent: '#EF4444' },
+                { title: 'Mock Draft', desc: 'Classic mock draft board', href: '/draft/mock', accent: '#3B82F6' },
+                { title: 'Round 1 Preview', desc: 'Free first round preview', href: '/draft/simulate', accent: '#22C55E' },
+              ].map(card => (
+                <Link key={card.title} href={card.href} className="group p-4 rounded-xl transition-all hover:translate-y-[-2px]" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}>
+                  <div className="text-sm font-bold mb-1" style={{ color: card.accent }}>{card.title}</div>
+                  <div className="text-[11px] text-white/40 leading-relaxed">{card.desc}</div>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </div>
+
         {/* ═══ CONTROLS BAR ═══ */}
         <div className="sticky top-0 z-20 border-b" style={{ background: T.surface, borderColor: T.border, boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
           <div className="max-w-7xl mx-auto px-6 py-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
