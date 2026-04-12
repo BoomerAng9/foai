@@ -2,20 +2,34 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { hasAccess, checkOwnerBypass } from '@/lib/paywall';
+import { hasAccess, checkOwnerBypass, setOwnerVerified } from '@/lib/paywall';
 
 export default function PaywallGate({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const [status, setStatus] = useState<'checking' | 'granted' | 'denied'>('checking');
 
   useEffect(() => {
-    // Check owner bypass first, then localStorage
     if (checkOwnerBypass() || hasAccess()) {
       setStatus('granted');
-    } else {
-      setStatus('denied');
-      router.replace('/access');
+      return;
     }
+
+    // Try server-side verification
+    fetch('/api/podcasters/profile')
+      .then((r) => r.ok ? r.json() : null)
+      .then((data) => {
+        if (data?.user) {
+          setOwnerVerified(true);
+          setStatus('granted');
+        } else {
+          setStatus('denied');
+          router.replace('/access');
+        }
+      })
+      .catch(() => {
+        setStatus('denied');
+        router.replace('/access');
+      });
   }, [router]);
 
   if (status === 'checking') {
@@ -34,10 +48,7 @@ export default function PaywallGate({ children }: { children: React.ReactNode })
     );
   }
 
-  if (status === 'denied') {
-    // Redirecting — show nothing
-    return null;
-  }
+  if (status === 'denied') return null;
 
   return <>{children}</>;
 }

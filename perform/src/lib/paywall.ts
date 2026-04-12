@@ -10,13 +10,24 @@ export function grantAccess(): void {
   localStorage.setItem(STORAGE_KEY, 'granted');
 }
 
-/** Owner bypass — call on mount if URL has ?access=owner */
+/**
+ * Owner bypass — checks server-verified flag in localStorage.
+ * Never grants access from URL params.
+ */
 export function checkOwnerBypass(): boolean {
   if (typeof window === 'undefined') return false;
-  const params = new URLSearchParams(window.location.search);
-  if (params.get('access') === 'owner') {
+  return localStorage.getItem('perform_owner_verified') === 'true';
+}
+
+/**
+ * Called after server-side profile fetch confirms owner status.
+ */
+export function setOwnerVerified(verified: boolean): void {
+  if (typeof window === 'undefined') return;
+  if (verified) {
+    localStorage.setItem('perform_owner_verified', 'true');
     grantAccess();
-    return true;
+  } else {
+    localStorage.removeItem('perform_owner_verified');
   }
-  return false;
 }
