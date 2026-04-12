@@ -2,8 +2,8 @@
 
 Initiative-aware routing for FOAI-AIMS:
   - Vision tasks → Gemini 3.1 Pro (best vision) or GPT-5.4 Mini (budget vision)
-  - Scrape/clean → DeepSeek V3.2 (cheapest) or Qwen3-Coder (free)
-  - Code → Qwen3-Coder (free, strong) or Claude Sonnet 4.6 (best)
+  - Scrape/clean → DeepSeek V3.2 (cheapest) or Gemini 3.1 Flash (default)
+  - Code → Gemini 3.1 Flash (default) or Claude Sonnet 4.6 (best)
   - Chat → DeepSeek V3.2 (cheapest good quality)
   - Routing/classification → GPT-5.4 Nano (fastest, cheapest)
   - Content → MiniMax M2.7 (strong writer, low cost)

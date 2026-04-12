@@ -54,7 +54,7 @@ export async function GET(req: NextRequest) {
   if (!users.length) return NextResponse.json({ error: 'Not registered' }, { status: 404 });
 
   const items = await sql`
-    SELECT * FROM podcaster_content
+    SELECT id, user_id, title, content_type, body, status, created_at, updated_at FROM podcaster_content
     WHERE user_id = ${users[0].id}
     ORDER BY updated_at DESC
     LIMIT 50

@@ -8,11 +8,11 @@
  */
 
 import { useEffect, useState, useCallback } from 'react';
-import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { BackHomeNav } from '@/components/layout/BackHomeNav';
 import WarRoomPanel from '@/components/podcasters/WarRoomPanel';
 import { getTeam } from '@/lib/podcasters/team-assets';
+import { usePodcasterAuth } from '@/hooks/usePodcasterAuth';
 
 /* ── Theme tokens ── */
 const T = {
@@ -78,9 +78,8 @@ function posOrder(pos: string): number {
 }
 
 export default function WarRoomPage() {
-  const router = useRouter();
+  const { loading: authLoading, authenticated, profile, promptLogin } = usePodcasterAuth();
   const [selectedTeam, setSelectedTeam] = useState<string | null>(null);
-  const [pageLoading, setPageLoading] = useState(true);
 
   // Panel states
   const [roster, setRoster] = useState<RosterPlayer[]>([]);
@@ -95,21 +94,10 @@ export default function WarRoomPage() {
   const [prospects, setProspects] = useState<Prospect[]>([]);
   const [prospectsLoading, setProspectsLoading] = useState(true);
 
-  // Auth + profile fetch
+  // Set team from profile when available
   useEffect(() => {
-    fetch('/api/podcasters/profile')
-      .then((r) => {
-        if (r.status === 401) { router.push('/login'); return null; }
-        if (r.status === 404) { router.push('/podcasters/onboarding'); return null; }
-        return r.json();
-      })
-      .then((data) => {
-        if (!data) return;
-        setSelectedTeam(data.user.selected_team);
-        setPageLoading(false);
-      })
-      .catch(() => setPageLoading(false));
-  }, [router]);
+    if (profile?.selected_team) setSelectedTeam(profile.selected_team);
+  }, [profile?.selected_team]);
 
   // Fetch team data when selected_team is known
   const fetchTeamData = useCallback((team: string) => {
@@ -149,10 +137,37 @@ export default function WarRoomPage() {
   const teamAsset = selectedTeam ? getTeam(selectedTeam) : null;
   const accent = teamAsset?.primaryColor || T.gold;
 
-  if (pageLoading) {
+  if (authLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center" style={{ background: T.bg }}>
         <div className="inline-block w-8 h-8 rounded-full border-2 animate-spin" style={{ borderColor: T.border, borderTopColor: T.gold }} />
+      </div>
+    );
+  }
+
+  if (!selectedTeam) {
+    return (
+      <div className="min-h-screen" style={{ background: T.bg, color: T.text, fontFamily: "'Inter', system-ui, sans-serif" }}>
+        <div style={{ background: T.bg, borderBottom: `2px solid ${T.red}` }}>
+          <div className="max-w-7xl mx-auto px-6 py-3 flex items-center justify-between text-[11px] font-bold tracking-[0.18em] uppercase">
+            <div className="flex items-center gap-3">
+              <BackHomeNav />
+              <span className="opacity-50">|</span>
+              <span>War Room</span>
+            </div>
+            <Link href="/podcasters/dashboard" className="opacity-80 hover:opacity-100 transition" style={{ color: T.gold }}>
+              Dashboard
+            </Link>
+          </div>
+        </div>
+        <div className="text-center py-20" style={{ color: T.textMuted }}>
+          <h2 className="text-3xl font-black mb-4" style={{ color: T.text }}>Pick a Team</h2>
+          <p className="mb-8 text-lg">Select a team to see their War Room intel</p>
+          {authenticated
+            ? <Link href="/podcasters/onboarding" className="px-8 py-4 text-sm font-bold tracking-wider uppercase rounded-lg inline-block" style={{ background: T.gold, color: T.bg }}>Complete Setup</Link>
+            : <button onClick={promptLogin} className="px-8 py-4 text-sm font-bold tracking-wider uppercase rounded-lg" style={{ background: T.gold, color: T.bg }}>Sign In to Select Your Team</button>
+          }
+        </div>
       </div>
     );
   }

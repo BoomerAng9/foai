@@ -8,9 +8,9 @@
  */
 
 import { useEffect, useState, useCallback } from 'react';
-import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { BackHomeNav } from '@/components/layout/BackHomeNav';
+import { usePodcasterAuth } from '@/hooks/usePodcasterAuth';
 
 /* ── Theme tokens ── */
 const T = {
@@ -78,8 +78,7 @@ interface ContentItem {
 }
 
 export default function WorkbenchPage() {
-  const router = useRouter();
-  const [loading, setLoading] = useState(true);
+  const { loading, authenticated, profile, promptLogin } = usePodcasterAuth();
   const [scripts, setScripts] = useState<ContentItem[]>([]);
   const [scriptsLoading, setScriptsLoading] = useState(true);
 
@@ -90,24 +89,9 @@ export default function WorkbenchPage() {
   const [saving, setSaving] = useState(false);
   const [lastSaved, setLastSaved] = useState<string | null>(null);
   const [warRoomNotice, setWarRoomNotice] = useState(false);
-  const [userTeam, setUserTeam] = useState<string | null>(null);
   const [warRoomLoading, setWarRoomLoading] = useState(false);
 
-  // Auth check
-  useEffect(() => {
-    fetch('/api/podcasters/profile')
-      .then((r) => {
-        if (r.status === 401) { router.push('/login'); return null; }
-        if (r.status === 404) { router.push('/podcasters/onboarding'); return null; }
-        return r.json();
-      })
-      .then((data) => {
-        if (!data) return;
-        setUserTeam(data.user?.selected_team || null);
-        setLoading(false);
-      })
-      .catch(() => setLoading(false));
-  }, [router]);
+  const userTeam = profile?.selected_team || null;
 
   // Fetch scripts
   const fetchScripts = useCallback(() => {
@@ -373,15 +357,15 @@ export default function WorkbenchPage() {
           >
             <div className="flex items-center gap-4">
               <button
-                onClick={saveDraft}
-                disabled={saving || !title.trim()}
+                onClick={authenticated ? saveDraft : promptLogin}
+                disabled={authenticated ? (saving || !title.trim()) : false}
                 className="px-5 py-2.5 rounded-lg text-sm font-bold tracking-wider uppercase transition-all disabled:opacity-40"
                 style={{
                   background: T.gold,
                   color: '#0A0A0F',
                 }}
               >
-                {saving ? 'Saving...' : 'Save Draft'}
+                {!authenticated ? 'Sign In to Save' : saving ? 'Saving...' : 'Save Draft'}
               </button>
               {lastSaved && (
                 <span className="text-xs" style={{ color: T.textMuted }}>

@@ -4,7 +4,7 @@
  * Source of truth: cti-hub/src/lib/acheevy/guide-me-engine.ts
  *
  * Three Boomer_Ang-class agents already wired in production:
- *   1. Consult_Ang — fast responder, active listener (Qwen 3.6 Plus free)
+ *   1. Consult_Ang — fast responder, active listener (Gemini 3.1 Flash)
  *   2. ACHEEVY    — senior consultant, execution model
  *   3. Note_Ang   — session recorder, audit + pattern detection
  *                   (NVIDIA Nemotron Nano free)
