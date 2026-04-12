@@ -38,7 +38,7 @@ export async function transcribeFile(
   if (!ELEVENLABS_KEY) throw new Error('ELEVENLABS_API_KEY not configured');
 
   const formData = new FormData();
-  formData.append('file', new Blob([audioBuffer], { type: 'audio/mpeg' }), 'audio.mp3');
+  formData.append('file', new Blob([new Uint8Array(audioBuffer)], { type: 'audio/mpeg' }), 'audio.mp3');
   formData.append('model_id', SCRIBE_MODEL);
 
   if (options.language) formData.append('language_code', options.language);
