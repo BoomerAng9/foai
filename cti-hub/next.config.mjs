@@ -6,7 +6,7 @@ const nextConfig = {
   // Transpile workspace packages from foai/aims-tools/* so cti-hub can
   // import them directly via the path mapping in tsconfig.json. Avoids
   // duplicating logic in cti-hub/src/lib/spinner/.
-  transpilePackages: ['@aims/spinner'],
+  transpilePackages: ['@aims/spinner', '@aims/pricing-matrix'],
   turbopack: {
     root: '.',
   },

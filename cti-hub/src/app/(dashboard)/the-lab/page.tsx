@@ -1,11 +1,11 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import Link from 'next/link';
 import {
   Search, Filter, ArrowUpDown, Star, Zap, Crown, Gem, Cpu,
   Image as ImageIcon, Video, Volume2, Mic, Code2, Layers,
-  ExternalLink, Pin, ChevronDown,
+  ExternalLink, Pin, ChevronDown, Loader2,
 } from 'lucide-react';
 
 /* ── types ─────────────────────────────────────────────── */
@@ -30,7 +30,7 @@ interface ToolTile {
 
 // User-facing names only — no model IDs, no provider names, no internal tool names.
 // Per CLAUDE.md: users see agent names, quality scores, token counts, costs. That's it.
-const TOOLS: ToolTile[] = [
+const FALLBACK_TOOLS: ToolTile[] = [
   // Design chain
   { id: 'design-studio', title: 'Design Studio', provider: 'Premium', sector: 'image', tier: 'premium', costLuc: 2, overview: 'AI design tool — portable specs for web/mobile/marketplace.', bestCase: 'Component design + multi-surface export', isLatest: true, routingPriority: 1 },
   { id: 'page-builder', title: 'Page Builder', provider: 'Premium', sector: 'mcp', tier: 'premium', costLuc: 5, overview: 'AI page builder — mockups from filtered intent.', bestCase: 'Full page mockup generation', isLatest: true, routingPriority: 2 },
@@ -81,14 +81,18 @@ type SortKey = 'priority' | 'price-asc' | 'price-desc' | 'newest';
 /* ── page ──────────────────────────────────────────────── */
 
 export default function TheLabPage() {
+  const [tools, setTools] = useState<ToolTile[]>(FALLBACK_TOOLS);
+  const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [sectorFilter, setSectorFilter] = useState<Sector | 'all'>('all');
   const [tierFilter, setTierFilter] = useState<Tier | 'all'>('all');
   const [sortKey, setSortKey] = useState<SortKey>('priority');
   const [filterOpen, setFilterOpen] = useState(false);
 
+  useEffect(() => { fetch('/api/the-lab/catalog').then(r=>r.ok?r.json():null).then(d=>{if(d?.catalog)setTools(d.catalog);}).catch(()=>{}).finally(()=>setLoading(false)); }, []);
+
   const filtered = useMemo(() => {
-    const list = TOOLS.filter(t => {
+    const list = tools.filter(t => {
       if (sectorFilter !== 'all' && t.sector !== sectorFilter) return false;
       if (tierFilter !== 'all' && t.tier !== tierFilter) return false;
       if (search) {

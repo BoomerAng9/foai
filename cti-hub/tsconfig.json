@@ -30,6 +30,12 @@
       ],
       "@aims/spinner/*": [
         "../aims-tools/spinner/src/*"
+      ],
+      "@aims/pricing-matrix": [
+        "../aims-tools/aims-pricing-matrix/src/index.ts"
+      ],
+      "@aims/pricing-matrix/*": [
+        "../aims-tools/aims-pricing-matrix/src/*"
       ]
     },
     "target": "ES2017"
