@@ -8,7 +8,7 @@ export async function POST(req: NextRequest) {
   if (!auth.ok) return auth.response;
 
   const body = await req.json();
-  const { podcast_name, podcaster_name, location, subscriber_count, primary_platforms, primary_vertical, addon_vertical, selected_team, plan_tier, huddl_name, mission, vision, objectives, needs_analysis } = body;
+  const { podcast_name, podcaster_name, location, subscriber_count, primary_platforms, primary_vertical, addon_vertical, selected_team, huddl_name, mission, vision, objectives, needs_analysis } = body;
 
   if (!podcast_name?.trim() || !podcaster_name?.trim() || !primary_vertical?.trim()) {
     return NextResponse.json({ error: 'podcast_name, podcaster_name, and primary_vertical required' }, { status: 400 });
@@ -19,7 +19,9 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Invalid vertical' }, { status: 400 });
   }
 
-  const effectiveTier = isOwnerEmail(auth.email || '') ? 'lfg' : (plan_tier || 'free');
+  // Owner emails get LFG tier; everyone else starts at free.
+  // User-supplied plan_tier is IGNORED to prevent tier escalation.
+  const effectiveTier = isOwnerEmail(auth.email || '') ? 'lfg' : 'free';
 
   try {
     // Create user
@@ -29,7 +31,7 @@ export async function POST(req: NextRequest) {
       ON CONFLICT (firebase_uid) DO UPDATE SET
         podcast_name = EXCLUDED.podcast_name, podcaster_name = EXCLUDED.podcaster_name,
         primary_vertical = EXCLUDED.primary_vertical, selected_team = EXCLUDED.selected_team,
-        plan_tier = EXCLUDED.plan_tier, onboarding_complete = true, updated_at = NOW()
+        onboarding_complete = true, updated_at = NOW()
       RETURNING *
     `;
 

@@ -4,10 +4,15 @@ import { getAdminAuth } from '@/lib/firebase/admin';
 
 const AUTH_COOKIE = 'firebase-auth-token';
 
-/** Timing-safe string comparison to prevent timing attacks on auth tokens. */
+/** Timing-safe string comparison — constant-time even on length mismatch. */
 export function safeCompare(a: string, b: string): boolean {
-  if (a.length !== b.length) return false;
-  return timingSafeEqual(Buffer.from(a), Buffer.from(b));
+  const bufA = Buffer.from(a);
+  const bufB = Buffer.from(b);
+  if (bufA.length !== bufB.length) {
+    timingSafeEqual(bufA, bufA);
+    return false;
+  }
+  return timingSafeEqual(bufA, bufB);
 }
 
 export interface AuthResult { ok: true; userId: string; email: string; }
