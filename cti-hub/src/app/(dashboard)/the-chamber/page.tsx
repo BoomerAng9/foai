@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, Suspense } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import {
   Play, Save, Plus, Cpu, Volume2, Code2, FileText, BarChart3,
@@ -61,25 +61,17 @@ function ChamberContent() {
     : QUICK_TOOLS;
 
   async function runTest() {
+    if (!selectedTool) return;
     setRunning(true);
-    // Simulated test — in production this hits the actual tool endpoint
-    await new Promise(r => setTimeout(r, 1200));
-    const result: TestResult = {
-      id: `test-${Date.now()}`,
-      status: 200,
-      latency: Math.floor(80 + Math.random() * 200),
-      output: `Tool "${selectedTool || 'unknown'}" responded successfully. This is a simulated test result — wire to real endpoints in production.`,
-      timestamp: new Date(),
-      logs: [
-        { level: 'info', msg: 'Initializing test...' },
-        { level: 'info', msg: 'Connecting to tool engine...' },
-        { level: 'info', msg: 'Request sent' },
-        { level: 'info', msg: 'Response received' },
-      ],
-    };
-    setResults(prev => [result, ...prev]);
-    setRunning(false);
-  }
+    try {
+      const res = await fetch('/api/the-chamber/run', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ toolId: selectedTool, body }) });
+      const data = await res.json();
+      setResults(prev => [{ id: data.id, status: data.status ?? res.status, latency: data.latency ?? 0, output: data.output ?? 'No output', timestamp: new Date(data.timestamp ?? Date.now()), logs: data.logs ?? [{ level: 'info', msg: 'Complete' }] }, ...prev]);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Network error';
+      setResults(prev => [{ id: `test-${Date.now()}`, status: 0, latency: 0, output: msg, timestamp: new Date(), logs: [{ level: 'error', msg }] }, ...prev]);
+    } finally { setRunning(false); }
+  
 
   return (
     <div className="h-full flex flex-col">
