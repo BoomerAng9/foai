@@ -242,8 +242,12 @@ export default function CircuitBoxPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [liveStatuses, setLiveStatuses] = useState<Record<string, { status: string; latency?: number }>>({});
   const [systemHealth, setSystemHealth] = useState<'optimal' | 'degraded' | 'critical'>('optimal');
+  const [toggles, setToggles] = useState<Record<string, boolean>>({});
+  const [togglesLoaded, setTogglesLoaded] = useState(false);
+  const [byokKeys, setByokKeys] = useState<{ provider: string; masked: string; updatedAt: string }[]>([]);
+  const [byokInput, setByokInput] = useState<Record<string, string>>({});
+  const [byokSaving, setByokSaving] = useState<string | null>(null);
 
-  // Fetch live system statuses on mount
   useEffect(() => {
     fetch('/api/system-status')
       .then(r => r.ok ? r.json() : null)
@@ -257,7 +261,13 @@ export default function CircuitBoxPage() {
         setSystemHealth(data.systemHealth);
       })
       .catch(() => {});
+    fetch('/api/circuit-box/toggle').then(r => r.ok ? r.json() : null).then(data => { if (data?.toggles) setToggles(data.toggles); }).catch(() => {}).finally(() => setTogglesLoaded(true));
+    fetch('/api/circuit-box/byok').then(r => r.ok ? r.json() : null).then(data => { if (data?.keys) setByokKeys(data.keys); }).catch(() => {});
   }, []);
+
+  async function handleToggle(c: string) { if (!togglesLoaded) return; const n = !(toggles[c] ?? true); setToggles(p => ({...p,[c]:n})); await fetch('/api/circuit-box/toggle',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({component:c,enabled:n})}).catch(() => {setToggles(p => ({...p,[c]:!n}))}); }
+  async function handleByokSave(p: string) { const k=byokInput[p]?.trim(); if(!k||k.length<8) return; setByokSaving(p); try { const r=await fetch('/api/circuit-box/byok',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({provider:p,key:k})}); const d=await r.json(); if(d.ok){setByokKeys(v=>[...v.filter(x=>x.provider!==p),{provider:p,masked:d.masked,updatedAt:new Date().toISOString()}]);setByokInput(v=>({...v,[p]:''}));}} catch{} setByokSaving(null); }
+  async function handleByokDelete(p: string) { await fetch(`/api/circuit-box/byok?provider=${p}`,{method:'DELETE'}).catch(()=>{}); setByokKeys(v=>v.filter(x=>x.provider!==p)); }
 
   const visiblePanels = PANELS.filter(p => {
     if (p.visibility === 'admin' && !isAdmin) return false;
@@ -274,6 +284,8 @@ export default function CircuitBoxPage() {
 
   // Resolve live status for an entry — live data overrides static defaults
   function resolveStatus(entryId: string, fallback?: string): string | undefined {
+    if (['elevenlabs','deepgram','openai','custom'].includes(entryId) && byokKeys.find(k => k.provider === entryId)) return 'configured';
+    if (togglesLoaded && toggles[entryId] === false) return 'offline';
     return liveStatuses[entryId]?.status || fallback;
   }
 

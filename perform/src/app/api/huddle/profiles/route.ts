@@ -18,12 +18,12 @@ export async function GET(req: NextRequest) {
     const analyst = req.nextUrl.searchParams.get('analyst');
 
     if (analyst) {
-      const [profile] = await sql`SELECT * FROM huddle_profiles WHERE analyst_id = ${analyst}`;
+      const [profile] = await sql`SELECT id, analyst_id, display_name, handle, bio, show_name, avatar_color, followers, following, post_count, verified, created_at FROM huddle_profiles WHERE analyst_id = ${analyst}`;
       if (!profile) return NextResponse.json({ error: 'Profile not found' }, { status: 404 });
       return NextResponse.json({ profile });
     }
 
-    const profiles = await sql`SELECT * FROM huddle_profiles ORDER BY post_count DESC`;
+    const profiles = await sql`SELECT id, analyst_id, display_name, handle, bio, show_name, avatar_color, followers, following, post_count, verified, created_at FROM huddle_profiles ORDER BY post_count DESC`;
     return NextResponse.json({ profiles });
   } catch (err) {
     return NextResponse.json({ error: err instanceof Error ? err.message : 'Unknown' }, { status: 500 });
