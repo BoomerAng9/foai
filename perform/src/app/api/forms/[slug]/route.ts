@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getForm, listSubmissions, paperformAvailable } from '@/lib/paperform/client';
+import { requireAuth } from '@/lib/auth-guard';
 
 /* ──────────────────────────────────────────────────────────────
  *  GET /api/forms/[slug]
@@ -31,6 +32,9 @@ export async function GET(
 
   let submissions = undefined;
   if (withSubmissions) {
+    // Submissions contain user data — require authentication
+    const auth = await requireAuth(req);
+    if (!auth.ok) return auth.response;
     submissions = await listSubmissions(slug, { limit: 25 });
   }
 
