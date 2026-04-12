@@ -7,4 +7,4 @@ services:
       - OPENROUTER_API_KEY=${OPENROUTER_API_KEY}
       - ACHEEVY_V1_URL=${ACHEEVY_V1_URL:-http://31.97.138.45:8000}
       - ACHEEVY_V1_TOKEN=${ACHEEVY_V1_TOKEN}
-      - ACHEEVY_MODEL=${ACHEEVY_MODEL:-qwen/qwen3.6-plus-preview:free}
+      - ACHEEVY_MODEL=${ACHEEVY_MODEL:-google/gemini-3.1-flash}

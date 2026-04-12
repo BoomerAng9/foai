@@ -23,7 +23,7 @@ const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
 const OPENROUTER_KEY = process.env.OPENROUTER_API_KEY;
 const V1_URL = process.env.ACHEEVY_V1_URL; // Must be set via env, no hardcoded fallback
 const V1_TOKEN = process.env.ACHEEVY_V1_TOKEN;
-const MODEL = process.env.ACHEEVY_MODEL || 'qwen/qwen3.6-plus-preview:free';
+const MODEL = process.env.ACHEEVY_MODEL || 'google/gemini-3.1-flash';
 
 if (!BOT_TOKEN) {
   console.error('TELEGRAM_BOT_TOKEN required');
