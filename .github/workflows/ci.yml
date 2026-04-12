@@ -25,13 +25,9 @@ jobs:
             path: perform
           - project: cti-hub
             path: cti-hub
-          - project: GRAMMAR
-            path: GRAMMAR
 
     steps:
       - uses: actions/checkout@v4
-        with:
-          submodules: true
 
       - uses: actions/setup-node@v4
         with:
