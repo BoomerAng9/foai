@@ -82,3 +82,44 @@ hawks:
     run_path: /run
     timeout_seconds: 300
     is_super_agent: true
+
+  # --- Lil_Forge_Hawks Sqwaadrun (SMLT-FORGE-HARNESS-001) ---
+  Lil_Plan_Hawk:
+    description: "Forge: RFP fragment -> workflow plan + task DAG decomposition"
+    internal_port: 7020
+    health_path: /health
+    run_path: /run
+    timeout_seconds: 60
+    sqwaadrun: forge
+
+  Lil_Worktree_Hawk:
+    description: "Forge: git worktree lifecycle, branch isolation, auto-prune"
+    internal_port: 7021
+    health_path: /health
+    run_path: /run
+    timeout_seconds: 30
+    sqwaadrun: forge
+
+  Lil_Exec_Hawk:
+    description: "Forge: step execution via MoEx adapter (Claw-Code/Codex/Gemini)"
+    internal_port: 7022
+    health_path: /health
+    run_path: /run
+    timeout_seconds: 180
+    sqwaadrun: forge
+
+  Lil_Gate_Hawk:
+    description: "Forge: five-gate enforcement (pytest/mypy/ruff/pip-audit/integration)"
+    internal_port: 7023
+    health_path: /health
+    run_path: /run
+    timeout_seconds: 120
+    sqwaadrun: forge
+
+  Lil_Chronicle_Hawk:
+    description: "Forge: Charter (customer) + Ledger (audit) dual-emission"
+    internal_port: 7024
+    health_path: /health
+    run_path: /run
+    timeout_seconds: 30
+    sqwaadrun: forge

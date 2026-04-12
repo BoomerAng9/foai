@@ -1,0 +1,53 @@
+id: perform-wire
+version: 1.0
+owner: Buildsmith
+description: "Per|Form Neon migrations + seed + /grading route wiring"
+
+inputs:
+  target_repo_path:
+    type: string
+    required: true
+    default: foai/perform
+  migration_dir:
+    type: string
+    required: false
+    default: prisma/migrations
+
+steps:
+  - id: plan
+    hawk: Lil_Plan_Hawk
+    action: plan_perform_wire
+    output: wire_plan
+
+  - id: isolate
+    hawk: Lil_Worktree_Hawk
+    action: create_worktree
+    branch: forge/perform-wire-{run_id}
+    auto_prune_on_exit: true
+
+  - id: implement
+    hawk: Lil_Exec_Hawk
+    action: execute_wire
+    adapter: ${FORGE_ADAPTER}
+    iterate_until_gate_passes: true
+    max_iterations: 3
+
+  - id: gate
+    hawk: Lil_Gate_Hawk
+    gates: [pytest, mypy, ruff]
+    on_failure: "return_to: implement"
+
+  - id: promote
+    hawk: Buildsmith
+    action: promote_ingot
+    from_tier: Raw
+    to_tier: Forged
+
+  - id: chronicle
+    hawk: Lil_Chronicle_Hawk
+    emit: [charter, ledger]
+
+  - id: bamaram
+    hawk: Buildsmith
+    when: promote.tier == Forged
+    action: fire_bamaram_event

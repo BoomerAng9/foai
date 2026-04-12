@@ -1,0 +1,50 @@
+id: refactor-safely
+version: 1.0
+owner: Buildsmith
+description: Refactor with regression-test gate, no behavior change allowed
+
+inputs:
+  target_repo_path:
+    type: string
+    required: true
+  refactor_scope:
+    type: string
+    required: true
+  test_command:
+    type: string
+    required: false
+    default: pytest
+
+steps:
+  - id: plan
+    hawk: Lil_Plan_Hawk
+    action: plan_refactor
+    output: refactor_plan
+
+  - id: isolate
+    hawk: Lil_Worktree_Hawk
+    action: create_worktree
+    branch: forge/refactor-{run_id}
+    auto_prune_on_exit: true
+
+  - id: implement
+    hawk: Lil_Exec_Hawk
+    action: execute_refactor
+    adapter: ${FORGE_ADAPTER}
+    iterate_until_gate_passes: true
+    max_iterations: 5
+
+  - id: gate
+    hawk: Lil_Gate_Hawk
+    gates: [pytest, mypy, ruff, integration]
+    on_failure: "return_to: implement"
+
+  - id: promote
+    hawk: Buildsmith
+    action: promote_ingot
+    from_tier: Raw
+    to_tier: Refined
+
+  - id: chronicle
+    hawk: Lil_Chronicle_Hawk
+    emit: [charter, ledger]
