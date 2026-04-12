@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@/lib/db';
-import { safeCompare } from '@/lib/auth-guard';
+import { safeCompare, requireAuth } from '@/lib/auth-guard';
+
+const AUTH_COOKIE = 'firebase-auth-token';
 
 const CREATE_TABLE = `
   CREATE TABLE IF NOT EXISTS perform_players (
@@ -42,20 +44,40 @@ async function ensureTable() {
   await sql.unsafe(CREATE_TABLE);
 }
 
+/** Public preview columns — no grades, scouting details, or analyst notes. */
+const PREVIEW_COLUMNS = 'id, name, school, position, overall_rank';
+const PREVIEW_LIMIT = 5;
+
 /**
- * GET /api/players — List players with optional filters
+ * GET /api/players — List players with optional filters.
+ *
+ * Unauthenticated requests receive a limited public preview (top 5 players,
+ * name/school/position only). Authenticated requests get the full dataset.
+ *
  * Query params: position, school, search, sort (field:asc|desc), limit, offset
  */
 export async function GET(req: NextRequest) {
   try {
     await ensureTable();
+
+    // Determine auth status — unauthenticated callers get preview mode
+    const token = req.cookies.get(AUTH_COOKIE)?.value;
+    const auth = token ? await requireAuth(req) : null;
+    const isAuthenticated = auth?.ok === true;
+
     const url = req.nextUrl;
     const position = url.searchParams.get('position');
     const school = url.searchParams.get('school');
     const search = url.searchParams.get('search');
     const sort = url.searchParams.get('sort') || 'overall_rank:asc';
-    const limit = Math.min(parseInt(url.searchParams.get('limit') || '100', 10), 500);
-    const offset = parseInt(url.searchParams.get('offset') || '0', 10);
+    const limit = isAuthenticated
+      ? Math.min(parseInt(url.searchParams.get('limit') || '100', 10), 500)
+      : PREVIEW_LIMIT;
+    const offset = isAuthenticated
+      ? parseInt(url.searchParams.get('offset') || '0', 10)
+      : 0;
+
+    const columns = isAuthenticated ? '*' : PREVIEW_COLUMNS;
 
     // Build dynamic query with conditions
     const conditions: string[] = [];
@@ -94,7 +116,7 @@ export async function GET(req: NextRequest) {
     const offsetParam = `$${paramIdx}`;
     values.push(offset);
 
-    const query = `SELECT * FROM perform_players ${where} ORDER BY ${safeSortField} ${safeSortDir} LIMIT ${limitParam} OFFSET ${offsetParam}`;
+    const query = `SELECT ${columns} FROM perform_players ${where} ORDER BY ${safeSortField} ${safeSortDir} LIMIT ${limitParam} OFFSET ${offsetParam}`;
     const countQuery = `SELECT COUNT(*) as total FROM perform_players ${where}`;
 
     const [rows, countResult] = await Promise.all([
@@ -104,7 +126,13 @@ export async function GET(req: NextRequest) {
 
     const total = parseInt(countResult[0]?.total || '0', 10);
 
-    return NextResponse.json({ players: rows, total, limit, offset });
+    return NextResponse.json({
+      players: rows,
+      total,
+      limit,
+      offset,
+      ...(isAuthenticated ? {} : { preview: true }),
+    });
   } catch (error) {
     const msg = error instanceof Error ? error.message : 'Failed to fetch players';
     return NextResponse.json({ error: msg }, { status: 500 });

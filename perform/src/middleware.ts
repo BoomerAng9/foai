@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { rateLimit } from '@/lib/rate-limit';
 
 /**
  * Public routes that never require authentication.
@@ -64,6 +65,10 @@ const PUBLIC_GET_ONLY = [
 
 const AUTH_COOKIE = 'firebase-auth-token';
 
+/** Rate limit: 100 requests per minute per IP. */
+const RATE_LIMIT_MAX = 100;
+const RATE_LIMIT_WINDOW_MS = 60_000;
+
 function isPublic(pathname: string, method: string): boolean {
   // Exact public paths
   if (PUBLIC_PATHS.includes(pathname)) return true;
@@ -79,12 +84,32 @@ function isPublic(pathname: string, method: string): boolean {
   return false;
 }
 
-// TODO: Add rate limiting (e.g. Upstash @upstash/ratelimit) to protect
-// POST endpoints from abuse. Apply per-IP limits on public routes and
-// per-user limits on authenticated routes.
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const method = request.method;
+
+  // ── Rate limiting on all /api/ routes ──
+  if (pathname.startsWith('/api/')) {
+    const ip =
+      request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
+      request.headers.get('x-real-ip') ||
+      'unknown';
+    const result = rateLimit(ip, RATE_LIMIT_MAX, RATE_LIMIT_WINDOW_MS);
+
+    if (!result.allowed) {
+      return NextResponse.json(
+        { error: 'Too many requests' },
+        {
+          status: 429,
+          headers: {
+            'Retry-After': String(Math.ceil(result.resetMs / 1000)),
+            'X-RateLimit-Limit': String(RATE_LIMIT_MAX),
+            'X-RateLimit-Remaining': '0',
+          },
+        },
+      );
+    }
+  }
 
   // Let public routes through
   if (isPublic(pathname, method)) {
