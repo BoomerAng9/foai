@@ -24,11 +24,14 @@ const ASYNC_MODEL = 'async_flash_v1.0';
 const DEFAULT_VOICE_ID = 'e0f39dc4-f691-4e78-bba5-5c636692cc04';
 
 export interface AsyncTTSRequest {
-  transcript: string;
-  voiceId?: string;      // UUID format
+  transcript?: string;
+  text?: string;          // Alias for transcript (hermes-tts-router compat)
+  voiceId?: string;       // UUID format
   speed?: number;
   sampleRate?: number;
   outputFormat?: 'pcm_f32le' | 'pcm_s16le' | 'pcm_mulaw' | 'pcm_alaw';
+  emotion?: string;
+  language?: string;
 }
 
 export interface AsyncCloneRequest {
@@ -53,7 +56,7 @@ export async function asyncTextToSpeech(req: AsyncTTSRequest): Promise<Buffer> {
     },
     body: JSON.stringify({
       model_id: ASYNC_MODEL,
-      transcript: req.transcript,
+      transcript: req.transcript || req.text,
       voice: {
         mode: 'id',
         id: req.voiceId || DEFAULT_VOICE_ID,
@@ -89,7 +92,7 @@ export async function asyncTextToSpeechStream(req: AsyncTTSRequest): Promise<Rea
     },
     body: JSON.stringify({
       model_id: ASYNC_MODEL,
-      transcript: req.transcript,
+      transcript: req.transcript || req.text,
       voice: {
         mode: 'id',
         id: req.voiceId || DEFAULT_VOICE_ID,
@@ -128,7 +131,7 @@ export async function asyncTextToSpeechWithTimestamps(req: AsyncTTSRequest): Pro
     },
     body: JSON.stringify({
       model_id: ASYNC_MODEL,
-      transcript: req.transcript,
+      transcript: req.transcript || req.text,
       voice: {
         mode: 'id',
         id: req.voiceId || DEFAULT_VOICE_ID,
