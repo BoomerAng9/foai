@@ -149,7 +149,7 @@ export async function asyncCloneVoice(req: AsyncCloneRequest): Promise<string> {
   const formData = new FormData();
   formData.append('name', req.name);
   if (req.description) formData.append('description', req.description);
-  formData.append('audio', new Blob([req.audioSample], { type: 'audio/mpeg' }), 'sample.mp3');
+  formData.append('audio', new Blob([new Uint8Array(req.audioSample)], { type: 'audio/mpeg' }), 'sample.mp3');
 
   const res = await fetch(`${ASYNC_BASE_URL}/voices/clone`, {
     method: 'POST',
