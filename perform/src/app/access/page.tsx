@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { hasAccess, grantAccess, checkOwnerBypass } from '@/lib/paywall';
+import { hasAccess, grantAccess } from '@/lib/paywall';
 import { COLORS } from '@/lib/design/tokens';
 import { BackHomeNav } from '@/components/layout/BackHomeNav';
 
@@ -32,7 +32,7 @@ export default function AccessPage() {
   const [checking, setChecking] = useState(true);
 
   useEffect(() => {
-    if (checkOwnerBypass() || hasAccess()) {
+    if (hasAccess()) {
       router.replace('/draft');
       return;
     }

@@ -120,7 +120,6 @@ export async function ensureAiplugTables(): Promise<void> {
     `;
   }
 
-<<<<<<< HEAD
   // Seed Teacher Twin
   const existingTt = await sql`SELECT id FROM plugs WHERE slug = 'teacher-twin' LIMIT 1`;
   if (existingTt.length === 0) {

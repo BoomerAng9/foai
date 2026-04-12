@@ -3,16 +3,16 @@
 /**
  * Podcaster Dashboard — Circuit Box Home
  * =========================================
- * Auth-gated. Fetches profile, redirects to onboarding if not registered.
+ * Browse-first: renders for all visitors. Auth-gated actions only.
  * Shows CircuitBoxRoom hero, editable Huddl name, nav cards, recent news.
  */
 
 import { useEffect, useState, useRef } from 'react';
-import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { BackHomeNav } from '@/components/layout/BackHomeNav';
 import CircuitBoxRoom from '@/components/podcasters/CircuitBoxRoom';
 import { getTeam } from '@/lib/podcasters/team-assets';
+import { usePodcasterAuth } from '@/hooks/usePodcasterAuth';
 
 /* ── Theme tokens ── */
 const T = {
@@ -24,14 +24,6 @@ const T = {
   gold: '#D4A853',
   red: '#D40028',
 };
-
-interface UserProfile {
-  id: number;
-  firebase_uid: string;
-  selected_team: string;
-  huddl_name: string | null;
-  email: string;
-}
 
 interface NewsItem {
   id: number;
@@ -104,65 +96,43 @@ const NAV_CARDS = [
 ];
 
 export default function PodcasterDashboardPage() {
-  const router = useRouter();
-  const [user, setUser] = useState<UserProfile | null>(null);
+  const { loading, authenticated, profile: user, promptLogin } = usePodcasterAuth();
   const [news, setNews] = useState<NewsItem[]>([]);
   const [deliveries, setDeliveries] = useState<Delivery[]>([]);
   const [teamDetail, setTeamDetail] = useState<TeamDetail | null>(null);
-  const [loading, setLoading] = useState(true);
   const [editingName, setEditingName] = useState(false);
   const [nameValue, setNameValue] = useState('');
   const nameRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    fetch('/api/podcasters/profile')
-      .then((r) => {
-        if (r.status === 401) {
-          router.push('/login');
-          return null;
-        }
-        if (r.status === 404) {
-          router.push('/podcasters/onboarding');
-          return null;
-        }
-        return r.json();
-      })
-      .then((data) => {
-        if (!data) return;
-        setUser(data.user);
-        setNameValue(data.user.huddl_name || '');
-        setLoading(false);
+    if (user?.huddl_name) setNameValue(user.huddl_name);
+  }, [user?.huddl_name]);
 
-        if (data.user.selected_team) {
-          const team = encodeURIComponent(data.user.selected_team);
-          // Fetch team news
-          fetch(`/api/nfl/news?team=${team}&limit=5`)
-            .then((r) => r.json())
-            .then((d) => setNews(d.news || d.articles || []))
-            .catch(() => {});
-          // Fetch team detail (wins, losses, roster count, draft picks)
-          fetch(`/api/nfl/teams/${team}`)
-            .then((r) => r.json())
-            .then((d) => {
-              if (d.team) {
-                setTeamDetail({
-                  wins_2025: d.team.wins_2025 || 0,
-                  losses_2025: d.team.losses_2025 || 0,
-                  roster_count: d.roster_count || 0,
-                  draft_picks_2026: d.team.draft_picks_2026 || [],
-                });
-              }
-            })
-            .catch(() => {});
-          // Fetch recent deliveries
-          fetch(`/api/podcasters/deliveries?limit=5`)
-            .then((r) => r.ok ? r.json() : { deliveries: [] })
-            .then((d) => setDeliveries(d.deliveries || []))
-            .catch(() => {});
+  useEffect(() => {
+    if (!user?.selected_team) return;
+    const team = encodeURIComponent(user.selected_team);
+    fetch(`/api/nfl/news?team=${team}&limit=5`)
+      .then((r) => r.json())
+      .then((d) => setNews(d.news || d.articles || []))
+      .catch(() => {});
+    fetch(`/api/nfl/teams/${team}`)
+      .then((r) => r.json())
+      .then((d) => {
+        if (d.team) {
+          setTeamDetail({
+            wins_2025: d.team.wins_2025 || 0,
+            losses_2025: d.team.losses_2025 || 0,
+            roster_count: d.roster_count || 0,
+            draft_picks_2026: d.team.draft_picks_2026 || [],
+          });
         }
       })
-      .catch(() => setLoading(false));
-  }, [router]);
+      .catch(() => {});
+    fetch(`/api/podcasters/deliveries?limit=5`)
+      .then((r) => r.ok ? r.json() : { deliveries: [] })
+      .then((d) => setDeliveries(d.deliveries || []))
+      .catch(() => {});
+  }, [user?.selected_team]);
 
   const teamData = user ? getTeam(user.selected_team) : null;
 
@@ -174,7 +144,6 @@ export default function PodcasterDashboardPage() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ huddl_name: nameValue.trim() }),
     }).catch(() => {});
-    setUser((prev) => (prev ? { ...prev, huddl_name: nameValue.trim() } : prev));
   };
 
   if (loading) {
@@ -184,8 +153,6 @@ export default function PodcasterDashboardPage() {
       </div>
     );
   }
-
-  if (!user) return null;
 
   return (
     <div className="min-h-screen" style={{ background: T.bg, color: T.text, fontFamily: "'Inter', system-ui, sans-serif" }}>
@@ -204,6 +171,19 @@ export default function PodcasterDashboardPage() {
       </div>
 
       <main className="max-w-7xl mx-auto px-6 py-8 space-y-8">
+        {/* ═══ SIGN-IN BANNER ═══ */}
+        {!authenticated && (
+          <div
+            className="rounded-lg text-center text-sm py-3 px-6"
+            style={{ background: T.surface, border: `1px solid ${T.gold}`, color: T.gold }}
+          >
+            <span>Sign in to save your team, configure deliveries, and access full features. </span>
+            <button onClick={promptLogin} className="underline font-bold hover:opacity-80">
+              Sign In
+            </button>
+          </div>
+        )}
+
         {/* ═══ CIRCUIT BOX ROOM HERO ═══ */}
         {teamData && (
           <CircuitBoxRoom
@@ -220,9 +200,9 @@ export default function PodcasterDashboardPage() {
           />
         )}
 
-        {/* ═══ HUDDL NAME (editable) ═══ */}
+        {/* ═══ HUDDL NAME ═══ */}
         <div className="flex items-center gap-3">
-          {editingName ? (
+          {authenticated && editingName ? (
             <input
               ref={nameRef}
               type="text"
@@ -236,15 +216,15 @@ export default function PodcasterDashboardPage() {
             />
           ) : (
             <h1
-              className="text-3xl md:text-4xl font-black cursor-pointer transition-colors hover:opacity-80"
-              style={{ color: T.gold }}
-              onClick={() => setEditingName(true)}
-              title="Click to edit"
+              className="text-3xl md:text-4xl font-black transition-colors"
+              style={{ color: T.gold, cursor: authenticated ? 'pointer' : 'default' }}
+              onClick={authenticated ? () => setEditingName(true) : undefined}
+              title={authenticated ? 'Click to edit' : undefined}
             >
-              {user.huddl_name || 'My Huddl'}
+              {user?.huddl_name || 'Command Center'}
             </h1>
           )}
-          {!editingName && (
+          {authenticated && !editingName && (
             <button
               onClick={() => setEditingName(true)}
               className="text-xs px-2 py-1 rounded transition-colors"
@@ -287,6 +267,19 @@ export default function PodcasterDashboardPage() {
             </Link>
           ))}
         </div>
+
+        {/* ═══ NO-TEAM PLACEHOLDER ═══ */}
+        {!user?.selected_team && (
+          <div className="text-center py-12" style={{ color: T.textMuted }}>
+            <p className="text-lg">Select a team to see your dashboard</p>
+            <p className="text-sm mt-2">
+              {authenticated
+                ? <Link href="/podcasters/onboarding" style={{ color: T.gold }} className="underline">Complete onboarding</Link>
+                : <button onClick={promptLogin} style={{ color: T.gold }} className="underline">Sign in to get started</button>
+              }
+            </p>
+          </div>
+        )}
 
         {/* ═══ RECENT DELIVERIES ═══ */}
         <section>

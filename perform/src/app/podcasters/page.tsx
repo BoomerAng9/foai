@@ -28,6 +28,14 @@ const TIER_ACCENT: Record<DisplayTier, string> = {
   lfg: '#D40028',
 };
 
+const TIER_PRICE: Record<DisplayTier, string> = {
+  free: 'Free',
+  bmc: '$7/mo',
+  premium: '$29/mo',
+  bucket_list: '$79/mo',
+  lfg: 'Custom',
+};
+
 const FREE_PLAN = {
   name: 'Free',
   description: 'Limited preview. Upgrade to BMC for full access.',
@@ -40,47 +48,33 @@ const FREE_PLAN = {
 
 const FEATURES = [
   {
-    title: 'War Room',
-    description: 'Your team data command center. Rosters, depth charts, cap numbers, injury reports — all in one broadcast-grade dashboard.',
-    icon: (
-      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#FFD700" strokeWidth="1.5">
-        <rect x="3" y="3" width="7" height="7" rx="1" />
-        <rect x="14" y="3" width="7" height="7" rx="1" />
-        <rect x="3" y="14" width="7" height="7" rx="1" />
-        <rect x="14" y="14" width="7" height="7" rx="1" />
-      </svg>
-    ),
+    tag: 'WAR ROOM',
+    title: 'Team Intelligence Dossier',
+    description: 'Rosters, depth charts, cap data, injury reports — your team\'s complete intelligence dossier refreshed by Hawk scouts every cycle.',
+    preview: 'LIVE ROSTER + DRAFT PICKS + BREAKING NEWS',
+    accent: T.red,
   },
   {
-    title: 'Workbench',
-    description: 'AI-assisted script editor. Talking points, segment outlines, stat-backed takes — write show prep in minutes, not hours.',
-    icon: (
-      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#FFD700" strokeWidth="1.5">
-        <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6z" />
-        <path d="M14 2v6h6" />
-        <path d="M8 13h8M8 17h5" />
-      </svg>
-    ),
+    tag: 'WORKBENCH',
+    title: 'AI Script Editor',
+    description: 'Talking points, segment outlines, stat-backed takes — write show prep in minutes, not hours. Inject War Room data with one click.',
+    preview: '5 EPISODE TEMPLATES + MONOSPACE EDITOR',
+    accent: T.gold,
   },
   {
-    title: 'Distribution',
+    tag: 'DISTRIBUTION',
+    title: 'Publish Everywhere',
     subtitle: 'Coming Soon',
-    description: 'Clip generation, social posts, and cross-platform scheduling. Create once, publish everywhere.',
-    icon: (
-      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#FFD700" strokeWidth="1.5">
-        <circle cx="12" cy="12" r="10" />
-        <path d="M2 12h20M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z" />
-      </svg>
-    ),
+    description: 'Clip generation, social posts, and cross-platform scheduling. Create once, publish to YouTube, Instagram, TikTok, and X.',
+    preview: 'MULTI-PLATFORM CLIP EXPORT',
+    accent: T.cyan,
   },
   {
-    title: 'Hawks',
-    description: 'AI data squadrons that scrape, summarize, and deliver intel straight to your War Room. Your research team on autopilot.',
-    icon: (
-      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#FFD700" strokeWidth="1.5">
-        <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
-      </svg>
-    ),
+    tag: 'HAWKS',
+    title: 'AI Scout Squadrons',
+    description: 'Autonomous data agents that scrape, summarize, and deliver intel straight to your War Room. Your research team on autopilot.',
+    preview: 'AUTOMATED INTEL DELIVERY',
+    accent: '#F97316',
   },
 ];
 
@@ -112,53 +106,95 @@ export default function PodcastersLandingPage() {
             <span>Per|Form for Podcasters</span>
           </div>
           <Link
-            href="/podcasters/onboarding"
+            href="/podcasters/war-room"
             className="opacity-80 hover:opacity-100 transition"
             style={{ color: T.gold }}
           >
-            Get Started
+            Browse War Room
           </Link>
         </div>
       </div>
 
       {/* ═══ HERO ═══ */}
       <header className="relative overflow-hidden" style={{ background: T.surface }}>
+        {/* Diagonal line pattern */}
         <div
-          className="absolute inset-0 opacity-[0.04]"
+          className="absolute inset-0 opacity-[0.03]"
           style={{
             backgroundImage: 'repeating-linear-gradient(45deg, transparent, transparent 80px, #FFFFFF 80px, #FFFFFF 81px)',
           }}
         />
-        <div className="relative max-w-7xl mx-auto px-6 py-20 md:py-28 text-center">
-          <div className="inline-flex items-center gap-2 mb-5">
+        {/* Red gradient wash */}
+        <div
+          className="absolute inset-0 opacity-[0.08]"
+          style={{
+            background: `radial-gradient(ellipse at 30% 50%, ${T.red}, transparent 70%)`,
+          }}
+        />
+        {/* Gold gradient wash */}
+        <div
+          className="absolute inset-0 opacity-[0.06]"
+          style={{
+            background: `radial-gradient(ellipse at 70% 30%, ${T.gold}, transparent 60%)`,
+          }}
+        />
+
+        <div className="relative max-w-7xl mx-auto px-6 py-24 md:py-32 text-center">
+          <div className="inline-flex items-center gap-3 mb-6">
             <span
-              className="px-2.5 py-1 text-[10px] font-bold tracking-[0.2em] rounded"
+              className="px-3 py-1.5 text-[10px] font-black tracking-[0.25em] rounded"
               style={{ background: T.red, color: '#FFFFFF' }}
             >
-              NEW
+              LIVE
             </span>
             <span className="text-[11px] font-semibold tracking-[0.15em] uppercase" style={{ color: T.textMuted }}>
               Per|Form Platform
             </span>
           </div>
-          <h1
-            className="text-5xl md:text-7xl font-black leading-[0.92] tracking-tight"
-            style={{ color: T.text }}
-          >
+
+          <h1 className="text-6xl md:text-8xl font-black leading-[0.88] tracking-tight">
             Your Draft
             <br />
             <span style={{ color: T.gold }}>Command Center</span>
           </h1>
-          <p className="text-lg md:text-xl mt-6 max-w-2xl mx-auto leading-relaxed" style={{ color: T.textMuted }}>
-            AI-powered show prep, team data, and content creation for sports podcasters.
+
+          <p className="text-lg md:text-xl mt-8 max-w-2xl mx-auto leading-relaxed" style={{ color: T.textMuted }}>
+            AI-powered show prep, real-time team intel, and content creation tools built for sports podcasters who take their craft seriously.
           </p>
-          <div className="mt-10 flex items-center justify-center gap-4 flex-wrap">
+
+          {/* ═══ STATS TICKER ═══ */}
+          <div className="flex items-center justify-center gap-8 md:gap-12 mt-12 text-xs font-mono tracking-wider" style={{ color: T.textMuted }}>
+            <div className="flex flex-col items-center">
+              <span className="text-3xl md:text-4xl font-black" style={{ color: T.gold }}>32</span>
+              <span className="mt-1">NFL TEAMS</span>
+            </div>
+            <div className="w-px h-10" style={{ background: T.border }} />
+            <div className="flex flex-col items-center">
+              <span className="text-3xl md:text-4xl font-black" style={{ color: T.gold }}>450+</span>
+              <span className="mt-1">PROSPECTS</span>
+            </div>
+            <div className="w-px h-10" style={{ background: T.border }} />
+            <div className="flex flex-col items-center">
+              <span className="text-3xl md:text-4xl font-black" style={{ color: T.gold }}>24/7</span>
+              <span className="mt-1">HAWK INTEL</span>
+            </div>
+          </div>
+
+          {/* ═══ DUAL CTA ═══ */}
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-12">
+            <Link
+              href="/podcasters/war-room"
+              className="px-8 py-4 text-sm font-bold tracking-wider uppercase rounded-lg transition-all hover:shadow-lg"
+              style={{ background: 'transparent', color: T.gold, border: `2px solid ${T.gold}` }}
+            >
+              Browse the War Room
+            </Link>
             <Link
               href="/podcasters/onboarding"
               className="inline-flex items-center gap-2 px-8 py-4 text-sm font-bold tracking-wider uppercase rounded-lg transition-all hover:shadow-lg hover:shadow-yellow-900/20"
               style={{ background: T.gold, color: T.bg }}
             >
-              Get Started
+              Create Your Command Center
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                 <path d="M5 12h14M12 5l7 7-7 7" />
               </svg>
@@ -167,47 +203,97 @@ export default function PodcastersLandingPage() {
         </div>
       </header>
 
-      {/* ═══ FEATURE CARDS ═══ */}
-      <section className="max-w-7xl mx-auto px-6 py-20">
-        <div className="text-center mb-14">
-          <h2 className="text-3xl md:text-4xl font-black tracking-tight">Everything You Need</h2>
-          <p className="mt-3 text-sm" style={{ color: T.textMuted }}>
+      {/* ═══ FEATURE SEGMENTS ═══ */}
+      <section className="max-w-7xl mx-auto px-6 py-24">
+        <div className="text-center mb-16">
+          <span className="text-[10px] font-black tracking-[0.3em] uppercase" style={{ color: T.red }}>
+            The Toolkit
+          </span>
+          <h2 className="text-4xl md:text-5xl font-black tracking-tight mt-3">
+            Everything You Need
+          </h2>
+          <p className="mt-4 text-sm" style={{ color: T.textMuted }}>
             Built for sports podcasters who take their content seriously.
           </p>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {FEATURES.map((f) => (
+
+        <div className="space-y-12">
+          {FEATURES.map((f, i) => (
             <div
-              key={f.title}
-              className="rounded-xl p-8 transition-all hover:shadow-lg hover:shadow-yellow-900/10"
-              style={{ background: T.surface, border: `1px solid ${T.border}` }}
+              key={f.tag}
+              className={`flex flex-col ${i % 2 === 0 ? 'md:flex-row' : 'md:flex-row-reverse'} gap-8 items-stretch`}
             >
-              <div className="mb-5">{f.icon}</div>
-              <div className="flex items-center gap-2 mb-3">
-                <h3 className="text-xl font-bold">{f.title}</h3>
-                {f.subtitle && (
-                  <span
-                    className="px-2 py-0.5 text-[9px] font-bold tracking-wider rounded"
-                    style={{ background: T.surfaceAlt, color: T.textMuted, border: `1px solid ${T.border}` }}
-                  >
-                    {f.subtitle}
-                  </span>
-                )}
+              {/* Text block */}
+              <div className="flex-1 flex flex-col justify-center">
+                <div className="relative pl-7" style={{ borderLeft: `3px solid ${f.accent}` }}>
+                  <div
+                    className="absolute -left-[7px] top-0 w-3.5 h-3.5 rounded-full"
+                    style={{ background: f.accent }}
+                  />
+                  <div className="flex items-center gap-3 mb-3">
+                    <span
+                      className="px-2.5 py-1 text-[9px] font-black tracking-[0.25em] rounded"
+                      style={{ background: `${f.accent}20`, color: f.accent, border: `1px solid ${f.accent}40` }}
+                    >
+                      {f.tag}
+                    </span>
+                    {f.subtitle && (
+                      <span
+                        className="px-2 py-0.5 text-[8px] font-bold tracking-wider rounded"
+                        style={{ background: T.surfaceAlt, color: T.textMuted }}
+                      >
+                        {f.subtitle}
+                      </span>
+                    )}
+                  </div>
+                  <h3 className="text-2xl md:text-3xl font-black tracking-tight mb-3">{f.title}</h3>
+                  <p className="text-sm leading-relaxed" style={{ color: T.textMuted }}>
+                    {f.description}
+                  </p>
+                </div>
               </div>
-              <p className="text-sm leading-relaxed" style={{ color: T.textMuted }}>
-                {f.description}
-              </p>
+
+              {/* Preview block */}
+              <div className="flex-1">
+                <div
+                  className="rounded-xl h-full min-h-[200px] flex items-center justify-center text-xs font-mono tracking-wider relative overflow-hidden"
+                  style={{
+                    background: T.surfaceAlt,
+                    border: `1px solid ${T.border}`,
+                    color: T.textMuted,
+                  }}
+                >
+                  {/* Accent glow */}
+                  <div
+                    className="absolute top-0 left-0 w-full h-1"
+                    style={{ background: `linear-gradient(90deg, ${f.accent}, transparent)` }}
+                  />
+                  <div className="text-center px-6">
+                    <div className="text-[10px] font-black tracking-[0.3em] mb-2 uppercase" style={{ color: f.accent }}>
+                      {f.tag}
+                    </div>
+                    <div className="text-xs" style={{ color: T.textMuted }}>
+                      {f.preview}
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           ))}
         </div>
       </section>
 
       {/* ═══ PLAN TIERS ═══ */}
-      <section className="py-20" style={{ background: T.surface }}>
+      <section className="py-24" style={{ background: T.surface }}>
         <div className="max-w-7xl mx-auto px-6">
-          <div className="text-center mb-14">
-            <h2 className="text-3xl md:text-4xl font-black tracking-tight">Choose Your Tier</h2>
-            <p className="mt-3 text-sm" style={{ color: T.textMuted }}>
+          <div className="text-center mb-16">
+            <span className="text-[10px] font-black tracking-[0.3em] uppercase" style={{ color: T.gold }}>
+              Pricing
+            </span>
+            <h2 className="text-4xl md:text-5xl font-black tracking-tight mt-3">
+              Choose Your Tier
+            </h2>
+            <p className="mt-4 text-sm" style={{ color: T.textMuted }}>
               Start free. Scale when you are ready.
             </p>
           </div>
@@ -215,21 +301,34 @@ export default function PodcastersLandingPage() {
             {TIER_ORDER.map((tier) => {
               const plan = tier === 'free' ? FREE_PLAN : PLAN_FEATURES[tier];
               const accent = TIER_ACCENT[tier];
+              const isPopular = tier === 'premium';
               return (
                 <div
                   key={tier}
-                  className="rounded-xl p-6 flex flex-col"
+                  className="rounded-xl p-6 flex flex-col relative"
                   style={{
                     background: T.bg,
-                    border: `1px solid ${T.border}`,
+                    border: `1px solid ${isPopular ? T.gold : T.border}`,
                     borderTop: `3px solid ${accent}`,
+                    boxShadow: isPopular ? `0 0 30px ${T.gold}15` : undefined,
                   }}
                 >
+                  {isPopular && (
+                    <span
+                      className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-0.5 text-[8px] font-black tracking-[0.2em] rounded-full"
+                      style={{ background: T.gold, color: T.bg }}
+                    >
+                      MOST POPULAR
+                    </span>
+                  )}
                   <div
-                    className="text-[10px] font-bold tracking-[0.2em] uppercase mb-2"
+                    className="text-[10px] font-bold tracking-[0.2em] uppercase mb-1"
                     style={{ color: accent }}
                   >
                     {plan.name}
+                  </div>
+                  <div className="text-xl font-black mb-2" style={{ color: T.text }}>
+                    {TIER_PRICE[tier]}
                   </div>
                   <p className="text-xs leading-relaxed mb-5 flex-1" style={{ color: T.textMuted }}>
                     {plan.description}
@@ -263,27 +362,48 @@ export default function PodcastersLandingPage() {
         </div>
       </section>
 
-      {/* ═══ FOOTER CTA ═══ */}
-      <section className="py-20">
-        <div className="max-w-3xl mx-auto px-6 text-center">
-          <h2 className="text-3xl md:text-4xl font-black tracking-tight">
-            Ready to Level Up Your Show?
+      {/* ═══ FINAL CTA ═══ */}
+      <section className="py-24">
+        <div className="max-w-4xl mx-auto px-6 text-center">
+          <h2 className="text-4xl md:text-5xl font-black tracking-tight">
+            Ready to Level Up
+            <br />
+            <span style={{ color: T.gold }}>Your Show?</span>
           </h2>
-          <p className="mt-4 text-sm leading-relaxed" style={{ color: T.textMuted }}>
+          <p className="mt-6 text-lg leading-relaxed" style={{ color: T.textMuted }}>
             Join the draft. Get access to the same data tools the pros use.
+            <br />
+            No paywall — browse everything first.
           </p>
-          <Link
-            href="/podcasters/onboarding"
-            className="inline-flex items-center gap-2 mt-8 px-8 py-4 text-sm font-bold tracking-wider uppercase rounded-lg transition-all hover:shadow-lg hover:shadow-yellow-900/20"
-            style={{ background: T.gold, color: T.bg }}
-          >
-            Join the Draft
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-              <path d="M5 12h14M12 5l7 7-7 7" />
-            </svg>
-          </Link>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-10">
+            <Link
+              href="/podcasters/war-room"
+              className="px-8 py-4 text-sm font-bold tracking-wider uppercase rounded-lg transition-all"
+              style={{ background: 'transparent', color: T.gold, border: `2px solid ${T.gold}` }}
+            >
+              Browse the War Room
+            </Link>
+            <Link
+              href="/podcasters/onboarding"
+              className="inline-flex items-center gap-2 px-8 py-4 text-sm font-bold tracking-wider uppercase rounded-lg transition-all hover:shadow-lg hover:shadow-yellow-900/20"
+              style={{ background: T.gold, color: T.bg }}
+            >
+              Join the Draft
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                <path d="M5 12h14M12 5l7 7-7 7" />
+              </svg>
+            </Link>
+          </div>
         </div>
       </section>
+
+      {/* ═══ TRUST STRIP ═══ */}
+      <div
+        className="py-4 text-center text-[10px] font-bold tracking-[0.25em] uppercase"
+        style={{ background: T.surfaceAlt, color: T.textMuted, borderTop: `1px solid ${T.border}` }}
+      >
+        Powered by Per|Form · Published by ACHIEVEMOR
+      </div>
 
       {/* ═══ FOOTER BAR ═══ */}
       <footer

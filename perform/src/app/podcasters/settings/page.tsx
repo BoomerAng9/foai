@@ -1,9 +1,9 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { BackHomeNav } from '@/components/layout/BackHomeNav';
+import { usePodcasterAuth } from '@/hooks/usePodcasterAuth';
 
 const T = {
   bg: '#06122A',
@@ -48,8 +48,7 @@ interface Settings {
 }
 
 export default function DeliverySettingsPage() {
-  const router = useRouter();
-  const [loading, setLoading] = useState(true);
+  const { loading, authenticated, profile, promptLogin } = usePodcasterAuth();
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [settings, setSettings] = useState<Settings>({
@@ -61,30 +60,22 @@ export default function DeliverySettingsPage() {
     delivery_format: 'both',
     notification_channels: ['email', 'dashboard'],
   });
+  const [settingsLoaded, setSettingsLoaded] = useState(false);
 
   useEffect(() => {
-    fetch('/api/podcasters/profile')
-      .then((r) => {
-        if (r.status === 401) { router.push('/login'); return null; }
-        if (r.status === 404) { router.push('/podcasters/onboarding'); return null; }
-        return r.json();
-      })
-      .then((data) => {
-        if (!data) return;
-        const u = data.user;
-        setSettings({
-          delivery_interval: u.delivery_interval || 'daily',
-          delivery_time: u.delivery_time || '05:00',
-          delivery_timezone: u.delivery_timezone || 'America/New_York',
-          email_delivery: u.email_delivery ?? true,
-          delivery_email: u.delivery_email || u.email || '',
-          delivery_format: u.delivery_format || 'both',
-          notification_channels: u.notification_channels || ['email', 'dashboard'],
-        });
-        setLoading(false);
-      })
-      .catch(() => setLoading(false));
-  }, [router]);
+    if (!profile || settingsLoaded) return;
+    const u = profile as unknown as Record<string, unknown>;
+    setSettings({
+      delivery_interval: (u.delivery_interval as string) || 'daily',
+      delivery_time: (u.delivery_time as string) || '05:00',
+      delivery_timezone: (u.delivery_timezone as string) || 'America/New_York',
+      email_delivery: (u.email_delivery as boolean) ?? true,
+      delivery_email: (u.delivery_email as string) || (u.email as string) || '',
+      delivery_format: (u.delivery_format as string) || 'both',
+      notification_channels: (u.notification_channels as string[]) || ['email', 'dashboard'],
+    });
+    setSettingsLoaded(true);
+  }, [profile, settingsLoaded]);
 
   const save = async () => {
     setSaving(true);
@@ -128,6 +119,13 @@ export default function DeliverySettingsPage() {
       </div>
 
       <main className="max-w-3xl mx-auto px-6 py-8 space-y-8">
+        {!authenticated && !loading && (
+          <div className="text-center py-8 rounded-lg"
+            style={{ background: T.surface, border: `1px solid ${T.gold}` }}>
+            <p style={{ color: T.gold }} className="font-bold mb-2">Sign in to configure your deliveries</p>
+            <button onClick={promptLogin} className="underline text-sm" style={{ color: T.text }}>Sign In</button>
+          </div>
+        )}
         <h1 className="text-2xl font-black" style={{ color: T.gold }}>Delivery Settings</h1>
         <p className="text-sm" style={{ color: T.textMuted }}>
           Configure when and how your Producer delivers briefings.
@@ -240,16 +238,16 @@ export default function DeliverySettingsPage() {
         {/* Save */}
         <div className="flex items-center gap-4">
           <button
-            onClick={save}
-            disabled={saving}
+            onClick={authenticated ? save : promptLogin}
+            disabled={authenticated ? saving : false}
             className="px-8 py-3 rounded-lg text-sm font-bold transition-all"
             style={{
               background: T.gold,
               color: T.bg,
-              opacity: saving ? 0.5 : 1,
+              opacity: (authenticated && saving) ? 0.5 : 1,
             }}
           >
-            {saving ? 'Saving...' : 'Save Settings'}
+            {!authenticated ? 'Sign In to Save' : saving ? 'Saving...' : 'Save Settings'}
           </button>
           {saved && (
             <span className="text-sm font-bold" style={{ color: T.green }}>

@@ -23,10 +23,6 @@ jobs:
         include:
           - project: perform
             path: perform
-          - project: cti-hub
-            path: cti-hub
-          - project: GRAMMAR
-            path: GRAMMAR
 
     steps:
       - uses: actions/checkout@v4

@@ -1,48 +1,47 @@
 /**
- * Async Voice API Client (async.com) — STRESS TESTED
- * =====================================================
- * Verified working 2026-04-12. Correct field names + auth.
- *
- * Auth: X-Api-Key header (NOT Authorization Bearer)
- * Version: v1 header required
- * Voice: { mode: "id", id: "<UUID>" } (NOT string)
- * Text field: "transcript" (NOT "text")
- * Model: "async_flash_v1.0"
+ * Async Voice API Client (async.com)
+ * ====================================
+ * Primary TTS for: analyst voices, podcast longform, user custom voices, studio production.
+ * Voice cloning from 3-second samples. $0.50/hour. 15+ languages.
  *
  * Endpoints:
  *   POST /text_to_speech              — full transcript → audio
- *   POST /text_to_speech/streaming    — continuous streaming
+ *   POST /text_to_speech/streaming    — continuous streaming audio
  *   POST /text_to_speech/with_timestamps — word-level timing
  *   WSS  /text_to_speech/websocket/ws — WebSocket incremental
+ *
+ * Hermes routing modes that use this adapter:
+ *   analyst_voice, podcast_longform, user_custom_voice, studio_production
  */
 
 const ASYNC_API_KEY = process.env.ASYNC_API_KEY || '';
-const ASYNC_BASE_URL = 'https://api.async.com';
-const ASYNC_MODEL = 'async_flash_v1.0';
-
-// Default voice UUID from Async library (verified working)
-const DEFAULT_VOICE_ID = 'e0f39dc4-f691-4e78-bba5-5c636692cc04';
+const ASYNC_BASE_URL = 'https://api.async.com/v1';
 
 export interface AsyncTTSRequest {
-  transcript?: string;
-  text?: string;          // Alias for transcript (hermes-tts-router compat)
-  voiceId?: string;       // UUID format
-  speed?: number;
-  sampleRate?: number;
-  outputFormat?: 'pcm_f32le' | 'pcm_s16le' | 'pcm_mulaw' | 'pcm_alaw';
-  emotion?: string;
-  language?: string;
+  text: string;
+  voiceId: string;
+  speed?: number;      // 0.5 - 2.0, default 1.0
+  emotion?: string;    // neutral, happy, sad, angry, excited
+  language?: string;   // en, es, fr, de, etc.
+  outputFormat?: 'mp3' | 'wav' | 'pcm';
 }
 
 export interface AsyncCloneRequest {
   name: string;
-  audioSample: Buffer;
+  audioSample: Buffer;   // 3+ seconds of audio
   description?: string;
+}
+
+export interface AsyncVoice {
+  id: string;
+  name: string;
+  language: string;
+  isClone: boolean;
 }
 
 /**
  * Generate speech from text using Async TTS.
- * Returns raw PCM audio buffer.
+ * Returns audio buffer.
  */
 export async function asyncTextToSpeech(req: AsyncTTSRequest): Promise<Buffer> {
   if (!ASYNC_API_KEY) throw new Error('ASYNC_API_KEY not configured');
@@ -50,22 +49,17 @@ export async function asyncTextToSpeech(req: AsyncTTSRequest): Promise<Buffer> {
   const res = await fetch(`${ASYNC_BASE_URL}/text_to_speech`, {
     method: 'POST',
     headers: {
-      'x-api-key': ASYNC_API_KEY,
-      'version': 'v1',
+      'Authorization': `Bearer ${ASYNC_API_KEY}`,
       'Content-Type': 'application/json',
+      'Accept': 'audio/mpeg',
     },
     body: JSON.stringify({
-      model_id: ASYNC_MODEL,
-      transcript: req.transcript || req.text,
-      voice: {
-        mode: 'id',
-        id: req.voiceId || DEFAULT_VOICE_ID,
-      },
-      output_format: {
-        container: 'raw',
-        encoding: req.outputFormat || 'pcm_f32le',
-        sample_rate: req.sampleRate || 44100,
-      },
+      text: req.text,
+      voice_id: req.voiceId,
+      speed: req.speed || 1.0,
+      emotion: req.emotion || 'neutral',
+      language: req.language || 'en',
+      output_format: req.outputFormat || 'mp3',
     }),
   });
 
@@ -79,6 +73,7 @@ export async function asyncTextToSpeech(req: AsyncTTSRequest): Promise<Buffer> {
 
 /**
  * Generate speech with streaming output.
+ * Returns a ReadableStream of audio chunks.
  */
 export async function asyncTextToSpeechStream(req: AsyncTTSRequest): Promise<ReadableStream<Uint8Array> | null> {
   if (!ASYNC_API_KEY) throw new Error('ASYNC_API_KEY not configured');
@@ -86,22 +81,16 @@ export async function asyncTextToSpeechStream(req: AsyncTTSRequest): Promise<Rea
   const res = await fetch(`${ASYNC_BASE_URL}/text_to_speech/streaming`, {
     method: 'POST',
     headers: {
-      'x-api-key': ASYNC_API_KEY,
-      'version': 'v1',
+      'Authorization': `Bearer ${ASYNC_API_KEY}`,
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      model_id: ASYNC_MODEL,
-      transcript: req.transcript || req.text,
-      voice: {
-        mode: 'id',
-        id: req.voiceId || DEFAULT_VOICE_ID,
-      },
-      output_format: {
-        container: 'raw',
-        encoding: req.outputFormat || 'pcm_f32le',
-        sample_rate: req.sampleRate || 44100,
-      },
+      text: req.text,
+      voice_id: req.voiceId,
+      speed: req.speed || 1.0,
+      emotion: req.emotion || 'neutral',
+      language: req.language || 'en',
+      output_format: req.outputFormat || 'mp3',
     }),
   });
 
@@ -115,6 +104,7 @@ export async function asyncTextToSpeechStream(req: AsyncTTSRequest): Promise<Rea
 
 /**
  * Generate speech with word-level timestamps.
+ * Returns audio buffer + timestamp array.
  */
 export async function asyncTextToSpeechWithTimestamps(req: AsyncTTSRequest): Promise<{
   audio: Buffer;
@@ -125,22 +115,15 @@ export async function asyncTextToSpeechWithTimestamps(req: AsyncTTSRequest): Pro
   const res = await fetch(`${ASYNC_BASE_URL}/text_to_speech/with_timestamps`, {
     method: 'POST',
     headers: {
-      'x-api-key': ASYNC_API_KEY,
-      'version': 'v1',
+      'Authorization': `Bearer ${ASYNC_API_KEY}`,
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      model_id: ASYNC_MODEL,
-      transcript: req.transcript || req.text,
-      voice: {
-        mode: 'id',
-        id: req.voiceId || DEFAULT_VOICE_ID,
-      },
-      output_format: {
-        container: 'raw',
-        encoding: 'pcm_f32le',
-        sample_rate: 44100,
-      },
+      text: req.text,
+      voice_id: req.voiceId,
+      speed: req.speed || 1.0,
+      language: req.language || 'en',
+      output_format: req.outputFormat || 'mp3',
     }),
   });
 
@@ -151,14 +134,14 @@ export async function asyncTextToSpeechWithTimestamps(req: AsyncTTSRequest): Pro
 
   const data = await res.json();
   return {
-    audio: Buffer.from(data.audio || '', 'base64'),
-    timestamps: data.word_timestamps || data.timestamps || [],
+    audio: Buffer.from(data.audio, 'base64'),
+    timestamps: data.timestamps || [],
   };
 }
 
 /**
  * Clone a voice from a 3-second audio sample.
- * Returns the new voice UUID.
+ * Returns the new voice ID.
  */
 export async function asyncCloneVoice(req: AsyncCloneRequest): Promise<string> {
   if (!ASYNC_API_KEY) throw new Error('ASYNC_API_KEY not configured');
@@ -171,8 +154,7 @@ export async function asyncCloneVoice(req: AsyncCloneRequest): Promise<string> {
   const res = await fetch(`${ASYNC_BASE_URL}/voices/clone`, {
     method: 'POST',
     headers: {
-      'x-api-key': ASYNC_API_KEY,
-      'version': 'v1',
+      'Authorization': `Bearer ${ASYNC_API_KEY}`,
     },
     body: formData,
   });
@@ -184,4 +166,24 @@ export async function asyncCloneVoice(req: AsyncCloneRequest): Promise<string> {
 
   const data = await res.json();
   return data.voice_id || data.id;
+}
+
+/**
+ * List available voices (library + clones).
+ */
+export async function asyncListVoices(): Promise<AsyncVoice[]> {
+  if (!ASYNC_API_KEY) throw new Error('ASYNC_API_KEY not configured');
+
+  const res = await fetch(`${ASYNC_BASE_URL}/voices`, {
+    headers: { 'Authorization': `Bearer ${ASYNC_API_KEY}` },
+  });
+
+  if (!res.ok) return [];
+  const data = await res.json();
+  return (data.voices || data || []).map((v: Record<string, unknown>) => ({
+    id: String(v.id || v.voice_id || ''),
+    name: String(v.name || ''),
+    language: String(v.language || 'en'),
+    isClone: Boolean(v.is_clone || v.isClone),
+  }));
 }
