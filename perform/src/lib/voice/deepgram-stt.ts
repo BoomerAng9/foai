@@ -49,7 +49,7 @@ export async function deepgramTranscribe(
       'Authorization': `Token ${DEEPGRAM_KEY}`,
       'Content-Type': 'audio/mpeg',
     },
-    body: audioBuffer,
+    body: new Uint8Array(audioBuffer),
   });
 
   if (!res.ok) {
