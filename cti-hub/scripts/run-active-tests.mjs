@@ -31,8 +31,8 @@ run('getOpenRouterModel falls back to the default model', () => {
   delete process.env.OPENROUTER_TEXT_MODEL;
   delete process.env.OPENROUTER_VOICE_MODEL;
 
-  assert.equal(getOpenRouterModel('text'), 'openai/gpt-4o-mini');
-  assert.equal(getOpenRouterModel('voice'), 'openai/gpt-4o-mini');
+  assert.equal(getOpenRouterModel('text'), 'qwen/qwen3.6-plus:free');
+  assert.equal(getOpenRouterModel('voice'), 'qwen/qwen3.6-plus:free');
 
   restoreEnvValue('OPENROUTER_TEXT_MODEL', originalTextModel);
   restoreEnvValue('OPENROUTER_VOICE_MODEL', originalVoiceModel);
@@ -52,10 +52,10 @@ run('getOpenRouterModel respects explicit voice and text models', () => {
   restoreEnvValue('OPENROUTER_VOICE_MODEL', originalVoiceModel);
 });
 
-run('determinePlanFromPriceId maps recognizable Stripe price ids', () => {
-  assert.equal(determinePlanFromPriceId('price_pro_monthly_123'), 'pro');
-  assert.equal(determinePlanFromPriceId('price_enterprise_456'), 'enterprise');
-  assert.equal(determinePlanFromPriceId(undefined), 'free');
+run('determinePlanFromPriceId falls back to pay_per_use for unrecognized ids', () => {
+  assert.equal(determinePlanFromPriceId('price_unknown_123'), 'pay_per_use');
+  assert.equal(determinePlanFromPriceId(undefined), 'pay_per_use');
+  assert.equal(determinePlanFromPriceId(null), 'pay_per_use');
 });
 
 run('getStripePriceId returns null for unknown plans', () => {

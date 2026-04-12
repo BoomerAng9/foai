@@ -50,3 +50,6 @@ ACHEEVY_MASTER_CREDENTIALS.md
 *.tsbuildinfo
 next-env.d.ts
 firebase-sa-key.json
+
+# Visual Engine — render candidates and audit logs (gitignored)
+scripts/visual-engine/out/
