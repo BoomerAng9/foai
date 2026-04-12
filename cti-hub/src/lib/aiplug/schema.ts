@@ -120,7 +120,39 @@ export async function ensureAiplugTables(): Promise<void> {
     `;
   }
 
-  // Seed Finance Analyst as the third flagship demo plug
+<<<<<<< HEAD
+  // Seed Teacher Twin
+  const existingTt = await sql`SELECT id FROM plugs WHERE slug = 'teacher-twin' LIMIT 1`;
+  if (existingTt.length === 0) {
+    await sql`
+      INSERT INTO plugs (
+        slug, name, tagline, description, category, status,
+        features, tags, price_cents, runtime_key, featured
+      )
+      VALUES (
+        'teacher-twin',
+        'Teacher Twin',
+        'Autonomous teaching assistant for classroom and tutoring contexts.',
+        'A real agentic teaching partner that builds 2-week learning plans, generates ready-to-print assessments with answer keys, and drafts parent briefings — all grade-appropriate and localized when needed. Every non-English parent brief ships with English labels alongside for ESL households. The Parent Portal invitation flow is the next step.',
+        'education',
+        'ready',
+        ARRAY[
+          'Grade-appropriate curriculum plans',
+          'Ready-to-print quizzes + worksheets + rubrics',
+          'Answer keys generated per assessment',
+          'Parent briefings with ESL-friendly bilingual labels',
+          'Parent Portal invitation flow (coming in I-3b)',
+          'Owner-viewable execution logs'
+        ],
+        ARRAY['education', 'classroom', 'tutoring', 'parent-portal', 'flagship'],
+        0,
+        'teacher-twin',
+        FALSE
+      )
+    `;
+  }
+
+  // Seed Finance Analyst
   const existingFa = await sql`SELECT id FROM plugs WHERE slug = 'finance-analyst' LIMIT 1`;
   if (existingFa.length === 0) {
     await sql`
