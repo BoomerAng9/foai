@@ -1,0 +1,62 @@
+{
+  "name": "Per|Form Smoke Test",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "trigger",
+      "name": "Manual Trigger",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "https://perform.foai.cloud/api/health",
+        "options": {}
+      },
+      "id": "health-check",
+      "name": "Health Check",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [450, 300]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "https://perform.foai.cloud/api/nfl/teams",
+        "options": {}
+      },
+      "id": "nfl-teams",
+      "name": "NFL Teams",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [650, 200]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "https://perform.foai.cloud/api/nfl/news?limit=5",
+        "options": {}
+      },
+      "id": "nfl-news",
+      "name": "NFL News",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [650, 400]
+    }
+  ],
+  "connections": {
+    "Manual Trigger": {
+      "main": [[
+        { "node": "Health Check", "type": "main", "index": 0 }
+      ]]
+    },
+    "Health Check": {
+      "main": [[
+        { "node": "NFL Teams", "type": "main", "index": 0 },
+        { "node": "NFL News", "type": "main", "index": 0 }
+      ]]
+    }
+  }
+}
