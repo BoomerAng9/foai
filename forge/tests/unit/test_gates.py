@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import asyncio
 from unittest.mock import AsyncMock, patch
 
 import pytest
@@ -17,7 +16,7 @@ from forge.gates.five_gate import (
     run_pytest,
     run_ruff,
 )
-from forge.gates.leanstral import LeanstralVerifier, VerificationResult
+from forge.gates.leanstral import LeanstralVerifier
 
 
 # ---------------------------------------------------------------------------
@@ -56,7 +55,8 @@ class TestRunPytest:
     @pytest.mark.asyncio
     async def test_pytest_success(self, mock_subprocess_success: AsyncMock) -> None:
         """pytest gate passes when subprocess returns 0."""
-        import tempfile, os
+        import tempfile
+        import os
         with tempfile.TemporaryDirectory() as d:
             os.makedirs(os.path.join(d, "tests"))
             with patch("asyncio.create_subprocess_exec", return_value=mock_subprocess_success):
@@ -66,7 +66,8 @@ class TestRunPytest:
     @pytest.mark.asyncio
     async def test_pytest_failure(self, mock_subprocess_failure: AsyncMock) -> None:
         """pytest gate fails when subprocess returns non-zero."""
-        import tempfile, os
+        import tempfile
+        import os
         with tempfile.TemporaryDirectory() as d:
             os.makedirs(os.path.join(d, "tests"))
             with patch("asyncio.create_subprocess_exec", return_value=mock_subprocess_failure):
@@ -113,7 +114,8 @@ class TestRunPipAudit:
     @pytest.mark.asyncio
     async def test_pip_audit_with_requirements(self, mock_subprocess_success: AsyncMock) -> None:
         """pip-audit runs when requirements.txt exists."""
-        import tempfile, os
+        import tempfile
+        import os
         with tempfile.TemporaryDirectory() as d:
             with open(os.path.join(d, "requirements.txt"), "w") as f:
                 f.write("requests>=2.0\n")
@@ -182,7 +184,8 @@ class TestLeanstralVerifier:
     @pytest.mark.asyncio
     async def test_verify_no_tools_available(self) -> None:
         """When neither solc nor slither is available, mark for manual review."""
-        import tempfile, os
+        import tempfile
+        import os
         with tempfile.TemporaryDirectory() as d:
             contract = os.path.join(d, "test.sol")
             with open(contract, "w") as f:
