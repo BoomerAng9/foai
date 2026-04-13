@@ -9,6 +9,7 @@ import {
   Search, Radio,
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
+import { useTheme } from '@/hooks/useTheme';
 
 /* ── types ─────────────────────────────────────────────── */
 
@@ -236,6 +237,7 @@ function StatusDot({ status }: { status?: string }) {
 
 export default function CircuitBoxPage() {
   const { profile } = useAuth();
+  const { theme, setTheme } = useTheme();
   const isAdmin = profile?.role === 'admin' || profile?.role === 'operator';
   const isPaid = profile?.tier && profile.tier !== 'free';
   const [selectedPanel, setSelectedPanel] = useState<string | null>(null);
