@@ -29,7 +29,7 @@ export async function POST(
 
   const { slug } = await params;
   if (!sql) {
-    return NextResponse.json({ error: 'Database not configured' }, { status: 503 });
+    return NextResponse.json({ error: 'Service temporarily unavailable. Please try again in a moment.' }, { status: 503 });
   }
 
   let inputs: Record<string, unknown> = {};
