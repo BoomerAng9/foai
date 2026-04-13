@@ -64,32 +64,38 @@ export async function POST(req: NextRequest) {
         `;
 
         if (dbTeams.length > 0) {
-          const dbTeam = dbTeams[0];
+          const profile = dbTeams[0].profile as Record<string, unknown> || {};
+          const ownership = profile.ownership as Record<string, unknown> || {};
+          const gm = profile.gm as Record<string, unknown> || {};
+          const hc = profile.head_coach as Record<string, unknown> || {};
+          const roster = profile.roster_2026 as Record<string, unknown> || {};
+          const needs = (profile.needs as Array<Record<string, unknown>>) || [];
+
           teamContext = {
             ...teamContext,
-            owner: dbTeam.owner_name ? { name: dbTeam.owner_name, archetype: dbTeam.owner_archetype } : undefined,
-            gm: dbTeam.gm_name ? { name: dbTeam.gm_name, philosophy: dbTeam.gm_philosophy } : undefined,
-            headCoach: dbTeam.hc_name ? { name: dbTeam.hc_name, scheme: dbTeam.hc_scheme } : undefined,
-            capSpace: dbTeam.cap_space,
-            record: dbTeam.wins != null ? { wins: dbTeam.wins, losses: dbTeam.losses, ties: dbTeam.ties } : undefined,
+            owner: ownership.name ? { name: String(ownership.name), archetype: String(ownership.style || '') } : undefined,
+            gm: gm.name ? { name: String(gm.name), philosophy: String(gm.philosophy || '') } : undefined,
+            headCoach: hc.name ? { name: String(hc.name), scheme: String(hc.scheme_offense || hc.style || '') } : undefined,
+            capSpace: roster.cap_space ? String(roster.cap_space) : undefined,
+            needs: needs.map(n => ({ position: String(n.position || ''), priority: Number(n.priority || 0), reason: String(n.reason || '') })),
+            fullProfile: profile,
           };
         }
 
-        // Fetch roster
+        // Fetch personnel (coaches/GMs, not players — players come from perform_players)
         const personnel = await sql`
-          SELECT name, position, overall_rating
+          SELECT name, person_type, position, profile
           FROM franchise.personnel_pool
           WHERE current_team = ${team.abbreviation.toUpperCase()}
             AND sport = ${sport}
-            AND person_type = 'player'
-          ORDER BY overall_rating DESC
+          ORDER BY person_type
         `;
 
         if (personnel.length > 0) {
-          teamContext.roster = personnel.map((p: Record<string, unknown>) => ({
+          teamContext.staff = personnel.map((p: Record<string, unknown>) => ({
             name: p.name as string,
+            role: p.person_type as string,
             position: p.position as string,
-            overallRating: (p.overall_rating as number) || 0,
           }));
         }
       } catch {
