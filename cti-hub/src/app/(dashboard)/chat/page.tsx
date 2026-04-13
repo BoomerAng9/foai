@@ -799,7 +799,7 @@ function ChatWithACHEEVY() {
               <img
                 src="/acheevy-chat-hero.png"
                 alt="ACHEEVY"
-                className="w-32 h-32 sm:w-44 sm:h-44 object-contain mb-4 animate-materialize"
+                className="w-48 h-48 sm:w-64 sm:h-64 md:w-72 md:h-72 object-contain mb-4 animate-materialize"
                 style={{ filter: 'drop-shadow(0 8px 24px rgba(232,160,32,0.2))' }}
               />
               <h1 className="text-xl sm:text-2xl font-light tracking-tight mb-1 text-center">

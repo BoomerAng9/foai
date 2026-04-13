@@ -20,10 +20,13 @@ export function RolodexVerb() {
   }, []);
 
   return (
-    <span className="inline-block relative overflow-hidden h-[1.2em] align-bottom">
+    <span className="inline-block relative overflow-hidden h-[1.3em] align-baseline" style={{ minWidth: '120px' }}>
       <span
-        className="inline-block font-bold transition-all duration-300 ease-in-out"
+        className="inline-block transition-all duration-300 ease-in-out"
         style={{
+          fontFamily: "'Permanent Marker', cursive",
+          color: '#E8A020',
+          fontSize: '1.1em',
           transform: visible ? 'translateY(0)' : 'translateY(-100%)',
           opacity: visible ? 1 : 0,
         }}
