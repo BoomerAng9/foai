@@ -52,10 +52,13 @@ export async function ensureAiplugTables(): Promise<void> {
   `;
 
   // plug_runs — per-launch runtime state
+  // NOTE: FK to plugs removed — the plugs table may have been created
+  // with a different id type in a prior migration. App-level validation
+  // checks plug existence before inserting a run.
   await sql`
     CREATE TABLE IF NOT EXISTS plug_runs (
       id              TEXT PRIMARY KEY DEFAULT gen_random_uuid()::text,
-      plug_id         TEXT NOT NULL REFERENCES plugs(id) ON DELETE CASCADE,
+      plug_id         TEXT NOT NULL,
       user_id         TEXT NOT NULL DEFAULT '',
       status          TEXT NOT NULL DEFAULT 'queued',
       inputs          JSONB NOT NULL DEFAULT '{}'::jsonb,
@@ -70,10 +73,11 @@ export async function ensureAiplugTables(): Promise<void> {
   `;
 
   // plug_run_events — append-only event log per run
+  // NOTE: FK to plug_runs removed for same reason as above.
   await sql`
     CREATE TABLE IF NOT EXISTS plug_run_events (
       id              TEXT PRIMARY KEY DEFAULT gen_random_uuid()::text,
-      run_id          TEXT NOT NULL REFERENCES plug_runs(id) ON DELETE CASCADE,
+      run_id          TEXT NOT NULL,
       kind            TEXT NOT NULL,
       stage           TEXT NOT NULL DEFAULT '',
       message         TEXT NOT NULL DEFAULT '',
@@ -81,6 +85,16 @@ export async function ensureAiplugTables(): Promise<void> {
       created_at      TIMESTAMPTZ NOT NULL DEFAULT now()
     )
   `;
+
+  // Drop stale FK constraints that may block table creation
+  // (plugs.id type may not match TEXT from a prior migration)
+  await sql`
+    DO $$ BEGIN
+      ALTER TABLE plug_runs DROP CONSTRAINT IF EXISTS plug_runs_plug_id_fkey;
+      ALTER TABLE plug_run_events DROP CONSTRAINT IF EXISTS plug_run_events_run_id_fkey;
+    EXCEPTION WHEN undefined_table THEN NULL;
+    END $$
+  `.catch(() => {});
 
   // Indices
   await sql`CREATE INDEX IF NOT EXISTS plugs_status_idx ON plugs (status)`;
