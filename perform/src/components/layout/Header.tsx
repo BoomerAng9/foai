@@ -15,6 +15,7 @@ const NAV_ITEMS = [
   { label: 'Rankings', href: '/rankings' },
   { label: 'Players', href: '/players' },
   { label: 'Film Room', href: '/film' },
+  { label: 'Franchise', href: '/franchise' },
   { label: 'Flag Football', href: '/flag-football' },
   { label: 'The Huddle', href: '/huddle' },
   { label: 'Dashboard', href: '/dashboard' },
