@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
+
 import { ArrowRight, Menu, X, Moon, Sun } from 'lucide-react';
 
 export default function LandingPage() {
@@ -32,7 +32,7 @@ export default function LandingPage() {
       {/* NAV */}
       <nav className="h-14 flex items-center justify-between px-4 md:px-8 relative" style={{ borderBottom: `1px solid ${border}`, background: surface }}>
         <div className="flex items-center gap-3">
-          <Image src="/brand/cti-shield-day.png" alt="CTI" width={28} height={34} className="object-contain" />
+          <img src="/brand/cti-shield-day.png" alt="CTI" width="28" height="34" className="object-contain" />
           <span className="font-mono text-[11px] font-bold tracking-[0.15em] uppercase" style={{ color: fg }}>
             Coastal Talent &amp; Innovation
           </span>
@@ -76,14 +76,14 @@ export default function LandingPage() {
           style={{ background: `radial-gradient(circle, ${accent}, transparent 70%)` }} />
 
         <div className="relative z-10 text-center max-w-3xl mx-auto px-4 sm:px-8">
-          <Image
+          <img
             src="/brand/cti-shield-day.png"
             alt="Coastal Talent and Innovation"
-            width={200}
-            height={240}
+            width="200"
+            height="240"
             className="mx-auto mb-8 object-contain"
             style={{ filter: 'drop-shadow(0 8px 40px rgba(232,160,32,0.15))' }}
-            priority
+            
           />
 
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-black tracking-tight leading-[1.1]">
