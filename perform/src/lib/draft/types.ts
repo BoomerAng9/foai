@@ -79,3 +79,16 @@ export interface SimulationConfig {
   speed?: SimulationSpeed;
   rounds?: number;
 }
+
+export interface TradeOffer {
+  offer_id: string;
+  offering_team: string;
+  offering_team_abbr: string;
+  target_pick: number;
+  picks_offered: number[];
+  picks_offered_values: number[];
+  target_pick_value: number;
+  value_surplus: number;
+  reason: string;
+  expires_at_pick: number;
+}

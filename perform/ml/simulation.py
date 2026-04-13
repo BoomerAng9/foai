@@ -577,7 +577,29 @@ class DraftSimulator:
         return order
 
     def _load_default_needs(self, state: DraftState):
-        """Load team needs from DB for 2025 (latest available)."""
+        """Load team needs — prefer the manual 2026 override file, fall back to DB."""
+        override_path = Path(__file__).resolve().parent / "team_needs_2026.json"
+        if override_path.exists():
+            try:
+                with open(override_path, 'r') as f:
+                    data = json.load(f)
+                teams_data = data.get("teams", {})
+                loaded = 0
+                for team, info in teams_data.items():
+                    if team not in state.team_needs:
+                        continue
+                    vec = info.get("needs_vector", {})
+                    for pos_name, score in vec.items():
+                        norm_pos = normalize_position(pos_name)
+                        if norm_pos in POS_TO_IDX:
+                            state.team_needs[team][POS_TO_IDX[norm_pos]] = float(score)
+                    loaded += 1
+                if loaded > 0:
+                    print(f"  Loaded 2026 team needs override for {loaded} teams.")
+                    return
+            except Exception as e:
+                print(f"  Warning: Could not load team_needs_2026.json: {e}")
+
         try:
             cols, rows = execute_sql(
                 "SELECT team, position, need_score FROM team_needs WHERE season = 2025",
