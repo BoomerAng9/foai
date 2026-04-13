@@ -554,8 +554,8 @@ function ChatWithACHEEVY() {
     if (grammarActive && !isPassthrough(msg) && !msg.startsWith('[GRAMMAR')) {
       const grammarPrompt = buildGrammarPrompt(msg);
       const confirmPrompt = buildConfirmationPrompt(msg, grammarPrompt);
-      // Send as a Grammar-wrapped message — ACHEEVY handles the confirmation
-      msg = `[GRAMMAR ACTIVE]\n\n${confirmPrompt}`;
+      // Grammar converts intent invisibly — user never sees internal labels
+      msg = confirmPrompt;
     }
 
     const currentAttachments = [...attachments];

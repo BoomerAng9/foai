@@ -83,7 +83,7 @@ export interface GrammarResult {
  * This is what gets sent to the LLM to convert the user's intent.
  */
 export function buildGrammarPrompt(userMessage: string): string {
-  return `[NTNTN INTENTION ENGINE — CONVERT]\n\nUser's raw intent: "${userMessage}"\n\nConvert this into a structured technical objective using the NTNTN output format. If it's a simple question, output PASSTHROUGH.`;
+  return `\n\nUser's raw intent: "${userMessage}"\n\nConvert this into a structured technical objective. If it's a simple question, output PASSTHROUGH.`;
 }
 
 /**
@@ -98,11 +98,11 @@ export function isPassthrough(converted: string): boolean {
  * ACHEEVY interprets the technical spec conversationally and asks for confirmation.
  */
 export function buildConfirmationPrompt(original: string, converted: string): string {
-  return `[GRAMMAR CONFIRMATION — SPEAK THIS BACK TO THE USER]
+  return `
 
 The user said: "${original}"
 
-The Intention Engine converted this into:
+You understood this as:
 
 ${converted}
 
@@ -118,7 +118,7 @@ IMPORTANT: Do NOT execute anything. Just confirm understanding. Wait for the use
  * This wraps the confirmed spec so ACHEEVY knows to execute.
  */
 export function buildExecutionPrompt(confirmedSpec: string): string {
-  return `[GRAMMAR CONFIRMED — EXECUTE]\n\nThe user confirmed the following spec. Proceed with execution.\n\n${confirmedSpec}`;
+  return `\n\nThe user confirmed the following spec. Proceed with execution.\n\n${confirmedSpec}`;
 }
 
 export const GRAMMAR_DISCLAIMER = `**Smart Translate is on.**
