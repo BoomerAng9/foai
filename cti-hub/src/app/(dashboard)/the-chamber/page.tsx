@@ -101,10 +101,10 @@ function ChamberContent() {
         </div>
       </div>
 
-      {/* Three-column layout */}
-      <div className="flex-1 flex overflow-hidden">
+      {/* Responsive layout — stacks on mobile, 3-col on desktop */}
+      <div className="flex-1 flex flex-col md:flex-row overflow-hidden">
         {/* Left — Tools & APIs */}
-        <div className="w-56 border-r border-border bg-bg-surface overflow-y-auto shrink-0">
+        <div className="hidden md:block w-48 lg:w-56 border-r border-border bg-bg-surface overflow-y-auto shrink-0">
           <div className="p-3">
             <div className="relative mb-3">
               <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 text-fg-ghost" />
@@ -238,7 +238,7 @@ function ChamberContent() {
         </div>
 
         {/* Right — Results */}
-        <div className="w-80 border-l border-border bg-bg-surface overflow-y-auto shrink-0">
+        <div className="hidden lg:block w-72 xl:w-80 border-l border-border bg-bg-surface overflow-y-auto shrink-0">
           <div className="p-3 border-b border-border">
             <p className="font-mono text-[10px] font-bold uppercase tracking-wider text-fg">Real-Time Results</p>
           </div>
