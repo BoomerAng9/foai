@@ -33,6 +33,7 @@ const QUICK_TOOLS = [
   { id: 'transcription', label: 'Transcription', sector: 'stt' },
 ];
 
+const TOOL_TEMPLATES: Record<string, { scenario: string; body: string }> = {  'fast-intel': { scenario: 'Fast Intelligence — Quick Reasoning', body: '{"messages": [{"role": "user", "content": "Summarize the key benefits of AI-managed solutions."}], "max_tokens": 256}' },  'standard-chat': { scenario: 'Standard Chat — General Query', body: '{"messages": [{"role": "user", "content": "What are the top 3 trends in AI for 2026?"}], "max_tokens": 256}' },  'precision-code': { scenario: 'Precision Code — Function Gen', body: '{"messages": [{"role": "user", "content": "Write a TypeScript function that validates an email address."}], "max_tokens": 512}' },  'voice-premium': { scenario: 'Voice Premium — TTS Test', body: '{"text": "Welcome to The Deploy Platform. Let ACHEEVY manage it.", "voice": "default"}' },  'voice-standard': { scenario: 'Voice Standard — Agent Voice', body: '{"text": "Your weekly report is ready. Three tasks completed.", "voice": "agent-01"}' },  'vector-engine': { scenario: 'Vector Engine — Logo Gen', body: '{"prompt": "Minimalist logo for a sports analytics platform, gold and dark navy", "style": "vector"}' },  'video-prime': { scenario: 'Video Prime — Short Clip', body: '{"prompt": "Sports highlight reel intro animation, gold particles", "duration": 3}' },  'transcription': { scenario: 'Transcription — STT Test', body: '{"audio_url": "https://example.com/sample.wav", "language": "en"}' },};
 const SAVED_PROJECTS = [
   { id: 'p1', name: 'Voice Agent Test', tool: 'voice-standard', lastRun: '2 hours ago' },
   { id: 'p2', name: 'Image Gen Pipeline', tool: 'vector-engine', lastRun: 'Yesterday' },
@@ -56,6 +57,7 @@ function ChamberContent() {
   const [results, setResults] = useState<TestResult[]>([]);
   const [toolSearch, setToolSearch] = useState('');
 
+useEffect(() => {    if (selectedTool && TOOL_TEMPLATES[selectedTool]) {      const tmpl = TOOL_TEMPLATES[selectedTool];      setScenarioName(tmpl.scenario);      setBody(tmpl.body);    }  }, [selectedTool]);
   const filteredTools = toolSearch
     ? QUICK_TOOLS.filter(t => t.label.toLowerCase().includes(toolSearch.toLowerCase()))
     : QUICK_TOOLS;

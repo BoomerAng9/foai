@@ -436,7 +436,7 @@ export default function CircuitBoxPage() {
       <div className="border-t border-border bg-bg-elevated px-4 py-2 flex items-center gap-4 text-[10px] font-mono">
         <span className="text-fg-ghost">[INFO]</span>
         <span className="text-fg-secondary">Circuit Box loaded — all systems nominal</span>
-        <span className="ml-auto text-fg-ghost">{new Date().toLocaleTimeString()}</span>
+        <span className="ml-auto text-fg-ghost">{typeof window !== 'undefined' ? new Date().toLocaleTimeString() : ''}</span>
       </div>
     </div>
   );
