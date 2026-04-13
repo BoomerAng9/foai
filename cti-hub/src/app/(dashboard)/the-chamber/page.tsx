@@ -71,7 +71,7 @@ function ChamberContent() {
       const msg = err instanceof Error ? err.message : 'Network error';
       setResults(prev => [{ id: `test-${Date.now()}`, status: 0, latency: 0, output: msg, timestamp: new Date(), logs: [{ level: 'error', msg }] }, ...prev]);
     } finally { setRunning(false); }
-  
+  }
 
   return (
     <div className="h-full flex flex-col">
