@@ -164,7 +164,7 @@ export async function createFranchiseSimulation(
     body: JSON.stringify({
       name: `franchise-sim-${sport}-${teamAbbr}-${mode}`,
       description: `Franchise simulation agent for ${teamAbbr} (${mode} mode)`,
-      model: 'claude-sonnet-4-20250514',
+      model: 'claude-sonnet-4-6',
       system: SYSTEM_PROMPTS[mode],
       max_tokens: 4096,
     }),
@@ -377,7 +377,7 @@ export async function streamFallbackSimulation(
             'anthropic-version': '2023-06-01',
           },
           body: JSON.stringify({
-            model: 'claude-sonnet-4-20250514',
+            model: 'claude-sonnet-4-6',
             max_tokens: 4096,
             system: SYSTEM_PROMPTS[mode],
             messages: [
