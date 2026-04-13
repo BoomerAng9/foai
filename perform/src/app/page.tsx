@@ -511,8 +511,54 @@ export default function HomePage() {
           </motion.div>
         </section>
 
-        {/* ── SPACER ── */}
-        <div style={{ height: '120px' }} />
+        {/* ── HORIZONTAL ACCORDION PANES ── */}
+        <motion.section
+          className="px-6 py-20 md:py-28"
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: '-100px' }}
+          variants={staggerContainer}
+        >
+          <div className="max-w-6xl mx-auto">
+            <motion.div variants={fadeUp} className="text-center mb-12">
+              <span className="text-[10px] font-mono font-bold tracking-[0.3em] uppercase" style={{ color: COLORS.gold }}>The Platform</span>
+              <h2 className="text-3xl md:text-4xl font-outfit font-black tracking-tight mt-2" style={{ color: 'var(--pf-text)' }}>
+                Intelligence. Delivered.
+              </h2>
+            </motion.div>
+
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-0 rounded-2xl overflow-hidden" style={{ border: `1px solid ${COLORS.goldBorder}` }}>
+              {[
+                { tag: 'SCOUTING', title: 'Draft Board', desc: 'TIE-graded prospects across all 7 rounds. AI-powered rankings with historical comp analysis.', color: '#D40028' },
+                { tag: 'ANALYSIS', title: 'War Room', desc: 'Rosters, depth charts, cap data, injury reports. Team intelligence updated by Hawk scouts.', color: COLORS.gold },
+                { tag: 'CONTENT', title: 'Podcasters', desc: 'Show prep, script editor, War Room data injection. AI-assisted content creation for sports media.', color: '#22D3EE' },
+                { tag: 'SIMULATION', title: 'Draft Experience', desc: 'ML-powered mock drafts with real trade logic. 6,644 historical picks. Broadcast-grade presentation.', color: '#F97316' },
+              ].map((pane, i) => (
+                <motion.div
+                  key={pane.tag}
+                  variants={staggerItem}
+                  className="p-8 md:p-6 lg:p-8 flex flex-col justify-between group hover:bg-white/[0.02] transition-colors"
+                  style={{ borderRight: i < 3 ? `1px solid ${COLORS.goldBorder}` : undefined }}
+                >
+                  <div>
+                    <span className="text-[9px] font-mono font-bold tracking-[0.25em] uppercase" style={{ color: pane.color }}>{pane.tag}</span>
+                    <h3 className="text-lg md:text-xl font-outfit font-extrabold tracking-tight mt-2 mb-3" style={{ color: 'var(--pf-text)' }}>{pane.title}</h3>
+                    <p className="text-xs leading-relaxed" style={{ color: 'var(--pf-text-muted)' }}>{pane.desc}</p>
+                  </div>
+                  <div className="mt-6">
+                    <Link
+                      href={pane.tag === 'SCOUTING' ? '/draft' : pane.tag === 'ANALYSIS' ? '/podcasters/war-room' : pane.tag === 'CONTENT' ? '/podcasters' : '/draft/simulate'}
+                      className="text-[10px] font-mono font-bold tracking-wider uppercase transition-colors hover:brightness-125"
+                      style={{ color: pane.color }}
+                    >
+                      Explore &rarr;
+                    </Link>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+        </motion.section>
 
         {/* ── TOP 40 NFT CARD CAROUSEL ── */}
         <motion.section
