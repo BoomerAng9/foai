@@ -86,6 +86,23 @@ export async function ensureAiplugTables(): Promise<void> {
     )
   `;
 
+  // Ensure required columns exist on plugs table (may be missing from prior schema)
+  const missingCols = [
+    { col: 'status', def: "ALTER TABLE plugs ADD COLUMN IF NOT EXISTS status TEXT NOT NULL DEFAULT 'draft'" },
+    { col: 'features', def: "ALTER TABLE plugs ADD COLUMN IF NOT EXISTS features TEXT[] NOT NULL DEFAULT ARRAY[]::TEXT[]" },
+    { col: 'tags', def: "ALTER TABLE plugs ADD COLUMN IF NOT EXISTS tags TEXT[] NOT NULL DEFAULT ARRAY[]::TEXT[]" },
+    { col: 'price_cents', def: "ALTER TABLE plugs ADD COLUMN IF NOT EXISTS price_cents INTEGER NOT NULL DEFAULT 0" },
+    { col: 'runtime_key', def: "ALTER TABLE plugs ADD COLUMN IF NOT EXISTS runtime_key TEXT NOT NULL DEFAULT ''" },
+    { col: 'featured', def: "ALTER TABLE plugs ADD COLUMN IF NOT EXISTS featured BOOLEAN NOT NULL DEFAULT FALSE" },
+    { col: 'tagline', def: "ALTER TABLE plugs ADD COLUMN IF NOT EXISTS tagline TEXT NOT NULL DEFAULT ''" },
+    { col: 'description', def: "ALTER TABLE plugs ADD COLUMN IF NOT EXISTS description TEXT NOT NULL DEFAULT ''" },
+    { col: 'category', def: "ALTER TABLE plugs ADD COLUMN IF NOT EXISTS category TEXT NOT NULL DEFAULT 'general'" },
+    { col: 'hero_image_url', def: "ALTER TABLE plugs ADD COLUMN IF NOT EXISTS hero_image_url TEXT NOT NULL DEFAULT ''" },
+  ];
+  for (const { def } of missingCols) {
+    await sql.unsafe(def).catch(() => {});
+  }
+
   // Drop stale FK constraints that may block table creation
   // (plugs.id type may not match TEXT from a prior migration)
   await sql`
