@@ -22,9 +22,9 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  title: "The Deploy Platform",
+  title: "Coastal Talent & Innovation",
   description: "Think it. Say it. Let's build it.",
-  keywords: ["Deploy Platform", "AI Operations", "ACHEEVY", "ACHIEVEMOR"],
+  keywords: ["Coastal Talent", "Innovation", "AI Operations", "ACHEEVY", "ACHIEVEMOR"],
   icons: {
     icon: [
       { url: '/favicon.ico', sizes: '32x32' },
