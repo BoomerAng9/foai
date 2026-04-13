@@ -131,20 +131,20 @@ export default function DraftLandingPage() {
               <span className="text-[10px] font-bold tracking-[0.25em] uppercase" style={{ color: '#D40028' }}>2026 NFL Draft — April 23, Pittsburgh</span>
             </motion.div>
             <motion.h1 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.1 }}
-              className="text-5xl md:text-7xl lg:text-8xl font-black leading-[0.88] tracking-tight">
+              className="text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-black leading-[0.88] tracking-tight">
               Draft<br /><span className="text-transparent bg-clip-text" style={{ backgroundImage: 'linear-gradient(135deg, #D4A853 0%, #F5D89A 40%, #D4A853 80%, #B8912E 100%)' }}>Experience</span>
             </motion.h1>
             <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5, delay: 0.3 }}
               className="text-base md:text-lg text-white/40 mt-5 max-w-xl leading-relaxed">
               AI-powered draft simulations with real trade logic, team needs analysis, and broadcast-grade presentation. Powered by 6,644 historical picks and ML models.
             </motion.p>
-            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 0.5 }} className="flex flex-wrap gap-3 mt-8">
-              <Link href="/draft/simulate" className="inline-flex items-center gap-2 px-7 py-3.5 text-sm font-bold tracking-wider uppercase rounded-lg transition-all hover:brightness-110 hover:shadow-lg"
+            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 0.5 }} className="flex flex-col sm:flex-row flex-wrap gap-3 mt-8">
+              <Link href="/draft/simulate" className="inline-flex items-center justify-center gap-2 px-7 py-3.5 text-sm font-bold tracking-wider uppercase rounded-lg transition-all hover:brightness-110 hover:shadow-lg min-h-[48px]"
                 style={{ background: 'linear-gradient(135deg, #D4A853 0%, #B8912E 100%)', color: '#0A0A0F', boxShadow: '0 0 30px rgba(212,168,83,0.2)' }}>
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z" /></svg>
                 Run Full Simulation
               </Link>
-              <Link href="/draft/board" className="inline-flex items-center gap-2 px-7 py-3.5 text-sm font-bold tracking-wider uppercase rounded-lg transition-all hover:bg-white/10"
+              <Link href="/draft/board" className="inline-flex items-center justify-center gap-2 px-7 py-3.5 text-sm font-bold tracking-wider uppercase rounded-lg transition-all hover:bg-white/10 min-h-[48px]"
                 style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)' }}>Try Free: Big Board Preview</Link>
             </motion.div>
           </div>
@@ -159,10 +159,10 @@ export default function DraftLandingPage() {
               <span className="text-[9px] text-white/20">|</span>
               <span className="text-[9px] text-white/20 font-mono">Round 1 picks streaming...</span>
             </div>
-            <div className="flex overflow-hidden">
+            <div className="flex overflow-x-auto scrollbar-hide">
               {TICKER_PICKS.map((pick, i) => (
                 <motion.div key={pick.pick} animate={{ opacity: i === tickerOffset ? 1 : 0.3, scale: i === tickerOffset ? 1.02 : 1 }} transition={{ duration: 0.4 }}
-                  className="flex-shrink-0 w-1/2 md:w-1/4 p-3" style={{ borderRight: '1px solid rgba(255,255,255,0.04)' }}>
+                  className="flex-shrink-0 w-[45%] sm:w-1/2 md:w-1/4 p-3" style={{ borderRight: '1px solid rgba(255,255,255,0.04)' }}>
                   <div className="flex items-center gap-2 mb-1">
                     <span className="text-[10px] font-mono text-white/20">#{pick.pick}</span>
                     <span className="text-[10px] font-bold tracking-wider" style={{ color: '#D4A853' }}>{pick.team}</span>
@@ -179,53 +179,6 @@ export default function DraftLandingPage() {
         </div>
       </section>
 
-        {/* SIM EXPERIENCE CARDS */}
-        <div style={{ background: T.navyDeep, color: '#FFFFFF', borderBottom: ` 1px solid ${T.border}`  }}>
-          <div className="max-w-7xl mx-auto px-6 py-8">
-            <div className="flex items-center gap-2 mb-4">
-              <span className="text-[10px] font-bold tracking-[0.2em] uppercase" style={{ color: T.red }}>NEW</span>
-              <span className="text-[11px] font-bold tracking-[0.15em] uppercase opacity-70">Draft Simulation Experience</span>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-              {[
-                { title: 'Full Auto', desc: 'Watch all 7 rounds unfold', href: '/draft/simulate', accent: '#D4A853' },
-                { title: 'War Room', desc: 'Pick your team, control every decision', href: '/draft/war-room', accent: '#EF4444' },
-                { title: 'Mock Draft', desc: 'Classic mock draft board', href: '/draft/mock', accent: '#3B82F6' },
-                { title: 'Round 1 Preview', desc: 'Free first round preview', href: '/draft/simulate', accent: '#22C55E' },
-              ].map(card => (
-                <Link key={card.title} href={card.href} className="group p-4 rounded-xl transition-all hover:translate-y-[-2px]" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}>
-                  <div className="text-sm font-bold mb-1" style={{ color: card.accent }}>{card.title}</div>
-                  <div className="text-[11px] text-white/40 leading-relaxed">{card.desc}</div>
-                </Link>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* ═══ CONTROLS BAR ═══ */}
-        <div className="sticky top-0 z-20 border-b" style={{ background: T.surface, borderColor: T.border, boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
-          <div className="max-w-7xl mx-auto px-6 py-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-            {/* Position pills */}
-            <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none">
-              {POSITIONS.map((pos) => {
-                const active = positionFilter === pos;
-                const color = pos === 'ALL' ? T.navy : posColor(pos);
-                return (
-                  <button
-                    key={pos}
-                    onClick={() => setPositionFilter(pos)}
-                    className="px-3 py-1.5 text-[11px] font-bold tracking-[0.1em] uppercase rounded-md transition-all whitespace-nowrap"
-                    style={{
-                      background: active ? color : 'transparent',
-                      color: active ? '#FFFFFF' : color,
-                      border: `1.5px solid ${active ? color : T.border}`,
-                    }}
-                  >
-                    {pos}
-                  </button>
-                );
-              })}
-            </div>
       {/* MODE CARDS */}
       <section className="max-w-7xl mx-auto px-4 md:px-6 py-12">
         <div className="text-center mb-10">
@@ -299,10 +252,10 @@ export default function DraftLandingPage() {
           <div className="relative">
             <h2 className="text-2xl md:text-4xl font-black mb-3">Ready to Draft?</h2>
             <p className="text-sm text-white/40 max-w-md mx-auto mb-6">Your free preview includes the full Big Board and a Round 1 simulation. Upgrade for unlimited access to all modes.</p>
-            <div className="flex flex-wrap justify-center gap-3">
-              <Link href="/draft/simulate" className="inline-flex items-center gap-2 px-8 py-3.5 text-sm font-bold tracking-wider uppercase rounded-lg transition-all hover:brightness-110"
+            <div className="flex flex-col sm:flex-row flex-wrap justify-center gap-3">
+              <Link href="/draft/simulate" className="inline-flex items-center justify-center gap-2 px-8 py-3.5 text-sm font-bold tracking-wider uppercase rounded-lg transition-all hover:brightness-110 min-h-[48px]"
                 style={{ background: 'linear-gradient(135deg, #D4A853 0%, #B8912E 100%)', color: '#0A0A0F', boxShadow: '0 0 30px rgba(212,168,83,0.15)' }}>Start Free Simulation</Link>
-              <Link href="/draft/war-room" className="inline-flex items-center gap-2 px-8 py-3.5 text-sm font-bold tracking-wider uppercase rounded-lg transition-all hover:bg-white/10"
+              <Link href="/draft/war-room" className="inline-flex items-center justify-center gap-2 px-8 py-3.5 text-sm font-bold tracking-wider uppercase rounded-lg transition-all hover:bg-white/10 min-h-[48px]"
                 style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)' }}>Enter War Room</Link>
             </div>
           </div>
