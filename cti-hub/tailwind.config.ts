@@ -9,11 +9,11 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        bg: { DEFAULT: '#F7F7F7', surface: '#FFFFFF', elevated: '#EFEFEF' },
-        fg: { DEFAULT: '#000000', secondary: '#616161', tertiary: '#9E9E9E', ghost: '#BDBDBD' },
-        accent: { DEFAULT: '#191919', hover: '#333333' },
-        border: { DEFAULT: '#E0E0E0', strong: '#C0C0C0' },
-        signal: { live: '#22C55E', warn: '#F59E0B', error: '#EF4444', info: '#3B82F6' },
+        bg: { DEFAULT: 'var(--bg)', surface: 'var(--bg-surface)', elevated: 'var(--bg-elevated)' },
+        fg: { DEFAULT: 'var(--fg)', secondary: 'var(--fg-secondary)', tertiary: 'var(--fg-tertiary)', ghost: 'var(--fg-ghost)' },
+        accent: { DEFAULT: 'var(--accent)', hover: 'var(--accent-hover)' },
+        border: { DEFAULT: 'var(--border)', strong: 'var(--border-strong)' },
+        signal: { live: 'var(--signal-live)', warn: 'var(--signal-warn)', error: 'var(--signal-error)', info: 'var(--signal-info)' },
       },
       fontFamily: {
         mono: ['IBM Plex Mono', 'GeistMono', 'monospace'],
