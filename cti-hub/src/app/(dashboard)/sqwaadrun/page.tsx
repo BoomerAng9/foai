@@ -81,7 +81,7 @@ function SqwaadrunDashboardPageInner() {
   const dbTier = slice.sqwaadrun_tier ? SQWAADRUN_TIERS[slice.sqwaadrun_tier] : null;
   // Owners always active — bypass ALL tier checks with unlimited Commander-level access
   const isActive = isOwnerUser || (slice.sqwaadrun_status === 'active' && dbTier !== null);
-  const tier = dbTier || (isOwnerUser ? { name: 'Commander (Owner)', color: '#E8A020', monthlyQuota: -1, maxConcurrent: -1, features: ['*'] } : null);
+  const tier = dbTier || (isOwnerUser ? { id: 'sqwaadrun_commander' as const, name: 'Commander (Owner)', tagline: 'Unlimited', price_monthly: 0, monthly_missions: -1, allowed_mission_types: ['recon', 'sweep', 'deep_scan', 'monitor', 'custom'], hawks_unlocked: 17, features: ['*'], color: '#E8A020' } : null);
 
   const refresh = useCallback(async (): Promise<RecentMission[]> => {
     if (!user) return [];
