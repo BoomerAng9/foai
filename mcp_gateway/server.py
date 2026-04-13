@@ -41,7 +41,7 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["https://foai.cloud","https://cti.foai.cloud","https://deploy.foai.cloud","http://localhost:3000","http://localhost:3001"],
     allow_methods=["GET", "POST"],
     allow_headers=["*"],
 )

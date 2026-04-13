@@ -23,6 +23,7 @@ async def lifespan(app: FastAPI):
     stop_scheduler()
 
 
+from auth_middleware import ApiKeyMiddleware
 app = FastAPI(
     title="Hermes LearnAng",
     description=(
@@ -34,6 +35,7 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
+app.add_middleware(ApiKeyMiddleware)
 app.include_router(evaluate.router)
 app.include_router(history.router)
 app.include_router(trends.router)

@@ -240,7 +240,7 @@ async def chat(request: ChatRequest, _: None = Depends(require_auth)) -> ChatRes
     )
 
 
-@app.get("/hawks", tags=["Observability"])
+@app.get("/hawks", tags=["Observability"], dependencies=[Depends(require_auth)])
 async def list_hawks() -> dict:
     """Return the configured Lil_Hawk endpoints."""
     settings = get_settings()
@@ -250,7 +250,7 @@ async def list_hawks() -> dict:
 # ---------------------------------------------------------------------------
 # Live Task Plan SSE endpoint
 # ---------------------------------------------------------------------------
-@app.get("/api/chicken-hawk/live-plan", tags=["LiveTaskPlan"])
+@app.get("/api/chicken-hawk/live-plan", tags=["LiveTaskPlan"], dependencies=[Depends(require_auth)])
 async def live_task_plan(request: Request) -> StreamingResponse:
     """
     SSE endpoint for the Live Task Plan.
