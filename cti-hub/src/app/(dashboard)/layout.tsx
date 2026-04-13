@@ -12,6 +12,7 @@ import {
   ChevronDown,
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
+import { ThemeToggle } from '@/components/ThemeToggle';
 
 function CornerBracket({ position }: { position: 'tl' | 'tr' | 'bl' | 'br' }) {
   const rotation = { tl: 0, tr: 90, bl: -90, br: 180 }[position];
@@ -64,11 +65,14 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const contentPadding = isFullBleedContent ? '' : 'p-3 sm:p-4 md:p-6';
 
   const headerRight = (
-    <span className="font-mono text-[10px] text-fg-tertiary hidden sm:inline">
-      {new Date()
-        .toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
-        .toUpperCase()}
-    </span>
+    <div className="flex items-center gap-3">
+      <ThemeToggle />
+      <span className="font-mono text-[10px] text-fg-tertiary hidden sm:inline">
+        {new Date()
+          .toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+          .toUpperCase()}
+      </span>
+    </div>
   );
 
   const userMenuSlot = (
