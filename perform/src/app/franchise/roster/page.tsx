@@ -29,10 +29,14 @@ import { PersonnelPool } from '@/components/franchise/PersonnelPool';
 import { PlayerCard } from '@/components/franchise/PlayerCard';
 import { TeamSelector } from '@/components/franchise/TeamSelector';
 import { SimulationButton } from '@/components/franchise/SimulationButton';
+import { SimulationPanel } from '@/components/franchise/SimulationPanel';
+import { TeamTheme } from '@/components/franchise/TeamTheme';
+import { useTeamSelection } from '@/lib/franchise/use-team-selection';
 import { getRosterLayout, getPositionFilters } from '@/lib/franchise/positions';
 import { getTeamByAbbr } from '@/lib/franchise/teams';
 import { getMockFreeAgents, getMockRosterPlayers } from '@/lib/franchise/mock-data';
 import type { Sport, Player, RosterSlot, SimulationResult } from '@/lib/franchise/types';
+import type { RosterModification } from '@/lib/franchise/simulation';
 
 type MobileTab = 'roster' | 'pool' | 'results';
 
@@ -41,7 +45,7 @@ function RosterRoomInner() {
   const sportParam = (searchParams.get('sport') as Sport) || 'nfl';
   const teamParam = searchParams.get('team') || undefined;
 
-  const [sport, setSport] = useState<Sport>(sportParam);
+  const { sport, teamAbbr: persistedTeam, setSport, setTeam: persistTeam } = useTeamSelection(sportParam, teamParam);
   const [selectedTeam, setSelectedTeam] = useState<string | undefined>(teamParam);
   const [slots, setSlots] = useState<RosterSlot[]>([]);
   const [pool, setPool] = useState<Player[]>([]);
@@ -50,7 +54,23 @@ function RosterRoomInner() {
   const [activePlayer, setActivePlayer] = useState<Player | null>(null);
   const [poolOpen, setPoolOpen] = useState(true);
   const [mobileTab, setMobileTab] = useState<MobileTab>('roster');
-  const [showTeamPicker, setShowTeamPicker] = useState(!teamParam);
+  const [showTeamPicker, setShowTeamPicker] = useState(!teamParam && !persistedTeam);
+  const [simPanelOpen, setSimPanelOpen] = useState(false);
+  const [simRequestBody, setSimRequestBody] = useState<Record<string, unknown> | undefined>();
+  const [rosterChanges, setRosterChanges] = useState<RosterModification[]>([]);
+
+  // Sync persisted team on mount
+  useEffect(() => {
+    if (persistedTeam && !teamParam && !selectedTeam) {
+      setSelectedTeam(persistedTeam);
+      setShowTeamPicker(false);
+    }
+  }, [persistedTeam, teamParam, selectedTeam]);
+
+  const handleSelectTeam = (abbr: string) => {
+    setSelectedTeam(abbr);
+    persistTeam(abbr);
+  };
 
   const team = selectedTeam ? getTeamByAbbr(sport, selectedTeam) : undefined;
   const posFilters = useMemo(() => getPositionFilters(sport), [sport]);
@@ -158,6 +178,22 @@ function RosterRoomInner() {
     // Remove from pool if dragged from there
     setPool((prev) => prev.filter((p) => p.id !== player.id));
 
+    // Track roster modification for simulation
+    const existingSlot = slots.find(s => s.position === targetPos);
+    const mod: RosterModification = existingSlot?.player
+      ? {
+          type: 'swap',
+          position: targetPos,
+          player: { name: player.name, position: player.position, overallRating: player.overallRating },
+          previousPlayer: { name: existingSlot.player.name, position: existingSlot.player.position, overallRating: existingSlot.player.overallRating },
+        }
+      : {
+          type: 'add',
+          position: targetPos,
+          player: { name: player.name, position: player.position, overallRating: player.overallRating },
+        };
+    setRosterChanges(prev => [...prev, mod]);
+
     // Compute mock impact
     setResult({
       capImpact: player.contract?.perYear ? player.contract.perYear : Math.round(Math.random() * 20 - 5),
@@ -201,13 +237,26 @@ function RosterRoomInner() {
   };
 
   const handleSimulate = async () => {
-    // Placeholder for Managed Agents simulation
-    await new Promise((r) => setTimeout(r, 2000));
-    setResult({
-      capImpact: Math.round(Math.random() * 30 - 10),
-      fitScore: Math.round(50 + Math.random() * 50),
-      winImpact: parseFloat((Math.random() * 6 - 2).toFixed(1)),
-    });
+    // Build modifications from current roster state vs initial
+    const body = {
+      sport,
+      team_abbr: selectedTeam,
+      mode: 'roster' as const,
+      modifications: rosterChanges,
+    };
+    setSimRequestBody(body);
+    setSimPanelOpen(true);
+  };
+
+  const handleSimulatePlayoffs = async () => {
+    const body = {
+      sport,
+      team_abbr: selectedTeam,
+      mode: 'roster' as const,
+      modifications: rosterChanges,
+    };
+    setSimRequestBody(body);
+    setSimPanelOpen(true);
   };
 
   // Team picker phase
@@ -242,7 +291,7 @@ function RosterRoomInner() {
               ))}
             </div>
 
-            <TeamSelector sport={sport} selected={selectedTeam} onSelect={setSelectedTeam} />
+            <TeamSelector sport={sport} selected={selectedTeam} onSelect={handleSelectTeam} />
           </div>
         </main>
       </>
@@ -252,7 +301,8 @@ function RosterRoomInner() {
   return (
     <>
       <Header />
-      <main className="min-h-screen" style={{ background: 'var(--pf-bg)' }}>
+      <TeamTheme sport={sport} teamAbbr={selectedTeam}>
+      <main className="min-h-screen" style={{ background: 'transparent' }}>
         {/* Top bar */}
         <div
           className="px-6 py-3 flex items-center gap-3 flex-wrap"
@@ -465,7 +515,7 @@ function RosterRoomInner() {
           }}
         >
           <SimulationButton label="Simulate Season" onClick={handleSimulate} />
-          <SimulationButton label="Simulate Playoffs" onClick={handleSimulate} variant="secondary" />
+          <SimulationButton label="Simulate Playoffs" onClick={handleSimulatePlayoffs} variant="secondary" />
           <button
             onClick={handleReset}
             className="px-4 py-2 text-[11px] font-bold tracking-wider uppercase text-white/30 hover:text-white/50 transition-colors rounded-lg"
@@ -474,7 +524,19 @@ function RosterRoomInner() {
             Reset Changes
           </button>
         </div>
+
+        {/* Simulation Results Panel */}
+        <SimulationPanel
+          open={simPanelOpen}
+          onClose={() => setSimPanelOpen(false)}
+          teamAbbr={selectedTeam}
+          teamColor={team?.primaryColor}
+          mode="roster"
+          streamUrl="/api/franchise/simulate"
+          requestBody={simRequestBody}
+        />
       </main>
+      </TeamTheme>
     </>
   );
 }

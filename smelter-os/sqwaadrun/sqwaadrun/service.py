@@ -356,6 +356,7 @@ async def on_startup(app: web.Application) -> None:
     squad = FullScrappHawkSquadrun(
         output_dir=str(data_dir / "output"),
         schedule_file=str(data_dir / "schedule.json"),
+        enable_screenshots=os.environ.get("ENABLE_SCREENSHOTS", "").lower() in ("1", "true", "yes"),
     )
     await squad.startup()
 

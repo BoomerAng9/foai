@@ -17,6 +17,7 @@ import { TeamSelector } from '@/components/draft/TeamSelector';
 import { ChaosSlider } from '@/components/draft/ChaosSlider';
 import { PickCard } from '@/components/draft/PickCard';
 import { BackHomeNav } from '@/components/layout/BackHomeNav';
+import { TeamTheme } from '@/components/franchise/TeamTheme';
 import type { SimulationState, DraftPick, Prospect, TradeOffer } from '@/lib/draft/types';
 import { getTeam, FIRST_ROUND_ORDER } from '@/lib/draft/teams';
 
@@ -109,7 +110,8 @@ export default function WarRoomPage() {
   }, [sim?.current_pick, isUserTurn, sim?.status, checkForTradeOffers, tradeOffer, sim]);
 
   return (
-    <div className="min-h-screen flex flex-col" style={{ background: '#0a0a0f', color: '#FFFFFF' }}>
+    <TeamTheme sport="nfl" teamAbbr={selectedTeam}>
+    <div className="min-h-screen flex flex-col" style={{ background: 'transparent', color: '#FFFFFF' }}>
       <div style={{ background: 'linear-gradient(180deg, rgba(15,15,22,1) 0%, rgba(10,10,15,1) 100%)', borderBottom: team ? `2px solid ${team.primaryColor}40` : '1px solid rgba(212,168,83,0.15)' }}>
         <div className="max-w-[1920px] mx-auto px-4 py-3 flex items-center gap-4">
           <BackHomeNav />
@@ -276,5 +278,6 @@ export default function WarRoomPage() {
         )}
       </AnimatePresence>
     </div>
+    </TeamTheme>
   );
 }
