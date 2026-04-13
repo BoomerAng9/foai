@@ -48,7 +48,7 @@ interface Settings {
 }
 
 export default function DeliverySettingsPage() {
-  const { loading, authenticated, profile, promptLogin } = usePodcasterAuth();
+  const { loading, authenticated, profile, promptLogin, showSignInPrompt } = usePodcasterAuth();
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [settings, setSettings] = useState<Settings>({
@@ -119,7 +119,7 @@ export default function DeliverySettingsPage() {
       </div>
 
       <main className="max-w-3xl mx-auto px-6 py-8 space-y-8">
-        {!authenticated && !loading && (
+        {showSignInPrompt && (
           <div className="text-center py-8 rounded-lg"
             style={{ background: T.surface, border: `1px solid ${T.gold}` }}>
             <p style={{ color: T.gold }} className="font-bold mb-2">Sign in to configure your deliveries</p>

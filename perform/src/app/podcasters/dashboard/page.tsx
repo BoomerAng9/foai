@@ -96,7 +96,7 @@ const NAV_CARDS = [
 ];
 
 export default function PodcasterDashboardPage() {
-  const { loading, authenticated, profile: user, promptLogin } = usePodcasterAuth();
+  const { loading, authenticated, profile: user, promptLogin, showSignInPrompt } = usePodcasterAuth();
   const [news, setNews] = useState<NewsItem[]>([]);
   const [deliveries, setDeliveries] = useState<Delivery[]>([]);
   const [teamDetail, setTeamDetail] = useState<TeamDetail | null>(null);
@@ -172,7 +172,7 @@ export default function PodcasterDashboardPage() {
 
       <main className="max-w-7xl mx-auto px-6 py-8 space-y-8">
         {/* ═══ SIGN-IN BANNER ═══ */}
-        {!authenticated && (
+        {showSignInPrompt && (
           <div
             className="rounded-lg text-center text-sm py-3 px-6"
             style={{ background: T.surface, border: `1px solid ${T.gold}`, color: T.gold }}

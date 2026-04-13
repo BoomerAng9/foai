@@ -5,6 +5,7 @@ import { BreakingBar } from "@/components/layout/BreakingBar";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { AudioPlayerProvider } from "@/context/AudioPlayerContext";
 import { AudioPlayer } from "@/components/podcast/AudioPlayer";
+import { SignInPrompt } from "@/components/SignInPrompt";
 
 export const metadata: Metadata = {
   title: "Per|Form — Sports Grading & Ranking Platform",
@@ -13,7 +14,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="en" className="dark">
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
@@ -25,6 +26,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               {children}
             </div>
             <AudioPlayer />
+            <SignInPrompt />
             <BreakingBar />
             <NewsTicker />
           </AudioPlayerProvider>

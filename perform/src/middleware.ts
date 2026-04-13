@@ -54,6 +54,7 @@ const PUBLIC_PREFIXES = [
   '/api/health',
   '/api/podcasters/upgrade-plan',
   '/api/webhooks/',
+  '/api/draft/tokens/webhook',
   '/generated/',
 ];
 
@@ -61,6 +62,8 @@ const PUBLIC_PREFIXES = [
 const PUBLIC_GET_ONLY = [
   '/api/huddle/',
   '/api/webhooks/stepper',
+  '/api/draft/tokens',
+  '/api/draft/simulate/',
 ];
 
 const AUTH_COOKIE = 'firebase-auth-token';

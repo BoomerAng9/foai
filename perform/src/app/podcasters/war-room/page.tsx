@@ -78,7 +78,7 @@ function posOrder(pos: string): number {
 }
 
 export default function WarRoomPage() {
-  const { loading: authLoading, authenticated, profile, promptLogin } = usePodcasterAuth();
+  const { loading: authLoading, authenticated, profile, promptLogin, showSignInPrompt } = usePodcasterAuth();
   const [selectedTeam, setSelectedTeam] = useState<string | null>(null);
 
   // Panel states

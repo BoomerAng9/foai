@@ -1,27 +1,47 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { getTokenBalance, deductToken, creditTokens, TOKEN_PACKAGES } from '@/lib/stripe/tokens';
 
-const tokenStore = new Map<string, number>();
-const DEFAULT_TOKENS = 3;
-
+/**
+ * Extract user identity from auth cookie first, then fall back to IP.
+ * The x-user-id header is only trusted for internal/server-to-server calls.
+ * For browser requests, the firebase-auth-token cookie is the canonical identity.
+ */
 function getUserId(req: NextRequest): string {
-  return req.headers.get('x-user-id') || req.headers.get('x-forwarded-for') || 'anonymous';
-}
-
-function getBalance(userId: string): number {
-  if (!tokenStore.has(userId)) tokenStore.set(userId, DEFAULT_TOKENS);
-  return tokenStore.get(userId)!;
+  // Prefer auth cookie (set by Firebase on sign-in)
+  const authToken = req.cookies.get('firebase-auth-token')?.value;
+  if (authToken) {
+    // Use a hash of the token as the user ID to avoid storing the raw token
+    // In production, decode the JWT to extract the Firebase UID
+    try {
+      const payload = JSON.parse(atob(authToken.split('.')[1] || '{}'));
+      if (payload.sub || payload.user_id) {
+        return payload.sub || payload.user_id;
+      }
+    } catch {
+      // Token decode failed -- fall through
+    }
+  }
+  // Fall back to IP-based identity for unauthenticated preview
+  const ip = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim()
+    || req.headers.get('x-real-ip')
+    || 'anonymous';
+  return `anon_${ip}`;
 }
 
 export async function GET(req: NextRequest) {
   const userId = getUserId(req);
+  const record = getTokenBalance(userId);
   return NextResponse.json({
-    tokens: getBalance(userId), user_id: userId,
-    pricing: {
-      single: { tokens: 1, price: 2.99 },
-      pack: { tokens: 5, price: 9.99 },
-      war_room: { tokens: 10, price: 19.99 },
-      unlimited: { tokens: -1, price: 49.99, period: 'month' },
-    },
+    tokens: record.is_unlimited ? -1 : record.balance,
+    is_unlimited: record.is_unlimited,
+    total_purchased: record.total_purchased,
+    user_id: userId,
+    pricing: Object.fromEntries(
+      Object.entries(TOKEN_PACKAGES).map(([k, v]) => [
+        k, { tokens: v.tokens, price: v.price_cents / 100, name: v.name, recurring: v.recurring },
+      ]),
+    ),
+    stripe_configured: !!process.env.STRIPE_SECRET_KEY,
   });
 }
 
@@ -29,17 +49,16 @@ export async function POST(req: NextRequest) {
   const userId = getUserId(req);
   const body = await req.json();
   const { action } = body;
-  const balance = getBalance(userId);
 
   if (action === 'deduct') {
-    if (balance <= 0) return NextResponse.json({ error: 'Insufficient tokens', tokens: 0 }, { status: 402 });
-    tokenStore.set(userId, balance - 1);
-    return NextResponse.json({ tokens: balance - 1, message: 'Token deducted' });
+    const { success, record } = deductToken(userId);
+    if (!success) return NextResponse.json({ error: 'Insufficient tokens', tokens: 0 }, { status: 402 });
+    return NextResponse.json({ tokens: record.is_unlimited ? -1 : record.balance, message: 'Token deducted' });
   }
   if (action === 'add') {
-    const amount = body.amount || 1;
-    tokenStore.set(userId, balance + amount);
-    return NextResponse.json({ tokens: balance + amount, message: `${amount} token(s) added` });
+    const packageId = body.package_id || 'single';
+    const record = creditTokens(userId, packageId);
+    return NextResponse.json({ tokens: record.balance, message: `Tokens credited (${packageId})` });
   }
-  return NextResponse.json({ error: 'Invalid action' }, { status: 400 });
+  return NextResponse.json({ error: 'Invalid action. Use deduct or add.' }, { status: 400 });
 }

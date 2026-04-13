@@ -1,18 +1,22 @@
 """
 MCP Gateway Authentication — API key validation + tenant tier extraction.
 
-API keys are stored in the database (or env for dev mode).
-Format: foai_TIER_TENANTID_SECRET
+Keys validated against HMAC signature derived from MCP_GATEWAY_SECRET.
 """
 
 import os
+import hmac
 import hashlib
 from typing import Optional
 from pydantic import BaseModel
 
-# Dev mode: single owner key
-DEV_API_KEY = os.getenv("MCP_DEV_API_KEY", "foai_enterprise_owner_dev")
-OWNER_EMAILS = ["bpo@achievemor.io", "jarrett.risher@gmail.com"]
+MCP_GATEWAY_SECRET = os.getenv("MCP_GATEWAY_SECRET", "")
+
+VALID_TIERS = frozenset([
+    "starter", "growth", "enterprise",
+    "plugmein_scout", "plugmein_content", "plugmein_biz",
+    "plugmein_edu", "plugmein_ops",
+])
 
 
 class AuthResult(BaseModel):
@@ -23,44 +27,45 @@ class AuthResult(BaseModel):
     error: str = ""
 
 
+def _verify_key_signature(key: str) -> bool:
+    """Verify API key HMAC: foai_TIER_TENANTID_SIGNATURE."""
+    if not MCP_GATEWAY_SECRET:
+        return False
+    parts = key.split("_", 3)
+    if len(parts) < 4 or parts[0] != "foai":
+        return False
+    # Reconstruct payload and verify HMAC
+    payload = f"foai_{parts[1]}_{parts[2]}"
+    expected = hmac.new(
+        MCP_GATEWAY_SECRET.encode(), payload.encode(), hashlib.sha256
+    ).hexdigest()[:32]
+    return hmac.compare_digest(parts[3], expected)
+
+
 def validate_api_key(authorization: Optional[str]) -> AuthResult:
     """Validate the API key from the Authorization header."""
     if not authorization:
         return AuthResult(valid=False, error="Authorization header required")
 
-    # Strip 'Bearer ' prefix
     key = authorization.replace("Bearer ", "").strip()
     if not key:
         return AuthResult(valid=False, error="API key required")
 
-    # Dev mode: accept dev key
-    if key == DEV_API_KEY:
-        return AuthResult(
-            valid=True,
-            tenant_id="owner",
-            tier="enterprise",
-            email="bpo@achievemor.io",
-        )
+    if not MCP_GATEWAY_SECRET:
+        return AuthResult(valid=False, error="Gateway not configured")
 
-    # Parse key format: foai_TIER_TENANTID_SECRET
-    parts = key.split("_")
+    # Parse key format: foai_TIER_TENANTID_SIGNATURE
+    parts = key.split("_", 3)
     if len(parts) < 4 or parts[0] != "foai":
         return AuthResult(valid=False, error="Invalid API key format")
 
     tier = parts[1]
     tenant_id = parts[2]
 
-    # TODO: In production, validate against database
-    # For now, accept any well-formatted key
-    valid_tiers = ["starter", "growth", "enterprise", "plugmein_scout",
-                   "plugmein_content", "plugmein_biz", "plugmein_edu", "plugmein_ops"]
+    if tier not in VALID_TIERS:
+        return AuthResult(valid=False, error="Invalid tier")
 
-    if tier not in valid_tiers:
-        return AuthResult(valid=False, error=f"Invalid tier: {tier}")
+    if not _verify_key_signature(key):
+        return AuthResult(valid=False, error="Invalid API key")
 
-    return AuthResult(
-        valid=True,
-        tenant_id=tenant_id,
-        tier=tier,
-        email="",
-    )
+    return AuthResult(valid=True, tenant_id=tenant_id, tier=tier)

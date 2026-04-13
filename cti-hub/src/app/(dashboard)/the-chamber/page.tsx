@@ -33,6 +33,7 @@ const QUICK_TOOLS = [
   { id: 'transcription', label: 'Transcription', sector: 'stt' },
 ];
 
+const TOOL_TEMPLATES: Record<string, { scenario: string; body: string }> = {  'fast-intel': { scenario: 'Fast Intelligence — Quick Reasoning', body: '{"messages": [{"role": "user", "content": "Summarize the key benefits of AI-managed solutions."}], "max_tokens": 256}' },  'standard-chat': { scenario: 'Standard Chat — General Query', body: '{"messages": [{"role": "user", "content": "What are the top 3 trends in AI for 2026?"}], "max_tokens": 256}' },  'precision-code': { scenario: 'Precision Code — Function Gen', body: '{"messages": [{"role": "user", "content": "Write a TypeScript function that validates an email address."}], "max_tokens": 512}' },  'voice-premium': { scenario: 'Voice Premium — TTS Test', body: '{"text": "Welcome to The Deploy Platform. Let ACHEEVY manage it.", "voice": "default"}' },  'voice-standard': { scenario: 'Voice Standard — Agent Voice', body: '{"text": "Your weekly report is ready. Three tasks completed.", "voice": "agent-01"}' },  'vector-engine': { scenario: 'Vector Engine — Logo Gen', body: '{"prompt": "Minimalist logo for a sports analytics platform, gold and dark navy", "style": "vector"}' },  'video-prime': { scenario: 'Video Prime — Short Clip', body: '{"prompt": "Sports highlight reel intro animation, gold particles", "duration": 3}' },  'transcription': { scenario: 'Transcription — STT Test', body: '{"audio_url": "https://example.com/sample.wav", "language": "en"}' },};
 const SAVED_PROJECTS = [
   { id: 'p1', name: 'Voice Agent Test', tool: 'voice-standard', lastRun: '2 hours ago' },
   { id: 'p2', name: 'Image Gen Pipeline', tool: 'vector-engine', lastRun: 'Yesterday' },
@@ -56,6 +57,7 @@ function ChamberContent() {
   const [results, setResults] = useState<TestResult[]>([]);
   const [toolSearch, setToolSearch] = useState('');
 
+useEffect(() => {    if (selectedTool && TOOL_TEMPLATES[selectedTool]) {      const tmpl = TOOL_TEMPLATES[selectedTool];      setScenarioName(tmpl.scenario);      setBody(tmpl.body);    }  }, [selectedTool]);
   const filteredTools = toolSearch
     ? QUICK_TOOLS.filter(t => t.label.toLowerCase().includes(toolSearch.toLowerCase()))
     : QUICK_TOOLS;
@@ -71,7 +73,7 @@ function ChamberContent() {
       const msg = err instanceof Error ? err.message : 'Network error';
       setResults(prev => [{ id: `test-${Date.now()}`, status: 0, latency: 0, output: msg, timestamp: new Date(), logs: [{ level: 'error', msg }] }, ...prev]);
     } finally { setRunning(false); }
-  
+  }
 
   return (
     <div className="h-full flex flex-col">
@@ -101,10 +103,10 @@ function ChamberContent() {
         </div>
       </div>
 
-      {/* Three-column layout */}
-      <div className="flex-1 flex overflow-hidden">
+      {/* Responsive layout — stacks on mobile, 3-col on desktop */}
+      <div className="flex-1 flex flex-col md:flex-row overflow-hidden">
         {/* Left — Tools & APIs */}
-        <div className="w-56 border-r border-border bg-bg-surface overflow-y-auto shrink-0">
+        <div className="hidden md:block w-48 lg:w-56 border-r border-border bg-bg-surface overflow-y-auto shrink-0">
           <div className="p-3">
             <div className="relative mb-3">
               <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 text-fg-ghost" />
@@ -238,7 +240,7 @@ function ChamberContent() {
         </div>
 
         {/* Right — Results */}
-        <div className="w-80 border-l border-border bg-bg-surface overflow-y-auto shrink-0">
+        <div className="hidden lg:block w-72 xl:w-80 border-l border-border bg-bg-surface overflow-y-auto shrink-0">
           <div className="p-3 border-b border-border">
             <p className="font-mono text-[10px] font-bold uppercase tracking-wider text-fg">Real-Time Results</p>
           </div>

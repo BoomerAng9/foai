@@ -12,23 +12,22 @@ export interface PodcasterProfile {
 }
 
 interface AuthState {
-  /** Whether auth check is still in progress */
   loading: boolean;
-  /** User is logged in AND registered as a podcaster */
   authenticated: boolean;
-  /** User profile data (null if not authenticated or not registered) */
   profile: PodcasterProfile | null;
-  /** User is an owner (unlimited access) */
   isOwner: boolean;
-  /** Trigger login flow — call on action buttons, not on page load */
+  /** Whether the delayed sign-in prompt should show */
+  showSignInPrompt: boolean;
   promptLogin: () => void;
 }
 
 const OWNER_EMAILS = new Set(['jarrett.risher@gmail.com', 'bpo@achievemor.io']);
+const SIGN_IN_DELAY_MS = 8000; // Show sign-in prompt after 8 seconds
 
 export function usePodcasterAuth(): AuthState {
   const [loading, setLoading] = useState(true);
   const [profile, setProfile] = useState<PodcasterProfile | null>(null);
+  const [showSignInPrompt, setShowSignInPrompt] = useState(false);
 
   useEffect(() => {
     fetch('/api/podcasters/profile')
@@ -43,6 +42,13 @@ export function usePodcasterAuth(): AuthState {
       .finally(() => setLoading(false));
   }, []);
 
+  // Delayed sign-in prompt for unauthenticated users
+  useEffect(() => {
+    if (loading || profile) return;
+    const timer = setTimeout(() => setShowSignInPrompt(true), SIGN_IN_DELAY_MS);
+    return () => clearTimeout(timer);
+  }, [loading, profile]);
+
   const authenticated = profile !== null;
   const isOwner = authenticated && OWNER_EMAILS.has(profile!.email?.toLowerCase());
 
@@ -51,5 +57,5 @@ export function usePodcasterAuth(): AuthState {
     window.location.href = `/login?redirect=${encodeURIComponent(current)}`;
   }
 
-  return { loading, authenticated, profile, isOwner, promptLogin };
+  return { loading, authenticated, profile, isOwner, showSignInPrompt, promptLogin };
 }

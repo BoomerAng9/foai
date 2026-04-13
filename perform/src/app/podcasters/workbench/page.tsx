@@ -78,7 +78,7 @@ interface ContentItem {
 }
 
 export default function WorkbenchPage() {
-  const { loading, authenticated, profile, promptLogin } = usePodcasterAuth();
+  const { loading, authenticated, profile, promptLogin, showSignInPrompt } = usePodcasterAuth();
   const [scripts, setScripts] = useState<ContentItem[]>([]);
   const [scriptsLoading, setScriptsLoading] = useState(true);
 

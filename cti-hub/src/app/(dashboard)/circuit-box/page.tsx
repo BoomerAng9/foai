@@ -9,6 +9,7 @@ import {
   Search, Radio,
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
+import { useTheme } from '@/hooks/useTheme';
 
 /* ── types ─────────────────────────────────────────────── */
 
@@ -236,6 +237,7 @@ function StatusDot({ status }: { status?: string }) {
 
 export default function CircuitBoxPage() {
   const { profile } = useAuth();
+  const { theme, setTheme } = useTheme();
   const isAdmin = profile?.role === 'admin' || profile?.role === 'operator';
   const isPaid = profile?.tier && profile.tier !== 'free';
   const [selectedPanel, setSelectedPanel] = useState<string | null>(null);
@@ -434,7 +436,7 @@ export default function CircuitBoxPage() {
       <div className="border-t border-border bg-bg-elevated px-4 py-2 flex items-center gap-4 text-[10px] font-mono">
         <span className="text-fg-ghost">[INFO]</span>
         <span className="text-fg-secondary">Circuit Box loaded — all systems nominal</span>
-        <span className="ml-auto text-fg-ghost">{new Date().toLocaleTimeString()}</span>
+        <span className="ml-auto text-fg-ghost">{typeof window !== 'undefined' ? new Date().toLocaleTimeString() : ''}</span>
       </div>
     </div>
   );

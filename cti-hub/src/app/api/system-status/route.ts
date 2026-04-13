@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth-guard';
+import { sql } from '@/lib/insforge';
 
 type Status = 'online' | 'offline' | 'degraded' | 'configured' | 'unconfigured';
 
@@ -34,6 +35,20 @@ export async function GET(req: NextRequest) {
     probe('https://api.elevenlabs.io/v1/voices', 3000),
   ]);
 
+  // Query real DB metrics if available
+  let dbMetrics: { users: number; conversations: number; plugRuns: number; lastActivity: string | null } | null = null;
+  if (sql) {
+    try {
+      const [users, convos, runs, activity] = await Promise.all([
+        sql`SELECT count(*)::int AS c FROM profiles`.then(r => r[0]?.c ?? 0).catch(() => 0),
+        sql`SELECT count(*)::int AS c FROM conversations`.then(r => r[0]?.c ?? 0).catch(() => 0),
+        sql`SELECT count(*)::int AS c FROM plug_runs`.then(r => r[0]?.c ?? 0).catch(() => 0),
+        sql`SELECT max(created_at) AS t FROM conversations`.then(r => r[0]?.t ?? null).catch(() => null),
+      ]);
+      dbMetrics = { users, conversations: convos, plugRuns: runs, lastActivity: activity };
+    } catch { /* DB query failed — continue with probe-only data */ }
+  }
+
   const statuses: ComponentStatus[] = [
     // Agents — always online if the server is running
     { id: 'acheevy', status: 'online' },
@@ -56,7 +71,7 @@ export async function GET(req: NextRequest) {
     // Integrations
     { id: 'stripe', status: envConfigured('STRIPE_SECRET_KEY') ? 'configured' : 'unconfigured' },
     { id: 'github', status: envConfigured('GITHUB_TOKEN') ? 'configured' : 'unconfigured' },
-    { id: 'neon', status: envConfigured('DATABASE_URL') ? 'online' : 'offline' },
+    { id: 'neon', status: dbMetrics ? 'online' : envConfigured('DATABASE_URL') ? 'degraded' : 'offline', latency: neonOk.ms },
     { id: 'firebase', status: envConfigured('NEXT_PUBLIC_FIREBASE_API_KEY') ? 'online' : 'offline' },
 
     // Grammar
@@ -74,6 +89,7 @@ export async function GET(req: NextRequest) {
     systemHealth,
     onlineCount,
     totalMonitored,
+    dbMetrics,
     timestamp: new Date().toISOString(),
   });
 }

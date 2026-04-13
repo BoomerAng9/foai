@@ -387,12 +387,28 @@ class DraftSimulator:
         return trade
 
     def _find_trade_partner(self, state: DraftState, pick_num: int) -> Optional[str]:
-        """Find a team that would want to trade up to this pick."""
+        """Find a team that would want to trade up to this pick.
+
+        Per-team cap: no team can trade up more than 3 times total, or
+        more than 2 times in the same round. This prevents one team
+        from dominating the trade market.
+        """
         current_team = state.get_team_at_pick(pick_num)
         available = state.get_available_prospects()
 
         if not available:
             return None
+
+        # Count existing trades per team
+        team_trade_counts: dict[str, int] = {}
+        current_round = (pick_num - 1) // 32 + 1
+        team_round_counts: dict[str, int] = {}
+        for trade in state.trades:
+            t = trade.trade_up_team
+            team_trade_counts[t] = team_trade_counts.get(t, 0) + 1
+            trade_round = (trade.pick_acquired - 1) // 32 + 1
+            if trade_round == current_round:
+                team_round_counts[t] = team_round_counts.get(t, 0) + 1
 
         # Teams with highest unmet needs that pick later
         best_team = None
@@ -400,6 +416,12 @@ class DraftSimulator:
 
         for team in NFL_TEAMS:
             if team == current_team:
+                continue
+
+            # Per-team caps: 3 total, 2 per round
+            if team_trade_counts.get(team, 0) >= 3:
+                continue
+            if team_round_counts.get(team, 0) >= 2:
                 continue
 
             # Check if this team picks later
@@ -555,7 +577,29 @@ class DraftSimulator:
         return order
 
     def _load_default_needs(self, state: DraftState):
-        """Load team needs from DB for 2025 (latest available)."""
+        """Load team needs — prefer the manual 2026 override file, fall back to DB."""
+        override_path = Path(__file__).resolve().parent / "team_needs_2026.json"
+        if override_path.exists():
+            try:
+                with open(override_path, 'r') as f:
+                    data = json.load(f)
+                teams_data = data.get("teams", {})
+                loaded = 0
+                for team, info in teams_data.items():
+                    if team not in state.team_needs:
+                        continue
+                    vec = info.get("needs_vector", {})
+                    for pos_name, score in vec.items():
+                        norm_pos = normalize_position(pos_name)
+                        if norm_pos in POS_TO_IDX:
+                            state.team_needs[team][POS_TO_IDX[norm_pos]] = float(score)
+                    loaded += 1
+                if loaded > 0:
+                    print(f"  Loaded 2026 team needs override for {loaded} teams.")
+                    return
+            except Exception as e:
+                print(f"  Warning: Could not load team_needs_2026.json: {e}")
+
         try:
             cols, rows = execute_sql(
                 "SELECT team, position, need_score FROM team_needs WHERE season = 2025",

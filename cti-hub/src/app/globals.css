@@ -33,6 +33,49 @@
   --font-sans: 'Geist', system-ui, -apple-system, sans-serif;
 }
 
+/* ── Dark Mode — Industrial Control Panel ─────────────── */
+/* Activates via data-theme="dark" on <html> or system preference */
+[data-theme="dark"],
+.dark {
+  --bg: #0a0f1a;
+  --bg-surface: #111827;
+  --bg-elevated: #1f2937;
+  --fg: #f1f5f9;
+  --fg-secondary: #94a3b8;
+  --fg-tertiary: #64748b;
+  --fg-ghost: #475569;
+  --accent: #E8A020;
+  --accent-hover: #f5b744;
+  --border: #1e293b;
+  --border-strong: #334155;
+  --signal-live: #10B981;
+  --signal-warn: #F59E0B;
+  --signal-error: #EF4444;
+  --signal-info: #22D3EE;
+  color-scheme: dark;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0a0f1a;
+    --bg-surface: #111827;
+    --bg-elevated: #1f2937;
+    --fg: #f1f5f9;
+    --fg-secondary: #94a3b8;
+    --fg-tertiary: #64748b;
+    --fg-ghost: #475569;
+    --accent: #E8A020;
+    --accent-hover: #f5b744;
+    --border: #1e293b;
+    --border-strong: #334155;
+    --signal-live: #10B981;
+    --signal-warn: #F59E0B;
+    --signal-error: #EF4444;
+    --signal-info: #22D3EE;
+    color-scheme: dark;
+  }
+}
+
 * {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;

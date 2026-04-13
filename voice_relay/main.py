@@ -1,3 +1,4 @@
+from auth import authenticate_ws, ALLOWED_ORIGINS
 """
 Voice Relay — Gemini 3.1 Flash Live bidirectional voice with ACHEEVY.
 
@@ -120,7 +121,7 @@ app = FastAPI(title="FOAI Voice Relay — ACHEEVY Live Voice")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["https://foai.cloud","https://cti.foai.cloud","https://deploy.foai.cloud","http://localhost:3000","http://localhost:3001"],
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -161,6 +162,11 @@ async def health():
 async def voice_session(ws: WebSocket):
     """Bidirectional voice WebSocket — browser mic → Gemini Live → speaker."""
     await ws.accept()
+    # Auth check
+    if not await authenticate_ws(ws):
+        await ws.send_json({"type": "error", "message": "Authentication required. Pass key= query param."})
+        await ws.close(code=4001)
+        return
     logger.info("Voice session started")
 
     if not GOOGLE_KEY:

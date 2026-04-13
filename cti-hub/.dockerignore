@@ -7,3 +7,7 @@ build.log
 *.md
 .vscode
 .claude
+playwright.config.ts
+e2e
+test-results
+*.spec.ts
