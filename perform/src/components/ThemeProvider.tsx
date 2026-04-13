@@ -1,8 +1,13 @@
 'use client';
 
 import { createContext, useContext, useEffect, useState } from 'react';
-
-type Theme = 'dark' | 'light';
+import {
+  type Theme,
+  getStoredTheme,
+  setStoredTheme,
+  applyThemeToDOM,
+  onSystemThemeChange,
+} from '@/lib/theme';
 
 interface ThemeContextValue {
   theme: Theme;
@@ -19,25 +24,28 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    const stored = localStorage.getItem('pf-theme') as Theme | null;
-    if (stored === 'light' || stored === 'dark') {
-      setTheme(stored);
-      if (stored === 'light') {
-        document.documentElement.classList.add('light-theme');
-      }
-    }
+    const initial = getStoredTheme();
+    setTheme(initial);
+    applyThemeToDOM(initial);
     setMounted(true);
+
+    // Listen for OS-level theme changes (only if user hasn't explicitly set)
+    const cleanup = onSystemThemeChange((systemTheme) => {
+      const stored = localStorage.getItem('pf-theme');
+      if (!stored) {
+        setTheme(systemTheme);
+        applyThemeToDOM(systemTheme);
+      }
+    });
+
+    return cleanup;
   }, []);
 
   const toggleTheme = () => {
-    const next = theme === 'dark' ? 'light' : 'dark';
+    const next: Theme = theme === 'dark' ? 'light' : 'dark';
     setTheme(next);
-    localStorage.setItem('pf-theme', next);
-    if (next === 'light') {
-      document.documentElement.classList.add('light-theme');
-    } else {
-      document.documentElement.classList.remove('light-theme');
-    }
+    setStoredTheme(next);
+    applyThemeToDOM(next);
   };
 
   // Prevent flash of wrong theme

@@ -35,9 +35,10 @@ export async function POST(req: NextRequest) {
       const { default: Stripe } = await import('stripe');
       stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '');
     } catch {
-      console.warn('[webhook] stripe package not available, parsing raw JSON');
-      event = JSON.parse(body);
-      return handleEvent(event);
+      // SECURITY: Never process unverified webhook payloads.
+      // If the stripe package is unavailable, reject the request.
+      console.error('[webhook] stripe package not available — cannot verify signature, rejecting');
+      return NextResponse.json({ error: 'Webhook verification unavailable' }, { status: 500 });
     }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

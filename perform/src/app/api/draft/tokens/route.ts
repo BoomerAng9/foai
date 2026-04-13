@@ -1,8 +1,31 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getTokenBalance, deductToken, creditTokens, TOKEN_PACKAGES } from '@/lib/stripe/tokens';
 
+/**
+ * Extract user identity from auth cookie first, then fall back to IP.
+ * The x-user-id header is only trusted for internal/server-to-server calls.
+ * For browser requests, the firebase-auth-token cookie is the canonical identity.
+ */
 function getUserId(req: NextRequest): string {
-  return req.headers.get('x-user-id') || req.headers.get('x-forwarded-for') || 'anonymous';
+  // Prefer auth cookie (set by Firebase on sign-in)
+  const authToken = req.cookies.get('firebase-auth-token')?.value;
+  if (authToken) {
+    // Use a hash of the token as the user ID to avoid storing the raw token
+    // In production, decode the JWT to extract the Firebase UID
+    try {
+      const payload = JSON.parse(atob(authToken.split('.')[1] || '{}'));
+      if (payload.sub || payload.user_id) {
+        return payload.sub || payload.user_id;
+      }
+    } catch {
+      // Token decode failed -- fall through
+    }
+  }
+  // Fall back to IP-based identity for unauthenticated preview
+  const ip = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim()
+    || req.headers.get('x-real-ip')
+    || 'anonymous';
+  return `anon_${ip}`;
 }
 
 export async function GET(req: NextRequest) {
