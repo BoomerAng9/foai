@@ -2,7 +2,7 @@ import time
 from collections.abc import AsyncGenerator
 from typing import Any
 
-from openai import AsyncOpenAI, OpenAIError
+from openai import AsyncOpenAI, APIError as OpenAIError
 
 from app.config import settings
 from app.services.llm_interface import LLMInterface
