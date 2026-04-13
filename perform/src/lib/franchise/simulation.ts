@@ -45,6 +45,9 @@ export interface TeamDigitalTwin {
   capSpace?: number;
   draftPicks?: Array<{ round: number; pick?: number }>;
   record?: { wins: number; losses: number; ties?: number };
+  needs?: Array<{ position: string; priority: number; reason: string }>;
+  staff?: Array<{ name: string; role: string; position: string }>;
+  fullProfile?: Record<string, unknown>;
 }
 
 export interface SimulationSession {

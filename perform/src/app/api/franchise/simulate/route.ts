@@ -76,7 +76,7 @@ export async function POST(req: NextRequest) {
             owner: ownership.name ? { name: String(ownership.name), archetype: String(ownership.style || '') } : undefined,
             gm: gm.name ? { name: String(gm.name), philosophy: String(gm.philosophy || '') } : undefined,
             headCoach: hc.name ? { name: String(hc.name), scheme: String(hc.scheme_offense || hc.style || '') } : undefined,
-            capSpace: roster.cap_space ? String(roster.cap_space) : undefined,
+            capSpace: roster.cap_space ? Number(roster.cap_space) || undefined : undefined,
             needs: needs.map(n => ({ position: String(n.position || ''), priority: Number(n.priority || 0), reason: String(n.reason || '') })),
             fullProfile: profile,
           };
