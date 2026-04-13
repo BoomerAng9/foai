@@ -89,7 +89,7 @@ export function VerbSpinner() {
   return (
     <button
       onClick={handleClick}
-      className="relative inline-block cursor-pointer group"
+      className="relative inline cursor-pointer group"
       title="Click to spin"
     >
       <span

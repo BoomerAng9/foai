@@ -21,7 +21,7 @@ export function RolodexVerb() {
 
   return (
     <span
-      className="inline-flex items-center justify-center transition-all duration-300 ease-in-out"
+      className="inline transition-all duration-300 ease-in-out"
       style={{
         fontFamily: "'Permanent Marker', cursive",
         color: '#E8A020',
