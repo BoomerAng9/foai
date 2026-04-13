@@ -28,6 +28,7 @@ const PUBLIC_PATHS = [
   '/login',
   '/teams',
   '/podcasters',
+  '/franchise',
 ];
 
 /** Path prefixes that are always public (including sub-routes). */
@@ -56,6 +57,8 @@ const PUBLIC_PREFIXES = [
   '/api/webhooks/',
   '/api/draft/tokens/webhook',
   '/generated/',
+  '/franchise/',
+  '/api/franchise/',
 ];
 
 /** API paths that allow unauthenticated GET but protect POST/PUT/DELETE. */
