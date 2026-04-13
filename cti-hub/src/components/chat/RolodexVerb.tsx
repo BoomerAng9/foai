@@ -20,19 +20,19 @@ export function RolodexVerb() {
   }, []);
 
   return (
-    <span className="inline-block relative overflow-hidden h-[1.3em] align-baseline" style={{ minWidth: '120px' }}>
-      <span
-        className="inline-block transition-all duration-300 ease-in-out"
-        style={{
-          fontFamily: "'Permanent Marker', cursive",
-          color: '#E8A020',
-          fontSize: '1.1em',
-          transform: visible ? 'translateY(0)' : 'translateY(-100%)',
-          opacity: visible ? 1 : 0,
-        }}
-      >
-        {VERBS[index]}
-      </span>
+    <span
+      className="inline-flex items-center justify-center transition-all duration-300 ease-in-out"
+      style={{
+        fontFamily: "'Permanent Marker', cursive",
+        color: '#E8A020',
+        fontSize: 'inherit',
+        lineHeight: 'inherit',
+        verticalAlign: 'baseline',
+        opacity: visible ? 1 : 0,
+        transform: visible ? 'translateY(0)' : 'translateY(-4px)',
+      }}
+    >
+      {VERBS[index]}
     </span>
   );
 }
