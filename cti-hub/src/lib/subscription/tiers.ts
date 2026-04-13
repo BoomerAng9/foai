@@ -121,6 +121,25 @@ export const TIERS: SubscriptionTier[] = [
   },
 ];
 
+/**
+ * Owner tier — unlimited everything, bypasses all tier checks.
+ * ACHEEVY's credentials never get gated.
+ */
+export const OWNER_TIER: SubscriptionTier = {
+  slug: 'enterprise',
+  name: 'ACHEEVY (Owner)',
+  tagline: 'Unlimited. Everything. Always.',
+  entryPrice: 0,
+  monthlyPrices: { '3-month': 0, '6-month': 0, '9-month': 0 },
+  features: ['*'],
+  agents: ['*'],
+  models: ['*'],
+  tokenAllocation: -1,
+  nurdCardIncluded: true,
+  nftMintIncluded: true,
+  color: '#E8A020',
+};
+
 export function getTierBySlug(slug: TierSlug): SubscriptionTier | undefined {
   return TIERS.find(t => t.slug === slug);
 }

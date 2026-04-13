@@ -78,9 +78,10 @@ function SqwaadrunDashboardPageInner() {
       .then(d => { if (d?.isOwner) setIsOwnerUser(true); })
       .catch(() => {});
   }, [user]);
-  const tier = slice.sqwaadrun_tier ? SQWAADRUN_TIERS[slice.sqwaadrun_tier] : null;
-  // Owners always active — they bypass tiers in the API (mission/route.ts) and should bypass in the UI too
-  const isActive = isOwnerUser || (slice.sqwaadrun_status === 'active' && tier !== null);
+  const dbTier = slice.sqwaadrun_tier ? SQWAADRUN_TIERS[slice.sqwaadrun_tier] : null;
+  // Owners always active — bypass ALL tier checks with unlimited Commander-level access
+  const isActive = isOwnerUser || (slice.sqwaadrun_status === 'active' && dbTier !== null);
+  const tier = dbTier || (isOwnerUser ? { name: 'Commander (Owner)', color: '#E8A020', monthlyQuota: -1, maxConcurrent: -1, features: ['*'] } : null);
 
   const refresh = useCallback(async (): Promise<RecentMission[]> => {
     if (!user) return [];
