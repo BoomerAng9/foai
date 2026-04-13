@@ -23,17 +23,36 @@ interface TestResult {
 /* ── saved tools (stub — will source from pricing-matrix) */
 
 const QUICK_TOOLS = [
+  { id: 'design-studio', label: 'Design Studio', sector: 'image' },
+  { id: 'page-builder', label: 'Page Builder', sector: 'image' },
+  { id: 'vector-engine', label: 'Vector Engine', sector: 'image' },
+  { id: 'graphics-engine', label: 'Graphics Engine', sector: 'image' },
+  { id: 'photo-engine', label: 'Photo Engine', sector: 'image' },
   { id: 'fast-intel', label: 'Fast Intelligence', sector: 'llm' },
   { id: 'standard-chat', label: 'Standard Chat', sector: 'llm' },
   { id: 'precision-code', label: 'Precision Code', sector: 'llm' },
   { id: 'voice-premium', label: 'Voice Premium', sector: 'tts' },
   { id: 'voice-standard', label: 'Voice Standard', sector: 'tts' },
-  { id: 'vector-engine', label: 'Vector Engine', sector: 'image' },
   { id: 'video-prime', label: 'Video Prime', sector: 'video' },
+  { id: 'video-broadcast', label: 'Video Broadcast', sector: 'video' },
   { id: 'transcription', label: 'Transcription', sector: 'stt' },
 ];
 
-const TOOL_TEMPLATES: Record<string, { scenario: string; body: string }> = {  'fast-intel': { scenario: 'Fast Intelligence — Quick Reasoning', body: '{"messages": [{"role": "user", "content": "Summarize the key benefits of AI-managed solutions."}], "max_tokens": 256}' },  'standard-chat': { scenario: 'Standard Chat — General Query', body: '{"messages": [{"role": "user", "content": "What are the top 3 trends in AI for 2026?"}], "max_tokens": 256}' },  'precision-code': { scenario: 'Precision Code — Function Gen', body: '{"messages": [{"role": "user", "content": "Write a TypeScript function that validates an email address."}], "max_tokens": 512}' },  'voice-premium': { scenario: 'Voice Premium — TTS Test', body: '{"text": "Welcome to The Deploy Platform. Let ACHEEVY manage it.", "voice": "default"}' },  'voice-standard': { scenario: 'Voice Standard — Agent Voice', body: '{"text": "Your weekly report is ready. Three tasks completed.", "voice": "agent-01"}' },  'vector-engine': { scenario: 'Vector Engine — Logo Gen', body: '{"prompt": "Minimalist logo for a sports analytics platform, gold and dark navy", "style": "vector"}' },  'video-prime': { scenario: 'Video Prime — Short Clip', body: '{"prompt": "Sports highlight reel intro animation, gold particles", "duration": 3}' },  'transcription': { scenario: 'Transcription — STT Test', body: '{"audio_url": "https://example.com/sample.wav", "language": "en"}' },};
+const TOOL_TEMPLATES: Record<string, { scenario: string; body: string }> = {
+  'design-studio': { scenario: 'Design Studio — Component Spec', body: '{"prompt": "Hero section for a SaaS landing page. Dark theme, gold accent #E8A020, bold headline, CTA button, trust badges below.", "format": "web", "width": 1440, "height": 900}' },
+  'page-builder': { scenario: 'Page Builder — Full Page Mockup', body: '{"prompt": "Pricing page with 3 tiers (Free, Pro, Enterprise). Clean white background, comparison table, FAQ accordion below.", "format": "web"}' },
+  'vector-engine': { scenario: 'Vector Engine — Logo Gen', body: '{"prompt": "Minimalist logo for a sports analytics platform, gold and dark navy, clean geometric lines", "style": "vector", "format": "svg"}' },
+  'graphics-engine': { scenario: 'Graphics Engine — Social Card', body: '{"prompt": "Instagram post: NFL Draft 2026 countdown, bold typography, dark background with gold accents, team helmet silhouettes", "width": 1080, "height": 1080}' },
+  'photo-engine': { scenario: 'Photo Engine — Product Shot', body: '{"prompt": "Professional product photography: premium leather boomerang with ANG branding on brushed metal plate, studio lighting, white background", "style": "photorealistic"}' },
+  'fast-intel': { scenario: 'Fast Intelligence — Quick Reasoning', body: '{"messages": [{"role": "user", "content": "Summarize the key benefits of AI-managed solutions in 3 bullet points."}], "max_tokens": 256}' },
+  'standard-chat': { scenario: 'Standard Chat — General Query', body: '{"messages": [{"role": "user", "content": "What are the top 3 trends in AI for 2026?"}], "max_tokens": 256}' },
+  'precision-code': { scenario: 'Precision Code — Function Gen', body: '{"messages": [{"role": "user", "content": "Write a TypeScript function that validates an email address."}], "max_tokens": 512}' },
+  'voice-premium': { scenario: 'Voice Premium — TTS Test', body: '{"text": "Welcome to Coastal Talent and Innovation. Let ACHEEVY manage it.", "voice": "default"}' },
+  'voice-standard': { scenario: 'Voice Standard — Agent Voice', body: '{"text": "Your weekly report is ready. Three tasks completed, two pending review.", "voice": "agent-01"}' },
+  'video-prime': { scenario: 'Video Prime — Short Clip', body: '{"prompt": "Sports highlight reel intro, gold particles on dark background, 3 seconds", "duration": 3}' },
+  'video-broadcast': { scenario: 'Video Broadcast — Broadcast Intro', body: '{"prompt": "NFL Draft broadcast opening, stadium lights, dramatic camera sweep, Per|Form branding", "duration": 5, "quality": "broadcast"}' },
+  'transcription': { scenario: 'Transcription — STT Test', body: '{"audio_url": "https://example.com/sample.wav", "language": "en"}' },
+};
 const SAVED_PROJECTS = [
   { id: 'p1', name: 'Voice Agent Test', tool: 'voice-standard', lastRun: '2 hours ago' },
   { id: 'p2', name: 'Image Gen Pipeline', tool: 'vector-engine', lastRun: 'Yesterday' },
