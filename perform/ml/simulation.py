@@ -387,12 +387,28 @@ class DraftSimulator:
         return trade
 
     def _find_trade_partner(self, state: DraftState, pick_num: int) -> Optional[str]:
-        """Find a team that would want to trade up to this pick."""
+        """Find a team that would want to trade up to this pick.
+
+        Per-team cap: no team can trade up more than 3 times total, or
+        more than 2 times in the same round. This prevents one team
+        from dominating the trade market.
+        """
         current_team = state.get_team_at_pick(pick_num)
         available = state.get_available_prospects()
 
         if not available:
             return None
+
+        # Count existing trades per team
+        team_trade_counts: dict[str, int] = {}
+        current_round = (pick_num - 1) // 32 + 1
+        team_round_counts: dict[str, int] = {}
+        for trade in state.trades:
+            t = trade.trade_up_team
+            team_trade_counts[t] = team_trade_counts.get(t, 0) + 1
+            trade_round = (trade.pick_acquired - 1) // 32 + 1
+            if trade_round == current_round:
+                team_round_counts[t] = team_round_counts.get(t, 0) + 1
 
         # Teams with highest unmet needs that pick later
         best_team = None
@@ -400,6 +416,12 @@ class DraftSimulator:
 
         for team in NFL_TEAMS:
             if team == current_team:
+                continue
+
+            # Per-team caps: 3 total, 2 per round
+            if team_trade_counts.get(team, 0) >= 3:
+                continue
+            if team_round_counts.get(team, 0) >= 2:
                 continue
 
             # Check if this team picks later
