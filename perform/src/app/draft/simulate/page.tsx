@@ -16,10 +16,12 @@ import { TradeAlert } from '@/components/draft/TradeAlert';
 import { ChaosSlider } from '@/components/draft/ChaosSlider';
 import { SimulationControls } from '@/components/draft/SimulationControls';
 import { PickCard } from '@/components/draft/PickCard';
+import { AnalystCommentary } from '@/components/draft/AnalystCommentary';
+import { ConfidenceMeter } from '@/components/draft/ConfidenceMeter';
 import { BackHomeNav } from '@/components/layout/BackHomeNav';
 import type { SimulationState, DraftPick, TradeDetails, SimulationSpeed } from '@/lib/draft/types';
 
-type MobileTab = 'board' | 'picks' | 'prospects' | 'trades';
+type MobileTab = 'board' | 'picks' | 'prospects' | 'trades' | 'analysis';
 
 export default function SimulatePage() {
   const [sim, setSim] = useState<SimulationState | null>(null);
@@ -91,7 +93,10 @@ export default function SimulatePage() {
             {sim && displayedPicks.length > 0 && <div className="text-[10px] font-mono text-white/30">{displayedPicks.length} / {sim.total_picks} picks</div>}
           </div>
           {isStreaming && currentPickData && (
-            <div className="mt-3"><PickClock teamAbbr={currentPickData.team_abbr} pickNumber={currentPick} round={currentPickData.round} isActive={isStreaming} /></div>
+            <div className="mt-3 flex flex-col sm:flex-row items-start sm:items-center gap-3">
+              <PickClock teamAbbr={currentPickData.team_abbr} pickNumber={currentPick} round={currentPickData.round} isActive={isStreaming} />
+              <ConfidenceMeter pickNumber={currentPick} />
+            </div>
           )}
         </div>
       </div>
@@ -134,7 +139,7 @@ export default function SimulatePage() {
         <>
           {/* Mobile tabs */}
           <div className="md:hidden flex border-b border-white/5">
-            {(['board', 'picks', 'prospects', 'trades'] as MobileTab[]).map(tab => (
+            {(['board', 'picks', 'analysis', 'trades'] as MobileTab[]).map(tab => (
               <button key={tab} onClick={() => setMobileTab(tab)}
                 className="flex-1 py-2 text-[10px] font-bold tracking-wider uppercase transition-colors"
                 style={{ color: mobileTab === tab ? '#D4A853' : 'rgba(255,255,255,0.3)', borderBottom: mobileTab === tab ? '2px solid #D4A853' : '2px solid transparent' }}>
@@ -156,16 +161,27 @@ export default function SimulatePage() {
               <DraftBoard picks={displayedPicks} currentPick={currentPick} rounds={7} onPickClick={setSelectedPick} />
             </div>
 
-            {/* Right: Prospects + Picks 40% */}
+            {/* Right: Prospects + Picks + Commentary 40% */}
             <div className={`${['picks', 'prospects'].includes(mobileTab) ? 'block' : 'hidden'} md:block md:w-[40%] flex flex-col border-l border-white/5`}>
-              <div className={`${mobileTab === 'prospects' ? 'block' : 'hidden'} md:block h-1/2 p-4 border-b border-white/5 overflow-hidden`}>
+              <div className={`${mobileTab === 'prospects' ? 'block' : 'hidden'} md:block md:h-[35%] p-4 border-b border-white/5 overflow-hidden`}>
                 <ProspectPool prospects={sim.available_prospects} />
               </div>
-              <div className={`${mobileTab === 'picks' ? 'block' : 'hidden'} md:block h-1/2 p-4 overflow-hidden`}>
+              <div className={`${mobileTab === 'picks' ? 'block' : 'hidden'} md:block md:h-[30%] p-4 border-b border-white/5 overflow-hidden`}>
                 <PickHistory picks={displayedPicks} onPickClick={setSelectedPick} />
+              </div>
+              {/* Analyst Commentary Panel */}
+              <div className={`${mobileTab === 'picks' ? 'block' : 'hidden'} md:block md:h-[35%] overflow-hidden`}
+                style={{ borderTop: '1px solid rgba(255,255,255,0.05)' }}>
+                <AnalystCommentary picks={displayedPicks} instant={speed === 'instant'} />
               </div>
             </div>
           </div>
+
+          {mobileTab === 'analysis' && (
+            <div className="flex-1 p-4 md:hidden overflow-y-auto">
+              <AnalystCommentary picks={displayedPicks} instant={speed === 'instant'} />
+            </div>
+          )}
 
           {mobileTab === 'trades' && (
             <div className="flex-1 p-4 md:hidden overflow-y-auto space-y-3">
