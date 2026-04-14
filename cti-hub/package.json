@@ -1,5 +1,5 @@
 {
-  "name": "grammar-app",
+  "name": "cti-hub",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -7,7 +7,12 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "test": "node --experimental-strip-types scripts/run-active-tests.mjs && jest"
+    "typecheck": "tsc --noEmit",
+    "test:active": "node --experimental-strip-types scripts/run-active-tests.mjs",
+    "test:unit": "jest --runInBand",
+    "test": "npm run test:active && npm run test:unit",
+    "validate": "npm run lint && npm run typecheck && npm test",
+    "validate:deploy": "npm run validate && npm run build"
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",

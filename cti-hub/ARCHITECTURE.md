@@ -1,11 +1,21 @@
-# GRAMMAR Architecture
+# Host Surface Architecture
 
-GRAMMAR is ACHIEVEMOR's API-first, vision-first action runtime designed to turn human intent into governed, multi-role execution.
+`cti-hub` is ACHIEVEMOR's shared Next.js application for two connected host surfaces:
+
+- `CTI Hub` on `https://cti.foai.cloud`
+- `The Deploy Platform` on `https://deploy.foai.cloud`
+
+The codebase stays unified, but host-aware routing splits the two surfaces at the edge:
+
+- `cti.foai.cloud` defaults to `/chat` and retains owner/operator routes
+- `deploy.foai.cloud` defaults to `/deploy-landing` and hides CTI-only routes
+
+That lets the platform share auth, agents, APIs, and persistence without collapsing the two products into one identity.
 
 ## System Map
 
 ```text
-GRAMMAR/
+cti-hub/
 |
 +-- Core_Runtime/                # Governed Logic & Routing
 |   |

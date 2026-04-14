@@ -1,26 +1,36 @@
 "use client";
 
-import React, { createContext, useContext } from 'react';
+import React, { createContext, useContext, useEffect, useState } from 'react';
+import {
+  getBrandConfig,
+  type BrandConfig,
+  type PlatformSurface,
+  surfaceFromHostname,
+} from '@/lib/platform/surface';
 
-interface BrandConfig {
-  systemName: string;
-  tagline: string;
-  primaryColor: string;
-  accentColor: string;
-}
+const defaultHost: PlatformSurface = 'deploy';
+const BrandContext = createContext<{ config: BrandConfig; host: PlatformSurface }>({
+  config: getBrandConfig(defaultHost),
+  host: defaultHost,
+});
 
-const config: BrandConfig = {
-  systemName: 'The Deploy Platform',
-  tagline: 'AI-Managed Operations',
-  primaryColor: '#00A3FF',
-  accentColor: '#A855F7',
-};
+export function WhiteLabelProvider({
+  children,
+  initialHost = defaultHost,
+}: {
+  children: React.ReactNode;
+  initialHost?: PlatformSurface;
+}) {
+  const [host, setHost] = useState<PlatformSurface>(initialHost);
 
-const BrandContext = createContext<{ config: BrandConfig }>({ config });
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    setHost(surfaceFromHostname(window.location.hostname));
+  }, []);
 
-export function WhiteLabelProvider({ children }: { children: React.ReactNode }) {
+  const config = getBrandConfig(host);
   return (
-    <BrandContext.Provider value={{ config }}>
+    <BrandContext.Provider value={{ config, host }}>
       {children}
     </BrandContext.Provider>
   );

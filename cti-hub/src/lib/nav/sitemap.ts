@@ -1,20 +1,23 @@
 /**
  * CTI Hub / Deploy Platform sitemap
- * ==================================
+ * =================================
  * Single source of truth for left-panel navigation, grouped into
  * main branches with sub-pages. Host-aware so cti.foai.cloud and
  * deploy.foai.cloud can surface different trees from the same
  * codebase (middleware.ts already enforces the security boundary;
  * the sitemap only drives UI presentation).
  *
- * The Spinner chat function (formerly referred to as "Speakly"
- * in older memories) consumes this via /api/sitemap to self-
- * navigate the platform — so entries MUST include a stable id,
+ * CTI Hub is the owner-only management surface.
+ * Deploy Platform is the customer-facing product surface.
+ *
+ * The Spinner chat function consumes this via /api/sitemap to self-
+ * navigate the platform, so entries MUST include a stable id,
  * a human label, and a short description Spinner can match
  * against natural-language prompts like "take me to the Plug Bin."
  */
 
 import type { LucideIcon } from 'lucide-react';
+import { surfaceFromHostname, type PlatformSurface } from '@/lib/platform/surface';
 import {
   Activity,
   Bird,
@@ -47,7 +50,7 @@ import {
   Zap,
 } from 'lucide-react';
 
-export type NavHost = 'cti' | 'deploy';
+export type NavHost = PlatformSurface;
 
 export type NavEntryKind =
   | 'internal'    // Next.js route inside this app
@@ -285,7 +288,7 @@ export const NAV_BRANCHES: NavBranch[] = [
   {
     id: 'commerce',
     label: 'Commerce',
-    description: 'Marketplace, enrollments, affiliates, and billing.',
+    description: 'Marketplace, enrollments, affiliates, and commercial operations.',
     icon: ShoppingBag,
     hosts: ['cti', 'deploy'],
     entries: [
@@ -332,11 +335,10 @@ export const NAV_BRANCHES: NavBranch[] = [
         id: 'commerce.billing',
         label: 'Billing',
         description: 'Subscription, invoices, and payment methods.',
-        href: '/pricing',
+        href: '/billing',
         kind: 'internal',
         icon: CreditCard,
-        hosts: ['cti'],
-        ownerOnly: true,
+        hosts: ['deploy'],
       },
     ],
   },
@@ -479,6 +481,16 @@ export const NAV_BRANCHES: NavBranch[] = [
  */
 export const EXTERNAL_REROUTES: NavEntry[] = [
   {
+    id: 'external.cti-hub',
+    label: 'CTI Hub',
+    description: 'Owner-only command center for managing the FOAI platform.',
+    href: 'https://cti.foai.cloud',
+    kind: 'reroute',
+    icon: Settings,
+    hosts: ['deploy'],
+    ownerOnly: true,
+  },
+  {
     id: 'external.smelter-os',
     label: 'Smelter OS',
     description: 'Launch the Smelter OS file manager and platform (opens in a new window).',
@@ -508,11 +520,7 @@ export const EXTERNAL_REROUTES: NavEntry[] = [
  * public surface if we can't match cti.
  */
 export function hostVariantFromHostname(hostname: string | null | undefined): NavHost {
-  if (!hostname) return 'deploy';
-  if (hostname.includes('cti.foai.cloud') || hostname.includes('cti.localhost')) return 'cti';
-  // localhost development defaults to cti so the owner sees everything
-  if (hostname.includes('localhost') || hostname.includes('127.0.0.1')) return 'cti';
-  return 'deploy';
+  return surfaceFromHostname(hostname);
 }
 
 export interface FilteredSitemap {

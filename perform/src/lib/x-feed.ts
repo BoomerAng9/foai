@@ -20,15 +20,15 @@ export interface Tweet {
 const SPORTS_ACCOUNTS = [
   'AdamSchefter',       // NFL insider
   'RapSheet',           // NFL Network
-  'wojespn',            // NBA insider
   'FieldYates',         // ESPN NFL
   'PFF',                // Pro Football Focus
-  'On3Recruits',        // Recruiting
-  '247Sports',          // Recruiting + CFB
-  'ESPNCollegeFootball',
-  'NFLDraft',           // Draft coverage
-  'BruceFeldmanCFB',    // CFB insider
-  'PeteThamel',         // CFB insider
+  'ShamsCharania',      // NBA insider
+  'ChrisBHaynes',       // NBA insider
+  'TheSteinLine',       // NBA insider
+  'JeffPassan',         // MLB insider
+  'MLBNetwork',         // MLB
+  'NBA',                // NBA league
+  'MLB',                // MLB league
   'SportsCenter',       // ESPN
 ];
 
@@ -41,7 +41,7 @@ export async function fetchSportsTimeline(maxResults = 20): Promise<Tweet[]> {
   try {
     // Use search/recent with sports query
     const query = encodeURIComponent(
-      '(NFL draft OR college football OR recruiting OR transfer portal OR NIL) -is:retweet lang:en'
+      '(NFL OR NBA OR MLB OR football OR basketball OR baseball) (trade OR signing OR injury OR playoffs OR free agency OR extension) -is:retweet lang:en'
     );
     const url = `${X_API_BASE}/tweets/search/recent?query=${query}&max_results=${maxResults}&tweet.fields=created_at,public_metrics,author_id&expansions=author_id&user.fields=name,username,verified`;
 

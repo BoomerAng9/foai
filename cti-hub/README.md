@@ -1,13 +1,18 @@
-# GRAMMAR
+# FOAI Host Surfaces
 
-GRAMMAR converts plain-language requests into structured technical prompts.
+`cti-hub` is the shared Next.js application behind two FOAI host surfaces:
+
+- `https://cti.foai.cloud` → `CTI Hub`, the owner/operator control surface
+- `https://deploy.foai.cloud` → `The Deploy Platform`, the customer-facing deployment surface
+
+Host-aware middleware, metadata, and shared chrome keep those surfaces connected in one codebase while routing them through distinct entry paths.
 
 Primary product flow:
 
-1. User lands on `/`
-2. User opens `Chat w/ ACHEEVY`
-3. User types or speaks a request in normal language
-4. ACHEEVY returns a structured prompt block the user can copy into another AI system
+1. User lands on the host root or a product surface such as `/chat`
+2. The host resolves into CTI Hub or Deploy Platform branding and route policy
+3. ACHEEVY routes requests across chat, broadcast, partner, and deployment surfaces
+4. The app persists tenant-scoped state and calls the configured model, media, and billing backends
 
 ## Stack
 
@@ -15,16 +20,21 @@ Primary product flow:
 - React 19
 - TypeScript
 - Tailwind CSS
-- InsForge for auth and data access
+- Firebase Auth + Firebase Admin
+- Neon Postgres via `postgres.js`
 - OpenRouter for text generation
 - ElevenLabs / NVIDIA PersonaPlex / Grok adapters for voice replies
 - Stripe for subscriptions
 
 ## Core Routes
 
-- `/` public landing page
-- `/chat/librechat` main product experience
-- `/pricing` and `/(dashboard)/pricing` billing surfaces
+- `/` host-aware entry point:
+  `cti.foai.cloud` rewrites to `/chat`
+  `deploy.foai.cloud` rewrites to `/deploy-landing`
+- `/chat` shared authenticated workspace
+- `/deploy-landing` deploy-only public landing page
+- `/pricing` CTI billing surface
+- `/billing` Deploy billing surface
 - `/api/chat` prompt-generation API
 - `/api/voice` voice vendor catalog and synthesis API
 - `/api/research` NotebookLM-backed research API
@@ -66,18 +76,17 @@ npm install
 npm run dev
 ```
 
-Default local app URL:
-
-- `http://localhost:3000`
+Default local app URL is `http://localhost:3000`, which resolves to CTI behavior unless you provide a deploy-style host header locally.
 
 ## Validation
 
 ```bash
-npm run lint
-npx tsc --noEmit
-npm test
-npm run build
+npm run validate
+npm run validate:deploy
 ```
+
+`npm run validate` is the local/operator gate.
+`npm run validate:deploy` is the pre-deploy gate for Docker, VPS, and Cloud Run rollouts.
 
 ## Database
 
@@ -96,6 +105,12 @@ Apply the SQL files in `sql/` to the target database. The current launch path ex
 - Auth cookies are written through `/api/auth/session` as `HttpOnly`.
 - Admin mutation routes, runtime routes, research routes, and voice synthesis are server-auth protected.
 
+## Deployment Notes
+
+- Secrets should come from local env files in development and GCP Secret Manager / bound service accounts in production.
+- VPS rollouts use Docker builds and restarts.
+- Cloud Run services/jobs should run the same `npm run validate:deploy` gate before image promotion.
+
 ## Current Launch Standard
 
 Before deploying, verify:
@@ -104,4 +119,4 @@ Before deploying, verify:
 2. Stripe webhook is configured with the correct signing secret.
 3. Voice vendors are configured in the target environment.
 4. NotebookLM credentials are valid.
-5. `npm run lint`, `npx tsc --noEmit`, `npm test`, and `npm run build` pass in the deployment environment.
+5. `npm run validate:deploy` passes in the deployment environment.

@@ -94,6 +94,7 @@ export async function GET(request: NextRequest) {
   // Service health checks
   const services: Record<string, { url: string; status: string; http_code: number }> = {
     'CTI Hub': { url: 'https://cti.foai.cloud', status: 'healthy', http_code: 200 },
+    'Deploy Platform': { url: 'https://deploy.foai.cloud', status: 'healthy', http_code: 200 },
     'Neon DB': { url: 'neon', status: sql ? 'healthy' : 'unhealthy', http_code: sql ? 200 : 503 },
     'OpenRouter': { url: 'openrouter', status: process.env.OPENROUTER_API_KEY ? 'healthy' : 'unhealthy', http_code: process.env.OPENROUTER_API_KEY ? 200 : 503 },
     'Google AI': { url: 'google', status: process.env.GOOGLE_KEY ? 'healthy' : 'unhealthy', http_code: process.env.GOOGLE_KEY ? 200 : 503 },

@@ -34,11 +34,9 @@ import {
   TOP_LEVEL_ENTRIES,
   EXTERNAL_REROUTES,
   filterSitemap,
-  hostVariantFromHostname,
-  type NavHost,
   type NavBranch,
-  type NavEntry,
 } from '@/lib/nav/sitemap';
+import { useWhiteLabel } from '@/hooks/useWhiteLabel';
 
 interface NavChromeProps {
   /** Display name for the signed-in user (falls back to "User") */
@@ -68,17 +66,6 @@ function branchHasActiveChild(pathname: string, branch: NavBranch): boolean {
   return branch.entries.some(e => isActive(pathname, e.href));
 }
 
-/** Detect the current host variant at mount time */
-function useHostVariant(): NavHost {
-  const [host, setHost] = useState<NavHost>('cti');
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      setHost(hostVariantFromHostname(window.location.hostname));
-    }
-  }, []);
-  return host;
-}
-
 export default function NavChrome({
   userDisplayName = 'User',
   userInitial = '?',
@@ -91,7 +78,7 @@ export default function NavChrome({
 }: NavChromeProps) {
   const pathname = usePathname();
   const router = useRouter();
-  const host = useHostVariant();
+  const { config, host } = useWhiteLabel();
 
   const sitemap = useMemo(() => filterSitemap(host, isOwner), [host, isOwner]);
 
@@ -136,7 +123,7 @@ export default function NavChrome({
   }, [mobileMenuOpen]);
 
   const sidebarExpanded = sidebarHovered || sidebarPinned;
-  const canGoBack = pathname !== '/' && pathname !== '/chat';
+  const canGoBack = pathname !== '/' && pathname !== config.homePath;
 
   // Active entry label for the header
   const activeLabel = useMemo(() => {
@@ -192,7 +179,7 @@ export default function NavChrome({
                 sidebarExpanded ? 'md:inline' : ''
               } lg:inline`}
             >
-              {host === 'cti' ? 'CTI Hub' : 'Deploy'}
+              {config.navLabel}
             </span>
           </Link>
           {/* Pin/expand toggle for condensed/split-window mode */}

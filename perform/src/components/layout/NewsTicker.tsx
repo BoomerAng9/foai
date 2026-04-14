@@ -1,6 +1,8 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import type { Sport } from '@/lib/franchise/types';
+import { SPORT_FEED_CONFIG } from '@/lib/sports/news-feed';
 
 interface Tweet {
   id: string;
@@ -12,6 +14,7 @@ interface Tweet {
 }
 
 interface ScrapedArticle {
+  sport?: Sport;
   title: string;
   url: string;
   description: string;
@@ -42,7 +45,25 @@ export function NewsTicker() {
           return;
         }
 
-        // Fallback to scraped news
+        // Fallback to the stored multi-sport headline feed
+        const sportsRes = await fetch('/api/sports/news?perSport=6&limit=18');
+        const sportsData = await sportsRes.json();
+        const storedArticles: ScrapedArticle[] = (sportsData.news || []).map((item: Record<string, unknown>) => ({
+          sport: item.sport as Sport | undefined,
+          title: String(item.headline || ''),
+          url: String(item.source_url || ''),
+          description: String(item.summary || ''),
+          source: String(item.source_name || ''),
+          publishedAt: typeof item.published_at === 'string' ? item.published_at : undefined,
+        }));
+
+        if (storedArticles.length > 0) {
+          setItems(storedArticles.map(a => ({ kind: 'article' as const, data: a })));
+          setUpdatedAt(sportsData.updatedAt || '');
+          return;
+        }
+
+        // Final fallback to on-demand Brave football search
         const newsRes = await fetch('/api/news');
         const newsData = await newsRes.json();
         const articles: ScrapedArticle[] = newsData.articles || [];
@@ -129,6 +150,14 @@ export function NewsTicker() {
             const article = item.data;
             return (
               <span key={`a-${article.url}-${i}`} className="inline-flex items-center gap-2 shrink-0">
+                {article.sport && (
+                  <span
+                    className="text-[8px] font-mono font-bold px-1.5 py-0.5 rounded"
+                    style={{ background: SPORT_FEED_CONFIG[article.sport].badgeColor, color: '#FFFFFF' }}
+                  >
+                    {SPORT_FEED_CONFIG[article.sport].label}
+                  </span>
+                )}
                 <span className="text-[10px] font-mono text-white/60">
                   {article.title.slice(0, 120)}{article.title.length > 120 ? '...' : ''}
                 </span>

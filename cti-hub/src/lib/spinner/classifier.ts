@@ -1,17 +1,13 @@
 /**
  * Spinner intent classifier — re-export from canonical package
  * =============================================================
- * Per the workspace path mapping in cti-hub/tsconfig.json + the
- * transpilePackages config in next.config.mjs, cti-hub now imports
- * the Spinner classifier directly from the canonical package at
- * aims-tools/spinner/src/intent-classifier.ts.
+ * This file previously fronted a workspace-level Spinner package.
+ * The current app keeps a local implementation so CTI Hub validation
+ * and deployment can stay scoped to this service.
  *
  * This file remains as a thin re-export so the existing import
  * `@/lib/spinner/classifier` keeps working without touching the
- * many call sites. New code should prefer importing from
- * '@aims/spinner' directly.
- *
- * Roadmap item #6 — drop the local mirror, single source of truth.
+ * existing call sites.
  */
 
 import {

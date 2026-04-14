@@ -1,14 +1,14 @@
+import { fileURLToPath } from 'node:url';
+
+const projectRoot = fileURLToPath(new URL('.', import.meta.url));
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   output: 'standalone',
   compress: true,
   poweredByHeader: false,
-  // Transpile workspace packages from foai/aims-tools/* so cti-hub can
-  // import them directly via the path mapping in tsconfig.json. Avoids
-  // duplicating logic in cti-hub/src/lib/spinner/.
-  transpilePackages: ['@aims/spinner', '@aims/pricing-matrix'],
   turbopack: {
-    root: '.',
+    root: projectRoot,
   },
   async headers() {
     return [

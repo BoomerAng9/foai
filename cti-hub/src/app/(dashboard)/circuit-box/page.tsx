@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useTheme } from '@/hooks/useTheme';
+import { useWhiteLabel } from '@/hooks/useWhiteLabel';
 
 /* ── types ─────────────────────────────────────────────── */
 
@@ -65,7 +66,7 @@ const PANELS: PanelSection[] = [
     icon: CreditCard,
     visibility: 'always',
     entries: [
-      { id: 'current_plan', label: 'Current Plan', description: 'View and change your subscription', href: '/pricing' },
+      { id: 'current_plan', label: 'Current Plan', description: 'View and change your subscription', href: '/billing' },
       { id: 'usage', label: 'Usage', description: 'Token consumption and cost breakdown' },
       { id: 'invoices', label: 'Invoices', description: 'Past invoices and receipts' },
     ],
@@ -238,6 +239,7 @@ function StatusDot({ status }: { status?: string }) {
 export default function CircuitBoxPage() {
   const { profile } = useAuth();
   const { theme, setTheme } = useTheme();
+  const { config } = useWhiteLabel();
   const isAdmin = profile?.role === 'admin' || profile?.role === 'operator';
   const isPaid = profile?.tier && profile.tier !== 'free';
   const [selectedPanel, setSelectedPanel] = useState<string | null>(null);
@@ -272,6 +274,7 @@ export default function CircuitBoxPage() {
   async function handleByokDelete(p: string) { await fetch(`/api/circuit-box/byok?provider=${p}`,{method:'DELETE'}).catch(()=>{}); setByokKeys(v=>v.filter(x=>x.provider!==p)); }
 
   const visiblePanels = PANELS.filter(p => {
+    if (p.id === 'billing' && !config.billingPath) return false;
     if (p.visibility === 'admin' && !isAdmin) return false;
     if (p.visibility === 'paid' && !isPaid) return false;
     return true;
