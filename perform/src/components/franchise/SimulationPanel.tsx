@@ -23,6 +23,59 @@ interface SimulationPanelProps {
   requestBody?: Record<string, unknown>;
 }
 
+interface SimulationHistoryItem {
+  id: string;
+  status: 'streaming' | 'complete' | 'error';
+  source?: 'managed_agents' | 'messages_fallback';
+  narrative?: string;
+  projection?: SimulationProjection | null;
+  error?: string | null;
+  createdAt: string;
+  managedAgentSessionId?: string | null;
+  tokensUsed: number;
+  modificationsCount: number;
+}
+
+function timeAgo(iso: string): string {
+  const diff = Date.now() - new Date(iso).getTime();
+  const mins = Math.floor(diff / 60_000);
+  if (mins < 60) return `${mins}m ago`;
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return `${hrs}h ago`;
+  const days = Math.floor(hrs / 24);
+  return `${days}d ago`;
+}
+
+function getSourceLabel(source?: SimulationHistoryItem['source'] | null): string | null {
+  if (source === 'managed_agents') return 'Managed Agents';
+  if (source === 'messages_fallback') return 'Direct Fallback';
+  return null;
+}
+
+function getHistorySummary(entry: SimulationHistoryItem): string | null {
+  if (entry.projection?.wins != null && entry.projection?.losses != null) {
+    return `${entry.projection.wins}-${entry.projection.losses} projected record`;
+  }
+
+  if (entry.projection?.playoffProbability != null) {
+    return `${entry.projection.playoffProbability}% playoff probability`;
+  }
+
+  if (entry.projection?.draftStrategy) {
+    return entry.projection.draftStrategy;
+  }
+
+  if (entry.status === 'error') {
+    return 'Simulation failed';
+  }
+
+  return null;
+}
+
+function truncateText(text: string, length: number): string {
+  return text.length > length ? `${text.slice(0, length).trim()}...` : text;
+}
+
 export function SimulationPanel({
   open,
   onClose,
@@ -36,8 +89,18 @@ export function SimulationPanel({
   const [streamText, setStreamText] = useState('');
   const [projection, setProjection] = useState<SimulationProjection | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [providerLabel, setProviderLabel] = useState<string | null>(null);
+  const [history, setHistory] = useState<SimulationHistoryItem[]>([]);
+  const [historyLoading, setHistoryLoading] = useState(false);
+  const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
   const abortRef = useRef<AbortController | null>(null);
   const textRef = useRef<HTMLDivElement>(null);
+
+  const requestedMode = requestBody?.['mode'];
+  const displayMode = requestedMode === 'roster' || requestedMode === 'staff' || requestedMode === 'draft'
+    ? requestedMode
+    : mode;
+  const requestSport = typeof requestBody?.['sport'] === 'string' ? requestBody['sport'] : null;
 
   // Auto-scroll narrative as it streams in
   useEffect(() => {
@@ -54,9 +117,41 @@ export function SimulationPanel({
     setStreamText('');
     setProjection(null);
     setError(null);
+    setProviderLabel(null);
+    setCurrentSessionId(null);
 
     const controller = new AbortController();
     abortRef.current = controller;
+
+    const loadHistory = async () => {
+      if (!requestSport || !teamAbbr) {
+        setHistory([]);
+        return;
+      }
+
+      setHistoryLoading(true);
+      try {
+        const historyRes = await fetch(
+          `/api/franchise/sessions?sport=${encodeURIComponent(requestSport)}&team=${encodeURIComponent(teamAbbr)}&mode=${encodeURIComponent(displayMode)}&limit=5`,
+          { signal: controller.signal }
+        );
+        if (!historyRes.ok) {
+          setHistory([]);
+          return;
+        }
+
+        const historyData = await historyRes.json().catch(() => ({ sessions: [] }));
+        setHistory(Array.isArray(historyData.sessions) ? historyData.sessions : []);
+      } catch (historyError) {
+        if ((historyError as Error).name !== 'AbortError') {
+          setHistory([]);
+        }
+      } finally {
+        setHistoryLoading(false);
+      }
+    };
+
+    void loadHistory();
 
     (async () => {
       try {
@@ -74,10 +169,24 @@ export function SimulationPanel({
           return;
         }
 
+        const headerSource = res.headers.get('X-Simulation-Source');
+        if (headerSource === 'managed_agents') {
+          setProviderLabel('Managed Agents');
+        } else if (headerSource === 'messages_fallback') {
+          setProviderLabel('Direct Model Fallback');
+        }
+
+        const headerSessionId = res.headers.get('X-Simulation-Session');
+        if (headerSessionId) {
+          setCurrentSessionId(headerSessionId);
+          void loadHistory();
+        }
+
         const reader = res.body?.getReader();
         if (!reader) {
           setError('No response stream');
           setLoading(false);
+          void loadHistory();
           return;
         }
 
@@ -98,6 +207,17 @@ export function SimulationPanel({
                 const event: SimulationStreamEvent = JSON.parse(line.slice(6));
                 if (event.type === 'text') {
                   setStreamText((prev) => prev + event.content);
+                } else if (event.type === 'meta') {
+                  const source = typeof event.metadata?.source === 'string' ? event.metadata.source : null;
+                  const sessionId = typeof event.metadata?.session_id === 'string' ? event.metadata.session_id : null;
+                  if (sessionId) {
+                    setCurrentSessionId(sessionId);
+                  }
+                  if (source === 'managed_agents') {
+                    setProviderLabel('Managed Agents');
+                  } else if (source === 'messages_fallback') {
+                    setProviderLabel('Direct Model Fallback');
+                  }
                 } else if (event.type === 'projection' && event.data) {
                   setProjection(event.data);
                 } else if (event.type === 'complete') {
@@ -115,11 +235,13 @@ export function SimulationPanel({
         }
 
         setLoading(false);
+        void loadHistory();
       } catch (err) {
         if ((err as Error).name !== 'AbortError') {
           setError((err as Error).message || 'Simulation failed');
         }
         setLoading(false);
+        void loadHistory();
       }
     })();
 
@@ -134,8 +256,8 @@ export function SimulationPanel({
   };
 
   const modeLabel =
-    mode === 'roster' ? 'Season Projection' :
-    mode === 'staff' ? 'Staff Impact Analysis' :
+    displayMode === 'roster' ? 'Season Projection' :
+    displayMode === 'staff' ? 'Staff Impact Analysis' :
     'Draft Strategy';
 
   return (
@@ -187,11 +309,16 @@ export function SimulationPanel({
                   <p className="text-[10px] text-white/30">
                     {loading ? 'Analyzing...' : error ? 'Error' : 'Complete'}
                   </p>
+                  {providerLabel && (
+                    <p className="text-[10px] text-white/20">{providerLabel}</p>
+                  )}
                 </div>
                 {loading && <Loader2 className="w-4 h-4 text-amber-400/60 animate-spin ml-2" />}
               </div>
               <button
                 onClick={handleClose}
+                aria-label="Close simulation panel"
+                title="Close simulation panel"
                 className="p-2 rounded-lg hover:bg-white/5 transition-colors"
               >
                 <X className="w-4 h-4 text-white/40" />
@@ -320,6 +447,88 @@ export function SimulationPanel({
                     {streamText || (loading ? 'Generating analysis...' : '')}
                     {loading && (
                       <span className="inline-block w-1.5 h-3 ml-0.5 animate-pulse" style={{ background: teamColor }} />
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {(historyLoading || history.length > 0) && (
+                <div className="mt-4">
+                  <h4 className="text-[10px] font-bold text-white/40 uppercase tracking-wider mb-2">
+                    Recent Runs
+                  </h4>
+                  <div className="space-y-2">
+                    {historyLoading && history.length === 0 ? (
+                      <div
+                        className="rounded-lg p-3 text-[11px] text-white/35"
+                        style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.04)' }}
+                      >
+                        Loading recent simulations...
+                      </div>
+                    ) : (
+                      history.map((entry) => {
+                        const summary = getHistorySummary(entry);
+                        const sourceLabel = getSourceLabel(entry.source);
+                        const isCurrent = entry.id === currentSessionId;
+
+                        return (
+                          <div
+                            key={entry.id}
+                            className="rounded-lg p-3"
+                            style={{
+                              background: isCurrent ? `${teamColor}10` : 'rgba(255,255,255,0.02)',
+                              border: isCurrent ? `1px solid ${teamColor}25` : '1px solid rgba(255,255,255,0.04)',
+                            }}
+                          >
+                            <div className="flex items-center gap-2 flex-wrap text-[9px] font-bold tracking-[0.16em] uppercase">
+                              <span className="text-white/25">{timeAgo(entry.createdAt)}</span>
+                              <span
+                                className="px-1.5 py-0.5 rounded"
+                                style={{
+                                  background:
+                                    entry.status === 'complete'
+                                      ? 'rgba(34,197,94,0.12)'
+                                      : entry.status === 'error'
+                                        ? 'rgba(239,68,68,0.12)'
+                                        : 'rgba(245,158,11,0.12)',
+                                  color:
+                                    entry.status === 'complete'
+                                      ? '#22C55E'
+                                      : entry.status === 'error'
+                                        ? '#EF4444'
+                                        : '#F59E0B',
+                                }}
+                              >
+                                {entry.status}
+                              </span>
+                              {sourceLabel && (
+                                <span className="text-white/25">{sourceLabel}</span>
+                              )}
+                              {isCurrent && (
+                                <span style={{ color: teamColor }}>Current</span>
+                              )}
+                            </div>
+
+                            {summary && (
+                              <div className="mt-2 text-[11px] font-semibold text-white/75">
+                                {truncateText(summary, 70)}
+                              </div>
+                            )}
+
+                            <div className="mt-1 text-[10px] text-white/35 leading-relaxed">
+                              {entry.error
+                                ? truncateText(entry.error, 140)
+                                : truncateText(entry.narrative || 'No narrative captured yet.', 140)}
+                            </div>
+
+                            <div className="mt-2 text-[9px] text-white/20 uppercase tracking-[0.14em]">
+                              {entry.modificationsCount} change{entry.modificationsCount === 1 ? '' : 's'}
+                              {entry.tokensUsed > 0 ? ` • ${entry.tokensUsed} tokens` : ''}
+                              {entry.managedAgentSessionId ? ' • linked agent session' : ''}
+                            </div>
+                          </div>
+                        );
+                      })
                     )}
                   </div>
                 </div>

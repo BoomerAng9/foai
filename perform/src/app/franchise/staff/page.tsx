@@ -39,6 +39,13 @@ import type { StaffModification } from '@/lib/franchise/simulation';
 
 type MobileTab = 'org' | 'pool' | 'impact';
 
+function upsertStaffChange(
+  changes: StaffModification[],
+  change: StaffModification
+): StaffModification[] {
+  return [...changes.filter((existing) => existing.role !== change.role), change];
+}
+
 function StaffRoomInner() {
   const searchParams = useSearchParams();
   const sportParam = (searchParams.get('sport') as Sport) || 'nfl';
@@ -77,6 +84,7 @@ function StaffRoomInner() {
   const loadData = useCallback(async (s: Sport, t?: string) => {
     setLoading(true);
     setSchemeChange(null);
+    setStaffChanges([]);
 
     // Try API, fall back to mock
     try {
@@ -173,7 +181,7 @@ function StaffRoomInner() {
           role: targetRole,
           staff: { name: staffMember.name, title: staffMember.title, scheme: staffMember.scheme, philosophy: staffMember.philosophy },
         };
-    setStaffChanges(prev => [...prev, mod]);
+    setStaffChanges((prev) => upsertStaffChange(prev, mod));
 
     // Scheme change indicator
     if (staffMember.scheme && (targetRole === 'head_coach' || targetRole === 'offensive_coordinator' || targetRole === 'defensive_coordinator')) {
@@ -188,6 +196,7 @@ function StaffRoomInner() {
   const handleMobileTapStaff = (staff: StaffMember) => {
     if (!pendingRole) return;
     const targetRole = pendingRole as StaffRole;
+    const existingNode = orgNodes.find((node) => node.role === targetRole);
 
     setOrgNodes((prev) =>
       prev.map((node) => {
@@ -200,6 +209,19 @@ function StaffRoomInner() {
       })
     );
     setPool((prev) => prev.filter((s) => s.id !== staff.id));
+    const mod: StaffModification = existingNode?.staff
+      ? {
+          type: 'replace',
+          role: targetRole,
+          staff: { name: staff.name, title: staff.title, scheme: staff.scheme, philosophy: staff.philosophy },
+          previousStaff: { name: existingNode.staff.name, title: existingNode.staff.title },
+        }
+      : {
+          type: 'hire',
+          role: targetRole,
+          staff: { name: staff.name, title: staff.title, scheme: staff.scheme, philosophy: staff.philosophy },
+        };
+    setStaffChanges((prev) => upsertStaffChange(prev, mod));
     setPendingRole(null);
     setMobileTab('org');
 

@@ -40,6 +40,13 @@ import type { RosterModification } from '@/lib/franchise/simulation';
 
 type MobileTab = 'roster' | 'pool' | 'results';
 
+function upsertRosterChange(
+  changes: RosterModification[],
+  change: RosterModification
+): RosterModification[] {
+  return [...changes.filter((existing) => existing.position !== change.position), change];
+}
+
 function RosterRoomInner() {
   const searchParams = useSearchParams();
   const sportParam = (searchParams.get('sport') as Sport) || 'nfl';
@@ -79,10 +86,11 @@ function RosterRoomInner() {
   const loadData = useCallback(async (s: Sport, t?: string) => {
     setLoading(true);
     setResult(null);
+    setRosterChanges([]);
 
     // Try API first, fall back to mock
     try {
-      const res = await fetch(`/api/franchise/teams?sport=${s}&team=${t || ''}`);
+      const res = await fetch(`/api/franchise/roster?sport=${s}&team=${t || ''}`);
       if (res.ok) {
         const data = await res.json();
         if (data.roster) {
@@ -192,7 +200,7 @@ function RosterRoomInner() {
           position: targetPos,
           player: { name: player.name, position: player.position, overallRating: player.overallRating },
         };
-    setRosterChanges(prev => [...prev, mod]);
+    setRosterChanges((prev) => upsertRosterChange(prev, mod));
 
     // Compute mock impact
     setResult({
@@ -207,6 +215,8 @@ function RosterRoomInner() {
 
   const handleMobileTapPlayer = (player: Player) => {
     if (!pendingSlot) return;
+    const existingSlot = slots.find((slot) => slot.position === pendingSlot);
+
     setSlots((prev) =>
       prev.map((s) => {
         if (s.position === pendingSlot) {
@@ -218,6 +228,23 @@ function RosterRoomInner() {
       })
     );
     setPool((prev) => prev.filter((p) => p.id !== player.id));
+    const mod: RosterModification = existingSlot?.player
+      ? {
+          type: 'swap',
+          position: pendingSlot,
+          player: { name: player.name, position: player.position, overallRating: player.overallRating },
+          previousPlayer: {
+            name: existingSlot.player.name,
+            position: existingSlot.player.position,
+            overallRating: existingSlot.player.overallRating,
+          },
+        }
+      : {
+          type: 'add',
+          position: pendingSlot,
+          player: { name: player.name, position: player.position, overallRating: player.overallRating },
+        };
+    setRosterChanges((prev) => upsertRosterChange(prev, mod));
     setPendingSlot(null);
     setMobileTab('roster');
     setResult({

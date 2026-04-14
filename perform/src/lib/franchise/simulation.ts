@@ -58,9 +58,10 @@ export interface SimulationSession {
 }
 
 export interface SimulationStreamEvent {
-  type: 'thinking' | 'text' | 'projection' | 'complete' | 'error';
+  type: 'thinking' | 'text' | 'projection' | 'complete' | 'error' | 'meta';
   content: string;
   data?: SimulationProjection;
+  metadata?: Record<string, unknown>;
 }
 
 export interface SimulationProjection {
