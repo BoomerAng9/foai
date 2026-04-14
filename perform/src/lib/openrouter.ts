@@ -52,8 +52,13 @@ export function stripReasoningArtifacts(text: string): string {
   return cleaned.trim();
 }
 
-export async function generateText(systemPrompt: string, userMessage: string): Promise<string> {
+export async function generateText(
+  systemPrompt: string,
+  userMessage: string,
+  model: string = DEFAULT_MODEL,
+): Promise<string> {
   const res = await chatCompletion({
+    model,
     messages: [
       { role: 'system', content: systemPrompt },
       { role: 'user', content: userMessage },

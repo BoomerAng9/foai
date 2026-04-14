@@ -1,5 +1,10 @@
-import { generateText } from '@/lib/openrouter';
+import { DEFAULT_MODEL, generateText } from '@/lib/openrouter';
 import type { ScrapedArticle } from './scraper';
+
+const EXTRACTION_MODELS = [
+  'meta-llama/llama-3.3-70b-instruct:free',
+  DEFAULT_MODEL,
+] as const;
 
 export interface PlayerUpdate {
   playerName: string;
@@ -30,11 +35,22 @@ For each player mentioned, output a JSON array of updates. Each update must have
 ONLY extract factual, verifiable information. If an article is speculative, set confidence below 0.5.
 Return ONLY the JSON array, no markdown, no explanation.`;
 
-  try {
-    const response = await generateText(systemPrompt, `Extract player updates from these articles:\n\n${articleText}`);
-    const cleaned = response.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
-    return JSON.parse(cleaned);
-  } catch {
-    return [];
+  for (const model of EXTRACTION_MODELS) {
+    try {
+      const response = await generateText(
+        systemPrompt,
+        `Extract player updates from these articles:\n\n${articleText}`,
+        model,
+      );
+      const cleaned = response.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+      const parsed = JSON.parse(cleaned);
+      if (Array.isArray(parsed)) {
+        return parsed;
+      }
+    } catch {
+      // Try the next model.
+    }
   }
+
+  return [];
 }

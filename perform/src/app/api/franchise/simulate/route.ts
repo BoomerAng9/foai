@@ -4,15 +4,131 @@ import {
   createFranchiseSimulation,
   streamSimulationResults,
   streamFallbackSimulation,
+  type SimulationProjection,
+  type SimulationStreamEvent,
   type SimulationRequest,
   type SimulationMode,
   type TeamDigitalTwin,
 } from '@/lib/franchise/simulation';
+import {
+  createSimulationSessionRecord,
+  updateSimulationSessionRecord,
+  type SimulationSource,
+} from '@/lib/franchise/session-store';
+import { loadFranchiseRosterPlayers } from '@/lib/franchise/server-data';
 import { getTeamByAbbr } from '@/lib/franchise/teams';
 import type { Sport } from '@/lib/franchise/types';
 
 const VALID_SPORTS: Sport[] = ['nfl', 'nba', 'mlb'];
 const VALID_MODES: SimulationMode[] = ['roster', 'staff', 'draft'];
+
+function createMetaEvent(sessionId: string | null, source: SimulationSource): Uint8Array {
+  const event: SimulationStreamEvent = {
+    type: 'meta',
+    content: '',
+    metadata: {
+      session_id: sessionId,
+      source,
+    },
+  };
+  return new TextEncoder().encode(`data: ${JSON.stringify(event)}\n\n`);
+}
+
+function withPersistence(
+  stream: ReadableStream<Uint8Array>,
+  options: {
+    sessionId: string | null;
+    source: SimulationSource;
+    managedAgentSessionId?: string;
+    request: SimulationRequest;
+  },
+): ReadableStream<Uint8Array> {
+  const [clientStream, persistenceStream] = stream.tee();
+
+  void (async () => {
+    const reader = persistenceStream.getReader();
+    const decoder = new TextDecoder();
+    let buffer = '';
+    let projection: SimulationProjection | null = null;
+    let narrative = '';
+    let errorMessage: string | null = null;
+
+    try {
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n');
+        buffer = lines.pop() || '';
+
+        for (const line of lines) {
+          if (!line.startsWith('data: ')) continue;
+          try {
+            const event = JSON.parse(line.slice(6)) as SimulationStreamEvent;
+            if (event.type === 'text') {
+              narrative += event.content;
+            } else if (event.type === 'projection' && event.data) {
+              projection = event.data;
+            } else if (event.type === 'complete') {
+              if (event.data) projection = event.data;
+              if (event.content) narrative = event.content;
+            } else if (event.type === 'error') {
+              errorMessage = event.content;
+            }
+          } catch {
+            // Ignore malformed SSE lines while persisting.
+          }
+        }
+      }
+    } catch (error) {
+      errorMessage = error instanceof Error ? error.message : 'Persistence stream failure';
+    } finally {
+      await updateSimulationSessionRecord(options.sessionId, {
+        status: errorMessage ? 'error' : 'complete',
+        source: options.source,
+        managed_agent_session_id: options.managedAgentSessionId ?? null,
+        request: {
+          sport: options.request.sport,
+          mode: options.request.mode,
+          team_abbr: options.request.teamAbbr,
+          modifications_count: options.request.modifications.length,
+        },
+        narrative,
+        projection,
+        error: errorMessage,
+        completed_at: new Date().toISOString(),
+      });
+      reader.releaseLock();
+    }
+  })();
+
+  const encoder = new TextEncoder();
+
+  return new ReadableStream<Uint8Array>({
+    async start(controller) {
+      controller.enqueue(createMetaEvent(options.sessionId, options.source));
+      const reader = clientStream.getReader();
+
+      try {
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          controller.enqueue(value);
+        }
+      } catch (error) {
+        const event: SimulationStreamEvent = {
+          type: 'error',
+          content: error instanceof Error ? error.message : 'Simulation stream error',
+        };
+        controller.enqueue(encoder.encode(`data: ${JSON.stringify(event)}\n\n`));
+      } finally {
+        reader.releaseLock();
+        controller.close();
+      }
+    },
+  });
+}
 
 export async function POST(req: NextRequest) {
   try {
@@ -82,7 +198,16 @@ export async function POST(req: NextRequest) {
           };
         }
 
-        // Fetch personnel (coaches/GMs, not players — players come from perform_players)
+        const { players } = await loadFranchiseRosterPlayers(sport as Sport, team.abbreviation);
+        if (players.length > 0) {
+          teamContext.roster = players.map((player) => ({
+            name: player.name,
+            position: player.position,
+            overallRating: player.overallRating,
+          }));
+        }
+
+        // Fetch personnel (coaches/GMs for the digital twin)
         const personnel = await sql`
           SELECT name, person_type, position, profile
           FROM franchise.personnel_pool
@@ -111,24 +236,39 @@ export async function POST(req: NextRequest) {
       teamContext,
     };
 
+    const sessionRecordId = await createSimulationSessionRecord(req, body as Record<string, unknown>);
+
     // Try Managed Agents first, fall back to direct Messages API
     let stream: ReadableStream<Uint8Array>;
+    let source: SimulationSource = 'messages_fallback';
+    let managedAgentSessionId: string | undefined;
 
     try {
       const session = await createFranchiseSimulation(simRequest);
+      managedAgentSessionId = session.sessionId;
       const userMessage = `Analyze the ${team.city} ${team.name} with the provided modifications and generate your full projection.`;
       stream = await streamSimulationResults(session, userMessage);
-    } catch {
-      // Managed Agents beta may not be available — fall back to direct streaming
+      source = 'managed_agents';
+    } catch (managedAgentError) {
+      console.warn('Managed Agents unavailable, falling back to direct simulation stream.', managedAgentError);
       stream = await streamFallbackSimulation(simRequest);
     }
 
-    return new Response(stream, {
+    const persistedStream = withPersistence(stream, {
+      sessionId: sessionRecordId,
+      source,
+      managedAgentSessionId,
+      request: simRequest,
+    });
+
+    return new Response(persistedStream, {
       headers: {
         'Content-Type': 'text/event-stream',
         'Cache-Control': 'no-cache',
         'Connection': 'keep-alive',
         'X-Accel-Buffering': 'no',
+        'X-Simulation-Source': source,
+        ...(sessionRecordId ? { 'X-Simulation-Session': sessionRecordId } : {}),
       },
     });
   } catch (err) {
