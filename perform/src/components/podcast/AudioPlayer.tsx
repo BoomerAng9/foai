@@ -24,11 +24,15 @@ function formatTime(seconds: number): string {
 export function AudioPlayer() {
   const {
     currentEpisode,
+    queue,
+    queueIndex,
     isPlaying,
     currentTime,
     duration,
     playbackRate,
     togglePlay,
+    playNextInQueue,
+    playPreviousInQueue,
     seek,
     setSpeed,
     skipForward,
@@ -60,6 +64,32 @@ export function AudioPlayer() {
   if (!currentEpisode) return null;
 
   const progress = duration > 0 ? (currentTime / duration) * 100 : 0;
+  const queueHasPrevious = queueIndex > 0;
+  const queueHasNext = queueIndex >= 0 && queueIndex < queue.length - 1;
+  const useQueueTransport = queue.length > 0 && queueIndex >= 0;
+
+  const handleBack = useCallback(() => {
+    if (useQueueTransport) {
+      playPreviousInQueue();
+      return;
+    }
+
+    skipBack();
+  }, [playPreviousInQueue, skipBack, useQueueTransport]);
+
+  const handleForward = useCallback(() => {
+    if (useQueueTransport) {
+      playNextInQueue();
+      return;
+    }
+
+    skipForward();
+  }, [playNextInQueue, skipForward, useQueueTransport]);
+
+  const backDisabled = useQueueTransport ? !queueHasPrevious : false;
+  const forwardDisabled = useQueueTransport ? !queueHasNext : false;
+  const backTitle = useQueueTransport ? 'Previous episode' : 'Back 15s';
+  const forwardTitle = useQueueTransport ? 'Next episode' : 'Forward 15s';
 
   // Minimized bar
   if (minimized) {
@@ -157,9 +187,10 @@ export function AudioPlayer() {
         {/* Transport controls */}
         <div className="flex items-center gap-1.5 shrink-0">
           <button
-            onClick={skipBack}
-            className="w-8 h-8 flex items-center justify-center rounded-full text-white/40 hover:text-white/70 transition-colors"
-            title="Back 15s"
+            onClick={handleBack}
+            disabled={backDisabled}
+            className="w-8 h-8 flex items-center justify-center rounded-full text-white/40 hover:text-white/70 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+            title={backTitle}
           >
             <SkipBack size={14} />
           </button>
@@ -177,9 +208,10 @@ export function AudioPlayer() {
           </button>
 
           <button
-            onClick={skipForward}
-            className="w-8 h-8 flex items-center justify-center rounded-full text-white/40 hover:text-white/70 transition-colors"
-            title="Forward 15s"
+            onClick={handleForward}
+            disabled={forwardDisabled}
+            className="w-8 h-8 flex items-center justify-center rounded-full text-white/40 hover:text-white/70 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+            title={forwardTitle}
           >
             <SkipForward size={14} />
           </button>

@@ -5,21 +5,7 @@ import { useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { Menu, X, ChevronLeft, Home } from 'lucide-react';
 import { ThemeToggle } from '@/components/ThemeToggle';
-
-const NAV_ITEMS = [
-  { label: 'Home', href: '/' },
-  { label: 'Draft Board', href: '/draft' },
-  { label: 'Mock Draft', href: '/draft/mock' },
-  { label: 'War Room', href: '/studio' },
-  { label: 'Analysts', href: '/analysts' },
-  { label: 'Rankings', href: '/rankings' },
-  { label: 'Players', href: '/players' },
-  { label: 'Film Room', href: '/film' },
-  { label: 'Franchise', href: '/franchise' },
-  { label: 'Flag Football', href: '/flag-football' },
-  { label: 'The Huddle', href: '/huddle' },
-  { label: 'Dashboard', href: '/dashboard' },
-];
+import { PRIMARY_NAV_ITEMS, isActiveNavRoute } from '@/lib/platform/config';
 
 export function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -62,11 +48,22 @@ export function Header() {
 
       {/* Desktop nav */}
       <nav className="hidden md:flex items-center gap-6">
-        {NAV_ITEMS.map(item => (
-          <Link key={item.href} href={item.href} className="text-xs font-mono text-white/40 hover:text-white/70 tracking-wider transition-colors">
-            {item.label.toUpperCase()}
-          </Link>
-        ))}
+        {PRIMARY_NAV_ITEMS.map(item => {
+          const isActive = isActiveNavRoute(pathname, item.href, item.matchPrefixes);
+
+          return (
+            <Link
+              key={item.href}
+              href={item.href}
+              className={`text-xs font-mono tracking-wider transition-colors ${
+                isActive ? 'text-white' : 'text-white/40 hover:text-white/70'
+              }`}
+              style={isActive ? { color: '#D4A853' } : undefined}
+            >
+              {item.label.toUpperCase()}
+            </Link>
+          );
+        })}
       </nav>
 
       {/* Mobile menu toggle */}
@@ -83,11 +80,23 @@ export function Header() {
       {/* Mobile dropdown */}
       {menuOpen && (
         <div className="absolute top-14 left-0 right-0 py-4 px-6 flex flex-col gap-1 md:hidden" style={{ background: '#0A0A0F', borderBottom: '1px solid rgba(255,255,255,0.08)', zIndex: 999 }}>
-          {NAV_ITEMS.map(item => (
-            <Link key={item.href} href={item.href} onClick={() => setMenuOpen(false)} className="text-sm font-mono text-white/50 hover:text-white/80 py-2 tracking-wider transition-colors">
-              {item.label.toUpperCase()}
-            </Link>
-          ))}
+          {PRIMARY_NAV_ITEMS.map(item => {
+            const isActive = isActiveNavRoute(pathname, item.href, item.matchPrefixes);
+
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                onClick={() => setMenuOpen(false)}
+                className={`text-sm font-mono py-2 tracking-wider transition-colors ${
+                  isActive ? 'text-white' : 'text-white/50 hover:text-white/80'
+                }`}
+                style={isActive ? { color: '#D4A853' } : undefined}
+              >
+                {item.label.toUpperCase()}
+              </Link>
+            );
+          })}
         </div>
       )}
     </header>
