@@ -21,6 +21,8 @@ export interface AudioEpisode {
 
 interface AudioPlayerState {
   currentEpisode: AudioEpisode | null;
+  queue: AudioEpisode[];
+  queueIndex: number;
   isPlaying: boolean;
   currentTime: number;
   duration: number;
@@ -29,12 +31,16 @@ interface AudioPlayerState {
 
 interface AudioPlayerActions {
   play: (episode: AudioEpisode) => void;
+  playCollection: (episodes: AudioEpisode[], startIndex?: number) => void;
+  playNextInQueue: () => void;
+  playPreviousInQueue: () => void;
   pause: () => void;
   togglePlay: () => void;
   seek: (time: number) => void;
   setSpeed: (rate: number) => void;
   skipForward: () => void;
   skipBack: () => void;
+  clearQueue: () => void;
   stop: () => void;
 }
 
@@ -51,10 +57,27 @@ export function useAudioPlayer() {
 export function AudioPlayerProvider({ children }: { children: ReactNode }) {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [currentEpisode, setCurrentEpisode] = useState<AudioEpisode | null>(null);
+  const [queue, setQueue] = useState<AudioEpisode[]>([]);
+  const [queueIndex, setQueueIndex] = useState(-1);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [playbackRate, setPlaybackRate] = useState(1);
+  const queueRef = useRef<AudioEpisode[]>([]);
+  const queueIndexRef = useRef(-1);
+  const playbackRateRef = useRef(1);
+
+  useEffect(() => {
+    queueRef.current = queue;
+  }, [queue]);
+
+  useEffect(() => {
+    queueIndexRef.current = queueIndex;
+  }, [queueIndex]);
+
+  useEffect(() => {
+    playbackRateRef.current = playbackRate;
+  }, [playbackRate]);
 
   // Ensure audio element exists
   const getAudio = useCallback(() => {
@@ -66,6 +89,55 @@ export function AudioPlayerProvider({ children }: { children: ReactNode }) {
     return audioRef.current;
   }, []);
 
+  const playEpisodeInternal = useCallback(
+    (episode: AudioEpisode) => {
+      const audio = getAudio();
+
+      if (currentEpisode?.id === episode.id && audio.src) {
+        audio.play();
+        return;
+      }
+
+      if (!episode.audioUrl) return;
+      audio.src = episode.audioUrl;
+      audio.playbackRate = playbackRateRef.current;
+      audio.play();
+      setCurrentEpisode(episode);
+      setCurrentTime(0);
+      setDuration(episode.duration || 0);
+    },
+    [currentEpisode, getAudio],
+  );
+
+  const clearQueue = useCallback(() => {
+    queueRef.current = [];
+    queueIndexRef.current = -1;
+    setQueue([]);
+    setQueueIndex(-1);
+  }, []);
+
+  const playNextInQueue = useCallback(() => {
+    const nextIndex = queueIndexRef.current + 1;
+    const nextEpisode = queueRef.current[nextIndex];
+
+    if (!nextEpisode) return;
+
+    queueIndexRef.current = nextIndex;
+    setQueueIndex(nextIndex);
+    playEpisodeInternal(nextEpisode);
+  }, [playEpisodeInternal]);
+
+  const playPreviousInQueue = useCallback(() => {
+    const previousIndex = queueIndexRef.current - 1;
+    const previousEpisode = queueRef.current[previousIndex];
+
+    if (!previousEpisode) return;
+
+    queueIndexRef.current = previousIndex;
+    setQueueIndex(previousIndex);
+    playEpisodeInternal(previousEpisode);
+  }, [playEpisodeInternal]);
+
   // Sync event listeners
   useEffect(() => {
     const audio = getAudio();
@@ -73,6 +145,15 @@ export function AudioPlayerProvider({ children }: { children: ReactNode }) {
     const onTimeUpdate = () => setCurrentTime(audio.currentTime);
     const onDurationChange = () => setDuration(audio.duration || 0);
     const onEnded = () => {
+      const nextEpisode = queueRef.current[queueIndexRef.current + 1];
+
+      if (nextEpisode) {
+        queueIndexRef.current = queueIndexRef.current + 1;
+        setQueueIndex(queueIndexRef.current);
+        playEpisodeInternal(nextEpisode);
+        return;
+      }
+
       setIsPlaying(false);
       setCurrentTime(0);
     };
@@ -92,28 +173,29 @@ export function AudioPlayerProvider({ children }: { children: ReactNode }) {
       audio.removeEventListener('play', onPlay);
       audio.removeEventListener('pause', onPause);
     };
-  }, [getAudio]);
+  }, [getAudio, playEpisodeInternal]);
 
   const play = useCallback(
     (episode: AudioEpisode) => {
-      const audio = getAudio();
-
-      // Same episode: resume
-      if (currentEpisode?.id === episode.id && audio.src) {
-        audio.play();
-        return;
-      }
-
-      // New episode
-      if (!episode.audioUrl) return;
-      audio.src = episode.audioUrl;
-      audio.playbackRate = playbackRate;
-      audio.play();
-      setCurrentEpisode(episode);
-      setCurrentTime(0);
-      setDuration(episode.duration || 0);
+      clearQueue();
+      playEpisodeInternal(episode);
     },
-    [currentEpisode, playbackRate, getAudio],
+    [clearQueue, playEpisodeInternal],
+  );
+
+  const playCollection = useCallback(
+    (episodes: AudioEpisode[], startIndex = 0) => {
+      const playableEpisodes = episodes.filter((episode) => Boolean(episode.audioUrl));
+      if (playableEpisodes.length === 0) return;
+
+      const boundedIndex = Math.max(0, Math.min(startIndex, playableEpisodes.length - 1));
+      queueRef.current = playableEpisodes;
+      queueIndexRef.current = boundedIndex;
+      setQueue(playableEpisodes);
+      setQueueIndex(boundedIndex);
+      playEpisodeInternal(playableEpisodes[boundedIndex]);
+    },
+    [playEpisodeInternal],
   );
 
   const pause = useCallback(() => {
@@ -161,27 +243,34 @@ export function AudioPlayerProvider({ children }: { children: ReactNode }) {
       audio.pause();
       audio.src = '';
     }
+    clearQueue();
     setCurrentEpisode(null);
     setIsPlaying(false);
     setCurrentTime(0);
     setDuration(0);
-  }, []);
+  }, [clearQueue]);
 
   return (
     <AudioPlayerContext.Provider
       value={{
         currentEpisode,
+        queue,
+        queueIndex,
         isPlaying,
         currentTime,
         duration,
         playbackRate,
         play,
+        playCollection,
+        playNextInQueue,
+        playPreviousInQueue,
         pause,
         togglePlay,
         seek,
         setSpeed,
         skipForward,
         skipBack,
+        clearQueue,
         stop,
       }}
     >

@@ -175,61 +175,40 @@ export default function ShowsPage() {
   /* ── expanded show ── */
   const [expandedShow, setExpandedShow] = useState<string | null>(null);
 
-  /* ── queue ── */
-  const [queue, setQueue] = useState<Episode[]>([]);
-  const queueRef = useRef(queue);
-  queueRef.current = queue;
-
   /* ── volume ── */
-  const [volume, setVolume] = useState(1);
   const [muted, setMuted] = useState(false);
 
-  /* When an episode ends, play next in queue */
-  useEffect(() => {
-    if (
-      audio.currentEpisode &&
-      !audio.isPlaying &&
-      audio.currentTime > 0 &&
-      audio.duration > 0 &&
-      audio.currentTime >= audio.duration - 0.5
-    ) {
-      const q = queueRef.current;
-      const idx = q.findIndex((ep) => ep.id === audio.currentEpisode?.id);
-      if (idx >= 0 && idx < q.length - 1) {
-        const next = q[idx + 1];
-        if (next.audio_url) {
-          const show = SHOWS.find((s) =>
-            s.analystIds.includes(next.analyst_id),
-          );
-          audio.play({
-            id: next.id,
-            title: next.title,
-            analyst: show?.analystName || next.analyst_id,
-            analystColor: show?.color || '#888',
-            audioUrl: next.audio_url,
-            duration: next.duration_seconds,
-          });
-        }
-      }
-    }
-  }, [audio.currentTime, audio.duration, audio.isPlaying, audio.currentEpisode, audio]);
+  const toAudioEpisode = useCallback((ep: Episode): AudioEpisode => {
+    const show = SHOWS.find((s) => s.analystIds.includes(ep.analyst_id));
+
+    return {
+      id: ep.id,
+      title: ep.title,
+      analyst: show?.analystName || ep.analyst_id,
+      analystColor: show?.color || '#888',
+      audioUrl: ep.audio_url,
+      duration: ep.duration_seconds,
+    };
+  }, []);
 
   /* ── play episode helper ── */
   const playEpisode = useCallback(
-    (ep: Episode) => {
+    (ep: Episode, collection?: Episode[]) => {
       if (!ep.audio_url) return;
-      const show = SHOWS.find((s) => s.analystIds.includes(ep.analyst_id));
-      const audioEp: AudioEpisode = {
-        id: ep.id,
-        title: ep.title,
-        analyst: show?.analystName || ep.analyst_id,
-        analystColor: show?.color || '#888',
-        audioUrl: ep.audio_url,
-        duration: ep.duration_seconds,
-      };
-      audio.play(audioEp);
+
+      if (collection) {
+        const playableEpisodes = collection.filter((episode) => Boolean(episode.audio_url));
+        const startIndex = playableEpisodes.findIndex((episode) => episode.id === ep.id);
+
+        if (startIndex >= 0) {
+          audio.playCollection(playableEpisodes.map(toAudioEpisode), startIndex);
+          return;
+        }
+      }
+
+      audio.play(toAudioEpisode(ep));
     },
-    [audio],
+    [audio, toAudioEpisode],
   );
 
   /* ── play entire show ── */
@@ -238,25 +217,20 @@ export default function ShowsPage() {
       const eps = showEpisodes[showId] || [];
       const playable = eps.filter((e) => e.audio_url);
       if (playable.length === 0) return;
-      setQueue(playable);
-      playEpisode(playable[0]);
+      audio.playCollection(playable.map(toAudioEpisode));
       setExpandedShow(showId);
     },
-    [showEpisodes, playEpisode],
+    [audio, showEpisodes, toAudioEpisode],
   );
 
   /* ── prev / next in queue ── */
   const playPrev = useCallback(() => {
-    if (!audio.currentEpisode || queue.length === 0) return;
-    const idx = queue.findIndex((ep) => ep.id === audio.currentEpisode?.id);
-    if (idx > 0) playEpisode(queue[idx - 1]);
-  }, [audio.currentEpisode, queue, playEpisode]);
+    audio.playPreviousInQueue();
+  }, [audio]);
 
   const playNext = useCallback(() => {
-    if (!audio.currentEpisode || queue.length === 0) return;
-    const idx = queue.findIndex((ep) => ep.id === audio.currentEpisode?.id);
-    if (idx >= 0 && idx < queue.length - 1) playEpisode(queue[idx + 1]);
-  }, [audio.currentEpisode, queue, playEpisode]);
+    audio.playNextInQueue();
+  }, [audio]);
 
   /* ── scrubber ── */
   const scrubberRef = useRef<HTMLDivElement>(null);
@@ -287,11 +261,13 @@ export default function ShowsPage() {
 
   /* ── up next ── */
   const upNext = useMemo(() => {
-    if (!audio.currentEpisode || queue.length === 0) return [];
-    const idx = queue.findIndex((ep) => ep.id === audio.currentEpisode?.id);
-    if (idx < 0) return [];
-    return queue.slice(idx + 1, idx + 4);
-  }, [audio.currentEpisode, queue]);
+    if (audio.queueIndex < 0) return [];
+
+    return audio.queue
+      .slice(audio.queueIndex + 1, audio.queueIndex + 4)
+      .map((queueEpisode) => episodes.find((episode) => episode.id === queueEpisode.id) ?? null)
+      .filter((episode): episode is Episode => Boolean(episode));
+  }, [audio.queue, audio.queueIndex, episodes]);
 
   return (
     <div
@@ -496,6 +472,7 @@ export default function ShowsPage() {
                       border: '1px solid rgba(255,255,255,0.06)',
                     }}
                     title="Previous episode"
+                    disabled={audio.queueIndex <= 0}
                   >
                     <SkipBack size={16} />
                   </button>
@@ -528,6 +505,9 @@ export default function ShowsPage() {
                       border: '1px solid rgba(255,255,255,0.06)',
                     }}
                     title="Next episode"
+                    disabled={
+                      audio.queueIndex < 0 || audio.queueIndex >= audio.queue.length - 1
+                    }
                   >
                     <SkipForward size={16} />
                   </button>
@@ -794,11 +774,7 @@ export default function ShowsPage() {
                                 key={ep.id}
                                 onClick={() => {
                                   if (!hasAudio) return;
-                                  const playable = eps.filter(
-                                    (e) => e.audio_url,
-                                  );
-                                  setQueue(playable);
-                                  playEpisode(ep);
+                                  playEpisode(ep, eps);
                                 }}
                                 disabled={!hasAudio}
                                 className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-all group"
