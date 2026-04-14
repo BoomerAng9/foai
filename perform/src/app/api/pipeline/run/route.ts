@@ -3,6 +3,7 @@ import { searchDraftNews, searchTransferPortal } from '@/lib/data-pipeline/scrap
 import { extractPlayerUpdates } from '@/lib/data-pipeline/enricher';
 import { sql } from '@/lib/db';
 import { safeCompare } from '@/lib/auth-guard';
+import { fetchSportsHeadlineFeed } from '@/lib/sports/news-feed';
 
 const PIPELINE_KEY = process.env.PIPELINE_AUTH_KEY || '';
 
@@ -23,6 +24,7 @@ export async function POST(req: NextRequest) {
       searchTransferPortal(),
     ]);
     const allArticles = [...draftNews, ...portalNews];
+    const sportsFeed = await fetchSportsHeadlineFeed();
 
     // Step 2: Extract structured updates via LLM
     const updates = await extractPlayerUpdates(allArticles);
@@ -52,7 +54,62 @@ export async function POST(req: NextRequest) {
       } catch {}
     }
 
-    // Step 4: Apply high-confidence player updates to DB
+    // Step 4: Store multi-sport headlines for the live ticker
+    await sql`
+      CREATE TABLE IF NOT EXISTS sports_news_feed (
+        id SERIAL PRIMARY KEY,
+        sport TEXT NOT NULL,
+        headline TEXT NOT NULL,
+        summary TEXT,
+        source_name TEXT NOT NULL,
+        source_url TEXT NOT NULL UNIQUE,
+        players_mentioned TEXT[] DEFAULT '{}'::TEXT[],
+        teams_mentioned TEXT[] DEFAULT '{}'::TEXT[],
+        category TEXT,
+        published_at TIMESTAMPTZ,
+        scraped_at TIMESTAMPTZ DEFAULT NOW()
+      )
+    `;
+
+    let sportsNewsStored = 0;
+    for (const item of sportsFeed) {
+      try {
+        const inserted = await sql`
+          INSERT INTO sports_news_feed (
+            sport,
+            headline,
+            summary,
+            source_name,
+            source_url,
+            players_mentioned,
+            teams_mentioned,
+            category,
+            published_at
+          )
+          VALUES (
+            ${item.sport},
+            ${item.headline},
+            ${item.summary},
+            ${item.source_name},
+            ${item.source_url},
+            ${item.players_mentioned},
+            ${item.teams_mentioned},
+            ${item.category},
+            ${item.published_at}
+          )
+          ON CONFLICT (source_url) DO NOTHING
+          RETURNING id
+        `;
+        sportsNewsStored += inserted.length;
+      } catch {}
+    }
+
+    await sql`
+      DELETE FROM sports_news_feed
+      WHERE COALESCE(published_at, scraped_at) < NOW() - INTERVAL '14 days'
+    `;
+
+    // Step 5: Apply high-confidence player updates to DB
     let updatesApplied = 0;
     for (const update of updates) {
       if (update.confidence < 0.7) continue;
@@ -71,6 +128,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({
       articlesScraped: allArticles.length,
       articlesStored,
+      sportsFeedScraped: sportsFeed.length,
+      sportsNewsStored,
       updatesExtracted: updates.length,
       updatesApplied,
       timestamp: new Date().toISOString(),

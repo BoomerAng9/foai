@@ -20,6 +20,7 @@ import { buildGrammarPrompt, buildConfirmationPrompt, isPassthrough, GRAMMAR_DIS
 import { VoiceBar } from '@/components/voice/VoiceBar';
 import { VoicePicker } from '@/components/voice/VoicePicker';
 import { AcheevyInterview } from '@/components/onboarding/AcheevyInterview';
+import { useWhiteLabel } from '@/hooks/useWhiteLabel';
 
 /** Scenario/skill → agent routing. When a user activates a scenario tile,
  *  the chat switches to the agent that owns that skill. This is the ONLY
@@ -50,6 +51,7 @@ function formatFileSize(bytes: number) {
 
 function ChatWithACHEEVY() {
   const { user } = useAuth();
+  const { config } = useWhiteLabel();
   const searchParams = useSearchParams();
   const deployAgent = searchParams.get('deploy');
   const prefillQ = searchParams.get('q');
@@ -1186,7 +1188,7 @@ function ChatWithACHEEVY() {
                 )}
               </div>
               <p className="font-mono text-[9px] text-fg-ghost">
-                The Deploy Platform
+                {config.systemName}
               </p>
             </div>
           </div>

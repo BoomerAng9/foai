@@ -29,7 +29,8 @@ export function GET(req: NextRequest) {
   const ownerParam = url.searchParams.get('owner');
   const format = url.searchParams.get('format') || 'both';
 
-  // Detect host: explicit param wins, else Host header, else default cti
+  // Detect host: explicit param wins, else Host header, else the shared
+  // host resolver defaults localhost to CTI and unknown hosts to Deploy.
   const detectedHost: NavHost = hostParam === 'cti' || hostParam === 'deploy'
     ? hostParam
     : hostVariantFromHostname(req.headers.get('host'));

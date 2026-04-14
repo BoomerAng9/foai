@@ -2,28 +2,18 @@
 
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
+import type { Sport } from '@/lib/franchise/types';
+import { SPORT_FEED_CONFIG } from '@/lib/sports/news-feed';
 
 interface NewsItem {
   id: number;
-  sport: string;
+  sport: Sport;
   headline: string;
   source_name: string;
   source_url: string;
   category: string;
   teams_mentioned: string[];
 }
-
-const SPORT_COLORS: Record<string, string> = {
-  nfl: '#013369',
-  nba: '#1D428A',
-  mlb: '#002D72',
-};
-
-const SPORT_LABELS: Record<string, string> = {
-  nfl: 'NFL',
-  nba: 'NBA',
-  mlb: 'MLB',
-};
 
 interface Props {
   sports?: string[];     // ['nfl', 'nba', 'mlb'] — which leagues to show
@@ -37,21 +27,22 @@ export function BreakingNewsTicker({ sports = ['nfl', 'nba', 'mlb'], team, limit
 
   useEffect(() => {
     async function fetchNews() {
-      const allNews: NewsItem[] = [];
       for (const sport of sports) {
-        try {
-          const params = new URLSearchParams({ limit: String(Math.ceil(limit / sports.length)) });
-          if (team) params.set('team', team);
-          const res = await fetch(`/api/nfl/news?${params}`);
-          if (res.ok) {
-            const data = await res.json();
-            allNews.push(...(data.news || []).map((n: Record<string, unknown>) => ({ ...n, sport })));
-          }
-        } catch { /* silent */ }
+        if (!SPORT_FEED_CONFIG[sport as Sport]) return;
       }
-      // Sort by most recent
-      allNews.sort((a, b) => (b.id || 0) - (a.id || 0));
-      setNews(allNews.slice(0, limit));
+
+      try {
+        const params = new URLSearchParams({
+          sports: sports.join(','),
+          perSport: String(Math.max(1, Math.ceil(limit / sports.length))),
+          limit: String(limit),
+        });
+        if (team) params.set('team', team);
+        const res = await fetch(`/api/sports/news?${params.toString()}`);
+        if (!res.ok) return;
+        const data = await res.json();
+        setNews((data.news || []).slice(0, limit));
+      } catch { /* silent */ }
     }
 
     fetchNews();
@@ -101,15 +92,15 @@ export function BreakingNewsTicker({ sports = ['nfl', 'nba', 'mlb'], team, limit
                 className="text-xs flex items-center gap-2 hover:opacity-80 transition-opacity"
               >
                 {/* Sport badge */}
-                <span
-                  className="text-[8px] font-black tracking-wider px-1.5 py-0.5 rounded"
-                  style={{
-                    background: SPORT_COLORS[item.sport] || '#333',
-                    color: '#fff',
-                  }}
-                >
-                  {SPORT_LABELS[item.sport] || item.sport.toUpperCase()}
-                </span>
+                  <span
+                    className="text-[8px] font-black tracking-wider px-1.5 py-0.5 rounded"
+                    style={{
+                      background: SPORT_FEED_CONFIG[item.sport]?.badgeColor || '#333',
+                      color: '#fff',
+                    }}
+                  >
+                    {SPORT_FEED_CONFIG[item.sport]?.label || item.sport.toUpperCase()}
+                  </span>
 
                 {/* Teams */}
                 {item.teams_mentioned?.length > 0 && (

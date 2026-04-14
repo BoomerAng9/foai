@@ -42,6 +42,7 @@ const PUBLIC_PREFIXES = [
   '/podcast/',
   '/api/cfb/',
   '/api/nfl/',
+  '/api/sports/',
   '/api/auth/',
   '/api/players',
   '/api/tie/',

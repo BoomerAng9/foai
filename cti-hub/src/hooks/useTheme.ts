@@ -1,14 +1,20 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { getBrandConfigFromHostname } from '@/lib/platform/surface';
 
 type Theme = 'light' | 'dark' | 'system';
-
-const STORAGE_KEY = 'cti-theme-preference';
 
 function getSystemTheme(): 'light' | 'dark' {
   if (typeof window === 'undefined') return 'dark';
   return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+}
+
+function getStorageKey(): string {
+  if (typeof window === 'undefined') {
+    return getBrandConfigFromHostname(null).themeStorageKey;
+  }
+  return getBrandConfigFromHostname(window.location.hostname).themeStorageKey;
 }
 
 function applyTheme(theme: Theme) {
@@ -25,7 +31,8 @@ export function useTheme() {
   const [theme, setThemeState] = useState<Theme>('system');
 
   useEffect(() => {
-    const saved = localStorage.getItem(STORAGE_KEY) as Theme | null;
+    const storageKey = getStorageKey();
+    const saved = localStorage.getItem(storageKey) as Theme | null;
     const initial = saved ?? 'system';
     setThemeState(initial);
     applyTheme(initial);
@@ -33,7 +40,7 @@ export function useTheme() {
     // Listen for system theme changes
     const mq = window.matchMedia('(prefers-color-scheme: dark)');
     const handler = () => {
-      if ((localStorage.getItem(STORAGE_KEY) ?? 'system') === 'system') {
+      if ((localStorage.getItem(storageKey) ?? 'system') === 'system') {
         applyTheme('system');
       }
     };
@@ -43,7 +50,7 @@ export function useTheme() {
 
   const setTheme = useCallback((t: Theme) => {
     setThemeState(t);
-    localStorage.setItem(STORAGE_KEY, t);
+    localStorage.setItem(getStorageKey(), t);
     applyTheme(t);
   }, []);
 

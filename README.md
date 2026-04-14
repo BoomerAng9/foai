@@ -26,3 +26,14 @@ AI-Managed Solutions for businesses. Powered by autonomous agent hierarchies, en
 See `AGENTS.md` for the full agent hierarchy.
 See `docs/SOUL.md` for mission and revenue mandate.
 See `docs/BRAIN.md` for tenant isolation rules.
+
+## Repo Topology
+
+This root repository is an operational umbrella workspace, not a single-package app.
+
+- `cti-hub/` serves CTI Hub and `deploy.foai.cloud`
+- `perform/` serves Per|Form and related producer flows
+- `runtime/` contains the Python runtime services and tests
+- `GRAMMAR/`, `SmelterOS/`, and `aims-tools/aims-core/` are tracked as nested git repos/submodules and need to be initialized or updated intentionally
+
+Validation and deployment happen through local/Docker workflows, Hostinger VPS services, Cloud Run services/jobs, and GCP-managed secrets rather than GitHub-native CI/CD alone.

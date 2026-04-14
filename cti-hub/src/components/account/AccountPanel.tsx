@@ -2,8 +2,10 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
+import { useAccessLevel } from '@/hooks/useAccessLevel';
+import { useWhiteLabel } from '@/hooks/useWhiteLabel';
 import {
-  X, Settings, CreditCard, Share2, ChevronUp, MessageSquare,
+  X, Settings, CreditCard, ExternalLink, Share2, ChevronUp, MessageSquare,
   LogOut, Crown, Zap, Send,
 } from 'lucide-react';
 
@@ -17,6 +19,8 @@ const TIER_DISPLAY: Record<string, { name: string; color: string; icon: typeof C
 
 export function AccountPanel() {
   const { user, profile, signOut } = useAuth();
+  const accessLevel = useAccessLevel();
+  const { config } = useWhiteLabel();
   const [open, setOpen] = useState(false);
   const [chatInput, setChatInput] = useState('');
   const [chatMessages, setChatMessages] = useState<Array<{ role: string; text: string }>>([]);
@@ -37,6 +41,7 @@ export function AccountPanel() {
   if (!user) return null;
 
   const tier = profile?.tier || 'free';
+  const isOwnerUser = accessLevel === 'OWNER';
   const tierInfo = TIER_DISPLAY[tier] || TIER_DISPLAY.free;
   const initial = user.displayName?.charAt(0).toUpperCase() || user.email?.charAt(0).toUpperCase() || '?';
   const photoUrl = user.photoURL;
@@ -136,9 +141,21 @@ export function AccountPanel() {
             <a href="/settings" className="flex items-center gap-3 px-3 py-2 text-xs font-mono text-fg-secondary hover:bg-bg-elevated transition-colors">
               <Settings className="w-3.5 h-3.5" /> Account Settings
             </a>
-            <a href="/pricing" className="flex items-center gap-3 px-3 py-2 text-xs font-mono text-fg-secondary hover:bg-bg-elevated transition-colors">
-              <CreditCard className="w-3.5 h-3.5" /> Upgrade Plan
-            </a>
+            {config.ownerHubUrl && isOwnerUser && (
+              <a
+                href={config.ownerHubUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="flex items-center gap-3 px-3 py-2 text-xs font-mono text-fg-secondary hover:bg-bg-elevated transition-colors"
+              >
+                <ExternalLink className="w-3.5 h-3.5" /> Open CTI Hub
+              </a>
+            )}
+            {config.billingPath && (
+              <a href={config.billingPath} className="flex items-center gap-3 px-3 py-2 text-xs font-mono text-fg-secondary hover:bg-bg-elevated transition-colors">
+                <CreditCard className="w-3.5 h-3.5" /> Upgrade Plan
+              </a>
+            )}
             <button className="w-full flex items-center gap-3 px-3 py-2 text-xs font-mono text-fg-secondary hover:bg-bg-elevated transition-colors text-left">
               <Share2 className="w-3.5 h-3.5" /> Share Invite Link
             </button>
@@ -201,7 +218,7 @@ export function AccountPanel() {
 
           {/* Footer */}
           <div className="px-4 py-2 border-t border-border flex items-center justify-between">
-            <span className="font-mono text-[8px] text-fg-ghost">The Deploy Platform</span>
+            <span className="font-mono text-[8px] text-fg-ghost">{config.systemName}</span>
             <button onClick={() => setOpen(false)}>
               <ChevronUp className="w-3 h-3 text-fg-ghost" />
             </button>

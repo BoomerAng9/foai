@@ -31,7 +31,7 @@ export async function POST(req: NextRequest) {
           return NextResponse.json({
             error: 'Voice export requires an active subscription.',
             code: 'PAYMENT_REQUIRED',
-            upgrade_url: '/pricing',
+            upgrade_url: '/billing',
           }, { status: 402 });
         }
       } catch {

@@ -97,8 +97,8 @@ export async function POST(request: NextRequest) {
           price_id: priceId,
         },
       },
-      success_url: `${origin}/pricing?success=true&session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${origin}/pricing?canceled=true`,
+      success_url: `${origin}/billing?success=true&session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${origin}/billing?canceled=true`,
     });
 
     if (!session.url) {

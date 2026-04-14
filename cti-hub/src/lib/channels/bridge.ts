@@ -26,10 +26,19 @@ export interface ChannelMessage {
 export interface ChannelConfig {
   channel: Channel;
   enabled: boolean;
+  implemented?: boolean;
   webhook_url?: string;
   bot_token?: string;
   api_key?: string;
 }
+
+const IMPLEMENTED_CHANNELS: Record<Channel, boolean> = {
+  app: true,
+  discord: true,
+  telegram: true,
+  email: false,
+  whatsapp: false,
+};
 
 // Channel configs loaded from env
 export function getChannelConfigs(): Record<Channel, ChannelConfig> {
@@ -37,21 +46,25 @@ export function getChannelConfigs(): Record<Channel, ChannelConfig> {
     app: { channel: 'app', enabled: true },
     email: {
       channel: 'email',
-      enabled: !!process.env.GMAIL_OAUTH_TOKEN,
+      enabled: IMPLEMENTED_CHANNELS.email && !!process.env.GMAIL_OAUTH_TOKEN,
+      implemented: IMPLEMENTED_CHANNELS.email,
     },
     discord: {
       channel: 'discord',
       enabled: !!process.env.DISCORD_BOT_TOKEN,
+      implemented: IMPLEMENTED_CHANNELS.discord,
       bot_token: process.env.DISCORD_BOT_TOKEN,
     },
     telegram: {
       channel: 'telegram',
       enabled: !!process.env.TELEGRAM_BOT_TOKEN,
+      implemented: IMPLEMENTED_CHANNELS.telegram,
       bot_token: process.env.TELEGRAM_BOT_TOKEN,
     },
     whatsapp: {
       channel: 'whatsapp',
-      enabled: !!process.env.WHATSAPP_API_KEY,
+      enabled: IMPLEMENTED_CHANNELS.whatsapp && !!process.env.WHATSAPP_API_KEY,
+      implemented: IMPLEMENTED_CHANNELS.whatsapp,
       api_key: process.env.WHATSAPP_API_KEY,
     },
   };
@@ -62,6 +75,8 @@ export function getChannelConfigs(): Record<Channel, ChannelConfig> {
 export async function resolveUserId(channel: Channel, externalId: string): Promise<string | null> {
   // TODO: Query linked_accounts table in Neon
   // For now, return null (user must link their account in the app first)
+  void channel;
+  void externalId;
   return null;
 }
 
@@ -70,10 +85,11 @@ export async function sendToChannel(
   channel: Channel,
   externalId: string,
   message: string,
-  attachments?: Array<{ type: string; url: string }>,
+  _attachments?: Array<{ type: string; url: string }>,
 ): Promise<boolean> {
   const configs = getChannelConfigs();
   const config = configs[channel];
+  void _attachments;
 
   if (!config.enabled) return false;
 
@@ -114,13 +130,14 @@ async function sendTelegram(token: string, chatId: string, message: string): Pro
 }
 
 async function sendEmail(to: string, message: string): Promise<boolean> {
-  // TODO: Gmail API send via OAuth
-  console.log(`[Email] Would send to ${to}: ${message.slice(0, 100)}`);
-  return true;
+  console.warn(`[channels] Email adapter not implemented. Refusing stub send to ${to}.`);
+  void message;
+  return false;
 }
 
 async function sendWhatsApp(apiKey: string, phone: string, message: string): Promise<boolean> {
-  // TODO: WhatsApp Business API
-  console.log(`[WhatsApp] Would send to ${phone}: ${message.slice(0, 100)}`);
-  return true;
+  console.warn(`[channels] WhatsApp adapter not implemented. Refusing stub send to ${phone}.`);
+  void apiKey;
+  void message;
+  return false;
 }

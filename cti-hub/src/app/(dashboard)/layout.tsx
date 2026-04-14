@@ -8,10 +8,12 @@ import NavChrome from '@/components/nav/NavChrome';
 import {
   User,
   CreditCard,
+  ExternalLink,
   LogOut,
   ChevronDown,
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
+import { useWhiteLabel } from '@/hooks/useWhiteLabel';
 import { ThemeToggle } from '@/components/ThemeToggle';
 
 function CornerBracket({ position }: { position: 'tl' | 'tr' | 'bl' | 'br' }) {
@@ -37,6 +39,7 @@ function CornerBracket({ position }: { position: 'tl' | 'tr' | 'bl' | 'br' }) {
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const { user, profile, organization, signOut } = useAuth();
+  const { config } = useWhiteLabel();
   // Owner detection via server-side /api/me — owner emails never leak to client JS
   const [isOwnerUser, setIsOwnerUser] = useState(false);
   useEffect(() => {
@@ -99,13 +102,26 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           >
             <User className="w-3.5 h-3.5" /> CIRCUIT BOX
           </Link>
-          <Link
-            href="/pricing"
-            onClick={() => setUserMenuOpen(false)}
-            className="flex items-center gap-2 px-4 py-2.5 text-xs font-mono text-fg-secondary hover:bg-bg-elevated hover:text-fg"
-          >
-            <CreditCard className="w-3.5 h-3.5" /> BILLING
-          </Link>
+          {config.ownerHubUrl && isOwnerUser && (
+            <a
+              href={config.ownerHubUrl}
+              target="_blank"
+              rel="noreferrer"
+              onClick={() => setUserMenuOpen(false)}
+              className="flex items-center gap-2 px-4 py-2.5 text-xs font-mono text-fg-secondary hover:bg-bg-elevated hover:text-fg"
+            >
+              <ExternalLink className="w-3.5 h-3.5" /> CTI HUB
+            </a>
+          )}
+          {config.billingPath && (
+            <Link
+              href={config.billingPath}
+              onClick={() => setUserMenuOpen(false)}
+              className="flex items-center gap-2 px-4 py-2.5 text-xs font-mono text-fg-secondary hover:bg-bg-elevated hover:text-fg"
+            >
+              <CreditCard className="w-3.5 h-3.5" /> BILLING
+            </Link>
+          )}
           <div className="border-t border-border" />
           <button
             onClick={async e => {

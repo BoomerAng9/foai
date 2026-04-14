@@ -4,6 +4,7 @@ import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { authService } from '@/lib/auth-paywall';
 import { useAuth } from '@/hooks/useAuth';
+import { useWhiteLabel } from '@/hooks/useWhiteLabel';
 import { Shield } from 'lucide-react';
 
 export default function LoginPage() {
@@ -18,6 +19,7 @@ export default function LoginPage() {
 function LoginInner() {
   const searchParams = useSearchParams();
   const { user, denied, loading: authLoading } = useAuth();
+  const { config, host } = useWhiteLabel();
   const [signingIn, setSigningIn] = useState(false);
   const [error, setError] = useState('');
 
@@ -78,8 +80,13 @@ function LoginInner() {
     <div className="min-h-screen flex items-center justify-center bg-[#0a0a0f]">
       <div className="w-full max-w-sm">
         <div className="flex items-center justify-center gap-3 mb-10">
-          <div className="w-12 h-12 rounded-2xl bg-[#00A3FF] flex items-center justify-center text-white text-xl font-black shadow-lg shadow-[#00A3FF]/30">D</div>
-          <span className="text-2xl font-bold text-white tracking-tight">Deploy</span>
+          <div
+            className="w-12 h-12 rounded-2xl flex items-center justify-center text-white text-xl font-black shadow-lg"
+            style={{ background: config.primaryColor, boxShadow: `0 12px 24px ${config.primaryColor}4D` }}
+          >
+            {host === 'cti' ? 'C' : 'D'}
+          </div>
+          <span className="text-2xl font-bold text-white tracking-tight">{config.navLabel}</span>
         </div>
 
         {denied && (
@@ -120,17 +127,17 @@ function LoginInner() {
 
         <p className="text-center text-xs text-slate-500 mt-6">
           Have an invitation?{' '}
-          <a href="/auth/redeem" className="text-[#00A3FF] font-bold hover:underline">Redeem here</a>
+          <a href="/auth/redeem" className="font-bold hover:underline" style={{ color: config.primaryColor }}>Redeem here</a>
         </p>
         {(user || forceReauth) && (
           <p className="text-center text-xs text-slate-500 mt-3">
             Stuck on the wrong account?{' '}
-            <button onClick={handleForceSignOut} className="text-[#00A3FF] font-bold hover:underline">
+            <button onClick={handleForceSignOut} className="font-bold hover:underline" style={{ color: config.primaryColor }}>
               Sign out and start over
             </button>
           </p>
         )}
-        <p className="text-center text-[10px] text-slate-600 mt-3">The Deploy Platform &mdash; Authorized personnel only</p>
+        <p className="text-center text-[10px] text-slate-600 mt-3">{config.systemName} &mdash; Authorized personnel only</p>
       </div>
     </div>
   );

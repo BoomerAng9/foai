@@ -1,3 +1,9 @@
+[submodule "GRAMMAR"]
+	path = GRAMMAR
+	url = https://github.com/BoomerAng9/GRAMMAR.git
+[submodule "SmelterOS"]
+	path = SmelterOS
+	url = https://github.com/ACHVMR/SmelterOS.git
 [submodule "runtime/hermes/docs/ch-docs"]
 	path = runtime/hermes/docs/ch-docs
 	url = https://github.com/BoomerAng9/CH-Docs

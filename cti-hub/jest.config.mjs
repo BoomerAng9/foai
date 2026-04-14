@@ -24,6 +24,7 @@ const config = {
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/$1',
   },
+  modulePathIgnorePatterns: ['<rootDir>/.next/standalone/'],
   testPathIgnorePatterns: ['/node_modules/', '/.next/'],
   // Keep output quiet enough to read
   verbose: false,

@@ -1,47 +1,85 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import type { Sport } from '@/lib/franchise/types';
+import { DEFAULT_FEED_SPORTS, SPORT_FEED_CONFIG } from '@/lib/sports/news-feed';
 
 interface NewsItem {
   id: number;
+  summary?: string | null;
   headline: string;
   source_name: string;
   source_url: string;
-  sport: string;
+  sport: Sport;
   teams_mentioned: string[];
-  category: string;
+  category?: string | null;
+  published_at?: string | null;
+  scraped_at?: string | null;
 }
 
-const SPORT_BADGE: Record<string, { bg: string; label: string }> = {
-  nfl: { bg: '#013369', label: 'NFL' },
-  nba: { bg: '#1D428A', label: 'NBA' },
-  mlb: { bg: '#002D72', label: 'MLB' },
-};
+interface NewsSegment {
+  sport: Sport;
+  label: string;
+  badgeColor: string;
+  segmentMs: number;
+  updatedAt?: string | null;
+  items: NewsItem[];
+}
+
+function timeAgo(value?: string | null): string {
+  if (!value) return 'pending';
+  const diff = Date.now() - new Date(value).getTime();
+  const mins = Math.max(0, Math.floor(diff / 60000));
+  if (mins < 1) return 'just now';
+  if (mins < 60) return `${mins}m ago`;
+  const hours = Math.floor(mins / 60);
+  if (hours < 24) return `${hours}h ago`;
+  return `${Math.floor(hours / 24)}d ago`;
+}
 
 export function BreakingBar() {
-  const [news, setNews] = useState<NewsItem[]>([]);
+  const [segments, setSegments] = useState<NewsSegment[]>([]);
+  const [activeIndex, setActiveIndex] = useState(0);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     async function fetchAll() {
-      const items: NewsItem[] = [];
       try {
-        const res = await fetch('/api/nfl/news?limit=20');
+        const params = new URLSearchParams({
+          sports: DEFAULT_FEED_SPORTS.join(','),
+          perSport: '8',
+          limit: '24',
+        });
+        const res = await fetch(`/api/sports/news?${params.toString()}`);
         if (res.ok) {
           const d = await res.json();
-          items.push(...(d.news || []).map((n: Record<string, unknown>) => ({ ...n, sport: 'nfl' })));
+          const nextSegments = (d.segments || []).filter((segment: NewsSegment) => segment.items?.length > 0);
+          setSegments(nextSegments);
         }
       } catch { /* silent */ }
-      // Sort newest first
-      items.sort((a, b) => (b.id || 0) - (a.id || 0));
-      setNews(items);
     }
     fetchAll();
     const interval = setInterval(fetchAll, 90000);
     return () => clearInterval(interval);
   }, []);
 
-  // Scroll animation via CSS
+  useEffect(() => {
+    if (activeIndex < segments.length) return;
+    setActiveIndex(0);
+  }, [activeIndex, segments.length]);
+
+  useEffect(() => {
+    if (segments.length <= 1) return;
+    const current = segments[activeIndex] || segments[0];
+    const timeout = setTimeout(() => {
+      setActiveIndex((prev) => (prev + 1) % segments.length);
+    }, current?.segmentMs || 18000);
+    return () => clearTimeout(timeout);
+  }, [activeIndex, segments]);
+
+  const currentSegment = segments[activeIndex] || segments[0];
+  const news = currentSegment?.items || [];
+
   useEffect(() => {
     const el = scrollRef.current;
     if (!el || news.length === 0) return;
@@ -49,7 +87,7 @@ export function BreakingBar() {
     el.style.setProperty('--ticker-width', `${totalW}px`);
   }, [news]);
 
-  if (news.length === 0) return null;
+  if (!currentSegment || news.length === 0) return null;
 
   return (
     <div
@@ -60,37 +98,59 @@ export function BreakingBar() {
       }}
     >
       <div className="flex items-center h-9">
-        {/* LIVE badge */}
-        <div className="flex-shrink-0 px-3 h-full flex items-center gap-1.5" style={{ background: '#D4A853' }}>
-          <span className="w-2 h-2 rounded-full bg-red-600 animate-pulse" />
-          <span className="text-[9px] font-black tracking-[0.2em] text-black uppercase">LIVE</span>
+        <div className="flex-shrink-0 px-3 h-full flex items-center gap-2" style={{ background: '#0A0A0F' }}>
+          <div className="flex items-center gap-1.5 px-2 h-6 rounded-sm" style={{ background: '#D4A853' }}>
+            <span className="w-2 h-2 rounded-full bg-red-600 animate-pulse" />
+            <span className="text-[9px] font-black tracking-[0.2em] text-black uppercase">LIVE</span>
+          </div>
+          <span
+            className="text-[8px] font-black tracking-[0.18em] px-2 py-1 rounded-sm text-white"
+            style={{ background: currentSegment.badgeColor }}
+          >
+            {currentSegment.label}
+          </span>
+          <span className="text-[8px] text-white/35 uppercase tracking-[0.16em]">
+            {timeAgo(currentSegment.updatedAt)}
+          </span>
+          {segments.length > 1 && (
+            <div className="flex items-center gap-1">
+              {segments.map((segment, idx) => (
+                <span
+                  key={segment.sport}
+                  className="w-1.5 h-1.5 rounded-full"
+                  style={{
+                    background: idx === activeIndex ? segment.badgeColor : 'rgba(255,255,255,0.18)',
+                  }}
+                />
+              ))}
+            </div>
+          )}
         </div>
 
-        {/* Scrolling headlines */}
         <div className="flex-1 overflow-hidden">
           <div
             ref={scrollRef}
-            className="flex items-center gap-8 whitespace-nowrap animate-ticker"
-            style={{
-              animation: `ticker ${Math.max(40, news.length * 4)}s linear infinite`,
-            }}
-          >
-            {[...news, ...news].map((item, idx) => (
-              <a
+              className="flex items-center gap-8 whitespace-nowrap animate-ticker"
+              style={{
+                animation: `ticker ${Math.max(40, news.length * 4)}s linear infinite`,
+              }}
+            >
+              {[...news, ...news].map((item, idx) => (
+                <a
                 key={`${item.id}-${idx}`}
                 href={item.source_url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-2 hover:opacity-80 transition-opacity"
-              >
-                <span
-                  className="text-[8px] font-black tracking-wider px-1.5 py-0.5 rounded flex-shrink-0"
-                  style={{ background: SPORT_BADGE[item.sport]?.bg || '#333', color: '#fff' }}
+                  className="flex items-center gap-2 hover:opacity-80 transition-opacity"
                 >
-                  {SPORT_BADGE[item.sport]?.label || item.sport?.toUpperCase()}
-                </span>
-                {item.teams_mentioned?.length > 0 && (
-                  <span className="text-amber-400 font-bold text-[10px] flex-shrink-0">
+                  <span
+                    className="text-[8px] font-black tracking-wider px-1.5 py-0.5 rounded flex-shrink-0"
+                    style={{ background: SPORT_FEED_CONFIG[item.sport]?.badgeColor || '#333', color: '#fff' }}
+                  >
+                    {SPORT_FEED_CONFIG[item.sport]?.label || item.sport?.toUpperCase()}
+                  </span>
+                  {item.teams_mentioned?.length > 0 && (
+                    <span className="text-amber-400 font-bold text-[10px] flex-shrink-0">
                     {item.teams_mentioned.slice(0, 2).join(' ')}
                   </span>
                 )}
@@ -103,7 +163,6 @@ export function BreakingBar() {
           </div>
         </div>
       </div>
-
       <style jsx>{`
         @keyframes ticker {
           0% { transform: translateX(0); }

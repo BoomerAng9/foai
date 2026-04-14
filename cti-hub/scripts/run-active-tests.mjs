@@ -31,8 +31,8 @@ run('getOpenRouterModel falls back to the default model', () => {
   delete process.env.OPENROUTER_TEXT_MODEL;
   delete process.env.OPENROUTER_VOICE_MODEL;
 
-  assert.equal(getOpenRouterModel('text'), 'qwen/qwen3.6-plus:free');
-  assert.equal(getOpenRouterModel('voice'), 'qwen/qwen3.6-plus:free');
+  assert.equal(getOpenRouterModel('text'), 'google/gemini-3.1-flash');
+  assert.equal(getOpenRouterModel('voice'), 'google/gemini-3.1-flash');
 
   restoreEnvValue('OPENROUTER_TEXT_MODEL', originalTextModel);
   restoreEnvValue('OPENROUTER_VOICE_MODEL', originalVoiceModel);
