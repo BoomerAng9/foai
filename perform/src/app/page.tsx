@@ -8,6 +8,7 @@ import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { getGradeForScore } from '@/lib/tie/grades';
 import { scoreMoments, seasonTint, type ScoredMoment } from '@/lib/season/featured-moments';
+import { timeAgo, freshnessDot } from '@/lib/time/freshness';
 import { heroStagger, heroItem, staggerContainer, staggerItem } from '@/lib/motion';
 
 interface Prospect {
@@ -94,6 +95,17 @@ function formatDuration(sec?: number) {
   return `${m}:${s}`;
 }
 
+function FreshnessBadge({ iso, now, label }: { iso?: string | null; now: Date; label?: string }) {
+  if (!iso) return null;
+  const dot = freshnessDot(iso, now);
+  return (
+    <span className="inline-flex items-center gap-1.5 text-[10px] font-mono tracking-wider uppercase text-white/40">
+      <span className="w-1.5 h-1.5 rounded-full" style={{ background: dot }} />
+      {label ? `${label} · ` : ''}Updated {timeAgo(iso, now)}
+    </span>
+  );
+}
+
 /* ═════════════════════════════════════════════════════
  *  HOMEPAGE — season-aware, algorithmic featured hub
  * ═════════════════════════════════════════════════════ */
@@ -107,6 +119,7 @@ export default function HomePage() {
   const [prospects, setProspects] = useState<Prospect[]>([]);
   const [episodes, setEpisodes] = useState<Episode[]>([]);
   const [teamNeeds, setTeamNeeds] = useState<TeamNeed[]>([]);
+  const [freshness, setFreshness] = useState<{ players?: string; podcasts?: string; teamNeeds?: string; prospects?: string } | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -114,10 +127,12 @@ export default function HomePage() {
       fetch('/api/players?limit=10&sort=overall_rank:asc&sport=football').then(r => r.json()).catch(() => ({})),
       fetch('/api/podcast/episodes?limit=5').then(r => r.json()).catch(() => ({})),
       fetch('/api/draft/team-needs').then(r => r.ok ? r.json() : { teams: [] }).catch(() => ({ teams: [] })),
-    ]).then(([playersJson, epsJson, needsJson]) => {
+      fetch('/api/platform/freshness').then(r => r.ok ? r.json() : null).catch(() => null),
+    ]).then(([playersJson, epsJson, needsJson, freshJson]) => {
       setProspects(playersJson.players || []);
       setEpisodes(epsJson.episodes || []);
       setTeamNeeds(needsJson.teams || []);
+      setFreshness(freshJson);
       setLoading(false);
     });
   }, []);
@@ -179,7 +194,7 @@ export default function HomePage() {
 
         {/* ═══ TEAM NEEDS BOARD (when NFL Draft is featured) ═══ */}
         {hero?.sport === 'nfl' && hero.kind === 'draft' && teamNeeds.length > 0 && (
-          <TeamNeedsBoard teams={teamNeeds} />
+          <TeamNeedsBoard teams={teamNeeds} freshness={freshness?.teamNeeds} now={now} />
         )}
 
         {/* ═══ TOP 10 BIG BOARD ═══ */}
@@ -190,9 +205,12 @@ export default function HomePage() {
             className="flex items-end justify-between gap-4 mb-6"
           >
             <motion.div variants={staggerItem}>
-              <span className="text-[10px] font-mono tracking-[0.25em] uppercase text-white/30 block mb-1">
-                Per|Form Big Board · Top 10
-              </span>
+              <div className="flex items-center gap-3 mb-1">
+                <span className="text-[10px] font-mono tracking-[0.25em] uppercase text-white/30">
+                  Per|Form Big Board · Top 10
+                </span>
+                <FreshnessBadge iso={freshness?.prospects} now={now} />
+              </div>
               <h2 className="font-outfit text-2xl md:text-3xl font-extrabold tracking-tight" style={{ color: 'var(--pf-text)' }}>
                 30,000+ players. These 10 lead the 2026 class.
               </h2>
@@ -280,6 +298,7 @@ export default function HomePage() {
               <motion.div variants={staggerItem} className="flex items-center gap-3">
                 <Radio className="w-4 h-4" style={{ color: tint.accent }} />
                 <span className="text-[10px] font-mono tracking-[0.25em] uppercase text-white/30">Latest from the shows</span>
+                <FreshnessBadge iso={freshness?.podcasts} now={now} />
               </motion.div>
               <motion.div variants={staggerItem}>
                 <Link href="/podcast/shows" className="text-xs font-mono font-bold tracking-wider uppercase hover:underline" style={{ color: tint.accent }}>
@@ -399,16 +418,19 @@ function HeroMoment({ moment, now, tint }: { moment: ScoredMoment; now: Date; ti
 }
 
 /* ── Team Needs Board ───────────────────────────────── */
-function TeamNeedsBoard({ teams }: { teams: TeamNeed[] }) {
+function TeamNeedsBoard({ teams, freshness, now }: { teams: TeamNeed[]; freshness?: string | null; now: Date }) {
   const top12 = teams.slice(0, 12);
   return (
     <section className="max-w-7xl mx-auto px-4 md:px-8 pb-16">
       <motion.div variants={staggerContainer} initial="hidden" whileInView="visible" viewport={{ once: true, margin: '-60px' }}
         className="flex items-end justify-between gap-4 mb-6">
         <motion.div variants={staggerItem}>
-          <span className="text-[10px] font-mono tracking-[0.25em] uppercase text-white/30 block mb-1">
-            Draft Order · Top 12 picks
-          </span>
+          <div className="flex items-center gap-3 mb-1">
+            <span className="text-[10px] font-mono tracking-[0.25em] uppercase text-white/30">
+              Draft Order · Top 12 picks
+            </span>
+            <FreshnessBadge iso={freshness} now={now} />
+          </div>
           <h2 className="font-outfit text-2xl md:text-3xl font-extrabold tracking-tight" style={{ color: 'var(--pf-text)' }}>
             Who's taking whom?
           </h2>
