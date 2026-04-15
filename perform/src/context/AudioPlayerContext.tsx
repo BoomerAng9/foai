@@ -99,7 +99,10 @@ export function AudioPlayerProvider({ children }: { children: ReactNode }) {
       }
 
       if (!episode.audioUrl) return;
-      audio.src = episode.audioUrl;
+      const normalizedSrc = /^(https?:|\/)/i.test(episode.audioUrl)
+        ? episode.audioUrl
+        : `/${episode.audioUrl}`;
+      audio.src = normalizedSrc;
       audio.playbackRate = playbackRateRef.current;
       audio.play();
       setCurrentEpisode(episode);
