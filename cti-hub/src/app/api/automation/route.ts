@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth-guard';
+import { rateLimit } from '@/lib/rate-limit-simple';
 
 /**
  * POST /api/automation — Browser automation via Playwright.
@@ -27,6 +28,10 @@ export async function POST(req: NextRequest) {
   // Owner-only for now — browser automation is powerful
   if (auth.role !== 'owner') {
     return NextResponse.json({ error: 'Automation requires elevated access' }, { status: 403 });
+  }
+  // Tight rate limit even for owner — browser ops are LLM-driven and expensive.
+  if (!rateLimit(auth.userId, 5, 60000)) {
+    return NextResponse.json({ error: 'Too many requests', code: 'RATE_LIMITED' }, { status: 429 });
   }
 
   const body = await req.json();

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth-guard';
+import { rateLimit } from '@/lib/rate-limit-simple';
 
 const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY;
 const LUC_URL = process.env.LUC_URL || 'http://localhost:8081';
@@ -48,6 +49,9 @@ async function recordUsage(model: string, tokensIn: number, tokensOut: number) {
 export async function POST(request: NextRequest) {
   const auth = await requireAuth(request);
   if (!auth.ok) return auth.response;
+  if (!rateLimit(auth.userId, 10, 60000)) {
+    return NextResponse.json({ error: 'Too many requests', code: 'RATE_LIMITED' }, { status: 429 });
+  }
 
   try {
     if (!OPENROUTER_API_KEY) {

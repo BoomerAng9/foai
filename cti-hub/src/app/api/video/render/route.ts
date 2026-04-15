@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth-guard';
+import { rateLimit } from '@/lib/rate-limit-simple';
 import { getDownloadUrl } from '@/lib/video/kie-ai';
 
 /**
@@ -35,6 +36,13 @@ export async function POST(req: NextRequest) {
     const auth = await requireAuth(req);
     if (!auth.ok) return auth.response;
     const { userId } = auth;
+    // Video render is expensive — Kie/fal calls per scene. Tight cap.
+    if (!rateLimit(userId, 5, 60000)) {
+      return NextResponse.json(
+        { error: 'Too many requests', code: 'RATE_LIMITED' },
+        { status: 429 },
+      );
+    }
 
     const body = await req.json();
     const { scenes } = body;

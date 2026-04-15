@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth-guard';
+import { rateLimit } from '@/lib/rate-limit-simple';
 import { getPlug, updatePlug, deletePlug, installPlug } from '@/lib/plugs/engine';
 
 /**
@@ -47,6 +48,10 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ s
 export async function POST(req: NextRequest, { params }: { params: Promise<{ slug: string }> }) {
   const auth = await requireAuth(req);
   if (!auth.ok) return auth.response;
+  // Plug actions can hit OpenRouter (chat) — rate-limit at 20/min.
+  if (!rateLimit(auth.userId, 20, 60000)) {
+    return NextResponse.json({ error: 'Too many requests', code: 'RATE_LIMITED' }, { status: 429 });
+  }
 
   const { slug } = await params;
   const body = await req.json();
