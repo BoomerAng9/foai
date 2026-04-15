@@ -48,10 +48,11 @@ interface StaleRow {
 
 export async function POST(request: NextRequest) {
   // Auth: PIPELINE_AUTH_KEY bearer. No user session — ops endpoint.
-  const authHeader = request.headers.get('authorization') || '';
-  const token = authHeader.replace(/^Bearer\s+/i, '');
-  if (!PIPELINE_KEY || token !== PIPELINE_KEY) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  // Use timing-safe comparison to prevent token-probing attacks.
+  const { checkBearerKey } = await import('@/lib/security/timing-safe');
+  const authResult = checkBearerKey(request, PIPELINE_KEY);
+  if (!authResult.ok) {
+    return NextResponse.json(authResult.body, { status: authResult.status });
   }
 
   if (!sql) {
