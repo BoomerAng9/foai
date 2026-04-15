@@ -79,7 +79,7 @@ export function Header() {
 
       {/* Mobile dropdown */}
       {menuOpen && (
-        <div className="absolute top-14 left-0 right-0 py-4 px-6 flex flex-col gap-1 md:hidden" style={{ background: '#0A0A0F', borderBottom: '1px solid rgba(255,255,255,0.08)', zIndex: 999 }}>
+        <div className="absolute top-14 left-0 right-0 py-4 px-6 flex flex-col gap-1 md:hidden" style={{ background: 'var(--pf-bg)', borderBottom: '1px solid rgba(255,255,255,0.08)', zIndex: 999 }}>
           {PRIMARY_NAV_ITEMS.map(item => {
             const isActive = isActiveNavRoute(pathname, item.href, item.matchPrefixes);
 

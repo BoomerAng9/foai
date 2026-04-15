@@ -1,0 +1,542 @@
+[
+  {
+    "team": "Arizona Diamondbacks",
+    "abbreviation": "ARI",
+    "league": "National",
+    "division": "NL West",
+    "owner": { "name": "Ken Kendrick", "style": "Managing general partner, involved in baseball decisions, willing to invest when contending" },
+    "gm": { "name": "Mike Hazen", "tenure": "Since 2016", "philosophy": "Analytics-forward, player development pipeline, balances spending with sustainability" },
+    "manager": { "name": "Torey Lovullo", "style": "10th season at helm, steady hand, player-friendly; retained despite back-to-back losing years" },
+    "decision_chain": "Ken Kendrick (managing partner) -> Derrick Hall (President/CEO) -> Mike Hazen (GM) -> Torey Lovullo (manager)",
+    "window": "retooling",
+    "key_storylines": [
+      "Lovullo retained for 10th season despite missing playoffs in last two years",
+      "Kendrick and Hazen believe roster underperformed relative to talent",
+      "Payroll reduced after disappointing 2025 but core talent remains",
+      "2023 World Series appearance feels like distant memory",
+      "Organization not limiting expectations for 2026 despite recent struggles"
+    ]
+  },
+  {
+    "team": "Atlanta Braves",
+    "abbreviation": "ATL",
+    "league": "National",
+    "division": "NL East",
+    "owner": { "name": "Liberty Media", "style": "Corporate ownership, now recognized as one of MLB's best owners; committed to top-5 payroll" },
+    "gm": { "name": "Alex Anthopoulos", "tenure": "Since 2017 (President and GM of Baseball Ops)", "philosophy": "Relentless roster improvement, strong farm system pipeline, aggressive at trade deadline" },
+    "manager": { "name": "Walt Weiss", "style": "Former bench coach under Snitker for 8 years; younger, more analytical coaching staff; 3-year deal" },
+    "decision_chain": "Liberty Media (ownership) -> Alex Anthopoulos (President/GM) -> Walt Weiss (manager)",
+    "window": "contending",
+    "key_storylines": [
+      "Walt Weiss replaces Brian Snitker as manager after 8 years as bench coach",
+      "Weiss assembling younger, more analytically-minded coaching staff",
+      "Liberty Media committed to top-5 payroll in 2026",
+      "Anthopoulos continues relentless roster improvement",
+      "Deep roster intrigues new manager as Braves aim to return to dominance"
+    ]
+  },
+  {
+    "team": "Baltimore Orioles",
+    "abbreviation": "BAL",
+    "league": "American",
+    "division": "AL East",
+    "owner": { "name": "David Rubenstein", "style": "New ownership group (purchased 2024 for $1.73B), aggressive spender, 'open for business'" },
+    "gm": { "name": "Mike Elias", "tenure": "Since 2018 (Executive VP/GM)", "philosophy": "Analytics-driven rebuild architect, now transitioning to win-now with new ownership resources" },
+    "manager": { "name": "Craig Albernaz", "style": "Former Guardians associate manager; culture-builder, defensive-minded, first managerial role" },
+    "decision_chain": "David Rubenstein (owner) -> Mike Elias (EVP/GM) -> Craig Albernaz (manager)",
+    "window": "contending",
+    "key_storylines": [
+      "Craig Albernaz hired from Cleveland as new manager (October 2025)",
+      "Rubenstein's spending spree sets up AL East bloodbath",
+      "75-87 last-place finish in 2025 after back-to-back postseason runs",
+      "Strong internal belief 2026 will be immediate return to form",
+      "Rubenstein firmly supports Elias after two years as owner"
+    ]
+  },
+  {
+    "team": "Boston Red Sox",
+    "abbreviation": "BOS",
+    "league": "American",
+    "division": "AL East",
+    "owner": { "name": "John Henry (Fenway Sports Group)", "style": "Data-driven, willing to invest for contention, championship pedigree" },
+    "gm": { "name": "Craig Breslow", "tenure": "Since 2023 (Chief Baseball Officer)", "philosophy": "Analytics-informed, roster depth priority, pitching-first approach" },
+    "manager": { "name": "Alex Cora", "style": "Player's manager, bilingual clubhouse leader, championship experience (2018), fiery competitor" },
+    "decision_chain": "John Henry / FSG (ownership) -> Craig Breslow (Chief Baseball Officer) -> Alex Cora (manager)",
+    "window": "contending",
+    "key_storylines": [
+      "Significant rotation upgrades: acquired Sonny Gray, Johan Oviedo, signed Ranger Suarez",
+      "Ugly 2-7 start to 2026 season despite offseason improvements",
+      "Breslow failed to land power bat identified as critical need",
+      "Roman Anthony emerging as key young position player",
+      "Both Breslow and Cora facing pressure to deliver in 2026"
+    ]
+  },
+  {
+    "team": "Chicago Cubs",
+    "abbreviation": "CHC",
+    "league": "National",
+    "division": "NL Central",
+    "owner": { "name": "Tom Ricketts", "style": "Family ownership, shifting toward win-now rhetoric; 'We have to win more World Series'" },
+    "gm": { "name": "Jed Hoyer (President of Baseball Ops) / Carter Hawkins (GM)", "tenure": "Hoyer since 2020, Hawkins since 2021", "philosophy": "Strategic free agency spending, farm system investment, now embracing high expectations" },
+    "manager": { "name": "Craig Counsell", "style": "Elite game manager, analytical approach, $40M+ contract; former Brewers skipper brought championship culture" },
+    "decision_chain": "Tom Ricketts (Chairman) -> Jed Hoyer (President of Baseball Ops) -> Carter Hawkins (GM) -> Craig Counsell (manager)",
+    "window": "contending",
+    "key_storylines": [
+      "Ricketts changing tone: 'It's about winning' and championship expectations",
+      "Jed Hoyer extended, showing organizational alignment",
+      "High expectations with Alex Bregman signing and Dansby Swanson core",
+      "Roster looks dramatically different in 2027 with many free agents",
+      "Craig Counsell bringing championship mindset from Milwaukee"
+    ]
+  },
+  {
+    "team": "Chicago White Sox",
+    "abbreviation": "CWS",
+    "league": "American",
+    "division": "AL Central",
+    "owner": { "name": "Jerry Reinsdorf", "style": "Longtime owner (46th season), aging (90 years old), cost-conscious; sold 35% to Ishbia brothers" },
+    "gm": { "name": "Chris Getz", "tenure": "Since 2023 (3rd season)", "philosophy": "Rebuild-focused, player development pipeline, 'meaningful step forward' mantra" },
+    "manager": { "name": "Will Venable", "style": "Hired October 2024 from Rangers; culture-builder replacing fired Pedro Grifol; player development emphasis" },
+    "decision_chain": "Jerry Reinsdorf (owner, 90 years old) -> Chris Getz (GM) -> Will Venable (manager); Ishbia brothers own 35% minority stake",
+    "window": "rebuilding",
+    "key_storylines": [
+      "Emerging from 102-loss 2024 season and historic 121-loss 2023",
+      "Will Venable replacing fired Pedro Grifol, bringing culture change",
+      "Jerry Reinsdorf sold 35% to Justin and Mat Ishbia (Suns owner)",
+      "Young prospect pipeline beginning to arrive in majors",
+      "Chris Getz under pressure to show rebuild progress in year three"
+    ]
+  },
+  {
+    "team": "Cincinnati Reds",
+    "abbreviation": "CIN",
+    "league": "National",
+    "division": "NL Central",
+    "owner": { "name": "Phil Castellini", "style": "Took over from father Bob Castellini (August 2024), MLB-approved February 2026; budget-conscious" },
+    "gm": { "name": "Nick Krall", "tenure": "Since 2020 (President of Baseball Operations)", "philosophy": "Cost-controlled roster building, player development focus, limited payroll" },
+    "manager": { "name": "Terry Francona", "style": "Hall of Fame caliber manager, 2-time World Series champion, hired after David Bell fired and Barry Larkin declined" },
+    "decision_chain": "Phil Castellini (owner) -> Nick Krall (President of Baseball Ops) -> Terry Francona (manager)",
+    "window": "retooling",
+    "key_storylines": [
+      "Phil Castellini officially approved as successor to father Bob Castellini (February 2026)",
+      "Terry Francona hired as manager after David Bell fired and Barry Larkin refused the job",
+      "Francona brings championship pedigree and credibility to budget franchise",
+      "Nick Krall working with limited payroll despite young talent base",
+      "Ownership transition creates uncertainty about spending direction"
+    ]
+  },
+  {
+    "team": "Cleveland Guardians",
+    "abbreviation": "CLE",
+    "league": "American",
+    "division": "AL Central",
+    "owner": { "name": "Paul Dolan", "style": "Budget-conscious (29th of 30 in payroll), pragmatic, sometimes criticized for lack of spending" },
+    "gm": { "name": "Chris Antonetti (President of Baseball Ops) / Mike Chernoff (GM)", "tenure": "23+ years working together in Cleveland front office", "philosophy": "Analytics-driven, development pipeline, cost-controlled roster construction, punching above weight class" },
+    "manager": { "name": "Stephen Vogt", "style": "Back-to-back Manager of the Year; player-friendly, analytical, modern clubhouse leader" },
+    "decision_chain": "Paul Dolan (Chairman/CEO) / David Blitzer (Vice Chairman) -> Chris Antonetti (President) -> Mike Chernoff (GM) -> Stephen Vogt (manager)",
+    "window": "contending",
+    "key_storylines": [
+      "Stephen Vogt won Manager of the Year in both seasons with Cleveland",
+      "Jose Ramirez signed to 7-year $175M extension (January 2026)",
+      "Antonetti and Chernoff have worked together for 23+ years",
+      "Projected $94M payroll ranks 29th in MLB despite competitive results",
+      "David Blitzer added as Vice Chairman, potentially signaling future ownership changes"
+    ]
+  },
+  {
+    "team": "Colorado Rockies",
+    "abbreviation": "COL",
+    "league": "National",
+    "division": "NL West",
+    "owner": { "name": "Dick Monfort (Walker Monfort taking larger role)", "style": "Long-suffering ownership; Walker Monfort vowing to pivot away from insularity that plagued franchise" },
+    "gm": { "name": "Paul DePodesta (President of Baseball Ops) / Josh Byrnes (GM)", "tenure": "Both hired 2025-26 offseason", "philosophy": "Moneyball pioneer DePodesta bringing analytics revolution; wants to treat altitude as advantage not hindrance" },
+    "manager": { "name": "Warren Schaeffer", "style": "Promoted from interim to full-time; culture-first approach, hired by DePodesta" },
+    "decision_chain": "Dick Monfort / Walker Monfort (ownership) -> Paul DePodesta (President of Baseball Ops) -> Josh Byrnes (GM) -> Warren Schaeffer (manager)",
+    "window": "rebuilding",
+    "key_storylines": [
+      "Paul DePodesta (Moneyball fame) hired as President of Baseball Ops - total organizational overhaul",
+      "Josh Byrnes (longtime Dodgers exec) hired as GM alongside DePodesta",
+      "Three straight 100+ loss seasons including 119 losses in 2025",
+      "DePodesta wants to reframe Coors Field altitude as competitive advantage",
+      "Warren Schaeffer promoted from interim, emphasizing culture change"
+    ]
+  },
+  {
+    "team": "Detroit Tigers",
+    "abbreviation": "DET",
+    "league": "American",
+    "division": "AL Central",
+    "owner": { "name": "Christopher Ilitch", "style": "Ilitch family ownership, increasingly willing to spend, committed to winning" },
+    "gm": { "name": "Scott Harris", "tenure": "Since 2022 (President of Baseball Operations)", "philosophy": "Analytics-driven roster construction, aggressive free agency when window opens, player development" },
+    "manager": { "name": "A.J. Hinch", "style": "Championship experience (2017 Astros), strategic game manager, extended through rebuild and rise" },
+    "decision_chain": "Christopher Ilitch (owner/CEO) -> Scott Harris (President of Baseball Ops) -> A.J. Hinch (manager)",
+    "window": "contending",
+    "key_storylines": [
+      "A.J. Hinch extended as Tigers transition from rebuild to contention",
+      "Tarik Skubal long-term extension being pursued as franchise ace priority",
+      "Framber Valdez signed for $115M/3 years in aggressive offseason",
+      "Ilitch increasing payroll significantly, supporting Harris' win-now push",
+      "Tigers tied for final Wild Card in 2025, looking to take next step"
+    ]
+  },
+  {
+    "team": "Houston Astros",
+    "abbreviation": "HOU",
+    "league": "American",
+    "division": "AL West",
+    "owner": { "name": "Jim Crane", "style": "Demanding, results-oriented, evaluates leadership annually; didn't extend staff heading into final year" },
+    "gm": { "name": "Dana Brown", "tenure": "Since 2023 (4th season)", "philosophy": "Scouting background, transitioning from draft-and-develop to maintaining competitive roster" },
+    "manager": { "name": "Joe Espada", "style": "Former bench coach promoted; strategic, bilingual clubhouse leader; under make-or-break pressure" },
+    "decision_chain": "Jim Crane (owner) -> Dana Brown (GM) -> Joe Espada (manager); both Brown and Espada in final contract years",
+    "window": "contending",
+    "key_storylines": [
+      "Both Dana Brown and Joe Espada in final contract years with no extension discussions",
+      "Jim Crane creating 'make the playoffs or else' pressure",
+      "Missed playoffs for first time since 2016 in 2025 (87-75, lost tiebreaker to Tigers)",
+      "Had 7-game AL West lead July 6 before collapse",
+      "Limited offseason spending despite owner's resources"
+    ]
+  },
+  {
+    "team": "Kansas City Royals",
+    "abbreviation": "KC",
+    "league": "American",
+    "division": "AL Central",
+    "owner": { "name": "John Sherman", "style": "Engaged, believes in front office leadership, willing to spend strategically" },
+    "gm": { "name": "J.J. Picollo", "tenure": "Since 2022 (EVP/GM, extended through 2030)", "philosophy": "Combines traditional scouting with advanced sciences and technologies; innovative methods" },
+    "manager": { "name": "Matt Quatraro", "style": "Data-informed game management, player development culture; 2026 option exercised" },
+    "decision_chain": "John Sherman (Chairman/CEO) -> J.J. Picollo (EVP/GM) -> Matt Quatraro (manager)",
+    "window": "contending",
+    "key_storylines": [
+      "J.J. Picollo extended through 2030 with club option, recognized as top executive",
+      "Matt Quatraro's 2026 option exercised after strong results",
+      "Salvador Perez remains franchise cornerstone and cultural leader",
+      "Sherman praises Picollo's ability to combine scouting with analytics",
+      "Competing for AL Central crown against Tigers and Guardians"
+    ]
+  },
+  {
+    "team": "Los Angeles Angels",
+    "abbreviation": "LAA",
+    "league": "American",
+    "division": "AL West",
+    "owner": { "name": "Arte Moreno", "style": "Unpredictable, 'on his own planet' per critics; pulled team off market in 2023; no plans to sell" },
+    "gm": { "name": "Perry Minasian", "tenure": "Since 2020 (final guaranteed year of contract)", "philosophy": "Working with limited resources and erratic ownership; trying to build competitive roster" },
+    "manager": { "name": "Kurt Suzuki", "style": "First-time manager on 1-year deal; former catcher, player-friendly; 6th manager in 8 years" },
+    "decision_chain": "Arte Moreno (owner) -> Perry Minasian (GM) -> Kurt Suzuki (manager); both Minasian and Suzuki on short leashes",
+    "window": "rebuilding",
+    "key_storylines": [
+      "Kurt Suzuki hired as 6th manager in 8 years, on just a 1-year deal",
+      "Perry Minasian in final guaranteed year, make-or-break season",
+      "Moreno praised Minasian but said 'you have to start adding up wins'",
+      "Angels haven't finished above .500 in Minasian's five seasons",
+      "Organizational instability continues under Moreno's erratic ownership"
+    ]
+  },
+  {
+    "team": "Los Angeles Dodgers",
+    "abbreviation": "LAD",
+    "league": "National",
+    "division": "NL West",
+    "owner": { "name": "Mark Walter (Guggenheim Baseball Management)", "style": "Unlimited resources, championship-obsessed, also purchased Lakers; dominant sports empire builder" },
+    "gm": { "name": "Andrew Friedman", "tenure": "Since 2014 (President of Baseball Operations)", "philosophy": "Analytics pioneer, unlimited budget execution, depth-obsessed roster construction, three World Series titles" },
+    "manager": { "name": "Dave Roberts", "style": "Steady hand, 10+ years at helm, three championships, nine division titles; player-friendly" },
+    "decision_chain": "Mark Walter / Guggenheim (ownership) -> Andrew Friedman (President of Baseball Ops) -> Dave Roberts (manager)",
+    "window": "contending",
+    "key_storylines": [
+      "Three World Series titles (2020, 2024, 2025) under Friedman-Roberts partnership",
+      "Nine division titles in 10 years under Roberts",
+      "Mark Walter purchased Lakers for $10B, expanding sports empire",
+      "Andrew Friedman given additional roles with Lakers organization",
+      "Dodgers accused of 'ruining baseball' with unlimited spending and talent acquisition"
+    ]
+  },
+  {
+    "team": "Miami Marlins",
+    "abbreviation": "MIA",
+    "league": "National",
+    "division": "NL East",
+    "owner": { "name": "Bruce Sherman", "style": "9th season as owner; patient through rebuild, expects consistent competitiveness" },
+    "gm": { "name": "Peter Bendix", "tenure": "Since 2024 (President of Baseball Operations, replacing Kim Ng)", "philosophy": "Long-term development focus, culture-building, competitive every year" },
+    "manager": { "name": "Clayton McCullough", "style": "Former Dodgers coach; development and culture emphasis; entering second season after 79-win debut" },
+    "decision_chain": "Bruce Sherman (owner) -> Peter Bendix (President of Baseball Ops) -> Clayton McCullough (manager)",
+    "window": "retooling",
+    "key_storylines": [
+      "Clayton McCullough's 79-win debut season showed improvement over 100-loss predecessor",
+      "Peter Bendix replaced Kim Ng as president of baseball operations",
+      "Sherman emphasizes 'getting to the playoffs consistently' as success metric",
+      "Bendix focused on creating championship culture regardless of opponents",
+      "Young roster development under McCullough showing positive signs"
+    ]
+  },
+  {
+    "team": "Milwaukee Brewers",
+    "abbreviation": "MIL",
+    "league": "National",
+    "division": "NL Central",
+    "owner": { "name": "Mark Attanasio", "style": "Chairman and principal owner; budget-conscious but effective; losing $20M/year on TV broadcast upheaval" },
+    "gm": { "name": "Matt Arnold", "tenure": "Since 2019 (promoted to President of Baseball Ops ahead of 2026)", "philosophy": "Back-to-back MLB Executive of the Year; exceptional at finding value, player development pipeline" },
+    "manager": { "name": "Pat Murphy", "style": "Back-to-back NL Manager of the Year; first to win consecutive MOY since 2005; intense, detail-oriented" },
+    "decision_chain": "Mark Attanasio (Chairman) -> Matt Arnold (President of Baseball Ops) -> Pat Murphy (manager)",
+    "window": "contending",
+    "key_storylines": [
+      "Matt Arnold promoted to President of Baseball Ops, first Brewers exec to win Executive of Year twice",
+      "Pat Murphy first NL Manager to win back-to-back Manager of the Year since 2005",
+      "Brewers consistently outperform payroll expectations under Arnold-Murphy tandem",
+      "Attanasio reveals $20M loss from local broadcast upheaval",
+      "Perennial contender despite budget constraints compared to division rivals"
+    ]
+  },
+  {
+    "team": "Minnesota Twins",
+    "abbreviation": "MIN",
+    "league": "American",
+    "division": "AL Central",
+    "owner": { "name": "Tom Pohlad", "style": "Took control from brother Joe (December 2025); added minority investors to pay down $500M debt; CEO through 2026" },
+    "gm": { "name": "Jeremy Zoll (GM)", "tenure": "New GM for 2026 after Derek Falvey mutually parted ways", "philosophy": "Fresh leadership after Falvey's 9-season tenure; focus on accountability and winning culture" },
+    "manager": { "name": "Derek Shelton", "style": "Former Pirates manager; intense, communication-focused, accountability-driven; Pohlad's culture change hire" },
+    "decision_chain": "Tom Pohlad (owner/CEO) -> Jeremy Zoll (GM) -> Derek Shelton (manager)",
+    "window": "retooling",
+    "key_storylines": [
+      "Derek Falvey mutually parted ways weeks before 2026 season start after 9 years",
+      "Tom Pohlad took control from brother Joe, added minority investors (Craig Leipold among them)",
+      "Derek Shelton hired as culture change agent from Pittsburgh",
+      "Pohlad family dealing with $500M in organizational debt",
+      "Significant front office turnover creating transition year uncertainty"
+    ]
+  },
+  {
+    "team": "New York Mets",
+    "abbreviation": "NYM",
+    "league": "National",
+    "division": "NL East",
+    "owner": { "name": "Steve Cohen", "style": "Richest MLB owner, unlimited spending willingness, championship-obsessed, wants 2026 title for 40th anniversary of 1986 team" },
+    "gm": { "name": "David Stearns", "tenure": "Since 2023 (President of Baseball Operations)", "philosophy": "Analytics-driven, complete roster overhaul, unafraid to make dramatic changes" },
+    "manager": { "name": "Carlos Mendoza", "style": "Young manager entering 3rd year; survived historic late-season collapse in 2025; on short leash" },
+    "decision_chain": "Steve Cohen (owner) -> David Stearns (President of Baseball Ops) -> Carlos Mendoza (manager)",
+    "window": "contending",
+    "key_storylines": [
+      "Nearly entire coaching staff replaced around Mendoza after 2025 collapse",
+      "Four longest-tenured players (Alonso, Diaz, Nimmo, McNeil) traded/released by Christmas",
+      "Cohen wants championship for 40th anniversary of 1986 World Series",
+      "Mets went from 45-24 (best in baseball) to 83-79, missing playoffs in 2025",
+      "Mendoza on very short leash entering 2026 despite Stearns' public support"
+    ]
+  },
+  {
+    "team": "New York Yankees",
+    "abbreviation": "NYY",
+    "league": "American",
+    "division": "AL East",
+    "owner": { "name": "Hal Steinbrenner", "style": "Managing general partner; championship expectations but increasingly cost-conscious; wants payroll reduction" },
+    "gm": { "name": "Brian Cashman", "tenure": "Since 1998 (longest-tenured GM in MLB)", "philosophy": "Big-market spending, star acquisition, win-now mentality balanced with payroll concerns" },
+    "manager": { "name": "Aaron Boone", "style": "9th season; players' coach, steady demeanor, draws criticism for in-game management; extended through 2027" },
+    "decision_chain": "Hal Steinbrenner (managing partner) -> Brian Cashman (SVP/GM) -> Aaron Boone (manager)",
+    "window": "contending",
+    "key_storylines": [
+      "Steinbrenner 'frustrated and disappointed' but supports Cashman and Boone",
+      "Wants to reduce payroll from $319M spent in 2025",
+      "Key injuries to Carlos Rodon, Gerrit Cole, Anthony Volpe to start 2026",
+      "Boone entering 9th season amid constant October disappointment scrutiny",
+      "Run-it-back approach questioned by projections systems"
+    ]
+  },
+  {
+    "team": "Oakland Athletics",
+    "abbreviation": "OAK",
+    "league": "American",
+    "division": "AL West",
+    "owner": { "name": "John Fisher", "style": "Widely criticized as worst owner in MLB; sole owner since 2016; overseeing relocation from Oakland" },
+    "gm": { "name": "David Forst", "tenure": "Since 2015 (discussing new deal)", "philosophy": "Moneyball legacy, analytics-driven, working with lowest payrolls in baseball" },
+    "manager": { "name": "Mark Kotsay", "style": "Former player turned manager; steady hand through turbulent relocation era" },
+    "decision_chain": "John Fisher (owner) -> Billy Beane (advisory) -> David Forst (GM) -> Mark Kotsay (manager)",
+    "window": "rebuilding",
+    "key_storylines": [
+      "Playing at Sutter Health Park in West Sacramento through 2027, moving to Las Vegas in 2028",
+      "Left Oakland after 57-year tenure (final game September 2024)",
+      "Fisher's penny-pinching widely blamed for franchise's struggles",
+      "Young superstar Nick Kurtz leading emerging talent group",
+      "David Forst discussing new deal as payroll may increase for Sacramento/Vegas transition"
+    ]
+  },
+  {
+    "team": "Philadelphia Phillies",
+    "abbreviation": "PHI",
+    "league": "National",
+    "division": "NL East",
+    "owner": { "name": "John Middleton", "style": "Vocal, willing to spend aggressively ($317M projected 2026 payroll), championship-demanding" },
+    "gm": { "name": "Dave Dombrowski", "tenure": "Since 2020 (President of Baseball Operations)", "philosophy": "Win-now veteran executive, aggressive acquisitions, historically great GM reputation" },
+    "manager": { "name": "Rob Thomson", "style": "Players love him; 90+ wins in all 3 full seasons; extended through 2026 with coaching staff retained" },
+    "decision_chain": "John Middleton (principal owner) -> Dave Dombrowski (President of Baseball Ops) -> Rob Thomson (manager)",
+    "window": "contending",
+    "key_storylines": [
+      "5th consecutive season over luxury tax threshold, 2nd year clearing highest threshold ($304M)",
+      "Three straight playoff trips but back-to-back NLDS eliminations raise questions",
+      "Thomson's status debated despite 90-win consistency",
+      "Dombrowski recognized as historically great GM",
+      "Clubhouse turmoil reports add pressure despite regular-season success"
+    ]
+  },
+  {
+    "team": "Pittsburgh Pirates",
+    "abbreviation": "PIT",
+    "league": "National",
+    "division": "NL Central",
+    "owner": { "name": "Bob Nutting", "style": "Budget-conscious, 'never gonna be about absolute dollars'; building differently than big-market teams" },
+    "gm": { "name": "Ben Cherington", "tenure": "Since 2019 (expects to return despite 6 straight losing seasons)", "philosophy": "Draft-and-develop, player development pipeline focus, limited payroll operation" },
+    "manager": { "name": "Don Kelly", "style": "Culture-builder, clubhouse connector; extended after replacing fired Derek Shelton in May 2025" },
+    "decision_chain": "Bob Nutting (owner) -> Travis Williams (President) -> Ben Cherington (GM) -> Don Kelly (manager)",
+    "window": "rebuilding",
+    "key_storylines": [
+      "Don Kelly promoted after Derek Shelton fired, immediately impressed Nutting with culture change",
+      "Ben Cherington returning for 7th season despite no winning records",
+      "Nutting openly acknowledges Pirates cannot compete on spending",
+      "Offense upgraded through trades and O'Hearn free agent signing",
+      "Nutting's demands for 2026: tangible competitive progress"
+    ]
+  },
+  {
+    "team": "San Diego Padres",
+    "abbreviation": "SD",
+    "league": "National",
+    "division": "NL West",
+    "owner": { "name": "Seidler family (exploring sale)", "style": "Peter Seidler's family exploring sale of franchise while committed to winning in 2026" },
+    "gm": { "name": "A.J. Preller", "tenure": "Since 2014 (extended through 2028, but must find success or could be out)", "philosophy": "Aggressive, blockbuster trade maker, willing to take huge swings in free agency" },
+    "manager": { "name": "Craig Stammen", "style": "Former Padres reliever turned special assistant; first-time manager on 3-year deal; player-friendly" },
+    "decision_chain": "Seidler family (ownership, exploring sale) -> A.J. Preller (President of Baseball Ops) -> Craig Stammen (manager)",
+    "window": "contending",
+    "key_storylines": [
+      "Seidler family exploring sale of Padres after Peter Seidler's passing",
+      "Craig Stammen hired as surprise first-time manager from within organization",
+      "A.J. Preller extended through 2028 but 2026 is make-or-break under new ownership",
+      "Ownership transition creates uncertainty about long-term direction",
+      "Must find success in 2026 or Preller could be gone per The Athletic"
+    ]
+  },
+  {
+    "team": "San Francisco Giants",
+    "abbreviation": "SF",
+    "league": "National",
+    "division": "NL West",
+    "owner": { "name": "Greg Johnson (Chairman)", "style": "Ownership group investing aggressively to end mediocrity era" },
+    "gm": { "name": "Buster Posey (President of Baseball Ops) / Zack Minasian (GM)", "tenure": "Posey since fall 2024 (replacing fired Farhan Zaidi), Minasian since 2024", "philosophy": "Human-centric approach, dramatic departure from Zaidi's analytics-heavy era; aggressive roster upgrades" },
+    "manager": { "name": "Tony Vitello", "style": "First MLB manager hired straight from college (Tennessee); intense, demanding, everywhere-at-once energy" },
+    "decision_chain": "Ownership group -> Buster Posey (President of Baseball Ops) -> Zack Minasian (GM) -> Tony Vitello (manager)",
+    "window": "retooling",
+    "key_storylines": [
+      "Tony Vitello first college coach to jump directly to MLB manager (from Tennessee)",
+      "Buster Posey aggressively reshaping roster: signed Willy Adames, traded for Rafael Devers",
+      "Dramatic culture shift from Farhan Zaidi's analytics-heavy era to human-centric approach",
+      "2026 viewed as make-or-break year for Posey's vision",
+      "Embarrassing Opening Day sweep by Yankees started season poorly"
+    ]
+  },
+  {
+    "team": "Seattle Mariners",
+    "abbreviation": "SEA",
+    "league": "American",
+    "division": "AL West",
+    "owner": { "name": "John Stanton (Chairman)", "style": "Ownership group led by Stanton, steady investment in franchise" },
+    "gm": { "name": "Jerry Dipoto (President of Baseball Ops) / Justin Hollander (EVP/GM)", "tenure": "Dipoto since 2015, Hollander promoted to GM role", "philosophy": "Analytics-driven, pitching-first roster construction, strategic roster balance" },
+    "manager": { "name": "Dan Wilson", "style": "Former Mariners catcher, promoted after Scott Servais firing in 2024; clubhouse connector" },
+    "decision_chain": "John Stanton (Chairman) -> Jerry Dipoto (President of Baseball Ops) -> Justin Hollander (EVP/GM) -> Dan Wilson (manager)",
+    "window": "contending",
+    "key_storylines": [
+      "Dan Wilson in second full season after replacing Scott Servais",
+      "Justin Hollander promoted to EVP/GM role, talking about striking lineup balance",
+      "Jerry Dipoto continues to oversee baseball operations at presidential level",
+      "Mariners traditionally elite pitching seeking offensive complement",
+      "Competing in tough AL West against Astros and emerging Athletics"
+    ]
+  },
+  {
+    "team": "St. Louis Cardinals",
+    "abbreviation": "STL",
+    "league": "National",
+    "division": "NL Central",
+    "owner": { "name": "Bill DeWitt Jr.", "style": "Longtime owner, values organizational tradition, supported full rebuild pivot" },
+    "gm": { "name": "Chaim Bloom", "tenure": "Since October 2025 (President of Baseball Ops, replacing John Mozeliak)", "philosophy": "Bold rebuild architect; traded away veterans (Gray, Contreras, Arenado) for pitching prospects from Boston" },
+    "manager": { "name": "Oliver Marmol", "style": "Extended through 2028 with club option for 2029; Bloom's strong endorsement; invested in young core development" },
+    "decision_chain": "Bill DeWitt Jr. (Chairman) -> Chaim Bloom (President of Baseball Ops) -> Oliver Marmol (manager)",
+    "window": "rebuilding",
+    "key_storylines": [
+      "Chaim Bloom replaced John Mozeliak as President of Baseball Ops (October 2025)",
+      "Full-scale rebuild: traded Sonny Gray, Willson Contreras, Nolan Arenado for pitching prospects",
+      "Oliver Marmol extended through 2028, showing organizational commitment to manager",
+      "Third straight year missing playoffs triggered rebuild decision",
+      "Bloom building player development program from ground up"
+    ]
+  },
+  {
+    "team": "Tampa Bay Rays",
+    "abbreviation": "TB",
+    "league": "American",
+    "division": "AL East",
+    "owner": { "name": "Patrick Zalupski", "style": "New owner (purchased September 2025 for $1.7B), committed to Tampa Bay area, pledged not to interfere with baseball ops" },
+    "gm": { "name": "Erik Neander", "tenure": "Since 2016 (President of Baseball Ops, signed through 2028)", "philosophy": "Analytics pioneer, consistently competitive with lowest payrolls, innovative roster construction" },
+    "manager": { "name": "Kevin Cash", "style": "Innovative game management, analytics-driven decisions, extended through 2030; longest-tenured AL manager" },
+    "decision_chain": "Patrick Zalupski (owner) -> Erik Neander (President of Baseball Ops) -> Kevin Cash (manager); new ownership pledged non-interference",
+    "window": "contending",
+    "key_storylines": [
+      "New ownership under Patrick Zalupski completed (September 2025, $1.7B)",
+      "Zalupski pledged non-interference in baseball operations",
+      "Returning to Tropicana Field in 2026, new stadium targeted for 2029 Opening Day",
+      "Erik Neander (through 2028) and Kevin Cash (through 2030) provide extraordinary stability",
+      "Perennial contender in AL East despite budget constraints"
+    ]
+  },
+  {
+    "team": "Texas Rangers",
+    "abbreviation": "TEX",
+    "league": "American",
+    "division": "AL West",
+    "owner": { "name": "Ray Davis", "style": "Majority owner since 2010; cost-conscious despite franchise value; penny-pinching criticized by fans" },
+    "gm": { "name": "Chris Young", "tenure": "Since 2020 (President of Baseball Operations/GM)", "philosophy": "Former pitcher turned executive; balanced approach to roster building" },
+    "manager": { "name": "Skip Schumaker", "style": "2023 NL Manager of the Year (Marlins); 4-year deal; promoted from senior adviser role within Rangers" },
+    "decision_chain": "Ray Davis (owner) -> Chris Young (President of Baseball Ops) -> Skip Schumaker (manager)",
+    "window": "retooling",
+    "key_storylines": [
+      "Skip Schumaker hired on 4-year deal after Bruce Bochy departed following 81-81 season",
+      "Schumaker was internal hire, having joined Rangers as senior adviser",
+      "2023 World Series champion Rangers fell to .500 by 2025",
+      "Chris Young acknowledged focusing on internal candidate for manager search",
+      "Ray Davis' limited spending frustrates fans despite franchise's championship window"
+    ]
+  },
+  {
+    "team": "Toronto Blue Jays",
+    "abbreviation": "TOR",
+    "league": "American",
+    "division": "AL East",
+    "owner": { "name": "Rogers Communications", "style": "Corporate ownership through Rogers; committed to winning, invested in roster and leadership extensions" },
+    "gm": { "name": "Mark Shapiro (President/CEO) / Ross Atkins (EVP/GM)", "tenure": "Shapiro since 2015 (extended through 2030), Atkins since 2015 (extended through 2031)", "philosophy": "Stability-focused leadership, long-term roster building, analytics-informed decisions" },
+    "manager": { "name": "John Schneider", "style": "4th full season; runner-up for AL MOY; led Jays to World Series in 2025; 3-year extension through 2028" },
+    "decision_chain": "Rogers Communications -> Edward Rogers (Chairman) -> Mark Shapiro (President/CEO) -> Ross Atkins (EVP/GM) -> John Schneider (manager)",
+    "window": "contending",
+    "key_storylines": [
+      "Coming off AL pennant and World Series appearance in 2025 (lost to Dodgers in 7 games)",
+      "All three leaders (Shapiro, Atkins, Schneider) received long-term extensions",
+      "Shapiro emphasizes 'leadership stability' and culture of consistency",
+      "Schneider has 303-257 record since taking over in July 2022",
+      "Legitimate championship contender in loaded AL East"
+    ]
+  },
+  {
+    "team": "Washington Nationals",
+    "abbreviation": "WSH",
+    "league": "National",
+    "division": "NL East",
+    "owner": { "name": "Mark Lerner", "style": "Family ownership, decided not to sell after exploring sale; investing in youth movement" },
+    "gm": { "name": "Paul Toboni (President of Baseball Ops) / Anirudh Kilambi (GM)", "tenure": "Both hired 2025 after Mike Rizzo fired in July 2025", "philosophy": "Youth revolution: POBO, GM, and manager all born in the 1990s; tech-forward, new approach" },
+    "manager": { "name": "Blake Butera", "style": "At 33, youngest MLB manager since 1972; first-time manager; tech-embracing modernizer" },
+    "decision_chain": "Mark Lerner (owner) -> Paul Toboni (President of Baseball Ops, age 35) -> Anirudh Kilambi (GM) -> Blake Butera (manager, age 33)",
+    "window": "rebuilding",
+    "key_storylines": [
+      "Youngest front office in MLB: POBO (35), GM, and manager (33) all born in 1990s",
+      "Mike Rizzo fired in July 2025 after holding dual roles since 2013",
+      "Blake Butera youngest MLB manager since Frank Quilici in 1972",
+      "Lerner family embracing radical youth movement after declining to sell team",
+      "Nationals embrace new tech and shed 'dark ages' reputation under new leadership"
+    ]
+  }
+]

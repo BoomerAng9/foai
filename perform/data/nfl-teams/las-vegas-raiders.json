@@ -1,0 +1,46 @@
+{
+  "team": "Las Vegas Raiders",
+  "abbreviation": "LV",
+  "conference": "AFC",
+  "division": "AFC West",
+  "ownership": {
+    "name": "Mark Davis (minority owner: Tom Brady)",
+    "style": "Hands-on but delegating to new front office; willing to spend on marquee moves",
+    "tendencies": "Historically unstable coaching carousel; new regime signals desire for long-term stability; Brady's minority stake adds strategic football influence"
+  },
+  "gm": {
+    "name": "John Spytek",
+    "tenure": "2nd year (hired 2025)",
+    "philosophy": "BPA-leaning with emphasis on building through the draft; willing to make bold trades",
+    "analytics_approach": "Hybrid — modern analytics integrated with traditional scouting"
+  },
+  "head_coach": {
+    "name": "Klint Kubiak",
+    "tenure": "1st year (hired January 2026)",
+    "scheme_offense": "Outside zone-heavy scheme (Kubiak/Shanahan tree), play-action passing, bootlegs",
+    "scheme_defense": "3-4 base defense (transitioning from 4-3)",
+    "key_position_values": ["QB", "OT", "WR", "DT", "EDGE"]
+  },
+  "decision_makers": {
+    "primary": "John Spytek (GM) with Klint Kubiak (HC) input",
+    "committee": ["Mark Davis (owner)", "Tom Brady (minority owner)", "John Spytek (GM)", "Klint Kubiak (HC)"]
+  },
+  "roster_2026": {
+    "qb_situation": "Drafting Fernando Mendoza at #1 overall; signed veteran Kirk Cousins as bridge/mentor; Kubiak prefers rookie to learn behind veteran",
+    "key_departures": ["Daniel Carlson (K)", "Maxx Crosby (trade fell through with Ravens, still disgruntled)"],
+    "key_signings": ["Kirk Cousins (QB)", "Tyler Linderbaum (C, record $81M/3yr deal)", "Matt Gay (K)"],
+    "cap_space": "Moderate — spent significantly in free agency but still have room",
+    "expiring_contracts": ["unverified"]
+  },
+  "draft_capital_2026": {
+    "picks": ["Round 1 Pick 1", "Round 2 Pick 32", "Round 3 Pick 64", "Round 4 Pick 102", "Round 5 Pick 141", "Round 6 Pick 181", "Round 6 Pick 195", "Round 7 Pick 220", "Round 7 Pick 236", "Round 7 Pick 244"],
+    "traded_away": [],
+    "acquired_extra": [],
+    "compensatory": ["unverified — multiple late-round comp picks expected"]
+  },
+  "needs": [
+    {"position": "DT", "priority": 1, "reason": "Shifting to 3-4 defense requires reloading the DT room; unquestionably the weakest position on the roster"},
+    {"position": "WR", "priority": 2, "reason": "Outside of Brock Bowers (TE) and Ashton Jeanty (RB), receiving corps is thin; Tre Tucker and Jalen Nailor are current top options"},
+    {"position": "RT", "priority": 3, "reason": "Upgrading right tackle would make O-line near-complete, critical for protecting Mendoza and opening lanes for Jeanty"}
+  ]
+}

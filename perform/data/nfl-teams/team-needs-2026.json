@@ -1,0 +1,378 @@
+{
+  "generatedAt": "2026-04-15",
+  "source": "Sqwaadrun Lil_Intel_Hawk (NFL.com, FantasyPros, ESPN, CBS)",
+  "teams": [
+    {
+      "team": "Las Vegas Raiders",
+      "pick": 1,
+      "record": "3-14",
+      "needs": ["QB", "WR", "OL", "DL", "CB"],
+      "keyLosses": "Full regime change (new HC Klint Kubiak, 2nd-year GM John Spytek)",
+      "consensusPick": { "player": "Fernando Mendoza", "position": "QB", "school": "Indiana", "confidence": 100 },
+      "otherPicks": []
+    },
+    {
+      "team": "New York Jets",
+      "pick": 2,
+      "record": "3-14",
+      "needs": ["QB", "EDGE", "WR", "CB", "OL"],
+      "keyLosses": "Entire secondary gutted; only 4 takeaways all season (worst since 1940)",
+      "consensusPick": { "player": "Arvell Reese", "position": "EDGE/LB", "school": "Ohio State", "confidence": 60 },
+      "otherPicks": [
+        { "player": "David Bailey", "position": "EDGE", "school": "Texas Tech", "confidence": 40 }
+      ]
+    },
+    {
+      "team": "Arizona Cardinals",
+      "pick": 3,
+      "record": "3-14",
+      "needs": ["QB", "OL", "EDGE", "DL", "LB"],
+      "keyLosses": "Parted ways with Kyler Murray after 7 years",
+      "consensusPick": { "player": "David Bailey", "position": "EDGE", "school": "Texas Tech", "confidence": 33 },
+      "otherPicks": [
+        { "player": "Sonny Styles", "position": "LB", "school": "Ohio State", "confidence": 33 },
+        { "player": "Francis Mauigoa", "position": "OT", "school": "Miami", "confidence": 33 }
+      ]
+    },
+    {
+      "team": "Tennessee Titans",
+      "pick": 4,
+      "record": "3-14",
+      "needs": ["OL", "EDGE", "WR", "RB", "LB"],
+      "keyLosses": "Offensive line decimated; league-low 20 sacks",
+      "consensusPick": { "player": "Jeremiyah Love", "position": "RB", "school": "Notre Dame", "confidence": 80 },
+      "otherPicks": []
+    },
+    {
+      "team": "New York Giants",
+      "pick": 5,
+      "record": "4-13",
+      "needs": ["DL", "CB", "OL", "LB", "WR"],
+      "keyLosses": "Dexter Lawrence reportedly requested trade; gaps everywhere on defense",
+      "consensusPick": { "player": "Sonny Styles", "position": "LB", "school": "Ohio State", "confidence": 20 },
+      "otherPicks": [
+        { "player": "Carnell Tate", "position": "WR", "school": "Ohio State", "confidence": 20 },
+        { "player": "Caleb Downs", "position": "S", "school": "Ohio State", "confidence": 20 }
+      ]
+    },
+    {
+      "team": "Cleveland Browns",
+      "pick": 6,
+      "record": "5-12",
+      "needs": ["QB", "OL", "WR", "CB", "EDGE"],
+      "keyLosses": "QB carousel (Watson/Sanders/Gabriel all in-house); LT still a void",
+      "consensusPick": { "player": "Carnell Tate", "position": "WR", "school": "Ohio State", "confidence": 60 },
+      "otherPicks": []
+    },
+    {
+      "team": "Washington Commanders",
+      "pick": 7,
+      "record": "5-12",
+      "needs": ["WR", "CB", "EDGE", "OL", "RB"],
+      "keyLosses": "Need #2 WR opposite Terry McLaurin; signed Oweh + Chaisson at edge",
+      "consensusPick": { "player": "Caleb Downs", "position": "S", "school": "Ohio State", "confidence": 33 },
+      "otherPicks": [
+        { "player": "Mansoor Delane", "position": "CB", "school": "LSU", "confidence": 33 },
+        { "player": "Jordyn Tyson", "position": "WR", "school": "Arizona State", "confidence": 33 }
+      ]
+    },
+    {
+      "team": "New Orleans Saints",
+      "pick": 8,
+      "record": "6-11",
+      "needs": ["WR", "EDGE", "CB", "DL", "OL"],
+      "keyLosses": "Alontae Taylor (nickelback) in FA; Cam Jordan may not return; thin WR corps behind Olave",
+      "consensusPick": { "player": "Jordyn Tyson", "position": "WR", "school": "Arizona State", "confidence": 33 },
+      "otherPicks": [
+        { "player": "Makai Lemon", "position": "WR", "school": "USC", "confidence": 33 },
+        { "player": "Rueben Bain Jr.", "position": "EDGE", "school": "Miami", "confidence": 33 }
+      ]
+    },
+    {
+      "team": "Kansas City Chiefs",
+      "pick": 9,
+      "record": "6-11",
+      "needs": ["CB", "WR", "EDGE", "DL", "LB"],
+      "keyLosses": "THREE secondary starters departed; Mahomes rehabbing ACL tear",
+      "consensusPick": { "player": "Spencer Fano", "position": "OT", "school": "Utah", "confidence": 50 },
+      "otherPicks": [
+        { "player": "Francis Mauigoa", "position": "OT", "school": "Miami", "confidence": 25 },
+        { "player": "Mansoor Delane", "position": "CB", "school": "LSU", "confidence": 25 }
+      ]
+    },
+    {
+      "team": "Cincinnati Bengals",
+      "pick": 10,
+      "record": "6-11",
+      "needs": ["DL", "LB", "OL", "DB", "EDGE"],
+      "keyLosses": "2nd-worst total defense (382 ypg), 3rd-worst scoring defense (28.9 ppg)",
+      "consensusPick": { "player": "Mansoor Delane", "position": "CB", "school": "LSU", "confidence": 50 },
+      "otherPicks": [
+        { "player": "Rueben Bain Jr.", "position": "EDGE", "school": "Miami", "confidence": 25 },
+        { "player": "Peter Woods", "position": "DT", "school": "Clemson", "confidence": 25 }
+      ]
+    },
+    {
+      "team": "Miami Dolphins",
+      "pick": 11,
+      "record": "7-10",
+      "needs": ["WR", "CB", "EDGE", "OL", "S"],
+      "keyLosses": "Released Tyreek Hill; traded Jaylen Waddle to Broncos; released Bradley Chubb; lost Minkah Fitzpatrick",
+      "consensusPick": { "player": "Olaivavega Ioane", "position": "G", "school": "Penn State", "confidence": 25 },
+      "otherPicks": [
+        { "player": "Francis Mauigoa", "position": "OT", "school": "Miami", "confidence": 25 },
+        { "player": "Jermod McCoy", "position": "CB", "school": "Tennessee", "confidence": 25 }
+      ]
+    },
+    {
+      "team": "Dallas Cowboys",
+      "pick": 12,
+      "record": "7-9-1",
+      "needs": ["EDGE", "LB", "CB", "DL", "OL"],
+      "keyLosses": "Allowed most points/game (30.1) and passing yards/game (251.5) in NFL",
+      "consensusPick": { "player": "Rueben Bain Jr.", "position": "EDGE", "school": "Miami", "confidence": 33 },
+      "otherPicks": [
+        { "player": "Akheem Mesidor", "position": "DT", "school": "Miami", "confidence": 33 },
+        { "player": "Jermod McCoy", "position": "CB", "school": "Tennessee", "confidence": 33 }
+      ]
+    },
+    {
+      "team": "Los Angeles Rams",
+      "pick": 13,
+      "record": "8-9",
+      "needs": ["WR", "OL", "EDGE", "LB", "DB"],
+      "keyLosses": "Rob Havenstein retired (RT); Davante Adams entering final year",
+      "consensusPick": { "player": "Makai Lemon", "position": "WR", "school": "USC", "confidence": 100 },
+      "otherPicks": [],
+      "note": "Pick acquired from Atlanta Falcons"
+    },
+    {
+      "team": "Baltimore Ravens",
+      "pick": 14,
+      "record": "8-9",
+      "needs": ["OL", "EDGE", "WR", "DL", "CB"],
+      "keyLosses": "Tyler Linderbaum (3x Pro Bowl C) left in FA; Nnamdi Madubuike status unclear (neck)",
+      "consensusPick": { "player": "Akheem Mesidor", "position": "DT", "school": "Miami", "confidence": 33 },
+      "otherPicks": [
+        { "player": "Francis Mauigoa", "position": "OT", "school": "Miami", "confidence": 33 },
+        { "player": "Kenyon Sadiq", "position": "TE", "school": "Oregon", "confidence": 33 }
+      ]
+    },
+    {
+      "team": "Tampa Bay Buccaneers",
+      "pick": 15,
+      "record": "8-9",
+      "needs": ["EDGE", "DL", "CB", "LB", "OL"],
+      "keyLosses": "Jamel Dean departed secondary; injuries ripped through OL last season",
+      "consensusPick": { "player": "Kenyon Sadiq", "position": "TE", "school": "Oregon", "confidence": 40 },
+      "otherPicks": [
+        { "player": "Jermod McCoy", "position": "CB", "school": "Tennessee", "confidence": 20 },
+        { "player": "C.J. Allen", "position": "LB", "school": "Georgia", "confidence": 20 }
+      ]
+    },
+    {
+      "team": "New York Jets",
+      "pick": 16,
+      "record": "3-14",
+      "needs": ["QB", "EDGE", "WR", "CB", "OL"],
+      "keyLosses": "Same as pick #2",
+      "consensusPick": { "player": "Avieon Terrell", "position": "CB", "school": "Clemson", "confidence": 50 },
+      "otherPicks": [
+        { "player": "Denzel Boston", "position": "WR", "school": "Washington", "confidence": 50 }
+      ],
+      "note": "Pick acquired from Indianapolis Colts"
+    },
+    {
+      "team": "Detroit Lions",
+      "pick": 17,
+      "record": "9-8",
+      "needs": ["OL", "EDGE", "LB", "S", "DL"],
+      "keyLosses": "Taylor Decker departed (longtime starting LT)",
+      "consensusPick": { "player": "Kadyn Proctor", "position": "OT", "school": "Alabama", "confidence": 75 },
+      "otherPicks": []
+    },
+    {
+      "team": "Minnesota Vikings",
+      "pick": 18,
+      "record": "9-8",
+      "needs": ["DL", "OL", "S", "WR", "CB"],
+      "keyLosses": "Released Jonathan Allen + Javon Hargrave (both DL starters); Harrison Smith possibly retiring; Ryan Kelly retired (C)",
+      "consensusPick": { "player": "Dillon Thieneman", "position": "S", "school": "Oregon", "confidence": 80 },
+      "otherPicks": []
+    },
+    {
+      "team": "Carolina Panthers",
+      "pick": 19,
+      "record": "8-9",
+      "needs": ["OL", "S", "WR", "DL", "CB"],
+      "keyLosses": "Ikem Ekwonu (patellar tendon injury); ranked 27th in ppg (18.3)",
+      "consensusPick": { "player": "Kayden McDonald", "position": "DT", "school": "Ohio State", "confidence": 66 },
+      "otherPicks": [
+        { "player": "Monroe Freeling", "position": "OT", "school": "Georgia", "confidence": 33 }
+      ]
+    },
+    {
+      "team": "Dallas Cowboys",
+      "pick": 20,
+      "record": "7-9-1",
+      "needs": ["EDGE", "LB", "CB", "DL", "OL"],
+      "keyLosses": "Same as pick #12",
+      "consensusPick": { "player": "Colton Hood", "position": "CB", "school": "Tennessee", "confidence": 50 },
+      "otherPicks": [
+        { "player": "Keldric Faulk", "position": "DE", "school": "Auburn", "confidence": 25 },
+        { "player": "C.J. Allen", "position": "LB", "school": "Georgia", "confidence": 25 }
+      ],
+      "note": "Pick acquired from Green Bay Packers (Micah Parsons trade)"
+    },
+    {
+      "team": "Pittsburgh Steelers",
+      "pick": 21,
+      "record": "10-7",
+      "needs": ["QB", "OL", "WR", "TE", "LB"],
+      "keyLosses": "Isaac Seumalo (LG) departed in FA; awaiting Aaron Rodgers retirement decision",
+      "consensusPick": { "player": "KC Concepcion", "position": "WR", "school": "Texas A&M", "confidence": 33 },
+      "otherPicks": [
+        { "player": "Omar Cooper Jr.", "position": "WR", "school": "Indiana", "confidence": 33 },
+        { "player": "Caleb Lomu", "position": "OT", "school": "Utah", "confidence": 33 }
+      ]
+    },
+    {
+      "team": "Los Angeles Chargers",
+      "pick": 22,
+      "record": "11-6",
+      "needs": ["OL", "EDGE", "DL", "DB", "WR"],
+      "keyLosses": "OL overwhelmed in playoff defeats; top 3 edge rushers (Tuipulotu/Mack/Dupree) all expiring after 2026",
+      "consensusPick": { "player": "Peter Woods", "position": "DT", "school": "Clemson", "confidence": 40 },
+      "otherPicks": [
+        { "player": "T.J. Parker", "position": "EDGE", "school": "Clemson", "confidence": 20 },
+        { "player": "Caleb Banks", "position": "DT", "school": "Florida", "confidence": 20 }
+      ]
+    },
+    {
+      "team": "Philadelphia Eagles",
+      "pick": 23,
+      "record": "11-6",
+      "needs": ["EDGE", "OL", "S", "WR", "TE"],
+      "keyLosses": "Reed Blankenship (S) walked in FA; Lane Johnson entering age-36 season; possible AJ Brown trade",
+      "consensusPick": { "player": "Blake Miller", "position": "OT", "school": "Clemson", "confidence": 50 },
+      "otherPicks": [
+        { "player": "Emmanuel McNeil-Warren", "position": "S", "school": "Toledo", "confidence": 25 },
+        { "player": "Monroe Freeling", "position": "OT", "school": "Georgia", "confidence": 25 }
+      ]
+    },
+    {
+      "team": "Cleveland Browns",
+      "pick": 24,
+      "record": "5-12",
+      "needs": ["QB", "OL", "WR", "CB", "EDGE"],
+      "keyLosses": "Same as pick #6",
+      "consensusPick": { "player": "Caleb Lomu", "position": "OT", "school": "Utah", "confidence": 33 },
+      "otherPicks": [
+        { "player": "T.J. Parker", "position": "EDGE", "school": "Clemson", "confidence": 33 },
+        { "player": "Monroe Freeling", "position": "OT", "school": "Georgia", "confidence": 33 }
+      ],
+      "note": "Pick acquired from Jacksonville Jaguars"
+    },
+    {
+      "team": "Chicago Bears",
+      "pick": 25,
+      "record": "11-6",
+      "needs": ["S", "OL", "DL", "EDGE", "WR"],
+      "keyLosses": "Jaquan Brisker (SS) departed in FA; Ozzy Trapilo (LT) rehabbing patellar tendon; DJ Moore traded to Bills",
+      "consensusPick": { "player": "Emmanuel McNeil-Warren", "position": "S", "school": "Toledo", "confidence": 50 },
+      "otherPicks": [
+        { "player": "Cashius Howell", "position": "EDGE", "school": "Texas A&M", "confidence": 50 }
+      ]
+    },
+    {
+      "team": "Buffalo Bills",
+      "pick": 26,
+      "record": "12-5",
+      "needs": ["EDGE", "OL", "LB", "DB", "WR"],
+      "keyLosses": "David Edwards (LG) departed in FA; signed Bradley Chubb but need more edge juice",
+      "consensusPick": { "player": "Cashius Howell", "position": "EDGE", "school": "Texas A&M", "confidence": 40 },
+      "otherPicks": [
+        { "player": "C.J. Allen", "position": "LB", "school": "Georgia", "confidence": 20 },
+        { "player": "Max Iheanachor", "position": "OT", "school": "Arizona State", "confidence": 20 }
+      ]
+    },
+    {
+      "team": "San Francisco 49ers",
+      "pick": 27,
+      "record": "12-5",
+      "needs": ["OL", "EDGE", "WR", "DL", "S"],
+      "keyLosses": "Spencer Burford (LG) departed; Trent Williams + Jake Brendel deep into 30s; Nick Bosa rehabbing ACL; Bryce Huff retired; George Kittle Achilles injury",
+      "consensusPick": { "player": "Omar Cooper Jr.", "position": "WR", "school": "Indiana", "confidence": 100 },
+      "otherPicks": []
+    },
+    {
+      "team": "Houston Texans",
+      "pick": 28,
+      "record": "12-5",
+      "needs": ["OL", "DL", "LB", "DB", "EDGE"],
+      "keyLosses": "Major OL changes for 2nd straight year; John Franklin-Myers (DL) left in FA",
+      "consensusPick": { "player": "Anthony Hill Jr.", "position": "LB", "school": "Texas", "confidence": 100 },
+      "otherPicks": []
+    },
+    {
+      "team": "Kansas City Chiefs",
+      "pick": 29,
+      "record": "6-11",
+      "needs": ["CB", "WR", "EDGE", "DL", "LB"],
+      "keyLosses": "Same as pick #9",
+      "consensusPick": { "player": "Denzel Boston", "position": "WR", "school": "Washington", "confidence": 33 },
+      "otherPicks": [
+        { "player": "Monroe Freeling", "position": "OT", "school": "Georgia", "confidence": 33 },
+        { "player": "Jermod McCoy", "position": "CB", "school": "Tennessee", "confidence": 33 }
+      ],
+      "note": "Pick acquired from Los Angeles Rams"
+    },
+    {
+      "team": "Miami Dolphins",
+      "pick": 30,
+      "record": "7-10",
+      "needs": ["WR", "CB", "EDGE", "OL", "S"],
+      "keyLosses": "Same as pick #11",
+      "consensusPick": { "player": "Max Iheanachor", "position": "OT", "school": "Arizona State", "confidence": 100 },
+      "otherPicks": [],
+      "note": "Pick acquired from Denver Broncos"
+    },
+    {
+      "team": "New England Patriots",
+      "pick": 31,
+      "record": "14-3",
+      "needs": ["EDGE", "DL", "TE", "OL", "WR"],
+      "keyLosses": "Learned limits in lopsided Super Bowl LX loss to Seahawks (29-13)",
+      "consensusPick": { "player": "Keldric Faulk", "position": "DE", "school": "Auburn", "confidence": 50 },
+      "otherPicks": [
+        { "player": "T.J. Parker", "position": "EDGE", "school": "Clemson", "confidence": 50 }
+      ]
+    },
+    {
+      "team": "Seattle Seahawks",
+      "pick": 32,
+      "record": "14-3",
+      "needs": ["RB", "OL", "DB", "EDGE", "WR"],
+      "keyLosses": "Kenneth Walker III (SB LX MVP) left for Chiefs; Zach Charbonnet injured; lost Coby Bryant (S), Boye Mafe (Edge), Riq Woolen (CB)",
+      "consensusPick": { "player": "Brandon Cisse", "position": "CB", "school": "South Carolina", "confidence": 50 },
+      "otherPicks": [
+        { "player": "Jadarian Price", "position": "RB", "school": "Notre Dame", "confidence": 50 }
+      ],
+      "note": "Super Bowl LX Champions"
+    }
+  ],
+  "teamsWithoutFirstRoundPick": [
+    { "team": "Atlanta Falcons", "record": "8-9", "tradedTo": "LA Rams (#13)", "needs": ["WR", "OL", "DL", "CB", "EDGE"] },
+    { "team": "Green Bay Packers", "record": "9-7-1", "tradedTo": "Dallas (#20)", "needs": ["EDGE", "DL", "OL", "CB", "RB"] },
+    { "team": "Indianapolis Colts", "record": "8-9", "tradedTo": "NY Jets (#16)", "needs": ["EDGE", "LB", "S", "OL", "WR"] },
+    { "team": "Denver Broncos", "record": "14-3", "tradedTo": "Miami (#30)", "needs": ["DL", "TE", "DB", "LB", "EDGE"] },
+    { "team": "Jacksonville Jaguars", "record": "13-4", "tradedTo": "Cleveland (#24)", "needs": ["LB", "EDGE", "DL", "OL", "S"] }
+  ],
+  "lockPicks": [
+    { "pick": 1, "team": "Raiders", "player": "Fernando Mendoza", "position": "QB" },
+    { "pick": 13, "team": "Rams", "player": "Makai Lemon", "position": "WR" },
+    { "pick": 27, "team": "49ers", "player": "Omar Cooper Jr.", "position": "WR" },
+    { "pick": 28, "team": "Texans", "player": "Anthony Hill Jr.", "position": "LB" },
+    { "pick": 30, "team": "Dolphins", "player": "Max Iheanachor", "position": "OT" }
+  ]
+}

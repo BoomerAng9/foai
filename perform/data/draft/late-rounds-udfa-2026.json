@@ -1,0 +1,181 @@
+{
+  "generatedAt": "2026-04-15",
+  "source": "Sqwaadrun Lil_Deep_Hawk (ESPN, DraftPlex, NFL Draft Countdown, SportsGrid, SI, NFL.com, DraftTek, PFF)",
+  "dataInventory": {
+    "drafttekBoard": 601,
+    "beastBrugler": 100,
+    "seedData": 225,
+    "note": "DraftTek covers picks 1-600 (all 257 draft picks + 343 UDFA-range). Beast catalogues 2700+ but only top 100 coded."
+  },
+  "round4": [
+    { "player": "Emmett Johnson", "position": "RB", "school": "Nebraska", "drafttekRank": 101 },
+    { "player": "Jonah Coleman", "position": "RB", "school": "Washington", "drafttekRank": 102 },
+    { "player": "Anthony Lucas", "position": "EDGE", "school": "USC", "drafttekRank": 103 },
+    { "player": "Rayshaun Benny", "position": "DL", "school": "Michigan", "drafttekRank": 104 },
+    { "player": "Michael Trigg", "position": "TE", "school": "Baylor", "drafttekRank": 105 },
+    { "player": "Skyler Bell", "position": "WR", "school": "Connecticut", "drafttekRank": 106 },
+    { "player": "Connor Lew", "position": "OC", "school": "Auburn", "drafttekRank": 88 },
+    { "player": "Caleb Tiernan", "position": "OT", "school": "Northwestern", "drafttekRank": null },
+    { "player": "Tim Keenan III", "position": "DL", "school": "Alabama", "drafttekRank": 138 },
+    { "player": "Tyler Onyedim", "position": "DL", "school": "Texas A&M", "drafttekRank": 282 },
+    { "player": "Harold Perkins Jr.", "position": "LB", "school": "LSU", "drafttekRank": 130 },
+    { "player": "Deontae Lawson", "position": "LB", "school": "Alabama", "drafttekRank": 115 },
+    { "player": "Matt Gulbin", "position": "OC", "school": "Michigan State", "drafttekRank": 269 },
+    { "player": "Jack Kelly", "position": "LB", "school": "BYU", "drafttekRank": 210 },
+    { "player": "Kaleb Elarms-Orr", "position": "LB", "school": "TCU", "drafttekRank": 166 },
+    { "player": "Daylen Everette", "position": "CB", "school": "Georgia", "drafttekRank": 98 },
+    { "player": "Kaleb Proctor", "position": "DT", "school": "SE Louisiana", "drafttekRank": 163 },
+    { "player": "Nick Barrett", "position": "DT", "school": "South Carolina", "drafttekRank": 259 },
+    { "player": "Demond Claiborne", "position": "RB", "school": "Wake Forest", "drafttekRank": 146 }
+  ],
+  "round5": [
+    { "player": "Nadame Tucker", "position": "EDGE", "school": "Western Michigan" },
+    { "player": "Charles Demmings", "position": "CB", "school": "Stephen F. Austin" },
+    { "player": "Nate Boerkircher", "position": "TE", "school": "Texas A&M" },
+    { "player": "Kaleb Proctor", "position": "DT", "school": "SE Louisiana" },
+    { "player": "Le'Veon Moss", "position": "RB", "school": "Texas A&M" },
+    { "player": "Bryce Boettcher", "position": "LB", "school": "Oregon" },
+    { "player": "Josh Cameron", "position": "WR", "school": "Baylor" },
+    { "player": "Kevin Coleman Jr.", "position": "WR", "school": "Missouri" },
+    { "player": "Cade Klubnik", "position": "QB", "school": "Clemson" },
+    { "player": "Nick Singleton", "position": "RB", "school": "Penn State" },
+    { "player": "L.T. Overton", "position": "DL", "school": "Alabama" },
+    { "player": "Taurean York", "position": "LB", "school": "Texas A&M" },
+    { "player": "Anez Cooper", "position": "OG", "school": "Miami" },
+    { "player": "D.J. Campbell", "position": "OG", "school": "Texas" },
+    { "player": "Keagen Trost", "position": "OT", "school": "Missouri" }
+  ],
+  "round6": [
+    { "player": "Robert Spears-Jennings", "position": "S", "school": "Oklahoma" },
+    { "player": "Logan Fano", "position": "EDGE", "school": "Utah" },
+    { "player": "Lander Barton", "position": "LB", "school": "Utah" },
+    { "player": "Diego Pounds", "position": "OT", "school": "Ole Miss" },
+    { "player": "Adam Randall", "position": "RB", "school": "Clemson" },
+    { "player": "Patrick Payton", "position": "EDGE", "school": "LSU" },
+    { "player": "Thaddeus Dixon", "position": "CB", "school": "North Carolina" },
+    { "player": "Colbie Young", "position": "WR", "school": "Georgia" },
+    { "player": "Roman Hemby", "position": "RB", "school": "Indiana" },
+    { "player": "Jaydn Ott", "position": "RB", "school": "Oklahoma" },
+    { "player": "Deven Eastern", "position": "DT", "school": "Minnesota" },
+    { "player": "Cole Payton", "position": "QB", "school": "North Dakota State" },
+    { "player": "Bryson Eason", "position": "DL", "school": "Tennessee" },
+    { "player": "Diego Pavia", "position": "QB", "school": "Vanderbilt" },
+    { "player": "Fernando Carmona Jr.", "position": "OG", "school": "Arkansas" }
+  ],
+  "round7": [
+    { "player": "Barion Brown", "position": "WR", "school": "LSU" },
+    { "player": "Le'Veon Moss", "position": "RB", "school": "Texas A&M" },
+    { "player": "Cole Brevard", "position": "DT", "school": "Texas" },
+    { "player": "Behren Morton", "position": "QB", "school": "Texas Tech" },
+    { "player": "Haynes King", "position": "QB", "school": "Georgia Tech" },
+    { "player": "Eli Heidenreich", "position": "RB", "school": "Navy" },
+    { "player": "Fa'alili Fa'amoe", "position": "OT", "school": "Wake Forest" },
+    { "player": "Jordan Hudson", "position": "WR", "school": "SMU" },
+    { "player": "Jack Pyburn", "position": "EDGE", "school": "LSU" },
+    { "player": "Eric McAlister", "position": "WR", "school": "TCU" },
+    { "player": "Ar'Maj Reed-Adams", "position": "OG", "school": "Texas A&M" },
+    { "player": "D.J. Rogers", "position": "TE", "school": "TCU" },
+    { "player": "Joe Fagnano", "position": "QB", "school": "UConn" },
+    { "player": "Desmond Reid", "position": "RB", "school": "Pittsburgh" },
+    { "player": "Chip Trayanum", "position": "RB", "school": "Toledo" },
+    { "player": "Caden Barnett", "position": "OG", "school": "Wyoming" }
+  ],
+  "udfaProjections": [
+    { "player": "Caullin Lacy", "position": "WR", "school": "Louisville", "drafttekRank": 290 },
+    { "player": "Harrison Wallace III", "position": "WR", "school": "Ole Miss", "drafttekRank": 271 },
+    { "player": "Jamal Haynes", "position": "RB", "school": "Georgia Tech", "drafttekRank": 358 },
+    { "player": "Jalen Walthall", "position": "WR", "school": "Incarnate Word", "drafttekRank": 346 },
+    { "player": "Miller Moss", "position": "QB", "school": "Louisville", "drafttekRank": 396 },
+    { "player": "Coleman Bennett", "position": "RB", "school": "Kennesaw State", "drafttekRank": 397 },
+    { "player": "Mark Gronowski", "position": "QB", "school": "Iowa", "drafttekRank": 403 },
+    { "player": "Logan Diggs", "position": "RB", "school": "Ole Miss", "drafttekRank": 420 },
+    { "player": "Athan Kaliakmanis", "position": "QB", "school": "Rutgers", "drafttekRank": 439 },
+    { "player": "Squirrel White", "position": "WR", "school": "Florida State", "drafttekRank": 521 },
+    { "player": "Nic Anderson", "position": "WR", "school": "LSU", "drafttekRank": 467 },
+    { "player": "Dane Key", "position": "WR", "school": "Nebraska", "drafttekRank": 446 },
+    { "player": "Jalen Catalon", "position": "S", "school": "Missouri", "drafttekRank": 427 },
+    { "player": "Ricardo Hallman", "position": "CB", "school": "Wisconsin", "drafttekRank": 552 },
+    { "player": "Blake Shapen", "position": "QB", "school": "Mississippi State", "drafttekRank": 545 },
+    { "player": "Maverick McIvor", "position": "QB", "school": "Western Kentucky", "drafttekRank": 553 },
+    { "player": "Jack Strand", "position": "QB", "school": "MSU Moorhead", "drafttekRank": 598 },
+    { "player": "Emmanuel Henderson", "position": "WR", "school": "Kansas", "drafttekRank": 315 },
+    { "player": "Star Thomas", "position": "RB", "school": "Tennessee", "drafttekRank": 432 },
+    { "player": "C.J. Donaldson", "position": "RB", "school": "Ohio State", "drafttekRank": 369 },
+    { "player": "Noah Whittington", "position": "RB", "school": "Oregon", "drafttekRank": 241 }
+  ],
+  "allStarGames": {
+    "seniorBowl": {
+      "date": "2026-01-31",
+      "location": "Mobile, AL",
+      "result": "American 17, National 9",
+      "mvp": { "player": "Garrett Nussmeier", "position": "QB", "school": "LSU" },
+      "playerCount": 136,
+      "keyHeadliners": [
+        { "player": "David Bailey", "position": "EDGE", "school": "Texas Tech" },
+        { "player": "T.J. Parker", "position": "EDGE", "school": "Clemson" },
+        { "player": "Zion Young", "position": "EDGE", "school": "Missouri" },
+        { "player": "L.T. Overton", "position": "DL", "school": "Alabama" },
+        { "player": "Akheem Mesidor", "position": "EDGE", "school": "Miami" },
+        { "player": "Diego Pavia", "position": "QB", "school": "Vanderbilt" },
+        { "player": "Mike Washington Jr.", "position": "RB", "school": "Arkansas" },
+        { "player": "Kevin Coleman Jr.", "position": "WR", "school": "Missouri" }
+      ],
+      "fullRosterUrl": "https://www.seniorbowl.com/roster-full/"
+    },
+    "eastWestShrineBowl": {
+      "date": "2026-01-27",
+      "location": "Ford Center, Dallas",
+      "playerCount": 131,
+      "keyParticipants": [
+        { "player": "Cade Klubnik", "position": "QB", "school": "Clemson" },
+        { "player": "Behren Morton", "position": "QB", "school": "Texas Tech" },
+        { "player": "Haynes King", "position": "QB", "school": "Georgia Tech" },
+        { "player": "Joe Fagnano", "position": "QB", "school": "UConn" },
+        { "player": "Jake Golday", "position": "LB", "school": "Cincinnati" },
+        { "player": "Harold Perkins Jr.", "position": "LB", "school": "LSU" },
+        { "player": "Albert Regis", "position": "DL", "school": "Texas A&M" },
+        { "player": "Tyler Onyedim", "position": "DL", "school": "Texas A&M" },
+        { "player": "Darrell Jackson Jr.", "position": "DL", "school": "Florida State" },
+        { "player": "DeMonte Capehart", "position": "DL", "school": "Clemson" }
+      ],
+      "fullRosterUrl": "https://shrinebowl.com/roster/"
+    },
+    "nflpaCollegiateBowl": {
+      "status": "CANCELLED",
+      "note": "NFLPA discontinued the game in 2023 after 12 years. Now partners with Senior Bowl and Shrine Bowl."
+    }
+  },
+  "sleepers": {
+    "coachPoll": [
+      { "player": "Diego Pavia", "position": "QB", "school": "Vanderbilt", "projection": "R5-7" },
+      { "player": "Haynes King", "position": "QB", "school": "Georgia Tech", "projection": "R5-7" },
+      { "player": "Markel Bell", "position": "OT", "school": "Miami", "projection": "R4-5" },
+      { "player": "Brian Parker II", "position": "OC", "school": "Duke", "projection": "R4-5" },
+      { "player": "Peter Kump", "position": "OC", "school": "Utah", "projection": "R5-6" },
+      { "player": "Michael Taaffe", "position": "S", "school": "Texas", "projection": "R4-5" },
+      { "player": "Zane Durant", "position": "DT", "school": "Penn State", "projection": "R3-4" },
+      { "player": "Kyle Louis", "position": "LB", "school": "Pittsburgh", "projection": "R3-4" },
+      { "player": "Bryson Eason", "position": "DL", "school": "Tennessee", "projection": "R5-7" }
+    ],
+    "smallSchool": [
+      { "player": "Tyren Montgomery", "position": "WR", "school": "John Carroll", "projection": "R5-6" },
+      { "player": "Nadame Tucker", "position": "EDGE", "school": "Western Michigan", "projection": "R5-6" },
+      { "player": "Caden Barnett", "position": "OG", "school": "Wyoming", "projection": "R6-7" },
+      { "player": "Kaleb Proctor", "position": "DT", "school": "SE Louisiana", "projection": "R3-4" },
+      { "player": "Cole Payton", "position": "QB", "school": "North Dakota State", "projection": "R4-5" }
+    ]
+  },
+  "combineStandouts": [
+    { "player": "Bryce Lance", "position": "WR", "school": "North Dakota State", "metric": "4.34 40-yard dash, 6-3/204 lbs" },
+    { "player": "Sam Roush", "position": "TE", "school": "Stanford", "metric": "Elite vertical + broad jump" },
+    { "player": "Skyler Bell", "position": "WR", "school": "Connecticut", "metric": "Strong overall testing" },
+    { "player": "Haynes King", "position": "QB", "school": "Georgia Tech", "metric": "Best 3-cone (6.89) + shuttle (4.17) among QBs" },
+    { "player": "Connor Lew", "position": "OC", "school": "Auburn", "metric": "31 bench reps (torn ACL recovery)" },
+    { "player": "Travis Burke", "position": "OT", "school": "Memphis", "metric": "6-9 frame, started 11 games" }
+  ],
+  "underclassmen": {
+    "totalDeclared": 63,
+    "withDegrees": 21,
+    "specialEligibility": 42
+  }
+}

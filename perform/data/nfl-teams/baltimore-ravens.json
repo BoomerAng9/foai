@@ -1,0 +1,46 @@
+{
+  "team": "Baltimore Ravens",
+  "abbreviation": "BAL",
+  "conference": "AFC",
+  "division": "AFC North",
+  "ownership": {
+    "name": "Steve Bisciotti",
+    "style": "Hands-off on football decisions; trusts front office completely; stable ownership",
+    "tendencies": "Patient with coaching transitions; allowed Harbaugh to leave for Giants; empowered DeCosta for rebuild"
+  },
+  "gm": {
+    "name": "Eric DeCosta",
+    "tenure": "7th year (since 2019)",
+    "philosophy": "Draft-centric; values positional versatility; aggressive in trades; BPA-oriented with need awareness",
+    "analytics_approach": "Heavy analytics — one of the most data-driven front offices in the NFL; pioneered modern draft value charts"
+  },
+  "head_coach": {
+    "name": "Jesse Minter",
+    "tenure": "1st year (hired January 2026 — replaced John Harbaugh after 18 years)",
+    "scheme_offense": "unverified — new OC hire",
+    "scheme_defense": "Minter is a defensive specialist; aggressive scheme; built Michigan's #1 defense in 2023; multiple fronts with exotic blitz packages",
+    "key_position_values": ["EDGE", "OL", "WR", "TE", "S"]
+  },
+  "decision_makers": {
+    "primary": "Eric DeCosta (GM) — now fully driving team-building without Harbaugh",
+    "committee": ["Steve Bisciotti (owner)", "Eric DeCosta (GM)", "Jesse Minter (HC)"]
+  },
+  "roster_2026": {
+    "qb_situation": "Lamar Jackson — franchise QB, MVP-caliber; need to surround him with better weapons",
+    "key_departures": ["John Harbaugh (HC, left for Giants)", "Tyler Linderbaum (C, signed with Raiders for record $81M/3yr)", "Isaiah Likely (TE, signed with Giants)", "Charlie Kolar (TE, signed with Chargers)", "Maxx Crosby trade fell through (medical concerns)"],
+    "key_signings": ["Trey Hendrickson (EDGE, 4yr/$112M from Bengals)", "Durham Smythe (TE, veteran blocker)"],
+    "cap_space": "unverified",
+    "expiring_contracts": ["unverified"]
+  },
+  "draft_capital_2026": {
+    "picks": ["Round 1 Pick 14", "Round 2 Pick 45", "Round 3 Pick 80", "Round 4 Pick 115", "Round 5 Pick 154", "Round 5 Pick 162", "Round 6 Pick 173", "Round 6 Pick 174", "Round 7 Pick 211", "Round 7 Pick 250", "Round 7 Pick 253"],
+    "traded_away": [],
+    "acquired_extra": ["Multiple late-round picks from Crosby trade reversal"],
+    "compensatory": []
+  },
+  "needs": [
+    {"position": "WR", "priority": 1, "reason": "WRs totaled only 1,946 receiving yards (25th in NFL); Lamar Jackson desperately needs better pass catchers; Jordyn Tyson linked"},
+    {"position": "OL", "priority": 2, "reason": "Lost Tyler Linderbaum (3x Pro Bowl C) in free agency; center spot vacant; need guard competition for Emery Jones at RG"},
+    {"position": "TE", "priority": 3, "reason": "Lost both Isaiah Likely and Charlie Kolar in free agency; depth chart depleted to Durham Smythe and one other contributor"}
+  ]
+}

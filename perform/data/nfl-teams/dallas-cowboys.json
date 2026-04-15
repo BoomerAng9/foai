@@ -1,0 +1,46 @@
+{
+  "team": "Dallas Cowboys",
+  "abbreviation": "DAL",
+  "conference": "NFC",
+  "division": "NFC East",
+  "ownership": {
+    "name": "Jerry Jones",
+    "style": "Extremely hands-on; acts as owner AND general manager; most involved owner in NFL history",
+    "tendencies": "Meddles in every football decision; loves splash picks and star players; values marketability alongside talent; oldest owner-GM model in NFL"
+  },
+  "gm": {
+    "name": "Jerry Jones (owner/president/GM) with Will McClay (VP of Player Personnel) as de facto draft evaluator",
+    "tenure": "Jerry Jones since 1989; Will McClay elevated to key role circa 2014",
+    "philosophy": "BPA-oriented; Schottenheimer says 'draft natural, draft pure'; aggressive trade history (acquired Micah Parsons from Packers for 1st-round pick + Kenny Clark)",
+    "analytics_approach": "Traditional with some modern elements; Will McClay is widely respected as one of best talent evaluators in NFL"
+  },
+  "head_coach": {
+    "name": "Brian Schottenheimer",
+    "tenure": "2nd year (promoted to HC 2025)",
+    "scheme_offense": "Pro-style with zone-run elements; play-action passing; physical identity",
+    "scheme_defense": "New-look defense in 2026; multiple fronts with Micah Parsons as centerpiece",
+    "key_position_values": ["CB", "LB", "EDGE", "OL", "WR"]
+  },
+  "decision_makers": {
+    "primary": "Jerry Jones (owner/GM) — always has final say",
+    "committee": ["Jerry Jones (owner/GM)", "Stephen Jones (co-owner/EVP)", "Will McClay (VP Player Personnel)", "Brian Schottenheimer (HC)"]
+  },
+  "roster_2026": {
+    "qb_situation": "Dak Prescott — unverified current status but expected franchise QB",
+    "key_departures": ["Kenny Clark (DT, traded to Packers in Micah Parsons deal)"],
+    "key_signings": ["Micah Parsons (LB/EDGE, acquired from Packers via trade)"],
+    "cap_space": "unverified",
+    "expiring_contracts": ["unverified"]
+  },
+  "draft_capital_2026": {
+    "picks": ["Round 1 Pick 12", "Round 1 Pick 20 (from Green Bay via Parsons trade)", "Round 3 Pick 92", "Round 4 Pick 112", "Round 5 Pick 152", "Round 6 Pick 177", "Round 6 Pick 180", "Round 7 Pick 218"],
+    "traded_away": [],
+    "acquired_extra": ["Round 1 Pick 20 (from Green Bay)"],
+    "compensatory": []
+  },
+  "needs": [
+    {"position": "CB", "priority": 1, "reason": "Known top need; seven corners among 30 pre-draft visitors; allowed 8.1 yards per attempt (31st) and ranked near bottom in every pass defense category in 2025"},
+    {"position": "LB", "priority": 2, "reason": "Despite Parsons acquisition, linebacker depth needs reinforcement; South Carolina's Brandon Cisse and Tennessee's Colton Hood in play at #20"},
+    {"position": "DL", "priority": 3, "reason": "Lost Kenny Clark in Parsons trade; defensive interior needs attention; Mansoor Delane (CB) could address CB need instead"}
+  ]
+}

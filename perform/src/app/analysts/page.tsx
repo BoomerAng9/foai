@@ -15,7 +15,7 @@ import PaywallGate from '@/components/PaywallGate';
 import { BackHomeNav } from '@/components/layout/BackHomeNav';
 
 const T = {
-  bg:           '#F4F6FA',
+  bg:           'var(--pf-bg)',
   surface:      '#FFFFFF',
   surfaceAlt:   '#FAFBFD',
   border:       '#E2E6EE',

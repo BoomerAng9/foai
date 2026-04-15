@@ -1,0 +1,46 @@
+{
+  "team": "Detroit Lions",
+  "abbreviation": "DET",
+  "conference": "NFC",
+  "division": "NFC North",
+  "ownership": {
+    "name": "Sheila Ford Hamp",
+    "style": "Supportive of front office; trusts Campbell and Holmes; patient with process",
+    "tendencies": "Backed the rebuild fully; loyalty to coaching staff through ups and downs; will apply pressure after 2025 disappointment"
+  },
+  "gm": {
+    "name": "Brad Holmes",
+    "tenure": "6th year (since 2021)",
+    "philosophy": "BPA-focused; values offensive line and trenches; excellent mid-round draft evaluator; built a contender quickly",
+    "analytics_approach": "Heavy analytics — Rams analytical tree; data-driven draft board construction"
+  },
+  "head_coach": {
+    "name": "Dan Campbell",
+    "tenure": "5th year (since 2021)",
+    "scheme_offense": "OC Drew Petzing; power run game with play-action; physical identity; creative formations",
+    "scheme_defense": "DC Kelvin Sheppard; 4-3 base; aggressive front seven; Aidan Hutchinson as centerpiece",
+    "key_position_values": ["OT", "EDGE", "CB", "S", "IOL"]
+  },
+  "decision_makers": {
+    "primary": "Brad Holmes (GM) and Dan Campbell (HC) — tightly aligned",
+    "committee": ["Sheila Ford Hamp (owner)", "Brad Holmes (GM)", "Dan Campbell (HC)"]
+  },
+  "roster_2026": {
+    "qb_situation": "Jared Goff — franchise QB; under contract long-term",
+    "key_departures": ["unverified — division finish disappointment after consecutive deep playoff runs"],
+    "key_signings": ["Cade Mays (C, free agency)", "Larry Borom (OT, veteran)", "DJ Wonnum (EDGE, veteran)"],
+    "cap_space": "unverified",
+    "expiring_contracts": ["unverified"]
+  },
+  "draft_capital_2026": {
+    "picks": ["Round 1 Pick 17", "Round 2 (unverified)", "Round 3 (unverified)", "Round 4 (unverified)", "Round 5 (unverified)", "Round 6 (unverified)", "Round 7 (unverified)"],
+    "traded_away": [],
+    "acquired_extra": [],
+    "compensatory": []
+  },
+  "needs": [
+    {"position": "OT", "priority": 1, "reason": "Sizable void at left tackle; 62 of 66 mock drafts pair Lions with offensive lineman in Round 1; need pro-ready tackle to reignite dominant rushing attack"},
+    {"position": "EDGE", "priority": 2, "reason": "Need young pass rusher opposite Aidan Hutchinson; DJ Wonnum is a veteran stopgap, not long-term answer"},
+    {"position": "CB", "priority": 3, "reason": "Secondary needs reinforcement; Campbell wants competition at multiple positions"}
+  ]
+}

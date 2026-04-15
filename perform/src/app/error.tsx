@@ -12,7 +12,7 @@ export default function ErrorPage({
   return (
     <div
       className="min-h-screen flex flex-col items-center justify-center px-6"
-      style={{ background: '#0A0A0F' }}
+      style={{ background: 'var(--pf-bg)' }}
     >
       <div className="max-w-md w-full text-center">
         <div

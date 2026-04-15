@@ -1,0 +1,46 @@
+{
+  "team": "Miami Dolphins",
+  "abbreviation": "MIA",
+  "conference": "AFC",
+  "division": "AFC East",
+  "ownership": {
+    "name": "Stephen Ross",
+    "style": "Aggressive owner willing to spend; has been hands-on in major decisions; win-now mentality",
+    "tendencies": "Complete organizational overhaul — fired coach and GM; hired new HC and GM; traded away multiple franchise players in rebuild"
+  },
+  "gm": {
+    "name": "Jon-Eric Sullivan",
+    "tenure": "1st year (hired January 2026)",
+    "philosophy": "Complete rebuild approach; stripped roster of high-paid veterans; accumulating draft capital and cap space",
+    "analytics_approach": "unverified — new to role"
+  },
+  "head_coach": {
+    "name": "Jeff Hafley",
+    "tenure": "1st year (hired January 2026)",
+    "scheme_offense": "unverified — new system being installed",
+    "scheme_defense": "Hafley is a defensive specialist; likely aggressive man-coverage scheme from his background",
+    "key_position_values": ["WR", "OT", "CB", "TE", "QB"]
+  },
+  "decision_makers": {
+    "primary": "Jon-Eric Sullivan (GM) with Jeff Hafley (HC) collaboration",
+    "committee": ["Stephen Ross (owner)", "Jon-Eric Sullivan (GM)", "Jeff Hafley (HC)"]
+  },
+  "roster_2026": {
+    "qb_situation": "Malik Willis signed as starter (previously backup in Green Bay); bridge QB at best; long-term answer still needed",
+    "key_departures": ["Tua Tagovailoa (QB, signed with Falcons)", "Tyreek Hill (WR)", "Jaylen Waddle (WR, traded to Broncos)", "Bradley Chubb (EDGE, signed with Bills)", "Minkah Fitzpatrick (S, traded to Jets)", "Jalen Ramsey (CB, traded)", "Jonnu Smith (TE, traded)"],
+    "key_signings": ["Malik Willis (QB)", "Darren Waller (TE, came out of retirement)"],
+    "cap_space": "Significant cap space from veteran departures; full rebuild mode",
+    "expiring_contracts": ["Austin Jackson (OT, final year)"]
+  },
+  "draft_capital_2026": {
+    "picks": ["Round 1 Pick 11", "Round 1 Pick 30", "Round 2 Pick 43", "Round 3 Pick 75", "Round 3 Pick 87", "Round 3 Pick 90", "Round 3 Pick 94", "Round 4 Pick 130", "Round 5 Pick 151", "Round 7 Pick 227", "Round 7 Pick 238"],
+    "traded_away": [],
+    "acquired_extra": ["Round 1 Pick 30", "Round 3 Pick 87", "Round 3 Pick 90", "Round 3 Pick 94"],
+    "compensatory": []
+  },
+  "needs": [
+    {"position": "WR", "priority": 1, "reason": "Lost both Tyreek Hill and Jaylen Waddle; Willis needs a reliable WR1; Carnell Tate frequently mocked at #11"},
+    {"position": "OT", "priority": 2, "reason": "Austin Jackson on final year of contract with inconsistent play and injuries; need long-term partner with Patrick Paul"},
+    {"position": "CB", "priority": 3, "reason": "Traded away Jalen Ramsey; cornerback room was already thin before the trade; must rebuild secondary"}
+  ]
+}

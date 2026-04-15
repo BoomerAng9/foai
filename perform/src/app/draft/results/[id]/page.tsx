@@ -92,13 +92,13 @@ export default function ResultsPage() {
   }, [sim, id]);
 
   if (loading) return (
-    <div className="min-h-screen flex items-center justify-center" style={{ background: '#0a0a0f' }}>
+    <div className="min-h-screen flex items-center justify-center" style={{ background: 'var(--pf-bg)' }}>
       <div className="inline-block w-8 h-8 rounded-full border-2 animate-spin" style={{ borderColor: 'rgba(255,255,255,0.1)', borderTopColor: '#D4A853' }} />
     </div>
   );
 
   if (error || !sim) return (
-    <div className="min-h-screen flex items-center justify-center" style={{ background: '#0a0a0f', color: '#FFFFFF' }}>
+    <div className="min-h-screen flex items-center justify-center" style={{ background: 'var(--pf-bg)', color: '#FFFFFF' }}>
       <div className="text-center">
         <h1 className="text-2xl font-black mb-2">Simulation Not Found</h1>
         <p className="text-white/40 text-sm mb-4">{error || 'This simulation may have expired.'}</p>
@@ -115,7 +115,7 @@ export default function ResultsPage() {
   const topTeam = grades[0];
 
   return (
-    <div className="min-h-screen" style={{ background: '#0a0a0f', color: '#FFFFFF' }}>
+    <div className="min-h-screen" style={{ background: 'var(--pf-bg)', color: '#FFFFFF' }}>
       <div style={{ background: 'linear-gradient(180deg, rgba(15,15,22,1) 0%, rgba(10,10,15,1) 100%)', borderBottom: '1px solid rgba(212,168,83,0.15)' }}>
         <div className="max-w-5xl mx-auto px-4 sm:px-6 py-6">
           <div className="flex items-center gap-3 mb-4">

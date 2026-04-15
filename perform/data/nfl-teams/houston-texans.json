@@ -1,0 +1,46 @@
+{
+  "team": "Houston Texans",
+  "abbreviation": "HOU",
+  "conference": "AFC",
+  "division": "AFC South",
+  "ownership": {
+    "name": "Cal McNair (chairman/CEO)",
+    "style": "Generally supportive of football operations; invested in winning; family ownership (Janice McNair holds title of owner)",
+    "tendencies": "Backed DeMeco Ryans and Nick Caserio; patient with rebuild that turned to contention quickly"
+  },
+  "gm": {
+    "name": "Nick Caserio",
+    "tenure": "6th year (since 2021)",
+    "philosophy": "Aggressive trader (7 trades in recent draft); values flexibility and draft capital accumulation; Belichick tree",
+    "analytics_approach": "New England analytical roots; data-driven with traditional scouting"
+  },
+  "head_coach": {
+    "name": "DeMeco Ryans",
+    "tenure": "4th year (since 2023, 6-year deal)",
+    "scheme_offense": "Spread concepts; building around C.J. Stroud; multiple TE sets",
+    "scheme_defense": "Aggressive 4-3; man-coverage heavy; exotic pressures; former 49ers DC — physical defensive identity",
+    "key_position_values": ["IOL", "DT", "LB", "S", "RB"]
+  },
+  "decision_makers": {
+    "primary": "Nick Caserio (EVP/GM) with DeMeco Ryans (HC) input",
+    "committee": ["Cal McNair (chairman)", "Nick Caserio (GM)", "DeMeco Ryans (HC)"]
+  },
+  "roster_2026": {
+    "qb_situation": "C.J. Stroud — elite young franchise QB; built to win now around him",
+    "key_departures": ["unverified — 12-win season indicates roster mostly intact"],
+    "key_signings": ["unverified"],
+    "cap_space": "unverified",
+    "expiring_contracts": ["Ed Ingram (RG, due for new contract)"]
+  },
+  "draft_capital_2026": {
+    "picks": ["Round 1 Pick 28", "Round 2 (two 2nd-round picks)", "Round 3 (unverified)", "Round 4 (unverified)", "Round 5 (unverified)", "Round 6 (unverified)", "Round 7 (unverified)"],
+    "traded_away": [],
+    "acquired_extra": ["Extra 2nd-round pick"],
+    "compensatory": []
+  },
+  "needs": [
+    {"position": "IOL", "priority": 1, "reason": "Most glaring need is interior offensive line; need upgrade over Jake Andrews at center or find new guard; Olaivavega Ioane (Penn State) frequently mocked"},
+    {"position": "DT", "priority": 2, "reason": "Interior defensive line needs reinforcement alongside offense; DeMeco Ryans wants dominant interior presence"},
+    {"position": "LB", "priority": 3, "reason": "Linebacker depth needs attention; Ryans' defense requires versatile, athletic linebackers"}
+  ]
+}

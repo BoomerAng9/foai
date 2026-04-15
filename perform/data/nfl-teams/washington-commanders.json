@@ -1,0 +1,46 @@
+{
+  "team": "Washington Commanders",
+  "abbreviation": "WAS",
+  "conference": "NFC",
+  "division": "NFC East",
+  "ownership": {
+    "name": "Josh Harris (Harris-Blitzer Sports & Entertainment)",
+    "style": "New ownership (acquired 2023); professional sports management background; invested in long-term build",
+    "tendencies": "Hired experienced football people; patient with rebuild; significant offseason spending authorized"
+  },
+  "gm": {
+    "name": "Adam Peters",
+    "tenure": "2nd year (hired 2024 from San Francisco 49ers)",
+    "philosophy": "San Francisco model — build through the draft, supplement in free agency; aggressive free agent spending (signed 15 new players this offseason)",
+    "analytics_approach": "Modern hybrid — SF 49ers analytical background"
+  },
+  "head_coach": {
+    "name": "Dan Quinn",
+    "tenure": "2nd year (hired 2024)",
+    "scheme_offense": "unverified — new OC system",
+    "scheme_defense": "DC Daronte Jones (from Minnesota Vikings); aggressive man-coverage scheme",
+    "key_position_values": ["WR", "CB", "LB", "C", "EDGE"]
+  },
+  "decision_makers": {
+    "primary": "Adam Peters (GM) — aggressive roster builder",
+    "committee": ["Josh Harris (owner)", "Adam Peters (GM)", "Dan Quinn (HC)"]
+  },
+  "roster_2026": {
+    "qb_situation": "Jayden Daniels is the franchise QB; goal is to surround him with elite weapons and protection",
+    "key_departures": ["Tyler Biadasz (C, released)", "Bobby Wagner (LB, unsigned)", "Marshon Lattimore (CB, injury concerns, possible cut candidate)"],
+    "key_signings": ["Leo Chenal (LB, from Chiefs)", "Nick Allegretti (C, interim starter)", "15 total new free agent signings including pass rusher, TE, and RB additions"],
+    "cap_space": "unverified",
+    "expiring_contracts": ["unverified"]
+  },
+  "draft_capital_2026": {
+    "picks": ["Round 1 Pick 7", "Round 3 Pick 71", "Round 5 Pick 147", "Round 6 Pick 187", "Round 7 Pick 209", "Round 7 Pick 223"],
+    "traded_away": [],
+    "acquired_extra": [],
+    "compensatory": []
+  },
+  "needs": [
+    {"position": "WR", "priority": 1, "reason": "Need alpha receiver opposite Terry McLaurin; WR room is biggest roster weakness; Carnell Tate (Ohio State) getting heavy attention with Pro Day visit and top-30 visit"},
+    {"position": "CB", "priority": 2, "reason": "Marshon Lattimore no longer the same player after injuries; perimeter CB is a clear need; defense needs to get younger"},
+    {"position": "C", "priority": 3, "reason": "Released Tyler Biadasz; Nick Allegretti is stopgap; Quinn left door open for draft additions at center"}
+  ]
+}

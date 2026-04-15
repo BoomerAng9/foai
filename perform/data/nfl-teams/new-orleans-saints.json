@@ -1,0 +1,46 @@
+{
+  "team": "New Orleans Saints",
+  "abbreviation": "NO",
+  "conference": "NFC",
+  "division": "NFC South",
+  "ownership": {
+    "name": "Gayle Benson",
+    "style": "Loyal to long-tenured executives; historically big spenders in free agency",
+    "tendencies": "Kept Mickey Loomis through decades of cap gymnastics; loyalty to proven leaders"
+  },
+  "gm": {
+    "name": "Mickey Loomis",
+    "tenure": "24th year (since 2002) — longest-tenured GM in NFL",
+    "philosophy": "Aggressive cap management (cap gymnastics); win-now mentality; willing to restructure contracts aggressively",
+    "analytics_approach": "Traditional scouting with some modern elements; values veteran free agents heavily"
+  },
+  "head_coach": {
+    "name": "Kellen Moore",
+    "tenure": "2nd year (hired 2025)",
+    "scheme_offense": "Spread concepts, motion-heavy, play-action passing; modern offensive mind",
+    "scheme_defense": "unverified",
+    "key_position_values": ["WR", "EDGE", "CB", "RB", "OL"]
+  },
+  "decision_makers": {
+    "primary": "Mickey Loomis (GM)",
+    "committee": ["Gayle Benson (owner)", "Mickey Loomis (GM)", "Kellen Moore (HC)"]
+  },
+  "roster_2026": {
+    "qb_situation": "Tyler Shough is the starter; organization views him as the franchise guy going into next season",
+    "key_departures": ["Cam Jordan (EDGE, retirement/departure)"],
+    "key_signings": ["David Edwards (G)", "Kaden Elliss (LB)", "Noah Fant (TE)", "Travis Etienne Jr. (RB, 4yr/$48M)"],
+    "cap_space": "Historically tight cap situation; Loomis continues aggressive restructuring",
+    "expiring_contracts": ["unverified"]
+  },
+  "draft_capital_2026": {
+    "picks": ["Round 1 Pick 8", "Round 2 (unverified)", "Round 3 (unverified)", "Round 4 (unverified)", "Round 5 (unverified)", "Round 6 (unverified)", "Round 7 (unverified)"],
+    "traded_away": [],
+    "acquired_extra": [],
+    "compensatory": []
+  },
+  "needs": [
+    {"position": "WR", "priority": 1, "reason": "Need a No. 2 receiver to pair with existing weapons; easy pick at #8 if top WR available; Carnell Tate frequently mocked"},
+    {"position": "EDGE", "priority": 2, "reason": "Pass rush needs significant help; if David Bailey or Rueben Bain Jr. are on the board, they would be hard to pass up"},
+    {"position": "CB", "priority": 3, "reason": "Cornerback is a top-3 need; secondary needs reinforcement to compete in NFC South"}
+  ]
+}

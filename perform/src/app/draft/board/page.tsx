@@ -24,7 +24,7 @@ interface PlayerRow {
 type SortKey = 'rank' | 'grade' | 'name' | 'school';
 
 const T = {
-  bg: '#F4F6FA', surface: '#FFFFFF', surfaceAlt: '#FAFBFD',
+  bg: 'var(--pf-bg)', surface: '#FFFFFF', surfaceAlt: '#FAFBFD',
   border: '#E2E6EE', text: '#0A0E1A', textMuted: '#5A6478', textSubtle: '#8B94A8',
   navy: '#0B1E3F', navyDeep: '#06122A', red: '#D40028', redSoft: '#FFE9ED', green: '#00874C',
 };

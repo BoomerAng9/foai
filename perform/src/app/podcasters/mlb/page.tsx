@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { BackHomeNav } from '@/components/layout/BackHomeNav';
 
 const T = {
-  bg: '#0a0a0f',
+  bg: 'var(--pf-bg)',
   surface: '#0B1E3F',
   border: '#1E3A5F',
   text: '#F4F6FA',

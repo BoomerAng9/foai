@@ -99,7 +99,7 @@ export default function TeamsPage() {
     : groupByDivision(confFilter);
 
   return (
-    <div className="min-h-screen flex flex-col" style={{ background: '#0A0A0F', color: '#fff' }}>
+    <div className="min-h-screen flex flex-col" style={{ background: 'var(--pf-bg)', color: '#fff' }}>
       <Header />
 
       <main className="flex-1 px-4 md:px-8 py-8 max-w-7xl mx-auto w-full">

@@ -1,0 +1,46 @@
+{
+  "team": "New England Patriots",
+  "abbreviation": "NE",
+  "conference": "AFC",
+  "division": "AFC East",
+  "ownership": {
+    "name": "Robert Kraft",
+    "style": "Hands-on owner who demands excellence; hired Vrabel — a former Patriots player — signaling return to Patriot Way",
+    "tendencies": "Loyal but demands results; backed Belichick for 24 years; now expects quicker turnaround under Vrabel"
+  },
+  "gm": {
+    "name": "Eliot Wolf (EVP of Player Personnel)",
+    "tenure": "3rd year (since 2024)",
+    "philosophy": "Draft-and-develop; building around Drake Maye; values offensive line and defense",
+    "analytics_approach": "Modern approach — Wolf comes from Green Bay Packers and Cleveland Browns front office trees"
+  },
+  "head_coach": {
+    "name": "Mike Vrabel",
+    "tenure": "2nd year (hired 2025)",
+    "scheme_offense": "Physical identity; values tight ends (explicitly said at league meetings he hopes to draft a TE); run-first approach",
+    "scheme_defense": "Multiple fronts; aggressive blitz packages; Vrabel is a defensive-minded coach",
+    "key_position_values": ["OT", "EDGE", "TE", "DL", "CB"]
+  },
+  "decision_makers": {
+    "primary": "Eliot Wolf (EVP) with Mike Vrabel (HC) having significant input",
+    "committee": ["Robert Kraft (owner)", "Eliot Wolf (EVP)", "Mike Vrabel (HC)"]
+  },
+  "roster_2026": {
+    "qb_situation": "Drake Maye — 2nd year franchise QB; development is top priority; need to protect him",
+    "key_departures": ["unverified"],
+    "key_signings": ["unverified"],
+    "cap_space": "unverified",
+    "expiring_contracts": ["Isaiah Wynn (OT, Moses — starter whose successor is needed)"]
+  },
+  "draft_capital_2026": {
+    "picks": ["Round 1 Pick 31", "Round 3 Pick 63", "Round 3 Pick 95", "Round 4 Pick 125", "Round 4 Pick 131", "Round 5 Pick 171", "Round 6 Pick 191", "Round 6 Pick 198", "Round 6 Pick 202", "Round 7 Pick 212", "Round 7 Pick 247"],
+    "traded_away": [],
+    "acquired_extra": ["Multiple extra picks across rounds"],
+    "compensatory": []
+  },
+  "needs": [
+    {"position": "OT", "priority": 1, "reason": "Draft is extremely shallow at tackle; need Moses's replacement in-house; can't envision doing it without using #31 on a tackle successor; LT Will Campbell's depth behind him is thin"},
+    {"position": "EDGE", "priority": 2, "reason": "Need pass-rush help badly; draft is deeper at EDGE than tackle; could address at #31 or early Day 2"},
+    {"position": "TE", "priority": 3, "reason": "Vrabel explicitly said at NFL annual meeting he hopes to add a tight end in the draft; position is a priority for his physical offense"}
+  ]
+}

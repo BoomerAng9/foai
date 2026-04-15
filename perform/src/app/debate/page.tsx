@@ -60,7 +60,7 @@ export default function DebatePage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col" style={{ background: '#0A0A0F', color: '#fff' }}>
+    <div className="min-h-screen flex flex-col" style={{ background: 'var(--pf-bg)', color: '#fff' }}>
       <Header />
 
       <main className="flex-1 max-w-6xl mx-auto w-full px-4 py-8">

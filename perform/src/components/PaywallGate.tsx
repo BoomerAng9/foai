@@ -34,7 +34,7 @@ export default function PaywallGate({ children }: { children: React.ReactNode })
 
   if (status === 'checking') {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: '#0A0A0F' }}>
+      <div className="min-h-screen flex items-center justify-center" style={{ background: 'var(--pf-bg)' }}>
         <div className="flex flex-col items-center gap-4">
           <div
             className="w-8 h-8 rounded-full border-2 border-t-transparent animate-spin"

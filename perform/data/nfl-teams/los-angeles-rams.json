@@ -1,0 +1,46 @@
+{
+  "team": "Los Angeles Rams",
+  "abbreviation": "LAR",
+  "conference": "NFC",
+  "division": "NFC West",
+  "ownership": {
+    "name": "Stan Kroenke",
+    "style": "Hands-off on football operations; trusts McVay/Snead completely; willing to fund aggressive moves",
+    "tendencies": "Supports all-in approach; backed Super Bowl-winning aggressive trading philosophy"
+  },
+  "gm": {
+    "name": "Les Snead",
+    "tenure": "14th year (since 2012)",
+    "philosophy": "Aggressive trader; 'F them picks' mentality but has matured; brought in Phil Savage as personnel expert; flexible approach at #13",
+    "analytics_approach": "Hybrid — willing to use analytics but trusts scouting heavily; known for creative roster construction"
+  },
+  "head_coach": {
+    "name": "Sean McVay",
+    "tenure": "10th year (since 2017)",
+    "scheme_offense": "Shanahan-tree outside zone; play-action heavy; motion and misdirection; elite scheme design",
+    "scheme_defense": "Raheem Morris departed; new DC Raheem Morris was replaced (unverified current DC); 3-4 transition",
+    "key_position_values": ["WR", "OT", "TE", "EDGE", "DL"]
+  },
+  "decision_makers": {
+    "primary": "Les Snead (GM) and Sean McVay (HC) — tightly aligned partnership",
+    "committee": ["Stan Kroenke (owner)", "Les Snead (GM)", "Sean McVay (HC)", "Phil Savage (senior personnel advisor)"]
+  },
+  "roster_2026": {
+    "qb_situation": "Matthew Stafford — veteran franchise QB; windows may be closing due to age",
+    "key_departures": ["unverified — traded original 1st, 5th, and 6th round picks to Chiefs for Trent McDuffie"],
+    "key_signings": ["Trent McDuffie (CB, acquired from Chiefs)", "Jaylen Watson (CB, acquired from Chiefs)"],
+    "cap_space": "unverified",
+    "expiring_contracts": ["unverified"]
+  },
+  "draft_capital_2026": {
+    "picks": ["Round 1 Pick 13 (from Atlanta)", "Round 2 (unverified)", "Round 3 (unverified)", "Round 4 (unverified)"],
+    "traded_away": ["Round 1 Pick 29 (original, to Chiefs)", "Round 5 Pick 169 (to Chiefs)", "Round 7 Pick 210 (to Chiefs)"],
+    "acquired_extra": ["Round 1 Pick 13 (from Atlanta — via 2025 draft trade for James Pearce Jr.)"],
+    "compensatory": []
+  },
+  "needs": [
+    {"position": "WR", "priority": 1, "reason": "Receiver help needed for Stafford; McVay's offense demands elite route runners and playmakers"},
+    {"position": "OT", "priority": 2, "reason": "Offensive tackle depth needed to protect aging Stafford; potential Trent Williams uncertainty applies across NFC West"},
+    {"position": "TE", "priority": 3, "reason": "Tight end need identified by analysts; McVay's system utilizes TEs effectively when talent is available"}
+  ]
+}

@@ -146,7 +146,7 @@ export default function AnalystFeedPage({ params }: { params: Promise<{ name: st
 
   if (!analyst) {
     return (
-      <div className="min-h-screen flex flex-col" style={{ background: '#0A0A0F' }}>
+      <div className="min-h-screen flex flex-col" style={{ background: 'var(--pf-bg)' }}>
         <Header />
         <main className="flex-1 flex items-center justify-center">
           <div className="text-center">
@@ -168,7 +168,7 @@ export default function AnalystFeedPage({ params }: { params: Promise<{ name: st
   }
 
   return (
-    <div className="min-h-screen flex flex-col" style={{ background: '#0A0A0F' }}>
+    <div className="min-h-screen flex flex-col" style={{ background: 'var(--pf-bg)' }}>
       <Header />
 
       <main className="flex-1 px-6 py-16 max-w-3xl mx-auto w-full">

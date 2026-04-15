@@ -100,7 +100,7 @@ export default function DraftLandingPage() {
   }, []);
 
   return (
-    <div className="min-h-screen flex flex-col" style={{ background: '#08080d', color: '#FFFFFF' }}>
+    <div className="min-h-screen flex flex-col" style={{ background: 'var(--pf-bg)', color: '#FFFFFF' }}>
       {/* NAV BAR */}
       <nav style={{ background: 'rgba(8,8,13,0.95)', borderBottom: '1px solid rgba(212,168,83,0.1)', backdropFilter: 'blur(12px)' }}
         className="sticky top-0 z-30">
