@@ -18,7 +18,7 @@ import { motion } from 'framer-motion';
 import { BackHomeNav } from '@/components/layout/BackHomeNav';
 
 const T = {
-  bg: '#060A14',
+  bg: 'var(--pf-bg)',
   bgAlt: '#0D1424',
   surface: '#111A2F',
   border: '#1F2A45',

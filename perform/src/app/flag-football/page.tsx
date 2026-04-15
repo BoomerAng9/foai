@@ -13,7 +13,7 @@ const sectionReveal = {
 
 export default function FlagFootballPage() {
   return (
-    <div className="min-h-screen" style={{ background: '#0A0A0F' }}>
+    <div className="min-h-screen" style={{ background: 'var(--pf-bg)' }}>
       <Header />
 
       {/* Hero */}

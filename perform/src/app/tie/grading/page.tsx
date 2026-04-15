@@ -20,7 +20,7 @@ import { TIELoader } from '@/components/tie/TIELoader';
 import { BackHomeNav } from '@/components/layout/BackHomeNav';
 
 const T = {
-  bg:        '#060A14',
+  bg:        'var(--pf-bg)',
   bgAlt:     '#0D1424',
   surface:   '#111A2F',
   surfaceAlt:'#0A1020',

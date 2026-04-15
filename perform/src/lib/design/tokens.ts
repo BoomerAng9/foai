@@ -26,7 +26,7 @@ export const COLORS = {
   goldBorderStrong: 'rgba(212,168,83,0.4)',
 
   // Surfaces
-  bg: '#0A0A0F',
+  bg: 'var(--pf-bg)',
   surface: '#111118',
   elevated: '#1A1A24',
 

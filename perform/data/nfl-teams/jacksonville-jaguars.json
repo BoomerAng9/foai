@@ -1,0 +1,46 @@
+{
+  "team": "Jacksonville Jaguars",
+  "abbreviation": "JAX",
+  "conference": "AFC",
+  "division": "AFC South",
+  "ownership": {
+    "name": "Shahid Khan",
+    "style": "Patient owner; willing to invest in coaching and roster; backed rebuild and now expecting sustained success",
+    "tendencies": "Hired entirely new coaching and GM staff in 2025; supported aggressive 2025 draft (Travis Hunter trade-up); expects playoffs"
+  },
+  "gm": {
+    "name": "James Gladstone",
+    "tenure": "2nd year (hired February 2025 — 1st year GM)",
+    "philosophy": "BPA approach — roster is good enough to not draft by need; values flexibility; willing to trade up or down; 'stay agile'",
+    "analytics_approach": "unverified — building his own scouting/analytics framework"
+  },
+  "head_coach": {
+    "name": "Liam Coen",
+    "tenure": "2nd year (hired January 2025)",
+    "scheme_offense": "Creative passing attack; RPOs; motion-heavy; developed into a top offense leading to 13-4 record and AFC South title",
+    "scheme_defense": "League's #1 run defense in 2025; DaVon Hamilton and Arik Armstead anchor interior",
+    "key_position_values": ["EDGE", "TE", "LB", "DL", "CB"]
+  },
+  "decision_makers": {
+    "primary": "James Gladstone (GM) and Liam Coen (HC) — aligned on BPA philosophy",
+    "committee": ["Shahid Khan (owner)", "James Gladstone (GM)", "Liam Coen (HC)"]
+  },
+  "roster_2026": {
+    "qb_situation": "Trevor Lawrence — franchise QB; 13-4 season validates the roster around him; Travis Hunter adds two-way star",
+    "key_departures": ["Devin Lloyd (LB, signed with Panthers)"],
+    "key_signings": ["Travis Hunter (2025 #1 overall pick — WR/CB two-way player, traded up from CLE)"],
+    "cap_space": "unverified — playoff team with cap commitments",
+    "expiring_contracts": ["unverified"]
+  },
+  "draft_capital_2026": {
+    "picks": ["Round 2 Pick 56", "Round 3 (three 3rd-round picks)", "Round 4 (unverified)", "Round 5 (unverified)", "Round 6 (unverified)", "Round 7 (three 7th-round picks)"],
+    "traded_away": ["Round 1 Pick 24 (to Cleveland in Travis Hunter trade-up)"],
+    "acquired_extra": ["Multiple Day 3 picks"],
+    "compensatory": []
+  },
+  "needs": [
+    {"position": "EDGE", "priority": 1, "reason": "Need to improve pass rush on both edge and interior; must build on league's #1 run defense with pass-rush complement"},
+    {"position": "TE", "priority": 2, "reason": "Need another tight end to pair with Brenton Strange; important position in Coen's offensive scheme"},
+    {"position": "LB", "priority": 3, "reason": "Lost Devin Lloyd to Panthers; need replacement linebacker to maintain defensive excellence"}
+  ]
+}

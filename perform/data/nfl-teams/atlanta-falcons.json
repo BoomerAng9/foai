@@ -1,0 +1,46 @@
+{
+  "team": "Atlanta Falcons",
+  "abbreviation": "ATL",
+  "conference": "NFC",
+  "division": "NFC South",
+  "ownership": {
+    "name": "Arthur Blank",
+    "style": "Engaged owner who cares about culture and fan experience; willing to spend on coaching and roster",
+    "tendencies": "Fired Raheem Morris after missing playoffs since 2017; brought in Stefanski and Matt Ryan (president of football) for fresh start"
+  },
+  "gm": {
+    "name": "Ian Cunningham",
+    "tenure": "1st year (hired January 29, 2026 — formerly Bears assistant GM)",
+    "philosophy": "Rebuilding with limited draft capital (5 picks); must maximize value on every selection",
+    "analytics_approach": "Modern front office background from Bears and Eagles organizations"
+  },
+  "head_coach": {
+    "name": "Kevin Stefanski",
+    "tenure": "1st year (hired January 17, 2026 — two-time AP Coach of the Year from Cleveland)",
+    "scheme_offense": "Stefanski runs a balanced offense — outside zone, play-action, RPOs; values tight ends and run game; Tua vs Penix QB battle brewing",
+    "scheme_defense": "unverified — new DC hire",
+    "key_position_values": ["OL", "DL", "WR", "CB", "RB"]
+  },
+  "decision_makers": {
+    "primary": "Ian Cunningham (GM) with Kevin Stefanski (HC) and Matt Ryan (president of football)",
+    "committee": ["Arthur Blank (owner)", "Matt Ryan (president of football)", "Ian Cunningham (GM)", "Kevin Stefanski (HC)"]
+  },
+  "roster_2026": {
+    "qb_situation": "Tua Tagovailoa (signed 1yr/$1.3M from Dolphins) vs Michael Penix Jr. QB battle; Stefanski evaluating both",
+    "key_departures": ["Raheem Morris (HC, fired)", "David Onyemata (DT, left in free agency)", "Darnell Mooney (WR, cut candidate for cap savings)"],
+    "key_signings": ["Tua Tagovailoa (QB, 1yr/$1.3M)", "Zac Robinson (OC, departed for Buccaneers)"],
+    "cap_space": "unverified — roster needs significant work",
+    "expiring_contracts": ["unverified"]
+  },
+  "draft_capital_2026": {
+    "picks": ["Round 2 Pick 48", "Round 3 Pick 79", "Round 4 Pick 122", "Round 6 Pick 215", "Round 7 Pick 231"],
+    "traded_away": ["Round 1 (to Rams, 2025 draft trade for James Pearce Jr.)", "Round 5 (traded)"],
+    "acquired_extra": [],
+    "compensatory": []
+  },
+  "needs": [
+    {"position": "OL", "priority": 1, "reason": "Only drafted one OL (7th round) in past two seasons; severe lack of depth; need to protect whichever QB wins the battle"},
+    {"position": "DL", "priority": 2, "reason": "23rd in yards allowed per carry (4.5); 27th in explosive run rate allowed (13.6%); lost best run defender Onyemata in free agency"},
+    {"position": "WR", "priority": 3, "reason": "Mooney's exorbitant cost makes him a likely cut; need receivers for Stefanski's offense regardless of QB"}
+  ]
+}

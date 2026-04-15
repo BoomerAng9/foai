@@ -6,7 +6,7 @@ import { BackHomeNav } from '@/components/layout/BackHomeNav';
 import { usePodcasterAuth } from '@/hooks/usePodcasterAuth';
 
 const T = {
-  bg: '#06122A',
+  bg: 'var(--pf-bg)',
   surface: '#0B1E3F',
   border: '#1E3A5F',
   text: '#F4F6FA',

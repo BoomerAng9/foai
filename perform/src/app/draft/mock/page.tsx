@@ -83,7 +83,7 @@ export default function MockDraftPage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col" style={{ background: '#0A0A0F', color: '#fff' }}>
+    <div className="min-h-screen flex flex-col" style={{ background: 'var(--pf-bg)', color: '#fff' }}>
       <Header />
 
       {/* Hero — draft stage background */}

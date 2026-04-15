@@ -1,0 +1,46 @@
+{
+  "team": "Carolina Panthers",
+  "abbreviation": "CAR",
+  "conference": "NFC",
+  "division": "NFC South",
+  "ownership": {
+    "name": "David Tepper",
+    "style": "Aggressive, impatient owner; willing to spend but historically poor coaching hires",
+    "tendencies": "Has fired multiple coaches quickly; finally seeing stability with Canales; won NFC South at 8-9 — first division title since 2015"
+  },
+  "gm": {
+    "name": "Dan Morgan",
+    "tenure": "2nd year (hired 2024)",
+    "philosophy": "Seeks best value; willing to move up and down draft board; tries to land prospects he likes regardless of positional need",
+    "analytics_approach": "unverified — relatively new GM; building his evaluation framework"
+  },
+  "head_coach": {
+    "name": "Dave Canales",
+    "tenure": "2nd year (hired 2024)",
+    "scheme_offense": "West Coast concepts; developing Bryce Young (unverified QB situation); QB-friendly system",
+    "scheme_defense": "Multiple fronts; need more talent across all levels of defense",
+    "key_position_values": ["EDGE", "S", "LB", "CB", "OT"]
+  },
+  "decision_makers": {
+    "primary": "Dan Morgan (GM) with Dave Canales (HC) and EVP Brandt Tillis collaboration",
+    "committee": ["David Tepper (owner)", "Dan Morgan (GM)", "Brandt Tillis (EVP)", "Dave Canales (HC)"]
+  },
+  "roster_2026": {
+    "qb_situation": "unverified — Young development or new addition; upward trajectory under Canales",
+    "key_departures": ["unverified"],
+    "key_signings": ["Jaelan Phillips (EDGE, acquired from Steelers)", "Devin Lloyd (LB, acquired from Jaguars)"],
+    "cap_space": "unverified",
+    "expiring_contracts": ["unverified"]
+  },
+  "draft_capital_2026": {
+    "picks": ["Round 1 Pick 19", "Round 2 (unverified)", "Round 3 (unverified)", "Round 4 (unverified)", "Round 5 (unverified)", "Round 6 (unverified)", "Round 7 (unverified)"],
+    "traded_away": [],
+    "acquired_extra": [],
+    "compensatory": []
+  },
+  "needs": [
+    {"position": "EDGE", "priority": 1, "reason": "Need edge rusher so badly; positional value makes it far and away the biggest need; almost assuredly taking best EDGE at 19 despite Phillips acquisition"},
+    {"position": "S", "priority": 2, "reason": "Canales said 'a couple of dynamic safeties could free us up' — sees opportunity for impact player at #19"},
+    {"position": "CB", "priority": 3, "reason": "Defense needs to get younger and more talented across the secondary; playoff team needs upgrades to compete"}
+  ]
+}

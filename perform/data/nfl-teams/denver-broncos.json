@@ -1,0 +1,46 @@
+{
+  "team": "Denver Broncos",
+  "abbreviation": "DEN",
+  "conference": "AFC",
+  "division": "AFC West",
+  "ownership": {
+    "name": "Rob Walton (Walton-Penner Family Ownership Group)",
+    "style": "Richest NFL owner; invested in winning; professional sports management group; bought team for $4.65B in 2022",
+    "tendencies": "Supportive of Payton and Paton; patient with roster construction; backed AFC Championship run"
+  },
+  "gm": {
+    "name": "George Paton",
+    "tenure": "6th year (since 2021)",
+    "philosophy": "Patient roster builder; retains own players (90%+ of 2025 starting snaps returning); smart trade execution (Waddle acquisition)",
+    "analytics_approach": "Hybrid — modern analytics with strong scouting; Minnesota Vikings front office background"
+  },
+  "head_coach": {
+    "name": "Sean Payton",
+    "tenure": "3rd year (since 2023)",
+    "scheme_offense": "Saints-style offense — short passing game, diverse formations, creative play-calling; developing Bo Nix",
+    "scheme_defense": "DC Vance Joseph; 3-4 base; aggressive pressures; physical run defense",
+    "key_position_values": ["OT", "ILB", "TE", "IOL", "CB"]
+  },
+  "decision_makers": {
+    "primary": "George Paton (GM) with Sean Payton (HC) having significant influence",
+    "committee": ["Rob Walton (owner)", "George Paton (GM)", "Sean Payton (HC)"]
+  },
+  "roster_2026": {
+    "qb_situation": "Bo Nix — 3rd year; breakout expected under Payton's continued development; AFC Championship appearance validates trajectory",
+    "key_departures": ["Round 1 Pick 30 (traded for Jaylen Waddle)"],
+    "key_signings": ["Jaylen Waddle (WR, acquired from Dolphins for 1st-round pick)"],
+    "cap_space": "Healthy — retained most of roster through smart contracts",
+    "expiring_contracts": ["Garett Bolles (OT, turning 34)", "Mike McGlinchey (OT, age 31)"]
+  },
+  "draft_capital_2026": {
+    "picks": ["Round 2 Pick 62", "Round 4 Pick 108", "Round 4 Pick 111", "Round 5 Pick 170", "Round 7 Pick 246", "Round 7 Pick 256", "Round 7 Pick 257"],
+    "traded_away": ["Round 1 Pick 30 (to Dolphins in Waddle trade)"],
+    "acquired_extra": [],
+    "compensatory": ["Round 7 Pick 256", "Round 7 Pick 257"]
+  },
+  "needs": [
+    {"position": "OT", "priority": 1, "reason": "Garett Bolles turning 34, McGlinchey is 31; need young tackle for future; could be in play at #62"},
+    {"position": "ILB", "priority": 2, "reason": "Singleton and Strnad will both be on wrong side of 30 by season start; need youth at inside linebacker for Vance Joseph's system"},
+    {"position": "TE", "priority": 3, "reason": "Need more impact from tight end position; Max Klare (Ohio State) and Eli Stowers (Vanderbilt) could be options at #62"}
+  ]
+}

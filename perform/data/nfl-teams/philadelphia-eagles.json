@@ -1,0 +1,46 @@
+{
+  "team": "Philadelphia Eagles",
+  "abbreviation": "PHI",
+  "conference": "NFC",
+  "division": "NFC East",
+  "ownership": {
+    "name": "Jeffrey Lurie",
+    "style": "Supportive of front office; backs Roseman's aggressive approach; willing to spend",
+    "tendencies": "Patient with coaching changes; trusts Howie Roseman's unconventional methods; values Super Bowl windows"
+  },
+  "gm": {
+    "name": "Howie Roseman (EVP of Football Operations)",
+    "tenure": "15th+ year — one of the longest-tenured GMs in the NFL",
+    "philosophy": "Aggressive trader and cap manipulator; builds from the inside out (trenches first); edge rusher is his most-drafted position in Round 1",
+    "analytics_approach": "Heavy analytics — one of the most aggressive data-driven front offices; innovative contract structures"
+  },
+  "head_coach": {
+    "name": "Nick Sirianni",
+    "tenure": "5th year (since 2021) — unverified if retained for 2026",
+    "scheme_offense": "RPO-heavy; spread concepts; values skill position versatility",
+    "scheme_defense": "DC Vic Fangio; 3-4 base; zone coverage; complex disguised pressures",
+    "key_position_values": ["OL", "EDGE", "S", "TE", "CB"]
+  },
+  "decision_makers": {
+    "primary": "Howie Roseman — unquestioned decision-maker on roster construction",
+    "committee": ["Jeffrey Lurie (owner)", "Howie Roseman (EVP)", "Nick Sirianni (HC, if retained)"]
+  },
+  "roster_2026": {
+    "qb_situation": "Jalen Hurts — franchise QB; need to protect him and improve weapons",
+    "key_departures": ["Josh Sweat (EDGE)", "Jaelan Phillips (EDGE, lost previous offseason)", "Reed Blankenship (S, free agency)"],
+    "key_signings": ["Riq Woolen (CB, 1yr deal from Seahawks)", "Johnny Mundt (TE, 1yr)", "Grant Calcaterra (TE, re-signed)"],
+    "cap_space": "unverified — Roseman typically manages cap aggressively",
+    "expiring_contracts": ["Lane Johnson (OT, pondered retirement)", "Landon Dickerson (LG, pondered retirement)", "Dallas Goedert (TE, 31yo, injury prone)"]
+  },
+  "draft_capital_2026": {
+    "picks": ["Round 1 Pick 23", "Round 2 (unverified)", "Round 3 (unverified)", "Round 4 (unverified)", "Round 5 (unverified)", "Round 6 (unverified)", "Round 7 (unverified)"],
+    "traded_away": [],
+    "acquired_extra": [],
+    "compensatory": []
+  },
+  "needs": [
+    {"position": "OL", "priority": 1, "reason": "Uncharacteristically poor OL in 2025; Lane Johnson and Landon Dickerson both pondered retirement; majority of pre-draft visits are with OL prospects"},
+    {"position": "EDGE", "priority": 2, "reason": "Lost Josh Sweat and Jaelan Phillips over last two offseasons; Nolan Smith and Jalyx Hunt have flashed but group lacks elite bite; Roseman's most-drafted position in Round 1"},
+    {"position": "S", "priority": 3, "reason": "Lost Reed Blankenship in free agency; only Drew Mukuba returning for second season; safety position feels unfinished"}
+  ]
+}

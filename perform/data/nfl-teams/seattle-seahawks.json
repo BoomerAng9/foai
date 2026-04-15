@@ -1,0 +1,46 @@
+{
+  "team": "Seattle Seahawks",
+  "abbreviation": "SEA",
+  "conference": "NFC",
+  "division": "NFC West",
+  "ownership": {
+    "name": "Jody Allen (Paul G. Allen Trust)",
+    "style": "Continuation of Paul Allen's vision; trusts football operations; supportive of aggressive moves",
+    "tendencies": "Backed the Super Bowl-winning roster construction; willing to trade picks for proven talent"
+  },
+  "gm": {
+    "name": "John Schneider",
+    "tenure": "17th year (since 2010) — one of the longest-tenured GMs",
+    "philosophy": "Aggressive trader; values athletic traits and competition; built Super Bowl dynasty through mid-round gems; willing to trade up or down",
+    "analytics_approach": "Hybrid — strong analytics with Pete Carroll's influence giving way to modern approach under Macdonald"
+  },
+  "head_coach": {
+    "name": "Mike Macdonald",
+    "tenure": "3rd year (since 2024)",
+    "scheme_offense": "unverified OC — new coordinator needed",
+    "scheme_defense": "Macdonald is a defensive specialist; multiple fronts; exotic blitz packages; Baltimore-tree scheme",
+    "key_position_values": ["CB", "RB", "EDGE", "S", "WR"]
+  },
+  "decision_makers": {
+    "primary": "John Schneider (GM/President of Football Ops)",
+    "committee": ["Jody Allen (owner)", "John Schneider (GM)", "Mike Macdonald (HC)"]
+  },
+  "roster_2026": {
+    "qb_situation": "Geno Smith — traded to Jets; Sam Howell or unverified QB situation; Super Bowl champions",
+    "key_departures": ["Riq Woolen (CB, signed with Eagles)", "Coby Bryant (S, signed with Bears)", "Kenneth Walker III (RB, signed with Chiefs)", "Boye Mafe (EDGE, signed with Bengals)", "Geno Smith (QB, traded to Jets)"],
+    "key_signings": ["Rashid Shaheed (WR, acquired via trade)"],
+    "cap_space": "unverified — Super Bowl champions typically face cap pressure from re-signings",
+    "expiring_contracts": ["Josh Jobe (CB)"]
+  },
+  "draft_capital_2026": {
+    "picks": ["Round 1 Pick 32", "Round 2 Pick 64", "Round 3 Pick 96", "Round 6 Pick 188 (from Cleveland)"],
+    "traded_away": ["Multiple picks traded for Rashid Shaheed"],
+    "acquired_extra": ["Round 6 Pick 188 (from Cleveland, 2024 trade)"],
+    "compensatory": []
+  },
+  "needs": [
+    {"position": "CB", "priority": 1, "reason": "Lost both Riq Woolen and Coby Bryant in free agency; cornerback room gutted; Josh Jobe is also a free agent"},
+    {"position": "RB", "priority": 2, "reason": "Kenneth Walker III signed with Chiefs; need featured back to replace him"},
+    {"position": "EDGE", "priority": 3, "reason": "Boye Mafe departed in free agency; need pass rush complement for Macdonald's defensive scheme"}
+  ]
+}

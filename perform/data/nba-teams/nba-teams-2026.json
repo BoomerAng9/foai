@@ -1,0 +1,542 @@
+[
+  {
+    "team": "Atlanta Hawks",
+    "abbreviation": "ATL",
+    "conference": "Eastern",
+    "division": "Southeast",
+    "owner": { "name": "Tony Ressler", "style": "Hands-off but engaged, major investment group backing" },
+    "gm": { "name": "Onsi Saleh", "tenure": "Since April 2025", "philosophy": "Promoted internally after Landry Fields was fired; tasked with finding new President of Basketball Ops" },
+    "coach": { "name": "Quin Snyder", "style": "Motion-heavy offense, defensive-minded schemes; entering final year of deal" },
+    "decision_chain": "Tony Ressler (owner) -> Onsi Saleh (GM) -> Quin Snyder (coach); new POBO search underway",
+    "window": "retooling",
+    "key_storylines": [
+      "Landry Fields fired as GM in April 2025, Onsi Saleh promoted internally",
+      "Search ongoing for new President of Basketball Operations",
+      "Quin Snyder on hot seat entering final contract year with no winning record in Atlanta",
+      "Trae Young traded to Washington Wizards in January 2026",
+      "Young core led by Zaccharie Risacher needs development direction"
+    ]
+  },
+  {
+    "team": "Boston Celtics",
+    "abbreviation": "BOS",
+    "conference": "Eastern",
+    "division": "Atlantic",
+    "owner": { "name": "Bill Chisholm", "style": "New ownership group; Wyc Grousbeck remains as Alternate Governor through 2028" },
+    "gm": { "name": "Brad Stevens", "tenure": "Since 2021 (President of Basketball Operations)", "philosophy": "Analytics-driven roster construction, shrewd cap management, championship-or-bust mentality" },
+    "coach": { "name": "Joe Mazzulla", "style": "Aggressive, pace-and-space offense; unconventional defensive schemes" },
+    "decision_chain": "Bill Chisholm (owner) -> Brad Stevens (President of Basketball Ops) -> Joe Mazzulla (coach)",
+    "window": "contending",
+    "key_storylines": [
+      "Ownership transition from Wyc Grousbeck to Bill Chisholm group completed in 2025",
+      "Brad Stevens credited with GM masterclass in roster construction",
+      "Defending recent championship pedigree with deep roster",
+      "54-25 record, reestablished as Eastern Conference powerhouse",
+      "Stevens navigating new ownership relationship while maintaining championship culture"
+    ]
+  },
+  {
+    "team": "Brooklyn Nets",
+    "abbreviation": "BKN",
+    "conference": "Eastern",
+    "division": "Atlantic",
+    "owner": { "name": "Joe Tsai", "style": "Patient, committed to long-term rebuild after superteam era collapse" },
+    "gm": { "name": "Sean Marks", "tenure": "Since 2016", "philosophy": "Player development focus, building through the draft after trading away all assets in KD/Kyrie era" },
+    "coach": { "name": "Jordi Fernandez", "style": "Development-focused, emphasis on culture-building and defensive identity" },
+    "decision_chain": "Joe Tsai (owner) -> Sean Marks (GM) -> Jordi Fernandez (coach); strong collaborative partnership",
+    "window": "rebuilding",
+    "key_storylines": [
+      "Deep rebuild continues after post-superteam teardown",
+      "Jordi Fernandez in second year, improving on year-one growing pains",
+      "20-61 first-year record under Fernandez; year two expected to show progress",
+      "Building around young draft picks and development projects",
+      "Last playoff appearance was 2023; multi-year rebuild timeline"
+    ]
+  },
+  {
+    "team": "Charlotte Hornets",
+    "abbreviation": "CHA",
+    "conference": "Eastern",
+    "division": "Southeast",
+    "owner": { "name": "Rick Schnall", "style": "New ownership (co-owned with Gabe Plotkin), invested in turnaround" },
+    "gm": { "name": "Jeff Peterson", "tenure": "Since 2024 (EVP of Basketball Operations)", "philosophy": "Player development emphasis, culture-building, collaborative with coaching staff" },
+    "coach": { "name": "Charles Lee", "style": "Player development specialist, 40-year-old former Celtics/Bucks assistant, culture builder" },
+    "decision_chain": "Rick Schnall (owner) -> Jeff Peterson (EVP Basketball Ops) -> Charles Lee (coach)",
+    "window": "retooling",
+    "key_storylines": [
+      "Jeff Peterson and Charles Lee partnership showing promise after 43-38 first year together",
+      "Massive turnaround from 19-win season before their arrival",
+      "Focus on daily competition and young player development entering 2025-26",
+      "New ownership investing in long-term vision",
+      "Building identity around player development and defensive culture"
+    ]
+  },
+  {
+    "team": "Chicago Bulls",
+    "abbreviation": "CHI",
+    "conference": "Eastern",
+    "division": "Central",
+    "owner": { "name": "Jerry Reinsdorf", "style": "Old-school, cost-conscious, reluctant to spend into luxury tax" },
+    "gm": { "name": "Vacant (searching)", "tenure": "Arturas Karnisovas and Marc Eversley fired in April 2026", "philosophy": "Seeking new head of basketball operations; must be sold on keeping Billy Donovan as coach" },
+    "coach": { "name": "Billy Donovan", "style": "Structured offense, player-friendly, experienced NBA and college coach" },
+    "decision_chain": "Jerry Reinsdorf / Michael Reinsdorf (CEO) -> New POBO (TBD) -> Billy Donovan (coach); currently in transition",
+    "window": "retooling",
+    "key_storylines": [
+      "Arturas Karnisovas and Marc Eversley fired with 4 games left in 2025-26 season",
+      "Fourth straight playoff miss triggered front office overhaul",
+      "Michael Reinsdorf requiring new hire to retain Billy Donovan as coach",
+      "Engaging search firm for new head of basketball operations",
+      "Team direction unclear pending new front office leadership"
+    ]
+  },
+  {
+    "team": "Cleveland Cavaliers",
+    "abbreviation": "CLE",
+    "conference": "Eastern",
+    "division": "Central",
+    "owner": { "name": "Dan Gilbert", "style": "Willing to spend, championship-focused, empowers front office" },
+    "gm": { "name": "Koby Altman", "tenure": "Since 2017 (President of Basketball Ops, extended through 2030)", "philosophy": "Aggressive roster construction, analytics-informed, championship-contending window mindset" },
+    "coach": { "name": "Kenny Atkinson", "style": "Modern pace-and-space offense, player development background, 2025 Coach of the Year" },
+    "decision_chain": "Dan Gilbert (owner) -> Koby Altman (President of Basketball Ops) -> Kenny Atkinson (coach)",
+    "window": "contending",
+    "key_storylines": [
+      "Kenny Atkinson won 2025 Coach of the Year after 64-18 inaugural season",
+      "Koby Altman extended through 2030, runner-up for Executive of the Year",
+      "Championship-contending roster with 50-29 record in 2025-26",
+      "Organization fully aligned from ownership through coaching",
+      "Clear championship-or-bust mandate from Dan Gilbert"
+    ]
+  },
+  {
+    "team": "Dallas Mavericks",
+    "abbreviation": "DAL",
+    "conference": "Western",
+    "division": "Southwest",
+    "owner": { "name": "Patrick Dumont (Adelson family)", "style": "New ownership, decisive, willing to make tough organizational changes" },
+    "gm": { "name": "Michael Finley / Matt Riccardi (co-interim GMs)", "tenure": "Since November 2025 (after Nico Harrison fired)", "philosophy": "Interim leadership; comprehensive search for permanent GM underway" },
+    "coach": { "name": "Jason Kidd", "style": "Players' coach, defensive emphasis, championship experience (2024 Finals run)" },
+    "decision_chain": "Patrick Dumont (owner) -> Co-interim GMs (Finley/Riccardi) -> Jason Kidd (coach); permanent GM search ongoing",
+    "window": "retooling",
+    "key_storylines": [
+      "Nico Harrison fired November 2025 after dismal start and salary cap mismanagement",
+      "Luka Doncic traded to Lakers, Cooper Flagg drafted as new cornerstone",
+      "Jason Kidd retained with contract extension despite organizational turmoil",
+      "Comprehensive search for permanent GM replacement ongoing",
+      "Disappointing season after 2024 Finals appearance"
+    ]
+  },
+  {
+    "team": "Denver Nuggets",
+    "abbreviation": "DEN",
+    "conference": "Western",
+    "division": "Northwest",
+    "owner": { "name": "Stan Kroenke / Ann Walton Kroenke", "style": "Billionaire ownership (Walmart family), high expectations, willing to make dramatic changes" },
+    "gm": { "name": "Ben Tenzer / Jon Wallace (co-EVPs of Basketball Ops)", "tenure": "Since April 2025 (jointly replacing Calvin Booth)", "philosophy": "New leadership duo tasked with maximizing Jokic championship window" },
+    "coach": { "name": "David Adelman", "style": "Promoted from interim after leading team to conference semifinals; collaborative, offensive-minded" },
+    "decision_chain": "Kroenke family (owners) -> Ben Tenzer & Jon Wallace (co-EVPs) -> David Adelman (coach)",
+    "window": "contending",
+    "key_storylines": [
+      "Michael Malone and Calvin Booth both fired April 2025 due to organizational toxicity",
+      "David Adelman promoted to full-time coach May 2025 after playoff success as interim",
+      "Complete front office overhaul with co-EVP structure replacing single GM",
+      "51-28 record proves team remains contender around Nikola Jokic",
+      "Kroenke family demanded culture reset and got dramatic results"
+    ]
+  },
+  {
+    "team": "Detroit Pistons",
+    "abbreviation": "DET",
+    "conference": "Eastern",
+    "division": "Central",
+    "owner": { "name": "Tom Gores", "style": "Patient through rebuild, empowered new leadership to execute turnaround" },
+    "gm": { "name": "Trajan Langdon", "tenure": "Since 2024 (President of Basketball Operations)", "philosophy": "Culture-first rebuild, aggressive player development, transformed 14-win team into contender" },
+    "coach": { "name": "J.B. Bickerstaff", "style": "Defensive identity, accountability-driven, player development focus" },
+    "decision_chain": "Tom Gores (owner) -> Trajan Langdon (President of Basketball Ops) -> J.B. Bickerstaff (coach)",
+    "window": "contending",
+    "key_storylines": [
+      "Stunning turnaround from 14-win team to 59-22 record in two years under Langdon",
+      "Cade Cunningham emerging as franchise cornerstone and MVP candidate",
+      "One of the league's most dramatic rebuilds in recent memory",
+      "J.B. Bickerstaff establishing elite defensive culture",
+      "Legitimate title contender after years of futility"
+    ]
+  },
+  {
+    "team": "Golden State Warriors",
+    "abbreviation": "GSW",
+    "conference": "Western",
+    "division": "Pacific",
+    "owner": { "name": "Joe Lacob", "style": "Aggressive, championship-obsessed, willing to spend into luxury tax, hands-on" },
+    "gm": { "name": "Mike Dunleavy Jr.", "tenure": "Since 2023", "philosophy": "Balancing win-now with Steph Curry while preparing for post-dynasty transition" },
+    "coach": { "name": "Steve Kerr", "style": "Motion offense, player empowerment, four-time champion; in final year of contract" },
+    "decision_chain": "Joe Lacob (owner) -> Mike Dunleavy Jr. (GM) -> Steve Kerr (coach); all three aligned",
+    "window": "retooling",
+    "key_storylines": [
+      "Steve Kerr in final year of $35M contract, extension discussions deferred to end of season",
+      "Kerr, Dunleavy, and Lacob publicly aligned despite contract uncertainty",
+      "Navigating post-dynasty transition while Steph Curry still competing",
+      "Kerr highest-paid NBA coach at $17.5M/year",
+      "Dunleavy envisions Kerr returning beyond 2025-26"
+    ]
+  },
+  {
+    "team": "Houston Rockets",
+    "abbreviation": "HOU",
+    "conference": "Western",
+    "division": "Southwest",
+    "owner": { "name": "Tilman Fertitta", "style": "Demanding, results-oriented, willing to invest in winning product" },
+    "gm": { "name": "Rafael Stone", "tenure": "Since 2020", "philosophy": "Patient rebuild through draft, now transitioning to win-now; analytics-informed" },
+    "coach": { "name": "Ime Udoka", "style": "Defensive intensity, accountability, structured half-court offense; extended through 2031" },
+    "decision_chain": "Tilman Fertitta (owner) -> Rafael Stone (GM) -> Ime Udoka (coach); Stone and Udoka aligned from day one",
+    "window": "contending",
+    "key_storylines": [
+      "Ime Udoka extended through 2031 with massive contract after back-to-back 50+ win seasons",
+      "51-30 record continues Houston's rise as Western Conference contender",
+      "Rafael Stone and Udoka partnership driving franchise turnaround",
+      "Young core fully developed and ready to compete for championship",
+      "First 50-win seasons since Harden era"
+    ]
+  },
+  {
+    "team": "Indiana Pacers",
+    "abbreviation": "IND",
+    "conference": "Eastern",
+    "division": "Central",
+    "owner": { "name": "Herbert Simon", "style": "Veteran owner, stability-focused, trusts front office leadership" },
+    "gm": { "name": "Kevin Pritchard", "tenure": "Since 2017 (President of Basketball Operations)", "philosophy": "Competitive roster-building, values coaching stability and culture" },
+    "coach": { "name": "Rick Carlisle", "style": "Veteran strategist, structured offense, emphasis on execution and discipline; multi-year extension" },
+    "decision_chain": "Herbert Simon (owner) -> Kevin Pritchard (President of Basketball Ops) -> Rick Carlisle (coach)",
+    "window": "contending",
+    "key_storylines": [
+      "Consecutive Eastern Conference Finals appearances under Carlisle",
+      "First NBA Finals appearance in 25 years since Carlisle's return in 2021",
+      "Carlisle signed multi-year extension reflecting organizational commitment",
+      "Tyrese Haliburton emerging as franchise cornerstone",
+      "Stable front office allowing sustained competitive window"
+    ]
+  },
+  {
+    "team": "Los Angeles Clippers",
+    "abbreviation": "LAC",
+    "conference": "Western",
+    "division": "Pacific",
+    "owner": { "name": "Steve Ballmer", "style": "Richest NBA owner ($118B net worth), passionate, willing to spend unlimited resources" },
+    "gm": { "name": "Lawrence Frank", "tenure": "Since 2017 (President of Basketball Operations)", "philosophy": "Win-now at all costs, values continuity, analytics-driven roster construction" },
+    "coach": { "name": "Tyronn Lue", "style": "Championship-experienced (2016 Cavs), strong player relationships, adjustable schemes" },
+    "decision_chain": "Steve Ballmer (owner) -> Lawrence Frank (President of Basketball Ops) -> Tyronn Lue (coach)",
+    "window": "retooling",
+    "key_storylines": [
+      "Disastrous 5-15 start put pressure on Lue and Frank",
+      "Ballmer publicly placed responsibility on Lue and Frank to turn things around",
+      "Despite struggles, ownership values continuity and extensions were discussed",
+      "New Intuit Dome arena opened but on-court results disappointing",
+      "Post-Kawhi Leonard era transition proving difficult"
+    ]
+  },
+  {
+    "team": "Los Angeles Lakers",
+    "abbreviation": "LAL",
+    "conference": "Western",
+    "division": "Pacific",
+    "owner": { "name": "Mark Walter / Jeanie Buss", "style": "Mark Walter new majority owner (2025 purchase from Buss family); brand-conscious, willing to invest" },
+    "gm": { "name": "Rob Pelinka", "tenure": "Since 2017", "philosophy": "Star-driven roster construction, aggressive in trades and free agency" },
+    "coach": { "name": "JJ Redick", "style": "Modern offensive philosophy, analytics-savvy, strong communicator; extended entering year two" },
+    "decision_chain": "Mark Walter & Jeanie Buss (governors) -> Rob Pelinka (GM) -> JJ Redick (coach)",
+    "window": "contending",
+    "key_storylines": [
+      "Major ownership transition with Mark Walter becoming majority owner in 2025",
+      "JJ Redick extended after impressive 50-32 rookie coaching season",
+      "Luka Doncic acquired, signed to 3-year $165M extension",
+      "Questions about whether new ownership will keep Pelinka and Redick long-term",
+      "Lon Rosen hired as president of business operations from Dodgers"
+    ]
+  },
+  {
+    "team": "Memphis Grizzlies",
+    "abbreviation": "MEM",
+    "conference": "Western",
+    "division": "Southwest",
+    "owner": { "name": "Robert Pera", "style": "Tech billionaire ($20B+ net worth), generally hands-off, trusts front office" },
+    "gm": { "name": "Zach Kleiman", "tenure": "Since 2019 (EVP of Basketball Operations)", "philosophy": "Aggressive team-building, willing to make bold trades, analytics-forward" },
+    "coach": { "name": "Tuomas Iisalo", "style": "First-year coach hired May 2025; international coaching background, modern system" },
+    "decision_chain": "Robert Pera (owner) -> Zach Kleiman (EVP Basketball Ops) -> Tuomas Iisalo (coach)",
+    "window": "rebuilding",
+    "key_storylines": [
+      "25-56 record in disappointing 2025-26 season",
+      "Tuomas Iisalo hired as full-time coach in May 2025",
+      "Ja Morant health and availability continues to be franchise's defining question",
+      "Pera ownership willing to be financially aggressive over next 5 seasons",
+      "Franchise appears stuck despite significant talent investment"
+    ]
+  },
+  {
+    "team": "Miami Heat",
+    "abbreviation": "MIA",
+    "conference": "Eastern",
+    "division": "Southeast",
+    "owner": { "name": "Micky Arison", "style": "Hall of Fame owner (inducted 2025), loyal to organizational stability and Heat Culture" },
+    "gm": { "name": "Andy Elisburg", "tenure": "Since 2013 (SVP Basketball Ops / GM)", "philosophy": "Cap management specialist, undrafted free agent pipeline, Heat Culture development" },
+    "coach": { "name": "Erik Spoelstra", "style": "Elite tactician, player maximizer, highest-paid coach ($120M contract); named Team USA head coach" },
+    "decision_chain": "Micky Arison (owner) -> Pat Riley (President, final say on basketball matters since 1995) -> Andy Elisburg (GM) -> Erik Spoelstra (coach)",
+    "window": "contending",
+    "key_storylines": [
+      "Micky Arison inducted into Basketball Hall of Fame Class of 2025",
+      "Erik Spoelstra named Team USA head coach, cementing legacy",
+      "Pat Riley still holds final say on basketball decisions at age 80+",
+      "Organization maintains remarkable leadership stability since 1995",
+      "Heat Culture continues to maximize roster talent beyond expectations"
+    ]
+  },
+  {
+    "team": "Milwaukee Bucks",
+    "abbreviation": "MIL",
+    "conference": "Eastern",
+    "division": "Central",
+    "owner": { "name": "Wes Edens / Jimmy Haslam", "style": "Co-owners alternating 5-year governor terms; willing to spend into luxury tax" },
+    "gm": { "name": "Jon Horst", "tenure": "Since 2017 (multi-year extension signed April 2025)", "philosophy": "Maximize Giannis championship window, aggressive trades, willing to take big swings" },
+    "coach": { "name": "Doc Rivers", "style": "Veteran coach, motivator, championship experience (2008 Celtics); future uncertain" },
+    "decision_chain": "Wes Edens & Jimmy Haslam (co-owners) -> Jon Horst (GM) -> Doc Rivers (coach)",
+    "window": "retooling",
+    "key_storylines": [
+      "Playoff streak comes to an end in disappointing 2025-26 season",
+      "Giannis Antetokounmpo relationship with organization described as 'fractured' and 'toxic'",
+      "Damian Lillard waived after achilles injury; Myles Turner acquired",
+      "Doc Rivers' future uncertain; Horst declined to confirm his return",
+      "Jon Horst extended but faces massive offseason decisions around Giannis"
+    ]
+  },
+  {
+    "team": "Minnesota Timberwolves",
+    "abbreviation": "MIN",
+    "conference": "Western",
+    "division": "Northwest",
+    "owner": { "name": "Marc Lore / Alex Rodriguez", "style": "New owners (transfer approved June 2025), hands-off on basketball operations, stability-focused" },
+    "gm": { "name": "Tim Connelly", "tenure": "Since 2022 (President of Basketball Operations)", "philosophy": "Competitive stability, re-sign core players, trust coaching staff" },
+    "coach": { "name": "Chris Finch", "style": "Creative offensive schemes, back-to-back Conference Finals with different rosters, elite at adjustments" },
+    "decision_chain": "Marc Lore & Alex Rodriguez (owners) -> Tim Connelly (President of Basketball Ops) -> Chris Finch (coach)",
+    "window": "contending",
+    "key_storylines": [
+      "First season under Marc Lore and Alex Rodriguez ownership (approved June 2025)",
+      "New owners opted for stability: re-signed Julius Randle and Naz Reid",
+      "Chris Finch leading back-to-back Conference Finals runs with different rosters",
+      "40-26 record, 6th in Western Conference",
+      "Tim Connelly has strong relationship with new ownership group"
+    ]
+  },
+  {
+    "team": "New Orleans Pelicans",
+    "abbreviation": "NOP",
+    "conference": "Western",
+    "division": "Southwest",
+    "owner": { "name": "Gayle Benson", "style": "Hands-off on basketball, delegates to front office; also owns NFL Saints" },
+    "gm": { "name": "Joe Dumars", "tenure": "Since April 2025 (EVP, replacing David Griffin)", "philosophy": "Veteran executive tasked with organizational overhaul after years of underperformance" },
+    "coach": { "name": "James Borrego (interim)", "style": "Associate head coach promoted after Willie Green fired 12 games into season (2-10 start)" },
+    "decision_chain": "Gayle Benson (owner) -> Joe Dumars (EVP) -> James Borrego (interim coach)",
+    "window": "rebuilding",
+    "key_storylines": [
+      "David Griffin fired, replaced by Joe Dumars as EVP end of 2024-25 season",
+      "Willie Green fired after 2-10 start to 2025-26, James Borrego named interim",
+      "NBA-record three 30-point losses in first six games",
+      "Complete organizational overhaul underway",
+      "Gayle Benson under increasing pressure for both Pelicans and Saints struggles"
+    ]
+  },
+  {
+    "team": "New York Knicks",
+    "abbreviation": "NYK",
+    "conference": "Eastern",
+    "division": "Atlantic",
+    "owner": { "name": "James Dolan", "style": "Hands-on but controversial; invested in winning, rarely speaks publicly" },
+    "gm": { "name": "Leon Rose", "tenure": "Since 2020 (President)", "philosophy": "Aggressive roster-building through trades, win-now mentality, values collaborative coaching" },
+    "coach": { "name": "Mike Brown", "style": "Championship experience (LeBron-era Cavs and Warriors assistant), collaborative approach, 4-year $40M deal" },
+    "decision_chain": "James Dolan (owner) -> Leon Rose (President) -> Mike Brown (coach); emphasis on collaboration over unilateral decisions",
+    "window": "contending",
+    "key_storylines": [
+      "Tom Thibodeau fired after 5 seasons, replaced by Mike Brown (July 2025)",
+      "Organization wanted collaborative coaching after Thibodeau's 'too unilateral' approach",
+      "51-28 record, 3rd in Eastern Conference in Brown's first season",
+      "Mike Brown signed to 4-year $40M deal, bringing championship pedigree",
+      "Leon Rose's long-term future confirmed by Dolan"
+    ]
+  },
+  {
+    "team": "Oklahoma City Thunder",
+    "abbreviation": "OKC",
+    "conference": "Western",
+    "division": "Northwest",
+    "owner": { "name": "Clay Bennett", "style": "Loyal, patient, trusts front office completely through rebuild and rise" },
+    "gm": { "name": "Sam Presti", "tenure": "Since 2007", "philosophy": "Draft-and-develop architect, long-term vision, asset accumulation, analytics pioneer" },
+    "coach": { "name": "Mark Daigneault", "style": "Young, player development focus, championship-winning system (2025 title)" },
+    "decision_chain": "Clay Bennett (owner) -> Sam Presti (GM) -> Mark Daigneault (coach)",
+    "window": "contending",
+    "key_storylines": [
+      "Defending 2025 NBA champions, 62-16 record in 2025-26",
+      "Shai Gilgeous-Alexander massive lead in MVP race",
+      "Best record in Western Conference, dominant +11.7 net rating",
+      "Sam Presti's long-term rebuild culminated in championship dynasty",
+      "Championship rings ceremony kicked off dominant title defense season"
+    ]
+  },
+  {
+    "team": "Orlando Magic",
+    "abbreviation": "ORL",
+    "conference": "Eastern",
+    "division": "Southeast",
+    "owner": { "name": "Dan DeVos (DeVos family)", "style": "Committed to winning, patient through rebuild, willing to push chips in" },
+    "gm": { "name": "Jeff Weltman", "tenure": "Since 2017 (President of Basketball Operations)", "philosophy": "Draft-and-develop core, patient roster construction, now pivoting to win-now" },
+    "coach": { "name": "Jamahl Mosley", "style": "Player development emphasis, strong defensive identity, building around Paolo Banchero and Franz Wagner" },
+    "decision_chain": "DeVos family (owners) -> Jeff Weltman (President of Basketball Ops) -> Jamahl Mosley (coach)",
+    "window": "contending",
+    "key_storylines": [
+      "DeVos family 'eager to push all chips in' according to Weltman",
+      "Mosley on hot seat amid coaching carousel rumors despite player development success",
+      "Building around Paolo Banchero and Franz Wagner as franchise cornerstones",
+      "Weltman and Mosley satisfied with roster moves heading into season",
+      "Transitioning from rebuild to contention window"
+    ]
+  },
+  {
+    "team": "Philadelphia 76ers",
+    "abbreviation": "PHI",
+    "conference": "Eastern",
+    "division": "Atlantic",
+    "owner": { "name": "Josh Harris", "style": "Analytics-driven, willing to spend big in free agency, championship-focused" },
+    "gm": { "name": "Daryl Morey", "tenure": "Since 2020 (President of Basketball Operations)", "philosophy": "Analytics pioneer, star-hunting through trades and free agency, willing to make bold moves" },
+    "coach": { "name": "Nick Nurse", "style": "Defensive innovator, championship experience (2019 Raptors), adjustable schemes" },
+    "decision_chain": "Josh Harris (owner) -> Daryl Morey (President of Basketball Ops) -> Nick Nurse (coach)",
+    "window": "contending",
+    "key_storylines": [
+      "Dramatic bounce-back from 24-58 disaster to 44-37 and 8th seed in 2025-26",
+      "Morey and Nurse returned despite heavy scrutiny after 2024-25 flop",
+      "Joel Embiid health remains franchise's defining variable",
+      "Significant improvement proved front office stability was right call",
+      "Continued pressure to maximize championship window with aging core"
+    ]
+  },
+  {
+    "team": "Phoenix Suns",
+    "abbreviation": "PHX",
+    "conference": "Western",
+    "division": "Pacific",
+    "owner": { "name": "Mat Ishbia", "style": "Hands-on, culture-obsessed, willing to spend and make dramatic changes" },
+    "gm": { "name": "Brian Gregory", "tenure": "Since 2025 (replacing James Jones)", "philosophy": "Complete organizational reset alongside new coach; culture-first approach" },
+    "coach": { "name": "Jordan Ott", "style": "Young coach from Cavaliers staff, 4th coach in 4 years; modern defensive system" },
+    "decision_chain": "Mat Ishbia (owner) -> Brian Gregory (GM) -> Jordan Ott (coach); Ishbia very involved",
+    "window": "contending",
+    "key_storylines": [
+      "Complete organizational reset: new GM (Brian Gregory), new coach (Jordan Ott)",
+      "Fourth head coach in four years under Ishbia ownership",
+      "Jordan Ott hired from Cleveland, establishing new defensive identity",
+      "32-23 at All-Star break, 7th in West - pleasant surprise",
+      "Kevin Durant-Mike Budenholzer era firmly over"
+    ]
+  },
+  {
+    "team": "Portland Trail Blazers",
+    "abbreviation": "POR",
+    "conference": "Western",
+    "division": "Northwest",
+    "owner": { "name": "Jody Allen", "style": "Paul Allen estate ownership, generally hands-off, trusts front office" },
+    "gm": { "name": "Joe Cronin", "tenure": "Since 2022 (multi-year extension April 2025)", "philosophy": "Patient rebuild, building young core, emphasizing development pipeline" },
+    "coach": { "name": "Tiago Splitter (interim)", "style": "Stepped in after Chauncey Billups placed on leave October 2025 due to gambling arrest" },
+    "decision_chain": "Jody Allen (Governor) -> Joe Cronin (GM) -> Tiago Splitter (interim coach)",
+    "window": "rebuilding",
+    "key_storylines": [
+      "Chauncey Billups arrested for alleged illegal gambling scheme October 2025, placed on NBA leave",
+      "Tiago Splitter named interim head coach",
+      "Joe Cronin extended after strong second-half turnaround (23-18 since January)",
+      "Young core developing but coaching disruption derailed progress",
+      "Billups had just signed multi-year extension before arrest"
+    ]
+  },
+  {
+    "team": "Sacramento Kings",
+    "abbreviation": "SAC",
+    "conference": "Western",
+    "division": "Pacific",
+    "owner": { "name": "Vivek Ranadive", "style": "Tech mogul, involved in coaching decisions, sometimes impulsive" },
+    "gm": { "name": "Scott Perry (interim)", "tenure": "Since April 2025 (Monte McNair departed after 5 years)", "philosophy": "Fifth lead executive since Ranadive took over in 2013; stability needed" },
+    "coach": { "name": "Doug Christie", "style": "Former Kings fan favorite, promoted from interim; 27-24 regular season record; longtime Ranadive supporter" },
+    "decision_chain": "Vivek Ranadive (owner, heavily involved) -> Scott Perry (interim GM) -> Doug Christie (coach)",
+    "window": "retooling",
+    "key_storylines": [
+      "Monte McNair and Kings mutually parted ways after Play-In Tournament loss",
+      "Doug Christie retained as coach with strong backing from Ranadive",
+      "Scott Perry serving as interim GM; search for permanent executive underway",
+      "Fifth lead executive change under Ranadive ownership since 2013",
+      "Trainwreck season blamed on multiple people across organization"
+    ]
+  },
+  {
+    "team": "San Antonio Spurs",
+    "abbreviation": "SAS",
+    "conference": "Western",
+    "division": "Southwest",
+    "owner": { "name": "Peter J. Holt", "style": "Loyal to organization's tradition, patient through rebuild, respects Popovich legacy" },
+    "gm": { "name": "Brian Wright", "tenure": "Since 2019", "philosophy": "Building around Victor Wembanyama, patient development approach, Pop influence" },
+    "coach": { "name": "Mitch Johnson", "style": "Promoted from interim after Popovich stepped down; 10th season with Spurs organization, 19th coach in franchise history" },
+    "decision_chain": "Peter J. Holt (Managing Partner) -> Gregg Popovich (President of Basketball Ops) -> Brian Wright (GM) -> Mitch Johnson (coach)",
+    "window": "retooling",
+    "key_storylines": [
+      "Gregg Popovich stepped down as coach after 29 seasons due to health, moved to President of Basketball Ops",
+      "Mitch Johnson named 19th head coach in franchise history, May 2025",
+      "Best franchise start in history at 5-0 to open season",
+      "Victor Wembanyama development remains organizational priority",
+      "New era begins while honoring Popovich legacy"
+    ]
+  },
+  {
+    "team": "Toronto Raptors",
+    "abbreviation": "TOR",
+    "conference": "Eastern",
+    "division": "Atlantic",
+    "owner": { "name": "Larry Tanenbaum (MLSE / Bell & Rogers)", "style": "Corporate ownership through MLSE, willing to invest in winning" },
+    "gm": { "name": "Bobby Webster", "tenure": "Since 2017", "philosophy": "Player development, international scouting pipeline, building young core" },
+    "coach": { "name": "Darko Rajakovic", "style": "Modern offensive system, player development focus, international coaching perspective" },
+    "decision_chain": "MLSE / Larry Tanenbaum (ownership) -> Bobby Webster (GM) -> Darko Rajakovic (coach)",
+    "window": "rebuilding",
+    "key_storylines": [
+      "Masai Ujiri departed June 2025 after 12 years, ending transformative era",
+      "Ujiri joined Toronto Tempo WNBA expansion team as principal owner",
+      "Bobby Webster and Darko Rajakovic provide coaching stability post-Ujiri",
+      "Young roster in development phase without clear franchise cornerstone",
+      "Organization navigating identity reset after Ujiri departure"
+    ]
+  },
+  {
+    "team": "Utah Jazz",
+    "abbreviation": "UTA",
+    "conference": "Western",
+    "division": "Northwest",
+    "owner": { "name": "Ryan Smith", "style": "Tech billionaire, young owner, invested in new arena and franchise building" },
+    "gm": { "name": "Justin Zanik (GM) / Austin Ainge (President of Basketball Ops)", "tenure": "Austin Ainge promoted 2025 (Danny Ainge's son); Zanik since 2019", "philosophy": "Patient rebuild, Austin Ainge has final recommendation to owner; Danny Ainge in advisory role" },
+    "coach": { "name": "Will Hardy", "style": "Young coach extended through 2031; development-focused, demanding, viral for intensity" },
+    "decision_chain": "Ryan Smith (owner) -> Austin Ainge (President of Basketball Ops, final recommendation) -> Justin Zanik (GM) -> Will Hardy (coach); Danny Ainge in advisory capacity",
+    "window": "rebuilding",
+    "key_storylines": [
+      "Austin Ainge (Danny Ainge's son) named President of Basketball Ops",
+      "Will Hardy extended through 2031, signaling long-term coaching commitment",
+      "Danny Ainge steps back from day-to-day but remains valuable advisor",
+      "Austin Ainge says Jazz won't tank in 2025-26",
+      "Multi-year rebuild continuing with young roster development"
+    ]
+  },
+  {
+    "team": "Washington Wizards",
+    "abbreviation": "WAS",
+    "conference": "Eastern",
+    "division": "Southeast",
+    "owner": { "name": "Ted Leonsis", "style": "Tech entrepreneur, patient through rebuild, long-term vision" },
+    "gm": { "name": "Will Dawkins", "tenure": "Since 2024", "philosophy": "Development-focused rebuild, building through draft and young talent acquisition" },
+    "coach": { "name": "Brian Keefe", "style": "First-time head coach, player development emphasis, promoted from interim" },
+    "decision_chain": "Ted Leonsis (owner) -> Will Dawkins (GM) -> Brian Keefe (coach)",
+    "window": "rebuilding",
+    "key_storylines": [
+      "Acquired Trae Young from Atlanta in January 2026 blockbuster trade",
+      "Acquired Anthony Davis from Mavericks in February 2026",
+      "1-15 start raised questions about Keefe's job security, but Dawkins maintains faith",
+      "Multi-year rebuild with major trade acquisitions signaling pivot toward competitiveness",
+      "18-64 previous season among worst records in league"
+    ]
+  }
+]

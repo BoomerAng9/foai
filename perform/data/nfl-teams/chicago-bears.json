@@ -1,0 +1,46 @@
+{
+  "team": "Chicago Bears",
+  "abbreviation": "CHI",
+  "conference": "NFC",
+  "division": "NFC North",
+  "ownership": {
+    "name": "George McCaskey (controlling owner, took over from Virginia Halas McCaskey who passed February 2025)",
+    "style": "Family ownership since franchise founding; historically conservative; improving under new generation",
+    "tendencies": "Hired Ben Johnson as HC — first aggressive coaching hire in years; invested in franchise QB"
+  },
+  "gm": {
+    "name": "Ryan Poles",
+    "tenure": "5th year (since 2022)",
+    "philosophy": "Build through the draft; aggressive early-round picks; values athletic profiles and upside",
+    "analytics_approach": "Modern analytics-forward front office; Poles came from Chiefs analytical background"
+  },
+  "head_coach": {
+    "name": "Ben Johnson",
+    "tenure": "2nd year (hired 2025 — from Lions OC)",
+    "scheme_offense": "Creative play-calling; Lions-style power run with play-action; motion-heavy; designed to develop QB",
+    "scheme_defense": "unverified DC; defense was 29th in total defense (361.8 YPG allowed) in 2025",
+    "key_position_values": ["EDGE", "S", "OT", "DL", "LB"]
+  },
+  "decision_makers": {
+    "primary": "Ryan Poles (GM) with Ben Johnson (HC) collaboration",
+    "committee": ["George McCaskey (owner)", "Ryan Poles (GM)", "Ben Johnson (HC)"]
+  },
+  "roster_2026": {
+    "qb_situation": "Caleb Williams (2024 #1 pick) — franchise QB; Johnson hired specifically to develop him",
+    "key_departures": ["DJ Moore (WR, traded to Colts)", "Tremaine Edmunds (LB)", "Kevin Byard (S)", "Jaquan Brisker (S)", "Drew Dalman (C, retired)"],
+    "key_signings": ["Coby Bryant (S, from Seahawks Super Bowl champ)", "Devin Bush (LB)", "Neville Gallimore (DT)", "Kalif Raymond (WR)"],
+    "cap_space": "unverified",
+    "expiring_contracts": ["unverified"]
+  },
+  "draft_capital_2026": {
+    "picks": ["Round 1 Pick 25", "Round 2 (two 2nd-round picks)", "Round 3 Pick 89", "Round 4 (unverified)", "Round 5 (unverified)", "Round 6 (unverified)", "Round 7 (unverified)"],
+    "traded_away": [],
+    "acquired_extra": ["Extra 2nd-round pick (from Colts in DJ Moore trade)"],
+    "compensatory": []
+  },
+  "needs": [
+    {"position": "EDGE", "priority": 1, "reason": "Every mock draft has Bears targeting pass rusher at #25; 29th in total defense in 2025; desperately need pressure"},
+    {"position": "OT", "priority": 2, "reason": "Ozzy Trapilo's injury and uncertain timeline could shift Round 1 priority; LT competition features four players with no consistent high-end play recently"},
+    {"position": "S", "priority": 3, "reason": "Lost both Kevin Byard and Jaquan Brisker; Coby Bryant signing fills one spot but second safety vacancy remains"}
+  ]
+}

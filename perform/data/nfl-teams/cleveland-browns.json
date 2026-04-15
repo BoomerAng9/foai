@@ -1,0 +1,46 @@
+{
+  "team": "Cleveland Browns",
+  "abbreviation": "CLE",
+  "conference": "AFC",
+  "division": "AFC North",
+  "ownership": {
+    "name": "Jimmy and Dee Haslam",
+    "style": "Aggressive, impatient owners; willing to spend big and take risks (e.g., Deshaun Watson contract)",
+    "tendencies": "Historically quick to fire coaches and GMs; have cycled through many regimes; analytics-driven under Berry"
+  },
+  "gm": {
+    "name": "Andrew Berry",
+    "tenure": "7th year (hired 2020)",
+    "philosophy": "Heavy analytics approach; values draft capital accumulation; willing to make bold trades; BPA-oriented",
+    "analytics_approach": "One of the most analytics-driven front offices in the NFL; Berry has Ivy League background"
+  },
+  "head_coach": {
+    "name": "Todd Monken",
+    "tenure": "1st year (hired January 2026)",
+    "scheme_offense": "Aggressive downfield passing; spread concepts; play-action heavy; known for high-octane offenses (Georgia OC background)",
+    "scheme_defense": "unverified — new DC hire",
+    "key_position_values": ["WR", "OT", "QB", "EDGE", "CB"]
+  },
+  "decision_makers": {
+    "primary": "Andrew Berry (GM/EVP of Football Operations)",
+    "committee": ["Jimmy Haslam (owner)", "Dee Haslam (owner)", "Andrew Berry (GM)", "Todd Monken (HC)"]
+  },
+  "roster_2026": {
+    "qb_situation": "unverified — post-Watson era; likely looking at young QB development",
+    "key_departures": ["Almost entirely new offensive line"],
+    "key_signings": ["unverified — significant roster overhaul underway"],
+    "cap_space": "unverified",
+    "expiring_contracts": ["unverified"]
+  },
+  "draft_capital_2026": {
+    "picks": ["Round 1 Pick 6", "Round 1 Pick 24 (from JAX via Travis Hunter trade)", "Round 2 Pick 39", "Round 3 Pick 70", "Round 4 Pick 107", "Round 5 Pick 146", "Round 5 Pick 149", "Round 7 Pick 206", "Round 7 Pick 248"],
+    "traded_away": [],
+    "acquired_extra": ["Round 1 Pick 24 (from Jacksonville)"],
+    "compensatory": []
+  },
+  "needs": [
+    {"position": "WR", "priority": 1, "reason": "Receiving corps headlined by Jerry Jeudy, Cedric Tillman, and Isaiah Bond is insufficient for Monken's air-attack offense; top need at either #6 or #24"},
+    {"position": "OT", "priority": 2, "reason": "Had to completely overhaul offensive line this offseason; still have a hole at left tackle"},
+    {"position": "CB", "priority": 3, "reason": "Secondary needs reinforcement to complement rebuilt offensive roster"}
+  ]
+}

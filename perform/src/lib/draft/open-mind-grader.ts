@@ -44,14 +44,14 @@ import {
 
 /* ── Projected round from final score ── */
 export function gradeToProjectedRound(score: number): number {
-  if (score >= 95) return 1;       // Top 5
-  if (score >= 88) return 1;       // First round lock
-  if (score >= 83) return 2;
-  if (score >= 78) return 3;
-  if (score >= 73) return 4;
-  if (score >= 68) return 5;
-  if (score >= 63) return 6;
-  if (score >= 58) return 7;
+  if (score >= 95) return 1;       // Top 5 lock
+  if (score >= 85) return 1;       // First round (A tier = late first)
+  if (score >= 80) return 2;       // A- tier = early-mid second
+  if (score >= 75) return 3;       // B+ tier = day 2
+  if (score >= 70) return 4;       // B tier = mid rounds
+  if (score >= 65) return 5;       // B- tier = developmental
+  if (score >= 60) return 6;       // C+ tier = late rounds
+  if (score >= 55) return 7;       // Low C+ / high C
   return 8; // UDFA
 }
 

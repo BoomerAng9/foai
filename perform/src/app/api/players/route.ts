@@ -65,10 +65,14 @@ export async function GET(req: NextRequest) {
     const auth = token ? await requireAuth(req) : null;
     const isAuthenticated = auth?.ok === true;
 
+    // Add sport column if missing (multi-sport Player Index support)
+    try { await sql!.unsafe('ALTER TABLE perform_players ADD COLUMN IF NOT EXISTS sport TEXT DEFAULT \'football\''); } catch { /* already exists */ }
+
     const url = req.nextUrl;
     const position = url.searchParams.get('position');
     const school = url.searchParams.get('school');
     const search = url.searchParams.get('search');
+    const sport = url.searchParams.get('sport'); // multi-sport filter
     const sort = url.searchParams.get('sort') || 'overall_rank:asc';
     const limit = isAuthenticated
       ? Math.min(parseInt(url.searchParams.get('limit') || '100', 10), 500)
@@ -84,6 +88,11 @@ export async function GET(req: NextRequest) {
     const values: (string | number)[] = [];
     let paramIdx = 0;
 
+    if (sport) {
+      paramIdx++;
+      conditions.push(`sport = $${paramIdx}`);
+      values.push(sport);
+    }
     if (position) {
       paramIdx++;
       conditions.push(`position = $${paramIdx}`);
@@ -104,7 +113,7 @@ export async function GET(req: NextRequest) {
 
     // Parse sort
     const [sortField, sortDir] = sort.split(':');
-    const allowedSortFields = ['overall_rank', 'grade', 'name', 'position', 'school', 'projected_round', 'position_rank', 'created_at'];
+    const allowedSortFields = ['overall_rank', 'grade', 'name', 'position', 'school', 'projected_round', 'position_rank', 'beast_rank', 'forty_time', 'vertical_jump', 'pillar_athleticism', 'pillar_game_performance', 'pillar_intangibles', 'created_at'];
     const safeSortField = allowedSortFields.includes(sortField) ? sortField : 'overall_rank';
     const safeSortDir = sortDir === 'desc' ? 'DESC' : 'ASC';
 

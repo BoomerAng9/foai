@@ -138,7 +138,7 @@ export default function PositionRankingPage() {
   const rest = players.slice(5);
 
   return (
-    <div className="min-h-screen flex flex-col" style={{ background: '#0A0A0F' }}>
+    <div className="min-h-screen flex flex-col" style={{ background: 'var(--pf-bg)' }}>
       <Header />
 
       {/* Back nav */}

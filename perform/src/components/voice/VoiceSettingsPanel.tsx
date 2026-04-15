@@ -5,7 +5,7 @@ import VoiceProviderSwitcher from './VoiceProviderSwitcher';
 import { getCost, type VoiceProvider } from '@/lib/voice/pricing';
 
 const T = {
-  bg: '#0a0a0f',
+  bg: 'var(--pf-bg)',
   surface: '#111118',
   card: '#161620',
   gold: '#D4A853',

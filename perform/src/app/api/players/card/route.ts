@@ -8,6 +8,8 @@ import {
   type CardVariation,
   listCardVariations,
 } from '@/lib/images/card-styles';
+import { buildAnyCardPrompt, listAllCardStyles, type AnyCardStyle } from '@/lib/images/card-aesthetics';
+import { compositeCard } from '@/lib/images/card-compositor';
 import { safeCompare } from '@/lib/auth-guard';
 
 /* ──────────────────────────────────────────────────────────────
@@ -23,9 +25,13 @@ import { safeCompare } from '@/lib/auth-guard';
  * ────────────────────────────────────────────────────────────── */
 
 export async function GET() {
+  const allStyles = listAllCardStyles();
   return NextResponse.json({
     variations: listCardVariations(),
+    aesthetics: allStyles.filter((s: { category: string }) => s.category === 'aesthetic'),
+    allStyles,
     default: 'auto (picks by TIE grade)',
+    compositing: 'Real Per|Form logo composited via Sharp after generation. No AI-generated logos.',
   });
 }
 

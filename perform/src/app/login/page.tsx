@@ -11,7 +11,7 @@ async function getFirebaseAuth(): Promise<{ auth: Auth; signInWithPopup: typeof 
 }
 
 const COLORS = {
-  bg: '#0A0A0F',
+  bg: 'var(--pf-bg)',
   surface: '#111118',
   gold: '#D4A853',
   goldBorder: 'rgba(212,168,83,0.2)',

@@ -1,0 +1,46 @@
+{
+  "team": "Green Bay Packers",
+  "abbreviation": "GB",
+  "conference": "NFC",
+  "division": "NFC North",
+  "ownership": {
+    "name": "Green Bay Packers Inc. (publicly owned — only community-owned NFL franchise)",
+    "style": "Board of Directors oversees; Mark Murphy is president/CEO; unique community ownership model",
+    "tendencies": "Stability-oriented; trust front office and coaching staff; organic development approach"
+  },
+  "gm": {
+    "name": "Brian Gutekunst",
+    "tenure": "8th year (since 2018)",
+    "philosophy": "Aggressive trader — acquired Micah Parsons from Dallas, giving up 1st-round pick + Kenny Clark; values impact players; willing to sacrifice draft capital for proven talent",
+    "analytics_approach": "Hybrid — Ted Thompson's traditional scouting legacy blended with modern analytics"
+  },
+  "head_coach": {
+    "name": "Matt LaFleur",
+    "tenure": "7th year (since 2019)",
+    "scheme_offense": "Shanahan-tree outside zone; play-action heavy; motion and pre-snap shifts; RPOs",
+    "scheme_defense": "DC Jonathan Gannon (hired from Cardinals HC firing); multiple fronts with exotic pressures",
+    "key_position_values": ["CB", "DL", "C", "OT", "EDGE"]
+  },
+  "decision_makers": {
+    "primary": "Brian Gutekunst (GM) with Matt LaFleur (HC) strong collaboration",
+    "committee": ["Mark Murphy (president/CEO)", "Brian Gutekunst (GM)", "Matt LaFleur (HC)"]
+  },
+  "roster_2026": {
+    "qb_situation": "Jordan Love — franchise QB; locked in as starter; team built around his development",
+    "key_departures": ["Kenny Clark (DT, traded to Dallas in Parsons deal)", "Malik Willis (QB, signed with Dolphins)"],
+    "key_signings": ["Micah Parsons (LB/EDGE, acquired from Dallas)", "Jonathan Gannon (DC, hired from Arizona)"],
+    "cap_space": "unverified — could save $20M by moving on from Elgton Jenkins",
+    "expiring_contracts": ["Elgton Jenkins (G/C, potential $20M cap savings if released)", "Rasheed Walker (OT, impending free agent)"]
+  },
+  "draft_capital_2026": {
+    "picks": ["Round 2 Pick 52", "Round 3 Pick 84", "Round 4 (unverified)", "Round 5 (unverified)", "Round 6 (unverified)", "Round 7 (unverified)"],
+    "traded_away": ["Round 1 Pick 20 (to Dallas in Micah Parsons trade)"],
+    "acquired_extra": [],
+    "compensatory": []
+  },
+  "needs": [
+    {"position": "CB", "priority": 1, "reason": "Nate Hobbs experiment at outside CB didn't work; Carrington Valentine and Keisean Nixon are solid but need premier talent on perimeter"},
+    {"position": "DL", "priority": 2, "reason": "Lost Kenny Clark in Parsons trade; Devonte Wyatt returning from season-ending ankle injury; interior defensive line depleted"},
+    {"position": "C", "priority": 3, "reason": "Elgton Jenkins could be released for $20M cap savings (age 30, fractured fibula); center replacement needed; Jordan Morgan could move to LT"}
+  ]
+}

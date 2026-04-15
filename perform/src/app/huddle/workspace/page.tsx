@@ -42,7 +42,7 @@ const SPACES = [
 
 export default function HuddleWorkspacePage() {
   return (
-    <div className="min-h-screen flex flex-col" style={{ background: '#0A0A0F' }}>
+    <div className="min-h-screen flex flex-col" style={{ background: 'var(--pf-bg)' }}>
       <Header />
 
       {/* ── Ribbon ── */}

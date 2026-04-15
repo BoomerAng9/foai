@@ -1,0 +1,46 @@
+{
+  "team": "New York Jets",
+  "abbreviation": "NYJ",
+  "conference": "AFC",
+  "division": "AFC East",
+  "ownership": {
+    "name": "Woody Johnson",
+    "style": "Hands-on, impatient with losing; historically meddlesome in football decisions",
+    "tendencies": "Quick to fire coaches; has cycled through many GMs and HCs; splashy free-agent signings; win-now mentality despite rebuild-level roster"
+  },
+  "gm": {
+    "name": "Darren Mougey",
+    "tenure": "1st year (hired 2026 offseason)",
+    "philosophy": "Building through the draft; needs to hit on early picks to establish credibility",
+    "analytics_approach": "unverified"
+  },
+  "head_coach": {
+    "name": "Aaron Glenn",
+    "tenure": "2nd year (retained for 2026 after 3-14 in first season)",
+    "scheme_offense": "OC Frank Reich calling plays; West Coast concepts with vertical shots",
+    "scheme_defense": "DC Brian Duker; aggressive man-coverage scheme; desperate for playmakers and takeaways (only 4 takeaways in 2025, fewest since 1940)",
+    "key_position_values": ["EDGE", "WR", "LB", "CB", "S"]
+  },
+  "decision_makers": {
+    "primary": "Darren Mougey (GM) with Aaron Glenn (HC) collaboration",
+    "committee": ["Woody Johnson (owner)", "Darren Mougey (GM)", "Aaron Glenn (HC)"]
+  },
+  "roster_2026": {
+    "qb_situation": "Acquired Geno Smith via trade from Raiders; looking for long-term answer",
+    "key_departures": ["Jermaine Johnson II (EDGE, traded to Titans)", "Sauce Gardner (traded to Colts for 2026+2027 first-round picks + Adonai Mitchell)"],
+    "key_signings": ["Minkah Fitzpatrick (S, acquired via trade from Dolphins, signed 3yr/$40M extension)", "Several veteran defensive pieces"],
+    "cap_space": "unverified",
+    "expiring_contracts": ["unverified"]
+  },
+  "draft_capital_2026": {
+    "picks": ["Round 1 Pick 2", "Round 1 Pick 16 (from IND via Sauce Gardner trade)", "Round 2 Pick 33", "Round 2 Pick 44", "Round 4 Pick 103", "Round 5 Pick 140", "Round 6 Pick 179", "Round 7 Pick 228", "Round 7 Pick 242"],
+    "traded_away": [],
+    "acquired_extra": ["Round 1 Pick 16 (from Colts)", "Round 2 Pick 44"],
+    "compensatory": []
+  },
+  "needs": [
+    {"position": "WR", "priority": 1, "reason": "Biggest need by a wide margin; desperately need playmakers for the offense"},
+    {"position": "EDGE", "priority": 2, "reason": "Traded Jermaine Johnson to Titans; were 31st in sacks last season; pass rush is nonexistent"},
+    {"position": "CB", "priority": 3, "reason": "Traded away Sauce Gardner; need to rebuild the secondary despite Fitzpatrick addition"}
+  ]
+}

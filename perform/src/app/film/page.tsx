@@ -102,7 +102,7 @@ export default function FilmRoomPage() {
 
   return (
     <PaywallGate>
-    <div className="min-h-screen flex flex-col" style={{ background: '#0A0A0F' }}>
+    <div className="min-h-screen flex flex-col" style={{ background: 'var(--pf-bg)' }}>
       <Header />
 
       <main className="flex-1 px-4 md:px-8 py-8 max-w-4xl mx-auto w-full">

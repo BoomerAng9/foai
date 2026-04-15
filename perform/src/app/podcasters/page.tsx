@@ -4,7 +4,7 @@ import { PLAN_FEATURES, type PlanTier } from '@/lib/podcasters/plans';
 
 /* ── Theme tokens (dark broadcast) ──────────────────────── */
 const T = {
-  bg: '#06122A',
+  bg: 'var(--pf-bg)',
   surface: '#0B1E3F',
   surfaceAlt: '#112A52',
   border: '#1E3A5F',
