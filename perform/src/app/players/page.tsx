@@ -18,16 +18,26 @@ interface Player {
   grade: string;
   projected_round: number;
   nfl_comparison: string;
+  sport?: string;
 }
 
-/* ── Position grouping ─────────────────────────────── */
-const POSITION_GROUPS = ['QB', 'RB', 'WR', 'TE', 'OL', 'EDGE', 'DL', 'LB', 'CB', 'S'] as const;
+type Sport = 'football' | 'basketball' | 'baseball';
 
-const POSITION_MAP: Record<string, string> = {
-  QB: 'QB',
-  RB: 'RB',
-  WR: 'WR',
-  TE: 'TE',
+const SPORTS: { id: Sport; label: string; status: 'live' | 'coming-soon' }[] = [
+  { id: 'football', label: 'FOOTBALL', status: 'live' },
+  { id: 'basketball', label: 'BASKETBALL', status: 'coming-soon' },
+  { id: 'baseball', label: 'BASEBALL', status: 'coming-soon' },
+];
+
+/* ── Position groups per sport ──────────────────────── */
+const POSITION_GROUPS_BY_SPORT: Record<Sport, readonly string[]> = {
+  football: ['QB', 'RB', 'WR', 'TE', 'OL', 'EDGE', 'DL', 'LB', 'CB', 'S'] as const,
+  basketball: ['PG', 'SG', 'SF', 'PF', 'C'] as const,
+  baseball: ['P', 'C', 'IF', 'OF', 'DH'] as const,
+};
+
+const POSITION_MAP_FOOTBALL: Record<string, string> = {
+  QB: 'QB', RB: 'RB', WR: 'WR', TE: 'TE',
   OL: 'OL', OT: 'OL', OG: 'OL', C: 'OL', IOL: 'OL',
   EDGE: 'EDGE', DE: 'EDGE',
   DL: 'DL', DT: 'DL', NT: 'DL', IDL: 'DL',
@@ -36,29 +46,23 @@ const POSITION_MAP: Record<string, string> = {
   S: 'S', FS: 'S', SS: 'S',
 };
 
-function normalizePosition(pos: string): string {
-  return POSITION_MAP[pos?.toUpperCase()] || pos?.toUpperCase() || 'OTHER';
+function normalizePosition(pos: string, sport: Sport): string {
+  if (sport === 'football') return POSITION_MAP_FOOTBALL[pos?.toUpperCase()] || pos?.toUpperCase() || 'OTHER';
+  return pos?.toUpperCase() || 'OTHER';
 }
 
-/* ── Position group accent colors ────────────────────── */
 const GROUP_COLORS: Record<string, string> = {
-  QB: '#E74C3C',
-  RB: '#2ECC71',
-  WR: '#3498DB',
-  TE: '#E67E22',
-  OL: '#9B59B6',
-  EDGE: '#E74C3C',
-  DL: '#E91E63',
-  LB: '#00BCD4',
-  CB: '#FF9800',
-  S: '#8BC34A',
+  QB: '#E74C3C', RB: '#2ECC71', WR: '#3498DB', TE: '#E67E22',
+  OL: '#9B59B6', EDGE: '#E74C3C', DL: '#E91E63', LB: '#00BCD4',
+  CB: '#FF9800', S: '#8BC34A',
+  PG: '#E74C3C', SG: '#3498DB', SF: '#2ECC71', PF: '#E67E22', C: '#9B59B6',
+  P: '#E74C3C', IF: '#3498DB', OF: '#2ECC71', DH: '#E67E22',
 };
 
 function getGroupColor(group: string): string {
   return GROUP_COLORS[group] || '#D4A853';
 }
 
-/* ── Grade pill ──────────────────────────────────────── */
 function GradePill({ value }: { value: string | number }) {
   const num = parseFloat(String(value));
   if (isNaN(num)) return <span className="font-mono text-xs text-white/30">--</span>;
@@ -77,16 +81,22 @@ export default function PlayerIndexPage() {
   const [players, setPlayers] = useState<Player[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
+  const [sport, setSport] = useState<Sport>('football');
+
+  const sportMeta = SPORTS.find(s => s.id === sport)!;
+  const isLive = sportMeta.status === 'live';
 
   useEffect(() => {
-    fetch('/api/players?limit=500&sort=overall_rank:asc')
+    if (!isLive) { setPlayers([]); setLoading(false); return; }
+    setLoading(true);
+    fetch(`/api/players?limit=500&sort=overall_rank:asc&sport=${sport}`)
       .then(r => r.json())
       .then(d => {
         setPlayers(d.players || []);
         setLoading(false);
       })
       .catch(() => setLoading(false));
-  }, []);
+  }, [sport, isLive]);
 
   const filtered = useMemo(() => {
     if (!search.trim()) return players;
@@ -96,27 +106,23 @@ export default function PlayerIndexPage() {
     );
   }, [players, search]);
 
+  const positionGroups = POSITION_GROUPS_BY_SPORT[sport];
   const grouped = useMemo(() => {
     const groups: Record<string, Player[]> = {};
-    for (const g of POSITION_GROUPS) groups[g] = [];
+    for (const g of positionGroups) groups[g] = [];
     for (const p of filtered) {
-      const norm = normalizePosition(p.position);
-      if (groups[norm]) {
-        groups[norm].push(p);
-      } else {
-        if (!groups['OTHER']) groups['OTHER'] = [];
-        groups['OTHER'].push(p);
-      }
+      const norm = normalizePosition(p.position, sport);
+      if (groups[norm]) groups[norm].push(p);
+      else { if (!groups['OTHER']) groups['OTHER'] = []; groups['OTHER'].push(p); }
     }
     return groups;
-  }, [filtered]);
+  }, [filtered, positionGroups, sport]);
 
   return (
     <div className="min-h-screen flex flex-col" style={{ background: '#0A0A0F' }}>
       <Header />
 
       <main className="flex-1 px-4 md:px-8 py-8 max-w-6xl mx-auto w-full">
-        {/* Page header */}
         <motion.div variants={heroStagger} initial="hidden" animate="visible" className="mb-8">
           <motion.h1
             variants={heroItem}
@@ -126,73 +132,102 @@ export default function PlayerIndexPage() {
             PLAYER INDEX
           </motion.h1>
 
-          {/* Nav links */}
-          <motion.div variants={heroItem} className="flex gap-3 mb-4">
-            <Link
-              href="/players/cards"
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-mono font-bold tracking-wider transition-all hover:scale-[1.02]"
-              style={{
-                background: 'rgba(212,168,83,0.08)',
-                border: '1px solid rgba(212,168,83,0.25)',
-                color: '#D4A853',
-              }}
-            >
-              DRAFT CARDS
-              <span className="text-white/20">&rarr;</span>
-            </Link>
+          {/* Sport tabs */}
+          <motion.div variants={heroItem} className="flex gap-2 mb-5 flex-wrap">
+            {SPORTS.map(s => {
+              const active = s.id === sport;
+              return (
+                <button
+                  key={s.id}
+                  onClick={() => { setSport(s.id); setSearch(''); }}
+                  className="px-4 py-2 rounded-lg text-xs font-mono font-bold tracking-wider transition-all"
+                  style={{
+                    background: active ? 'rgba(212,168,83,0.15)' : 'rgba(255,255,255,0.03)',
+                    border: `1px solid ${active ? 'rgba(212,168,83,0.45)' : 'rgba(255,255,255,0.06)'}`,
+                    color: active ? '#D4A853' : 'rgba(255,255,255,0.5)',
+                  }}
+                >
+                  {s.label}
+                  {s.status === 'coming-soon' && <span className="ml-2 text-[9px] text-white/30">SOON</span>}
+                </button>
+              );
+            })}
           </motion.div>
 
-          {/* Search */}
-          <motion.div variants={heroItem} className="mb-2">
-            <div className="relative max-w-md">
-              <svg
-                className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="rgba(255,255,255,0.3)"
-                strokeWidth={2}
-              >
-                <circle cx="11" cy="11" r="8" />
-                <path d="m21 21-4.35-4.35" />
-              </svg>
-              <input
-                type="text"
-                placeholder="Search by name, school, or position..."
-                value={search}
-                onChange={e => setSearch(e.target.value)}
-                className="w-full pl-10 pr-4 py-3 rounded-lg text-sm font-mono focus:outline-none focus:ring-1 transition-all"
+          {/* Nav links (football only) */}
+          {sport === 'football' && (
+            <motion.div variants={heroItem} className="flex gap-3 mb-4">
+              <Link
+                href="/players/cards"
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-mono font-bold tracking-wider transition-all hover:scale-[1.02]"
                 style={{
-                  background: 'rgba(255,255,255,0.04)',
-                  border: '1px solid rgba(255,255,255,0.08)',
-                  color: '#FFFFFF',
-                  caretColor: '#D4A853',
+                  background: 'rgba(212,168,83,0.08)',
+                  border: '1px solid rgba(212,168,83,0.25)',
+                  color: '#D4A853',
                 }}
-                onFocus={e => {
-                  e.currentTarget.style.borderColor = 'rgba(212,168,83,0.4)';
-                  e.currentTarget.style.background = 'rgba(255,255,255,0.06)';
-                }}
-                onBlur={e => {
-                  e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)';
-                  e.currentTarget.style.background = 'rgba(255,255,255,0.04)';
-                }}
-              />
-            </div>
-            {search && (
-              <p className="text-xs font-mono text-white/30 mt-2">
-                {filtered.length} result{filtered.length !== 1 ? 's' : ''}
-              </p>
-            )}
-          </motion.div>
+              >
+                DRAFT CARDS
+                <span className="text-white/20">&rarr;</span>
+              </Link>
+            </motion.div>
+          )}
+
+          {isLive && (
+            <motion.div variants={heroItem} className="mb-2">
+              <div className="relative max-w-md">
+                <svg
+                  className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4"
+                  fill="none" viewBox="0 0 24 24" stroke="rgba(255,255,255,0.3)" strokeWidth={2}
+                >
+                  <circle cx="11" cy="11" r="8" />
+                  <path d="m21 21-4.35-4.35" />
+                </svg>
+                <input
+                  type="text"
+                  placeholder="Search by name, school, or position..."
+                  value={search}
+                  onChange={e => setSearch(e.target.value)}
+                  className="w-full pl-10 pr-4 py-3 rounded-lg text-sm font-mono focus:outline-none focus:ring-1 transition-all"
+                  style={{
+                    background: 'rgba(255,255,255,0.04)',
+                    border: '1px solid rgba(255,255,255,0.08)',
+                    color: '#FFFFFF',
+                    caretColor: '#D4A853',
+                  }}
+                />
+              </div>
+              {search && (
+                <p className="text-xs font-mono text-white/30 mt-2">
+                  {filtered.length} result{filtered.length !== 1 ? 's' : ''}
+                </p>
+              )}
+            </motion.div>
+          )}
         </motion.div>
 
-        {loading && (
+        {!isLive && (
+          <motion.div
+            variants={fadeUp} initial="hidden" animate="visible"
+            className="flex flex-col items-center justify-center py-24 gap-3 rounded-2xl"
+            style={{ background: 'rgba(255,255,255,0.02)', border: '1px dashed rgba(255,255,255,0.08)' }}
+          >
+            <span className="font-outfit text-lg font-bold" style={{ color: '#D4A853' }}>
+              {sportMeta.label} — COMING SOON
+            </span>
+            <p className="text-xs font-mono text-white/40 max-w-md text-center">
+              Player Index expands to {sportMeta.label.toLowerCase()} after the NFL Draft launch.
+              Multi-sport grading engine already live on the backend.
+            </p>
+          </motion.div>
+        )}
+
+        {isLive && loading && (
           <div className="flex items-center justify-center py-24">
             <span className="text-sm font-mono text-white/30 animate-pulse">Loading players...</span>
           </div>
         )}
 
-        {/* ── Position Groups ────────────────────────────── */}
-        {POSITION_GROUPS.map(group => {
+        {isLive && positionGroups.map(group => {
           const list = grouped[group];
           if (!list || list.length === 0) return null;
           const accent = getGroupColor(group);
@@ -200,17 +235,11 @@ export default function PlayerIndexPage() {
           return (
             <motion.div
               key={group}
-              variants={staggerContainer}
-              initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true, margin: '-30px' }}
+              variants={staggerContainer} initial="hidden"
+              whileInView="visible" viewport={{ once: true, margin: '-30px' }}
               className="mb-10"
             >
-              {/* Group header */}
-              <motion.div
-                variants={staggerItem}
-                className="flex items-center gap-3 mb-3"
-              >
+              <motion.div variants={staggerItem} className="flex items-center gap-3 mb-3">
                 <div className="w-1 h-6 rounded-full" style={{ background: accent }} />
                 <span className="font-outfit text-sm font-extrabold tracking-wider" style={{ color: accent }}>
                   {group}
@@ -218,9 +247,7 @@ export default function PlayerIndexPage() {
                 <span className="text-[11px] font-mono text-white/25">{list.length} players</span>
               </motion.div>
 
-              {/* ── Desktop: Table ────────────────────────── */}
               <div className="hidden md:block">
-                {/* Table header */}
                 <div
                   className="grid gap-3 px-4 py-2.5 text-[10px] font-mono tracking-widest uppercase"
                   style={{
@@ -233,11 +260,10 @@ export default function PlayerIndexPage() {
                   <span>Name</span>
                   <span>School</span>
                   <span>Grade</span>
-                  <span>Round</span>
-                  <span>NFL Comp</span>
+                  <span>{sport === 'football' ? 'Round' : 'Tier'}</span>
+                  <span>{sport === 'football' ? 'NFL Comp' : 'Pro Comp'}</span>
                 </div>
 
-                {/* Player rows */}
                 {list.map((p, i) => (
                   <motion.div
                     key={p.id}
@@ -248,9 +274,7 @@ export default function PlayerIndexPage() {
                       borderBottom: i < list.length - 1 ? '1px solid rgba(255,255,255,0.03)' : 'none',
                     }}
                   >
-                    <span className="font-mono text-xs text-white/25 tabular-nums">
-                      {p.overall_rank || '-'}
-                    </span>
+                    <span className="font-mono text-xs text-white/25 tabular-nums">{p.overall_rank || '-'}</span>
                     <Link
                       href={`/draft/${encodeURIComponent(p.name)}`}
                       className="font-outfit text-sm font-bold text-white hover:text-[#D4A853] transition-colors truncate"
@@ -260,16 +284,13 @@ export default function PlayerIndexPage() {
                     <span className="font-mono text-xs text-white/40 truncate">{p.school}</span>
                     <GradePill value={p.grade || p.tie_grade} />
                     <span className="font-mono text-xs text-white/40">
-                      {p.projected_round ? `RD ${p.projected_round}` : '--'}
+                      {p.projected_round ? (sport === 'football' ? `RD ${p.projected_round}` : `T${p.projected_round}`) : '--'}
                     </span>
-                    <span className="font-mono text-[11px] text-white/30 truncate">
-                      {p.nfl_comparison || '--'}
-                    </span>
+                    <span className="font-mono text-[11px] text-white/30 truncate">{p.nfl_comparison || '--'}</span>
                   </motion.div>
                 ))}
               </div>
 
-              {/* ── Mobile: Cards ─────────────────────────── */}
               <div className="md:hidden flex flex-col gap-2">
                 {list.map(p => (
                   <motion.div key={p.id} variants={staggerItem}>
@@ -281,25 +302,16 @@ export default function PlayerIndexPage() {
                       <div className="flex items-start justify-between gap-3 mb-2">
                         <div className="min-w-0">
                           <div className="flex items-center gap-2">
-                            {p.overall_rank && (
-                              <span className="text-[10px] font-mono text-white/25">#{p.overall_rank}</span>
-                            )}
-                            <span className="font-outfit text-sm font-bold text-white truncate">
-                              {p.name}
-                            </span>
+                            {p.overall_rank && <span className="text-[10px] font-mono text-white/25">#{p.overall_rank}</span>}
+                            <span className="font-outfit text-sm font-bold text-white truncate">{p.name}</span>
                           </div>
                           <span className="text-xs font-mono text-white/40">{p.school}</span>
                         </div>
                         <GradePill value={p.grade || p.tie_grade} />
                       </div>
                       <div className="flex items-center gap-3 text-[11px] font-mono text-white/30">
-                        {p.projected_round && <span>Round {p.projected_round}</span>}
-                        {p.nfl_comparison && (
-                          <>
-                            <span className="text-white/10">|</span>
-                            <span className="truncate">{p.nfl_comparison}</span>
-                          </>
-                        )}
+                        {p.projected_round && <span>{sport === 'football' ? `Round ${p.projected_round}` : `Tier ${p.projected_round}`}</span>}
+                        {p.nfl_comparison && (<><span className="text-white/10">|</span><span className="truncate">{p.nfl_comparison}</span></>)}
                       </div>
                     </Link>
                   </motion.div>
@@ -309,11 +321,9 @@ export default function PlayerIndexPage() {
           );
         })}
 
-        {!loading && filtered.length === 0 && (
+        {isLive && !loading && filtered.length === 0 && (
           <motion.div
-            variants={fadeUp}
-            initial="hidden"
-            animate="visible"
+            variants={fadeUp} initial="hidden" animate="visible"
             className="flex flex-col items-center justify-center py-24 gap-4"
           >
             <p className="text-sm font-mono text-white/30">No players found.</p>
