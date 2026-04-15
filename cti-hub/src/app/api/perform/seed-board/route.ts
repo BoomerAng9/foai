@@ -52,10 +52,15 @@ const BOARD_2026 = [
 
 export async function POST(req: NextRequest) {
   try {
-    // Allow internal seeding via dedicated pipeline key (for VPS-to-VPS calls)
-    const internalKey = req.headers.get('x-pipeline-key');
-    const pipelineKey = process.env.PIPELINE_AUTH_KEY;
-    if (!internalKey || !pipelineKey || internalKey !== pipelineKey) {
+    // Allow internal seeding via dedicated pipeline key (for VPS-to-VPS calls).
+    // Use timing-safe comparison to prevent token-probing attacks.
+    const { checkHeaderKey } = await import('@/lib/security/timing-safe');
+    const pipelineKey = process.env.PIPELINE_AUTH_KEY || '';
+    const pipelineResult = pipelineKey
+      ? checkHeaderKey(req, 'x-pipeline-key', pipelineKey)
+      : { ok: false as const, status: 401, body: { error: 'No pipeline key configured' } };
+    if (!pipelineResult.ok) {
+      // Fall back to user-session auth — owner only.
       const auth = await requireAuth(req);
       if (!auth.ok) return auth.response;
       if (auth.role !== 'owner') {

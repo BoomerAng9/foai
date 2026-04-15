@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth-guard';
+import { rateLimit } from '@/lib/rate-limit-simple';
 import { SEED_MODELS } from '@/lib/pricing/seed-models';
 
 /* ── Tool ID → internal route mapping ─────────────────────────── */
@@ -218,6 +219,9 @@ interface Log {
 export async function POST(req: NextRequest) {
   const auth = await requireAuth(req);
   if (!auth.ok) return auth.response;
+  if (!rateLimit(auth.userId, 10, 60000)) {
+    return NextResponse.json({ error: 'Too many requests', code: 'RATE_LIMITED' }, { status: 429 });
+  }
 
   const payload = await req.json().catch(() => null);
   if (!payload?.toolId) {

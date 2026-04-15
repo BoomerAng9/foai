@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth-guard';
+import { rateLimit } from '@/lib/rate-limit-simple';
 
 const OPENROUTER_KEY = process.env.OPENROUTER_API_KEY || '';
 const MODEL = 'google/gemini-3.1-flash';
@@ -16,6 +17,10 @@ export async function POST(req: NextRequest) {
   try {
     const auth = await requireAuth(req);
     if (!auth.ok) return auth.response;
+    // Seeding is bursty + LLM-driven — cap at 5/min.
+    if (!rateLimit(auth.userId, 5, 60000)) {
+      return NextResponse.json({ error: 'Too many requests', code: 'RATE_LIMITED' }, { status: 429 });
+    }
 
     const { position, count = 10 } = await req.json();
 

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth-guard';
+import { rateLimit } from '@/lib/rate-limit-simple';
 import { buildGrammarPrompt, buildConfirmationPrompt, isPassthrough, NTNTN_SYSTEM_PROMPT } from '@/lib/grammar/converter';
 import { checkMIMGate } from '@/lib/acheevy/mim-gate';
 
@@ -65,6 +66,15 @@ export async function POST(req: NextRequest) {
     if (!auth.ok) return auth.response;
     const { userId } = auth;
 
+    // Rate limit — broadcast chat streams from a paid LLM per message.
+    // 20 messages / minute is generous for a single user but caps runaway loops.
+    if (!rateLimit(userId, 20, 60000)) {
+      return NextResponse.json(
+        { error: 'Too many requests. Please slow down.', code: 'RATE_LIMITED' },
+        { status: 429 },
+      );
+    }
+
     const { message, history = [] } = await req.json();
     if (!message?.trim()) {
       return NextResponse.json({ error: 'Message required' }, { status: 400 });
@@ -90,37 +100,54 @@ export async function POST(req: NextRequest) {
       content: m.content,
     }));
 
-    // If not passthrough, run Grammar conversion first
+    // Grammar conversion. We track status so the UI can show an
+    // indicator instead of silently dropping the filter step.
+    //   "applied"      Grammar produced an enriched prompt and we used it
+    //   "passthrough"  message was a pure passthrough (no enrichment needed)
+    //   "failed"       Grammar call errored — falling back to raw message
     let enrichedMessage = message;
-    if (!passthrough) {
-      // Grammar converts the user's intent
-      const grammarRes = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${OPENROUTER_KEY}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          model: CONSULT_MODEL,
-          messages: [
-            { role: 'system', content: NTNTN_SYSTEM_PROMPT },
-            { role: 'user', content: grammarPrompt },
-          ],
-          temperature: 0.3,
-          max_tokens: 500,
-          stream: false,
-        }),
-      });
+    let grammarStatus: 'applied' | 'passthrough' | 'failed' = 'passthrough';
+    let grammarError: string | undefined;
 
-      if (grammarRes.ok) {
-        const grammarData = await grammarRes.json();
-        const grammarOutput = grammarData.choices?.[0]?.message?.content || '';
-        if (!isPassthrough(grammarOutput)) {
-          enrichedMessage = buildConfirmationPrompt(message, grammarOutput);
+    if (!passthrough) {
+      try {
+        const grammarRes = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${OPENROUTER_KEY}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            model: CONSULT_MODEL,
+            messages: [
+              { role: 'system', content: NTNTN_SYSTEM_PROMPT },
+              { role: 'user', content: grammarPrompt },
+            ],
+            temperature: 0.3,
+            max_tokens: 500,
+            stream: false,
+          }),
+        });
+
+        if (grammarRes.ok) {
+          const grammarData = await grammarRes.json();
+          const grammarOutput = grammarData.choices?.[0]?.message?.content || '';
+          if (isPassthrough(grammarOutput)) {
+            grammarStatus = 'passthrough';
+          } else {
+            enrichedMessage = buildConfirmationPrompt(message, grammarOutput);
+            grammarStatus = 'applied';
+          }
+        } else {
+          grammarStatus = 'failed';
+          grammarError = `HTTP ${grammarRes.status} ${grammarRes.statusText}`;
+          console.error(`[Broadcast] Grammar call failed: ${grammarError}`);
         }
-      } else {
-        console.error(`[Broadcast] Grammar call failed: ${grammarRes.status} ${grammarRes.statusText}`);
-        // Continue with raw message — Grammar failure shouldn't block the conversation
+      } catch (err) {
+        // Network error, abort, JSON parse — anything that throws.
+        grammarStatus = 'failed';
+        grammarError = err instanceof Error ? err.message : String(err);
+        console.error(`[Broadcast] Grammar call exception: ${grammarError}`);
       }
     }
 
@@ -152,6 +179,12 @@ export async function POST(req: NextRequest) {
     const encoder = new TextEncoder();
     const stream = new ReadableStream({
       async start(controller) {
+        // Lead with a metadata frame so the UI can show Grammar
+        // status (and any error reason) before any content arrives.
+        const meta: Record<string, unknown> = { meta: { grammar_status: grammarStatus } };
+        if (grammarError) (meta.meta as Record<string, unknown>).grammar_error = grammarError;
+        controller.enqueue(encoder.encode(`data: ${JSON.stringify(meta)}\n\n`));
+
         const reader = res.body!.getReader();
         const decoder = new TextDecoder();
         let buffer = '';

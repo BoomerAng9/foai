@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth-guard';
+import { rateLimit } from '@/lib/rate-limit-simple';
 import { SEED_MODELS } from '@/lib/pricing/seed-models';
 import type { PricingRow, Sector, Tier, Capability } from '@/lib/pricing/types';
 
@@ -109,6 +110,9 @@ function toTile(row: PricingRow): CatalogTile {
 export async function GET(req: NextRequest) {
   const auth = await requireAuth(req);
   if (!auth.ok) return auth.response;
+  if (!rateLimit(auth.userId, 60, 60000)) {
+    return NextResponse.json({ error: 'Too many requests', code: 'RATE_LIMITED' }, { status: 429 });
+  }
 
   const catalog = SEED_MODELS
     .filter(r => r.active && (!r.supersededBy))
