@@ -1,0 +1,21 @@
+.root {
+  display: inline-flex;
+  align-items: baseline;
+  justify-content: center;
+  font-family: 'Permanent Marker', cursive;
+  font-size: inherit;
+  line-height: inherit;
+  color: #e8a020;
+  vertical-align: baseline;
+  white-space: nowrap;
+  transition: width 300ms ease, opacity 300ms ease, transform 300ms ease;
+}
+
+.visible { opacity: 1; transform: translateY(0); }
+.hidden { opacity: 0; transform: translateY(-4px); }
+
+.w4 { width: 4.8ch; }
+.w5 { width: 5.8ch; }
+.w6 { width: 6.8ch; }
+.w7 { width: 7.8ch; }
+.w8 { width: 8.8ch; }
