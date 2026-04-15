@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth-guard';
+import { rateLimit } from '@/lib/rate-limit-simple';
 import { buildGrammarPrompt, buildConfirmationPrompt, isPassthrough, NTNTN_SYSTEM_PROMPT } from '@/lib/grammar/converter';
 import { checkMIMGate } from '@/lib/acheevy/mim-gate';
 
@@ -64,6 +65,15 @@ export async function POST(req: NextRequest) {
     const auth = await requireAuth(req);
     if (!auth.ok) return auth.response;
     const { userId } = auth;
+
+    // Rate limit — broadcast chat streams from a paid LLM per message.
+    // 20 messages / minute is generous for a single user but caps runaway loops.
+    if (!rateLimit(userId, 20, 60000)) {
+      return NextResponse.json(
+        { error: 'Too many requests. Please slow down.', code: 'RATE_LIMITED' },
+        { status: 429 },
+      );
+    }
 
     const { message, history = [] } = await req.json();
     if (!message?.trim()) {
