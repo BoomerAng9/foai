@@ -272,7 +272,7 @@ export default function ShowsPage() {
   return (
     <div
       className="min-h-screen flex flex-col"
-      style={{ background: '#0A0A0F', color: '#fff' }}
+      style={{ background: 'var(--pf-bg)', color: 'var(--pf-text)' }}
     >
       <Header />
 
@@ -390,7 +390,7 @@ export default function ShowsPage() {
               <div className="px-6 pb-6">
                 <h3
                   className="text-lg md:text-xl font-bold mb-1"
-                  style={{ fontFamily: 'Outfit, sans-serif', color: '#fff' }}
+                  style={{ fontFamily: 'Outfit, sans-serif', color: 'var(--pf-text)' }}
                 >
                   {audio.currentEpisode.title}
                 </h3>

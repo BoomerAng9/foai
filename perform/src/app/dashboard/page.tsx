@@ -158,7 +158,7 @@ export default function DashboardPage() {
   }, []);
 
   return (
-    <div className="min-h-screen flex flex-col" style={{ background: '#0A0A0F' }}>
+    <div className="min-h-screen flex flex-col" style={{ background: 'var(--pf-bg)' }}>
       <Header />
 
       <main className="flex-1 px-6 py-20 max-w-7xl mx-auto w-full">

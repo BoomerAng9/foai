@@ -154,11 +154,11 @@ function FilterSelect({
         e.currentTarget.style.background = 'rgba(255,255,255,0.04)';
       }}
     >
-      <option value="" style={{ background: '#111118', color: 'rgba(255,255,255,0.5)' }}>
+      <option value="" style={{ background: 'var(--pf-bg-secondary)', color: 'rgba(255,255,255,0.5)' }}>
         {placeholder}
       </option>
       {options.map(opt => (
-        <option key={opt} value={opt} style={{ background: '#111118', color: '#FFFFFF' }}>
+        <option key={opt} value={opt} style={{ background: 'var(--pf-bg-secondary)', color: 'var(--pf-text)' }}>
           {opt}
         </option>
       ))}
@@ -370,7 +370,7 @@ export default function CollegePlayerIndexPage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col" style={{ background: '#0A0A0F' }}>
+    <div className="min-h-screen flex flex-col" style={{ background: 'var(--pf-bg)' }}>
       <Header />
 
       <main className="flex-1 px-4 md:px-8 py-8 max-w-7xl mx-auto w-full">
@@ -421,7 +421,7 @@ export default function CollegePlayerIndexPage() {
                   style={{
                     background: 'rgba(255,255,255,0.04)',
                     border: '1px solid rgba(255,255,255,0.08)',
-                    color: '#FFFFFF',
+                    color: 'var(--pf-text)',
                     caretColor: '#D4A853',
                   }}
                   onFocus={e => {

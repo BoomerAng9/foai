@@ -119,7 +119,7 @@ export default function PlayerIndexPage() {
   }, [filtered, positionGroups, sport]);
 
   return (
-    <div className="min-h-screen flex flex-col" style={{ background: '#0A0A0F' }}>
+    <div className="min-h-screen flex flex-col" style={{ background: 'var(--pf-bg)' }}>
       <Header />
 
       <main className="flex-1 px-4 md:px-8 py-8 max-w-6xl mx-auto w-full">
@@ -191,7 +191,7 @@ export default function PlayerIndexPage() {
                   style={{
                     background: 'rgba(255,255,255,0.04)',
                     border: '1px solid rgba(255,255,255,0.08)',
-                    color: '#FFFFFF',
+                    color: 'var(--pf-text)',
                     caretColor: '#D4A853',
                   }}
                 />

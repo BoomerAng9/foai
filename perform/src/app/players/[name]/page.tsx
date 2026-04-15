@@ -119,7 +119,7 @@ export default function PlayerProfilePage({ params }: { params: Promise<{ name: 
 
   return (
     <PaywallGate>
-      <div className="min-h-screen flex flex-col" style={{ background: '#0A0A0F', color: '#fff' }}>
+      <div className="min-h-screen flex flex-col" style={{ background: 'var(--pf-bg)', color: 'var(--pf-text)' }}>
         <Header />
 
         <main className="flex-1 w-full max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">

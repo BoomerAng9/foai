@@ -124,7 +124,7 @@ export default function RankingsPage() {
   return (
     <div className="min-h-screen" style={{ background: T.bg, color: T.text, fontFamily: "'Inter', system-ui, sans-serif" }}>
       {/* Nav ribbon */}
-      <nav style={{ background: T.navyDeep, color: '#FFFFFF' }}>
+      <nav style={{ background: T.navyDeep, color: 'var(--pf-text)' }}>
         <div className="max-w-6xl mx-auto px-6 py-3 flex items-center justify-between text-xs font-semibold">
           <div className="flex items-center">
             <BackHomeNav />
@@ -135,7 +135,7 @@ export default function RankingsPage() {
       </nav>
 
       {/* ═══ TOP 5 HERO SECTION ═══ */}
-      <header style={{ background: T.navyDeep, color: '#FFFFFF' }}>
+      <header style={{ background: T.navyDeep, color: 'var(--pf-text)' }}>
         <div className="max-w-6xl mx-auto px-6 pt-12 pb-14">
           <div className="mb-8">
             <span className="text-xs font-bold px-2 py-1 rounded" style={{ background: T.red }}>The Top 5</span>
@@ -189,7 +189,7 @@ export default function RankingsPage() {
                             </span>
                             <span
                               className="text-[10px] font-bold px-2 py-0.5 rounded"
-                              style={{ background: accent, color: '#FFFFFF' }}
+                              style={{ background: accent, color: 'var(--pf-text)' }}
                             >
                               {normalizePosition(p.position)}
                             </span>

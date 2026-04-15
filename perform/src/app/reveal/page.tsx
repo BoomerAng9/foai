@@ -53,7 +53,7 @@ export default function RevealDemoPage() {
   }, []);
 
   return (
-    <div className="min-h-screen" style={{ background: '#0A0A0F' }}>
+    <div className="min-h-screen" style={{ background: 'var(--pf-bg)' }}>
       <Header />
       <main className="px-6 py-16 max-w-7xl mx-auto">
         <div className="text-center mb-12">

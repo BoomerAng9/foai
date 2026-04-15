@@ -63,7 +63,7 @@ const CHANNELS = [
   { name: 'YouTube', icon: '▶', color: '#FF0000' },
   { name: 'Instagram', icon: '📷', color: '#E1306C' },
   { name: 'TikTok', icon: '♪', color: '#69C9D0' },
-  { name: 'Twitter / X', icon: '𝕏', color: '#FFFFFF' },
+  { name: 'Twitter / X', icon: '𝕏', color: 'var(--pf-text)' },
 ];
 
 /* ── Types ── */

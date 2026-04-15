@@ -81,7 +81,7 @@ export default function SimulatePage() {
   const trades = sim?.trades.filter(t => displayedPicks.some(p => p.trade_details?.trade_id === t.trade_id)) ?? [];
 
   return (
-    <div className="min-h-screen flex flex-col" style={{ background: '#0a0a0f', color: '#FFFFFF' }}>
+    <div className="min-h-screen flex flex-col" style={{ background: 'var(--pf-bg)', color: 'var(--pf-text)' }}>
       {/* Top bar */}
       <div style={{ background: 'linear-gradient(180deg, rgba(15,15,22,1) 0%, rgba(10,10,15,1) 100%)', borderBottom: '1px solid rgba(212,168,83,0.15)' }}>
         <div className="max-w-[1920px] mx-auto px-4 py-3">

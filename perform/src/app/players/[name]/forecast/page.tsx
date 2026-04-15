@@ -120,7 +120,7 @@ export default function ForecastPage({ params }: { params: Promise<{ name: strin
   return (
     <div className="min-h-screen" style={{ background: T.bg, color: T.text, fontFamily: "'Inter', system-ui, sans-serif" }}>
       {/* Navigation bar */}
-      <nav style={{ background: T.navyDeep, color: '#FFFFFF' }}>
+      <nav style={{ background: T.navyDeep, color: 'var(--pf-text)' }}>
         <div className="max-w-6xl mx-auto px-6 py-3 flex items-center justify-between text-xs font-semibold">
           <div className="flex items-center">
             <BackHomeNav />
@@ -131,7 +131,7 @@ export default function ForecastPage({ params }: { params: Promise<{ name: strin
       </nav>
 
       {/* Hero — player identity + dual grade */}
-      <header className="relative overflow-hidden" style={{ background: T.navyDeep, color: '#FFFFFF' }}>
+      <header className="relative overflow-hidden" style={{ background: T.navyDeep, color: 'var(--pf-text)' }}>
         <div
           className="absolute inset-0"
           style={{

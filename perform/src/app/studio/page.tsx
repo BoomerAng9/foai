@@ -104,7 +104,7 @@ export default function StudioPage() {
 
   return (
     <PaywallGate>
-    <div className="min-h-screen flex flex-col" style={{ background: '#0A0A0F' }}>
+    <div className="min-h-screen flex flex-col" style={{ background: 'var(--pf-bg)' }}>
       <Header />
 
       {/* Subtle grid overlay */}
