@@ -16,16 +16,21 @@ Endpoints:
     POST /approve/{mission_id}
     POST /deny/{mission_id}   — body: {reason}
 
-Auth: Bearer token via SQWAADRUN_API_KEY env var.
-      If unset, service runs unauthenticated (dev mode only).
+Auth: Bearer token via SQWAADRUN_API_KEY env var (required — no dev bypass).
+      Comparison is timing-safe (hmac.compare_digest).
+CORS: Allowlist via SQWAADRUN_CORS_ORIGINS (comma-separated origins).
+      Empty = no cross-origin access.
+Bind: Default 127.0.0.1. Override with --host or SQWAADRUN_BIND env var.
+      Production should front with Traefik/reverse proxy.
 
 Launch:
-    python -m sqwaadrun.service --host 0.0.0.0 --port 7700
+    python -m sqwaadrun.service --host 127.0.0.1 --port 7700
 """
 
 from __future__ import annotations
 
 import asyncio
+import hmac
 import logging
 import os
 from pathlib import Path
@@ -54,6 +59,45 @@ logger = logging.getLogger("Sqwaadrun.Service")
 
 
 # ═════════════════════════════════════════════════════════════════════════
+#  CORS MIDDLEWARE
+# ═════════════════════════════════════════════════════════════════════════
+
+def _allowed_origins() -> set[str]:
+    """Comma-separated allowlist from SQWAADRUN_CORS_ORIGINS. Empty = no CORS."""
+    raw = os.environ.get("SQWAADRUN_CORS_ORIGINS", "").strip()
+    if not raw:
+        return set()
+    return {o.strip() for o in raw.split(",") if o.strip()}
+
+
+@web.middleware
+async def cors_middleware(request: web.Request, handler):
+    """Lock CORS to an explicit allowlist. Preflight → 204, actual → stamped."""
+    origin = request.headers.get("Origin", "")
+    allowed = _allowed_origins()
+
+    if request.method == "OPTIONS":
+        if origin and origin in allowed:
+            return web.Response(
+                status=204,
+                headers={
+                    "Access-Control-Allow-Origin": origin,
+                    "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+                    "Access-Control-Allow-Headers": "Authorization, Content-Type",
+                    "Access-Control-Max-Age": "600",
+                    "Vary": "Origin",
+                },
+            )
+        return web.Response(status=403)
+
+    response = await handler(request)
+    if origin and origin in allowed:
+        response.headers["Access-Control-Allow-Origin"] = origin
+        response.headers["Vary"] = "Origin"
+    return response
+
+
+# ═════════════════════════════════════════════════════════════════════════
 #  AUTH MIDDLEWARE
 # ═════════════════════════════════════════════════════════════════════════
 
@@ -69,7 +113,8 @@ async def auth_middleware(request: web.Request, handler):
         return web.json_response({"error": "gateway not configured"}, status=503)
 
     got = request.headers.get("Authorization", "").replace("Bearer ", "")
-    if got != expected:
+    # Timing-safe comparison — constant-time, protects against token-probing.
+    if not got or not hmac.compare_digest(got, expected):
         return web.json_response({"error": "unauthorized"}, status=401)
 
     return await handler(request)
@@ -83,7 +128,6 @@ def _hawk_status(hawk) -> str:
     """Derive the public status string from BaseLilHawk internals."""
     if not getattr(hawk, "_active", False):
         return "standby"
-    # Lil_Snap_Hawk reports STANDBY when Playwright is unavailable
     if hasattr(hawk, "is_available") and not hawk.is_available:
         return "standby"
     return "active"
@@ -124,7 +168,6 @@ async def scrape_intent(request: web.Request) -> web.Response:
     squad: FullScrappHawkSquadrun = request.app["squad"]
     storage: SmelterStorage = request.app["storage"]
 
-    # ── Rate limiting ──
     client_ip = request.remote or "unknown"
     allowed, remaining = scrape_limiter.check(client_ip)
     if not allowed:
@@ -151,7 +194,6 @@ async def scrape_intent(request: web.Request) -> web.Response:
     if not intent:
         return web.json_response({"error": "intent required"}, status=400)
 
-    # ── SSRF validation — block internal/metadata URLs ──
     try:
         targets = validate_targets(raw_targets)
     except SSRFError as e:
@@ -163,20 +205,20 @@ async def scrape_intent(request: web.Request) -> web.Response:
     try:
         result = await bridge.scrape_intent(intent, targets, **config)
 
-        # ── Write-through to Puter + GCS if the mission actually ran ──
         mission_id = result.get("mission_id")
         if mission_id and result.get("status") in ("completed", "failed"):
             mission_obj = _find_mission(squad, mission_id)
             await _persist_mission(storage, mission_id, mission_obj, result)
 
-        return web.json_response(result)
+        # sanitize_output strips internal paths, IPs, and leaked secrets
+        # before the response crosses the API boundary.
+        return web.json_response(sanitize_output(result))
     except Exception as e:
         logger.exception("scrape_intent failed")
         return web.json_response({"error": "internal error"}, status=500)
 
 
 def _find_mission(squad: FullScrappHawkSquadrun, mission_id: str) -> Optional[Mission]:
-    """Look up a full Mission object from Chicken Hawk's in-memory log."""
     try:
         for m in squad.chicken_hawk._mission_log:  # type: ignore[attr-defined]
             if m.mission_id == mission_id:
@@ -192,12 +234,7 @@ async def _persist_mission(
     mission_obj: Optional[Mission],
     api_result: Dict[str, Any],
 ) -> None:
-    """
-    Fire-and-log the mission persistence. Never raises — storage
-    failures are logged but don't break the API response.
-    """
     try:
-        # Manifest (intent + targets + config)
         manifest: Dict[str, Any] = {
             "mission_id": mission_id,
             "intent": api_result.get("type") or (mission_obj.mission_type.value if mission_obj else None),
@@ -207,7 +244,6 @@ async def _persist_mission(
         }
         await storage.store_mission_manifest(mission_id, manifest)
 
-        # Full result payload — includes all scraped artifacts
         payload: Dict[str, Any] = {
             "mission_id": mission_id,
             "status": api_result.get("status"),
@@ -227,11 +263,9 @@ async def _persist_mission(
 
 
 async def mission(request: web.Request) -> web.Response:
-    """Typed mission dispatch — bypasses NL intent routing."""
     squad: FullScrappHawkSquadrun = request.app["squad"]
     storage: SmelterStorage = request.app["storage"]
 
-    # ── Rate limiting ──
     client_ip = request.remote or "unknown"
     allowed, remaining = mission_limiter.check(client_ip)
     if not allowed:
@@ -260,7 +294,6 @@ async def mission(request: web.Request) -> web.Response:
     if not raw_targets:
         return web.json_response({"error": "targets required"}, status=400)
 
-    # ── SSRF validation ──
     try:
         targets = validate_targets(raw_targets)
     except SSRFError as e:
@@ -280,16 +313,15 @@ async def mission(request: web.Request) -> web.Response:
             "status": m.status,
             "target_count": len(m.targets),
             "results_count": len(m.results),
-            "results": m.results[:50],  # cap to keep response size sane
+            "results": m.results[:50],
             "kpis": m.kpis,
             "error": m.error,
         }
 
-        # ── Write-through to Puter + GCS ──
         if m.status in ("completed", "failed"):
             await _persist_mission(storage, m.mission_id, m, api_result)
 
-        return web.json_response(api_result)
+        return web.json_response(sanitize_output(api_result))
     except Exception as e:
         logger.exception("mission failed")
         return web.json_response({"error": "internal error"}, status=500)
@@ -335,7 +367,6 @@ async def deny(request: web.Request) -> web.Response:
 async def on_startup(app: web.Application) -> None:
     logger.info("Bringing Sqwaadrun online for HTTP gateway...")
 
-    # ── Security checks at startup ──
     dep_audit = check_dependencies()
     if dep_audit["issues_found"] > 0:
         for issue in dep_audit["issues"]:
@@ -349,7 +380,6 @@ async def on_startup(app: web.Application) -> None:
     data_dir = Path(os.environ.get("SQWAADRUN_DATA_DIR", "./data"))
     data_dir.mkdir(parents=True, exist_ok=True)
 
-    # ── Dual-backend storage (Puter + GCS) ──
     storage = get_storage()
     app["storage"] = storage
 
@@ -360,7 +390,6 @@ async def on_startup(app: web.Application) -> None:
     )
     await squad.startup()
 
-    # Quota + sign-off policy from env
     policy = Policy(
         daily_quota_per_domain=int(os.environ.get("SQWAADRUN_QUOTA_PER_DOMAIN", "500")),
         sign_off_threshold=int(os.environ.get("SQWAADRUN_SIGNOFF_THRESHOLD", "100")),
@@ -370,16 +399,10 @@ async def on_startup(app: web.Application) -> None:
         policy=policy,
         doctrine_path=str(data_dir / "doctrine.jsonl"),
     )
-    # Inject storage so General_Ang's _log_doctrine fires a dual-write
     general.storage = storage  # type: ignore[attr-defined]
 
     bridge = AcheevyBridge(general)
 
-    # ── TRCC pipeline + scheduled jobs ──
-    # The pipeline registers default jobs with Lil_Sched_Hawk and
-    # launches a background loop that dispatches them on cadence.
-    # Disabled when SQWAADRUN_DISABLE_TRCC=1 (e.g. for ad-hoc gateway
-    # instances that don't need the data factory running).
     sched_task = None
     pipeline = None
     if os.environ.get("SQWAADRUN_DISABLE_TRCC", "0") != "1":
@@ -402,10 +425,6 @@ async def on_startup(app: web.Application) -> None:
         except Exception as e:
             logger.warning(f"TRCC pipeline failed to start: {e}")
 
-    # ── Heartbeat loop ──
-    # Writes a Chronicle Ledger entry to Puter every 90 seconds with
-    # the gateway's current state. Puter-only per the directive —
-    # never GCS, never customer-facing.
     heartbeat_interval = int(os.environ.get("SQWAADRUN_HEARTBEAT_INTERVAL_SECONDS", "90"))
     heartbeat_task = asyncio.create_task(
         _heartbeat_loop(storage, squad, heartbeat_interval)
@@ -425,11 +444,6 @@ async def _heartbeat_loop(
     squad: FullScrappHawkSquadrun,
     interval_seconds: int,
 ) -> None:
-    """
-    Write a gateway heartbeat to Puter (/chronicle/ledger/) on a
-    fixed cadence. If Puter is unavailable, log a warning and keep
-    trying — never crashes the daemon.
-    """
     logger.info(f"Heartbeat loop started ({interval_seconds}s interval)")
     while True:
         try:
@@ -457,8 +471,6 @@ async def _heartbeat_loop(
 
 
 async def on_cleanup(app: web.Application) -> None:
-    # Stop background tasks before the squad shuts down so their
-    # next wakeups find the app still present.
     for key in ("heartbeat_task", "sched_task"):
         task = app.get(key)
         if task is not None:
@@ -473,7 +485,8 @@ async def on_cleanup(app: web.Application) -> None:
 
 
 def build_app() -> web.Application:
-    app = web.Application(middlewares=[auth_middleware])
+    # CORS runs first so preflight never hits auth.
+    app = web.Application(middlewares=[cors_middleware, auth_middleware])
 
     app.router.add_get("/", health)
     app.router.add_get("/health", health)
@@ -492,7 +505,9 @@ def build_app() -> web.Application:
 def main():
     import argparse
     parser = argparse.ArgumentParser(description="Sqwaadrun HTTP Gateway")
-    parser.add_argument("--host", default="0.0.0.0")
+    # Default to loopback — expose publicly via reverse proxy (Traefik)
+    # or explicit --host 0.0.0.0 when the container network demands it.
+    parser.add_argument("--host", default=os.environ.get("SQWAADRUN_BIND", "127.0.0.1"))
     parser.add_argument("--port", type=int, default=7700)
     args = parser.parse_args()
 
