@@ -17,9 +17,8 @@
  *   - Every result is stamped with `vertical: 'WORKFORCE'`
  */
 
-import { getGradeForScore } from './grades';
 import type { TIEResult } from './types';
-import { getVerticalTierLabel } from './verticals';
+import { buildTIEResult } from '@aims/tie-matrix';
 import {
   getSoftSkills,
   getCertifications,
@@ -28,10 +27,8 @@ import {
   type WorkforceSoftSkill,
 } from './workforce-matrix';
 
-// PRIVATE WEIGHTS — NEVER EXPOSE
-const W_TALENT = 0.4;
-const W_INNOVATION = 0.3;
-const W_EXECUTION = 0.3;
+// Pillar weights (40/30/30) are owned by @aims/tie-matrix::buildTIEResult.
+// Never reintroduce weights in this file.
 
 export interface WorkforceTalentInput {
   yearsExperience?: number;
@@ -169,28 +166,19 @@ export function calculateWorkforceTIE(
   execution: WorkforceExecutionInput,
   context: WorkforceContext = {},
 ): WorkforceTIEResult {
-  const t = scoreTalent(talent);
-  const i = scoreInnovation(innovation);
-  const e = scoreExecution(execution);
+  const t = Math.round(scoreTalent(talent) * 10) / 10;
+  const i = Math.round(scoreInnovation(innovation) * 10) / 10;
+  const e = Math.round(scoreExecution(execution) * 10) / 10;
 
-  const raw = t * W_TALENT + i * W_INNOVATION + e * W_EXECUTION;
-  const score = Math.round(raw * 10) / 10;
-  const gradeInfo = getGradeForScore(score);
-  const labels = getVerticalTierLabel(gradeInfo.tier, 'WORKFORCE');
+  const base = buildTIEResult({
+    vertical: 'WORKFORCE',
+    performance: t, // Talent pillar
+    attributes: i,  // Innovation pillar
+    intangibles: e, // Execution pillar
+  });
 
   return {
-    vertical: 'WORKFORCE',
-    score,
-    grade: gradeInfo.grade,
-    tier: gradeInfo.tier,
-    label: labels.label,
-    context: labels.context,
-    badgeColor: gradeInfo.badgeColor,
-    components: {
-      performance: Math.round(t * 10) / 10,   // Talent pillar
-      attributes: Math.round(i * 10) / 10,    // Innovation pillar
-      intangibles: Math.round(e * 10) / 10,   // Execution pillar
-    },
+    ...base,
     salaryForecast: pickSalaryForecast(
       context.targetLevel ?? talent.currentLevel,
       innovation.softSkillsHeld?.[0],

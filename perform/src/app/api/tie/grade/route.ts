@@ -33,7 +33,7 @@ export async function POST(req: NextRequest) {
         grade: result.grade,
         tier: result.tier,
         label: result.label,
-        draftContext: result.draftContext,
+        draftContext: result.context,
         badgeColor: result.badgeColor,
         components: result.components,
       });

@@ -10,6 +10,7 @@ import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import PaywallGate from '@/components/PaywallGate';
 import { BackHomeNav } from '@/components/layout/BackHomeNav';
+import { positionColor } from '@/lib/ui/positions';
 
 interface PlayerRow {
   id: number; name: string; position: string; school: string;
@@ -25,18 +26,12 @@ type SortKey = 'rank' | 'grade' | 'name' | 'school';
 
 const T = {
   bg: 'var(--pf-bg)', surface: '#FFFFFF', surfaceAlt: '#FAFBFD',
-  border: '#E2E6EE', text: '#0A0E1A', textMuted: '#5A6478', textSubtle: '#8B94A8',
+  border: 'var(--pf-divider)', text: '#0A0E1A', textMuted: '#5A6478', textSubtle: '#8B94A8',
   navy: '#0B1E3F', navyDeep: '#06122A', red: '#D40028', redSoft: '#FFE9ED', green: '#00874C',
 };
 
-const POSITION_COLOR: Record<string, string> = {
-  QB: '#D40028', RB: '#00874C', WR: '#7C3AED', TE: '#DC6B19',
-  OT: '#0A66E8', IOL: '#0A66E8', OL: '#0A66E8',
-  EDGE: '#8B1A00', DT: '#DC2626', DL: '#DC2626',
-  LB: '#0891B2', OLB: '#0891B2', ILB: '#0891B2',
-  CB: '#F59E0B', S: '#84CC16',
-};
-const posColor = (pos: string | null | undefined): string => pos ? (POSITION_COLOR[pos.toUpperCase()] || T.navy) : T.navy;
+// Position colors — canonical source: @/lib/ui/positions
+const posColor = (pos: string | null | undefined): string => positionColor(pos);
 
 const POSITIONS = ['ALL', 'QB', 'RB', 'WR', 'TE', 'OT', 'IOL', 'EDGE', 'DT', 'LB', 'CB', 'S'];
 const SORT_OPTIONS: { key: SortKey; label: string }[] = [

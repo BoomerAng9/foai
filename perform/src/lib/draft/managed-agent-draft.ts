@@ -71,11 +71,21 @@ DRAFT RULES:
 - Trade values follow the Jimmy Johnson chart
 - Compensatory picks cannot be traded
 
-TIE GRADING (Per|Form proprietary):
-- 40% Talent (athleticism, physical tools, measurables)
+TIE GRADING (Per|Form, canonical @aims/tie-matrix):
+- 40% Performance (production, consistency, clutch performance)
+- 30% Attributes (athleticism, physical tools, measurables)
 - 30% Intangibles (leadership, character, work ethic, football IQ)
-- 30% Execution (production, consistency, clutch performance)
-- Tiers: Prime Player (101+), Elite (90-100), Starter (75-89), Contributor (60-74), Project (<60)
+- Tiers (use these EXACT labels): PRIME (101+, 🛸), A+ (90-100, 🚀), A (85-89, 🔥), A- (80-84, ⭐), B+ (75-79, ⏳), B (70-74, 🏈), B- (65-69, ⚡), C+ (60-64, 🔧), C (<60, ❌)
+- SPORTS draft projection per tier:
+  PRIME → Generational Talent / Franchise Player
+  A+ → Elite Prospect / Top 5 Pick
+  A → First-Round Lock / Pro Bowler potential
+  A- → Late First Round / High Upside Starter
+  B+ → Day 2 Pick / High Ceiling
+  B → Solid Contributor / Day 2
+  B- → Needs Development / Mid-Round
+  C+ → Depth Player / Late Round
+  C → Practice Squad / UDFA
 
 FOR EACH PICK, output in this format:
 [PICK] #<number> (Round <r>, Pick <p>) — <TEAM>

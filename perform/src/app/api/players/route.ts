@@ -65,8 +65,9 @@ export async function GET(req: NextRequest) {
     const auth = token ? await requireAuth(req) : null;
     const isAuthenticated = auth?.ok === true;
 
-    // Add sport column if missing (multi-sport Player Index support)
-    try { await sql!.unsafe('ALTER TABLE perform_players ADD COLUMN IF NOT EXISTS sport TEXT DEFAULT \'football\''); } catch { /* already exists */ }
+    // NOTE: `sport`, `vertical`, `beast_rank`, `beast_grade`, and
+    // `prime_sub_tags` columns are owned by migrations/008_tie_partition_and_analysts.sql.
+    // Do not re-introduce runtime ALTERs here — run the migration instead.
 
     const url = req.nextUrl;
     const position = url.searchParams.get('position');

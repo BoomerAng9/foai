@@ -12,6 +12,11 @@ import Link from 'next/link';
 import { useEffect, useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { BackHomeNav } from '@/components/layout/BackHomeNav';
+import {
+  POSITION_GROUPS,
+  normalizePosition,
+  positionColor,
+} from '@/lib/ui/positions';
 
 interface Player {
   id: number;
@@ -31,54 +36,24 @@ interface Player {
   nfl_comparison?: string | null;
 }
 
+// All surface + text tokens route through shared CSS vars so the page flips
+// with the theme toggle. Brand colors (navy, red, gold) stay fixed.
 const T = {
   bg:           'var(--pf-bg)',
-  surface:      '#FFFFFF',
-  surfaceAlt:   '#FAFBFD',
-  border:       '#E2E6EE',
-  borderStrong: '#CDD3DF',
-  text:         '#0A0E1A',
-  textMuted:    '#5A6478',
-  textSubtle:   '#8B94A8',
-  navy:         '#0B1E3F',
-  navyDeep:     '#06122A',
-  red:          '#D40028',
-  gold:         '#D4A853',
+  surface:      'var(--pf-bg-secondary)',
+  surfaceAlt:   'var(--pf-surface)',
+  border:       'var(--pf-divider)',
+  borderStrong: 'var(--pf-surface-2)',
+  text:         'var(--pf-text)',
+  textMuted:    'var(--pf-text-muted)',
+  textSubtle:   'var(--pf-text-subtle)',
+  navy:         'var(--pf-navy)',
+  navyDeep:     'var(--pf-navy-deep)',
+  red:          'var(--pf-red)',
+  gold:         'var(--pf-gold)',
 };
 
-const POSITION_GROUPS = [
-  { key: 'QB',   label: 'Quarterbacks',      color: '#D40028' },
-  { key: 'RB',   label: 'Running Backs',     color: '#00874C' },
-  { key: 'WR',   label: 'Wide Receivers',    color: '#7C3AED' },
-  { key: 'TE',   label: 'Tight Ends',        color: '#DC6B19' },
-  { key: 'OL',   label: 'Offensive Line',    color: '#0A66E8' },
-  { key: 'EDGE', label: 'Edge Rushers',      color: '#8B1A00' },
-  { key: 'DT',   label: 'Defensive Tackles', color: '#DC2626' },
-  { key: 'LB',   label: 'Linebackers',       color: '#0891B2' },
-  { key: 'CB',   label: 'Cornerbacks',       color: '#F59E0B' },
-  { key: 'S',    label: 'Safeties',          color: '#84CC16' },
-] as const;
-
-const POSITION_MAP: Record<string, string> = {
-  QB: 'QB', RB: 'RB', WR: 'WR', TE: 'TE',
-  OL: 'OL', OT: 'OL', OG: 'OL', C: 'OL', IOL: 'OL',
-  EDGE: 'EDGE', DE: 'EDGE',
-  DT: 'DT', NT: 'DT', IDL: 'DT', DL: 'DT',
-  LB: 'LB', ILB: 'LB', OLB: 'LB',
-  CB: 'CB',
-  S: 'S', FS: 'S', SS: 'S',
-};
-
-function normalizePosition(pos: string | null | undefined): string {
-  if (!pos) return 'OTHER';
-  return POSITION_MAP[pos.toUpperCase()] || pos.toUpperCase();
-}
-
-function positionColor(pos: string | null | undefined): string {
-  const norm = normalizePosition(pos);
-  const group = POSITION_GROUPS.find(g => g.key === norm);
-  return group?.color ?? T.navy;
-}
+// POSITION_GROUPS / normalizePosition / positionColor sourced from @/lib/ui/positions
 
 function blurbFor(p: Player, maxLen = 180): string {
   const s = (p.scouting_summary ?? '').trim();
