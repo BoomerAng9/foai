@@ -15,6 +15,7 @@
     "validate:deploy": "npm run validate && npm run build"
   },
   "dependencies": {
+    "@aims/pricing-matrix": "file:../aims-tools/aims-pricing-matrix",
     "@google/generative-ai": "^0.24.1",
     "@langchain/core": "^1.1.32",
     "@langchain/langgraph": "^1.2.2",
