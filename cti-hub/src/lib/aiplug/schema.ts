@@ -27,6 +27,127 @@ import { sql } from '@/lib/insforge';
 
 let tablesReady = false;
 
+const REQUIRED_PLUG_COLUMNS = [
+  { name: 'tagline', statement: "ALTER TABLE plugs ADD COLUMN tagline TEXT NOT NULL DEFAULT ''" },
+  { name: 'description', statement: "ALTER TABLE plugs ADD COLUMN description TEXT NOT NULL DEFAULT ''" },
+  { name: 'category', statement: "ALTER TABLE plugs ADD COLUMN category TEXT NOT NULL DEFAULT 'general'" },
+  { name: 'hero_image_url', statement: "ALTER TABLE plugs ADD COLUMN hero_image_url TEXT NOT NULL DEFAULT ''" },
+  { name: 'status', statement: "ALTER TABLE plugs ADD COLUMN status TEXT NOT NULL DEFAULT 'draft'" },
+  { name: 'features', statement: "ALTER TABLE plugs ADD COLUMN features TEXT[] NOT NULL DEFAULT ARRAY[]::TEXT[]" },
+  { name: 'tags', statement: "ALTER TABLE plugs ADD COLUMN tags TEXT[] NOT NULL DEFAULT ARRAY[]::TEXT[]" },
+  { name: 'price_cents', statement: "ALTER TABLE plugs ADD COLUMN price_cents INTEGER NOT NULL DEFAULT 0" },
+  { name: 'runtime_key', statement: "ALTER TABLE plugs ADD COLUMN runtime_key TEXT NOT NULL DEFAULT ''" },
+  { name: 'featured', statement: "ALTER TABLE plugs ADD COLUMN featured BOOLEAN NOT NULL DEFAULT FALSE" },
+  { name: 'updated_at', statement: "ALTER TABLE plugs ADD COLUMN updated_at TIMESTAMPTZ NOT NULL DEFAULT now()" },
+] as const;
+
+const REQUIRED_RUN_COLUMNS = [
+  { name: 'user_id', statement: "ALTER TABLE plug_runs ADD COLUMN user_id TEXT NOT NULL DEFAULT ''" },
+  { name: 'status', statement: "ALTER TABLE plug_runs ADD COLUMN status TEXT NOT NULL DEFAULT 'queued'" },
+  { name: 'inputs', statement: "ALTER TABLE plug_runs ADD COLUMN inputs JSONB NOT NULL DEFAULT '{}'::jsonb" },
+  { name: 'outputs', statement: "ALTER TABLE plug_runs ADD COLUMN outputs JSONB NOT NULL DEFAULT '{}'::jsonb" },
+  { name: 'error_message', statement: "ALTER TABLE plug_runs ADD COLUMN error_message TEXT NOT NULL DEFAULT ''" },
+  { name: 'started_at', statement: 'ALTER TABLE plug_runs ADD COLUMN started_at TIMESTAMPTZ' },
+  { name: 'finished_at', statement: 'ALTER TABLE plug_runs ADD COLUMN finished_at TIMESTAMPTZ' },
+  { name: 'last_heartbeat', statement: 'ALTER TABLE plug_runs ADD COLUMN last_heartbeat TIMESTAMPTZ' },
+  { name: 'cost_tokens', statement: 'ALTER TABLE plug_runs ADD COLUMN cost_tokens INTEGER NOT NULL DEFAULT 0' },
+  { name: 'created_at', statement: 'ALTER TABLE plug_runs ADD COLUMN created_at TIMESTAMPTZ NOT NULL DEFAULT now()' },
+] as const;
+
+const REQUIRED_EVENT_COLUMNS = [
+  { name: 'stage', statement: "ALTER TABLE plug_run_events ADD COLUMN stage TEXT NOT NULL DEFAULT ''" },
+  { name: 'message', statement: "ALTER TABLE plug_run_events ADD COLUMN message TEXT NOT NULL DEFAULT ''" },
+  { name: 'payload', statement: "ALTER TABLE plug_run_events ADD COLUMN payload JSONB NOT NULL DEFAULT '{}'::jsonb" },
+  { name: 'created_at', statement: 'ALTER TABLE plug_run_events ADD COLUMN created_at TIMESTAMPTZ NOT NULL DEFAULT now()' },
+] as const;
+
+function quoteIdent(identifier: string): string {
+  return `"${identifier.replace(/"/g, '""')}"`;
+}
+
+async function getExistingColumns(tableName: string): Promise<Set<string>> {
+  if (!sql) return new Set();
+
+  const rows = await sql`
+    SELECT column_name
+    FROM information_schema.columns
+    WHERE table_schema = 'public'
+      AND table_name = ${tableName}
+  `;
+
+  return new Set(rows.map(row => String(row.column_name)));
+}
+
+async function getColumnType(tableName: string, columnName: string): Promise<string | null> {
+  if (!sql) return null;
+
+  const rows = await sql`
+    SELECT data_type
+    FROM information_schema.columns
+    WHERE table_schema = 'public'
+      AND table_name = ${tableName}
+      AND column_name = ${columnName}
+    LIMIT 1
+  `;
+
+  return rows[0]?.data_type ? String(rows[0].data_type) : null;
+}
+
+async function ensureColumns(
+  tableName: string,
+  columns: ReadonlyArray<{ name: string; statement: string }>,
+): Promise<void> {
+  if (!sql) return;
+
+  const existingColumns = await getExistingColumns(tableName);
+
+  for (const column of columns) {
+    if (!existingColumns.has(column.name)) {
+      await sql.unsafe(column.statement);
+    }
+  }
+}
+
+async function ensureTextKeyColumn(
+  tableName: string,
+  columnName: string,
+  defaultExpression?: string,
+): Promise<void> {
+  if (!sql) return;
+
+  const currentType = await getColumnType(tableName, columnName);
+  if (!currentType) return;
+
+  if (currentType !== 'text') {
+    await sql.unsafe(
+      `ALTER TABLE ${quoteIdent(tableName)} ALTER COLUMN ${quoteIdent(columnName)} TYPE TEXT USING ${quoteIdent(columnName)}::text`
+    );
+  }
+
+  if (defaultExpression) {
+    await sql.unsafe(
+      `ALTER TABLE ${quoteIdent(tableName)} ALTER COLUMN ${quoteIdent(columnName)} SET DEFAULT ${defaultExpression}`
+    );
+  }
+}
+
+async function rebuildForeignKey(
+  tableName: string,
+  constraintName: string,
+  columnName: string,
+  referenceTable: string,
+  referenceColumn: string,
+): Promise<void> {
+  if (!sql) return;
+
+  await sql.unsafe(
+    `ALTER TABLE ${quoteIdent(tableName)} DROP CONSTRAINT IF EXISTS ${quoteIdent(constraintName)}`
+  );
+  await sql.unsafe(
+    `ALTER TABLE ${quoteIdent(tableName)} ADD CONSTRAINT ${quoteIdent(constraintName)} FOREIGN KEY (${quoteIdent(columnName)}) REFERENCES ${quoteIdent(referenceTable)}(${quoteIdent(referenceColumn)}) ON DELETE CASCADE`
+  );
+}
+
 export async function ensureAiplugTables(): Promise<void> {
   if (tablesReady || !sql) return;
 
@@ -86,32 +207,36 @@ export async function ensureAiplugTables(): Promise<void> {
     )
   `;
 
-  // Ensure required columns exist on plugs table (may be missing from prior schema)
-  const missingCols = [
-    { col: 'status', def: "ALTER TABLE plugs ADD COLUMN IF NOT EXISTS status TEXT NOT NULL DEFAULT 'draft'" },
-    { col: 'features', def: "ALTER TABLE plugs ADD COLUMN IF NOT EXISTS features TEXT[] NOT NULL DEFAULT ARRAY[]::TEXT[]" },
-    { col: 'tags', def: "ALTER TABLE plugs ADD COLUMN IF NOT EXISTS tags TEXT[] NOT NULL DEFAULT ARRAY[]::TEXT[]" },
-    { col: 'price_cents', def: "ALTER TABLE plugs ADD COLUMN IF NOT EXISTS price_cents INTEGER NOT NULL DEFAULT 0" },
-    { col: 'runtime_key', def: "ALTER TABLE plugs ADD COLUMN IF NOT EXISTS runtime_key TEXT NOT NULL DEFAULT ''" },
-    { col: 'featured', def: "ALTER TABLE plugs ADD COLUMN IF NOT EXISTS featured BOOLEAN NOT NULL DEFAULT FALSE" },
-    { col: 'tagline', def: "ALTER TABLE plugs ADD COLUMN IF NOT EXISTS tagline TEXT NOT NULL DEFAULT ''" },
-    { col: 'description', def: "ALTER TABLE plugs ADD COLUMN IF NOT EXISTS description TEXT NOT NULL DEFAULT ''" },
-    { col: 'category', def: "ALTER TABLE plugs ADD COLUMN IF NOT EXISTS category TEXT NOT NULL DEFAULT 'general'" },
-    { col: 'hero_image_url', def: "ALTER TABLE plugs ADD COLUMN IF NOT EXISTS hero_image_url TEXT NOT NULL DEFAULT ''" },
-  ];
-  for (const { def } of missingCols) {
-    await sql.unsafe(def).catch(() => {});
-  }
+  await ensureTextKeyColumn('plugs', 'id', 'gen_random_uuid()::text');
+  await ensureTextKeyColumn('plug_runs', 'id', 'gen_random_uuid()::text');
+  await ensureTextKeyColumn('plug_runs', 'plug_id');
+  await ensureTextKeyColumn('plug_run_events', 'id', 'gen_random_uuid()::text');
+  await ensureTextKeyColumn('plug_run_events', 'run_id');
 
-  // Drop stale FK constraints that may block table creation
-  // (plugs.id type may not match TEXT from a prior migration)
+  await ensureColumns('plugs', REQUIRED_PLUG_COLUMNS);
+  await ensureColumns('plug_runs', REQUIRED_RUN_COLUMNS);
+  await ensureColumns('plug_run_events', REQUIRED_EVENT_COLUMNS);
+
+  // Clean up orphaned rows before foreign keys are rebuilt.
   await sql`
-    DO $$ BEGIN
-      ALTER TABLE plug_runs DROP CONSTRAINT IF EXISTS plug_runs_plug_id_fkey;
-      ALTER TABLE plug_run_events DROP CONSTRAINT IF EXISTS plug_run_events_run_id_fkey;
-    EXCEPTION WHEN undefined_table THEN NULL;
-    END $$
-  `.catch(() => {});
+    DELETE FROM plug_run_events e
+    WHERE NOT EXISTS (
+      SELECT 1
+      FROM plug_runs r
+      WHERE r.id = e.run_id
+    )
+  `;
+  await sql`
+    DELETE FROM plug_runs r
+    WHERE NOT EXISTS (
+      SELECT 1
+      FROM plugs p
+      WHERE p.id = r.plug_id
+    )
+  `;
+
+  await rebuildForeignKey('plug_runs', 'plug_runs_plug_id_fkey', 'plug_id', 'plugs', 'id');
+  await rebuildForeignKey('plug_run_events', 'plug_run_events_run_id_fkey', 'run_id', 'plug_runs', 'id');
 
   // Indices
   await sql`CREATE INDEX IF NOT EXISTS plugs_status_idx ON plugs (status)`;

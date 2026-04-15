@@ -8,7 +8,7 @@ import { staggerContainer, staggerItem, scrollReveal } from '@/lib/motion';
 /* eslint-disable @next/next/no-img-element */
 
 const agents = [
-  { name: 'ACHEEVY', role: 'Digital CEO', desc: 'You describe the problem. ACHEEVY scopes the project, assigns agents, and delivers the finished product. No forms. No sprint planning. Just results.' },
+  { name: 'ACHEEVY', role: 'AI Operations Manager', desc: 'You describe the outcome. ACHEEVY scopes the plan, dispatches the agents, and manages delivery end to end. No forms. No sprint planning. Just results.' },
   { name: 'Chicken Hawk', role: 'Operations Manager', desc: 'Takes ACHEEVY\'s plan and breaks it into tasks. Assigns agents, tracks progress, catches problems before they become yours.' },
   { name: 'Scout_Ang', role: 'Research & Intel', desc: 'Finds leads, scrapes the web, pulls market data, and digs up opportunities across every source available.' },
   { name: 'Content_Ang', role: 'Content & Copy', desc: 'Writes proposals, marketing copy, presentations, and docs — polished, on-brand, and ready to send.' },

@@ -34,7 +34,7 @@ export interface AgentPersona {
 export const AGENT_PERSONAS: Record<string, AgentPersona> = {
   acheevy: {
     voice: 'leo', gender: 'male',
-    label: 'ACHEEVY', role: 'Digital CEO',
+    label: 'ACHEEVY', role: 'AI Operations Manager',
     allowedVoices: ['leo', 'rex', 'sal'],
     skills: ['Strategy', 'Execution', 'Dispatch', 'RFP-BAMARAM'],
   },
@@ -122,7 +122,7 @@ export function buildSessionConfig(config: GrokVoiceConfig = {}): object {
     session: {
       model: 'grok-4.20-beta',
       voice: config.voice || 'leo',
-      instructions: config.systemPrompt || 'You are ACHEEVY, the Digital CEO of The Deploy Platform.',
+      instructions: config.systemPrompt || 'You are ACHEEVY, the AI operations manager of The Deploy Platform.',
       input_audio_transcription: { model: 'grok-4.20-beta' },
       temperature: config.temperature ?? 0.7,
       tools: config.enableSearch ? [

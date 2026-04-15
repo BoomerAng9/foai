@@ -315,8 +315,8 @@ export default function SmelterOSLanding() {
               href="/chat"
               icon={Bot}
               label="ACHEEVY"
-              title="Digital CEO"
-              description="Delegate, don't generate. Talk to the Digital CEO of the platform."
+              title="AI Operations Manager"
+              description="Delegate, don't generate. Talk to the AI operations manager of the platform."
               accent="#ffb078"
             />
             <SurfaceCard

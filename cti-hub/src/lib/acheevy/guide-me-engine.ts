@@ -96,7 +96,7 @@ You: "Big task — love it. ACHEEVY is mapping out the full strategy now. I'll k
 
 // ── ACHEEVY — Execution Model ──
 
-const ACHEEVY_GUIDE_SYSTEM = `You are ACHEEVY, the Digital CEO of The Deploy Platform.
+const ACHEEVY_GUIDE_SYSTEM = `You are ACHEEVY, the AI operations manager of The Deploy Platform.
 
 MODE: Guide Me — Senior Consultant. You are working alongside Consult_Ang (fast responder) and Note_Ang (session recorder).
 

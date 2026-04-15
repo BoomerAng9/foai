@@ -3,8 +3,9 @@
 import { useState, useCallback } from 'react';
 import {
   ArrowRight, Search, TrendingUp, MessageSquare,
-  Users, Calendar, FileText, Loader2, Zap,
+  Users, Calendar, FileText, Zap,
 } from 'lucide-react';
+import { BoomerangLoader } from '@/components/branding/BoomerangLoader';
 import { PlugChat } from '@/components/plug/PlugChat';
 import { PlugChrome } from '@/components/plug/PlugChrome';
 
@@ -244,7 +245,7 @@ export default function SMBMarketingPage() {
         />
         <div className="flex items-center justify-center px-4 py-20">
           <div className="text-center max-w-md mx-4">
-            <Loader2 className="w-8 h-8 text-[#E8A020] animate-spin mx-auto mb-4" />
+            <BoomerangLoader layout="inline" size="lg" className="mx-auto mb-4" label="" />
             <h2 className="text-lg font-bold mb-2">Agents Working</h2>
             <div className="space-y-2 text-sm text-white/50">
               <div className="flex items-center gap-2 justify-center">

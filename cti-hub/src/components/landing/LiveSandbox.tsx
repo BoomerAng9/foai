@@ -20,11 +20,11 @@ interface Agent {
 }
 
 const AGENTS: Agent[] = [
-  { id: 'acheevy', name: 'ACHEEVY', role: 'Digital CEO', icon: <Crown className="w-4 h-4" />, color: '#E8A020', department: 'Executive', status: 'working' },
-  { id: 'scout', name: 'Scout_Ang', role: 'Market Research', icon: <Search className="w-4 h-4" />, color: '#3B82F6', department: 'Research', status: 'working' },
+  { id: 'acheevy', name: 'ACHEEVY', role: 'AI Operations Manager', icon: <Crown className="w-4 h-4" />, color: '#E8A020', department: 'Command', status: 'working' },
+  { id: 'scout', name: 'Scout_Ang', role: 'Institutional Sourcing', icon: <Search className="w-4 h-4" />, color: '#3B82F6', department: 'Research', status: 'working' },
   { id: 'biz', name: 'Biz_Ang', role: 'Lead Pipeline', icon: <TrendingUp className="w-4 h-4" />, color: '#10B981', department: 'Growth', status: 'working' },
   { id: 'content', name: 'Content_Ang', role: 'Content Ops', icon: <FileText className="w-4 h-4" />, color: '#8B5CF6', department: 'Content', status: 'working' },
-  { id: 'ops', name: 'Ops_Ang', role: 'Health Monitor', icon: <Activity className="w-4 h-4" />, color: '#F43F5E', department: 'Operations', status: 'working' },
+  { id: 'ops', name: 'Ops_Ang', role: 'Platform Health', icon: <Activity className="w-4 h-4" />, color: '#F43F5E', department: 'Operations', status: 'working' },
 ];
 
 // ─── Task + message data ─────────────────────────────────────────────────────

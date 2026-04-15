@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { Users, Activity, RefreshCw, ChevronDown, ChevronRight, Zap, Clock, Shield } from 'lucide-react';
+import { BoomerangLoader } from '@/components/branding/BoomerangLoader';
 import type { AgentProfile, Department } from '@/lib/agents/registry';
 
 interface AgentState extends AgentProfile {
@@ -31,6 +32,7 @@ function AgentCard({ agent, onClick }: { agent: AgentState; onClick: () => void 
   const status = STATUS_CONFIG[agent.status] || STATUS_CONFIG.idle;
   return (
     <button
+      id={agent.id}
       onClick={onClick}
       className="w-full text-left bg-bg border border-border hover:border-fg-ghost transition-all p-4 group"
     >
@@ -231,9 +233,7 @@ export default function AgentHQ() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="w-8 h-8 border-2 border-accent border-t-transparent rounded-full animate-spin" />
-      </div>
+      <BoomerangLoader layout="inline" size="lg" className="h-64" label="Loading..." />
     );
   }
 
@@ -250,7 +250,11 @@ export default function AgentHQ() {
   const toggleDept = (id: string) => {
     setExpandedDepts(prev => {
       const next = new Set(prev);
-      next.has(id) ? next.delete(id) : next.add(id);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
       return next;
     });
   };

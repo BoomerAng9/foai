@@ -56,8 +56,8 @@ export interface AgentDispatch {
 
 // Agent roster for assembly animations
 export const AGENT_ROSTER = {
-  acheevy: { name: 'ACHEEVY', role: 'Digital CEO', color: '#E8A020' },
-  q_ang: { name: 'Q_Ang', role: 'Intelligence Analyst', color: '#3B82F6' },
+  acheevy: { name: 'ACHEEVY', role: 'AI Operations Manager', color: '#E8A020' },
+  q_ang: { name: 'Scout_Ang', role: 'Institutional Contract Scout', color: '#3B82F6' },
   content_ang: { name: 'Content_Ang', role: 'Content & Copy', color: '#8B5CF6' },
   biz_ang: { name: 'Biz_Ang', role: 'Business Strategy', color: '#10B981' },
   code_ang: { name: 'Code_Ang', role: 'Engineering', color: '#F43F5E' },

@@ -20,6 +20,7 @@ import {
   ArrowRight,
   Package,
 } from 'lucide-react';
+import { BoomerangLoader } from '@/components/branding/BoomerangLoader';
 import type { PlugRow } from '@/lib/aiplug/types';
 
 function formatCents(cents: number): string {
@@ -73,12 +74,13 @@ export default function AiPlugLauncherPage() {
       </div>
 
       {loading && (
-        <div className="py-16 text-center">
-          <div className="inline-block w-6 h-6 rounded-full border-2 animate-spin border-border border-t-accent" />
-          <div className="text-xs font-mono text-fg-tertiary mt-3">
-            Loading aiPLUGs…
-          </div>
-        </div>
+        <BoomerangLoader
+          layout="inline"
+          size="md"
+          className="py-16"
+          label="Loading aiPLUGs..."
+          labelClassName="text-xs tracking-[0.2em]"
+        />
       )}
 
       {error && (

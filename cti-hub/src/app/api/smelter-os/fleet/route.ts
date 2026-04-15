@@ -61,16 +61,17 @@ export async function GET(req: NextRequest) {
   // agents table lands in Neon, swap to a real query.
   const boomerAngs = [
     { callsign: 'General_Ang', role: 'Sqwaadrun supervisor', status: 'active' },
-    { callsign: 'Research_Ang', role: 'Research + sourcing', status: 'active' },
+    { callsign: 'Scout_Ang', role: 'Institutional sourcing', status: 'active' },
     { callsign: 'Content_Ang', role: 'Writing + editorial', status: 'active' },
     { callsign: 'Analytics_Ang', role: 'KPI + measurement', status: 'active' },
-    { callsign: 'Sales_Ang', role: 'Pipeline + outreach', status: 'active' },
-    { callsign: 'Biz_Ang', role: 'Business operations', status: 'active' },
-    { callsign: 'Iller_Ang', role: 'Creative / image generation', status: 'active' },
+    { callsign: 'Edu_Ang', role: 'Enrollment + commissions', status: 'active' },
+    { callsign: 'Biz_Ang', role: 'Client growth', status: 'active' },
+    { callsign: 'Ops_Ang', role: 'Reporting + uptime', status: 'active' },
+    { callsign: 'Iller_Ang', role: 'Creative direction', status: 'active' },
   ];
 
   const commandTier = [
-    { callsign: 'ACHEEVY', role: 'Digital CEO', status: 'active' },
+    { callsign: 'ACHEEVY', role: 'AI operations manager', status: 'active' },
     { callsign: 'Chicken_Hawk', role: 'Sqwaadrun dispatcher (2IC/COO)', status: gatewayHealthy ? 'active' : 'standby' },
   ];
 

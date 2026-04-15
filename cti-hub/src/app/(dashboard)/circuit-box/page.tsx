@@ -40,7 +40,7 @@ const PANELS: PanelSection[] = [
     icon: Bot,
     visibility: 'always',
     entries: [
-      { id: 'acheevy', label: 'ACHEEVY', description: 'Digital CEO — strategy, execution, dispatch', status: 'online' },
+      { id: 'acheevy', label: 'ACHEEVY', description: 'AI operations manager — strategy, execution, dispatch', status: 'online' },
       { id: 'chicken_hawk', label: 'Chicken Hawk', description: 'Tactical Operator (2IC)', status: 'online' },
       { id: 'consult_ang', label: 'Consult_Ang', description: 'Fast Responder — clarification, triage', status: 'online' },
       { id: 'note_ang', label: 'Note_Ang', description: 'Session Recorder — intent tracking, audit', status: 'online' },
