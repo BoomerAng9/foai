@@ -10,7 +10,7 @@ import { PlugChrome } from '@/components/plug/PlugChrome';
 const USE_CASES = [
   {
     title: 'Run Your Business Without Hiring',
-    description: 'Deploy ACHEEVY as your Digital CEO with Boomer_Angs handling sales, operations, content, and business development. Every agent plans before it acts, remembers what worked, and improves over time.',
+    description: 'Deploy ACHEEVY as your AI operations manager with the six Boomer_Angs handling sourcing, education revenue, operations, content, client growth, and creative. Every agent plans before it acts, remembers what worked, and improves over time.',
     icon: Building2,
     tag: 'MOST POPULAR',
   },
@@ -150,7 +150,7 @@ export default function DeployLanding() {
             <span className="font-bold">This one runs like a real <span className="text-[#E8A020] font-black">company</span>.</span>
           </h2>
           <p className="text-sm text-white/40 leading-relaxed">
-            22 live services. 6 Boomer_Angs. 17 Lil_Hawks in the Sqwaadrun. A Digital CEO that delegates, not generates.
+            22 live services. 6 Boomer_Angs. 17 Lil_Hawks in the Sqwaadrun. An AI operations manager that delegates, not generates.
             Agents that plan before they act, remember what worked, and are measured against KPIs —
             the same way a Fortune 500 manages its workforce. The difference is this workforce never sleeps,
             scales infinitely, and improves through semantic memory.
@@ -226,74 +226,65 @@ export default function DeployLanding() {
               Strategic Tier <span style={{ color: '#E8A020' }}>Boomer_Angs</span>
             </h2>
             <p className="text-sm text-white/40 max-w-2xl mx-auto">
-              Seven autonomous agents. Each runs on its own, plans before it acts, and reports every move. Click any agent to see the full capability sheet.
+              Six autonomous agents. Each runs on its own, plans before it acts, and reports every move. Click any agent to see the full capability sheet.
             </p>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {([
               {
-                slug: 'q-ang',
-                name: 'Q_Ang',
-                role: 'Intelligence Analyst',
-                persona: 'Methodical, data-driven, always sourcing. Talks like an intelligence analyst. Finds what others miss.',
+                slug: 'q_ang',
+                name: 'Scout_Ang',
+                role: 'Institutional Contract Scout',
+                persona: 'Sources universities, contract signals, and institutional opportunities before they hit the open market.',
                 price: 97,
-                capabilities: ['Web intelligence', 'Opportunity sourcing', 'Competitive research', 'Data intelligence'],
+                capabilities: ['Institutional sourcing', 'University research', 'Opportunity intelligence', 'Competitive research'],
                 image: '/agents/scout-ang.png',
               },
               {
-                slug: 'content-ang',
+                slug: 'content_ang',
                 name: 'Content_Ang',
-                role: 'Creative Director',
-                persona: 'Creative, brand-aware, always on message. Talks like a CMO.',
+                role: 'SEO Growth Director',
+                persona: 'Builds content systems that compound search visibility and organic traffic without losing the brand voice.',
                 price: 127,
                 capabilities: ['SEO content', 'Blog posts', 'Landing pages', 'Social media', 'Email campaigns'],
                 image: '/agents/content-ang.png',
               },
               {
-                slug: 'sales-ang',
-                name: 'Sales_Ang',
-                role: 'VP of Sales',
-                persona: 'Driven, numbers-focused, always closing. ABC mentality.',
+                slug: 'sales_ang',
+                name: 'Edu_Ang',
+                role: 'Education Revenue Operator',
+                persona: 'Runs enrollment flow, affiliate follow-up, and commission tracking with no dropped handoffs.',
                 price: 147,
-                capabilities: ['Lead qualification', 'Pipeline management', 'Revenue attribution', 'Commission tracking'],
+                capabilities: ['Enrollment generation', 'Affiliate workflows', 'Commission tracking', 'Revenue attribution'],
                 image: '/agents/edu-ang.png',
               },
               {
-                slug: 'biz-ang',
+                slug: 'biz_ang',
                 name: 'Biz_Ang',
-                role: 'Growth Strategist',
-                persona: 'Big-picture, pipeline-obsessed, relationship builder. Talks like a BD director.',
+                role: 'SaaS Growth Strategist',
+                persona: 'Keeps lead generation, onboarding, and retention moving as one connected growth system.',
                 price: 97,
                 capabilities: ['Pipeline analytics', 'Lead generation', 'Client retention', 'Campaign performance'],
                 image: '/agents/biz-ang.png',
               },
               {
-                slug: 'ops-ang',
+                slug: 'ops_ang',
                 name: 'Ops_Ang',
-                role: 'Operations Chief',
-                persona: 'Always watching, never sleeping. Talks like a NOC engineer.',
+                role: 'Platform Operations Chief',
+                persona: 'Owns alerts, uptime, and platform reporting so the rest of the fleet can run without drift.',
                 price: 197,
                 capabilities: ['Fleet monitoring', 'Incident detection', 'Uptime tracking', 'Historical recall'],
                 image: '/agents/ops-ang.png',
               },
               {
-                slug: 'iller-ang',
+                slug: 'iller_ang',
                 name: 'Iller_Ang',
-                role: 'Visual Director',
-                persona: "Direct. Visual-first. Doesn't explain — shows. Opinionated about typography, spacing, color.",
+                role: 'Creative Director',
+                persona: "Leads player cards, broadcast graphics, motion pages, and digital art with a visual-first standard.",
                 price: 197,
                 capabilities: ['Player cards', 'Broadcast graphics', 'Character art', 'NFT assets', 'Merchandise concepts'],
                 image: '/agents/iller-ang.png',
-              },
-              {
-                slug: 'cfo-ang',
-                name: 'CFO_Ang',
-                role: 'Chief Financial Officer',
-                persona: 'Every dollar tracked. Every token counted. Receivables, bookkeeping, pricing.',
-                price: 147,
-                capabilities: ['Budget tracking', 'Cost analysis', 'Revenue optimization', 'Receivables', 'Bookkeeping'],
-                image: '/agents/cfo-ang.png',
               },
             ] as const).map(agent => (
               <Link

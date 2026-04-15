@@ -43,6 +43,7 @@
     "tailwind-merge": "^3.5.0"
   },
   "devDependencies": {
+    "@playwright/test": "^1.56.1",
     "@swc/core": "^1.15.24",
     "@swc/jest": "^0.2.39",
     "@types/dompurify": "^3.2.0",

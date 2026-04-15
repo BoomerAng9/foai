@@ -1,0 +1,62 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  text-align: center;
+}
+
+.inline {
+  min-height: auto;
+}
+
+.page {
+  min-height: 60vh;
+}
+
+.screen {
+  min-height: 100vh;
+}
+
+.image {
+  display: block;
+  height: auto;
+  object-fit: contain;
+  animation: spin 2.8s linear infinite;
+  filter: drop-shadow(0 10px 24px rgba(0, 0, 0, 0.24));
+}
+
+.sm {
+  width: 1.5rem;
+}
+
+.md {
+  width: 2rem;
+}
+
+.lg {
+  width: 3rem;
+}
+
+.xl {
+  width: 10rem;
+}
+
+.label {
+  font-family: monospace;
+  font-size: 11px;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--fg-ghost, rgba(228, 232, 237, 0.45));
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}

@@ -20,6 +20,7 @@ import {
   Clock,
   Tag,
 } from 'lucide-react';
+import { BoomerangLoader } from '@/components/branding/BoomerangLoader';
 import type {
   PlugDetailResponse,
   PlugRow,
@@ -91,12 +92,13 @@ export default function PlugDetailPage({
 
   if (loading) {
     return (
-      <div className="py-16 text-center">
-        <div className="inline-block w-6 h-6 rounded-full border-2 animate-spin border-border border-t-accent" />
-        <div className="text-xs font-mono text-fg-tertiary mt-3">
-          Loading plug…
-        </div>
-      </div>
+      <BoomerangLoader
+        layout="inline"
+        size="md"
+        className="py-16"
+        label="Loading plug..."
+        labelClassName="text-xs tracking-[0.2em]"
+      />
     );
   }
 

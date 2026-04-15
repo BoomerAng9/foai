@@ -97,7 +97,7 @@ export const Scene2Acheevy: React.FC = () => {
             marginBottom: 50,
           }}
         >
-          Your Digital CEO
+          Your AI Operations Manager
         </div>
       )}
 

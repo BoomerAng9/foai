@@ -199,7 +199,7 @@ export default function LandingPage() {
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             {[
-              { name: 'ACHEEVY', role: 'Digital CEO', color: '#E8A020' },
+              { name: 'ACHEEVY', role: 'AI Operations Manager', color: '#E8A020' },
               { name: 'Scout_Ang', role: 'Research & Intel', color: '#3B82F6' },
               { name: 'Chicken Hawk', role: 'Tactical Ops', color: '#DC2626' },
               { name: 'Biz_Ang', role: 'Business Strategy', color: '#10B981' },

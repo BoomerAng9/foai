@@ -23,7 +23,7 @@ const AGENTS = [
   { id: "chickenhawk", name: "Chicken Hawk", role: "Commander", emoji: "\uD83E\uDD85", color: C.hawk, glow: C.hawkGlow,
     desc: "Governed via Telegram. Approves partnerships, sets budgets, overrides schedules.", controls: ["Agent Framework", "Messaging Layer"] },
   { id: "acheevy", name: "ACHEEVY", role: "Orchestrator", emoji: "\u2699\uFE0F", color: C.acheevy, glow: C.acheevyGlow,
-    desc: "Digital CEO. Qualifies courses, scores viability, sets pricing, manages the pipeline state machine.", controls: ["Boomer_Angs", "Lil_Hawks"] },
+    desc: "AI operations manager. Qualifies courses, scores viability, sets pricing, and manages the pipeline state machine.", controls: ["Boomer_Angs", "Lil_Hawks"] },
   { id: "boomerangs", name: "Boomer_Angs", role: "Scouts / Scrapers", emoji: "\uD83E\uDE83", color: C.boomer, glow: C.boomerGlow,
     desc: "Minion fleet. Scrape course platforms, monitor seat availability, detect pricing changes, feed data to ACHEEVY.", controls: [] },
   { id: "lilhawks", name: "Lil_Hawks", role: "Outreach / Ops", emoji: "\uD83D\uDC26", color: C.lil, glow: C.lilGlow,

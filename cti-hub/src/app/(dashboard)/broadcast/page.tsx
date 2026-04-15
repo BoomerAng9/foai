@@ -667,7 +667,7 @@ export default function BroadcastStudio() {
             <div className="space-y-1">
               {[
                 { name: 'ILLA', role: 'Head of Studio', color: BC.amber, active: true },
-                { name: 'ACHEEVY', role: 'Digital CEO', color: BC.gold, active: true },
+                { name: 'ACHEEVY', role: 'AI Operations Manager', color: BC.gold, active: true },
                 { name: 'Beat_Ang', role: 'Audio & Music', color: '#A855F7', active: true },
                 { name: 'CUT_Ang', role: 'Video Editing', color: '#EC4899', active: true },
                 { name: 'Social_Ang', role: 'Social Distribution', color: '#14B8A6', active: false },

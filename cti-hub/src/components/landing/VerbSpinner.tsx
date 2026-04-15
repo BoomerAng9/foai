@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import styles from './VerbSpinner.module.css';
 
 const VERBS = [
   'DEPLOY',
@@ -47,7 +48,6 @@ const VERBS = [
 ];
 
 export function VerbSpinner() {
-  const [currentIndex, setCurrentIndex] = useState(0);
   const [isSpinning, setIsSpinning] = useState(false);
   const [displayVerb, setDisplayVerb] = useState(VERBS[0]);
 
@@ -55,10 +55,9 @@ export function VerbSpinner() {
   useEffect(() => {
     if (isSpinning) return;
     const interval = setInterval(() => {
-      setCurrentIndex(prev => {
-        const next = (prev + 1) % VERBS.length;
-        setDisplayVerb(VERBS[next]);
-        return next;
+      setDisplayVerb(prev => {
+        const next = (VERBS.indexOf(prev) + 1) % VERBS.length;
+        return VERBS[next];
       });
     }, 9000);
     return () => clearInterval(interval);
@@ -79,27 +78,29 @@ export function VerbSpinner() {
       if (spins >= totalSpins) {
         clearInterval(spinInterval);
         const finalIdx = Math.floor(Math.random() * VERBS.length);
-        setCurrentIndex(finalIdx);
         setDisplayVerb(VERBS[finalIdx]);
         setIsSpinning(false);
       }
     }, 80);
   }, [isSpinning]);
 
+  const widthClass = (() => {
+    const length = Math.min(11, Math.max(4, displayVerb.length));
+    return styles[`w${length}` as keyof typeof styles] || styles.w11;
+  })();
+
   return (
     <button
       onClick={handleClick}
-      className="relative inline cursor-pointer group"
+      className={`${styles.button} ${widthClass}`}
       title="Click to spin"
     >
       <span
-        className={`font-bold transition-all duration-200 ${
-          isSpinning ? 'text-white blur-[1px]' : 'text-[#E8A020] hover:text-white'
-        }`}
+        className={`${styles.word} ${isSpinning ? styles.spinning : styles.idle}`}
       >
         {displayVerb}
       </span>
-      <span className="absolute -bottom-0.5 left-0 w-full h-px bg-[#E8A020]/40 group-hover:bg-[#E8A020] transition-colors" />
+      <span className={styles.underline} />
     </button>
   );
 }
