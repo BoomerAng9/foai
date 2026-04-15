@@ -111,7 +111,7 @@ export default function WarRoomPage() {
 
   return (
     <TeamTheme sport="nfl" teamAbbr={selectedTeam}>
-    <div className="min-h-screen flex flex-col" style={{ background: 'transparent', color: '#FFFFFF' }}>
+    <div className="min-h-screen flex flex-col" style={{ background: 'transparent', color: 'var(--pf-text)' }}>
       <div style={{ background: 'linear-gradient(180deg, rgba(15,15,22,1) 0%, rgba(10,10,15,1) 100%)', borderBottom: team ? `2px solid ${team.primaryColor}40` : '1px solid rgba(212,168,83,0.15)' }}>
         <div className="max-w-[1920px] mx-auto px-4 py-3 flex items-center gap-4">
           <BackHomeNav />
@@ -216,7 +216,7 @@ export default function WarRoomPage() {
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
             className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
             <motion.div initial={{ scale: 0.9, y: 20 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.9, y: 20 }}
-              className="w-full max-w-md rounded-xl overflow-hidden" style={{ background: '#111118', border: '1px solid rgba(212,168,83,0.3)' }}>
+              className="w-full max-w-md rounded-xl overflow-hidden" style={{ background: 'var(--pf-bg-secondary)', border: '1px solid rgba(212,168,83,0.3)' }}>
               <div className="px-5 py-4" style={{ background: 'linear-gradient(135deg, rgba(212,168,83,0.15) 0%, rgba(212,168,83,0.05) 100%)', borderBottom: '1px solid rgba(212,168,83,0.2)' }}>
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-full flex items-center justify-center text-[10px] font-black"
@@ -256,7 +256,7 @@ export default function WarRoomPage() {
                   </button>
                   <button onClick={() => handleTradeResponse('accept')} disabled={tradeProcessing}
                     className="flex-1 py-3 text-sm font-bold tracking-wider uppercase rounded-lg transition-all hover:brightness-110 disabled:opacity-50"
-                    style={{ background: 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)', color: '#FFFFFF' }}>
+                    style={{ background: 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)', color: 'var(--pf-text)' }}>
                     {tradeProcessing ? 'Processing...' : 'Accept Trade'}
                   </button>
                 </div>

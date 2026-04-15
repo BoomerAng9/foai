@@ -143,7 +143,7 @@ export default function PodcastersLandingPage() {
           <div className="inline-flex items-center gap-3 mb-6">
             <span
               className="px-3 py-1.5 text-[10px] font-black tracking-[0.25em] rounded"
-              style={{ background: T.red, color: '#FFFFFF' }}
+              style={{ background: T.red, color: 'var(--pf-text)' }}
             >
               LIVE
             </span>

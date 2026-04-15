@@ -125,7 +125,7 @@ export async function GET(request: NextRequest) {
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    color: '#FFFFFF',
+                    color: 'var(--pf-text)',
                     fontSize: '16px',
                     fontWeight: 900,
                   }}
@@ -137,7 +137,7 @@ export async function GET(request: NextRequest) {
                     style={{
                       fontSize: '28px',
                       fontWeight: 900,
-                      color: '#FFFFFF',
+                      color: 'var(--pf-text)',
                       lineHeight: 1.1,
                     }}
                   >
@@ -187,7 +187,7 @@ export async function GET(request: NextRequest) {
                   >
                     R{i + 1}
                   </span>
-                  <span style={{ color: '#FFFFFF', fontWeight: 700 }}>
+                  <span style={{ color: 'var(--pf-text)', fontWeight: 700 }}>
                     {pick.trim()}
                   </span>
                 </div>

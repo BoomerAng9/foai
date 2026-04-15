@@ -83,7 +83,7 @@ export default function MockDraftPage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col" style={{ background: 'var(--pf-bg)', color: '#fff' }}>
+    <div className="min-h-screen flex flex-col" style={{ background: 'var(--pf-bg)', color: 'var(--pf-text)' }}>
       <Header />
 
       {/* Hero — draft stage background */}
@@ -105,7 +105,7 @@ export default function MockDraftPage() {
         />
         <div className="relative max-w-5xl mx-auto w-full px-4 py-14 text-center">
           <div className="inline-flex items-center gap-2 mb-3">
-            <span className="px-2 py-0.5 text-[10px] font-bold tracking-[0.2em] rounded" style={{ background: '#D40028', color: '#FFFFFF' }}>
+            <span className="px-2 py-0.5 text-[10px] font-bold tracking-[0.2em] rounded" style={{ background: '#D40028', color: 'var(--pf-text)' }}>
               DRAFT NIGHT
             </span>
             <span className="text-[10px] font-mono tracking-[0.18em] uppercase opacity-60">Mock Simulator</span>

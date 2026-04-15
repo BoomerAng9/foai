@@ -63,7 +63,7 @@ export default function AnalystsPage() {
     <PaywallGate>
       <div className="min-h-screen" style={{ background: T.bg, color: T.text, fontFamily: "'Inter', system-ui, sans-serif" }}>
         {/* ═══ TOP RIBBON ═══ */}
-        <div style={{ background: T.navyDeep, color: '#FFFFFF', borderBottom: `2px solid ${T.gold}` }}>
+        <div style={{ background: T.navyDeep, color: 'var(--pf-text)', borderBottom: `2px solid ${T.gold}` }}>
           <div className="max-w-7xl mx-auto px-6 py-3 flex items-center justify-between text-[11px] font-bold tracking-[0.18em] uppercase">
             <div className="flex items-center gap-3">
               <BackHomeNav />
@@ -74,7 +74,7 @@ export default function AnalystsPage() {
         </div>
 
         {/* ═══ HERO SECTION ═══ */}
-        <header className="relative overflow-hidden" style={{ background: `linear-gradient(135deg, ${T.navy} 0%, ${T.navyDeep} 100%)`, color: '#FFFFFF' }}>
+        <header className="relative overflow-hidden" style={{ background: `linear-gradient(135deg, ${T.navy} 0%, ${T.navyDeep} 100%)`, color: 'var(--pf-text)' }}>
           <div className="absolute inset-0 opacity-[0.06]" style={{
             backgroundImage: 'repeating-linear-gradient(45deg, transparent, transparent 80px, #FFFFFF 80px, #FFFFFF 81px)',
           }} />
