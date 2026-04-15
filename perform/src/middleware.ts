@@ -123,6 +123,15 @@ export function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
+  // Server-to-server bearer-token requests (scheduled crons, webhooks,
+  // pipeline runners) don't carry a firebase cookie. Let them pass the
+  // middleware — the route handler still enforces PIPELINE_AUTH_KEY via
+  // safeCompare, so this is a cookie-check bypass, not an auth bypass.
+  const authHeader = request.headers.get('authorization');
+  if (pathname.startsWith('/api/') && authHeader?.startsWith('Bearer ')) {
+    return NextResponse.next();
+  }
+
   // Protected routes — check for session cookie.
   // Full token verification happens in the API route handlers via requireAuth().
   // Middleware performs a lightweight cookie-presence check and redirects

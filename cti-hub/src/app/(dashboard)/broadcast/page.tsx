@@ -149,6 +149,12 @@ export default function BroadcastStudio() {
   const [textOverlays, setTextOverlays] = useState<TextOverlayConfig[]>([]);
   const [showScenarios, setShowScenarios] = useState(false);
   const [voiceEnabled, setVoiceEnabled] = useState(true);
+  // Grammar status from the chat-route SSE meta frame.
+  // 'applied'     enriched the user's prompt with NTNTN output
+  // 'passthrough' message bypassed Grammar (passthrough phrase)
+  // 'failed'      Grammar call errored — falling back to raw input
+  const [grammarStatus, setGrammarStatus] = useState<'applied' | 'passthrough' | 'failed' | null>(null);
+  const [grammarError, setGrammarError] = useState<string | null>(null);
   // Video generation state
   const [videoTaskId, setVideoTaskId] = useState<string | null>(null);
   const [videoProgress, setVideoProgress] = useState(0);
@@ -505,6 +511,11 @@ export default function BroadcastStudio() {
                 }
                 return prev;
               });
+            }
+            // Grammar status from SSE meta frame (sent before content stream).
+            if (data.meta?.grammar_status) {
+              setGrammarStatus(data.meta.grammar_status as 'applied' | 'passthrough' | 'failed');
+              setGrammarError(data.meta.grammar_error ?? null);
             }
             // Detect video_ready signal from chat route
             if (data.video_ready) {
@@ -1044,6 +1055,27 @@ export default function BroadcastStudio() {
 
             {/* Chat input */}
             <div className="px-2 py-2 shrink-0" style={{ borderTop: `1px solid ${BC.border}` }}>
+              {/* Grammar status indicator — sourced from chat-route SSE meta frame */}
+              {grammarStatus && (
+                <div
+                  className="flex items-center gap-1 mb-1.5 px-1 text-[7px] font-mono uppercase tracking-wider"
+                  style={{
+                    color:
+                      grammarStatus === 'failed'
+                        ? '#f97316'
+                        : grammarStatus === 'applied'
+                          ? BC.gold
+                          : BC.textGhost,
+                  }}
+                  title={grammarError ?? undefined}
+                >
+                  <span style={{ width: 4, height: 4, borderRadius: '50%', background: 'currentColor' }} />
+                  Grammar: {grammarStatus}
+                  {grammarStatus === 'failed' && grammarError && (
+                    <span className="ml-1 opacity-60">— {grammarError.slice(0, 40)}</span>
+                  )}
+                </div>
+              )}
               <div className="flex items-end gap-1.5">
                 <button
                   onClick={() => setShowScenarios(!showScenarios)}
