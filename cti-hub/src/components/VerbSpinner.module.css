@@ -1,0 +1,49 @@
+.button {
+  position: relative;
+  display: inline-flex;
+  align-items: flex-end;
+  justify-content: center;
+  margin: 0 0.12em;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  vertical-align: baseline;
+  line-height: 1;
+  transition: width 220ms ease;
+}
+
+.w4 { width: 4.8ch; }
+.w5 { width: 5.8ch; }
+.w6 { width: 6.8ch; }
+.w7 { width: 7.8ch; }
+.w8 { width: 8.8ch; }
+.w9 { width: 9.8ch; }
+.w10 { width: 10.8ch; }
+.w11 { width: 11.8ch; }
+
+.word {
+  display: block;
+  width: 100%;
+  font-weight: 700;
+  white-space: nowrap;
+  text-align: center;
+  transition: color 200ms ease, filter 200ms ease;
+}
+
+.idle { color: #e8a020; }
+.button:hover .idle { color: #ffffff; }
+.spinning { color: #ffffff; filter: blur(1px); }
+
+.underline {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -0.12rem;
+  height: 1px;
+  background: rgba(232, 160, 32, 0.4);
+  transition: background-color 200ms ease;
+}
+
+.button:hover .underline { background: #e8a020; }

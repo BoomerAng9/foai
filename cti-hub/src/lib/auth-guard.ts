@@ -10,6 +10,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getAdminAuth } from '@/lib/firebase-admin';
 import { isOwner } from '@/lib/allowlist';
 import { sql } from '@/lib/insforge';
+import crypto from 'crypto';
 
 const AUTH_COOKIE = 'firebase-auth-token';
 
@@ -114,10 +115,12 @@ export async function requireAuth(
  * Timing-safe string comparison to prevent timing attacks on webhook secrets.
  */
 export function safeCompare(a: string, b: string): boolean {
-  if (a.length !== b.length) return false;
-  let result = 0;
-  for (let i = 0; i < a.length; i++) {
-    result |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  const bufA = Buffer.from(a);
+  const bufB = Buffer.from(b);
+  if (bufA.length !== bufB.length) {
+    const padded = Buffer.alloc(bufA.length);
+    bufB.copy(padded);
+    return crypto.timingSafeEqual(bufA, padded) && bufA.length === bufB.length;
   }
-  return result === 0;
+  return crypto.timingSafeEqual(bufA, bufB);
 }
