@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { staggerContainer, staggerItem, heroStagger, heroItem, fadeUp } from '@/lib/motion';
+import { positionColor } from '@/lib/ui/positions';
 
 /* ── Types ─────────────────────────────────────────────── */
 
@@ -55,25 +56,8 @@ const CONFERENCES = [
 
 const CLASS_YEARS = ['Freshman', 'Sophomore', 'Junior', 'Senior', 'Graduate'] as const;
 
-const POSITION_COLORS: Record<string, string> = {
-  QB: '#E74C3C',
-  RB: '#27AE60',
-  WR: '#8E44AD',
-  TE: '#E67E22',
-  OL: '#2980B9', OT: '#2980B9', OG: '#2980B9', C: '#2980B9',
-  EDGE: '#C0392B', DE: '#C0392B',
-  DT: '#E91E63', DL: '#E91E63',
-  LB: '#00BCD4', ILB: '#00BCD4', OLB: '#00BCD4',
-  CB: '#FF9800',
-  S: '#8BC34A', FS: '#8BC34A', SS: '#8BC34A',
-  K: '#9E9E9E',
-  P: '#607D8B',
-};
-
-function getPositionColor(pos: string | null | undefined): string {
-  if (!pos) return '#D4A853';
-  return POSITION_COLORS[pos.toUpperCase()] || '#D4A853';
-}
+// Position colors — canonical source: @/lib/ui/positions
+const getPositionColor = (pos: string | null | undefined): string => positionColor(pos);
 
 /* ── Stat badge helper ──────────────────────────────────── */
 

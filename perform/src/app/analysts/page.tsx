@@ -16,16 +16,17 @@ import { BackHomeNav } from '@/components/layout/BackHomeNav';
 
 const T = {
   bg:           'var(--pf-bg)',
-  surface:      '#FFFFFF',
-  surfaceAlt:   '#FAFBFD',
-  border:       '#E2E6EE',
-  borderStrong: '#CDD3DF',
-  text:         '#0A0E1A',
-  textMuted:    '#5A6478',
-  textSubtle:   '#8B94A8',
-  navy:         '#0B1E3F',
-  navyDeep:     '#06122A',
-  gold:         '#D4A853',
+  surface:      'var(--pf-bg-secondary)',
+  surfaceAlt:   'var(--pf-surface)',
+  border:       'var(--pf-divider)',
+  borderStrong: 'var(--pf-surface-2)',
+  text:         'var(--pf-text)',
+  textMuted:    'var(--pf-text-muted)',
+  textSubtle:   'var(--pf-text-subtle)',
+  // Broadcast anchors — sourced from globals.css so theme tweaks are centralized.
+  navy:         'var(--pf-navy)',
+  navyDeep:     'var(--pf-navy-deep)',
+  gold:         'var(--pf-gold)',
 };
 
 const fadeUp: Variants = {

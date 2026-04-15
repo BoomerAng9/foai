@@ -224,16 +224,17 @@ export async function POST(req: NextRequest) {
             throw new Error(`No grade result for ${player.name}`);
           }
 
-          // Derive tie_tier from the new grade
-          let tieTier = 'DEVELOPMENTAL';
-          if (gradeResult.grade >= 90) tieTier = 'ELITE';
-          else if (gradeResult.grade >= 82) tieTier = 'BLUE CHIP';
-          else if (gradeResult.grade >= 75) tieTier = 'STARTER';
-          else if (gradeResult.grade >= 68) tieTier = 'SOLID';
+          // Derive tier from the canonical @aims/tie-matrix scale.
+          // Never invent local tier labels — a tier written to DB must
+          // round-trip with getGradeForScore() / getVerticalTierLabel().
+          const band = getGradeForScore(gradeResult.grade);
+          const tieTier = band.tier; // 'PRIME' | 'A_PLUS' | ... | 'C'
 
+          // UPDATE
           await sql!`
             UPDATE perform_players
             SET
+              vertical = 'SPORTS',
               grade = ${gradeResult.grade},
               tie_grade = ${gradeResult.tie_grade},
               tie_tier = ${tieTier},
@@ -244,6 +245,28 @@ export async function POST(req: NextRequest) {
               updated_at = NOW()
             WHERE id = ${player.id}
           `;
+
+          // SELECT verification — confirm the write landed.
+          // Extracted data ≠ applied data: read back and fail loud if the
+          // persisted row doesn't match what we just computed.
+          const rows = (await sql!`
+            SELECT grade, tie_grade, tie_tier
+            FROM perform_players
+            WHERE id = ${player.id}
+          `) as Array<{ grade: number; tie_grade: string; tie_tier: string }>;
+
+          const row = rows[0];
+          if (!row) throw new Error(`Verify failed: ${player.name} row missing after UPDATE`);
+          if (Number(row.grade) !== gradeResult.grade) {
+            throw new Error(
+              `Verify failed for ${player.name}: grade expected ${gradeResult.grade}, got ${row.grade}`,
+            );
+          }
+          if (row.tie_tier !== tieTier) {
+            throw new Error(
+              `Verify failed for ${player.name}: tier expected ${tieTier}, got ${row.tie_tier}`,
+            );
+          }
 
           return player.name;
         }),

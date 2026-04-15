@@ -6,6 +6,7 @@ import { motion } from 'framer-motion';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { getGradeForScore } from '@/lib/tie/grades';
+import { positionColor, normalizePosition as normalizeFootballPosition } from '@/lib/ui/positions';
 import { staggerContainer, staggerItem, heroItem, heroStagger, fadeUp } from '@/lib/motion';
 
 interface Player {
@@ -36,31 +37,19 @@ const POSITION_GROUPS_BY_SPORT: Record<Sport, readonly string[]> = {
   baseball: ['P', 'C', 'IF', 'OF', 'DH'] as const,
 };
 
-const POSITION_MAP_FOOTBALL: Record<string, string> = {
-  QB: 'QB', RB: 'RB', WR: 'WR', TE: 'TE',
-  OL: 'OL', OT: 'OL', OG: 'OL', C: 'OL', IOL: 'OL',
-  EDGE: 'EDGE', DE: 'EDGE',
-  DL: 'DL', DT: 'DL', NT: 'DL', IDL: 'DL',
-  LB: 'LB', ILB: 'LB', OLB: 'LB',
-  CB: 'CB',
-  S: 'S', FS: 'S', SS: 'S',
-};
-
 function normalizePosition(pos: string, sport: Sport): string {
-  if (sport === 'football') return POSITION_MAP_FOOTBALL[pos?.toUpperCase()] || pos?.toUpperCase() || 'OTHER';
+  if (sport === 'football') return normalizeFootballPosition(pos);
   return pos?.toUpperCase() || 'OTHER';
 }
 
-const GROUP_COLORS: Record<string, string> = {
-  QB: '#E74C3C', RB: '#2ECC71', WR: '#3498DB', TE: '#E67E22',
-  OL: '#9B59B6', EDGE: '#E74C3C', DL: '#E91E63', LB: '#00BCD4',
-  CB: '#FF9800', S: '#8BC34A',
-  PG: '#E74C3C', SG: '#3498DB', SF: '#2ECC71', PF: '#E67E22', C: '#9B59B6',
-  P: '#E74C3C', IF: '#3498DB', OF: '#2ECC71', DH: '#E67E22',
+// Basketball + baseball palettes — football routes through @/lib/ui/positions.
+const MULTI_SPORT_COLORS: Record<string, string> = {
+  PG: '#D40028', SG: '#0A66E8', SF: '#00874C', PF: '#DC6B19', C: '#7C3AED',
+  P:  '#D40028', IF: '#0A66E8', OF: '#00874C', DH: '#DC6B19',
 };
 
 function getGroupColor(group: string): string {
-  return GROUP_COLORS[group] || '#D4A853';
+  return positionColor(group) !== '#9CA3AF' ? positionColor(group) : (MULTI_SPORT_COLORS[group] ?? '#9CA3AF');
 }
 
 function GradePill({ value }: { value: string | number }) {

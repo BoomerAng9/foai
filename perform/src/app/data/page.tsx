@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { getGradeForScore } from '@/lib/tie/grades';
+import { positionColor as POS_COLOR_FN } from '@/lib/ui/positions';
 import {
   Database, Download, Search, Filter, ChevronDown, ChevronUp,
   Activity, Users, BarChart3, Layers, AlertTriangle, CheckCircle2,
@@ -49,15 +50,7 @@ interface ValidationData {
   summary: Record<string, number>;
 }
 
-/* ── Constants ──────────────────────────────────────── */
-const POSITION_COLORS: Record<string, string> = {
-  QB: '#E74C3C', RB: '#2ECC71', WR: '#3498DB', TE: '#E67E22',
-  OL: '#9B59B6', OT: '#9B59B6', OG: '#9B59B6', C: '#9B59B6', IOL: '#9B59B6',
-  EDGE: '#E74C3C', DE: '#E74C3C',
-  DL: '#E91E63', DT: '#E91E63', NT: '#E91E63', IDL: '#E91E63',
-  LB: '#00BCD4', ILB: '#00BCD4', OLB: '#00BCD4',
-  CB: '#FF9800', S: '#8BC34A', FS: '#8BC34A', SS: '#8BC34A',
-};
+/* ── Position colors — canonical source: @/lib/ui/positions ── */
 
 const SORT_OPTIONS = [
   { value: 'overall_rank:asc', label: 'Rank (Best)' },
@@ -106,7 +99,7 @@ function GradeBadge({ value }: { value: number | null }) {
 }
 
 function PositionTag({ pos }: { pos: string }) {
-  const color = POSITION_COLORS[pos?.toUpperCase()] || '#D4A853';
+  const color = POS_COLOR_FN(pos);
   return (
     <span
       className="inline-block text-[10px] font-mono font-bold px-1.5 py-0.5 rounded"

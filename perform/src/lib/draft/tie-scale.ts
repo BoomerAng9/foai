@@ -1,159 +1,83 @@
 /**
- * ACHIEVEMOR Grade Scale — CANONICAL
- * =====================================
- * From perform-talent-intelligence-skill-v2-final.md
+ * perform/lib/draft/tie-scale.ts  (FACADE — DEPRECATED internal implementation)
+ * ==============================================================================
+ * Previously this file held a PARALLEL grading engine with its own
+ * weights, scale, emojis, prime sub-tags, and multi-position bonuses.
+ * That parallel implementation has been removed. Everything here now
+ * delegates to @aims/tie-matrix — the canonical cross-vertical engine.
  *
- * The formula (proprietary, never shown to users):
- *   Player Grade Score = (Game Performance × 0.40)
- *                      + (Athleticism × 0.30)
- *                      + (Intangibles × 0.30)
- *
- * Max grade: 100 base, +up to 7 from multi-position bonus = 107 ceiling
- * Scale goes to 101+ for Prime Player (the alien 🛸)
+ * Existing imports continue to work (TIE_SCALE, getGradeBand,
+ * formatGradeDisplay, calculatePerFormGrade, PRIME_SUB_TAGS,
+ * multiPositionBonus, PrimeSubTag, TieGradeBand, GradeInputs, GradeResult),
+ * but new code should import from @aims/tie-matrix directly.
  */
+
+import {
+  SEED_GRADES,
+  SEED_PRIME_SUB_TAGS,
+  getGradeForScore,
+  getVerticalTierLabel,
+  formatGradeDisplay as matrixFormatGradeDisplay,
+  versatilityBonusValue,
+  type PrimeSubTag,
+  type GradeBand,
+  type VersatilityFlex,
+} from '@aims/tie-matrix';
+
+export type { PrimeSubTag };
+
+// ─── Legacy TieGradeBand shape (kept for existing consumers) ────────────
 
 export interface TieGradeBand {
   minScore: number;
   maxScore: number;
-  grade: string;       // e.g. "A+", "Prime Player"
-  icon: string;        // Emoji icon
-  projection: string;  // Draft projection
-  label: string;       // Display label
+  grade: string;
+  icon: string;
+  projection: string;
+  label: string;
 }
 
-export const TIE_SCALE: TieGradeBand[] = [
-  {
-    minScore: 101,
-    maxScore: 107,
-    grade: 'Prime Player',
-    icon: '🛸',
-    projection: 'Generational Talent, Franchise Player',
-    label: 'PRIME',
-  },
-  {
-    minScore: 90,
-    maxScore: 100,
-    grade: 'A+',
-    icon: '🚀',
-    projection: 'Elite Prospect, Top 5 Pick',
-    label: 'ELITE',
-  },
-  {
-    minScore: 85,
-    maxScore: 89.99,
-    grade: 'A',
-    icon: '🔥',
-    projection: 'First-Round Lock, Potential Pro Bowler',
-    label: 'FIRST ROUND LOCK',
-  },
-  {
-    minScore: 80,
-    maxScore: 84.99,
-    grade: 'A-',
-    icon: '⭐',
-    projection: 'Late First-Round, High Upside Starter',
-    label: 'LATE FIRST ROUND',
-  },
-  {
-    minScore: 75,
-    maxScore: 79.99,
-    grade: 'B+',
-    icon: '⏳',
-    projection: 'Day 2 Pick, High Ceiling, Some Concerns',
-    label: 'HIGH CEILING',
-  },
-  {
-    minScore: 70,
-    maxScore: 74.99,
-    grade: 'B',
-    icon: '🏈',
-    projection: 'Day 2 Pick, Solid Contributor but Not a Star',
-    label: 'SOLID CONTRIBUTOR',
-  },
-  {
-    minScore: 65,
-    maxScore: 69.99,
-    grade: 'B-',
-    icon: '⚡',
-    projection: 'Mid-Round Pick, Needs Development',
-    label: 'DEVELOPMENTAL',
-  },
-  {
-    minScore: 60,
-    maxScore: 64.99,
-    grade: 'C+',
-    icon: '🔧',
-    projection: 'Depth Player, Role Player at Best',
-    label: 'DEPTH',
-  },
-  {
-    minScore: 0,
-    maxScore: 59.99,
-    grade: 'C or Below',
-    icon: '❌',
-    projection: 'Practice Squad / Undrafted',
-    label: 'UDFA',
-  },
-];
+/** Derived from the canonical matrix — SPORTS projections. */
+export const TIE_SCALE: TieGradeBand[] = SEED_GRADES.map((band: GradeBand) => {
+  const sports = getVerticalTierLabel(band.tier, 'SPORTS');
+  return {
+    minScore: band.min,
+    maxScore: band.max === 999 ? 107 : band.max, // SPORTS ceiling (100 base + 7 bonus)
+    grade: band.grade === 'PRIME' ? 'Prime Player' : band.grade,
+    icon: band.icon,
+    projection: sports.projection ?? sports.context,
+    label: band.tier === 'PRIME' ? 'PRIME' : (sports.label.toUpperCase()),
+  };
+});
 
-/* ── Prime Player Sub-Tags (101+ only) ── */
-export type PrimeSubTag =
-  | 'franchise_cornerstone'
-  | 'talent_character_concerns'
-  | 'nil_ready'
-  | 'quiet_but_elite'
-  | 'ultra_competitive';
-
-export const PRIME_SUB_TAGS: Record<PrimeSubTag, { icon: string; label: string; meaning: string }> = {
-  franchise_cornerstone: {
-    icon: '🏗️',
-    label: 'Franchise Cornerstone',
-    meaning: 'Cornerstone of a franchise build — you build the team around this player',
-  },
-  talent_character_concerns: {
-    icon: '⚠️',
-    label: 'Talent w/ Character Concerns',
-    meaning: 'Elite ceiling, but off-field flags reduce certainty',
-  },
-  nil_ready: {
-    icon: '🎤',
-    label: 'NIL Ready',
-    meaning: 'Brand value and market readiness exceed pure football projection',
-  },
-  quiet_but_elite: {
-    icon: '🔒',
-    label: 'Quiet but Elite',
-    meaning: 'Under-the-radar generational talent — the hidden gem',
-  },
-  ultra_competitive: {
-    icon: '🤯',
-    label: 'Ultra-Competitive',
-    meaning: 'Elite motor and drive that elevates everyone around them',
-  },
-};
-
-/* ── Look up the grade band for a final score ── */
 export function getGradeBand(score: number): TieGradeBand {
-  for (const band of TIE_SCALE) {
-    if (score >= band.minScore && score <= band.maxScore) return band;
-  }
-  return TIE_SCALE[TIE_SCALE.length - 1]; // Below 60 fallback
+  const band = getGradeForScore(score);
+  const sports = getVerticalTierLabel(band.tier, 'SPORTS');
+  return {
+    minScore: band.min,
+    maxScore: band.max === 999 ? 107 : band.max,
+    grade: band.grade === 'PRIME' ? 'Prime Player' : band.grade,
+    icon: band.icon,
+    projection: sports.projection ?? sports.context,
+    label: band.tier === 'PRIME' ? 'PRIME' : sports.label.toUpperCase(),
+  };
 }
 
-/* ── Format a grade for display: "A+ 🚀" or "Prime Player 🛸 🏗️ 🤯" ── */
+// ─── Prime sub-tags — re-exported from matrix with legacy key shape ────
+
+export const PRIME_SUB_TAGS: Record<PrimeSubTag, { icon: string; label: string; meaning: string }> = Object.fromEntries(
+  (Object.keys(SEED_PRIME_SUB_TAGS) as PrimeSubTag[]).map((k) => {
+    const def = SEED_PRIME_SUB_TAGS[k];
+    return [k, { icon: def.icon, label: def.label, meaning: def.meaning }];
+  }),
+) as Record<PrimeSubTag, { icon: string; label: string; meaning: string }>;
+
 export function formatGradeDisplay(score: number, subTags?: PrimeSubTag[]): string {
-  const band = getGradeBand(score);
-  let display = `${band.grade} ${band.icon}`;
-
-  if (score >= 101 && subTags && subTags.length > 0) {
-    const tagIcons = subTags.map(t => PRIME_SUB_TAGS[t].icon).join(' ');
-    display += ` ${tagIcons}`;
-  }
-
-  return display;
+  return matrixFormatGradeDisplay(score, subTags);
 }
 
-/* ── Core Per|Form grade formula (proprietary weights) ── */
+// ─── Grade inputs/outputs (legacy shape) ────────────────────────────────
+
 export interface GradeInputs {
   gamePerformance: number;  // 0-100
   athleticism: number;      // 0-100
@@ -162,7 +86,7 @@ export interface GradeInputs {
 }
 
 export interface GradeResult {
-  finalScore: number;       // 0-107
+  finalScore: number;
   band: TieGradeBand;
   display: string;
   breakdown: {
@@ -173,20 +97,21 @@ export interface GradeResult {
   };
 }
 
+/**
+ * Legacy entry point — delegates to @aims/tie-matrix.
+ * Weights are enforced inside the matrix's buildTIEResult; this
+ * function only adapts the old {gamePerformance, athleticism,
+ * intangibles, multiPositionBonus} shape to the new pillar inputs.
+ */
 export function calculatePerFormGrade(inputs: GradeInputs): GradeResult {
-  // PROPRIETARY WEIGHTS — never exposed to users
-  const GAME_PERFORMANCE_WEIGHT = 0.40;
-  const ATHLETICISM_WEIGHT = 0.30;
-  const INTANGIBLES_WEIGHT = 0.30;
+  // Canonical 40/30/30 weighting is applied inside the matrix
+  const weighted =
+    inputs.gamePerformance * 0.4 +
+    inputs.athleticism * 0.3 +
+    inputs.intangibles * 0.3;
 
-  const base =
-    (inputs.gamePerformance * GAME_PERFORMANCE_WEIGHT) +
-    (inputs.athleticism * ATHLETICISM_WEIGHT) +
-    (inputs.intangibles * INTANGIBLES_WEIGHT);
-
-  const bonus = inputs.multiPositionBonus || 0;
-  const finalScore = Math.round((base + bonus) * 10) / 10;
-
+  const bonus = inputs.multiPositionBonus ?? 0;
+  const finalScore = Math.round((weighted + bonus) * 10) / 10;
   const band = getGradeBand(finalScore);
 
   return {
@@ -202,14 +127,8 @@ export function calculatePerFormGrade(inputs: GradeInputs): GradeResult {
   };
 }
 
-/* ── Multi-Position Bonus helper ── */
 export function multiPositionBonus(
   flex: 'none' | 'situational' | 'two_way' | 'unicorn',
 ): number {
-  switch (flex) {
-    case 'situational': return 3;
-    case 'two_way': return 5;
-    case 'unicorn': return 7;
-    default: return 0;
-  }
+  return versatilityBonusValue(flex as VersatilityFlex);
 }

@@ -24,6 +24,25 @@
   --pf-divider: rgba(255,255,255,0.05);
   --pf-card-shadow: rgba(0,0,0,0.4);
   --pf-overlay: rgba(10,10,15,0.75);
+
+  /* Broadcast brand anchors — used by analysts/draft pages.
+     Fixed across light/dark themes to preserve broadcast-booth feel. */
+  --pf-navy: #0B1E3F;
+  --pf-navy-deep: #06122A;
+  --pf-red: #D40028;
+
+  /* Canonical position-group colors (mirrors src/lib/ui/positions.ts).
+     Using CSS vars means global theme tweaks don't require code edits. */
+  --pos-qb:   #D40028;
+  --pos-rb:   #00874C;
+  --pos-wr:   #7C3AED;
+  --pos-te:   #DC6B19;
+  --pos-ol:   #0A66E8;
+  --pos-edge: #8B1A00;
+  --pos-dt:   #DC2626;
+  --pos-lb:   #0891B2;
+  --pos-cb:   #F59E0B;
+  --pos-s:    #84CC16;
 }
 
 .light-theme {
@@ -134,19 +153,19 @@
   animation: livePulse 2s ease-in-out infinite;
 }
 
-/* Position color glow for NFT cards */
-.card-glow-QB    { box-shadow: 0 0 30px rgba(231,76,60,0.2), 0 8px 32px rgba(0,0,0,0.4); }
-.card-glow-RB    { box-shadow: 0 0 30px rgba(39,174,96,0.2), 0 8px 32px rgba(0,0,0,0.4); }
-.card-glow-WR    { box-shadow: 0 0 30px rgba(142,68,173,0.2), 0 8px 32px rgba(0,0,0,0.4); }
-.card-glow-TE    { box-shadow: 0 0 30px rgba(230,126,34,0.2), 0 8px 32px rgba(0,0,0,0.4); }
-.card-glow-OT    { box-shadow: 0 0 30px rgba(41,128,185,0.2), 0 8px 32px rgba(0,0,0,0.4); }
-.card-glow-OL    { box-shadow: 0 0 30px rgba(41,128,185,0.2), 0 8px 32px rgba(0,0,0,0.4); }
-.card-glow-IOL   { box-shadow: 0 0 30px rgba(41,128,185,0.2), 0 8px 32px rgba(0,0,0,0.4); }
-.card-glow-EDGE  { box-shadow: 0 0 30px rgba(192,57,43,0.2), 0 8px 32px rgba(0,0,0,0.4); }
-.card-glow-DT    { box-shadow: 0 0 30px rgba(233,30,99,0.2), 0 8px 32px rgba(0,0,0,0.4); }
-.card-glow-LB    { box-shadow: 0 0 30px rgba(0,188,212,0.2), 0 8px 32px rgba(0,0,0,0.4); }
-.card-glow-CB    { box-shadow: 0 0 30px rgba(255,152,0,0.2), 0 8px 32px rgba(0,0,0,0.4); }
-.card-glow-S     { box-shadow: 0 0 30px rgba(139,195,74,0.2), 0 8px 32px rgba(0,0,0,0.4); }
+/* Position color glow for NFT cards — canonical palette (src/lib/ui/positions.ts) */
+.card-glow-QB    { box-shadow: 0 0 30px rgba(212, 0, 40, 0.22),   0 8px 32px rgba(0,0,0,0.4); }
+.card-glow-RB    { box-shadow: 0 0 30px rgba(0, 135, 76, 0.22),   0 8px 32px rgba(0,0,0,0.4); }
+.card-glow-WR    { box-shadow: 0 0 30px rgba(124, 58, 237, 0.22), 0 8px 32px rgba(0,0,0,0.4); }
+.card-glow-TE    { box-shadow: 0 0 30px rgba(220, 107, 25, 0.22), 0 8px 32px rgba(0,0,0,0.4); }
+.card-glow-OL    { box-shadow: 0 0 30px rgba(10, 102, 232, 0.22), 0 8px 32px rgba(0,0,0,0.4); }
+.card-glow-OT    { box-shadow: 0 0 30px rgba(10, 102, 232, 0.22), 0 8px 32px rgba(0,0,0,0.4); }
+.card-glow-IOL   { box-shadow: 0 0 30px rgba(10, 102, 232, 0.22), 0 8px 32px rgba(0,0,0,0.4); }
+.card-glow-EDGE  { box-shadow: 0 0 30px rgba(139, 26, 0, 0.22),   0 8px 32px rgba(0,0,0,0.4); }
+.card-glow-DT    { box-shadow: 0 0 30px rgba(220, 38, 38, 0.22),  0 8px 32px rgba(0,0,0,0.4); }
+.card-glow-LB    { box-shadow: 0 0 30px rgba(8, 145, 178, 0.22),  0 8px 32px rgba(0,0,0,0.4); }
+.card-glow-CB    { box-shadow: 0 0 30px rgba(245, 158, 11, 0.22), 0 8px 32px rgba(0,0,0,0.4); }
+.card-glow-S     { box-shadow: 0 0 30px rgba(132, 204, 22, 0.22), 0 8px 32px rgba(0,0,0,0.4); }
 
 /* Broadcast frame for video wall */
 .broadcast-frame {

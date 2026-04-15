@@ -7,6 +7,7 @@ import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { getGradeForScore } from '@/lib/tie/grades';
 import { getVerticalTierLabel } from '@/lib/tie/verticals';
+import { positionColor } from '@/lib/ui/positions';
 import { staggerContainer, staggerItem, heroStagger, heroItem, scrollReveal } from '@/lib/motion';
 import PaywallGate from '@/components/PaywallGate';
 
@@ -39,23 +40,8 @@ interface PlayerRow {
   key_stats: string | null;
 }
 
-/* ── Position colors ─────────────────────────────────── */
-const POS_COLORS: Record<string, string> = {
-  QB: '#E74C3C',
-  RB: '#2ECC71',
-  WR: '#3498DB',
-  TE: '#E67E22',
-  OL: '#9B59B6', OT: '#9B59B6', OG: '#9B59B6', C: '#9B59B6', IOL: '#9B59B6',
-  EDGE: '#E74C3C', DE: '#E74C3C',
-  DL: '#E91E63', DT: '#E91E63', NT: '#E91E63', IDL: '#E91E63',
-  LB: '#00BCD4', ILB: '#00BCD4', OLB: '#00BCD4',
-  CB: '#FF9800',
-  S: '#8BC34A', FS: '#8BC34A', SS: '#8BC34A',
-};
-
-function getPositionColor(pos: string): string {
-  return POS_COLORS[pos?.toUpperCase()] || '#D4A853';
-}
+/* ── Position colors ── canonical source: @/lib/ui/positions ── */
+const getPositionColor = (pos: string): string => positionColor(pos);
 
 /* ── Grade color by value (from centralized scale) ──── */
 function getGradeColor(score: number): string {

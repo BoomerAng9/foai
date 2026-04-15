@@ -1,6 +1,32 @@
-import type { Vertical } from './verticals';
+/**
+ * perform/lib/tie/types.ts
+ * =========================
+ * FACADE over @aims/tie-matrix for cross-vertical TIE types, plus
+ * SPORTS-specific input shapes that only Per|Form cares about.
+ *
+ * Cross-vertical types (TIETier, TIEResult, Vertical, GradeBand, ...)
+ * live in the canonical matrix and are re-exported here so existing
+ * `from './types'` imports keep working.
+ */
 
-export type TIETier = 'PRIME' | 'A_PLUS' | 'A' | 'A_MINUS' | 'B_PLUS' | 'B' | 'B_MINUS' | 'C_PLUS' | 'C';
+export type {
+  TIETier,
+  TIEResult,
+  TIEComponents,
+  Vertical,
+  GradeBand,
+  VerticalConfig,
+  VerticalTierLabel,
+  PrimeSubTag,
+  PrimeSubTagDef,
+  VersatilityFlex,
+  VersatilityBonus,
+} from '@aims/tie-matrix';
+
+import type { Vertical } from '@aims/tie-matrix';
+
+// ─── SPORTS-only — stays local to Per|Form ─────────────────────────────
+
 export type Pool = 'NFL_PROSPECT' | 'COLLEGE' | 'HIGH_SCHOOL';
 export type Trend = 'UP' | 'DOWN' | 'STEADY' | 'NEW';
 
@@ -35,27 +61,6 @@ export interface IntangiblesInput {
   competitiveness?: number;
   leadership?: number;
   offFieldCharacter?: number;
-}
-
-export interface TIEResult {
-  /** REQUIRED — which vertical this result belongs to.
-   *  Routing/UI MUST assertVertical() before consuming. */
-  vertical: Vertical;
-  score: number;
-  grade: string;
-  tier: TIETier;
-  label: string;
-  /** Context string — vertical-specific. For SPORTS this is draft context;
-   *  for WORKFORCE it's career-stage context; etc. */
-  context: string;
-  /** @deprecated legacy alias for sports callers — use `context` instead */
-  draftContext?: string;
-  badgeColor: string;
-  components: {
-    performance: number;   // generic pillar 1 (sports: Performance / workforce: Talent)
-    attributes: number;    // generic pillar 2 (sports: Attributes / workforce: Innovation)
-    intangibles: number;   // generic pillar 3 (sports: Intangibles / workforce: Execution)
-  };
 }
 
 export interface Prospect {

@@ -1,11 +1,23 @@
-import type { PerformanceInput, AttributesInput, IntangiblesInput, TIEResult } from './types';
-import { getGradeForScore } from './grades';
-import { getVerticalTierLabel } from './verticals';
+/**
+ * perform/lib/tie/engine.ts
+ * ==========================
+ * SPORTS TIE engine. Normalizes raw measurables + intangibles to pillar
+ * scores (0-100), then delegates to the canonical @aims/tie-matrix
+ * result builder. All cross-vertical logic (grading bands, labels,
+ * vertical routing) lives in the matrix — this file only knows how
+ * to turn sports stats into pillar scores.
+ */
 
-// PRIVATE WEIGHTS — NEVER EXPOSE TO FRONTEND
-const W_PERFORMANCE = 0.4;
-const W_ATTRIBUTES = 0.3;
-const W_INTANGIBLES = 0.3;
+import type {
+  PerformanceInput,
+  AttributesInput,
+  IntangiblesInput,
+  TIEResult,
+} from './types';
+import { buildTIEResult, versatilityBonusValue, type VersatilityFlex } from '@aims/tie-matrix';
+
+// PRIVATE WEIGHTS are owned by the matrix (buildTIEResult). This file
+// only produces pillar inputs. Never reintroduce weights here.
 
 function normalizePerformance(input: PerformanceInput): number {
   const scores: number[] = [];
@@ -49,30 +61,19 @@ export function calculateTIE(
   performance: PerformanceInput,
   attributes: AttributesInput,
   intangibles: IntangiblesInput,
+  opts?: { versatility?: VersatilityFlex },
 ): TIEResult {
-  const perfScore = normalizePerformance(performance);
-  const attrScore = normalizeAttributes(attributes);
-  const intScore = normalizeIntangibles(intangibles);
+  const perf = Math.round(normalizePerformance(performance) * 10) / 10;
+  const attr = Math.round(normalizeAttributes(attributes) * 10) / 10;
+  const intang = Math.round(normalizeIntangibles(intangibles) * 10) / 10;
 
-  const raw = (perfScore * W_PERFORMANCE) + (attrScore * W_ATTRIBUTES) + (intScore * W_INTANGIBLES);
-  const score = Math.round(raw * 10) / 10;
+  const bonus = opts?.versatility ? versatilityBonusValue(opts.versatility) : 0;
 
-  const gradeInfo = getGradeForScore(score);
-  const labels = getVerticalTierLabel(gradeInfo.tier, 'SPORTS');
-
-  return {
+  return buildTIEResult({
     vertical: 'SPORTS',
-    score,
-    grade: gradeInfo.grade,
-    tier: gradeInfo.tier,
-    label: labels.label,
-    context: labels.context,
-    draftContext: labels.context, // legacy alias for existing callers
-    badgeColor: gradeInfo.badgeColor,
-    components: {
-      performance: Math.round(perfScore * 10) / 10,
-      attributes: Math.round(attrScore * 10) / 10,
-      intangibles: Math.round(intScore * 10) / 10,
-    },
-  };
+    performance: perf,
+    attributes: attr,
+    intangibles: intang,
+    bonus,
+  });
 }
