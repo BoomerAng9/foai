@@ -109,6 +109,18 @@ export async function POST(req: NextRequest) {
     let grammarStatus: 'applied' | 'passthrough' | 'failed' = 'passthrough';
     let grammarError: string | undefined;
 
+    // Map raw error strings → safe public summaries.
+    // Never echo stack traces, internal hostnames, or model names to the client.
+    const safeGrammarError = (raw: string): string => {
+      const r = raw.toLowerCase();
+      if (r.includes('timeout') || r.includes('aborted')) return 'timeout';
+      if (r.includes('429') || r.includes('rate')) return 'rate_limited_upstream';
+      if (r.includes('401') || r.includes('403') || r.includes('unauthor')) return 'auth_error';
+      if (r.includes('500') || r.includes('502') || r.includes('503') || r.includes('504')) return 'upstream_unavailable';
+      if (r.includes('network') || r.includes('fetch') || r.includes('econn')) return 'network';
+      return 'unknown';
+    };
+
     if (!passthrough) {
       try {
         const grammarRes = await fetch('https://openrouter.ai/api/v1/chat/completions', {
@@ -140,14 +152,16 @@ export async function POST(req: NextRequest) {
           }
         } else {
           grammarStatus = 'failed';
-          grammarError = `HTTP ${grammarRes.status} ${grammarRes.statusText}`;
-          console.error(`[Broadcast] Grammar call failed: ${grammarError}`);
+          const raw = `HTTP ${grammarRes.status} ${grammarRes.statusText}`;
+          console.error(`[Broadcast] Grammar call failed: ${raw}`);
+          grammarError = safeGrammarError(raw);
         }
       } catch (err) {
         // Network error, abort, JSON parse — anything that throws.
         grammarStatus = 'failed';
-        grammarError = err instanceof Error ? err.message : String(err);
-        console.error(`[Broadcast] Grammar call exception: ${grammarError}`);
+        const raw = err instanceof Error ? err.message : String(err);
+        console.error(`[Broadcast] Grammar call exception: ${raw}`);
+        grammarError = safeGrammarError(raw);
       }
     }
 
