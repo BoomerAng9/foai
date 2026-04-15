@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { safeCompare } from '@/lib/auth-guard';
 import type { CardPromptInput } from '@/lib/images/card-styles';
 import {
   type CardAesthetic,
@@ -178,6 +179,13 @@ function aspectToIdeogramAR(ar: string): string {
 }
 
 export async function POST(req: NextRequest) {
+  const PIPELINE_KEY = process.env.PIPELINE_AUTH_KEY || '';
+  const authHeader = req.headers.get('authorization') || '';
+  const token = authHeader.replace('Bearer ', '');
+  if (!PIPELINE_KEY || !safeCompare(token, PIPELINE_KEY)) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
   const body = await req.json().catch(() => null);
   if (!body) return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 });
 

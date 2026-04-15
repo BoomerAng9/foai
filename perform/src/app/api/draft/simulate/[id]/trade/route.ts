@@ -5,13 +5,17 @@ import {
   acceptTradeOffer,
   type TradeOffer,
 } from '@/lib/draft/simulation-engine';
+import { requireAuth } from '@/lib/auth-guard';
 
 const pendingOffers = new Map<string, TradeOffer>();
 
 export async function GET(
-  _req: NextRequest,
+  req: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
+  const auth = await requireAuth(req);
+  if (!auth.ok) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
   const { id } = await params;
   const sim = getSimulation(id);
   if (!sim) return NextResponse.json({ error: 'Simulation not found' }, { status: 404 });
@@ -28,6 +32,9 @@ export async function POST(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
+  const auth = await requireAuth(req);
+  if (!auth.ok) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
   const { id } = await params;
   const body = await req.json();
   const { action, offer_id } = body;

@@ -1,8 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { requireAuth } from '@/lib/auth-guard';
 import { createTokenCheckout, TOKEN_PACKAGES } from '@/lib/stripe/tokens';
 
 export async function POST(req: NextRequest) {
   try {
+    const auth = await requireAuth(req);
+    if (!auth.ok) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
     const body = await req.json();
     const { package_id } = body;
 
@@ -13,11 +17,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const userId = req.headers.get('x-user-id')
-      || req.headers.get('x-forwarded-for')
-      || 'anonymous';
-
-    const { url, error } = await createTokenCheckout(package_id, userId);
+    const { url, error } = await createTokenCheckout(package_id, auth.userId);
 
     if (!url) {
       return NextResponse.json(

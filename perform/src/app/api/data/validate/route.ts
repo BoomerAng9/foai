@@ -1,4 +1,5 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
+import { safeCompare } from '@/lib/auth-guard';
 import { sql } from '@/lib/db';
 
 /* ──────────────────────────────────────────────────────────────
@@ -49,7 +50,14 @@ const ROUND_GRADE_RANGES: Record<number, [number, number]> = {
   7: [50, 68],
 };
 
-export async function GET() {
+export async function GET(req: NextRequest) {
+  const PIPELINE_KEY = process.env.PIPELINE_AUTH_KEY || '';
+  const authHeader = req.headers.get('authorization') || '';
+  const token = authHeader.replace('Bearer ', '');
+  if (!PIPELINE_KEY || !safeCompare(token, PIPELINE_KEY)) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
   if (!sql) {
     return NextResponse.json({ error: 'Database not configured' }, { status: 503 });
   }

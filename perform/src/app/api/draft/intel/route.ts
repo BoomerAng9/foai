@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { requireAuth } from '@/lib/auth-guard';
 import { SCHRAGER_MOCK_2026, DRAFT_TRENDS_2026, TAI_SIMPSON_INTEL, CHRIS_BRAZZELL_INTEL } from '@/lib/draft/schrager-mock-2026';
 import { BEAST_TOP_100, BEAST_POSITION_COUNTS } from '@/lib/draft/beast-brugler-2026';
 import { COMBINE_2026 } from '@/lib/draft/combine-2026';
@@ -24,6 +25,9 @@ function loadJSON(relativePath: string): unknown {
 }
 
 export async function GET(req: NextRequest) {
+  const auth = await requireAuth(req);
+  if (!auth.ok) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
   const section = req.nextUrl.searchParams.get('section') || 'all';
   const playerFilter = req.nextUrl.searchParams.get('player')?.toLowerCase();
 
