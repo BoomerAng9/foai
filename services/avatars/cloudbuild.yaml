@@ -1,0 +1,35 @@
+steps:
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'build'
+      - '-t'
+      - 'us-central1-docker.pkg.dev/foai-aims/avatars/avatars:$COMMIT_SHA'
+      - 'services/avatars'
+
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'push'
+      - 'us-central1-docker.pkg.dev/foai-aims/avatars/avatars:$COMMIT_SHA'
+
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: gcloud
+    args:
+      - 'run'
+      - 'deploy'
+      - 'avatars'
+      - '--image=us-central1-docker.pkg.dev/foai-aims/avatars/avatars:$COMMIT_SHA'
+      - '--region=us-central1'
+      - '--platform=managed'
+      - '--allow-unauthenticated'
+      - '--memory=512Mi'
+      - '--cpu=1'
+      - '--concurrency=80'
+      - '--max-instances=10'
+      - '--set-env-vars=ENVIRONMENT=production,GCS_AVATAR_BUCKET=foai-avatars,GCS_PUBLIC_URL=https://storage.googleapis.com/foai-avatars'
+      - '--set-secrets=SUPABASE_URL=SUPABASE_URL:latest,SUPABASE_SERVICE_KEY=SUPABASE_SERVICE_KEY:latest'
+
+images:
+  - 'us-central1-docker.pkg.dev/foai-aims/avatars/avatars:$COMMIT_SHA'
+
+options:
+  logging: CLOUD_LOGGING_ONLY
