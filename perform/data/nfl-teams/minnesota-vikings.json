@@ -1,0 +1,46 @@
+{
+  "team": "Minnesota Vikings",
+  "abbreviation": "MIN",
+  "conference": "NFC",
+  "division": "NFC North",
+  "ownership": {
+    "name": "Zygi Wilf and Mark Wilf",
+    "style": "Generally patient but willing to make dramatic moves; invested in winning",
+    "tendencies": "Fired Kwesi Adofo-Mensah just 243 days after extending him (spent $269.5M); disconnect between personnel and coaching was dealbreaker"
+  },
+  "gm": {
+    "name": "Rob Brzezinski (Interim — EVP serving as acting GM)",
+    "tenure": "Interim since January 2026; longtime executive; permanent GM search postponed until after draft",
+    "philosophy": "Maintaining status quo; not expected to make dramatic moves; coaching staff driving draft preferences",
+    "analytics_approach": "Organization was analytics-heavy under Adofo-Mensah; direction may shift with new GM"
+  },
+  "head_coach": {
+    "name": "Kevin O'Connell",
+    "tenure": "4th year (since 2022)",
+    "scheme_offense": "OC Wes Phillips; McVay-tree scheme; play-action, outside zone, motion-heavy; built around passing game",
+    "scheme_defense": "DC Brian Flores; aggressive man-coverage; heavy blitz packages; Flores is one of most aggressive DCs in NFL",
+    "key_position_values": ["S", "DT", "CB", "C", "TE"]
+  },
+  "decision_makers": {
+    "primary": "Kevin O'Connell (HC) and Brian Flores (DC) likely have outsized influence with no permanent GM",
+    "committee": ["Zygi Wilf (owner)", "Rob Brzezinski (interim GM)", "Kevin O'Connell (HC)", "Brian Flores (DC)", "Frank Smith (asst HC)"]
+  },
+  "roster_2026": {
+    "qb_situation": "Kyler Murray acquired (unverified — linked in search results) or J.J. McCarthy situation; QB situation is unsettled",
+    "key_departures": ["Kwesi Adofo-Mensah (fired as GM)"],
+    "key_signings": ["Frank Smith (assistant HC, former Dolphins OC)"],
+    "cap_space": "unverified",
+    "expiring_contracts": ["Harrison Smith (S, could retire)", "TJ Hockenson (TE, restructured but gone after 2026)"]
+  },
+  "draft_capital_2026": {
+    "picks": ["Round 1 Pick 18", "Round 2 (unverified)", "Round 3 (unverified)", "Round 4 (unverified)", "Round 5 (unverified)", "Round 6 (unverified)", "Round 7 (unverified)"],
+    "traded_away": [],
+    "acquired_extra": [],
+    "compensatory": []
+  },
+  "needs": [
+    {"position": "S", "priority": 1, "reason": "Harrison Smith could retire at any time; Dillon Thieneman (Oregon) has become consensus mock pick — would be Smith's heir; mock-draft darling for Vikings"},
+    {"position": "DT", "priority": 2, "reason": "Defensive tackle is a major need; interior defensive line requires reinforcement for Flores' aggressive scheme"},
+    {"position": "CB", "priority": 3, "reason": "Cornerback depth needs improvement; secondary talent must match Flores' aggressive man-coverage demands"}
+  ]
+}

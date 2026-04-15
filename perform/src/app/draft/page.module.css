@@ -1,0 +1,218 @@
+.root {
+  --paper: #f5f1e8;
+  --paper-alt: #fbf8f2;
+  --navy: #0f1c30;
+  --navy-soft: #1d2e48;
+  --ink: #172033;
+  --muted: #5e6b80;
+  --gold: #b8912e;
+  --gold-soft: rgba(184, 145, 46, 0.14);
+  --gold-line: rgba(184, 145, 46, 0.28);
+  --red: #c24a38;
+  --red-soft: #f4e0da;
+  --blue: #2b67c7;
+  --blue-soft: #dce7f8;
+  --green: #1c7a59;
+  --green-soft: #dcefe7;
+  --line: rgba(15, 28, 48, 0.1);
+  --shadow: 0 18px 50px rgba(15, 28, 48, 0.08);
+  position: relative;
+  overflow: hidden;
+  background: var(--paper);
+  color: var(--ink);
+}
+
+.ambient {
+  background:
+    radial-gradient(circle at 12% 12%, rgba(184, 145, 46, 0.18), transparent 30%),
+    radial-gradient(circle at 85% 18%, rgba(43, 103, 199, 0.12), transparent 28%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.75) 0%, rgba(245, 241, 232, 0) 78%);
+}
+
+.topNav {
+  background: rgba(251, 248, 242, 0.88);
+  -webkit-backdrop-filter: blur(18px);
+  backdrop-filter: blur(18px);
+  border-bottom: 1px solid var(--line);
+}
+
+.textGold {
+  color: var(--gold);
+}
+
+.textRed {
+  color: var(--red);
+}
+
+.textNavy {
+  color: var(--navy);
+}
+
+.textMuted {
+  color: var(--muted);
+}
+
+.topLink {
+  color: var(--navy);
+}
+
+.heroCard {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.82) 0%, var(--paper-alt) 100%);
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow);
+}
+
+.pillRed {
+  background: var(--red-soft);
+  color: var(--red);
+}
+
+.dotRed {
+  background: var(--red);
+}
+
+.navyButton {
+  background: var(--navy);
+  color: #fff;
+  box-shadow: 0 18px 38px rgba(15, 28, 48, 0.18);
+}
+
+.outlineGoldButton {
+  background: #fff;
+  color: var(--gold);
+  border: 1px solid var(--gold-line);
+}
+
+.outlineNavyButton {
+  color: var(--navy);
+  border: 1px solid var(--line);
+}
+
+.statCard {
+  background: rgba(255, 255, 255, 0.66);
+  border: 1px solid var(--line);
+}
+
+.sidePanel {
+  background: linear-gradient(180deg, var(--navy) 0%, var(--navy-soft) 100%);
+  color: #fff;
+  box-shadow: 0 22px 60px rgba(15, 28, 48, 0.22);
+}
+
+.sidePanelPill {
+  background: rgba(255, 255, 255, 0.08);
+  color: #d7e4ff;
+}
+
+.sideMiniCard {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.noteCard {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.whiteButton {
+  background: #fff;
+  color: var(--navy);
+}
+
+.ghostWhiteButton {
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  color: #fff;
+}
+
+.surfaceCard {
+  --surface-accent: var(--gold);
+  --surface-accent-soft: var(--gold-soft);
+  background: #fff;
+  border: 1px solid var(--line);
+  box-shadow: 0 14px 34px rgba(15, 28, 48, 0.05);
+}
+
+.surfaceCard[data-surface='board'] {
+  --surface-accent: var(--gold);
+  --surface-accent-soft: var(--gold-soft);
+}
+
+.surfaceCard[data-surface='sim'] {
+  --surface-accent: var(--red);
+  --surface-accent-soft: var(--red-soft);
+}
+
+.surfaceCard[data-surface='gm'] {
+  --surface-accent: var(--blue);
+  --surface-accent-soft: var(--blue-soft);
+}
+
+.surfaceCard[data-surface='index'] {
+  --surface-accent: var(--green);
+  --surface-accent-soft: var(--green-soft);
+}
+
+.surfaceTag {
+  background: var(--surface-accent-soft);
+  color: var(--surface-accent);
+}
+
+.surfaceArrow,
+.surfaceFooter {
+  color: var(--surface-accent);
+}
+
+.panelWhite {
+  background: #fff;
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow);
+}
+
+.panelMuted {
+  background: var(--paper-alt);
+  border: 1px solid var(--line);
+}
+
+.leadProspectCard {
+  background: linear-gradient(180deg, var(--paper-alt) 0%, #fff 100%);
+  border: 1px solid var(--gold-line);
+}
+
+.leadProspectBadge {
+  background: var(--red-soft);
+  color: var(--red);
+}
+
+.prospectRow {
+  background: var(--paper-alt);
+  border: 1px solid var(--line);
+}
+
+.prospectRankBox {
+  background: rgba(15, 28, 48, 0.06);
+  color: var(--navy);
+}
+
+.featuredWire {
+  background: linear-gradient(135deg, var(--navy) 0%, var(--navy-soft) 100%);
+  color: #fff;
+}
+
+.featuredWirePill {
+  background: rgba(255, 255, 255, 0.08);
+  color: #d7e4ff;
+}
+
+.wireRow {
+  background: var(--paper-alt);
+  border: 1px solid var(--line);
+}
+
+.ctaShell {
+  background: linear-gradient(135deg, var(--paper-alt) 0%, #fff 100%);
+  border: 1px solid var(--gold-line);
+  box-shadow: var(--shadow);
+}
+
+.footerBorder {
+  border-top: 1px solid var(--line);
+}

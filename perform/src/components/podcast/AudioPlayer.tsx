@@ -98,7 +98,7 @@ export function AudioPlayer() {
         className="fixed bottom-0 left-0 right-0 z-50 flex items-center gap-3 px-4"
         style={{
           height: 40,
-          background: '#0A0E1A',
+          background: 'var(--pf-bg)',
           borderTop: '1px solid rgba(212,168,83,0.15)',
         }}
       >
@@ -146,7 +146,7 @@ export function AudioPlayer() {
       className="fixed bottom-0 left-0 right-0 z-50"
       style={{
         height: 64,
-        background: '#0A0E1A',
+        background: 'var(--pf-bg)',
         borderTop: '1px solid rgba(212,168,83,0.15)',
       }}
     >

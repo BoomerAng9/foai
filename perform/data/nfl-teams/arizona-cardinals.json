@@ -1,0 +1,46 @@
+{
+  "team": "Arizona Cardinals",
+  "abbreviation": "ARI",
+  "conference": "NFC",
+  "division": "NFC West",
+  "ownership": {
+    "name": "Michael Bidwill",
+    "style": "Generally hands-off on football decisions but willing to make big coaching changes",
+    "tendencies": "Fired Jonathan Gannon after 3-14 season; trusted GM Ossenfort to find new HC despite hot seat speculation"
+  },
+  "gm": {
+    "name": "Monti Ossenfort",
+    "tenure": "3rd year (hired 2023)",
+    "philosophy": "Willing to trade down from premium picks if value dictates; aggressive roster overhaul approach",
+    "analytics_approach": "Hybrid — modern analytics background from Tennessee Titans front office"
+  },
+  "head_coach": {
+    "name": "Mike LaFleur",
+    "tenure": "1st year (hired January 2026)",
+    "scheme_offense": "Shanahan-style outside zone scheme, play-action heavy, RPOs",
+    "scheme_defense": "unverified — new defensive coordinator hire",
+    "key_position_values": ["QB", "OT", "EDGE", "IOL"]
+  },
+  "decision_makers": {
+    "primary": "Monti Ossenfort (GM) — on the hot seat, massive draft for his tenure",
+    "committee": ["Michael Bidwill (owner)", "Monti Ossenfort (GM)", "Mike LaFleur (HC)"]
+  },
+  "roster_2026": {
+    "qb_situation": "Widely expected to move on from Kyler Murray; hosting QBs Carson Beck (Miami) and Ty Simpson (Alabama) on pre-draft visits; could draft QB at #3",
+    "key_departures": ["Jonah Williams (OT, unsigned)", "Kelvin Beachum (OT, unsigned)"],
+    "key_signings": ["unverified — some O-line and pass rush additions in free agency"],
+    "cap_space": "unverified",
+    "expiring_contracts": ["unverified"]
+  },
+  "draft_capital_2026": {
+    "picks": ["Round 1 Pick 3", "Round 2 Pick 34", "Round 3 Pick 65", "Round 4 Pick 104", "Round 5 Pick 143", "Round 6 Pick 183", "Round 7 Pick 217"],
+    "traded_away": [],
+    "acquired_extra": [],
+    "compensatory": []
+  },
+  "needs": [
+    {"position": "QB", "priority": 1, "reason": "Moving on from Kyler Murray; need franchise quarterback for new coaching regime; hosting top QB prospects"},
+    {"position": "EDGE", "priority": 2, "reason": "Finished 27th in pressure rate and 28th in sacks despite investing resources in pass rush last offseason"},
+    {"position": "OT", "priority": 3, "reason": "Right tackle position unresolved with Jonah Williams and Kelvin Beachum unsigned; two first-round picks spent on OL still hasn't fixed the unit"}
+  ]
+}

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { safeCompare } from '@/lib/auth-guard';
 import { runDeliveryCycle, type PodcasterClient } from '@/lib/producer/engine';
 import { DEFAULT_PREFERENCES } from '@/lib/podcasters/delivery-preferences';
 
@@ -14,7 +15,7 @@ export async function POST(request: NextRequest) {
   const authKey = process.env.PIPELINE_AUTH_KEY;
   const provided = request.headers.get('x-pipeline-key');
 
-  if (!authKey || provided !== authKey) {
+  if (!authKey || !provided || !safeCompare(provided, authKey)) {
     return NextResponse.json({ error: 'unauthorized' }, { status: 401 });
   }
 

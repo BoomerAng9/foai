@@ -85,7 +85,7 @@ export function BroadcastOverlay({
           <div
             className="relative flex items-center gap-4 px-6 py-4"
             style={{
-              background: 'linear-gradient(180deg, #0A0A0F 0%, #111118 100%)',
+              background: 'linear-gradient(180deg, var(--pf-bg) 0%, #111118 100%)',
               borderTop: `1px solid ${accentColor}40`,
             }}
           >

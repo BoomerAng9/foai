@@ -1,0 +1,46 @@
+{
+  "team": "Buffalo Bills",
+  "abbreviation": "BUF",
+  "conference": "AFC",
+  "division": "AFC East",
+  "ownership": {
+    "name": "Terry and Kim Pegula",
+    "style": "Invested owners; willing to spend; demanded 'next level' after repeated playoff disappointments",
+    "tendencies": "Fired McDermott after 4th divisional round exit in 5 years despite winning seasons; want Super Bowl, not just playoffs"
+  },
+  "gm": {
+    "name": "Brandon Beane",
+    "tenure": "9th year (since 2017)",
+    "philosophy": "Smart free agent spending for flexibility; values draft capital; made veteran signings this offseason to create draft flexibility",
+    "analytics_approach": "Hybrid — strong analytical framework with traditional scouting values"
+  },
+  "head_coach": {
+    "name": "Joe Brady",
+    "tenure": "1st year (promoted from OC, January 2026, 5-year deal)",
+    "scheme_offense": "Modern spread concepts; creative play-design for Josh Allen; RPOs and read-options; was Bills QBs coach (2022), interim OC (2023), then OC (2024-25)",
+    "scheme_defense": "DC Jim Leonhard; aggressive scheme requiring downhill linebackers who can blitz",
+    "key_position_values": ["LB", "EDGE", "DT", "S", "WR"]
+  },
+  "decision_makers": {
+    "primary": "Brandon Beane (GM) with Joe Brady (HC) collaboration",
+    "committee": ["Terry Pegula (owner)", "Brandon Beane (GM)", "Joe Brady (HC)", "Jim Leonhard (DC)"]
+  },
+  "roster_2026": {
+    "qb_situation": "Josh Allen — elite franchise QB; perennial MVP candidate; organization built around him",
+    "key_departures": ["Sean McDermott (HC, fired)", "Bradley Chubb (EDGE, signed from Dolphins via FA)", "Boye Mafe (EDGE, left)"],
+    "key_signings": ["Bradley Chubb (EDGE, 3yr/$43.5M with $29M guaranteed)", "Other veteran free agents for roster flexibility"],
+    "cap_space": "unverified",
+    "expiring_contracts": ["unverified"]
+  },
+  "draft_capital_2026": {
+    "picks": ["Round 1 Pick 26", "Round 3 (unverified)", "Round 4 (unverified)", "Round 5 (unverified)", "Round 6 (unverified)", "Round 7 (unverified)"],
+    "traded_away": [],
+    "acquired_extra": [],
+    "compensatory": []
+  },
+  "needs": [
+    {"position": "LB", "priority": 1, "reason": "Terrel Bernard and Dorian Williams may not fit Jim Leonhard's scheme; needs more aggressive, downhill players who can blitz"},
+    {"position": "EDGE", "priority": 2, "reason": "Consistent pass rush has been an issue nearly every year of Josh Allen era; Leonhard's scheme demands it; Chubb helps but more needed"},
+    {"position": "DT", "priority": 3, "reason": "Missing true space-eating nose tackle for Leonhard's defense; have surplus of DEs who can play DT but no pure nose"}
+  ]
+}

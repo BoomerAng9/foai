@@ -1,0 +1,46 @@
+{
+  "team": "Kansas City Chiefs",
+  "abbreviation": "KC",
+  "conference": "AFC",
+  "division": "AFC West",
+  "ownership": {
+    "name": "Clark Hunt",
+    "style": "Hands-off on football decisions; trusts Andy Reid and Brett Veach completely; stability-oriented",
+    "tendencies": "Longest-tenured HC/GM combo in NFL; patient ownership that values sustained success; rarely meddles in draft"
+  },
+  "gm": {
+    "name": "Brett Veach",
+    "tenure": "9th year (since 2017)",
+    "philosophy": "Aggressive trader (grew from 5 to 9 picks via trades this offseason); BPA with positional value awareness; willing to make bold moves",
+    "analytics_approach": "Hybrid — modern analytics with strong scouting department; known for strategic deception in draft war rooms"
+  },
+  "head_coach": {
+    "name": "Andy Reid",
+    "tenure": "14th year (since 2013)",
+    "scheme_offense": "West Coast offense with creative formations; RPOs; heavy use of TEs and mismatches; Travis Kelce-era passing concepts",
+    "scheme_defense": "4-3 base; aggressive blitz packages; need to rebuild secondary after major departures",
+    "key_position_values": ["CB", "EDGE", "OT", "WR", "DT"]
+  },
+  "decision_makers": {
+    "primary": "Brett Veach (GM) with Andy Reid (HC) having significant input",
+    "committee": ["Clark Hunt (owner)", "Brett Veach (GM)", "Andy Reid (HC)"]
+  },
+  "roster_2026": {
+    "qb_situation": "Patrick Mahomes — locked in as franchise QB for the foreseeable future",
+    "key_departures": ["Trent McDuffie (CB, traded to Rams)", "Jaylen Watson (CB, lost in free agency)", "Boye Mafe (EDGE, signed with Bengals)"],
+    "key_signings": ["Kenneth Walker III (RB)"],
+    "cap_space": "unverified — typical tight cap management under Veach",
+    "expiring_contracts": ["unverified"]
+  },
+  "draft_capital_2026": {
+    "picks": ["Round 1 Pick 9", "Round 1 Pick 29 (from LAR via McDuffie trade)", "Round 2 Pick 40", "Round 3 Pick 74", "Round 4 Pick 109", "Round 5 Pick 148", "Round 5 Pick 169 (from LAR)", "Round 6 Pick 176", "Round 7 Pick 210 (from LAR)"],
+    "traded_away": [],
+    "acquired_extra": ["Round 1 Pick 29 (from Rams)", "Round 5 Pick 169 (from Rams)", "Round 7 Pick 210 (from Rams)"],
+    "compensatory": ["Round 5 compensatory pick"]
+  },
+  "needs": [
+    {"position": "CB", "priority": 1, "reason": "Lost both starting corners — Trent McDuffie (traded) and Jaylen Watson (free agency); enormous hole in secondary"},
+    {"position": "EDGE", "priority": 2, "reason": "No logical starter opposite George Karlaftis; need complement to Chris Jones interior pressure"},
+    {"position": "OT", "priority": 3, "reason": "Offensive tackle depth is a concern; need to protect Mahomes long-term"}
+  ]
+}

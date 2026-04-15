@@ -1,0 +1,46 @@
+{
+  "team": "Tennessee Titans",
+  "abbreviation": "TEN",
+  "conference": "AFC",
+  "division": "AFC South",
+  "ownership": {
+    "name": "Amy Adams Strunk",
+    "style": "Willing to invest but NFLPA grade dropped from B+ to C in 2026; patient with rebuilds",
+    "tendencies": "Interviewed 16 HC candidates before hiring Saleh; trusts GM Borgonzi (rated B+ by players)"
+  },
+  "gm": {
+    "name": "Mike Borgonzi",
+    "tenure": "2nd year (hired 2025)",
+    "philosophy": "Needs a home-run draft; willing to let the board come to them given premium cap space and multiple needs",
+    "analytics_approach": "Hybrid — learned under Kansas City's analytics-forward approach"
+  },
+  "head_coach": {
+    "name": "Robert Saleh",
+    "tenure": "1st year (hired January 29, 2026 on 5-year deal)",
+    "scheme_offense": "OC Brian Daboll; West Coast/Erhardt-Perkins system; designed to develop young QB Cam Ward",
+    "scheme_defense": "4-3 wide-nine front, Cover 3 base; aggressive use of edge rushers; requires rangy linebacker to roam the middle",
+    "key_position_values": ["EDGE", "LB", "WR", "CB", "IOL"]
+  },
+  "decision_makers": {
+    "primary": "Mike Borgonzi (GM) with Robert Saleh (HC) collaboration",
+    "committee": ["Amy Adams Strunk (owner)", "Mike Borgonzi (GM)", "Robert Saleh (HC)", "Brian Daboll (OC)"]
+  },
+  "roster_2026": {
+    "qb_situation": "Cam Ward is the franchise QB from 2025 draft; clear mandate to surround him with weapons",
+    "key_departures": ["unverified"],
+    "key_signings": ["Jermaine Johnson II (EDGE, acquired via trade from Jets)"],
+    "cap_space": "Premium cap space available",
+    "expiring_contracts": ["unverified"]
+  },
+  "draft_capital_2026": {
+    "picks": ["Round 1 Pick 4", "Round 2 Pick 35", "Round 3 Pick 66", "Round 4 Pick 101", "Round 5 Pick 142", "Round 5 Pick 144", "Round 6 Pick 184", "Round 6 Pick 194", "Round 7 Pick 225"],
+    "traded_away": [],
+    "acquired_extra": ["Round 5 Pick 144", "Round 6 Pick 194"],
+    "compensatory": []
+  },
+  "needs": [
+    {"position": "EDGE", "priority": 1, "reason": "Need elite pass rusher to pair with Jeffery Simmons; Saleh's defense demands dominant edge presence; top EDGE prospects Reese/Bailey/Bain all in play"},
+    {"position": "WR", "priority": 2, "reason": "Clear mandate to add weapons for Cam Ward; receiving corps needs significant upgrade"},
+    {"position": "LB", "priority": 3, "reason": "Transition to Saleh's defense requires more rangy linebacker to roam middle of the field; must be addressed"}
+  ]
+}

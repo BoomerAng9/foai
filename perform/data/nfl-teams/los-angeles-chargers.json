@@ -1,0 +1,46 @@
+{
+  "team": "Los Angeles Chargers",
+  "abbreviation": "LAC",
+  "conference": "AFC",
+  "division": "AFC West",
+  "ownership": {
+    "name": "Dean Spanos",
+    "style": "Generally hands-off on football decisions; trusts front office",
+    "tendencies": "Patient with coaching staff; backed Harbaugh's aggressive roster construction"
+  },
+  "gm": {
+    "name": "Joe Hortiz",
+    "tenure": "2nd year (hired 2024)",
+    "philosophy": "BPA regardless of roster needs — drafted Joe Alt despite WR need (2024), RB Omarion Hampton despite OL need (2025); true board discipline",
+    "analytics_approach": "Baltimore Ravens scouting tree — heavy analytics integration"
+  },
+  "head_coach": {
+    "name": "Jim Harbaugh",
+    "tenure": "2nd year (since 2024)",
+    "scheme_offense": "Power run game; play-action; physical identity; pro-style formations",
+    "scheme_defense": "Multiple fronts; Jesse Minter departed for Ravens HC job; new DC unverified",
+    "key_position_values": ["IOL", "EDGE", "DT", "CB", "WR"]
+  },
+  "decision_makers": {
+    "primary": "Joe Hortiz (GM) — follows his board regardless of need",
+    "committee": ["Dean Spanos (owner)", "Joe Hortiz (GM)", "Jim Harbaugh (HC)"]
+  },
+  "roster_2026": {
+    "qb_situation": "Justin Herbert — elite franchise QB; locked in long-term",
+    "key_departures": ["Zion Johnson (G, left in free agency)", "Khalil Mack (EDGE, aging)"],
+    "key_signings": ["Cole Strange (G, from Dolphins)", "Tyler Biadasz (C, from Commanders)", "Charlie Kolar (TE, from Ravens)"],
+    "cap_space": "unverified",
+    "expiring_contracts": ["unverified"]
+  },
+  "draft_capital_2026": {
+    "picks": ["Round 1 Pick 22", "Round 2 (unverified)", "Round 3 (unverified)", "Round 4 (unverified)", "Round 5 (unverified)"],
+    "traded_away": [],
+    "acquired_extra": [],
+    "compensatory": []
+  },
+  "needs": [
+    {"position": "IOL", "priority": 1, "reason": "No clear starter at left guard after Zion Johnson departure; Strange at RG and Biadasz at C are new, but LG is a hole"},
+    {"position": "EDGE", "priority": 2, "reason": "Lack depth beyond Khalil Mack and Tuipulotu; need young pass rusher for future"},
+    {"position": "DT", "priority": 3, "reason": "Interior defensive line needs reinforcement; missing space-eating presence in middle"}
+  ]
+}

@@ -33,7 +33,6 @@ export async function POST(req: NextRequest) {
   return new NextResponse(new Uint8Array(result.audio), {
     headers: {
       'Content-Type': 'audio/mpeg',
-      'X-TTS-Provider': result.provider,
       'X-TTS-Mode': result.mode,
       'X-TTS-Latency-Ms': String(result.latencyMs || 0),
     },

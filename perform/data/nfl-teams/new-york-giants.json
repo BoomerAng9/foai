@@ -1,0 +1,46 @@
+{
+  "team": "New York Giants",
+  "abbreviation": "NYG",
+  "conference": "NFC",
+  "division": "NFC East",
+  "ownership": {
+    "name": "John Mara and Steve Tisch (co-owners)",
+    "style": "Legacy ownership; loyal to staff but willing to make major coaching hires; patience wears thin after sustained losing",
+    "tendencies": "Hired John Harbaugh despite other openings available; shows commitment to franchise-changing hires"
+  },
+  "gm": {
+    "name": "Joe Schoen",
+    "tenure": "5th year (hired 2022); power has shifted — must work directly with Harbaugh",
+    "philosophy": "Aggressive roster construction around Jaxson Dart; willing to trade down from #5 to acquire more picks (only two top-100 selections currently)",
+    "analytics_approach": "Hybrid — modern front office sensibilities paired with traditional scouting"
+  },
+  "head_coach": {
+    "name": "John Harbaugh",
+    "tenure": "1st year (hired January 20, 2026 — 21st head coach in Giants history)",
+    "scheme_offense": "Versatile system designed around Jaxson Dart; Harbaugh compared Dart to Lamar Jackson on film; strong run-game foundation",
+    "scheme_defense": "Multiple front; aggressive blitz packages; Baltimore-style physical defense",
+    "key_position_values": ["OL", "DL", "WR", "CB", "LB"]
+  },
+  "decision_makers": {
+    "primary": "Joe Schoen (GM) and John Harbaugh (HC) — collaborative with Harbaugh holding significant influence",
+    "committee": ["John Mara (co-owner)", "Steve Tisch (co-owner)", "Chris Mara", "Joe Schoen (GM)", "John Harbaugh (HC)"]
+  },
+  "roster_2026": {
+    "qb_situation": "Jaxson Dart is the franchise QB (2025 draft pick); Harbaugh's #1 reason for choosing Giants; second-year development critical",
+    "key_departures": ["unverified"],
+    "key_signings": ["Isaiah Likely (TE, from Ravens followed Harbaugh)", "Darnell Mooney (WR)", "Calvin Austin III (WR)"],
+    "cap_space": "unverified",
+    "expiring_contracts": ["Malik Nabers (WR — coming off torn ACL in Week 4 of 2025, lost year after great rookie season)"]
+  },
+  "draft_capital_2026": {
+    "picks": ["Round 1 Pick 5", "Round 3 (unverified)", "Round 6 (three 6th-round picks)", "Round 7"],
+    "traded_away": [],
+    "acquired_extra": [],
+    "compensatory": []
+  },
+  "needs": [
+    {"position": "DL", "priority": 1, "reason": "Worst in NFL allowing 5.3 yards per carry; interior defensive line must be addressed for Harbaugh's physical defense"},
+    {"position": "OL", "priority": 2, "reason": "Protecting and developing Jaxson Dart is top priority; Harbaugh wants to build from the trenches"},
+    {"position": "WR", "priority": 3, "reason": "Malik Nabers recovering from torn ACL; need reliable targets while Nabers gets healthy; only two top-100 picks limits options"}
+  ]
+}

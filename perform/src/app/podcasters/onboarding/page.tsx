@@ -7,7 +7,7 @@ import { BackHomeNav } from '@/components/layout/BackHomeNav';
 import OnboardingStepper from '@/components/podcasters/OnboardingStepper';
 
 const T = {
-  bg: '#0a0a0f',
+  bg: 'var(--pf-bg)',
   surface: '#111118',
   gold: '#D4A853',
   text: 'rgba(255,255,255,0.9)',

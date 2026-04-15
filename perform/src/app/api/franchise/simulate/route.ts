@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { requireAuth } from '@/lib/auth-guard';
 import { sql } from '@/lib/db';
 import {
   createFranchiseSimulation,
@@ -131,6 +132,9 @@ function withPersistence(
 }
 
 export async function POST(req: NextRequest) {
+  const auth = await requireAuth(req);
+  if (!auth.ok) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
   try {
     // Check for API key early
     if (!process.env.ANTHROPIC_API_KEY) {
@@ -267,7 +271,6 @@ export async function POST(req: NextRequest) {
         'Cache-Control': 'no-cache',
         'Connection': 'keep-alive',
         'X-Accel-Buffering': 'no',
-        'X-Simulation-Source': source,
         ...(sessionRecordId ? { 'X-Simulation-Session': sessionRecordId } : {}),
       },
     });

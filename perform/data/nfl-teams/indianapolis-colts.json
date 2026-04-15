@@ -1,0 +1,46 @@
+{
+  "team": "Indianapolis Colts",
+  "abbreviation": "IND",
+  "conference": "AFC",
+  "division": "AFC South",
+  "ownership": {
+    "name": "Jim Irsay",
+    "style": "Passionate, hands-on owner; publicly vocal about team direction; willing to make bold roster moves",
+    "tendencies": "Patient with Ballard despite declining results; values stability but demands playoffs; has been known to meddle"
+  },
+  "gm": {
+    "name": "Chris Ballard",
+    "tenure": "9th year (since 2017) — on the hot seat",
+    "philosophy": "Build through the draft; historically conservative in free agency; values defensive players and offensive linemen; BPA approach",
+    "analytics_approach": "Traditional scouting with some analytics; less aggressive than peer GMs"
+  },
+  "head_coach": {
+    "name": "Shane Steichen",
+    "tenure": "3rd year (since 2023)",
+    "scheme_offense": "Spread concepts; RPOs; developed Jalen Hurts in Philly; building around Anthony Richardson (or successor)",
+    "scheme_defense": "4-3 base; zone coverage concepts; defense gave up 24.2 PPG and 2nd-most passing YPG (247.9)",
+    "key_position_values": ["EDGE", "LB", "CB", "IOL", "DT"]
+  },
+  "decision_makers": {
+    "primary": "Chris Ballard (GM) — plans to acquire more picks via trade",
+    "committee": ["Jim Irsay (owner)", "Chris Ballard (GM)", "Shane Steichen (HC)"]
+  },
+  "roster_2026": {
+    "qb_situation": "Anthony Richardson or successor — QB situation unsettled",
+    "key_departures": ["DJ Moore (WR, traded to Bears for 2nd-round pick)", "Michael Pittman Jr. (WR, traded to Steelers)", "Sauce Gardner (CB, acquired from Jets — major trade piece)", "Adonai Mitchell (WR, traded to Jets in Gardner deal)"],
+    "key_signings": ["Sauce Gardner (CB, acquired from Jets for 2026+2027 1st-round picks + Adonai Mitchell)"],
+    "cap_space": "unverified",
+    "expiring_contracts": ["Zaire Franklin (LB, regressing)", "Germaine Pratt (LB, headed toward FA)"]
+  },
+  "draft_capital_2026": {
+    "picks": ["Round 2 Pick 47", "Round 3 Pick 78", "Round 4 Pick 113", "Round 5 Pick 154", "Round 6 Pick 214", "Round 7 Pick 249", "Round 7 Pick 254"],
+    "traded_away": ["Round 1 Pick 16 (to Jets in Sauce Gardner trade)", "2027 1st-round pick (also to Jets)"],
+    "acquired_extra": [],
+    "compensatory": []
+  },
+  "needs": [
+    {"position": "EDGE", "priority": 1, "reason": "Defense severely underperformed; 24.2 PPG allowed; need impact pass rusher to improve unit"},
+    {"position": "LB", "priority": 2, "reason": "Zaire Franklin regressing at 29; Germaine Pratt headed to free agency; middle of defense easily exposed"},
+    {"position": "IOL", "priority": 3, "reason": "Interior offensive line depth needs attention; must protect QB investment; Ballard traditionally values trenches"}
+  ]
+}

@@ -1,0 +1,46 @@
+{
+  "team": "Cincinnati Bengals",
+  "abbreviation": "CIN",
+  "conference": "AFC",
+  "division": "AFC North",
+  "ownership": {
+    "name": "Mike Brown",
+    "style": "Notoriously frugal; family-run operation; historically reluctant to spend in free agency",
+    "tendencies": "Loyal to coaches despite losing — retained Zac Taylor after 6-11 season and three straight years without playoffs; no traditional GM title in organization"
+  },
+  "gm": {
+    "name": "Duke Tobin (Director of Player Personnel — de facto GM)",
+    "tenure": "24th year in role (since 2002)",
+    "philosophy": "Draft-and-develop; conservative free agency spending; relies heavily on scouting department",
+    "analytics_approach": "Traditional scouting emphasis; one of the less analytics-driven front offices"
+  },
+  "head_coach": {
+    "name": "Zac Taylor",
+    "tenure": "7th year (since 2019)",
+    "scheme_offense": "Spread passing attack built around Joe Burrow; three-wide sets; Sean McVay tree concepts",
+    "scheme_defense": "4-3 base; zone coverage; needs significant talent infusion across all levels",
+    "key_position_values": ["CB", "LB", "DL", "IOL", "EDGE"]
+  },
+  "decision_makers": {
+    "primary": "Mike Brown (owner) has final say; Duke Tobin (personnel) leads scouting and draft board",
+    "committee": ["Mike Brown (owner)", "Duke Tobin (Dir. Player Personnel)", "Zac Taylor (HC)"]
+  },
+  "roster_2026": {
+    "qb_situation": "Joe Burrow — locked in as franchise QB; elite talent but team around him has deteriorated",
+    "key_departures": ["Trey Hendrickson (EDGE, signed with Ravens for $112M/4yr)"],
+    "key_signings": ["Boye Mafe (EDGE)", "Bryan Cook (S)", "Jonathan Allen (DT)"],
+    "cap_space": "unverified — historically tight",
+    "expiring_contracts": ["unverified"]
+  },
+  "draft_capital_2026": {
+    "picks": ["Round 1 Pick 10", "Round 2 (unverified)", "Round 3 (unverified)", "Round 4 (unverified)", "Round 5 (unverified)", "Round 6 (unverified)", "Round 7 (unverified)", "8 total picks"],
+    "traded_away": [],
+    "acquired_extra": [],
+    "compensatory": []
+  },
+  "needs": [
+    {"position": "CB", "priority": 1, "reason": "Pressing need; in prime position to address at #10 with Mansoor Delane (LSU) or Jermod McCoy (Tennessee) likely available; Round 1 priority after signing Mafe at EDGE"},
+    {"position": "LB", "priority": 2, "reason": "Defense needs help at every level; linebacker corps is thin"},
+    {"position": "DL", "priority": 3, "reason": "Defensive line needs reinforcement despite Jonathan Allen signing; overall defensive talent significantly lacking"}
+  ]
+}

@@ -1,0 +1,46 @@
+{
+  "team": "San Francisco 49ers",
+  "abbreviation": "SF",
+  "conference": "NFC",
+  "division": "NFC West",
+  "ownership": {
+    "name": "Jed York",
+    "style": "Trusts Kyle Shanahan and John Lynch completely; backs aggressive roster moves; win-now window",
+    "tendencies": "Stable ownership that supports long-term vision; willing to trade picks for proven players"
+  },
+  "gm": {
+    "name": "John Lynch",
+    "tenure": "9th year (since 2017)",
+    "philosophy": "Aggressive roster construction; values scheme fits over raw talent; heavy free agent spending when in win-now mode",
+    "analytics_approach": "Hybrid — strong analytics with Shanahan's schematic evaluation driving choices"
+  },
+  "head_coach": {
+    "name": "Kyle Shanahan",
+    "tenure": "10th year (since 2017)",
+    "scheme_offense": "Wide zone run scheme; play-action heavy; motion and misdirection; among the best offensive minds in NFL",
+    "scheme_defense": "DC Raheem Morris hired (replacing Robert Saleh who left); transitioning to 3-4 front",
+    "key_position_values": ["OL", "WR", "EDGE", "DT", "CB"]
+  },
+  "decision_makers": {
+    "primary": "John Lynch (GM) and Kyle Shanahan (HC) — co-equal partnership",
+    "committee": ["Jed York (owner)", "John Lynch (GM)", "Kyle Shanahan (HC)"]
+  },
+  "roster_2026": {
+    "qb_situation": "Brock Purdy — franchise QB; under contract; system quarterback thriving in Shanahan's scheme",
+    "key_departures": ["Brandon Aiyuk (WR, moving on)", "Jauan Jennings (WR, set to be FA)", "Trent Williams (OT, uncertain future)", "Boye Mafe (EDGE)"],
+    "key_signings": ["Mike Evans (WR, from Buccaneers)", "Nate Hobbs (CB)", "Osa Odighizuwa (DL, acquired via trade)", "Dre Greenlaw (LB, re-signed)", "Jack Jones (DB)"],
+    "cap_space": "unverified — aggressive spending in win-now mode",
+    "expiring_contracts": ["Trent Williams (OT, future uncertain)", "Spencer Burford (G)", "Ben Bartch (G)"]
+  },
+  "draft_capital_2026": {
+    "picks": ["Round 1 Pick 27", "Round 2 (unverified)", "Round 3 (unverified)", "Round 4 (four 4th-round picks)", "Round 5 (unverified)", "Round 6 (unverified)", "Round 7 (unverified)"],
+    "traded_away": [],
+    "acquired_extra": ["Four 4th-round picks"],
+    "compensatory": []
+  },
+  "needs": [
+    {"position": "OL", "priority": 1, "reason": "Trent Williams uncertainty at LT; guard is a weakness (Burford struggling, Puni regressed, Bartch injured); interior OL needs help"},
+    {"position": "EDGE", "priority": 2, "reason": "Only 20 sacks in 2025 — six fewer than the lowly Jets; pass rush was anemic; edge rusher in play at #27"},
+    {"position": "DT", "priority": 3, "reason": "Surprisingly big need with switch to 3-4 defense under Raheem Morris; need different body types for new scheme"}
+  ]
+}

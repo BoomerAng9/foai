@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { requireAuth } from '@/lib/auth-guard';
 import { sql } from '@/lib/db';
 
 /**
@@ -63,15 +64,32 @@ export async function GET(req: NextRequest) {
     const playerId = req.nextUrl.searchParams.get('id');
     const all = req.nextUrl.searchParams.get('all');
 
+    // Auth check — unauthenticated users get basic metadata, authenticated get full data
+    const auth = await requireAuth(req);
+    const isAuthed = auth.ok;
+
     if (playerId) {
       // Single player NFT metadata
-      const players = await sql`SELECT * FROM perform_players WHERE id = ${parseInt(playerId)} AND class_year = '2026'`;
+      const players = await sql`
+        SELECT id, name, school, position, grade, tie_grade, projected_round,
+               overall_rank, nfl_comparison, key_stats, scouting_summary, strengths, weaknesses
+        FROM perform_players WHERE id = ${parseInt(playerId)} AND class_year = '2026'`;
       if (players.length === 0) return NextResponse.json({ error: 'Player not found' }, { status: 404 });
-      return NextResponse.json(buildNFTMetadata(players[0], parseInt(playerId)));
+      const metadata = buildNFTMetadata(players[0], parseInt(playerId));
+      if (!isAuthed) {
+        // Strip scouting details for unauthenticated users
+        metadata.attributes = metadata.attributes.filter((a: { trait_type: string }) =>
+          !['Grade', 'NFL Comparison', 'Projected Round', 'Overall Rank'].includes(a.trait_type)
+        );
+      }
+      return NextResponse.json(metadata);
     }
 
     // Full collection — top 40
-    const players = await sql`SELECT * FROM perform_players WHERE class = '2026' AND overall_rank <= 40 ORDER BY overall_rank ASC`;
+    const players = await sql`
+      SELECT id, name, school, position, grade, tie_grade, projected_round,
+             overall_rank, nfl_comparison, key_stats, scouting_summary, strengths, weaknesses
+      FROM perform_players WHERE class = '2026' AND overall_rank <= 40 ORDER BY overall_rank ASC`;
 
     if (players.length === 0) {
       return NextResponse.json({

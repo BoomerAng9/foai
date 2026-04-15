@@ -98,7 +98,7 @@ export function BreakingBar() {
       }}
     >
       <div className="flex items-center h-9">
-        <div className="flex-shrink-0 px-3 h-full flex items-center gap-2" style={{ background: '#0A0A0F' }}>
+        <div className="flex-shrink-0 px-3 h-full flex items-center gap-2" style={{ background: 'var(--pf-bg)' }}>
           <div className="flex items-center gap-1.5 px-2 h-6 rounded-sm" style={{ background: '#D4A853' }}>
             <span className="w-2 h-2 rounded-full bg-red-600 animate-pulse" />
             <span className="text-[9px] font-black tracking-[0.2em] text-black uppercase">LIVE</span>

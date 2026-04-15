@@ -3,3 +3,7 @@ node_modules/
 .env.local
 .env
 out/
+# Generated files - rebuild with scripts/run-regrade.ts and scripts/extract_beast.py
+src/lib/draft/beast-measurements.json
+src/lib/draft/regraded-prospects.json
+public/generated/

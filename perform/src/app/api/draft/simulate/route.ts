@@ -1,8 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createSimulation } from '@/lib/draft/simulation-engine';
+import { requireAuth } from '@/lib/auth-guard';
 import type { SimulationConfig } from '@/lib/draft/types';
 
 export async function POST(req: NextRequest) {
+  const auth = await requireAuth(req);
+  if (!auth.ok) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
   try {
     const body = await req.json() as Partial<SimulationConfig>;
     const config: SimulationConfig = {

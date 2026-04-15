@@ -8,7 +8,7 @@ import TeamSelector from './TeamSelector';
 
 /* ── Theme tokens ──────────────────────────────────────── */
 const T = {
-  bg: '#0a0a0f',
+  bg: 'var(--pf-bg)',
   surface: '#111118',
   surfaceAlt: '#1a1a24',
   border: 'rgba(255,255,255,0.08)',

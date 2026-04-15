@@ -1,10 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { makeUserPick } from '@/lib/draft/simulation-engine';
+import { requireAuth } from '@/lib/auth-guard';
 
 export async function POST(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
+  const auth = await requireAuth(req);
+  if (!auth.ok) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
   const { id } = await params;
   const body = await req.json();
   const { player_id } = body;

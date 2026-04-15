@@ -1,0 +1,46 @@
+{
+  "team": "Tampa Bay Buccaneers",
+  "abbreviation": "TB",
+  "conference": "NFC",
+  "division": "NFC South",
+  "ownership": {
+    "name": "Glazer Family (Joel, Bryan, and Edward Glazer)",
+    "style": "Generally hands-off; trust front office; stable ownership group",
+    "tendencies": "Patient with coaching staff; kept Todd Bowles despite missing playoffs; invest in roster when competitive window is open"
+  },
+  "gm": {
+    "name": "Jason Licht",
+    "tenure": "13th year (since 2014)",
+    "philosophy": "Values trenches and defense; willing to make aggressive trades; drafted well in recent years",
+    "analytics_approach": "Hybrid — traditional scouting roots with increasing analytics integration"
+  },
+  "head_coach": {
+    "name": "Todd Bowles",
+    "tenure": "4th year (since 2022)",
+    "scheme_offense": "OC Zac Robinson (from Atlanta); 12 personnel heavy (two tight ends, 38.2% usage in ATL — 2nd most in NFL)",
+    "scheme_defense": "3-4 base; aggressive blitz packages; Bowles is a defensive mastermind; known for exotic pressure looks",
+    "key_position_values": ["EDGE", "LB", "CB", "OT", "WR"]
+  },
+  "decision_makers": {
+    "primary": "Jason Licht (GM) with Todd Bowles (HC) input",
+    "committee": ["Glazer Family (owners)", "Jason Licht (GM)", "Todd Bowles (HC)"]
+  },
+  "roster_2026": {
+    "qb_situation": "Baker Mayfield — unverified current status but expected starter",
+    "key_departures": ["Mike Evans (WR, signed with 49ers)", "Lavonte David (LB, retired)", "Jamel Dean (CB, left in free agency)"],
+    "key_signings": ["Zac Robinson (OC, from Atlanta)"],
+    "cap_space": "unverified",
+    "expiring_contracts": ["unverified"]
+  },
+  "draft_capital_2026": {
+    "picks": ["Round 1 Pick 15", "Round 2 (unverified)", "Round 3 (unverified)", "Round 4 (unverified)", "Round 5 (unverified)", "Round 6 (unverified)", "Round 7 (unverified)"],
+    "traded_away": [],
+    "acquired_extra": [],
+    "compensatory": []
+  },
+  "needs": [
+    {"position": "EDGE", "priority": 1, "reason": "GM Licht explicitly stated at Combine they 'need to get more pressure on the quarterback'; Akheem Mesidor, Keldric Faulk, Cashius Howell all options at #15"},
+    {"position": "LB", "priority": 2, "reason": "Lavonte David retired — franchise legend gone; need replacement at inside linebacker"},
+    {"position": "CB", "priority": 3, "reason": "Lost Jamel Dean in free agency; secondary needs reinforcement to complement Bowles' aggressive scheme"}
+  ]
+}

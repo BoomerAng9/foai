@@ -1,0 +1,2946 @@
+{
+  "meta": {
+    "title": "2026 NFL Teams Digital Twin Dataset",
+    "description": "Complete digital twin data for all 32 NFL teams for the Per|Form draft simulation engine",
+    "draft_date": "April 23-25, 2026",
+    "draft_location": "Pittsburgh, PA",
+    "generated": "2026-04-13T10:38:22.079Z",
+    "version": "1.0.0",
+    "total_teams": 32,
+    "notes": "Data sourced from NFL.com, ESPN, CBS Sports, and team websites as of April 2026. Fields marked unverified require additional research."
+  },
+  "draft_order_round_1": [
+    {
+      "pick": 1,
+      "team": "Las Vegas Raiders"
+    },
+    {
+      "pick": 2,
+      "team": "New York Jets"
+    },
+    {
+      "pick": 3,
+      "team": "Arizona Cardinals"
+    },
+    {
+      "pick": 4,
+      "team": "Tennessee Titans"
+    },
+    {
+      "pick": 5,
+      "team": "New York Giants"
+    },
+    {
+      "pick": 6,
+      "team": "Cleveland Browns"
+    },
+    {
+      "pick": 7,
+      "team": "Washington Commanders"
+    },
+    {
+      "pick": 8,
+      "team": "New Orleans Saints"
+    },
+    {
+      "pick": 9,
+      "team": "Kansas City Chiefs"
+    },
+    {
+      "pick": 10,
+      "team": "Cincinnati Bengals"
+    },
+    {
+      "pick": 11,
+      "team": "Miami Dolphins"
+    },
+    {
+      "pick": 12,
+      "team": "Dallas Cowboys"
+    },
+    {
+      "pick": 13,
+      "team": "Los Angeles Rams (from Atlanta)"
+    },
+    {
+      "pick": 14,
+      "team": "Baltimore Ravens"
+    },
+    {
+      "pick": 15,
+      "team": "Tampa Bay Buccaneers"
+    },
+    {
+      "pick": 16,
+      "team": "New York Jets (from Indianapolis)"
+    },
+    {
+      "pick": 17,
+      "team": "Detroit Lions"
+    },
+    {
+      "pick": 18,
+      "team": "Minnesota Vikings"
+    },
+    {
+      "pick": 19,
+      "team": "Carolina Panthers"
+    },
+    {
+      "pick": 20,
+      "team": "Dallas Cowboys (from Green Bay)"
+    },
+    {
+      "pick": 21,
+      "team": "Pittsburgh Steelers"
+    },
+    {
+      "pick": 22,
+      "team": "Los Angeles Chargers"
+    },
+    {
+      "pick": 23,
+      "team": "Philadelphia Eagles"
+    },
+    {
+      "pick": 24,
+      "team": "Cleveland Browns (from Jacksonville)"
+    },
+    {
+      "pick": 25,
+      "team": "Chicago Bears"
+    },
+    {
+      "pick": 26,
+      "team": "Buffalo Bills"
+    },
+    {
+      "pick": 27,
+      "team": "San Francisco 49ers"
+    },
+    {
+      "pick": 28,
+      "team": "Houston Texans"
+    },
+    {
+      "pick": 29,
+      "team": "Kansas City Chiefs (from Los Angeles Rams)"
+    },
+    {
+      "pick": 30,
+      "team": "Miami Dolphins (from Denver)"
+    },
+    {
+      "pick": 31,
+      "team": "New England Patriots"
+    },
+    {
+      "pick": 32,
+      "team": "Seattle Seahawks"
+    }
+  ],
+  "teams_without_first_round_pick": [
+    "Atlanta Falcons",
+    "Green Bay Packers",
+    "Indianapolis Colts",
+    "Denver Broncos",
+    "Jacksonville Jaguars"
+  ],
+  "teams": [
+    {
+      "team": "Las Vegas Raiders",
+      "abbreviation": "LV",
+      "conference": "AFC",
+      "division": "AFC West",
+      "ownership": {
+        "name": "Mark Davis (minority owner: Tom Brady)",
+        "style": "Hands-on but delegating to new front office; willing to spend on marquee moves",
+        "tendencies": "Historically unstable coaching carousel; new regime signals desire for long-term stability; Brady's minority stake adds strategic football influence"
+      },
+      "gm": {
+        "name": "John Spytek",
+        "tenure": "2nd year (hired 2025)",
+        "philosophy": "BPA-leaning with emphasis on building through the draft; willing to make bold trades",
+        "analytics_approach": "Hybrid — modern analytics integrated with traditional scouting"
+      },
+      "head_coach": {
+        "name": "Klint Kubiak",
+        "tenure": "1st year (hired January 2026)",
+        "scheme_offense": "Outside zone-heavy scheme (Kubiak/Shanahan tree), play-action passing, bootlegs",
+        "scheme_defense": "3-4 base defense (transitioning from 4-3)",
+        "key_position_values": [
+          "QB",
+          "OT",
+          "WR",
+          "DT",
+          "EDGE"
+        ]
+      },
+      "decision_makers": {
+        "primary": "John Spytek (GM) with Klint Kubiak (HC) input",
+        "committee": [
+          "Mark Davis (owner)",
+          "Tom Brady (minority owner)",
+          "John Spytek (GM)",
+          "Klint Kubiak (HC)"
+        ]
+      },
+      "roster_2026": {
+        "qb_situation": "Drafting Fernando Mendoza at #1 overall; signed veteran Kirk Cousins as bridge/mentor; Kubiak prefers rookie to learn behind veteran",
+        "key_departures": [
+          "Daniel Carlson (K)",
+          "Maxx Crosby (trade fell through with Ravens, still disgruntled)"
+        ],
+        "key_signings": [
+          "Kirk Cousins (QB)",
+          "Tyler Linderbaum (C, record $81M/3yr deal)",
+          "Matt Gay (K)"
+        ],
+        "cap_space": "Moderate — spent significantly in free agency but still have room",
+        "expiring_contracts": [
+          "unverified"
+        ]
+      },
+      "draft_capital_2026": {
+        "picks": [
+          "Round 1 Pick 1",
+          "Round 2 Pick 32",
+          "Round 3 Pick 64",
+          "Round 4 Pick 102",
+          "Round 5 Pick 141",
+          "Round 6 Pick 181",
+          "Round 6 Pick 195",
+          "Round 7 Pick 220",
+          "Round 7 Pick 236",
+          "Round 7 Pick 244"
+        ],
+        "traded_away": [],
+        "acquired_extra": [],
+        "compensatory": [
+          "unverified — multiple late-round comp picks expected"
+        ]
+      },
+      "needs": [
+        {
+          "position": "DT",
+          "priority": 1,
+          "reason": "Shifting to 3-4 defense requires reloading the DT room; unquestionably the weakest position on the roster"
+        },
+        {
+          "position": "WR",
+          "priority": 2,
+          "reason": "Outside of Brock Bowers (TE) and Ashton Jeanty (RB), receiving corps is thin; Tre Tucker and Jalen Nailor are current top options"
+        },
+        {
+          "position": "RT",
+          "priority": 3,
+          "reason": "Upgrading right tackle would make O-line near-complete, critical for protecting Mendoza and opening lanes for Jeanty"
+        }
+      ]
+    },
+    {
+      "team": "New York Jets",
+      "abbreviation": "NYJ",
+      "conference": "AFC",
+      "division": "AFC East",
+      "ownership": {
+        "name": "Woody Johnson",
+        "style": "Hands-on, impatient with losing; historically meddlesome in football decisions",
+        "tendencies": "Quick to fire coaches; has cycled through many GMs and HCs; splashy free-agent signings; win-now mentality despite rebuild-level roster"
+      },
+      "gm": {
+        "name": "Darren Mougey",
+        "tenure": "1st year (hired 2026 offseason)",
+        "philosophy": "Building through the draft; needs to hit on early picks to establish credibility",
+        "analytics_approach": "unverified"
+      },
+      "head_coach": {
+        "name": "Aaron Glenn",
+        "tenure": "2nd year (retained for 2026 after 3-14 in first season)",
+        "scheme_offense": "OC Frank Reich calling plays; West Coast concepts with vertical shots",
+        "scheme_defense": "DC Brian Duker; aggressive man-coverage scheme; desperate for playmakers and takeaways (only 4 takeaways in 2025, fewest since 1940)",
+        "key_position_values": [
+          "EDGE",
+          "WR",
+          "LB",
+          "CB",
+          "S"
+        ]
+      },
+      "decision_makers": {
+        "primary": "Darren Mougey (GM) with Aaron Glenn (HC) collaboration",
+        "committee": [
+          "Woody Johnson (owner)",
+          "Darren Mougey (GM)",
+          "Aaron Glenn (HC)"
+        ]
+      },
+      "roster_2026": {
+        "qb_situation": "Acquired Geno Smith via trade from Raiders; looking for long-term answer",
+        "key_departures": [
+          "Jermaine Johnson II (EDGE, traded to Titans)",
+          "Sauce Gardner (traded to Colts for 2026+2027 first-round picks + Adonai Mitchell)"
+        ],
+        "key_signings": [
+          "Minkah Fitzpatrick (S, acquired via trade from Dolphins, signed 3yr/$40M extension)",
+          "Several veteran defensive pieces"
+        ],
+        "cap_space": "unverified",
+        "expiring_contracts": [
+          "unverified"
+        ]
+      },
+      "draft_capital_2026": {
+        "picks": [
+          "Round 1 Pick 2",
+          "Round 1 Pick 16 (from IND via Sauce Gardner trade)",
+          "Round 2 Pick 33",
+          "Round 2 Pick 44",
+          "Round 4 Pick 103",
+          "Round 5 Pick 140",
+          "Round 6 Pick 179",
+          "Round 7 Pick 228",
+          "Round 7 Pick 242"
+        ],
+        "traded_away": [],
+        "acquired_extra": [
+          "Round 1 Pick 16 (from Colts)",
+          "Round 2 Pick 44"
+        ],
+        "compensatory": []
+      },
+      "needs": [
+        {
+          "position": "WR",
+          "priority": 1,
+          "reason": "Biggest need by a wide margin; desperately need playmakers for the offense"
+        },
+        {
+          "position": "EDGE",
+          "priority": 2,
+          "reason": "Traded Jermaine Johnson to Titans; were 31st in sacks last season; pass rush is nonexistent"
+        },
+        {
+          "position": "CB",
+          "priority": 3,
+          "reason": "Traded away Sauce Gardner; need to rebuild the secondary despite Fitzpatrick addition"
+        }
+      ]
+    },
+    {
+      "team": "Arizona Cardinals",
+      "abbreviation": "ARI",
+      "conference": "NFC",
+      "division": "NFC West",
+      "ownership": {
+        "name": "Michael Bidwill",
+        "style": "Generally hands-off on football decisions but willing to make big coaching changes",
+        "tendencies": "Fired Jonathan Gannon after 3-14 season; trusted GM Ossenfort to find new HC despite hot seat speculation"
+      },
+      "gm": {
+        "name": "Monti Ossenfort",
+        "tenure": "3rd year (hired 2023)",
+        "philosophy": "Willing to trade down from premium picks if value dictates; aggressive roster overhaul approach",
+        "analytics_approach": "Hybrid — modern analytics background from Tennessee Titans front office"
+      },
+      "head_coach": {
+        "name": "Mike LaFleur",
+        "tenure": "1st year (hired January 2026)",
+        "scheme_offense": "Shanahan-style outside zone scheme, play-action heavy, RPOs",
+        "scheme_defense": "unverified — new defensive coordinator hire",
+        "key_position_values": [
+          "QB",
+          "OT",
+          "EDGE",
+          "IOL"
+        ]
+      },
+      "decision_makers": {
+        "primary": "Monti Ossenfort (GM) — on the hot seat, massive draft for his tenure",
+        "committee": [
+          "Michael Bidwill (owner)",
+          "Monti Ossenfort (GM)",
+          "Mike LaFleur (HC)"
+        ]
+      },
+      "roster_2026": {
+        "qb_situation": "Widely expected to move on from Kyler Murray; hosting QBs Carson Beck (Miami) and Ty Simpson (Alabama) on pre-draft visits; could draft QB at #3",
+        "key_departures": [
+          "Jonah Williams (OT, unsigned)",
+          "Kelvin Beachum (OT, unsigned)"
+        ],
+        "key_signings": [
+          "unverified — some O-line and pass rush additions in free agency"
+        ],
+        "cap_space": "unverified",
+        "expiring_contracts": [
+          "unverified"
+        ]
+      },
+      "draft_capital_2026": {
+        "picks": [
+          "Round 1 Pick 3",
+          "Round 2 Pick 34",
+          "Round 3 Pick 65",
+          "Round 4 Pick 104",
+          "Round 5 Pick 143",
+          "Round 6 Pick 183",
+          "Round 7 Pick 217"
+        ],
+        "traded_away": [],
+        "acquired_extra": [],
+        "compensatory": []
+      },
+      "needs": [
+        {
+          "position": "QB",
+          "priority": 1,
+          "reason": "Moving on from Kyler Murray; need franchise quarterback for new coaching regime; hosting top QB prospects"
+        },
+        {
+          "position": "EDGE",
+          "priority": 2,
+          "reason": "Finished 27th in pressure rate and 28th in sacks despite investing resources in pass rush last offseason"
+        },
+        {
+          "position": "OT",
+          "priority": 3,
+          "reason": "Right tackle position unresolved with Jonah Williams and Kelvin Beachum unsigned; two first-round picks spent on OL still hasn't fixed the unit"
+        }
+      ]
+    },
+    {
+      "team": "Tennessee Titans",
+      "abbreviation": "TEN",
+      "conference": "AFC",
+      "division": "AFC South",
+      "ownership": {
+        "name": "Amy Adams Strunk",
+        "style": "Willing to invest but NFLPA grade dropped from B+ to C in 2026; patient with rebuilds",
+        "tendencies": "Interviewed 16 HC candidates before hiring Saleh; trusts GM Borgonzi (rated B+ by players)"
+      },
+      "gm": {
+        "name": "Mike Borgonzi",
+        "tenure": "2nd year (hired 2025)",
+        "philosophy": "Needs a home-run draft; willing to let the board come to them given premium cap space and multiple needs",
+        "analytics_approach": "Hybrid — learned under Kansas City's analytics-forward approach"
+      },
+      "head_coach": {
+        "name": "Robert Saleh",
+        "tenure": "1st year (hired January 29, 2026 on 5-year deal)",
+        "scheme_offense": "OC Brian Daboll; West Coast/Erhardt-Perkins system; designed to develop young QB Cam Ward",
+        "scheme_defense": "4-3 wide-nine front, Cover 3 base; aggressive use of edge rushers; requires rangy linebacker to roam the middle",
+        "key_position_values": [
+          "EDGE",
+          "LB",
+          "WR",
+          "CB",
+          "IOL"
+        ]
+      },
+      "decision_makers": {
+        "primary": "Mike Borgonzi (GM) with Robert Saleh (HC) collaboration",
+        "committee": [
+          "Amy Adams Strunk (owner)",
+          "Mike Borgonzi (GM)",
+          "Robert Saleh (HC)",
+          "Brian Daboll (OC)"
+        ]
+      },
+      "roster_2026": {
+        "qb_situation": "Cam Ward is the franchise QB from 2025 draft; clear mandate to surround him with weapons",
+        "key_departures": [
+          "unverified"
+        ],
+        "key_signings": [
+          "Jermaine Johnson II (EDGE, acquired via trade from Jets)"
+        ],
+        "cap_space": "Premium cap space available",
+        "expiring_contracts": [
+          "unverified"
+        ]
+      },
+      "draft_capital_2026": {
+        "picks": [
+          "Round 1 Pick 4",
+          "Round 2 Pick 35",
+          "Round 3 Pick 66",
+          "Round 4 Pick 101",
+          "Round 5 Pick 142",
+          "Round 5 Pick 144",
+          "Round 6 Pick 184",
+          "Round 6 Pick 194",
+          "Round 7 Pick 225"
+        ],
+        "traded_away": [],
+        "acquired_extra": [
+          "Round 5 Pick 144",
+          "Round 6 Pick 194"
+        ],
+        "compensatory": []
+      },
+      "needs": [
+        {
+          "position": "EDGE",
+          "priority": 1,
+          "reason": "Need elite pass rusher to pair with Jeffery Simmons; Saleh's defense demands dominant edge presence; top EDGE prospects Reese/Bailey/Bain all in play"
+        },
+        {
+          "position": "WR",
+          "priority": 2,
+          "reason": "Clear mandate to add weapons for Cam Ward; receiving corps needs significant upgrade"
+        },
+        {
+          "position": "LB",
+          "priority": 3,
+          "reason": "Transition to Saleh's defense requires more rangy linebacker to roam middle of the field; must be addressed"
+        }
+      ]
+    },
+    {
+      "team": "New York Giants",
+      "abbreviation": "NYG",
+      "conference": "NFC",
+      "division": "NFC East",
+      "ownership": {
+        "name": "John Mara and Steve Tisch (co-owners)",
+        "style": "Legacy ownership; loyal to staff but willing to make major coaching hires; patience wears thin after sustained losing",
+        "tendencies": "Hired John Harbaugh despite other openings available; shows commitment to franchise-changing hires"
+      },
+      "gm": {
+        "name": "Joe Schoen",
+        "tenure": "5th year (hired 2022); power has shifted — must work directly with Harbaugh",
+        "philosophy": "Aggressive roster construction around Jaxson Dart; willing to trade down from #5 to acquire more picks (only two top-100 selections currently)",
+        "analytics_approach": "Hybrid — modern front office sensibilities paired with traditional scouting"
+      },
+      "head_coach": {
+        "name": "John Harbaugh",
+        "tenure": "1st year (hired January 20, 2026 — 21st head coach in Giants history)",
+        "scheme_offense": "Versatile system designed around Jaxson Dart; Harbaugh compared Dart to Lamar Jackson on film; strong run-game foundation",
+        "scheme_defense": "Multiple front; aggressive blitz packages; Baltimore-style physical defense",
+        "key_position_values": [
+          "OL",
+          "DL",
+          "WR",
+          "CB",
+          "LB"
+        ]
+      },
+      "decision_makers": {
+        "primary": "Joe Schoen (GM) and John Harbaugh (HC) — collaborative with Harbaugh holding significant influence",
+        "committee": [
+          "John Mara (co-owner)",
+          "Steve Tisch (co-owner)",
+          "Chris Mara",
+          "Joe Schoen (GM)",
+          "John Harbaugh (HC)"
+        ]
+      },
+      "roster_2026": {
+        "qb_situation": "Jaxson Dart is the franchise QB (2025 draft pick); Harbaugh's #1 reason for choosing Giants; second-year development critical",
+        "key_departures": [
+          "unverified"
+        ],
+        "key_signings": [
+          "Isaiah Likely (TE, from Ravens followed Harbaugh)",
+          "Darnell Mooney (WR)",
+          "Calvin Austin III (WR)"
+        ],
+        "cap_space": "unverified",
+        "expiring_contracts": [
+          "Malik Nabers (WR — coming off torn ACL in Week 4 of 2025, lost year after great rookie season)"
+        ]
+      },
+      "draft_capital_2026": {
+        "picks": [
+          "Round 1 Pick 5",
+          "Round 3 (unverified)",
+          "Round 6 (three 6th-round picks)",
+          "Round 7"
+        ],
+        "traded_away": [],
+        "acquired_extra": [],
+        "compensatory": []
+      },
+      "needs": [
+        {
+          "position": "DL",
+          "priority": 1,
+          "reason": "Worst in NFL allowing 5.3 yards per carry; interior defensive line must be addressed for Harbaugh's physical defense"
+        },
+        {
+          "position": "OL",
+          "priority": 2,
+          "reason": "Protecting and developing Jaxson Dart is top priority; Harbaugh wants to build from the trenches"
+        },
+        {
+          "position": "WR",
+          "priority": 3,
+          "reason": "Malik Nabers recovering from torn ACL; need reliable targets while Nabers gets healthy; only two top-100 picks limits options"
+        }
+      ]
+    },
+    {
+      "team": "Cleveland Browns",
+      "abbreviation": "CLE",
+      "conference": "AFC",
+      "division": "AFC North",
+      "ownership": {
+        "name": "Jimmy and Dee Haslam",
+        "style": "Aggressive, impatient owners; willing to spend big and take risks (e.g., Deshaun Watson contract)",
+        "tendencies": "Historically quick to fire coaches and GMs; have cycled through many regimes; analytics-driven under Berry"
+      },
+      "gm": {
+        "name": "Andrew Berry",
+        "tenure": "7th year (hired 2020)",
+        "philosophy": "Heavy analytics approach; values draft capital accumulation; willing to make bold trades; BPA-oriented",
+        "analytics_approach": "One of the most analytics-driven front offices in the NFL; Berry has Ivy League background"
+      },
+      "head_coach": {
+        "name": "Todd Monken",
+        "tenure": "1st year (hired January 2026)",
+        "scheme_offense": "Aggressive downfield passing; spread concepts; play-action heavy; known for high-octane offenses (Georgia OC background)",
+        "scheme_defense": "unverified — new DC hire",
+        "key_position_values": [
+          "WR",
+          "OT",
+          "QB",
+          "EDGE",
+          "CB"
+        ]
+      },
+      "decision_makers": {
+        "primary": "Andrew Berry (GM/EVP of Football Operations)",
+        "committee": [
+          "Jimmy Haslam (owner)",
+          "Dee Haslam (owner)",
+          "Andrew Berry (GM)",
+          "Todd Monken (HC)"
+        ]
+      },
+      "roster_2026": {
+        "qb_situation": "unverified — post-Watson era; likely looking at young QB development",
+        "key_departures": [
+          "Almost entirely new offensive line"
+        ],
+        "key_signings": [
+          "unverified — significant roster overhaul underway"
+        ],
+        "cap_space": "unverified",
+        "expiring_contracts": [
+          "unverified"
+        ]
+      },
+      "draft_capital_2026": {
+        "picks": [
+          "Round 1 Pick 6",
+          "Round 1 Pick 24 (from JAX via Travis Hunter trade)",
+          "Round 2 Pick 39",
+          "Round 3 Pick 70",
+          "Round 4 Pick 107",
+          "Round 5 Pick 146",
+          "Round 5 Pick 149",
+          "Round 7 Pick 206",
+          "Round 7 Pick 248"
+        ],
+        "traded_away": [],
+        "acquired_extra": [
+          "Round 1 Pick 24 (from Jacksonville)"
+        ],
+        "compensatory": []
+      },
+      "needs": [
+        {
+          "position": "WR",
+          "priority": 1,
+          "reason": "Receiving corps headlined by Jerry Jeudy, Cedric Tillman, and Isaiah Bond is insufficient for Monken's air-attack offense; top need at either #6 or #24"
+        },
+        {
+          "position": "OT",
+          "priority": 2,
+          "reason": "Had to completely overhaul offensive line this offseason; still have a hole at left tackle"
+        },
+        {
+          "position": "CB",
+          "priority": 3,
+          "reason": "Secondary needs reinforcement to complement rebuilt offensive roster"
+        }
+      ]
+    },
+    {
+      "team": "Washington Commanders",
+      "abbreviation": "WAS",
+      "conference": "NFC",
+      "division": "NFC East",
+      "ownership": {
+        "name": "Josh Harris (Harris-Blitzer Sports & Entertainment)",
+        "style": "New ownership (acquired 2023); professional sports management background; invested in long-term build",
+        "tendencies": "Hired experienced football people; patient with rebuild; significant offseason spending authorized"
+      },
+      "gm": {
+        "name": "Adam Peters",
+        "tenure": "2nd year (hired 2024 from San Francisco 49ers)",
+        "philosophy": "San Francisco model — build through the draft, supplement in free agency; aggressive free agent spending (signed 15 new players this offseason)",
+        "analytics_approach": "Modern hybrid — SF 49ers analytical background"
+      },
+      "head_coach": {
+        "name": "Dan Quinn",
+        "tenure": "2nd year (hired 2024)",
+        "scheme_offense": "unverified — new OC system",
+        "scheme_defense": "DC Daronte Jones (from Minnesota Vikings); aggressive man-coverage scheme",
+        "key_position_values": [
+          "WR",
+          "CB",
+          "LB",
+          "C",
+          "EDGE"
+        ]
+      },
+      "decision_makers": {
+        "primary": "Adam Peters (GM) — aggressive roster builder",
+        "committee": [
+          "Josh Harris (owner)",
+          "Adam Peters (GM)",
+          "Dan Quinn (HC)"
+        ]
+      },
+      "roster_2026": {
+        "qb_situation": "Jayden Daniels is the franchise QB; goal is to surround him with elite weapons and protection",
+        "key_departures": [
+          "Tyler Biadasz (C, released)",
+          "Bobby Wagner (LB, unsigned)",
+          "Marshon Lattimore (CB, injury concerns, possible cut candidate)"
+        ],
+        "key_signings": [
+          "Leo Chenal (LB, from Chiefs)",
+          "Nick Allegretti (C, interim starter)",
+          "15 total new free agent signings including pass rusher, TE, and RB additions"
+        ],
+        "cap_space": "unverified",
+        "expiring_contracts": [
+          "unverified"
+        ]
+      },
+      "draft_capital_2026": {
+        "picks": [
+          "Round 1 Pick 7",
+          "Round 3 Pick 71",
+          "Round 5 Pick 147",
+          "Round 6 Pick 187",
+          "Round 7 Pick 209",
+          "Round 7 Pick 223"
+        ],
+        "traded_away": [],
+        "acquired_extra": [],
+        "compensatory": []
+      },
+      "needs": [
+        {
+          "position": "WR",
+          "priority": 1,
+          "reason": "Need alpha receiver opposite Terry McLaurin; WR room is biggest roster weakness; Carnell Tate (Ohio State) getting heavy attention with Pro Day visit and top-30 visit"
+        },
+        {
+          "position": "CB",
+          "priority": 2,
+          "reason": "Marshon Lattimore no longer the same player after injuries; perimeter CB is a clear need; defense needs to get younger"
+        },
+        {
+          "position": "C",
+          "priority": 3,
+          "reason": "Released Tyler Biadasz; Nick Allegretti is stopgap; Quinn left door open for draft additions at center"
+        }
+      ]
+    },
+    {
+      "team": "New Orleans Saints",
+      "abbreviation": "NO",
+      "conference": "NFC",
+      "division": "NFC South",
+      "ownership": {
+        "name": "Gayle Benson",
+        "style": "Loyal to long-tenured executives; historically big spenders in free agency",
+        "tendencies": "Kept Mickey Loomis through decades of cap gymnastics; loyalty to proven leaders"
+      },
+      "gm": {
+        "name": "Mickey Loomis",
+        "tenure": "24th year (since 2002) — longest-tenured GM in NFL",
+        "philosophy": "Aggressive cap management (cap gymnastics); win-now mentality; willing to restructure contracts aggressively",
+        "analytics_approach": "Traditional scouting with some modern elements; values veteran free agents heavily"
+      },
+      "head_coach": {
+        "name": "Kellen Moore",
+        "tenure": "2nd year (hired 2025)",
+        "scheme_offense": "Spread concepts, motion-heavy, play-action passing; modern offensive mind",
+        "scheme_defense": "unverified",
+        "key_position_values": [
+          "WR",
+          "EDGE",
+          "CB",
+          "RB",
+          "OL"
+        ]
+      },
+      "decision_makers": {
+        "primary": "Mickey Loomis (GM)",
+        "committee": [
+          "Gayle Benson (owner)",
+          "Mickey Loomis (GM)",
+          "Kellen Moore (HC)"
+        ]
+      },
+      "roster_2026": {
+        "qb_situation": "Tyler Shough is the starter; organization views him as the franchise guy going into next season",
+        "key_departures": [
+          "Cam Jordan (EDGE, retirement/departure)"
+        ],
+        "key_signings": [
+          "David Edwards (G)",
+          "Kaden Elliss (LB)",
+          "Noah Fant (TE)",
+          "Travis Etienne Jr. (RB, 4yr/$48M)"
+        ],
+        "cap_space": "Historically tight cap situation; Loomis continues aggressive restructuring",
+        "expiring_contracts": [
+          "unverified"
+        ]
+      },
+      "draft_capital_2026": {
+        "picks": [
+          "Round 1 Pick 8",
+          "Round 2 (unverified)",
+          "Round 3 (unverified)",
+          "Round 4 (unverified)",
+          "Round 5 (unverified)",
+          "Round 6 (unverified)",
+          "Round 7 (unverified)"
+        ],
+        "traded_away": [],
+        "acquired_extra": [],
+        "compensatory": []
+      },
+      "needs": [
+        {
+          "position": "WR",
+          "priority": 1,
+          "reason": "Need a No. 2 receiver to pair with existing weapons; easy pick at #8 if top WR available; Carnell Tate frequently mocked"
+        },
+        {
+          "position": "EDGE",
+          "priority": 2,
+          "reason": "Pass rush needs significant help; if David Bailey or Rueben Bain Jr. are on the board, they would be hard to pass up"
+        },
+        {
+          "position": "CB",
+          "priority": 3,
+          "reason": "Cornerback is a top-3 need; secondary needs reinforcement to compete in NFC South"
+        }
+      ]
+    },
+    {
+      "team": "Kansas City Chiefs",
+      "abbreviation": "KC",
+      "conference": "AFC",
+      "division": "AFC West",
+      "ownership": {
+        "name": "Clark Hunt",
+        "style": "Hands-off on football decisions; trusts Andy Reid and Brett Veach completely; stability-oriented",
+        "tendencies": "Longest-tenured HC/GM combo in NFL; patient ownership that values sustained success; rarely meddles in draft"
+      },
+      "gm": {
+        "name": "Brett Veach",
+        "tenure": "9th year (since 2017)",
+        "philosophy": "Aggressive trader (grew from 5 to 9 picks via trades this offseason); BPA with positional value awareness; willing to make bold moves",
+        "analytics_approach": "Hybrid — modern analytics with strong scouting department; known for strategic deception in draft war rooms"
+      },
+      "head_coach": {
+        "name": "Andy Reid",
+        "tenure": "14th year (since 2013)",
+        "scheme_offense": "West Coast offense with creative formations; RPOs; heavy use of TEs and mismatches; Travis Kelce-era passing concepts",
+        "scheme_defense": "4-3 base; aggressive blitz packages; need to rebuild secondary after major departures",
+        "key_position_values": [
+          "CB",
+          "EDGE",
+          "OT",
+          "WR",
+          "DT"
+        ]
+      },
+      "decision_makers": {
+        "primary": "Brett Veach (GM) with Andy Reid (HC) having significant input",
+        "committee": [
+          "Clark Hunt (owner)",
+          "Brett Veach (GM)",
+          "Andy Reid (HC)"
+        ]
+      },
+      "roster_2026": {
+        "qb_situation": "Patrick Mahomes — locked in as franchise QB for the foreseeable future",
+        "key_departures": [
+          "Trent McDuffie (CB, traded to Rams)",
+          "Jaylen Watson (CB, lost in free agency)",
+          "Boye Mafe (EDGE, signed with Bengals)"
+        ],
+        "key_signings": [
+          "Kenneth Walker III (RB)"
+        ],
+        "cap_space": "unverified — typical tight cap management under Veach",
+        "expiring_contracts": [
+          "unverified"
+        ]
+      },
+      "draft_capital_2026": {
+        "picks": [
+          "Round 1 Pick 9",
+          "Round 1 Pick 29 (from LAR via McDuffie trade)",
+          "Round 2 Pick 40",
+          "Round 3 Pick 74",
+          "Round 4 Pick 109",
+          "Round 5 Pick 148",
+          "Round 5 Pick 169 (from LAR)",
+          "Round 6 Pick 176",
+          "Round 7 Pick 210 (from LAR)"
+        ],
+        "traded_away": [],
+        "acquired_extra": [
+          "Round 1 Pick 29 (from Rams)",
+          "Round 5 Pick 169 (from Rams)",
+          "Round 7 Pick 210 (from Rams)"
+        ],
+        "compensatory": [
+          "Round 5 compensatory pick"
+        ]
+      },
+      "needs": [
+        {
+          "position": "CB",
+          "priority": 1,
+          "reason": "Lost both starting corners — Trent McDuffie (traded) and Jaylen Watson (free agency); enormous hole in secondary"
+        },
+        {
+          "position": "EDGE",
+          "priority": 2,
+          "reason": "No logical starter opposite George Karlaftis; need complement to Chris Jones interior pressure"
+        },
+        {
+          "position": "OT",
+          "priority": 3,
+          "reason": "Offensive tackle depth is a concern; need to protect Mahomes long-term"
+        }
+      ]
+    },
+    {
+      "team": "Cincinnati Bengals",
+      "abbreviation": "CIN",
+      "conference": "AFC",
+      "division": "AFC North",
+      "ownership": {
+        "name": "Mike Brown",
+        "style": "Notoriously frugal; family-run operation; historically reluctant to spend in free agency",
+        "tendencies": "Loyal to coaches despite losing — retained Zac Taylor after 6-11 season and three straight years without playoffs; no traditional GM title in organization"
+      },
+      "gm": {
+        "name": "Duke Tobin (Director of Player Personnel — de facto GM)",
+        "tenure": "24th year in role (since 2002)",
+        "philosophy": "Draft-and-develop; conservative free agency spending; relies heavily on scouting department",
+        "analytics_approach": "Traditional scouting emphasis; one of the less analytics-driven front offices"
+      },
+      "head_coach": {
+        "name": "Zac Taylor",
+        "tenure": "7th year (since 2019)",
+        "scheme_offense": "Spread passing attack built around Joe Burrow; three-wide sets; Sean McVay tree concepts",
+        "scheme_defense": "4-3 base; zone coverage; needs significant talent infusion across all levels",
+        "key_position_values": [
+          "CB",
+          "LB",
+          "DL",
+          "IOL",
+          "EDGE"
+        ]
+      },
+      "decision_makers": {
+        "primary": "Mike Brown (owner) has final say; Duke Tobin (personnel) leads scouting and draft board",
+        "committee": [
+          "Mike Brown (owner)",
+          "Duke Tobin (Dir. Player Personnel)",
+          "Zac Taylor (HC)"
+        ]
+      },
+      "roster_2026": {
+        "qb_situation": "Joe Burrow — locked in as franchise QB; elite talent but team around him has deteriorated",
+        "key_departures": [
+          "Trey Hendrickson (EDGE, signed with Ravens for $112M/4yr)"
+        ],
+        "key_signings": [
+          "Boye Mafe (EDGE)",
+          "Bryan Cook (S)",
+          "Jonathan Allen (DT)"
+        ],
+        "cap_space": "unverified — historically tight",
+        "expiring_contracts": [
+          "unverified"
+        ]
+      },
+      "draft_capital_2026": {
+        "picks": [
+          "Round 1 Pick 10",
+          "Round 2 (unverified)",
+          "Round 3 (unverified)",
+          "Round 4 (unverified)",
+          "Round 5 (unverified)",
+          "Round 6 (unverified)",
+          "Round 7 (unverified)",
+          "8 total picks"
+        ],
+        "traded_away": [],
+        "acquired_extra": [],
+        "compensatory": []
+      },
+      "needs": [
+        {
+          "position": "CB",
+          "priority": 1,
+          "reason": "Pressing need; in prime position to address at #10 with Mansoor Delane (LSU) or Jermod McCoy (Tennessee) likely available; Round 1 priority after signing Mafe at EDGE"
+        },
+        {
+          "position": "LB",
+          "priority": 2,
+          "reason": "Defense needs help at every level; linebacker corps is thin"
+        },
+        {
+          "position": "DL",
+          "priority": 3,
+          "reason": "Defensive line needs reinforcement despite Jonathan Allen signing; overall defensive talent significantly lacking"
+        }
+      ]
+    },
+    {
+      "team": "Miami Dolphins",
+      "abbreviation": "MIA",
+      "conference": "AFC",
+      "division": "AFC East",
+      "ownership": {
+        "name": "Stephen Ross",
+        "style": "Aggressive owner willing to spend; has been hands-on in major decisions; win-now mentality",
+        "tendencies": "Complete organizational overhaul — fired coach and GM; hired new HC and GM; traded away multiple franchise players in rebuild"
+      },
+      "gm": {
+        "name": "Jon-Eric Sullivan",
+        "tenure": "1st year (hired January 2026)",
+        "philosophy": "Complete rebuild approach; stripped roster of high-paid veterans; accumulating draft capital and cap space",
+        "analytics_approach": "unverified — new to role"
+      },
+      "head_coach": {
+        "name": "Jeff Hafley",
+        "tenure": "1st year (hired January 2026)",
+        "scheme_offense": "unverified — new system being installed",
+        "scheme_defense": "Hafley is a defensive specialist; likely aggressive man-coverage scheme from his background",
+        "key_position_values": [
+          "WR",
+          "OT",
+          "CB",
+          "TE",
+          "QB"
+        ]
+      },
+      "decision_makers": {
+        "primary": "Jon-Eric Sullivan (GM) with Jeff Hafley (HC) collaboration",
+        "committee": [
+          "Stephen Ross (owner)",
+          "Jon-Eric Sullivan (GM)",
+          "Jeff Hafley (HC)"
+        ]
+      },
+      "roster_2026": {
+        "qb_situation": "Malik Willis signed as starter (previously backup in Green Bay); bridge QB at best; long-term answer still needed",
+        "key_departures": [
+          "Tua Tagovailoa (QB, signed with Falcons)",
+          "Tyreek Hill (WR)",
+          "Jaylen Waddle (WR, traded to Broncos)",
+          "Bradley Chubb (EDGE, signed with Bills)",
+          "Minkah Fitzpatrick (S, traded to Jets)",
+          "Jalen Ramsey (CB, traded)",
+          "Jonnu Smith (TE, traded)"
+        ],
+        "key_signings": [
+          "Malik Willis (QB)",
+          "Darren Waller (TE, came out of retirement)"
+        ],
+        "cap_space": "Significant cap space from veteran departures; full rebuild mode",
+        "expiring_contracts": [
+          "Austin Jackson (OT, final year)"
+        ]
+      },
+      "draft_capital_2026": {
+        "picks": [
+          "Round 1 Pick 11",
+          "Round 1 Pick 30",
+          "Round 2 Pick 43",
+          "Round 3 Pick 75",
+          "Round 3 Pick 87",
+          "Round 3 Pick 90",
+          "Round 3 Pick 94",
+          "Round 4 Pick 130",
+          "Round 5 Pick 151",
+          "Round 7 Pick 227",
+          "Round 7 Pick 238"
+        ],
+        "traded_away": [],
+        "acquired_extra": [
+          "Round 1 Pick 30",
+          "Round 3 Pick 87",
+          "Round 3 Pick 90",
+          "Round 3 Pick 94"
+        ],
+        "compensatory": []
+      },
+      "needs": [
+        {
+          "position": "WR",
+          "priority": 1,
+          "reason": "Lost both Tyreek Hill and Jaylen Waddle; Willis needs a reliable WR1; Carnell Tate frequently mocked at #11"
+        },
+        {
+          "position": "OT",
+          "priority": 2,
+          "reason": "Austin Jackson on final year of contract with inconsistent play and injuries; need long-term partner with Patrick Paul"
+        },
+        {
+          "position": "CB",
+          "priority": 3,
+          "reason": "Traded away Jalen Ramsey; cornerback room was already thin before the trade; must rebuild secondary"
+        }
+      ]
+    },
+    {
+      "team": "Dallas Cowboys",
+      "abbreviation": "DAL",
+      "conference": "NFC",
+      "division": "NFC East",
+      "ownership": {
+        "name": "Jerry Jones",
+        "style": "Extremely hands-on; acts as owner AND general manager; most involved owner in NFL history",
+        "tendencies": "Meddles in every football decision; loves splash picks and star players; values marketability alongside talent; oldest owner-GM model in NFL"
+      },
+      "gm": {
+        "name": "Jerry Jones (owner/president/GM) with Will McClay (VP of Player Personnel) as de facto draft evaluator",
+        "tenure": "Jerry Jones since 1989; Will McClay elevated to key role circa 2014",
+        "philosophy": "BPA-oriented; Schottenheimer says 'draft natural, draft pure'; aggressive trade history (acquired Micah Parsons from Packers for 1st-round pick + Kenny Clark)",
+        "analytics_approach": "Traditional with some modern elements; Will McClay is widely respected as one of best talent evaluators in NFL"
+      },
+      "head_coach": {
+        "name": "Brian Schottenheimer",
+        "tenure": "2nd year (promoted to HC 2025)",
+        "scheme_offense": "Pro-style with zone-run elements; play-action passing; physical identity",
+        "scheme_defense": "New-look defense in 2026; multiple fronts with Micah Parsons as centerpiece",
+        "key_position_values": [
+          "CB",
+          "LB",
+          "EDGE",
+          "OL",
+          "WR"
+        ]
+      },
+      "decision_makers": {
+        "primary": "Jerry Jones (owner/GM) — always has final say",
+        "committee": [
+          "Jerry Jones (owner/GM)",
+          "Stephen Jones (co-owner/EVP)",
+          "Will McClay (VP Player Personnel)",
+          "Brian Schottenheimer (HC)"
+        ]
+      },
+      "roster_2026": {
+        "qb_situation": "Dak Prescott — unverified current status but expected franchise QB",
+        "key_departures": [
+          "Kenny Clark (DT, traded to Packers in Micah Parsons deal)"
+        ],
+        "key_signings": [
+          "Micah Parsons (LB/EDGE, acquired from Packers via trade)"
+        ],
+        "cap_space": "unverified",
+        "expiring_contracts": [
+          "unverified"
+        ]
+      },
+      "draft_capital_2026": {
+        "picks": [
+          "Round 1 Pick 12",
+          "Round 1 Pick 20 (from Green Bay via Parsons trade)",
+          "Round 3 Pick 92",
+          "Round 4 Pick 112",
+          "Round 5 Pick 152",
+          "Round 6 Pick 177",
+          "Round 6 Pick 180",
+          "Round 7 Pick 218"
+        ],
+        "traded_away": [],
+        "acquired_extra": [
+          "Round 1 Pick 20 (from Green Bay)"
+        ],
+        "compensatory": []
+      },
+      "needs": [
+        {
+          "position": "CB",
+          "priority": 1,
+          "reason": "Known top need; seven corners among 30 pre-draft visitors; allowed 8.1 yards per attempt (31st) and ranked near bottom in every pass defense category in 2025"
+        },
+        {
+          "position": "LB",
+          "priority": 2,
+          "reason": "Despite Parsons acquisition, linebacker depth needs reinforcement; South Carolina's Brandon Cisse and Tennessee's Colton Hood in play at #20"
+        },
+        {
+          "position": "DL",
+          "priority": 3,
+          "reason": "Lost Kenny Clark in Parsons trade; defensive interior needs attention; Mansoor Delane (CB) could address CB need instead"
+        }
+      ]
+    },
+    {
+      "team": "Los Angeles Rams",
+      "abbreviation": "LAR",
+      "conference": "NFC",
+      "division": "NFC West",
+      "ownership": {
+        "name": "Stan Kroenke",
+        "style": "Hands-off on football operations; trusts McVay/Snead completely; willing to fund aggressive moves",
+        "tendencies": "Supports all-in approach; backed Super Bowl-winning aggressive trading philosophy"
+      },
+      "gm": {
+        "name": "Les Snead",
+        "tenure": "14th year (since 2012)",
+        "philosophy": "Aggressive trader; 'F them picks' mentality but has matured; brought in Phil Savage as personnel expert; flexible approach at #13",
+        "analytics_approach": "Hybrid — willing to use analytics but trusts scouting heavily; known for creative roster construction"
+      },
+      "head_coach": {
+        "name": "Sean McVay",
+        "tenure": "10th year (since 2017)",
+        "scheme_offense": "Shanahan-tree outside zone; play-action heavy; motion and misdirection; elite scheme design",
+        "scheme_defense": "Raheem Morris departed; new DC Raheem Morris was replaced (unverified current DC); 3-4 transition",
+        "key_position_values": [
+          "WR",
+          "OT",
+          "TE",
+          "EDGE",
+          "DL"
+        ]
+      },
+      "decision_makers": {
+        "primary": "Les Snead (GM) and Sean McVay (HC) — tightly aligned partnership",
+        "committee": [
+          "Stan Kroenke (owner)",
+          "Les Snead (GM)",
+          "Sean McVay (HC)",
+          "Phil Savage (senior personnel advisor)"
+        ]
+      },
+      "roster_2026": {
+        "qb_situation": "Matthew Stafford — veteran franchise QB; windows may be closing due to age",
+        "key_departures": [
+          "unverified — traded original 1st, 5th, and 6th round picks to Chiefs for Trent McDuffie"
+        ],
+        "key_signings": [
+          "Trent McDuffie (CB, acquired from Chiefs)",
+          "Jaylen Watson (CB, acquired from Chiefs)"
+        ],
+        "cap_space": "unverified",
+        "expiring_contracts": [
+          "unverified"
+        ]
+      },
+      "draft_capital_2026": {
+        "picks": [
+          "Round 1 Pick 13 (from Atlanta)",
+          "Round 2 (unverified)",
+          "Round 3 (unverified)",
+          "Round 4 (unverified)"
+        ],
+        "traded_away": [
+          "Round 1 Pick 29 (original, to Chiefs)",
+          "Round 5 Pick 169 (to Chiefs)",
+          "Round 7 Pick 210 (to Chiefs)"
+        ],
+        "acquired_extra": [
+          "Round 1 Pick 13 (from Atlanta — via 2025 draft trade for James Pearce Jr.)"
+        ],
+        "compensatory": []
+      },
+      "needs": [
+        {
+          "position": "WR",
+          "priority": 1,
+          "reason": "Receiver help needed for Stafford; McVay's offense demands elite route runners and playmakers"
+        },
+        {
+          "position": "OT",
+          "priority": 2,
+          "reason": "Offensive tackle depth needed to protect aging Stafford; potential Trent Williams uncertainty applies across NFC West"
+        },
+        {
+          "position": "TE",
+          "priority": 3,
+          "reason": "Tight end need identified by analysts; McVay's system utilizes TEs effectively when talent is available"
+        }
+      ]
+    },
+    {
+      "team": "Baltimore Ravens",
+      "abbreviation": "BAL",
+      "conference": "AFC",
+      "division": "AFC North",
+      "ownership": {
+        "name": "Steve Bisciotti",
+        "style": "Hands-off on football decisions; trusts front office completely; stable ownership",
+        "tendencies": "Patient with coaching transitions; allowed Harbaugh to leave for Giants; empowered DeCosta for rebuild"
+      },
+      "gm": {
+        "name": "Eric DeCosta",
+        "tenure": "7th year (since 2019)",
+        "philosophy": "Draft-centric; values positional versatility; aggressive in trades; BPA-oriented with need awareness",
+        "analytics_approach": "Heavy analytics — one of the most data-driven front offices in the NFL; pioneered modern draft value charts"
+      },
+      "head_coach": {
+        "name": "Jesse Minter",
+        "tenure": "1st year (hired January 2026 — replaced John Harbaugh after 18 years)",
+        "scheme_offense": "unverified — new OC hire",
+        "scheme_defense": "Minter is a defensive specialist; aggressive scheme; built Michigan's #1 defense in 2023; multiple fronts with exotic blitz packages",
+        "key_position_values": [
+          "EDGE",
+          "OL",
+          "WR",
+          "TE",
+          "S"
+        ]
+      },
+      "decision_makers": {
+        "primary": "Eric DeCosta (GM) — now fully driving team-building without Harbaugh",
+        "committee": [
+          "Steve Bisciotti (owner)",
+          "Eric DeCosta (GM)",
+          "Jesse Minter (HC)"
+        ]
+      },
+      "roster_2026": {
+        "qb_situation": "Lamar Jackson — franchise QB, MVP-caliber; need to surround him with better weapons",
+        "key_departures": [
+          "John Harbaugh (HC, left for Giants)",
+          "Tyler Linderbaum (C, signed with Raiders for record $81M/3yr)",
+          "Isaiah Likely (TE, signed with Giants)",
+          "Charlie Kolar (TE, signed with Chargers)",
+          "Maxx Crosby trade fell through (medical concerns)"
+        ],
+        "key_signings": [
+          "Trey Hendrickson (EDGE, 4yr/$112M from Bengals)",
+          "Durham Smythe (TE, veteran blocker)"
+        ],
+        "cap_space": "unverified",
+        "expiring_contracts": [
+          "unverified"
+        ]
+      },
+      "draft_capital_2026": {
+        "picks": [
+          "Round 1 Pick 14",
+          "Round 2 Pick 45",
+          "Round 3 Pick 80",
+          "Round 4 Pick 115",
+          "Round 5 Pick 154",
+          "Round 5 Pick 162",
+          "Round 6 Pick 173",
+          "Round 6 Pick 174",
+          "Round 7 Pick 211",
+          "Round 7 Pick 250",
+          "Round 7 Pick 253"
+        ],
+        "traded_away": [],
+        "acquired_extra": [
+          "Multiple late-round picks from Crosby trade reversal"
+        ],
+        "compensatory": []
+      },
+      "needs": [
+        {
+          "position": "WR",
+          "priority": 1,
+          "reason": "WRs totaled only 1,946 receiving yards (25th in NFL); Lamar Jackson desperately needs better pass catchers; Jordyn Tyson linked"
+        },
+        {
+          "position": "OL",
+          "priority": 2,
+          "reason": "Lost Tyler Linderbaum (3x Pro Bowl C) in free agency; center spot vacant; need guard competition for Emery Jones at RG"
+        },
+        {
+          "position": "TE",
+          "priority": 3,
+          "reason": "Lost both Isaiah Likely and Charlie Kolar in free agency; depth chart depleted to Durham Smythe and one other contributor"
+        }
+      ]
+    },
+    {
+      "team": "Tampa Bay Buccaneers",
+      "abbreviation": "TB",
+      "conference": "NFC",
+      "division": "NFC South",
+      "ownership": {
+        "name": "Glazer Family (Joel, Bryan, and Edward Glazer)",
+        "style": "Generally hands-off; trust front office; stable ownership group",
+        "tendencies": "Patient with coaching staff; kept Todd Bowles despite missing playoffs; invest in roster when competitive window is open"
+      },
+      "gm": {
+        "name": "Jason Licht",
+        "tenure": "13th year (since 2014)",
+        "philosophy": "Values trenches and defense; willing to make aggressive trades; drafted well in recent years",
+        "analytics_approach": "Hybrid — traditional scouting roots with increasing analytics integration"
+      },
+      "head_coach": {
+        "name": "Todd Bowles",
+        "tenure": "4th year (since 2022)",
+        "scheme_offense": "OC Zac Robinson (from Atlanta); 12 personnel heavy (two tight ends, 38.2% usage in ATL — 2nd most in NFL)",
+        "scheme_defense": "3-4 base; aggressive blitz packages; Bowles is a defensive mastermind; known for exotic pressure looks",
+        "key_position_values": [
+          "EDGE",
+          "LB",
+          "CB",
+          "OT",
+          "WR"
+        ]
+      },
+      "decision_makers": {
+        "primary": "Jason Licht (GM) with Todd Bowles (HC) input",
+        "committee": [
+          "Glazer Family (owners)",
+          "Jason Licht (GM)",
+          "Todd Bowles (HC)"
+        ]
+      },
+      "roster_2026": {
+        "qb_situation": "Baker Mayfield — unverified current status but expected starter",
+        "key_departures": [
+          "Mike Evans (WR, signed with 49ers)",
+          "Lavonte David (LB, retired)",
+          "Jamel Dean (CB, left in free agency)"
+        ],
+        "key_signings": [
+          "Zac Robinson (OC, from Atlanta)"
+        ],
+        "cap_space": "unverified",
+        "expiring_contracts": [
+          "unverified"
+        ]
+      },
+      "draft_capital_2026": {
+        "picks": [
+          "Round 1 Pick 15",
+          "Round 2 (unverified)",
+          "Round 3 (unverified)",
+          "Round 4 (unverified)",
+          "Round 5 (unverified)",
+          "Round 6 (unverified)",
+          "Round 7 (unverified)"
+        ],
+        "traded_away": [],
+        "acquired_extra": [],
+        "compensatory": []
+      },
+      "needs": [
+        {
+          "position": "EDGE",
+          "priority": 1,
+          "reason": "GM Licht explicitly stated at Combine they 'need to get more pressure on the quarterback'; Akheem Mesidor, Keldric Faulk, Cashius Howell all options at #15"
+        },
+        {
+          "position": "LB",
+          "priority": 2,
+          "reason": "Lavonte David retired — franchise legend gone; need replacement at inside linebacker"
+        },
+        {
+          "position": "CB",
+          "priority": 3,
+          "reason": "Lost Jamel Dean in free agency; secondary needs reinforcement to complement Bowles' aggressive scheme"
+        }
+      ]
+    },
+    {
+      "team": "Detroit Lions",
+      "abbreviation": "DET",
+      "conference": "NFC",
+      "division": "NFC North",
+      "ownership": {
+        "name": "Sheila Ford Hamp",
+        "style": "Supportive of front office; trusts Campbell and Holmes; patient with process",
+        "tendencies": "Backed the rebuild fully; loyalty to coaching staff through ups and downs; will apply pressure after 2025 disappointment"
+      },
+      "gm": {
+        "name": "Brad Holmes",
+        "tenure": "6th year (since 2021)",
+        "philosophy": "BPA-focused; values offensive line and trenches; excellent mid-round draft evaluator; built a contender quickly",
+        "analytics_approach": "Heavy analytics — Rams analytical tree; data-driven draft board construction"
+      },
+      "head_coach": {
+        "name": "Dan Campbell",
+        "tenure": "5th year (since 2021)",
+        "scheme_offense": "OC Drew Petzing; power run game with play-action; physical identity; creative formations",
+        "scheme_defense": "DC Kelvin Sheppard; 4-3 base; aggressive front seven; Aidan Hutchinson as centerpiece",
+        "key_position_values": [
+          "OT",
+          "EDGE",
+          "CB",
+          "S",
+          "IOL"
+        ]
+      },
+      "decision_makers": {
+        "primary": "Brad Holmes (GM) and Dan Campbell (HC) — tightly aligned",
+        "committee": [
+          "Sheila Ford Hamp (owner)",
+          "Brad Holmes (GM)",
+          "Dan Campbell (HC)"
+        ]
+      },
+      "roster_2026": {
+        "qb_situation": "Jared Goff — franchise QB; under contract long-term",
+        "key_departures": [
+          "unverified — division finish disappointment after consecutive deep playoff runs"
+        ],
+        "key_signings": [
+          "Cade Mays (C, free agency)",
+          "Larry Borom (OT, veteran)",
+          "DJ Wonnum (EDGE, veteran)"
+        ],
+        "cap_space": "unverified",
+        "expiring_contracts": [
+          "unverified"
+        ]
+      },
+      "draft_capital_2026": {
+        "picks": [
+          "Round 1 Pick 17",
+          "Round 2 (unverified)",
+          "Round 3 (unverified)",
+          "Round 4 (unverified)",
+          "Round 5 (unverified)",
+          "Round 6 (unverified)",
+          "Round 7 (unverified)"
+        ],
+        "traded_away": [],
+        "acquired_extra": [],
+        "compensatory": []
+      },
+      "needs": [
+        {
+          "position": "OT",
+          "priority": 1,
+          "reason": "Sizable void at left tackle; 62 of 66 mock drafts pair Lions with offensive lineman in Round 1; need pro-ready tackle to reignite dominant rushing attack"
+        },
+        {
+          "position": "EDGE",
+          "priority": 2,
+          "reason": "Need young pass rusher opposite Aidan Hutchinson; DJ Wonnum is a veteran stopgap, not long-term answer"
+        },
+        {
+          "position": "CB",
+          "priority": 3,
+          "reason": "Secondary needs reinforcement; Campbell wants competition at multiple positions"
+        }
+      ]
+    },
+    {
+      "team": "Minnesota Vikings",
+      "abbreviation": "MIN",
+      "conference": "NFC",
+      "division": "NFC North",
+      "ownership": {
+        "name": "Zygi Wilf and Mark Wilf",
+        "style": "Generally patient but willing to make dramatic moves; invested in winning",
+        "tendencies": "Fired Kwesi Adofo-Mensah just 243 days after extending him (spent $269.5M); disconnect between personnel and coaching was dealbreaker"
+      },
+      "gm": {
+        "name": "Rob Brzezinski (Interim — EVP serving as acting GM)",
+        "tenure": "Interim since January 2026; longtime executive; permanent GM search postponed until after draft",
+        "philosophy": "Maintaining status quo; not expected to make dramatic moves; coaching staff driving draft preferences",
+        "analytics_approach": "Organization was analytics-heavy under Adofo-Mensah; direction may shift with new GM"
+      },
+      "head_coach": {
+        "name": "Kevin O'Connell",
+        "tenure": "4th year (since 2022)",
+        "scheme_offense": "OC Wes Phillips; McVay-tree scheme; play-action, outside zone, motion-heavy; built around passing game",
+        "scheme_defense": "DC Brian Flores; aggressive man-coverage; heavy blitz packages; Flores is one of most aggressive DCs in NFL",
+        "key_position_values": [
+          "S",
+          "DT",
+          "CB",
+          "C",
+          "TE"
+        ]
+      },
+      "decision_makers": {
+        "primary": "Kevin O'Connell (HC) and Brian Flores (DC) likely have outsized influence with no permanent GM",
+        "committee": [
+          "Zygi Wilf (owner)",
+          "Rob Brzezinski (interim GM)",
+          "Kevin O'Connell (HC)",
+          "Brian Flores (DC)",
+          "Frank Smith (asst HC)"
+        ]
+      },
+      "roster_2026": {
+        "qb_situation": "Kyler Murray acquired (unverified — linked in search results) or J.J. McCarthy situation; QB situation is unsettled",
+        "key_departures": [
+          "Kwesi Adofo-Mensah (fired as GM)"
+        ],
+        "key_signings": [
+          "Frank Smith (assistant HC, former Dolphins OC)"
+        ],
+        "cap_space": "unverified",
+        "expiring_contracts": [
+          "Harrison Smith (S, could retire)",
+          "TJ Hockenson (TE, restructured but gone after 2026)"
+        ]
+      },
+      "draft_capital_2026": {
+        "picks": [
+          "Round 1 Pick 18",
+          "Round 2 (unverified)",
+          "Round 3 (unverified)",
+          "Round 4 (unverified)",
+          "Round 5 (unverified)",
+          "Round 6 (unverified)",
+          "Round 7 (unverified)"
+        ],
+        "traded_away": [],
+        "acquired_extra": [],
+        "compensatory": []
+      },
+      "needs": [
+        {
+          "position": "S",
+          "priority": 1,
+          "reason": "Harrison Smith could retire at any time; Dillon Thieneman (Oregon) has become consensus mock pick — would be Smith's heir; mock-draft darling for Vikings"
+        },
+        {
+          "position": "DT",
+          "priority": 2,
+          "reason": "Defensive tackle is a major need; interior defensive line requires reinforcement for Flores' aggressive scheme"
+        },
+        {
+          "position": "CB",
+          "priority": 3,
+          "reason": "Cornerback depth needs improvement; secondary talent must match Flores' aggressive man-coverage demands"
+        }
+      ]
+    },
+    {
+      "team": "Carolina Panthers",
+      "abbreviation": "CAR",
+      "conference": "NFC",
+      "division": "NFC South",
+      "ownership": {
+        "name": "David Tepper",
+        "style": "Aggressive, impatient owner; willing to spend but historically poor coaching hires",
+        "tendencies": "Has fired multiple coaches quickly; finally seeing stability with Canales; won NFC South at 8-9 — first division title since 2015"
+      },
+      "gm": {
+        "name": "Dan Morgan",
+        "tenure": "2nd year (hired 2024)",
+        "philosophy": "Seeks best value; willing to move up and down draft board; tries to land prospects he likes regardless of positional need",
+        "analytics_approach": "unverified — relatively new GM; building his evaluation framework"
+      },
+      "head_coach": {
+        "name": "Dave Canales",
+        "tenure": "2nd year (hired 2024)",
+        "scheme_offense": "West Coast concepts; developing Bryce Young (unverified QB situation); QB-friendly system",
+        "scheme_defense": "Multiple fronts; need more talent across all levels of defense",
+        "key_position_values": [
+          "EDGE",
+          "S",
+          "LB",
+          "CB",
+          "OT"
+        ]
+      },
+      "decision_makers": {
+        "primary": "Dan Morgan (GM) with Dave Canales (HC) and EVP Brandt Tillis collaboration",
+        "committee": [
+          "David Tepper (owner)",
+          "Dan Morgan (GM)",
+          "Brandt Tillis (EVP)",
+          "Dave Canales (HC)"
+        ]
+      },
+      "roster_2026": {
+        "qb_situation": "unverified — Young development or new addition; upward trajectory under Canales",
+        "key_departures": [
+          "unverified"
+        ],
+        "key_signings": [
+          "Jaelan Phillips (EDGE, acquired from Steelers)",
+          "Devin Lloyd (LB, acquired from Jaguars)"
+        ],
+        "cap_space": "unverified",
+        "expiring_contracts": [
+          "unverified"
+        ]
+      },
+      "draft_capital_2026": {
+        "picks": [
+          "Round 1 Pick 19",
+          "Round 2 (unverified)",
+          "Round 3 (unverified)",
+          "Round 4 (unverified)",
+          "Round 5 (unverified)",
+          "Round 6 (unverified)",
+          "Round 7 (unverified)"
+        ],
+        "traded_away": [],
+        "acquired_extra": [],
+        "compensatory": []
+      },
+      "needs": [
+        {
+          "position": "EDGE",
+          "priority": 1,
+          "reason": "Need edge rusher so badly; positional value makes it far and away the biggest need; almost assuredly taking best EDGE at 19 despite Phillips acquisition"
+        },
+        {
+          "position": "S",
+          "priority": 2,
+          "reason": "Canales said 'a couple of dynamic safeties could free us up' — sees opportunity for impact player at #19"
+        },
+        {
+          "position": "CB",
+          "priority": 3,
+          "reason": "Defense needs to get younger and more talented across the secondary; playoff team needs upgrades to compete"
+        }
+      ]
+    },
+    {
+      "team": "Pittsburgh Steelers",
+      "abbreviation": "PIT",
+      "conference": "AFC",
+      "division": "AFC North",
+      "ownership": {
+        "name": "Art Rooney II",
+        "style": "Old-school stability; Rooney family has owned Steelers since 1933; patient with coaching hires",
+        "tendencies": "Values loyalty and culture; typically promotes from within or hires proven coaches; rarely makes impulsive moves"
+      },
+      "gm": {
+        "name": "Omar Khan",
+        "tenure": "4th year (since 2022)",
+        "philosophy": "Draft-and-develop; strong salary cap management; values picks and competitive contracts",
+        "analytics_approach": "Hybrid — increasing analytics adoption under Khan compared to Kevin Colbert era"
+      },
+      "head_coach": {
+        "name": "Mike McCarthy",
+        "tenure": "1st year (hired January 2026)",
+        "scheme_offense": "Pro-style West Coast offense; play-action heavy; values run-pass balance; Super Bowl-winning HC (Green Bay)",
+        "scheme_defense": "Steelers traditional 3-4; aggressive blitz packages; zone coverage concepts",
+        "key_position_values": [
+          "WR",
+          "S",
+          "OL",
+          "CB",
+          "EDGE"
+        ]
+      },
+      "decision_makers": {
+        "primary": "Omar Khan (GM) with Mike McCarthy (HC) collaboration",
+        "committee": [
+          "Art Rooney II (owner)",
+          "Omar Khan (GM)",
+          "Mike McCarthy (HC)"
+        ]
+      },
+      "roster_2026": {
+        "qb_situation": "unverified — likely Russell Wilson or new acquisition situation",
+        "key_departures": [
+          "Jaelan Phillips (EDGE, traded to Panthers)",
+          "Devin Lloyd (LB, traded to Panthers)"
+        ],
+        "key_signings": [
+          "Michael Pittman Jr. (WR, acquired via trade from Colts)",
+          "D.K. Metcalf (WR, acquired)"
+        ],
+        "cap_space": "unverified",
+        "expiring_contracts": [
+          "unverified"
+        ]
+      },
+      "draft_capital_2026": {
+        "picks": [
+          "Round 1 Pick 21",
+          "Round 2 Pick 53",
+          "Round 3 Pick 76",
+          "Round 3 Pick 85",
+          "Round 3 Pick 99",
+          "Round 4 Pick 121",
+          "Round 5 Pick 135",
+          "Round 5 Pick 161",
+          "Round 7 Pick 216",
+          "Round 7 Pick 224",
+          "Round 7 Pick 230",
+          "Round 7 Pick 237"
+        ],
+        "traded_away": [],
+        "acquired_extra": [
+          "Multiple comp and trade-acquired picks"
+        ],
+        "compensatory": [
+          "Multiple compensatory picks"
+        ]
+      },
+      "needs": [
+        {
+          "position": "WR",
+          "priority": 1,
+          "reason": "Despite Pittman and Metcalf trades, WR3 Roman Wilson has only 164 career yards; McCarthy needs depth for his offense"
+        },
+        {
+          "position": "S",
+          "priority": 2,
+          "reason": "Second most pressing need; three safeties with first-round grades in this class; prime position at #21 for day-one starter"
+        },
+        {
+          "position": "OL",
+          "priority": 3,
+          "reason": "Draft is deep at multiple positions Steelers need including offensive line; must protect QB investment"
+        }
+      ]
+    },
+    {
+      "team": "Los Angeles Chargers",
+      "abbreviation": "LAC",
+      "conference": "AFC",
+      "division": "AFC West",
+      "ownership": {
+        "name": "Dean Spanos",
+        "style": "Generally hands-off on football decisions; trusts front office",
+        "tendencies": "Patient with coaching staff; backed Harbaugh's aggressive roster construction"
+      },
+      "gm": {
+        "name": "Joe Hortiz",
+        "tenure": "2nd year (hired 2024)",
+        "philosophy": "BPA regardless of roster needs — drafted Joe Alt despite WR need (2024), RB Omarion Hampton despite OL need (2025); true board discipline",
+        "analytics_approach": "Baltimore Ravens scouting tree — heavy analytics integration"
+      },
+      "head_coach": {
+        "name": "Jim Harbaugh",
+        "tenure": "2nd year (since 2024)",
+        "scheme_offense": "Power run game; play-action; physical identity; pro-style formations",
+        "scheme_defense": "Multiple fronts; Jesse Minter departed for Ravens HC job; new DC unverified",
+        "key_position_values": [
+          "IOL",
+          "EDGE",
+          "DT",
+          "CB",
+          "WR"
+        ]
+      },
+      "decision_makers": {
+        "primary": "Joe Hortiz (GM) — follows his board regardless of need",
+        "committee": [
+          "Dean Spanos (owner)",
+          "Joe Hortiz (GM)",
+          "Jim Harbaugh (HC)"
+        ]
+      },
+      "roster_2026": {
+        "qb_situation": "Justin Herbert — elite franchise QB; locked in long-term",
+        "key_departures": [
+          "Zion Johnson (G, left in free agency)",
+          "Khalil Mack (EDGE, aging)"
+        ],
+        "key_signings": [
+          "Cole Strange (G, from Dolphins)",
+          "Tyler Biadasz (C, from Commanders)",
+          "Charlie Kolar (TE, from Ravens)"
+        ],
+        "cap_space": "unverified",
+        "expiring_contracts": [
+          "unverified"
+        ]
+      },
+      "draft_capital_2026": {
+        "picks": [
+          "Round 1 Pick 22",
+          "Round 2 (unverified)",
+          "Round 3 (unverified)",
+          "Round 4 (unverified)",
+          "Round 5 (unverified)"
+        ],
+        "traded_away": [],
+        "acquired_extra": [],
+        "compensatory": []
+      },
+      "needs": [
+        {
+          "position": "IOL",
+          "priority": 1,
+          "reason": "No clear starter at left guard after Zion Johnson departure; Strange at RG and Biadasz at C are new, but LG is a hole"
+        },
+        {
+          "position": "EDGE",
+          "priority": 2,
+          "reason": "Lack depth beyond Khalil Mack and Tuipulotu; need young pass rusher for future"
+        },
+        {
+          "position": "DT",
+          "priority": 3,
+          "reason": "Interior defensive line needs reinforcement; missing space-eating presence in middle"
+        }
+      ]
+    },
+    {
+      "team": "Philadelphia Eagles",
+      "abbreviation": "PHI",
+      "conference": "NFC",
+      "division": "NFC East",
+      "ownership": {
+        "name": "Jeffrey Lurie",
+        "style": "Supportive of front office; backs Roseman's aggressive approach; willing to spend",
+        "tendencies": "Patient with coaching changes; trusts Howie Roseman's unconventional methods; values Super Bowl windows"
+      },
+      "gm": {
+        "name": "Howie Roseman (EVP of Football Operations)",
+        "tenure": "15th+ year — one of the longest-tenured GMs in the NFL",
+        "philosophy": "Aggressive trader and cap manipulator; builds from the inside out (trenches first); edge rusher is his most-drafted position in Round 1",
+        "analytics_approach": "Heavy analytics — one of the most aggressive data-driven front offices; innovative contract structures"
+      },
+      "head_coach": {
+        "name": "Nick Sirianni",
+        "tenure": "5th year (since 2021) — unverified if retained for 2026",
+        "scheme_offense": "RPO-heavy; spread concepts; values skill position versatility",
+        "scheme_defense": "DC Vic Fangio; 3-4 base; zone coverage; complex disguised pressures",
+        "key_position_values": [
+          "OL",
+          "EDGE",
+          "S",
+          "TE",
+          "CB"
+        ]
+      },
+      "decision_makers": {
+        "primary": "Howie Roseman — unquestioned decision-maker on roster construction",
+        "committee": [
+          "Jeffrey Lurie (owner)",
+          "Howie Roseman (EVP)",
+          "Nick Sirianni (HC, if retained)"
+        ]
+      },
+      "roster_2026": {
+        "qb_situation": "Jalen Hurts — franchise QB; need to protect him and improve weapons",
+        "key_departures": [
+          "Josh Sweat (EDGE)",
+          "Jaelan Phillips (EDGE, lost previous offseason)",
+          "Reed Blankenship (S, free agency)"
+        ],
+        "key_signings": [
+          "Riq Woolen (CB, 1yr deal from Seahawks)",
+          "Johnny Mundt (TE, 1yr)",
+          "Grant Calcaterra (TE, re-signed)"
+        ],
+        "cap_space": "unverified — Roseman typically manages cap aggressively",
+        "expiring_contracts": [
+          "Lane Johnson (OT, pondered retirement)",
+          "Landon Dickerson (LG, pondered retirement)",
+          "Dallas Goedert (TE, 31yo, injury prone)"
+        ]
+      },
+      "draft_capital_2026": {
+        "picks": [
+          "Round 1 Pick 23",
+          "Round 2 (unverified)",
+          "Round 3 (unverified)",
+          "Round 4 (unverified)",
+          "Round 5 (unverified)",
+          "Round 6 (unverified)",
+          "Round 7 (unverified)"
+        ],
+        "traded_away": [],
+        "acquired_extra": [],
+        "compensatory": []
+      },
+      "needs": [
+        {
+          "position": "OL",
+          "priority": 1,
+          "reason": "Uncharacteristically poor OL in 2025; Lane Johnson and Landon Dickerson both pondered retirement; majority of pre-draft visits are with OL prospects"
+        },
+        {
+          "position": "EDGE",
+          "priority": 2,
+          "reason": "Lost Josh Sweat and Jaelan Phillips over last two offseasons; Nolan Smith and Jalyx Hunt have flashed but group lacks elite bite; Roseman's most-drafted position in Round 1"
+        },
+        {
+          "position": "S",
+          "priority": 3,
+          "reason": "Lost Reed Blankenship in free agency; only Drew Mukuba returning for second season; safety position feels unfinished"
+        }
+      ]
+    },
+    {
+      "team": "Chicago Bears",
+      "abbreviation": "CHI",
+      "conference": "NFC",
+      "division": "NFC North",
+      "ownership": {
+        "name": "George McCaskey (controlling owner, took over from Virginia Halas McCaskey who passed February 2025)",
+        "style": "Family ownership since franchise founding; historically conservative; improving under new generation",
+        "tendencies": "Hired Ben Johnson as HC — first aggressive coaching hire in years; invested in franchise QB"
+      },
+      "gm": {
+        "name": "Ryan Poles",
+        "tenure": "5th year (since 2022)",
+        "philosophy": "Build through the draft; aggressive early-round picks; values athletic profiles and upside",
+        "analytics_approach": "Modern analytics-forward front office; Poles came from Chiefs analytical background"
+      },
+      "head_coach": {
+        "name": "Ben Johnson",
+        "tenure": "2nd year (hired 2025 — from Lions OC)",
+        "scheme_offense": "Creative play-calling; Lions-style power run with play-action; motion-heavy; designed to develop QB",
+        "scheme_defense": "unverified DC; defense was 29th in total defense (361.8 YPG allowed) in 2025",
+        "key_position_values": [
+          "EDGE",
+          "S",
+          "OT",
+          "DL",
+          "LB"
+        ]
+      },
+      "decision_makers": {
+        "primary": "Ryan Poles (GM) with Ben Johnson (HC) collaboration",
+        "committee": [
+          "George McCaskey (owner)",
+          "Ryan Poles (GM)",
+          "Ben Johnson (HC)"
+        ]
+      },
+      "roster_2026": {
+        "qb_situation": "Caleb Williams (2024 #1 pick) — franchise QB; Johnson hired specifically to develop him",
+        "key_departures": [
+          "DJ Moore (WR, traded to Colts)",
+          "Tremaine Edmunds (LB)",
+          "Kevin Byard (S)",
+          "Jaquan Brisker (S)",
+          "Drew Dalman (C, retired)"
+        ],
+        "key_signings": [
+          "Coby Bryant (S, from Seahawks Super Bowl champ)",
+          "Devin Bush (LB)",
+          "Neville Gallimore (DT)",
+          "Kalif Raymond (WR)"
+        ],
+        "cap_space": "unverified",
+        "expiring_contracts": [
+          "unverified"
+        ]
+      },
+      "draft_capital_2026": {
+        "picks": [
+          "Round 1 Pick 25",
+          "Round 2 (two 2nd-round picks)",
+          "Round 3 Pick 89",
+          "Round 4 (unverified)",
+          "Round 5 (unverified)",
+          "Round 6 (unverified)",
+          "Round 7 (unverified)"
+        ],
+        "traded_away": [],
+        "acquired_extra": [
+          "Extra 2nd-round pick (from Colts in DJ Moore trade)"
+        ],
+        "compensatory": []
+      },
+      "needs": [
+        {
+          "position": "EDGE",
+          "priority": 1,
+          "reason": "Every mock draft has Bears targeting pass rusher at #25; 29th in total defense in 2025; desperately need pressure"
+        },
+        {
+          "position": "OT",
+          "priority": 2,
+          "reason": "Ozzy Trapilo's injury and uncertain timeline could shift Round 1 priority; LT competition features four players with no consistent high-end play recently"
+        },
+        {
+          "position": "S",
+          "priority": 3,
+          "reason": "Lost both Kevin Byard and Jaquan Brisker; Coby Bryant signing fills one spot but second safety vacancy remains"
+        }
+      ]
+    },
+    {
+      "team": "Buffalo Bills",
+      "abbreviation": "BUF",
+      "conference": "AFC",
+      "division": "AFC East",
+      "ownership": {
+        "name": "Terry and Kim Pegula",
+        "style": "Invested owners; willing to spend; demanded 'next level' after repeated playoff disappointments",
+        "tendencies": "Fired McDermott after 4th divisional round exit in 5 years despite winning seasons; want Super Bowl, not just playoffs"
+      },
+      "gm": {
+        "name": "Brandon Beane",
+        "tenure": "9th year (since 2017)",
+        "philosophy": "Smart free agent spending for flexibility; values draft capital; made veteran signings this offseason to create draft flexibility",
+        "analytics_approach": "Hybrid — strong analytical framework with traditional scouting values"
+      },
+      "head_coach": {
+        "name": "Joe Brady",
+        "tenure": "1st year (promoted from OC, January 2026, 5-year deal)",
+        "scheme_offense": "Modern spread concepts; creative play-design for Josh Allen; RPOs and read-options; was Bills QBs coach (2022), interim OC (2023), then OC (2024-25)",
+        "scheme_defense": "DC Jim Leonhard; aggressive scheme requiring downhill linebackers who can blitz",
+        "key_position_values": [
+          "LB",
+          "EDGE",
+          "DT",
+          "S",
+          "WR"
+        ]
+      },
+      "decision_makers": {
+        "primary": "Brandon Beane (GM) with Joe Brady (HC) collaboration",
+        "committee": [
+          "Terry Pegula (owner)",
+          "Brandon Beane (GM)",
+          "Joe Brady (HC)",
+          "Jim Leonhard (DC)"
+        ]
+      },
+      "roster_2026": {
+        "qb_situation": "Josh Allen — elite franchise QB; perennial MVP candidate; organization built around him",
+        "key_departures": [
+          "Sean McDermott (HC, fired)",
+          "Bradley Chubb (EDGE, signed from Dolphins via FA)",
+          "Boye Mafe (EDGE, left)"
+        ],
+        "key_signings": [
+          "Bradley Chubb (EDGE, 3yr/$43.5M with $29M guaranteed)",
+          "Other veteran free agents for roster flexibility"
+        ],
+        "cap_space": "unverified",
+        "expiring_contracts": [
+          "unverified"
+        ]
+      },
+      "draft_capital_2026": {
+        "picks": [
+          "Round 1 Pick 26",
+          "Round 3 (unverified)",
+          "Round 4 (unverified)",
+          "Round 5 (unverified)",
+          "Round 6 (unverified)",
+          "Round 7 (unverified)"
+        ],
+        "traded_away": [],
+        "acquired_extra": [],
+        "compensatory": []
+      },
+      "needs": [
+        {
+          "position": "LB",
+          "priority": 1,
+          "reason": "Terrel Bernard and Dorian Williams may not fit Jim Leonhard's scheme; needs more aggressive, downhill players who can blitz"
+        },
+        {
+          "position": "EDGE",
+          "priority": 2,
+          "reason": "Consistent pass rush has been an issue nearly every year of Josh Allen era; Leonhard's scheme demands it; Chubb helps but more needed"
+        },
+        {
+          "position": "DT",
+          "priority": 3,
+          "reason": "Missing true space-eating nose tackle for Leonhard's defense; have surplus of DEs who can play DT but no pure nose"
+        }
+      ]
+    },
+    {
+      "team": "San Francisco 49ers",
+      "abbreviation": "SF",
+      "conference": "NFC",
+      "division": "NFC West",
+      "ownership": {
+        "name": "Jed York",
+        "style": "Trusts Kyle Shanahan and John Lynch completely; backs aggressive roster moves; win-now window",
+        "tendencies": "Stable ownership that supports long-term vision; willing to trade picks for proven players"
+      },
+      "gm": {
+        "name": "John Lynch",
+        "tenure": "9th year (since 2017)",
+        "philosophy": "Aggressive roster construction; values scheme fits over raw talent; heavy free agent spending when in win-now mode",
+        "analytics_approach": "Hybrid — strong analytics with Shanahan's schematic evaluation driving choices"
+      },
+      "head_coach": {
+        "name": "Kyle Shanahan",
+        "tenure": "10th year (since 2017)",
+        "scheme_offense": "Wide zone run scheme; play-action heavy; motion and misdirection; among the best offensive minds in NFL",
+        "scheme_defense": "DC Raheem Morris hired (replacing Robert Saleh who left); transitioning to 3-4 front",
+        "key_position_values": [
+          "OL",
+          "WR",
+          "EDGE",
+          "DT",
+          "CB"
+        ]
+      },
+      "decision_makers": {
+        "primary": "John Lynch (GM) and Kyle Shanahan (HC) — co-equal partnership",
+        "committee": [
+          "Jed York (owner)",
+          "John Lynch (GM)",
+          "Kyle Shanahan (HC)"
+        ]
+      },
+      "roster_2026": {
+        "qb_situation": "Brock Purdy — franchise QB; under contract; system quarterback thriving in Shanahan's scheme",
+        "key_departures": [
+          "Brandon Aiyuk (WR, moving on)",
+          "Jauan Jennings (WR, set to be FA)",
+          "Trent Williams (OT, uncertain future)",
+          "Boye Mafe (EDGE)"
+        ],
+        "key_signings": [
+          "Mike Evans (WR, from Buccaneers)",
+          "Nate Hobbs (CB)",
+          "Osa Odighizuwa (DL, acquired via trade)",
+          "Dre Greenlaw (LB, re-signed)",
+          "Jack Jones (DB)"
+        ],
+        "cap_space": "unverified — aggressive spending in win-now mode",
+        "expiring_contracts": [
+          "Trent Williams (OT, future uncertain)",
+          "Spencer Burford (G)",
+          "Ben Bartch (G)"
+        ]
+      },
+      "draft_capital_2026": {
+        "picks": [
+          "Round 1 Pick 27",
+          "Round 2 (unverified)",
+          "Round 3 (unverified)",
+          "Round 4 (four 4th-round picks)",
+          "Round 5 (unverified)",
+          "Round 6 (unverified)",
+          "Round 7 (unverified)"
+        ],
+        "traded_away": [],
+        "acquired_extra": [
+          "Four 4th-round picks"
+        ],
+        "compensatory": []
+      },
+      "needs": [
+        {
+          "position": "OL",
+          "priority": 1,
+          "reason": "Trent Williams uncertainty at LT; guard is a weakness (Burford struggling, Puni regressed, Bartch injured); interior OL needs help"
+        },
+        {
+          "position": "EDGE",
+          "priority": 2,
+          "reason": "Only 20 sacks in 2025 — six fewer than the lowly Jets; pass rush was anemic; edge rusher in play at #27"
+        },
+        {
+          "position": "DT",
+          "priority": 3,
+          "reason": "Surprisingly big need with switch to 3-4 defense under Raheem Morris; need different body types for new scheme"
+        }
+      ]
+    },
+    {
+      "team": "Houston Texans",
+      "abbreviation": "HOU",
+      "conference": "AFC",
+      "division": "AFC South",
+      "ownership": {
+        "name": "Cal McNair (chairman/CEO)",
+        "style": "Generally supportive of football operations; invested in winning; family ownership (Janice McNair holds title of owner)",
+        "tendencies": "Backed DeMeco Ryans and Nick Caserio; patient with rebuild that turned to contention quickly"
+      },
+      "gm": {
+        "name": "Nick Caserio",
+        "tenure": "6th year (since 2021)",
+        "philosophy": "Aggressive trader (7 trades in recent draft); values flexibility and draft capital accumulation; Belichick tree",
+        "analytics_approach": "New England analytical roots; data-driven with traditional scouting"
+      },
+      "head_coach": {
+        "name": "DeMeco Ryans",
+        "tenure": "4th year (since 2023, 6-year deal)",
+        "scheme_offense": "Spread concepts; building around C.J. Stroud; multiple TE sets",
+        "scheme_defense": "Aggressive 4-3; man-coverage heavy; exotic pressures; former 49ers DC — physical defensive identity",
+        "key_position_values": [
+          "IOL",
+          "DT",
+          "LB",
+          "S",
+          "RB"
+        ]
+      },
+      "decision_makers": {
+        "primary": "Nick Caserio (EVP/GM) with DeMeco Ryans (HC) input",
+        "committee": [
+          "Cal McNair (chairman)",
+          "Nick Caserio (GM)",
+          "DeMeco Ryans (HC)"
+        ]
+      },
+      "roster_2026": {
+        "qb_situation": "C.J. Stroud — elite young franchise QB; built to win now around him",
+        "key_departures": [
+          "unverified — 12-win season indicates roster mostly intact"
+        ],
+        "key_signings": [
+          "unverified"
+        ],
+        "cap_space": "unverified",
+        "expiring_contracts": [
+          "Ed Ingram (RG, due for new contract)"
+        ]
+      },
+      "draft_capital_2026": {
+        "picks": [
+          "Round 1 Pick 28",
+          "Round 2 (two 2nd-round picks)",
+          "Round 3 (unverified)",
+          "Round 4 (unverified)",
+          "Round 5 (unverified)",
+          "Round 6 (unverified)",
+          "Round 7 (unverified)"
+        ],
+        "traded_away": [],
+        "acquired_extra": [
+          "Extra 2nd-round pick"
+        ],
+        "compensatory": []
+      },
+      "needs": [
+        {
+          "position": "IOL",
+          "priority": 1,
+          "reason": "Most glaring need is interior offensive line; need upgrade over Jake Andrews at center or find new guard; Olaivavega Ioane (Penn State) frequently mocked"
+        },
+        {
+          "position": "DT",
+          "priority": 2,
+          "reason": "Interior defensive line needs reinforcement alongside offense; DeMeco Ryans wants dominant interior presence"
+        },
+        {
+          "position": "LB",
+          "priority": 3,
+          "reason": "Linebacker depth needs attention; Ryans' defense requires versatile, athletic linebackers"
+        }
+      ]
+    },
+    {
+      "team": "New England Patriots",
+      "abbreviation": "NE",
+      "conference": "AFC",
+      "division": "AFC East",
+      "ownership": {
+        "name": "Robert Kraft",
+        "style": "Hands-on owner who demands excellence; hired Vrabel — a former Patriots player — signaling return to Patriot Way",
+        "tendencies": "Loyal but demands results; backed Belichick for 24 years; now expects quicker turnaround under Vrabel"
+      },
+      "gm": {
+        "name": "Eliot Wolf (EVP of Player Personnel)",
+        "tenure": "3rd year (since 2024)",
+        "philosophy": "Draft-and-develop; building around Drake Maye; values offensive line and defense",
+        "analytics_approach": "Modern approach — Wolf comes from Green Bay Packers and Cleveland Browns front office trees"
+      },
+      "head_coach": {
+        "name": "Mike Vrabel",
+        "tenure": "2nd year (hired 2025)",
+        "scheme_offense": "Physical identity; values tight ends (explicitly said at league meetings he hopes to draft a TE); run-first approach",
+        "scheme_defense": "Multiple fronts; aggressive blitz packages; Vrabel is a defensive-minded coach",
+        "key_position_values": [
+          "OT",
+          "EDGE",
+          "TE",
+          "DL",
+          "CB"
+        ]
+      },
+      "decision_makers": {
+        "primary": "Eliot Wolf (EVP) with Mike Vrabel (HC) having significant input",
+        "committee": [
+          "Robert Kraft (owner)",
+          "Eliot Wolf (EVP)",
+          "Mike Vrabel (HC)"
+        ]
+      },
+      "roster_2026": {
+        "qb_situation": "Drake Maye — 2nd year franchise QB; development is top priority; need to protect him",
+        "key_departures": [
+          "unverified"
+        ],
+        "key_signings": [
+          "unverified"
+        ],
+        "cap_space": "unverified",
+        "expiring_contracts": [
+          "Isaiah Wynn (OT, Moses — starter whose successor is needed)"
+        ]
+      },
+      "draft_capital_2026": {
+        "picks": [
+          "Round 1 Pick 31",
+          "Round 3 Pick 63",
+          "Round 3 Pick 95",
+          "Round 4 Pick 125",
+          "Round 4 Pick 131",
+          "Round 5 Pick 171",
+          "Round 6 Pick 191",
+          "Round 6 Pick 198",
+          "Round 6 Pick 202",
+          "Round 7 Pick 212",
+          "Round 7 Pick 247"
+        ],
+        "traded_away": [],
+        "acquired_extra": [
+          "Multiple extra picks across rounds"
+        ],
+        "compensatory": []
+      },
+      "needs": [
+        {
+          "position": "OT",
+          "priority": 1,
+          "reason": "Draft is extremely shallow at tackle; need Moses's replacement in-house; can't envision doing it without using #31 on a tackle successor; LT Will Campbell's depth behind him is thin"
+        },
+        {
+          "position": "EDGE",
+          "priority": 2,
+          "reason": "Need pass-rush help badly; draft is deeper at EDGE than tackle; could address at #31 or early Day 2"
+        },
+        {
+          "position": "TE",
+          "priority": 3,
+          "reason": "Vrabel explicitly said at NFL annual meeting he hopes to add a tight end in the draft; position is a priority for his physical offense"
+        }
+      ]
+    },
+    {
+      "team": "Seattle Seahawks",
+      "abbreviation": "SEA",
+      "conference": "NFC",
+      "division": "NFC West",
+      "ownership": {
+        "name": "Jody Allen (Paul G. Allen Trust)",
+        "style": "Continuation of Paul Allen's vision; trusts football operations; supportive of aggressive moves",
+        "tendencies": "Backed the Super Bowl-winning roster construction; willing to trade picks for proven talent"
+      },
+      "gm": {
+        "name": "John Schneider",
+        "tenure": "17th year (since 2010) — one of the longest-tenured GMs",
+        "philosophy": "Aggressive trader; values athletic traits and competition; built Super Bowl dynasty through mid-round gems; willing to trade up or down",
+        "analytics_approach": "Hybrid — strong analytics with Pete Carroll's influence giving way to modern approach under Macdonald"
+      },
+      "head_coach": {
+        "name": "Mike Macdonald",
+        "tenure": "3rd year (since 2024)",
+        "scheme_offense": "unverified OC — new coordinator needed",
+        "scheme_defense": "Macdonald is a defensive specialist; multiple fronts; exotic blitz packages; Baltimore-tree scheme",
+        "key_position_values": [
+          "CB",
+          "RB",
+          "EDGE",
+          "S",
+          "WR"
+        ]
+      },
+      "decision_makers": {
+        "primary": "John Schneider (GM/President of Football Ops)",
+        "committee": [
+          "Jody Allen (owner)",
+          "John Schneider (GM)",
+          "Mike Macdonald (HC)"
+        ]
+      },
+      "roster_2026": {
+        "qb_situation": "Geno Smith — traded to Jets; Sam Howell or unverified QB situation; Super Bowl champions",
+        "key_departures": [
+          "Riq Woolen (CB, signed with Eagles)",
+          "Coby Bryant (S, signed with Bears)",
+          "Kenneth Walker III (RB, signed with Chiefs)",
+          "Boye Mafe (EDGE, signed with Bengals)",
+          "Geno Smith (QB, traded to Jets)"
+        ],
+        "key_signings": [
+          "Rashid Shaheed (WR, acquired via trade)"
+        ],
+        "cap_space": "unverified — Super Bowl champions typically face cap pressure from re-signings",
+        "expiring_contracts": [
+          "Josh Jobe (CB)"
+        ]
+      },
+      "draft_capital_2026": {
+        "picks": [
+          "Round 1 Pick 32",
+          "Round 2 Pick 64",
+          "Round 3 Pick 96",
+          "Round 6 Pick 188 (from Cleveland)"
+        ],
+        "traded_away": [
+          "Multiple picks traded for Rashid Shaheed"
+        ],
+        "acquired_extra": [
+          "Round 6 Pick 188 (from Cleveland, 2024 trade)"
+        ],
+        "compensatory": []
+      },
+      "needs": [
+        {
+          "position": "CB",
+          "priority": 1,
+          "reason": "Lost both Riq Woolen and Coby Bryant in free agency; cornerback room gutted; Josh Jobe is also a free agent"
+        },
+        {
+          "position": "RB",
+          "priority": 2,
+          "reason": "Kenneth Walker III signed with Chiefs; need featured back to replace him"
+        },
+        {
+          "position": "EDGE",
+          "priority": 3,
+          "reason": "Boye Mafe departed in free agency; need pass rush complement for Macdonald's defensive scheme"
+        }
+      ]
+    },
+    {
+      "team": "Indianapolis Colts",
+      "abbreviation": "IND",
+      "conference": "AFC",
+      "division": "AFC South",
+      "ownership": {
+        "name": "Jim Irsay",
+        "style": "Passionate, hands-on owner; publicly vocal about team direction; willing to make bold roster moves",
+        "tendencies": "Patient with Ballard despite declining results; values stability but demands playoffs; has been known to meddle"
+      },
+      "gm": {
+        "name": "Chris Ballard",
+        "tenure": "9th year (since 2017) — on the hot seat",
+        "philosophy": "Build through the draft; historically conservative in free agency; values defensive players and offensive linemen; BPA approach",
+        "analytics_approach": "Traditional scouting with some analytics; less aggressive than peer GMs"
+      },
+      "head_coach": {
+        "name": "Shane Steichen",
+        "tenure": "3rd year (since 2023)",
+        "scheme_offense": "Spread concepts; RPOs; developed Jalen Hurts in Philly; building around Anthony Richardson (or successor)",
+        "scheme_defense": "4-3 base; zone coverage concepts; defense gave up 24.2 PPG and 2nd-most passing YPG (247.9)",
+        "key_position_values": [
+          "EDGE",
+          "LB",
+          "CB",
+          "IOL",
+          "DT"
+        ]
+      },
+      "decision_makers": {
+        "primary": "Chris Ballard (GM) — plans to acquire more picks via trade",
+        "committee": [
+          "Jim Irsay (owner)",
+          "Chris Ballard (GM)",
+          "Shane Steichen (HC)"
+        ]
+      },
+      "roster_2026": {
+        "qb_situation": "Anthony Richardson or successor — QB situation unsettled",
+        "key_departures": [
+          "DJ Moore (WR, traded to Bears for 2nd-round pick)",
+          "Michael Pittman Jr. (WR, traded to Steelers)",
+          "Sauce Gardner (CB, acquired from Jets — major trade piece)",
+          "Adonai Mitchell (WR, traded to Jets in Gardner deal)"
+        ],
+        "key_signings": [
+          "Sauce Gardner (CB, acquired from Jets for 2026+2027 1st-round picks + Adonai Mitchell)"
+        ],
+        "cap_space": "unverified",
+        "expiring_contracts": [
+          "Zaire Franklin (LB, regressing)",
+          "Germaine Pratt (LB, headed toward FA)"
+        ]
+      },
+      "draft_capital_2026": {
+        "picks": [
+          "Round 2 Pick 47",
+          "Round 3 Pick 78",
+          "Round 4 Pick 113",
+          "Round 5 Pick 154",
+          "Round 6 Pick 214",
+          "Round 7 Pick 249",
+          "Round 7 Pick 254"
+        ],
+        "traded_away": [
+          "Round 1 Pick 16 (to Jets in Sauce Gardner trade)",
+          "2027 1st-round pick (also to Jets)"
+        ],
+        "acquired_extra": [],
+        "compensatory": []
+      },
+      "needs": [
+        {
+          "position": "EDGE",
+          "priority": 1,
+          "reason": "Defense severely underperformed; 24.2 PPG allowed; need impact pass rusher to improve unit"
+        },
+        {
+          "position": "LB",
+          "priority": 2,
+          "reason": "Zaire Franklin regressing at 29; Germaine Pratt headed to free agency; middle of defense easily exposed"
+        },
+        {
+          "position": "IOL",
+          "priority": 3,
+          "reason": "Interior offensive line depth needs attention; must protect QB investment; Ballard traditionally values trenches"
+        }
+      ]
+    },
+    {
+      "team": "Atlanta Falcons",
+      "abbreviation": "ATL",
+      "conference": "NFC",
+      "division": "NFC South",
+      "ownership": {
+        "name": "Arthur Blank",
+        "style": "Engaged owner who cares about culture and fan experience; willing to spend on coaching and roster",
+        "tendencies": "Fired Raheem Morris after missing playoffs since 2017; brought in Stefanski and Matt Ryan (president of football) for fresh start"
+      },
+      "gm": {
+        "name": "Ian Cunningham",
+        "tenure": "1st year (hired January 29, 2026 — formerly Bears assistant GM)",
+        "philosophy": "Rebuilding with limited draft capital (5 picks); must maximize value on every selection",
+        "analytics_approach": "Modern front office background from Bears and Eagles organizations"
+      },
+      "head_coach": {
+        "name": "Kevin Stefanski",
+        "tenure": "1st year (hired January 17, 2026 — two-time AP Coach of the Year from Cleveland)",
+        "scheme_offense": "Stefanski runs a balanced offense — outside zone, play-action, RPOs; values tight ends and run game; Tua vs Penix QB battle brewing",
+        "scheme_defense": "unverified — new DC hire",
+        "key_position_values": [
+          "OL",
+          "DL",
+          "WR",
+          "CB",
+          "RB"
+        ]
+      },
+      "decision_makers": {
+        "primary": "Ian Cunningham (GM) with Kevin Stefanski (HC) and Matt Ryan (president of football)",
+        "committee": [
+          "Arthur Blank (owner)",
+          "Matt Ryan (president of football)",
+          "Ian Cunningham (GM)",
+          "Kevin Stefanski (HC)"
+        ]
+      },
+      "roster_2026": {
+        "qb_situation": "Tua Tagovailoa (signed 1yr/$1.3M from Dolphins) vs Michael Penix Jr. QB battle; Stefanski evaluating both",
+        "key_departures": [
+          "Raheem Morris (HC, fired)",
+          "David Onyemata (DT, left in free agency)",
+          "Darnell Mooney (WR, cut candidate for cap savings)"
+        ],
+        "key_signings": [
+          "Tua Tagovailoa (QB, 1yr/$1.3M)",
+          "Zac Robinson (OC, departed for Buccaneers)"
+        ],
+        "cap_space": "unverified — roster needs significant work",
+        "expiring_contracts": [
+          "unverified"
+        ]
+      },
+      "draft_capital_2026": {
+        "picks": [
+          "Round 2 Pick 48",
+          "Round 3 Pick 79",
+          "Round 4 Pick 122",
+          "Round 6 Pick 215",
+          "Round 7 Pick 231"
+        ],
+        "traded_away": [
+          "Round 1 (to Rams, 2025 draft trade for James Pearce Jr.)",
+          "Round 5 (traded)"
+        ],
+        "acquired_extra": [],
+        "compensatory": []
+      },
+      "needs": [
+        {
+          "position": "OL",
+          "priority": 1,
+          "reason": "Only drafted one OL (7th round) in past two seasons; severe lack of depth; need to protect whichever QB wins the battle"
+        },
+        {
+          "position": "DL",
+          "priority": 2,
+          "reason": "23rd in yards allowed per carry (4.5); 27th in explosive run rate allowed (13.6%); lost best run defender Onyemata in free agency"
+        },
+        {
+          "position": "WR",
+          "priority": 3,
+          "reason": "Mooney's exorbitant cost makes him a likely cut; need receivers for Stefanski's offense regardless of QB"
+        }
+      ]
+    },
+    {
+      "team": "Green Bay Packers",
+      "abbreviation": "GB",
+      "conference": "NFC",
+      "division": "NFC North",
+      "ownership": {
+        "name": "Green Bay Packers Inc. (publicly owned — only community-owned NFL franchise)",
+        "style": "Board of Directors oversees; Mark Murphy is president/CEO; unique community ownership model",
+        "tendencies": "Stability-oriented; trust front office and coaching staff; organic development approach"
+      },
+      "gm": {
+        "name": "Brian Gutekunst",
+        "tenure": "8th year (since 2018)",
+        "philosophy": "Aggressive trader — acquired Micah Parsons from Dallas, giving up 1st-round pick + Kenny Clark; values impact players; willing to sacrifice draft capital for proven talent",
+        "analytics_approach": "Hybrid — Ted Thompson's traditional scouting legacy blended with modern analytics"
+      },
+      "head_coach": {
+        "name": "Matt LaFleur",
+        "tenure": "7th year (since 2019)",
+        "scheme_offense": "Shanahan-tree outside zone; play-action heavy; motion and pre-snap shifts; RPOs",
+        "scheme_defense": "DC Jonathan Gannon (hired from Cardinals HC firing); multiple fronts with exotic pressures",
+        "key_position_values": [
+          "CB",
+          "DL",
+          "C",
+          "OT",
+          "EDGE"
+        ]
+      },
+      "decision_makers": {
+        "primary": "Brian Gutekunst (GM) with Matt LaFleur (HC) strong collaboration",
+        "committee": [
+          "Mark Murphy (president/CEO)",
+          "Brian Gutekunst (GM)",
+          "Matt LaFleur (HC)"
+        ]
+      },
+      "roster_2026": {
+        "qb_situation": "Jordan Love — franchise QB; locked in as starter; team built around his development",
+        "key_departures": [
+          "Kenny Clark (DT, traded to Dallas in Parsons deal)",
+          "Malik Willis (QB, signed with Dolphins)"
+        ],
+        "key_signings": [
+          "Micah Parsons (LB/EDGE, acquired from Dallas)",
+          "Jonathan Gannon (DC, hired from Arizona)"
+        ],
+        "cap_space": "unverified — could save $20M by moving on from Elgton Jenkins",
+        "expiring_contracts": [
+          "Elgton Jenkins (G/C, potential $20M cap savings if released)",
+          "Rasheed Walker (OT, impending free agent)"
+        ]
+      },
+      "draft_capital_2026": {
+        "picks": [
+          "Round 2 Pick 52",
+          "Round 3 Pick 84",
+          "Round 4 (unverified)",
+          "Round 5 (unverified)",
+          "Round 6 (unverified)",
+          "Round 7 (unverified)"
+        ],
+        "traded_away": [
+          "Round 1 Pick 20 (to Dallas in Micah Parsons trade)"
+        ],
+        "acquired_extra": [],
+        "compensatory": []
+      },
+      "needs": [
+        {
+          "position": "CB",
+          "priority": 1,
+          "reason": "Nate Hobbs experiment at outside CB didn't work; Carrington Valentine and Keisean Nixon are solid but need premier talent on perimeter"
+        },
+        {
+          "position": "DL",
+          "priority": 2,
+          "reason": "Lost Kenny Clark in Parsons trade; Devonte Wyatt returning from season-ending ankle injury; interior defensive line depleted"
+        },
+        {
+          "position": "C",
+          "priority": 3,
+          "reason": "Elgton Jenkins could be released for $20M cap savings (age 30, fractured fibula); center replacement needed; Jordan Morgan could move to LT"
+        }
+      ]
+    },
+    {
+      "team": "Jacksonville Jaguars",
+      "abbreviation": "JAX",
+      "conference": "AFC",
+      "division": "AFC South",
+      "ownership": {
+        "name": "Shahid Khan",
+        "style": "Patient owner; willing to invest in coaching and roster; backed rebuild and now expecting sustained success",
+        "tendencies": "Hired entirely new coaching and GM staff in 2025; supported aggressive 2025 draft (Travis Hunter trade-up); expects playoffs"
+      },
+      "gm": {
+        "name": "James Gladstone",
+        "tenure": "2nd year (hired February 2025 — 1st year GM)",
+        "philosophy": "BPA approach — roster is good enough to not draft by need; values flexibility; willing to trade up or down; 'stay agile'",
+        "analytics_approach": "unverified — building his own scouting/analytics framework"
+      },
+      "head_coach": {
+        "name": "Liam Coen",
+        "tenure": "2nd year (hired January 2025)",
+        "scheme_offense": "Creative passing attack; RPOs; motion-heavy; developed into a top offense leading to 13-4 record and AFC South title",
+        "scheme_defense": "League's #1 run defense in 2025; DaVon Hamilton and Arik Armstead anchor interior",
+        "key_position_values": [
+          "EDGE",
+          "TE",
+          "LB",
+          "DL",
+          "CB"
+        ]
+      },
+      "decision_makers": {
+        "primary": "James Gladstone (GM) and Liam Coen (HC) — aligned on BPA philosophy",
+        "committee": [
+          "Shahid Khan (owner)",
+          "James Gladstone (GM)",
+          "Liam Coen (HC)"
+        ]
+      },
+      "roster_2026": {
+        "qb_situation": "Trevor Lawrence — franchise QB; 13-4 season validates the roster around him; Travis Hunter adds two-way star",
+        "key_departures": [
+          "Devin Lloyd (LB, signed with Panthers)"
+        ],
+        "key_signings": [
+          "Travis Hunter (2025 #1 overall pick — WR/CB two-way player, traded up from CLE)"
+        ],
+        "cap_space": "unverified — playoff team with cap commitments",
+        "expiring_contracts": [
+          "unverified"
+        ]
+      },
+      "draft_capital_2026": {
+        "picks": [
+          "Round 2 Pick 56",
+          "Round 3 (three 3rd-round picks)",
+          "Round 4 (unverified)",
+          "Round 5 (unverified)",
+          "Round 6 (unverified)",
+          "Round 7 (three 7th-round picks)"
+        ],
+        "traded_away": [
+          "Round 1 Pick 24 (to Cleveland in Travis Hunter trade-up)"
+        ],
+        "acquired_extra": [
+          "Multiple Day 3 picks"
+        ],
+        "compensatory": []
+      },
+      "needs": [
+        {
+          "position": "EDGE",
+          "priority": 1,
+          "reason": "Need to improve pass rush on both edge and interior; must build on league's #1 run defense with pass-rush complement"
+        },
+        {
+          "position": "TE",
+          "priority": 2,
+          "reason": "Need another tight end to pair with Brenton Strange; important position in Coen's offensive scheme"
+        },
+        {
+          "position": "LB",
+          "priority": 3,
+          "reason": "Lost Devin Lloyd to Panthers; need replacement linebacker to maintain defensive excellence"
+        }
+      ]
+    },
+    {
+      "team": "Denver Broncos",
+      "abbreviation": "DEN",
+      "conference": "AFC",
+      "division": "AFC West",
+      "ownership": {
+        "name": "Rob Walton (Walton-Penner Family Ownership Group)",
+        "style": "Richest NFL owner; invested in winning; professional sports management group; bought team for $4.65B in 2022",
+        "tendencies": "Supportive of Payton and Paton; patient with roster construction; backed AFC Championship run"
+      },
+      "gm": {
+        "name": "George Paton",
+        "tenure": "6th year (since 2021)",
+        "philosophy": "Patient roster builder; retains own players (90%+ of 2025 starting snaps returning); smart trade execution (Waddle acquisition)",
+        "analytics_approach": "Hybrid — modern analytics with strong scouting; Minnesota Vikings front office background"
+      },
+      "head_coach": {
+        "name": "Sean Payton",
+        "tenure": "3rd year (since 2023)",
+        "scheme_offense": "Saints-style offense — short passing game, diverse formations, creative play-calling; developing Bo Nix",
+        "scheme_defense": "DC Vance Joseph; 3-4 base; aggressive pressures; physical run defense",
+        "key_position_values": [
+          "OT",
+          "ILB",
+          "TE",
+          "IOL",
+          "CB"
+        ]
+      },
+      "decision_makers": {
+        "primary": "George Paton (GM) with Sean Payton (HC) having significant influence",
+        "committee": [
+          "Rob Walton (owner)",
+          "George Paton (GM)",
+          "Sean Payton (HC)"
+        ]
+      },
+      "roster_2026": {
+        "qb_situation": "Bo Nix — 3rd year; breakout expected under Payton's continued development; AFC Championship appearance validates trajectory",
+        "key_departures": [
+          "Round 1 Pick 30 (traded for Jaylen Waddle)"
+        ],
+        "key_signings": [
+          "Jaylen Waddle (WR, acquired from Dolphins for 1st-round pick)"
+        ],
+        "cap_space": "Healthy — retained most of roster through smart contracts",
+        "expiring_contracts": [
+          "Garett Bolles (OT, turning 34)",
+          "Mike McGlinchey (OT, age 31)"
+        ]
+      },
+      "draft_capital_2026": {
+        "picks": [
+          "Round 2 Pick 62",
+          "Round 4 Pick 108",
+          "Round 4 Pick 111",
+          "Round 5 Pick 170",
+          "Round 7 Pick 246",
+          "Round 7 Pick 256",
+          "Round 7 Pick 257"
+        ],
+        "traded_away": [
+          "Round 1 Pick 30 (to Dolphins in Waddle trade)"
+        ],
+        "acquired_extra": [],
+        "compensatory": [
+          "Round 7 Pick 256",
+          "Round 7 Pick 257"
+        ]
+      },
+      "needs": [
+        {
+          "position": "OT",
+          "priority": 1,
+          "reason": "Garett Bolles turning 34, McGlinchey is 31; need young tackle for future; could be in play at #62"
+        },
+        {
+          "position": "ILB",
+          "priority": 2,
+          "reason": "Singleton and Strnad will both be on wrong side of 30 by season start; need youth at inside linebacker for Vance Joseph's system"
+        },
+        {
+          "position": "TE",
+          "priority": 3,
+          "reason": "Need more impact from tight end position; Max Klare (Ohio State) and Eli Stowers (Vanderbilt) could be options at #62"
+        }
+      ]
+    }
+  ]
+}

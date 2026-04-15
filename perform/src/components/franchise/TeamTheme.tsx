@@ -29,7 +29,7 @@ export function TeamTheme({ sport, teamAbbr, children }: TeamThemeProps) {
 
   if (!theme || !teamAbbr) {
     return (
-      <div className="min-h-screen relative" style={{ background: '#08080d' }}>
+      <div className="min-h-screen relative" style={{ background: 'var(--pf-bg)' }}>
         {children}
       </div>
     );
@@ -39,7 +39,7 @@ export function TeamTheme({ sport, teamAbbr, children }: TeamThemeProps) {
     <div
       className="min-h-screen relative"
       style={{
-        background: '#08080d',
+        background: 'var(--pf-bg)',
         transition: 'all 0.6s ease',
       }}
     >

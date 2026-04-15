@@ -1,0 +1,46 @@
+{
+  "team": "Pittsburgh Steelers",
+  "abbreviation": "PIT",
+  "conference": "AFC",
+  "division": "AFC North",
+  "ownership": {
+    "name": "Art Rooney II",
+    "style": "Old-school stability; Rooney family has owned Steelers since 1933; patient with coaching hires",
+    "tendencies": "Values loyalty and culture; typically promotes from within or hires proven coaches; rarely makes impulsive moves"
+  },
+  "gm": {
+    "name": "Omar Khan",
+    "tenure": "4th year (since 2022)",
+    "philosophy": "Draft-and-develop; strong salary cap management; values picks and competitive contracts",
+    "analytics_approach": "Hybrid — increasing analytics adoption under Khan compared to Kevin Colbert era"
+  },
+  "head_coach": {
+    "name": "Mike McCarthy",
+    "tenure": "1st year (hired January 2026)",
+    "scheme_offense": "Pro-style West Coast offense; play-action heavy; values run-pass balance; Super Bowl-winning HC (Green Bay)",
+    "scheme_defense": "Steelers traditional 3-4; aggressive blitz packages; zone coverage concepts",
+    "key_position_values": ["WR", "S", "OL", "CB", "EDGE"]
+  },
+  "decision_makers": {
+    "primary": "Omar Khan (GM) with Mike McCarthy (HC) collaboration",
+    "committee": ["Art Rooney II (owner)", "Omar Khan (GM)", "Mike McCarthy (HC)"]
+  },
+  "roster_2026": {
+    "qb_situation": "unverified — likely Russell Wilson or new acquisition situation",
+    "key_departures": ["Jaelan Phillips (EDGE, traded to Panthers)", "Devin Lloyd (LB, traded to Panthers)"],
+    "key_signings": ["Michael Pittman Jr. (WR, acquired via trade from Colts)", "D.K. Metcalf (WR, acquired)"],
+    "cap_space": "unverified",
+    "expiring_contracts": ["unverified"]
+  },
+  "draft_capital_2026": {
+    "picks": ["Round 1 Pick 21", "Round 2 Pick 53", "Round 3 Pick 76", "Round 3 Pick 85", "Round 3 Pick 99", "Round 4 Pick 121", "Round 5 Pick 135", "Round 5 Pick 161", "Round 7 Pick 216", "Round 7 Pick 224", "Round 7 Pick 230", "Round 7 Pick 237"],
+    "traded_away": [],
+    "acquired_extra": ["Multiple comp and trade-acquired picks"],
+    "compensatory": ["Multiple compensatory picks"]
+  },
+  "needs": [
+    {"position": "WR", "priority": 1, "reason": "Despite Pittman and Metcalf trades, WR3 Roman Wilson has only 164 career yards; McCarthy needs depth for his offense"},
+    {"position": "S", "priority": 2, "reason": "Second most pressing need; three safeties with first-round grades in this class; prime position at #21 for day-one starter"},
+    {"position": "OL", "priority": 3, "reason": "Draft is deep at multiple positions Steelers need including offensive line; must protect QB investment"}
+  ]
+}
