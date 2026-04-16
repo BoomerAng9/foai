@@ -1,0 +1,31 @@
+{
+  "name": "@aims/voice-library",
+  "version": "0.1.0",
+  "description": "Voice reference → clone → (optional) alter → store pipeline. Ingestion is unfiltered per the attestation-not-policing policy (feedback_attestation_not_ingestion_policing.md). Compliance lives at the production layer via user attestation. Storage through SmelterOS (Puter metadata + GCS bytes). Cloning via Async (volume) or Vertex AI Chirp 3 HD Custom Voice (premium). Integrates with @aims/spinner tool registry.",
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./types": "./src/types.ts",
+    "./ingest": "./src/ingest/index.ts",
+    "./clone": "./src/clone/index.ts",
+    "./alter": "./src/alter/index.ts",
+    "./attestation": "./src/attestation/index.ts",
+    "./storage": "./src/storage/index.ts",
+    "./registry": "./src/registry/character-voices.ts"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@aims/spinner": "file:../spinner",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "typescript": "^5.6.0"
+  },
+  "private": true
+}
