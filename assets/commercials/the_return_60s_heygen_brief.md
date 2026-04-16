@@ -12,7 +12,32 @@
 - `project_foai_universe_canon.md` — character visual rules, setting, typography, bird species
 - `feedback_spinner_is_the_armament.md` — NO firearms / blades / cyber-weapons visible anywhere
 - `feedback_names_are_intentional.md` — every platform scene must earn its name literally
+- `feedback_spinner_grammar_inworld_roles.md` — Spinner's visual verb is **execution**, not thought; Grammar is the invisible filter, not a character
 - `assets/brand/acheevy/image_brief_acheevy_spinner_bandolier.md` — ACHEEVY character spec
+- `feedback_boomerang_spinner_image.md` — Spinner is **literally a boomerang**: black leather-wrapped body, engraved metal band stamped "ANG", gold inner-edge glow. Canonical image at `cti-hub/public/boomer-ang-loader.png` / `~/iCloudPhotos/Photos/Boomer_Ang.png`
+
+## Visual-grammar rule for "work completes in the Spinner's wake"
+
+**Spinner is a boomerang. It executes — it does not think, filter, or reason.** Every "work completes" moment in the ad must show an *action being completed*, NOT *a decision being made* or *an answer being figured out*. The distinction matters because:
+
+- **Grammar** (the filter / NTNTN-style intention engine) is what normalizes a user's intent into a clean prompt. It's invisible. It happens before anything visual in this commercial.
+- **Spinner** (the boomerang ACHEEVY throws) is what fires off the execution once Grammar has filtered the intent. It's the visible verb.
+
+When producing Beats 3–6, every transformation the Spinner triggers must be framed as one of the following:
+
+- **Shipped** — a deploy going live, an app loading, a service coming online
+- **Dispatched** — an agent being sent out, a mission being commissioned, a task handed off
+- **Delivered** — a contract arriving signed, a report arriving completed, a podcast arriving produced
+- **Executed** — a queued command running, a pipeline completing, a rollout finishing
+- **Completed** — a task marked done, a status turning green, a deliverable arriving
+
+NEVER frame a Spinner-triggered transformation as:
+
+- "Thought it through" / "figured it out" / "reasoned about" / "decided" / "classified" / "filtered" — that's Grammar's job
+- "Analyzed" — that's the model behind the Boomer_Ang doing their work; visually that should read as *a Boomer_Ang working*, not *the Spinner thinking*
+- "Understood the prompt" — that's Grammar, pre-Spinner
+
+If a scene needs to imply reasoning happened, show a Boomer_Ang (or an agent silhouette) doing the reasoning, and then the Spinner arrives to SHIP their conclusion.
 - `feedback_boomerang_spinner_image.md` — canonical Spinner visual (black leather-wrapped boomerang, engraved "ANG" metal band, gold inner-edge glow)
 
 ## Story beats (7 beats, 60 seconds)
@@ -37,15 +62,27 @@
 
 ### Beat 3 — FOAI scene (0:09 – 0:17)
 
-**Thesis earned:** *FOAI = Future of AI* — show AI doing something that existing AI can't quite do yet. This is the umbrella scene.
+**Thesis earned:** *FOAI = Future of AI* — the umbrella scene. Show AI **shipping things** that other AI stacks would still be deliberating about.
 
-**Visual:** interior of a darkened command center. Multiple large displays on all walls showing half-complete thoughts: a research paper with missing sections, a strategic plan with question marks, a half-built agent definition. Subtle particle motion around each display (AI "reasoning" visualization, minimal, not dramatic).
+**Visual:** interior of a darkened command center. Multiple large displays on all walls, each showing a **pending execution** — not pending thought:
+- One display: a deploy pipeline paused at a green "ready to ship" step, waiting
+- Another: a commissioned mission queued, agent assigned, timer at 0:00
+- Another: a drafted contract with the signatures line hovering, ready to transmit
+- Another: a rendered podcast episode sitting on "publish" with a blinking upload button
 
-**Spinner passes through** (frame-right → frame-left, 1-second pass). In its wake, each display fills in its own missing sections — not with text appearing character-by-character (that's derivative) but with **structural completion**: the paper's missing section headers become connected thought-graphs that self-organize; the strategic plan's question marks become probability-weighted branches that pick themselves; the agent definition self-defines its tool-registry entries.
+Every display is already *finished* — the work has been done, the **dispatch** is what's pending. In the foreground, a Boomer_Ang silhouette stands at the central console (one of the ANG specialists — ISO standard pose, Spinner hip-holstered, ANG patch visible). The Boomer_Ang has done the thinking; they're waiting for the go.
 
-**Copy (on-screen, subtle, Outfit typeface):** *"Reasoning, completed."*
+**Spinner passes through** (frame-right → frame-left, 1-second pass). In its wake, each display **fires its pending command**:
+- The deploy pipeline advances — the "deploy" button depresses itself, the live URL flashes up
+- The mission kicks off — the timer starts counting, an agent-sigil pulses to active
+- The contract transmits — SIGNED stamp lands, the document slides into an "out" tray
+- The podcast publishes — the upload bar fills, an RSS icon appears next to it, the live version is playable
 
-**Sound:** the whoosh persists underneath; displays make soft chime as each resolves.
+The Boomer_Ang at the console gives a single nod as the work ships — they did the reasoning; the Spinner delivered.
+
+**Copy (on-screen, subtle, Outfit typeface):** *"Commissioned. Shipped."*
+
+**Sound:** the whoosh persists underneath; each display makes a distinct execution-sound as it fires — a deploy chime, a dispatch thump, a transmission trill, a publish tone.
 
 ### Beat 4 — The Deploy Platform scene (0:17 – 0:26)
 
@@ -81,21 +118,21 @@
 - A transferable-credit transcript with unreviewed line items
 - A health / medical record with blank insurance fields
 
-**Spinner passes through** the center line of the table. In its wake, **both piles resolve**:
-- Scouting report auto-grades with pillar breakdowns visible
-- TIE partition fills with numerical scores
-- Longevity forecast curves to a projection
-- Film annotations appear in cadence
-- Red clauses flip to green ("AI-reviewed: market rate ± verified")
-- Eligibility boxes self-attest with chain-of-custody trail
-- Transcript line items verify
-- Health record populates with insurance + consent history
+**The work has already been done.** Off-camera — before the Spinner arrives — Scout_Ang has graded the scouting report, TPS_Report_Ang has reviewed the NIL contract, Biz_Ang has checked market rates, Edu_Ang has verified the transcript. The Spinner's job in this beat is **delivery**, not analysis: it carries the completed work back to the athlete's table in one pass.
 
-The athlete looks up from the table, exhales, picks up a pen — confident enough to sign on their own terms now.
+**Spinner passes through** the center line of the table. In its wake, **both piles are delivered**:
+- The unfinished scouting report slides out of the pile, and a **completed, graded version arrives in its place** — pillar scores visible (Body / Mind / Character), TIE partition filled, longevity forecast plotted, film annotations in the margins. Stamped *"Graded by Scout_Ang."*
+- The draft TIE partition sheet is lifted away; a finished one settles in — already scored.
+- The NIL contract with the red clauses is replaced by a clean-marked copy — red clauses now green with a small margin-note badge: *"Reviewed by Biz_Ang — market rate ± verified."* Signature line is present but un-signed (the athlete still signs themselves).
+- The eligibility waiver arrives with attestation boxes pre-filled but awaiting the athlete's initials, chain-of-custody trail stamped.
+- The transcript arrives verified, Edu_Ang's mark in the footer.
+- The health record arrives complete — insurance history, consent log, physician attestation.
 
-**Copy:** *"Performance and paperwork, handled."*
+The athlete looks up from the table, exhales, picks up a pen. The work came to them. They sign.
 
-**Sound:** soft paper-shuffle + a clean single pen-click at the end.
+**Copy:** *"Performance and paperwork, delivered."*
+
+**Sound:** soft paper-shuffle as each pile swaps; single clean pen-click at the end.
 
 ### Beat 6 — AIMS scene (0:37 – 0:47)
 
