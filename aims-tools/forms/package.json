@@ -1,0 +1,31 @@
+{
+  "name": "@aims/forms",
+  "version": "0.1.0",
+  "description": "The Form pillar of The Per|Form Platform. Intake, parsing, and AI-assisted review of athlete/professional paperwork — NIL contracts, eligibility docs, endorsement agreements, agent packets, medical releases, academic transcripts. Cross-references Per-side performance data to flag non-market terms. Attestation-gated outputs per feedback_attestation_not_ingestion_policing.md.",
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./types": "./src/types.ts",
+    "./intake": "./src/intake/index.ts",
+    "./parse": "./src/parse/index.ts",
+    "./review": "./src/review/index.ts",
+    "./nil": "./src/nil/index.ts",
+    "./registry": "./src/registry/form-types.ts"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@aims/spinner": "file:../spinner",
+    "@aims/voice-library": "file:../voice-library",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "typescript": "^5.6.0"
+  },
+  "private": true
+}
