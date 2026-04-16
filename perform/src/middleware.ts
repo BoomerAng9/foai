@@ -74,6 +74,33 @@ const PUBLIC_GET_ONLY = [
 
 const AUTH_COOKIE = 'firebase-auth-token';
 
+/**
+ * Tighter caps for endpoints that call paid LLM / TTS / image / video APIs.
+ * Prevents a single IP from burning the budget on any one expensive path.
+ * First match wins. Authenticated callers get 3× these limits.
+ */
+const COST_HEAVY_LIMITS: Array<{ prefix: string; max: number }> = [
+  { prefix: '/api/videos/generate', max: 3 },       // video gen — most expensive
+  { prefix: '/api/generate-image', max: 5 },
+  { prefix: '/api/players/generate-image', max: 5 },
+  { prefix: '/api/film/analyze', max: 5 },
+  { prefix: '/api/studio/debate', max: 8 },
+  { prefix: '/api/podcast/generate', max: 8 },
+  { prefix: '/api/cards/bakeoff', max: 8 },
+  { prefix: '/api/grade/recalculate', max: 10 },
+  { prefix: '/api/players/forecast', max: 10 },
+  { prefix: '/api/analysts/auto-publish', max: 10 },
+  { prefix: '/api/seed/expand', max: 5 },
+  { prefix: '/api/voice/config', max: 20 },
+];
+
+function costHeavyMax(pathname: string, isAuthed: boolean): number | null {
+  for (const rule of COST_HEAVY_LIMITS) {
+    if (pathname.startsWith(rule.prefix)) return isAuthed ? rule.max * 3 : rule.max;
+  }
+  return null;
+}
+
 /** Rate limit: 100 requests per minute per IP. */
 const RATE_LIMIT_MAX = 100;
 const RATE_LIMIT_WINDOW_MS = 60_000;
@@ -103,7 +130,16 @@ export function middleware(request: NextRequest) {
       request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
       request.headers.get('x-real-ip') ||
       'unknown';
-    const result = rateLimit(ip, RATE_LIMIT_MAX, RATE_LIMIT_WINDOW_MS);
+
+    // Tighter cap for expensive endpoints (LLM/image/video/voice gen).
+    // Cookie presence is a proxy for "authenticated caller" — they get 3×.
+    const isAuthed = !!request.cookies.get(AUTH_COOKIE)?.value;
+    const heavyCap = costHeavyMax(pathname, isAuthed);
+    const effectiveMax = heavyCap ?? RATE_LIMIT_MAX;
+    // Use a separate bucket for heavy paths so global 100/min doesn't
+    // mask the tighter limit, and vice versa.
+    const bucketKey = heavyCap != null ? `${ip}:${pathname}` : ip;
+    const result = rateLimit(bucketKey, effectiveMax, RATE_LIMIT_WINDOW_MS);
 
     if (!result.allowed) {
       return NextResponse.json(
@@ -112,8 +148,9 @@ export function middleware(request: NextRequest) {
           status: 429,
           headers: {
             'Retry-After': String(Math.ceil(result.resetMs / 1000)),
-            'X-RateLimit-Limit': String(RATE_LIMIT_MAX),
+            'X-RateLimit-Limit': String(effectiveMax),
             'X-RateLimit-Remaining': '0',
+            ...(heavyCap != null && { 'X-RateLimit-Scope': 'cost-heavy' }),
           },
         },
       );
