@@ -44,9 +44,18 @@ async function ensureTable() {
   await sql.unsafe(CREATE_TABLE);
 }
 
-/** Public preview columns — no grades, scouting details, or analyst notes. */
-const PREVIEW_COLUMNS = 'id, name, school, position, overall_rank';
-const PREVIEW_LIMIT = 5;
+/**
+ * Public preview columns — homepage Big Board needs rank, position, and
+ * top-line grade/tier/NFL comp to be a real product. Keep deep scouting
+ * (strengths, weaknesses, analyst_notes, scouting_summary, film_grade,
+ * pillar_*) paywalled. Aligns with "browse-first, gate-on-action".
+ */
+const PREVIEW_COLUMNS = `
+  id, name, school, position, class_year,
+  height, weight, overall_rank, position_rank, projected_round,
+  grade, tie_grade, tie_tier, nfl_comparison, trend
+`.replace(/\s+/g, ' ').trim();
+const PREVIEW_LIMIT = 25;
 
 /**
  * GET /api/players — List players with optional filters.

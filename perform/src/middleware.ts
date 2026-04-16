@@ -49,6 +49,8 @@ const PUBLIC_PREFIXES = [
   '/api/feed',
   '/api/news',
   '/api/podcast/episodes',
+  '/api/platform/freshness',
+  '/api/draft/team-needs',
   '/api/seed-board',
   '/teams/',
   '/huddle/',
