@@ -16,6 +16,7 @@
   },
   "dependencies": {
     "@aims/pricing-matrix": "file:../aims-tools/aims-pricing-matrix",
+    "@aims/spinner": "file:../aims-tools/spinner",
     "@google/generative-ai": "^0.24.1",
     "@langchain/core": "^1.1.32",
     "@langchain/langgraph": "^1.2.2",

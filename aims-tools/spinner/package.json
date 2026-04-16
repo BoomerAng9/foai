@@ -28,8 +28,8 @@
     "smoke:chat": "node --experimental-strip-types scripts/smoke-test-chat.ts"
   },
   "dependencies": {
-    "@aims/pricing-matrix": "*",
-    "@aims/pmo": "*",
+    "@aims/pricing-matrix": "file:../aims-pricing-matrix",
+    "@aims/pmo": "file:../aims-pmo",
     "zod": "^3.23.8",
     "ws": "^8.18.0"
   },
