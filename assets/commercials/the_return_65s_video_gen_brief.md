@@ -1,8 +1,8 @@
 # Commercial Brief — "The Return" (60s)
 
 **Platform:** FOAI umbrella, with one scene each for The Deploy Platform, Per|Form, AIMS.
-**Primary renderer:** HeyGen v4 for ACHEEVY and any human analysts (per `project_heygen_v4_identity_layer_2026_04_16.md` — one reference video = consistent subject across all scenes).
-**Secondary renderer:** Seedance / Veo / Kling for non-character environmental shots, composited in post.
+**Primary renderer:** **Video generation APIs** — Seedance 2.0 (via fal.ai + Kie.ai per `project_seedance_status_2026_04_08.md`), Veo 3.1 (via Kie.ai per `reference_kie_ai_platform.md`), Kling 3.0 (via fal.ai). Image-to-video from ACHEEVY reference stills gives character continuity without the HeyGen avatar-creation step. One vendor family, fewer dependencies.
+**Not used in this commercial:** HeyGen. HeyGen remains the canonical identity layer for long-form talking-head content (Per|Form analyst podcasts — see `project_heygen_v4_identity_layer_2026_04_16.md`), but cinematic multi-scene commercials with character action route through video-gen APIs instead.
 **Runtime:** 65 seconds (modular to 30s / 45s / 90s). Opens on the user commissioning ACHEEVY through Live Look In — see Beat 0.
 **Audience:** prospective users, partners, press — first impression of the ecosystem.
 **Tone:** grounded sci-fi, coastal Georgia warmth, cinematic. Not dystopian. Not militaristic. Not mystical.
@@ -195,21 +195,26 @@ Below it, smaller:
 
 | Beat | Shot | Renderer | Reference asset |
 |---|---|---|---|
-| 0 | User's workspace, laptop with Live Look In panel, "Yes — please start" VO, camera push toward bezel | HeyGen v4 (user ref) + Omniverse/Cosmos render of ACHEEVY on dock inside the Live Look In panel + practical-style laptop/room plate | `project_live_look_in.md` rendering rules; `feedback_attestation_not_ingestion_policing.md` for the commissioning framing |
-| 1 | Portal transition through the bezel, reveal ACHEEVY full-frame on the dock | HeyGen v4 (ACHEEVY ref) + Seedance (port bg) composite; match-cut via color match | IMG_2360.HEIC coastal GA sunset |
-| 2 | Medium on throw, whip-pan out | HeyGen v4 animation pass | Bandolier brief |
-| 3 | Interior command center, displays resolving | Seedance / Veo for room + motion graphics overlay | Open Mind Skill v1 doc for "reasoning" visualization |
-| 4 | Container yard ignitions | Seedance / Veo + compositing | FOAI universe canon portal description |
-| 5 | Athlete at table, both piles | HeyGen v4 (athlete ref) + practical-style paper VFX | Per\|Form card system, NIL contract templates |
-| 6 | Ops room with Lil_Hawks | Seedance / Veo + Lil_Hawk character ref (to be established from Phase 4 art) | Canonical org chart |
-| 7 | Dock pull-back + tagline card | HeyGen v4 + motion graphics | Same as Beat 1 |
+| 0 | User's workspace, laptop with Live Look In panel, "Yes — please start" VO, camera push toward bezel | Recraft/Ideogram still of user workspace → Seedance 2.0 image-to-video; Omniverse+Cosmos render of ACHEEVY on dock composited inside the Live Look In panel frame | `project_live_look_in.md`; `feedback_attestation_not_ingestion_policing.md` |
+| 1 | Portal transition through the bezel, reveal ACHEEVY full-frame on the dock | ACHEEVY hero still (Recraft V4 primary, Ideogram V3 fallback) → Seedance 2.0 image-to-video with motion prompt "reach to bandolier, draw one Spinner"; match-cut via color match | `assets/brand/acheevy/image_brief_acheevy_spinner_bandolier.md`; IMG_2360.HEIC coastal GA sunset |
+| 2 | Medium on throw, whip-pan out | Seedance 2.0 image-to-video or Kling 3.0 via fal.ai with motion prompt "horizontal throw motion, whip pan follows Spinner"; Spinner VFX composited in post | Bandolier brief + canonical Spinner PNG |
+| 3 | Interior command center, displays resolving | Seedance / Veo 3.1 text-to-video for the room + motion graphics overlay for each display's execution event | Updated Beat 3 brief (pending-execution visuals) |
+| 4 | Container yard ignitions | Seedance 2.0 text-to-video for the port + image-to-video of glowing containers | FOAI universe canon portal description |
+| 5 | Athlete at table, both piles | Athlete still (Recraft/Ideogram) → Seedance 2.0 image-to-video with motion prompt "looks up, exhales, picks up pen"; practical-style paper VFX overlay for the delivery swap | Per\|Form card system, NIL contract templates |
+| 6 | Ops room with Lil_Hawks | Seedance / Veo 3.1 text-to-video + Lil_Hawk character ref composited in (from Phase 4 art) | Canonical org chart |
+| 7 | Dock pull-back + tagline card | ACHEEVY hero still → Seedance 2.0 image-to-video with motion prompt "Spinner returns to bandolier, camera pulls back"; tagline card done in motion graphics | Same as Beat 1 |
 
-## HeyGen v4 specific notes
+## Video-gen API specific notes
 
-- Use ONE canonical ACHEEVY reference video as the identity anchor. All scenes with ACHEEVY (Beats 1, 2, 7) render against the same reference so the character is continuous.
-- Use a SECOND reference for the Per|Form athlete (Beat 5).
-- The Lil_Hawks in Beat 6 are *non-HeyGen* — they're generated characters via Recraft/Ideogram + animated in post. HeyGen is for humanoid faces; Lil_Hawks are stylized birds.
-- Spinner flights are **all VFX composite**, not HeyGen. HeyGen renders ACHEEVY throwing; the Spinner itself is animated as a separate layer in After Effects or Resolve Fusion.
+- **Character continuity strategy**: one canonical ACHEEVY still (generated once via Recraft V4 primary / Ideogram V3 fallback / Imagen 4 via Vertex alternate) is the identity anchor. Every ACHEEVY scene (Beats 1, 2, 7) uses that same still as the image-to-video reference. Seedance 2.0 preserves subject identity across image-to-video renders when the same source still is used — that's what gives us character continuity without an avatar-training step.
+- **Second still for the Per|Form athlete** (Beat 5) — also generated via Recraft/Ideogram, then used as Seedance image-to-video reference.
+- **Provider routing per beat**:
+  - Seedance 2.0 via fal.ai is primary for image-to-video (Beats 0, 1, 2, 5, 7)
+  - Veo 3.1 via Kie.ai is primary for text-to-video environmental plates (Beats 3, 4, 6)
+  - Kling 3.0 via fal.ai is the fallback for both paths
+- **Lil_Hawks in Beat 6** are generated separately via Recraft/Ideogram as stylized birds (non-human), then composited into the ops-room plate in post.
+- **Spinner flights are all VFX composite**, not video-gen. The canonical boomerang PNG (`cti-hub/public/boomer-ang-loader.png` / `~/iCloudPhotos/Photos/Boomer_Ang.png`) is flown on a motion path in After Effects or Resolve Fusion with a gold-trail streak, layered over the video-gen plates.
+- **HeyGen is explicitly NOT used for this commercial.** HeyGen's strength is long-form talking-head continuity (per `project_heygen_v4_identity_layer_2026_04_16.md`); this commercial is short-form cinematic action where Seedance + a consistent reference still is the better fit. HeyGen stays reserved for Per|Form analyst podcast content.
 
 ## Negative constraints (must not appear)
 
@@ -247,8 +252,8 @@ Track brief for a composer or library search:
 
 ## Cost estimate (order of magnitude)
 
-- HeyGen v4 reference + 3 scene renders: low-three-figure spend
-- Seedance / Veo background plates, ~6 scenes at 10s each: low-three-figure spend
+- Reference still generation (ACHEEVY + athlete, Recraft/Ideogram): <$20 in API spend
+- Seedance 2.0 image-to-video + Veo 3.1 text-to-video — 8 beats at 5–10s each via fal.ai + Kie.ai: low-three-figure spend (Seedance is ~$0.15/sec at current fal.ai pricing)
 - Motion graphics + VFX (Spinner flights, display resolution animations, tagline card): 1–3 days of a mid-level motion designer
 - Music: stock library license ~$50–300 OR custom composition ~$1–5k
 - Color grade + mix: 1–2 days of a colorist + audio engineer
@@ -257,7 +262,7 @@ Track brief for a composer or library search:
 
 ## Signoff gates before shipping
 
-1. HeyGen reference renders of ACHEEVY match `assets/brand/acheevy/image_brief_acheevy_spinner_bandolier.md` (visor glow, bandolier, posture) — Rish reviews
+1. ACHEEVY reference still (from Recraft/Ideogram) matches `assets/brand/acheevy/image_brief_acheevy_spinner_bandolier.md` (visor glow, bandolier, posture) — Rish reviews before any Seedance render fires against it
 2. No frame in any scene contains a firearm, blade, cyber-weapon, pelican, or visible face under a visor
 3. Per|Form scene shows BOTH piles finishing — if the Form pile is missing or smaller than the Per pile, the scene is rejected (the whole point of the scene is dual-pillar parity)
 4. Tagline card does not reduce any platform name (Per|Form keeps the pipe, AIMS stays all-caps, FOAI uppercase, "The Deploy Platform" appears in full if it appears at all)
