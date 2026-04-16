@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { gradeAllProspects } from '@/lib/draft/open-mind-grader';
 import { getPlayerHeadshot } from '@/lib/players/headshots';
+import { requireAuth } from '@/lib/auth-guard';
 import {
   renderCareerArcChart,
   renderPillarRadarChart,
@@ -28,8 +29,24 @@ import { generatePlayerCardSpec, c1Available } from '@/lib/viz/thesys-c1';
 export async function GET(req: NextRequest) {
   const url = new URL(req.url);
   const name = url.searchParams.get('name');
-  const includeViz = url.searchParams.get('viz') === '1';
-  const useC1 = url.searchParams.get('c1') === '1';
+  const wantsViz = url.searchParams.get('viz') === '1';
+  const wantsC1 = url.searchParams.get('c1') === '1';
+
+  // Viz and C1 flags trigger paid LLM / Thesys API calls. Gate those behind
+  // auth to prevent anonymous cost abuse. Base forecast payload stays public.
+  let includeViz = false;
+  let useC1 = false;
+  if (wantsViz || wantsC1) {
+    const auth = await requireAuth(req);
+    if (!auth.ok) {
+      return NextResponse.json(
+        { error: 'Authentication required for viz/c1 rendering' },
+        { status: 401 },
+      );
+    }
+    includeViz = wantsViz;
+    useC1 = wantsC1;
+  }
 
   if (!name) {
     return NextResponse.json({ error: 'name query param required' }, { status: 400 });
