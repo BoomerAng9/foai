@@ -3,7 +3,7 @@
 **Platform:** FOAI umbrella, with one scene each for The Deploy Platform, Per|Form, AIMS.
 **Primary renderer:** HeyGen v4 for ACHEEVY and any human analysts (per `project_heygen_v4_identity_layer_2026_04_16.md` — one reference video = consistent subject across all scenes).
 **Secondary renderer:** Seedance / Veo / Kling for non-character environmental shots, composited in post.
-**Runtime:** 60 seconds (can cut down to 30s or extend to 90s; storyboard is modular).
+**Runtime:** 65 seconds (modular to 30s / 45s / 90s). Opens on the user commissioning ACHEEVY through Live Look In — see Beat 0.
 **Audience:** prospective users, partners, press — first impression of the ecosystem.
 **Tone:** grounded sci-fi, coastal Georgia warmth, cinematic. Not dystopian. Not militaristic. Not mystical.
 
@@ -13,6 +13,7 @@
 - `feedback_spinner_is_the_armament.md` — NO firearms / blades / cyber-weapons visible anywhere
 - `feedback_names_are_intentional.md` — every platform scene must earn its name literally
 - `feedback_spinner_grammar_inworld_roles.md` — Spinner's visual verb is **execution**, not thought; Grammar is the invisible filter, not a character
+- `project_live_look_in.md` — Live Look In is the **stylized 2D/3D Omniverse+Cosmos rendering** of the agent fleet at work; NEVER a screen-capture of a server room. Beat 0 depends on this exact rendering style.
 - `assets/brand/acheevy/image_brief_acheevy_spinner_bandolier.md` — ACHEEVY character spec
 - `feedback_boomerang_spinner_image.md` — Spinner is **literally a boomerang**: black leather-wrapped body, engraved metal band stamped "ANG", gold inner-edge glow. Canonical image at `cti-hub/public/boomer-ang-loader.png` / `~/iCloudPhotos/Photos/Boomer_Ang.png`
 
@@ -42,25 +43,47 @@ If a scene needs to imply reasoning happened, show a Boomer_Ang (or an agent sil
 
 ## Story beats (7 beats, 60 seconds)
 
-### Beat 1 — Establishing (0:00 – 0:07)
+### Beat 0 — The Commission (0:00 – 0:06)
 
-**Location:** FOAI port, coastal Georgia, golden hour. AIMS shipping containers line the dock. Pink/coral/orange sky. A wood stork wings across the distance. (Not pelicans.)
+**Thesis earned:** user agency. The ad opens on *the user giving ACHEEVY the go-ahead* — which reinforces that this platform acts on explicit human authorization and ties visually to the attestation model locked in `feedback_attestation_not_ingestion_policing.md`.
 
-**Subject:** ACHEEVY stands at the dock edge, three-quarter rear angle. Tan leather jacket, cargo pants, tactical gloves, full helmet with glowing orange-gold visor. 2-chevron rank above helmet. Across his chest: a leather bandolier holding **6 Spinners** (black leather-wrapped boomerangs, engraved ANG bands, gold inner-edge glow).
+**Location:** a user's workspace — warm, modern, lived-in. Could be a home office, a co-working loft, a young athlete's dorm desk, or a young professional's apartment. Golden-hour light spills through a window to pre-match the coastal-Georgia palette we'll transition into. On the desk: a laptop, a pair of Jordan 1-coded sneakers in-frame, a Per|Form-branded notebook with a pen clipped to it, a coffee cup. The user is seated three-quarter to camera; torso and hands visible, face out-of-focus or partially off-frame. Gender and ethnicity deliberately ambiguous — they represent any user.
 
-**Action:** Wide establishing shot. Ambient wind + distant wave lapping + faint wood stork call. Camera slowly pushes in from 20m out to medium-shot over 5 seconds. ACHEEVY raises his right gloved hand to the bandolier, draws one Spinner.
+**The screen:** front-and-center on the laptop, a **Live Look In panel** is open. The panel is NOT a screen-capture. Per `project_live_look_in.md`, it's a stylized Omniverse+Cosmos-rendered scene: ACHEEVY visible on the FOAI dock at golden hour, bandolier of Spinners across his chest, standing in his commanding stance. A status label at the bottom of the panel reads *"ACHEEVY standing by."* Beside the render, a small command-entry pane shows a recent user message — something like *"Ship the Week 4 package."*
 
-**Audio bed starts:** low warm synth pad + single low drone. Think *Blade Runner 2049* restraint, not Zimmer BRAAM.
+**Action:**
+- (0:00 – 0:02) Close-up of the user's hand near the laptop trackpad. Eyes visible (out of focus) looking at the Live Look In render of ACHEEVY. The user considers.
+- (0:02 – 0:04) The user's voice (natural, approving, unproduced): **"Yes — please start."** Spoken at the Live Look In as if commissioning a team. Finger taps to confirm; a subtle chime from the laptop.
+- (0:04 – 0:06) Inside the Live Look In panel, ACHEEVY's head turns — acknowledging the go-ahead. The camera begins a slow push toward the panel. The laptop bezel grows in frame. Room audio begins to fade; the warm synth pad underscore rises.
+
+**Audio:**
+- Room tone: soft HVAC hum, faint ambient distance track low on the user's speakers.
+- Voice: clean spoken-word capture of *"Yes — please start."* No reverb, no processing. Human.
+- Music bed: the low warm synth pad (*Blade Runner 2049* restraint) enters on the panel push-in.
+
+**Copy:** none on screen.
+
+### Beat 1 — Portal Transition to the Dock (0:06 – 0:10)
+
+**Thesis earned:** the Portal/Realm navigation metaphor from `project_foai_universe_canon.md`. The Live Look In panel **is** a Portal — the user's gateway into the world where ACHEEVY operates. The camera crosses the threshold.
+
+**Transition technique:** as the camera push continues past the laptop bezel, the bezel softens and disappears — we are no longer watching a render through a screen, we are *inside* the render. The golden-hour palette of the room light matches the golden-hour palette of the FOAI dock exactly, so the cut reads as a seamless walk-through rather than a jump.
+
+**Location (after transition):** FOAI port, coastal Georgia, golden hour. AIMS shipping containers line the dock. Pink/coral/orange sky. A wood stork wings across the distance. (Not pelicans.)
+
+**Subject:** ACHEEVY now occupies the full frame. Tan leather jacket, cargo pants, tactical gloves, full helmet with glowing orange-gold visor. 2-chevron rank above helmet. Across his chest: the leather bandolier holding **6 Spinners** (black leather-wrapped boomerangs, engraved ANG bands, gold inner-edge glow per `feedback_boomerang_spinner_image.md`).
+
+**Action:** Medium shot, three-quarter rear angle. Ambient coastal wind + distant wave lapping + faint wood stork call layer in underneath the synth pad. ACHEEVY raises his right gloved hand to the bandolier and draws one Spinner. His head angles briefly toward where the user "entered" — a subtle acknowledgment of the commission — then forward again.
 
 **Copy:** none. Visual only.
 
-### Beat 2 — The Throw (0:07 – 0:09)
+### Beat 2 — The Throw (0:10 – 0:12)
 
 **Action:** ACHEEVY's arm extends in one clean horizontal motion. Spinner releases. Camera whip-pans to follow — the Spinner rockets frame-right, leaving a thin gold trail like a light-painting afterimage. Whoosh on the release, slightly compressed low-end (the Spinner has weight).
 
 **Transition out:** the Spinner crosses the frame edge; match-cut to Beat 3 on the whoosh.
 
-### Beat 3 — FOAI scene (0:09 – 0:17)
+### Beat 3 — FOAI scene (0:12 – 0:20)
 
 **Thesis earned:** *FOAI = Future of AI* — the umbrella scene. Show AI **shipping things** that other AI stacks would still be deliberating about.
 
@@ -84,7 +107,7 @@ The Boomer_Ang at the console gives a single nod as the work ships — they did 
 
 **Sound:** the whoosh persists underneath; each display makes a distinct execution-sound as it fires — a deploy chime, a dispatch thump, a transmission trill, a publish tone.
 
-### Beat 4 — The Deploy Platform scene (0:17 – 0:26)
+### Beat 4 — The Deploy Platform scene (0:20 – 0:29)
 
 **Thesis earned:** *literally deploys services, apps, agents.*
 
@@ -100,7 +123,7 @@ The Boomer_Ang at the console gives a single nod as the work ships — they did 
 
 **Sound:** each container's ignition hits a rising tonal chord.
 
-### Beat 5 — Per|Form scene (0:26 – 0:37)
+### Beat 5 — Per|Form scene (0:29 – 0:40)
 
 **Thesis earned:** *both sides of the pipe — Performance AND Form.* This is the longest scene by design because it has to do double work. It's also where most sports-platform commercials skip the paperwork half.
 
@@ -134,7 +157,7 @@ The athlete looks up from the table, exhales, picks up a pen. The work came to t
 
 **Sound:** soft paper-shuffle as each pile swaps; single clean pen-click at the end.
 
-### Beat 6 — AIMS scene (0:37 – 0:47)
+### Beat 6 — AIMS scene (0:40 – 0:50)
 
 **Thesis earned:** *AI Managed Solutions* — AI is the operator, not the assistant. The DevOps team is the Hawks.
 
@@ -150,7 +173,7 @@ The athlete looks up from the table, exhales, picks up a pen. The work came to t
 
 **Sound:** keyboards + light electronic ambient — the sound of a datacenter.
 
-### Beat 7 — The Return + Tagline (0:47 – 1:00)
+### Beat 7 — The Return + Tagline (0:50 – 1:05)
 
 **Action:** Cut back to ACHEEVY on the dock. The Spinner arcs back into frame from the sunset and snaps cleanly into its bandolier slot — a soft magnetic click. ACHEEVY's stance is unchanged. Commanding. Unbothered.
 
@@ -172,7 +195,8 @@ Below it, smaller:
 
 | Beat | Shot | Renderer | Reference asset |
 |---|---|---|---|
-| 1 | Wide dock, ACHEEVY three-quarter rear | HeyGen v4 (ACHEEVY ref) + Seedance (port bg) composite | IMG_2360.HEIC coastal GA sunset |
+| 0 | User's workspace, laptop with Live Look In panel, "Yes — please start" VO, camera push toward bezel | HeyGen v4 (user ref) + Omniverse/Cosmos render of ACHEEVY on dock inside the Live Look In panel + practical-style laptop/room plate | `project_live_look_in.md` rendering rules; `feedback_attestation_not_ingestion_policing.md` for the commissioning framing |
+| 1 | Portal transition through the bezel, reveal ACHEEVY full-frame on the dock | HeyGen v4 (ACHEEVY ref) + Seedance (port bg) composite; match-cut via color match | IMG_2360.HEIC coastal GA sunset |
 | 2 | Medium on throw, whip-pan out | HeyGen v4 animation pass | Bandolier brief |
 | 3 | Interior command center, displays resolving | Seedance / Veo for room + motion graphics overlay | Open Mind Skill v1 doc for "reasoning" visualization |
 | 4 | Container yard ignitions | Seedance / Veo + compositing | FOAI universe canon portal description |
@@ -209,13 +233,13 @@ Below it, smaller:
 Track brief for a composer or library search:
 - **Reference vibes:** *Blade Runner 2049* main theme restraint, *Arrival* opening sparsity, *The Social Network* credits pulse (slowed), *Oblivion (2013)* soundtrack warmth
 - **Avoid:** trailer trap/dubstep, cinematic BRAAM hits, hip-hop drop (save for Per|Form-specific cuts elsewhere), orchestral crescendo cliché
-- **Structure:** low drone + pad through Beats 1–2, add low pulse Beat 3, add melodic lead Beat 4, peak melodic sparsity Beat 5 (the key scene), ops-ambient under Beat 6, resolution chord Beat 7
+- **Structure:** room tone under Beat 0 → pad rises into Beat 1 portal transition → low drone + pad through Beats 1–2, add low pulse Beat 3, add melodic lead Beat 4, peak melodic sparsity Beat 5 (the key scene), ops-ambient under Beat 6, resolution chord Beat 7
 
 ## Deliverables when this is built
 
-1. **Master 60s cut** — 16:9, 4K H.264 + HEVC + ProRes 422
-2. **Social cuts** — 9:16 (TikTok / Reels), 1:1 (feed), 6s (teaser), 15s (pre-roll). Reframe Beat 5 as the hero for social since it's the most concrete.
-3. **Stills pack** — hero still of Beat 7 dock pull-back for press, Beat 5 athlete still for Per|Form marketing, Beat 1 ACHEEVY-bandolier hero for FOAI landing.
+1. **Master 65s cut** — 16:9, 4K H.264 + HEVC + ProRes 422
+2. **Social cuts** — 9:16 (TikTok / Reels), 1:1 (feed), 6s (teaser), 15s (pre-roll). The 15s pre-roll variant should lead with Beat 0's "Yes — please start" + the Portal transition, then jump straight to Beat 5 (Per|Form) + Beat 7 tagline — that's the tightest story compression.
+3. **Stills pack** — hero still of Beat 7 dock pull-back for press, Beat 5 athlete still for Per|Form marketing, Beat 1 ACHEEVY-bandolier hero for FOAI landing, Beat 0 Live Look In panel framed in a laptop for product marketing (it's the clearest image of the Live Look In product in the whole piece).
 4. **Alt tagline cuts** — minimum 3 tagline-ending variants to test:
    - *"The Future of AI. Returned."* (primary, nods to boomerang mechanic)
    - *"Performance and paperwork. Handled."* (Per|Form anchor)
@@ -239,6 +263,9 @@ Track brief for a composer or library search:
 4. Tagline card does not reduce any platform name (Per|Form keeps the pipe, AIMS stays all-caps, FOAI uppercase, "The Deploy Platform" appears in full if it appears at all)
 5. Audio does not leak any internal service or provider names
 6. ACHEEVY never speaks on camera — he is visual authority, not narration. Any VO, if used, is a separate persona (future Bun-E or Void-Caster pass)
+7. Beat 0 Live Look In panel is NOT a screen-capture of a dashboard UI — it is the stylized Omniverse/Cosmos render of ACHEEVY on the dock (per `project_live_look_in.md`). If the panel shows chat bubbles / graphs / monitoring widgets instead of a rendered ACHEEVY, the beat is rejected.
+8. The user's "Yes — please start" VO is a human voice, natural and unproduced — no reverb, no processing, not AI-generated. This is a deliberate contrast to everything else in the ad being a render.
+9. The Portal transition (Beat 0 → Beat 1) uses a matched-palette push-through, not a hard cut, wipe, or fx-heavy dissolve. If the transition reads as "cut from one scene to another" instead of "walked through a doorway," it's rejected — the whole point is Portal/Realm navigation.
 
 ## What this commercial proves (the Open-Mind check)
 
