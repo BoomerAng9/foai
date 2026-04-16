@@ -19,7 +19,8 @@
     "./tool-registry": "./src/tool-registry.ts",
     "./function-calling": "./src/function-calling.ts",
     "./tools/port-authority": "./src/tools/port-authority.ts",
-    "./chat-route": "./src/chat-route-helper.ts"
+    "./chat-route": "./src/chat-route-helper.ts",
+    "./orchestration": "./src/orchestration-schema.ts"
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",
