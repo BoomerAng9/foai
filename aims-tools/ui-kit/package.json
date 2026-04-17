@@ -1,0 +1,28 @@
+{
+  "name": "@aims/ui-kit",
+  "version": "0.1.0",
+  "description": "Shared React component library for Deploy by: ACHIEVEMOR surfaces. Consumes @aims/brand-tokens (#196) + @aims/contracts (#191) types. Components built via 21st.dev Magic with Open Mind discipline (Foster → Develop three-approach → Hone → pre-mortem blacklist). No generic SaaS aesthetic.",
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./home-hero": "./src/components/HomeHero.tsx"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@aims/brand-tokens": "*"
+  },
+  "peerDependencies": {
+    "react": "^18.0.0 || ^19.0.0",
+    "react-dom": "^18.0.0 || ^19.0.0"
+  },
+  "devDependencies": {
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "typescript": "^5.6.0"
+  },
+  "private": true
+}
