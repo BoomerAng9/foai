@@ -141,3 +141,22 @@ export { registerPortAuthorityTools } from './tools/port-authority.js';
 
 export { handleChatRequest } from './chat-route-helper.js';
 export type { ChatRouteOptions } from './chat-route-helper.js';
+
+// ─── Orchestration schema (delegation triad) ────────────────────────
+export {
+  DelegateTargetSchema,
+  InitiationSourceSchema,
+  DelegateRequestSchema,
+  DelegateOutcomeSchema,
+  TaskadeAuditRecordSchema,
+  CustomAgentSchema,
+  ORCHESTRATION_DDL,
+} from './orchestration-schema.js';
+export type {
+  DelegateTarget,
+  InitiationSource,
+  DelegateRequest,
+  DelegateOutcome,
+  TaskadeAuditRecord,
+  CustomAgent,
+} from './orchestration-schema.js';
