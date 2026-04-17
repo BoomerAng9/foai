@@ -23,6 +23,7 @@ Before generating any component, the result must NOT look like:
 | Component | File | Approach | Surfaces |
 |---|---|---|---|
 | `HomeHero` | `src/components/HomeHero.tsx` | Differentiated — asymmetric "manage" vs "guide" split, neon frame on hover, Permanent Marker wordmark spanning divider | foai.cloud, deploy.foai.cloud, perform.foai.cloud |
+| `AcheevyNavShell` | `src/components/AcheevyNavShell.tsx` | Differentiated — nav split LEFT/RIGHT of the wordmark (not logo-left SaaS pattern), optional mode-pill row renders only when an engagement is live | All public surfaces |
 
 ## Usage
 
@@ -43,8 +44,8 @@ Fonts (`Permanent Marker`, `Geist Sans`) loaded per the brand-tokens README.
 
 Per the 2026-04-17 arbitration + session 2026-04-17 UI queue:
 
-1. ✅ `HomeHero` — this PR
-2. ⬜ `AcheevyNavShell` — shared header across public surfaces
+1. ✅ `HomeHero` — #198
+2. ✅ `AcheevyNavShell` — this PR
 3. ⬜ `CharterDetailView` — 11-component Charter renderer
 4. ⬜ `RfpBamaramProgressTracker` — 10-stage progress + HITL gates
 5. ⬜ `PickerAngBomRenderer` — customer-safe BoM with internal-only relabel
