@@ -9,7 +9,7 @@
 
 You are building **Broad|Cast Studio** — a full video production platform inside the Deploy platform. This is not a simple page addition. This is an entire creative suite: a video editor, a generation engine, a sports analytics workstation, a podcast production studio, and a content publishing platform — all driven by AI agents through a chat interface.
 
-The user talks to ACHEEVY through the standard platform chat. ACHEEVY's three-party engagement works the same as everywhere else on the platform, except in Broad|Cast Studio, **Iller_Ang** (the Creative Director) is always present as the specialist. Grammar (NTNTN) is always active — it converts plain language into cinematic specs that auto-populate every field. The user never needs to know camera terminology. They describe what they want. The system handles the rest.
+The user talks to ACHEEVY through the standard platform chat. ACHEEVY's three-party engagement works the same as everywhere else on the platform, except in Broad|Cast Studio, **Iller_Ang** (the Creative Director) is always present as the specialist. Grammar is always active — it converts plain language into cinematic specs that auto-populate every field. The user never needs to know camera terminology. They describe what they want. The system handles the rest.
 
 **Read the Broadcast Studio Directive v3.0 (OFFICIAL) first.** It contains the complete model roster, sports analytics stack, video source procurement chain, rendering pipeline, upscaling options, and licensing table. This build directive tells you HOW to implement what that document specifies.
 
@@ -22,7 +22,7 @@ This is the most important section. You need to understand how 10+ tools combine
 ```
 USER INPUT (plain language)
     ↓
-GRAMMAR (NTNTN) — Intention Engine
+GRAMMAR — Intention Engine
     Converts "dramatic shot of a QB throwing at night" into:
     {camera: "tracking", lens: "85mm", aperture: "f/2.0", 
      profile: "ARRI Alexa 35", lighting: "stadium rim", ...}
@@ -185,7 +185,7 @@ Reference the UI mockup image provided (dark theme, three-panel layout). Build t
 - **Team Chat** — The ACHEEVY chat interface
   - Standard "Chat with ACHEEVY" interface, same as the rest of the platform
   - Iller_Ang is always present as the specialist agent in this context
-  - Grammar (NTNTN) is always active — every user message goes through the Intention Engine
+  - Grammar is always active — every user message goes through the Intention Engine
   - The three-party engagement: Consult_Ang (Mercury 2, instant) + ACHEEVY (Qwen 3.6 Plus for pay-per-use, GLM5 Turbo for premium) + Note_Ang (Nemotron Nano, background session recording)
   - In Broad|Cast Studio context, Iller_Ang is the domain specialist. When the user describes a scene, Iller_Ang interprets the cinematic intent and Grammar converts it to technical specs
   - Quick-action buttons at bottom of chat: Media, Task, Request, Note

@@ -58,7 +58,9 @@ export function surfaceFromHostname(hostname: string | null | undefined): Platfo
   if (!normalized) return 'deploy';
   if (normalized.includes('cti.foai.cloud') || normalized.includes('cti.localhost')) return 'cti';
   if (normalized.includes('deploy.foai.cloud') || normalized.includes('deploy.localhost')) return 'deploy';
-  if (normalized.includes('localhost') || normalized.includes('127.0.0.1')) return 'cti';
+  // Bare localhost / 127.0.0.1 defaults to the customer-facing Deploy Platform,
+  // matching canonical naming rule (feedback_deploy_vs_cti_hub_naming.md).
+  // Use cti.localhost explicitly to hit the CTI Hub admin branding locally.
   return 'deploy';
 }
 
