@@ -1,0 +1,29 @@
+{
+  "name": "@aims/brand-tokens",
+  "version": "0.1.0",
+  "description": "Canonical brand tokens for 'Deploy by: ACHIEVEMOR' + agenticUI.net theme. Colors, fonts, CSS variables, Tailwind preset. Every customer-facing Deploy surface imports from here.",
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./colors": "./src/colors.ts",
+    "./typography": "./src/typography.ts",
+    "./tailwind-preset": "./src/tailwind-preset.ts",
+    "./css-variables": "./src/css-variables.ts",
+    "./css": "./dist/tokens.css"
+  },
+  "files": [
+    "src",
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "build:css": "node scripts/build-css.mjs",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.0"
+  },
+  "private": true
+}
