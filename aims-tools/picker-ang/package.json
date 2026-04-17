@@ -1,0 +1,36 @@
+{
+  "name": "@aims/picker-ang",
+  "version": "0.1.0",
+  "description": "Picker_Ang — the Step-3 Commercial Proposal tool router. Amazon Warehouse model: scans the 325-tool warehouse against customer CTQs, scores candidates on IIR (Impact/Integration-fit/Risk), emits Bill of Materials JSON + Security Addendum, writes results to the engagement Ledger. Fires only at RFP→BAMARAM Step 3.",
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./schema": "./src/schema.ts",
+    "./requirements": "./src/requirements.ts",
+    "./scoring": "./src/scoring.ts",
+    "./security-addendum": "./src/security-addendum.ts",
+    "./engine": "./src/engine.ts",
+    "./client": "./src/client.ts"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@aims/contracts": "*",
+    "@aims/tool-warehouse": "*",
+    "postgres": "^3.4.5",
+    "zod": "^3.23.8"
+  },
+  "peerDependenciesMeta": {
+    "postgres": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "typescript": "^5.6.0"
+  },
+  "private": true
+}
