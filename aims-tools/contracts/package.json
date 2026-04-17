@@ -1,0 +1,34 @@
+{
+  "name": "@aims/contracts",
+  "version": "0.1.0",
+  "description": "Charter ↔ Ledger dual-surface contracts for every RFP→BAMARAM engagement. Charter = customer-safe artifact. Ledger = internal audit (ICAR + ACP + costs + rationale). 10-stage engagement lifecycle. Zod schemas, postgres client, validation helpers. Scaffold per 2026-04-17 Rish arbitration.",
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./stages": "./src/stages.ts",
+    "./charter-schema": "./src/charter-schema.ts",
+    "./ledger-schema": "./src/ledger-schema.ts",
+    "./client": "./src/client.ts",
+    "./queries": "./src/queries.ts",
+    "./validation": "./src/validation.ts"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "postgres": "^3.4.5",
+    "zod": "^3.23.8"
+  },
+  "peerDependenciesMeta": {
+    "postgres": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "typescript": "^5.6.0"
+  },
+  "private": true
+}
