@@ -77,3 +77,12 @@ export type {
   ConveniencePillar,
   SecurityPillar,
 } from './components/TeslaVortexPricingPicker.js';
+
+export {
+  PerformSportsPricingSelector,
+  PERFORM_SPORTS_TIERS,
+} from './components/PerformSportsPricingSelector.js';
+export type {
+  PerformSportsPricingSelectorProps,
+  PerformTier,
+} from './components/PerformSportsPricingSelector.js';
