@@ -24,6 +24,7 @@ Before generating any component, the result must NOT look like:
 |---|---|---|---|
 | `HomeHero` | `src/components/HomeHero.tsx` | Differentiated — asymmetric "manage" vs "guide" split, neon frame on hover, Permanent Marker wordmark spanning divider | foai.cloud, deploy.foai.cloud, perform.foai.cloud |
 | `AcheevyNavShell` | `src/components/AcheevyNavShell.tsx` | Differentiated — nav split LEFT/RIGHT of the wordmark (not logo-left SaaS pattern), optional mode-pill row renders only when an engagement is live | All public surfaces |
+| `RfpBamaramProgressTracker` | `src/components/RfpBamaramProgressTracker.tsx` | Differentiated — horizontal 10-dot rail with gate-status glyphs (✓ ⟳ ✗ ↑), neon ring on current, mono stage labels below, special BAMARAM! outline at stage 10 | Anywhere an engagement is surfaced — Charter detail, admin dashboards, PiP windows |
 
 ## Usage
 
@@ -45,9 +46,9 @@ Fonts (`Permanent Marker`, `Geist Sans`) loaded per the brand-tokens README.
 Per the 2026-04-17 arbitration + session 2026-04-17 UI queue:
 
 1. ✅ `HomeHero` — #198
-2. ✅ `AcheevyNavShell` — this PR
+2. ✅ `AcheevyNavShell` — #199
 3. ⬜ `CharterDetailView` — 11-component Charter renderer
-4. ⬜ `RfpBamaramProgressTracker` — 10-stage progress + HITL gates
+4. ✅ `RfpBamaramProgressTracker` — this PR
 5. ⬜ `PickerAngBomRenderer` — customer-safe BoM with internal-only relabel
 6. ⬜ `MelaniumBalanceWidget` — customer platform currency
 7. ⬜ `DigitalMaintenanceFeeLineItem` — generic Charter line

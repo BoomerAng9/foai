@@ -8,7 +8,8 @@
   "exports": {
     ".": "./src/index.ts",
     "./home-hero": "./src/components/HomeHero.tsx",
-    "./nav-shell": "./src/components/AcheevyNavShell.tsx"
+    "./nav-shell": "./src/components/AcheevyNavShell.tsx",
+    "./progress-tracker": "./src/components/RfpBamaramProgressTracker.tsx"
   },
   "scripts": {
     "typecheck": "tsc --noEmit"
