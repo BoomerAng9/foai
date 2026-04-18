@@ -137,11 +137,19 @@ Ordered by leverage:
    hand-written squads/ and hawks/ modules to consume the generated
    constants instead of keeping parallel lists.
 
-2. **Expand Kani harnesses** — the two harnesses in `kani_harnesses.rs`
-   are proofs of concept. Every `kani_properties` entry in every YAML
-   should have a corresponding harness. The Paranoia harness is the
-   most structurally important; replicate its thoroughness for Halo's
-   no-self-cosign property and Privacy's no-PII-emit invariant.
+2. ~~**Expand Kani harnesses**~~ **PARTIAL — v0.2 (2026-04-18)**:
+   `kani_harnesses.rs` grew from 2 harnesses to 13, covering 13 of 22
+   `kani_properties` entries across the YAMLs. Achieved coverage:
+   universal base (3/3), Black (1/2), Blue (1/1), White (2/2), Gold &
+   Platinum (2/3), per-Hawk overrides for Reaper / Privacy / Halo /
+   Paranoia. Paranoia's `kani_paranoia_refuses_crypt_ang` remains the
+   marquee proof: for every invocation where `hawk == Paranoia AND
+   commander == Crypt_Ang`, Kani discharges `Err(ProhibitedCommander)`
+   for ALL possible input combinations. The remaining 9 YAML
+   properties need Rust types that don't exist yet (`tool_class` enum,
+   `Payload`, `Component`, `KernelBuild`, `AuditReport`, `Simulation`)
+   — adding those in v0.3 extends coverage toward 22/22 without
+   changing the existing harnesses.
 
 3. **Prusti annotations** — the YAML's `prusti_invariants` entries are
    currently documentation-only. Annotate the Rust with Prusti
