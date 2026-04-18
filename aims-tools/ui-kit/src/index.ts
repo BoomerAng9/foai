@@ -104,3 +104,13 @@ export type {
   TosSection,
   TosAcceptance,
 } from './components/TermsOfServicePage.js';
+
+export {
+  AcheevyChatKioskEntry,
+  classifyIntent,
+} from './components/AcheevyChatKioskEntry.js';
+export type {
+  AcheevyChatKioskEntryProps,
+  AcheevyChatKioskSubmission,
+  ChatKioskIntent,
+} from './components/AcheevyChatKioskEntry.js';
