@@ -1,0 +1,29 @@
+[package]
+name = "shield-policy"
+version = "0.1.0"
+edition = "2021"
+description = "ACHIEVEMOR Shield Division Semantic Constraint Profile enforcement. Compiled from config/shield/*.yml. Formally verified via Kani + Prusti."
+license-file = "../../LICENSE"
+
+[lib]
+name = "shield_policy"
+path = "src/lib.rs"
+
+[dependencies]
+# Keep dependencies minimal — the kernel must be auditable.
+thiserror = "1"
+
+[dev-dependencies]
+# Kani and Prusti are invoked via their own toolchains, not as cargo deps.
+# See README.md for the verification pipeline.
+
+[features]
+default = []
+# Enables Kani harnesses. Toggle on in CI, off in production builds.
+kani = []
+
+[profile.release]
+lto = true
+codegen-units = 1
+# Formal verification requires reproducible builds across the three
+# substrates (Linux x86_64, macOS ARM64, WASM RISC-V) per v1.6 §3.1.
