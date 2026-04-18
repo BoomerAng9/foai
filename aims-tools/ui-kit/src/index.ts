@@ -33,3 +33,6 @@ export type {
   BomScanProfile,
   SecurityAddendumView,
 } from './components/PickerAngBomRenderer.js';
+
+export { MelaniumBalanceWidget } from './components/MelaniumBalanceWidget.js';
+export type { MelaniumBalanceWidgetProps } from './components/MelaniumBalanceWidget.js';
