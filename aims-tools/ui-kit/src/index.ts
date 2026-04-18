@@ -13,3 +13,14 @@ export type {
   AcheevyNavShellProps,
   AcheevyNavItem,
 } from './components/AcheevyNavShell.js';
+
+export {
+  RfpBamaramProgressTracker,
+  TRACKER_STAGES,
+} from './components/RfpBamaramProgressTracker.js';
+export type {
+  RfpBamaramProgressTrackerProps,
+  TrackerStage,
+  TrackerStageEntry,
+  TrackerGateStatus,
+} from './components/RfpBamaramProgressTracker.js';
