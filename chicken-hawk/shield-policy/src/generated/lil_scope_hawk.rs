@@ -19,11 +19,6 @@ pub const LIL_SCOPE_HAWK_PROHIBITED_TARGETS: &[&str] = &[
     "/personas/Crypt_Ang/**",
 ];
 
-pub const LIL_SCOPE_HAWK_PROHIBITED_TARGET_PREFIXES: &[&str] = &[
-    "/personas/ACHEEVY/",
-    "/personas/Crypt_Ang/",
-];
-
 pub const LIL_SCOPE_HAWK_PROHIBITED_DATA_CLASSES: &[DataClass] = &[
 ];
 

@@ -17,10 +17,6 @@ pub const PURPLE_PROHIBITED_TARGETS: &[&str] = &[
     "/tenants/*/bridge_buffer/**",
 ];
 
-pub const PURPLE_PROHIBITED_TARGET_PREFIXES: &[&str] = &[
-];
-// complex (hand-written): "/tenants/*/bridge_buffer/**"
-
 pub const PURPLE_PROHIBITED_DATA_CLASSES: &[DataClass] = &[
     DataClass::CrossTenantIdentifier,
 ];

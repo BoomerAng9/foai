@@ -18,10 +18,6 @@ pub const LIL_SEAL_HAWK_PROHIBITED_TARGETS: &[&str] = &[
     "/tenants/*/raw_ingest/**",
 ];
 
-pub const LIL_SEAL_HAWK_PROHIBITED_TARGET_PREFIXES: &[&str] = &[
-];
-// complex (hand-written): "/tenants/*/raw_ingest/**"
-
 pub const LIL_SEAL_HAWK_PROHIBITED_DATA_CLASSES: &[DataClass] = &[
     DataClass::UnredactedPhi,
     DataClass::UnredactedPii,

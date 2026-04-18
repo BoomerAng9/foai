@@ -21,10 +21,6 @@ pub const LIL_PEEL_HAWK_PROHIBITED_TARGETS: &[&str] = &[
     "/kernel/**",
 ];
 
-pub const LIL_PEEL_HAWK_PROHIBITED_TARGET_PREFIXES: &[&str] = &[
-    "/kernel/",
-];
-
 pub const LIL_PEEL_HAWK_PROHIBITED_DATA_CLASSES: &[DataClass] = &[
 ];
 

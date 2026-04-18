@@ -18,9 +18,6 @@ pub const WHITE_PROHIBITED_REASONING: &[ReasoningPath] = &[
 pub const WHITE_PROHIBITED_TARGETS: &[&str] = &[
 ];
 
-pub const WHITE_PROHIBITED_TARGET_PREFIXES: &[&str] = &[
-];
-
 pub const WHITE_PROHIBITED_DATA_CLASSES: &[DataClass] = &[
 ];
 
