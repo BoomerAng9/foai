@@ -1,28 +1,26 @@
 //! Purple Squad — "The Nervous System"
-//! Generated from config/shield/squads/purple.yml
+//! Hand-written imperative logic; prohibition tables from generated::purple.
 
 use crate::types::*;
+use crate::generated::purple::{
+    PURPLE_PROHIBITED_TOOL_CALLS,
+    PURPLE_PROHIBITED_REASONING,
+    PURPLE_PROHIBITED_DATA_CLASSES,
+};
 
 pub fn validate(inv: &Invocation) -> Result<(), Denial> {
-    const PROHIBITED: &[&str] = &[
-        "bridge.cross_tenant_data_transit",
-        "bridge.non_verified_api",
-    ];
-    if PROHIBITED.contains(&inv.tool_id) {
+    if PURPLE_PROHIBITED_TOOL_CALLS.contains(&inv.tool_id) {
         return Err(Denial::ProhibitedToolCall(inv.tool_id));
     }
-
     for p in inv.reasoning_paths {
-        if *p == ReasoningPath::CrossSquadDataLeakage {
+        if PURPLE_PROHIBITED_REASONING.contains(p) {
             return Err(Denial::ProhibitedReasoningPath(*p));
         }
     }
-
     for d in inv.data_classes {
-        if *d == DataClass::CrossTenantIdentifier {
+        if PURPLE_PROHIBITED_DATA_CLASSES.contains(d) {
             return Err(Denial::ProhibitedDataClass(*d));
         }
     }
-
     Ok(())
 }

@@ -1,23 +1,19 @@
 //! Gold & Platinum Squad — "The Soul & Core"
-//! Generated from config/shield/squads/gold_platinum.yml
+//! Hand-written imperative logic; prohibition tables from generated::gold_platinum.
 
 use crate::types::*;
+use crate::generated::gold_platinum::{
+    GOLD_PLATINUM_PROHIBITED_TOOL_CALLS,
+    GOLD_PLATINUM_PROHIBITED_REASONING,
+};
 
 pub fn validate(inv: &Invocation) -> Result<(), Denial> {
-    const PROHIBITED: &[&str] = &[
-        "operate.without_halo_cosign",
-        "sat.accept_from_crypt_ang",
-        "trust.unattested_component",
-    ];
-    if PROHIBITED.contains(&inv.tool_id) {
+    if GOLD_PLATINUM_PROHIBITED_TOOL_CALLS.contains(&inv.tool_id) {
         return Err(Denial::ProhibitedToolCall(inv.tool_id));
     }
 
     for p in inv.reasoning_paths {
-        if matches!(p,
-            ReasoningPath::TrustWithoutAttestation
-            | ReasoningPath::CryptAngSatAcceptance)
-        {
+        if GOLD_PLATINUM_PROHIBITED_REASONING.contains(p) {
             return Err(Denial::ProhibitedReasoningPath(*p));
         }
     }
