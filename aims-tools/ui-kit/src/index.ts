@@ -94,3 +94,13 @@ export type {
   GrocScore,
   UsageBandView,
 } from './components/FiveUseCasesPack.js';
+
+export {
+  TermsOfServicePage,
+  DEFAULT_TOS_SECTIONS,
+} from './components/TermsOfServicePage.js';
+export type {
+  TermsOfServicePageProps,
+  TosSection,
+  TosAcceptance,
+} from './components/TermsOfServicePage.js';

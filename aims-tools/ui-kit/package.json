@@ -16,7 +16,8 @@
     "./charter-detail": "./src/components/CharterDetailView.tsx",
     "./tesla-vortex": "./src/components/TeslaVortexPricingPicker.tsx",
     "./perform-pricing": "./src/components/PerformSportsPricingSelector.tsx",
-    "./five-use-cases": "./src/components/FiveUseCasesPack.tsx"
+    "./five-use-cases": "./src/components/FiveUseCasesPack.tsx",
+    "./tos-page": "./src/components/TermsOfServicePage.tsx"
   },
   "scripts": {
     "typecheck": "tsc --noEmit"
