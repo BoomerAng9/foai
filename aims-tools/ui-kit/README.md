@@ -31,6 +31,7 @@ Before generating any component, the result must NOT look like:
 | `CharterDetailView` | `src/components/CharterDetailView.tsx` | Differentiated — 60/40 record-cover grid. Left: 11 sections in canonical order with Bebas Neue section numbers. Right: sticky metadata + pinned tracker + optional Melanium widget. BAMARAM signal flips the right rail's top edge neon. Dog-foods every prior component | The customer-facing engagement artifact — Charter pages across every surface |
 | `TeslaVortexPricingPicker` | `src/components/TeslaVortexPricingPicker.tsx` | Differentiated — three-zone vortex: Frequency (3/6/9 Bebas Neue cards with Axis-of-Balance label) × V.I.B.E. Group chips × 3 Pillars (Confidence Shield / Convenience Boost / Security Vault) stacking. Neon-top summary strip shows monthly total + pillar stack %. Enterprise flips to CUSTOM quote flow | A.I.M.S. core pricing pages — aimanagedsolutions.cloud, onboarding, upgrade flows |
 | `PerformSportsPricingSelector` | `src/components/PerformSportsPricingSelector.tsx` | Differentiated — 5 tiers (BMAC / Lite / Medium / Heavy / Superior) in a horizontal row with progressive visual weight. No "Most Popular" badge on any tier. Superior surfaces the canonical "Grok-4 · latest-resolved" note — the ONE vendor-name exception per master-canon-pricing.md | Per\|Form sports surfaces — perform.foai.cloud pricing pages, upgrade flows |
+| `FiveUseCasesPack` | `src/components/FiveUseCasesPack.tsx` | Differentiated — expandable card stack. Each collapsed card shows Bebas Neue title + purpose + GROC micro-bars (mirrors IIR pattern from BomRenderer for kit consistency). Expanded reveals how-to-implement steps + usage bands (high/med/low) + KPIs + risks | Charter detail Step 6, Purchase Order deliverable, plug gallery show-pages |
 
 ## Usage
 
@@ -59,8 +60,8 @@ Per the 2026-04-17 arbitration + session 2026-04-17 UI queue:
 6. ✅ `MelaniumBalanceWidget` — #202
 7. ✅ `DigitalMaintenanceFeeLineItem` — #203
 8. ✅ `TeslaVortexPricingPicker` — #205
-9. ✅ `PerformSportsPricingSelector` — this PR
-10. ⬜ `FiveUseCasesPack` — GROC-ranked card set
+9. ✅ `PerformSportsPricingSelector` — #206
+10. ✅ `FiveUseCasesPack` — this PR
 11. ⬜ `TermsOfServicePage` — Charter-aware legal
 12. ⬜ `AcheevyChatKioskEntry` — mode-transition handler
 

@@ -86,3 +86,11 @@ export type {
   PerformSportsPricingSelectorProps,
   PerformTier,
 } from './components/PerformSportsPricingSelector.js';
+
+export { FiveUseCasesPack } from './components/FiveUseCasesPack.js';
+export type {
+  FiveUseCasesPackProps,
+  UseCaseFullView,
+  GrocScore,
+  UsageBandView,
+} from './components/FiveUseCasesPack.js';
