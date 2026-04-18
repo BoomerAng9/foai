@@ -24,3 +24,12 @@ export type {
   TrackerStageEntry,
   TrackerGateStatus,
 } from './components/RfpBamaramProgressTracker.js';
+
+export { PickerAngBomRenderer } from './components/PickerAngBomRenderer.js';
+export type {
+  PickerAngBomRendererProps,
+  BomEntryView,
+  BomIir,
+  BomScanProfile,
+  SecurityAddendumView,
+} from './components/PickerAngBomRenderer.js';

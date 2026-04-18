@@ -25,6 +25,7 @@ Before generating any component, the result must NOT look like:
 | `HomeHero` | `src/components/HomeHero.tsx` | Differentiated — asymmetric "manage" vs "guide" split, neon frame on hover, Permanent Marker wordmark spanning divider | foai.cloud, deploy.foai.cloud, perform.foai.cloud |
 | `AcheevyNavShell` | `src/components/AcheevyNavShell.tsx` | Differentiated — nav split LEFT/RIGHT of the wordmark (not logo-left SaaS pattern), optional mode-pill row renders only when an engagement is live | All public surfaces |
 | `RfpBamaramProgressTracker` | `src/components/RfpBamaramProgressTracker.tsx` | Differentiated — horizontal 10-dot rail with gate-status glyphs (✓ ⟳ ✗ ↑), neon ring on current, mono stage labels below, special BAMARAM! outline at stage 10 | Anywhere an engagement is surfaced — Charter detail, admin dashboards, PiP windows |
+| `PickerAngBomRenderer` | `src/components/PickerAngBomRenderer.tsx` | Differentiated — card stack with Bebas Neue tool names, three-bar IIR micro-meters (neon dot on highest axis), outlined Security Addendum below. Operates only on customer-safe BoM — internal-only relabels arrive pre-scrubbed and render identically to named tools | Charter detail, Commercial Proposal surface, admin drill-down |
 
 ## Usage
 
@@ -48,8 +49,8 @@ Per the 2026-04-17 arbitration + session 2026-04-17 UI queue:
 1. ✅ `HomeHero` — #198
 2. ✅ `AcheevyNavShell` — #199
 3. ⬜ `CharterDetailView` — 11-component Charter renderer
-4. ✅ `RfpBamaramProgressTracker` — this PR
-5. ⬜ `PickerAngBomRenderer` — customer-safe BoM with internal-only relabel
+4. ✅ `RfpBamaramProgressTracker` — #200
+5. ✅ `PickerAngBomRenderer` — this PR
 6. ⬜ `MelaniumBalanceWidget` — customer platform currency
 7. ⬜ `DigitalMaintenanceFeeLineItem` — generic Charter line
 8. ⬜ `TeslaVortexPricingPicker` — 3-6-9 A.I.M.S. core

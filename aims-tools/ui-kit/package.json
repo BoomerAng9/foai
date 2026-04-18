@@ -9,7 +9,8 @@
     ".": "./src/index.ts",
     "./home-hero": "./src/components/HomeHero.tsx",
     "./nav-shell": "./src/components/AcheevyNavShell.tsx",
-    "./progress-tracker": "./src/components/RfpBamaramProgressTracker.tsx"
+    "./progress-tracker": "./src/components/RfpBamaramProgressTracker.tsx",
+    "./bom-renderer": "./src/components/PickerAngBomRenderer.tsx"
   },
   "scripts": {
     "typecheck": "tsc --noEmit"
