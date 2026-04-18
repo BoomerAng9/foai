@@ -24,6 +24,14 @@ pub mod kernel;
 pub mod squads;
 pub mod hawks;
 
+/// Generated prohibition tables, compiled from `config/shield/*.yml`
+/// via `chicken-hawk/scripts/compile-shield-policy.py`. The hand-written
+/// squad/Hawk modules will consume these constants after the v0.2
+/// refactor (currently the hand-written Rust keeps its local `const`
+/// lists; the generated tables are a parallel source of truth that
+/// `--check` mode validates against).
+pub mod generated;
+
 #[cfg(feature = "kani")]
 pub mod kani_harnesses;
 
