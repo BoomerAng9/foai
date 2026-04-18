@@ -1,16 +1,11 @@
 //! Halo — Lil_Mast_Hawk — Gold & Platinum Squad Lead, SAT co-signer
-//! Generated from config/shield/hawks/Lil_Mast_Hawk.yml
+//! Hand-written imperative logic; prohibition tables from generated::lil_mast_hawk.
 
 use crate::types::*;
+use crate::generated::lil_mast_hawk::LIL_MAST_HAWK_PROHIBITED_TOOL_CALLS;
 
 pub fn validate(inv: &Invocation) -> Result<(), Denial> {
-    const PROHIBITED: &[&str] = &[
-        "cosign.delegate_authority",
-        "cosign.batch_without_per_plan_verification",
-        "cosign.accept_invalid_plan_signature",
-        "cosign.self_issued",
-    ];
-    if PROHIBITED.contains(&inv.tool_id) {
+    if LIL_MAST_HAWK_PROHIBITED_TOOL_CALLS.contains(&inv.tool_id) {
         return Err(Denial::ProhibitedToolCall(inv.tool_id));
     }
 

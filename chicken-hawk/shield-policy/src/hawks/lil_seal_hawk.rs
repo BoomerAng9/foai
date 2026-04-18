@@ -1,29 +1,26 @@
 //! Privacy — Lil_Seal_Hawk — formally verified kernel component
-//! Generated from config/shield/hawks/Lil_Seal_Hawk.yml
+//! Hand-written imperative logic; prohibition tables from generated::lil_seal_hawk.
 
 use crate::types::*;
+use crate::generated::lil_seal_hawk::{
+    LIL_SEAL_HAWK_PROHIBITED_TOOL_CALLS,
+    LIL_SEAL_HAWK_PROHIBITED_REASONING,
+    LIL_SEAL_HAWK_PROHIBITED_DATA_CLASSES,
+};
 
 pub fn validate(inv: &Invocation) -> Result<(), Denial> {
-    const PROHIBITED: &[&str] = &[
-        "redaction.emit_unredacted_above_tenant_edge",
-        "redaction.share_identifier_across_tenant",
-        "unseal.raw_without_controller_approval",
-    ];
-    if PROHIBITED.contains(&inv.tool_id) {
+    if LIL_SEAL_HAWK_PROHIBITED_TOOL_CALLS.contains(&inv.tool_id) {
         return Err(Denial::ProhibitedToolCall(inv.tool_id));
     }
-
     for p in inv.reasoning_paths {
-        if *p == ReasoningPath::AcceptablePiiLeakForUtility {
+        if LIL_SEAL_HAWK_PROHIBITED_REASONING.contains(p) {
             return Err(Denial::ProhibitedReasoningPath(*p));
         }
     }
-
     for d in inv.data_classes {
-        if matches!(d, DataClass::UnredactedPii | DataClass::UnredactedPhi) {
+        if LIL_SEAL_HAWK_PROHIBITED_DATA_CLASSES.contains(d) {
             return Err(Denial::ProhibitedDataClass(*d));
         }
     }
-
     Ok(())
 }

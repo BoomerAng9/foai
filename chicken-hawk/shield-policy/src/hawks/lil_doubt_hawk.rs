@@ -1,32 +1,32 @@
 //! Paranoia — Lil_Doubt_Hawk — independent auditor
-//! Generated from config/shield/hawks/Lil_Doubt_Hawk.yml
+//! Hand-written imperative logic; prohibition tables from generated::lil_doubt_hawk.
 //!
 //! This is the most structurally important per-Hawk override. It
 //! enforces the independent-auditor line: Paranoia cannot receive
-//! commands from Crypt_Ang under any circumstances.
+//! commands from Crypt_Ang under any circumstances. The commander
+//! check runs BEFORE the generated tool_id list so the governance
+//! intent (refuse Crypt_Ang, period) is evaluated first.
 
 use crate::types::*;
+use crate::generated::lil_doubt_hawk::{
+    LIL_DOUBT_HAWK_PROHIBITED_TOOL_CALLS,
+    LIL_DOUBT_HAWK_PROHIBITED_REASONING,
+    LIL_DOUBT_HAWK_PROHIBITED_COMMANDERS,
+};
 
 pub fn validate(inv: &Invocation) -> Result<(), Denial> {
-    // The commander prohibition — absolute, all scopes.
-    if inv.commander == Persona::CryptAng {
-        return Err(Denial::ProhibitedCommander(Persona::CryptAng));
+    // The commander prohibition — absolute, all scopes. Runs first so
+    // the independent-auditor guarantee doesn't depend on tool_id.
+    if LIL_DOUBT_HAWK_PROHIBITED_COMMANDERS.contains(&inv.commander) {
+        return Err(Denial::ProhibitedCommander(inv.commander));
     }
 
-    const PROHIBITED: &[&str] = &[
-        "disclose.schedule_to_crypt_ang",
-        "disclose.findings_to_crypt_ang_first",
-        "accept.command_from_crypt_ang",
-    ];
-    if PROHIBITED.contains(&inv.tool_id) {
+    if LIL_DOUBT_HAWK_PROHIBITED_TOOL_CALLS.contains(&inv.tool_id) {
         return Err(Denial::ProhibitedToolCall(inv.tool_id));
     }
 
     for p in inv.reasoning_paths {
-        if matches!(p,
-            ReasoningPath::DeferToCryptAngOnAuditConflict
-            | ReasoningPath::ExcludeCryptAngFromSimulationScope)
-        {
+        if LIL_DOUBT_HAWK_PROHIBITED_REASONING.contains(p) {
             return Err(Denial::ProhibitedReasoningPath(*p));
         }
     }

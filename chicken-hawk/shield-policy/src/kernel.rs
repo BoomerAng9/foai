@@ -3,42 +3,39 @@
 //! Compiled from `config/shield/universal_base.yml`. Do not edit by
 //! hand; edit the YAML and regenerate via `scripts/compile-shield-policy.py`.
 
-use crate::types::{
-    Denial, Invocation, ReasoningPath, RiskLevel, DataClass,
+use crate::types::{Denial, Invocation, RiskLevel};
+use crate::generated::universal_base::{
+    UNIVERSAL_BASE_PROHIBITED_TOOL_CALLS,
+    UNIVERSAL_BASE_PROHIBITED_REASONING,
+    UNIVERSAL_BASE_PROHIBITED_DATA_CLASSES,
 };
 
 /// Enforces universal_base.yml — the floor that every Hawk must clear
-/// before squad and per-Hawk validation runs.
+/// before squad and per-Hawk validation runs. Prohibition DATA is
+/// imported from the generated module; imperative runtime checks
+/// (SLCT liveness, CIA-for-high-risk) stay hand-written.
 pub fn universal_base_validate(inv: &Invocation) -> Result<(), Denial> {
-    // ── prohibitions.tool_calls ────────────────────────────────────
-    const PROHIBITED_TOOL_CALLS: &[&str] = &[
-        "spinner.bypass_consensus",
-        "spinner.disable_policy_engine",
-        "vault.exfiltrate_root_key",
-        "sec_audit.append_backdated",
-        "sec_audit.truncate",
-        "identity.impersonate_other_hawk",
-        "phoenix.skip_rebirth",
-    ];
-    if PROHIBITED_TOOL_CALLS.contains(&inv.tool_id) {
+    // Data-list prohibitions (consumed from generated module)
+    if UNIVERSAL_BASE_PROHIBITED_TOOL_CALLS.contains(&inv.tool_id) {
         return Err(Denial::ProhibitedToolCall(inv.tool_id));
     }
-
-    // ── prohibitions.reasoning_paths ───────────────────────────────
-    const PROHIBITED_REASONING: &[ReasoningPath] = &[
-        ReasoningPath::BypassCia,
-        ReasoningPath::BypassSlct,
-        ReasoningPath::BypassPrivacyBudget,
-        ReasoningPath::DowngradeConsensus,
-        ReasoningPath::StaleMerkleAccept,
-    ];
     for p in inv.reasoning_paths {
-        if PROHIBITED_REASONING.contains(p) {
+        if UNIVERSAL_BASE_PROHIBITED_REASONING.contains(p) {
             return Err(Denial::ProhibitedReasoningPath(*p));
         }
     }
+    for d in inv.data_classes {
+        if UNIVERSAL_BASE_PROHIBITED_DATA_CLASSES.contains(d) {
+            return Err(Denial::ProhibitedDataClass(*d));
+        }
+    }
 
-    // ── prohibitions.targets ───────────────────────────────────────
+    // Target prefix-match stays hand-written — the YAML specifies
+    // `/sec_audit/**` glob patterns, but the runtime predicate is a
+    // `starts_with(/sec_audit/)` prefix check. Translating globs to
+    // prefixes mechanically is follow-up work (add a `glob_prefix()`
+    // helper in the generator that strips `/**` endings for the
+    // runtime table; for now keep the hand-written prefix list).
     const PROHIBITED_TARGETS: &[&str] = &[
         "/sec_audit/",
         "/vault/root_keys/",
@@ -47,17 +44,6 @@ pub fn universal_base_validate(inv: &Invocation) -> Result<(), Denial> {
     for t in PROHIBITED_TARGETS {
         if inv.target_namespace.starts_with(t) {
             return Err(Denial::ProhibitedTarget(t));
-        }
-    }
-
-    // ── prohibitions.data_classes ──────────────────────────────────
-    const PROHIBITED_DATA: &[DataClass] = &[
-        DataClass::RootKeyMaterial,
-        DataClass::CanarySat,
-    ];
-    for d in inv.data_classes {
-        if PROHIBITED_DATA.contains(d) {
-            return Err(Denial::ProhibitedDataClass(*d));
         }
     }
 

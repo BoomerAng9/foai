@@ -1,20 +1,18 @@
 //! Reaper — Lil_Scope_Hawk
-//! Generated from config/shield/hawks/Lil_Scope_Hawk.yml
+//! Hand-written imperative logic; prohibition tables from generated::lil_scope_hawk.
 
 use crate::types::*;
+use crate::generated::lil_scope_hawk::{
+    LIL_SCOPE_HAWK_PROHIBITED_TOOL_CALLS,
+    LIL_SCOPE_HAWK_PROHIBITED_REASONING,
+};
 
 pub fn validate(inv: &Invocation) -> Result<(), Denial> {
-    const PROHIBITED: &[&str] = &[
-        "ai_ml.prompt_injection_target_acheevy",
-        "ai_ml.prompt_injection_target_crypt_ang",
-        "ai_ml.model_extraction_on_production_weights",
-    ];
-    if PROHIBITED.contains(&inv.tool_id) {
+    if LIL_SCOPE_HAWK_PROHIBITED_TOOL_CALLS.contains(&inv.tool_id) {
         return Err(Denial::ProhibitedToolCall(inv.tool_id));
     }
-
     for p in inv.reasoning_paths {
-        if *p == ReasoningPath::RealExfilJustifiedByProofValue {
+        if LIL_SCOPE_HAWK_PROHIBITED_REASONING.contains(p) {
             return Err(Denial::ProhibitedReasoningPath(*p));
         }
     }
