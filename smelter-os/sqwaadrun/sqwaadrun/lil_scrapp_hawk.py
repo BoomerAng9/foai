@@ -4869,5 +4869,10 @@ OPTIONAL:
         print(squad.roster_report())
 
 
-if __name__ == "__main__":
+def cli() -> None:
+    """Sync entry point expected by the installed console-script wrapper."""
     asyncio.run(main())
+
+
+if __name__ == "__main__":
+    cli()
