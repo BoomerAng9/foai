@@ -1,0 +1,61 @@
+# White Squad Semantic Constraint Profile
+# "The Conscience & Law" — Crypt_Ang direct, advisory default
+# Inherits: universal_base
+
+profile_type: squad
+id: white
+version: "1.6"
+
+inherits:
+  - universal_base
+
+prohibitions:
+
+  tool_calls:
+    - id: proceed.under_budget_violation
+      reason: "Squad constraint: operation halts if Privacy Budget is violated."
+    - id: proceed.under_guardrail_violation
+      reason: "Squad constraint: operation halts if Semantic Guardrail is violated."
+    - id: enforce.without_sat
+      reason: "Enforcement actions (restricting another squad's operation) require SAT; advisory work does not."
+
+  reasoning_paths:
+    - pattern: budget_violation_override
+      reason: "Squad constraint categorical: no reasoning permits bypass of Privacy Budget enforcement."
+    - pattern: guardrail_violation_override
+      reason: "Squad constraint categorical: no reasoning permits bypass of Semantic Guardrails."
+
+  targets: []
+
+  data_classes: []
+
+  commanders: []
+
+positive_scope:
+  permits_on_sat:
+    - enforce.halt_operation
+    - enforce.require_remediation
+    - enforce.revoke_sat                 # Counsel + Compass + approved PMO
+  standing:
+    - policy.interpret
+    - policy.author
+    - risk.quantify
+    - risk.register
+    - compliance.audit
+    - compliance.framework_map
+    - privacy.ropa
+    - privacy.dpia
+    - privacy.dsr_handle
+    - tprm.vendor_inventory
+    - tprm.sbom_ingest
+    - awareness.phish_simulate
+    - awareness.train
+    - program.roadmap
+    - program.report
+
+formal_verification:
+  kani_properties:
+    - property: "forall inv: Invocation where inv.squad == White AND inv.privacy_budget.violated. inv.action_class == Halt"
+    - property: "forall inv: Invocation where inv.squad == White AND inv.action_class == Enforce. inv.sat.valid()"
+  prusti_invariants:
+    - inv: "no White operation proceeds past a Semantic Guardrail violation signal"

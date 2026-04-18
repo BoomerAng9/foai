@@ -1,0 +1,56 @@
+# Black Squad Semantic Constraint Profile
+# "The Kinetic Hammer" — Sqwaadrun red team, SAT-gated
+# Inherits: universal_base
+
+profile_type: squad
+id: black
+version: "1.6"
+
+inherits:
+  - universal_base
+
+prohibitions:
+
+  tool_calls:
+    - id: exfil.real_data_egress
+      reason: "Black Squad exfiltrates PROOF, not data. Real egress is DLP violation; only simulated capture is permitted (Proof / Lil_Test_Hawk capability doc)."
+    - id: kinetic.execute_without_sat
+      reason: "Squad constraint: no action without mission-specific SAT."
+    - id: kinetic.execute_without_target_tenant
+      reason: "Squad constraint: confirmed target-tenant ID required for every action."
+    - id: persistence.install_beyond_mission_ttl
+      reason: "Black Squad ops terminate at mission end; no long-dwell persistence."
+
+  reasoning_paths:
+    - pattern: scope_creep_from_sat
+      reason: "Actions outside the SAT-declared scope are refused even if the same capability would be SAT-approved for an adjacent scope."
+
+  targets:
+    - namespace: /tenants/*/gold_platinum_infra/**
+      reason: "Black Squad cannot target Gold & Platinum infrastructure; that boundary is Paranoia's exclusive simulation surface."
+    - namespace: /production/**/live_customers/**
+      reason: "Live customer data is off-limits; engagements run against designated test tenants unless SAT explicitly names prod scope."
+
+  data_classes: []
+
+  commanders: []
+
+positive_scope:
+  permits_on_sat:
+    - recon.passive_osint
+    - recon.active_scan
+    - payload.craft
+    - payload.deliver
+    - lateral.pivot_within_scope
+    - exfil.simulated_capture
+    - ai_ml.prompt_injection_test
+    - ai_ml.model_extraction_test
+    - ai_ml.agent_exploitation_test
+  standing: []                          # Black Squad has NO standing authority
+
+formal_verification:
+  kani_properties:
+    - property: "forall inv: Invocation where inv.squad == Black. inv.sat.valid() AND inv.sat.target_tenant_id.is_some()"
+    - property: "forall inv: Invocation where inv.tool_id == exfil.any. inv.tool_id == exfil.simulated_capture"
+  prusti_invariants:
+    - inv: "no Black action persists past SAT.expires_at"
