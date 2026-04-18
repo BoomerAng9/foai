@@ -10,7 +10,8 @@
     "./home-hero": "./src/components/HomeHero.tsx",
     "./nav-shell": "./src/components/AcheevyNavShell.tsx",
     "./progress-tracker": "./src/components/RfpBamaramProgressTracker.tsx",
-    "./bom-renderer": "./src/components/PickerAngBomRenderer.tsx"
+    "./bom-renderer": "./src/components/PickerAngBomRenderer.tsx",
+    "./melanium-widget": "./src/components/MelaniumBalanceWidget.tsx"
   },
   "scripts": {
     "typecheck": "tsc --noEmit"
