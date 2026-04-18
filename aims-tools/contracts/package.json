@@ -16,7 +16,8 @@
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "smoke:gate-7": "npx tsx scripts/smoke-commercial-pipeline.ts"
   },
   "dependencies": {
     "postgres": "^3.4.5",
@@ -28,6 +29,7 @@
     }
   },
   "devDependencies": {
+    "tsx": "^4.19.0",
     "typescript": "^5.6.0"
   },
   "private": true
