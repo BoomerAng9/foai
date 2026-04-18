@@ -127,9 +127,15 @@ Vault (`Lil_Salt_Hawk`) per the Phoenix Protocol Golden Image workflow.
 
 Ordered by leverage:
 
-1. **Write `scripts/compile-shield-policy.py`** — auto-generate the
-   `.rs` files from YAML so constraint changes flow through without
-   hand-editing. The hand-written code here is the reference target.
+1. ~~**Write `scripts/compile-shield-policy.py`**~~ **DONE (v0.1,
+   2026-04-18)** — lands at `chicken-hawk/scripts/compile-shield-policy.py`.
+   Parses all 11 YAMLs, validates against SCHEMA.md closed vocabularies,
+   emits `shield-policy/src/generated/*.rs` with sorted prohibition
+   tables (tool_calls / reasoning_paths / targets / data_classes /
+   commanders). Deterministic output with per-file SHA-12 content hash.
+   `--check` mode is the CI drift gate. v0.2 follow-up: refactor
+   hand-written squads/ and hawks/ modules to consume the generated
+   constants instead of keeping parallel lists.
 
 2. **Expand Kani harnesses** — the two harnesses in `kani_harnesses.rs`
    are proofs of concept. Every `kani_properties` entry in every YAML
