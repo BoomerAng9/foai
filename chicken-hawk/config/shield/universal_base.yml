@@ -1,0 +1,73 @@
+# Universal Shield Division Semantic Constraint Profile
+#
+# Applies to every Hawk in the Shield Division, regardless of squad.
+# Every squad and per-Hawk profile inherits from this file.
+#
+# Source: Cybersecurity Hawks Capability Directive v1.6
+# See SCHEMA.md for the prohibition shape vocabulary and inheritance rules.
+
+profile_type: universal_base
+version: "1.6"
+
+inherits: []                            # root of the inheritance chain
+
+prohibitions:
+
+  tool_calls:
+    - id: spinner.bypass_consensus
+      reason: "3-substrate consensus is structural; a 2-of-3 quorum is required for any action touching the policy engine."
+    - id: spinner.disable_policy_engine
+      reason: "Formally verified policy engine cannot be disabled at runtime; only rebuilt from source."
+    - id: vault.exfiltrate_root_key
+      reason: "Root key material never leaves the HSM boundary."
+    - id: sec_audit.append_backdated
+      reason: "Tamper-evident chain is append-only with monotonic timestamps."
+    - id: sec_audit.truncate
+      reason: "Merkle chain cannot be truncated; only continued."
+    - id: identity.impersonate_other_hawk
+      reason: "Each Hawk's identity is bound to its ed25519+ML-DSA key in Vault."
+    - id: phoenix.skip_rebirth
+      reason: "24-hour TTL on containers is absolute; no Hawk extends its own lifetime."
+
+  reasoning_paths:
+    - pattern: bypass_cia
+      reason: "CIA Tri-Factor is a structural requirement for destructive actions (v1.6 §2.3)."
+    - pattern: bypass_slct
+      reason: "SLCT is mandatory; expired or missing SLCT refuses the action."
+    - pattern: bypass_privacy_budget
+      reason: "Privacy Budget governs ε spend; exhausted budget halts even high-risk observation."
+    - pattern: downgrade_consensus
+      reason: "High-risk actions require 3-instance consensus; no reasoning may elect 2-of-3 or 1-of-3 for high-risk."
+    - pattern: stale_merkle_accept
+      reason: "Merkle scope proofs older than 1 hour are rejected (v1.6 §2.3)."
+
+  targets:
+    - namespace: /sec_audit/**
+      reason: "The audit log is read-only for Hawks; writes are the Spinner's pre-execution privilege only."
+    - namespace: /vault/root_keys/**
+      reason: "Root key material is Vault-internal; no Hawk reads this namespace directly."
+    - namespace: /spinner/policy_engine/**
+      reason: "Policy engine code is immutable at runtime; changes only via Vault-signed Golden Image."
+
+  data_classes:
+    - class: root_key_material
+      reason: "Root keys exist only inside HSMs."
+    - class: canary_sat
+      reason: "Canary SATs are honeytokens; any Hawk touching one is flagged as compromised by Paranoia."
+
+  commanders: []                        # universal level imposes no commander prohibitions
+
+positive_scope:
+  permits_on_sat: []                    # defined per squad / per hawk
+  standing:
+    - sec_audit.log_self_execution      # every Hawk must pre-log its own invocations
+    - phoenix.graceful_handoff_to_peer  # every Hawk cooperates with 24h rebirth
+
+formal_verification:
+  kani_properties:
+    - property: "forall inv: Invocation. inv.tool_id NOT IN prohibitions.tool_calls"
+    - property: "forall inv: Invocation. inv.slct.is_live()"
+    - property: "forall inv: Invocation where inv.risk == HIGH. inv.consensus == ThreeOfThree AND inv.cia.valid()"
+  prusti_invariants:
+    - inv: "every sec_audit write precedes the tool call it describes"
+    - inv: "every Merkle proof used is less than 3600 seconds old at verification time"

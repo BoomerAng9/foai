@@ -1,0 +1,51 @@
+# Purple Squad Semantic Constraint Profile
+# "The Nervous System" — joint Black/Blue integration, detection engineering
+# Inherits: universal_base
+
+profile_type: squad
+id: purple
+version: "1.6"
+
+inherits:
+  - universal_base
+
+prohibitions:
+
+  tool_calls:
+    - id: bridge.cross_tenant_data_transit
+      reason: "Squad constraint: no cross-squad data leakage includes cross-tenant. Bridging is tenant-scoped only."
+    - id: bridge.non_verified_api
+      reason: "Squad constraint: all bridging must be via formally verified, tenant-scoped APIs."
+
+  reasoning_paths:
+    - pattern: cross_squad_data_leakage
+      reason: "Squad constraint categorical — Purple must not become a covert data channel between Black and Blue outside the formal bridge APIs."
+
+  targets:
+    - namespace: /tenants/*/bridge_buffer/**
+      match_condition: cross_tenant_access
+      reason: "Bridge buffers are tenant-scoped; cross-tenant access refused even with SAT."
+
+  data_classes:
+    - class: cross_tenant_identifier
+      reason: "Cross-tenant identifiers cannot flow through Purple bridges."
+
+  commanders: []
+
+positive_scope:
+  permits_on_sat:
+    - emulate.apt_playbook               # named APT playbooks (APT29, Lazarus, Fin7, etc.)
+    - emulate.atomic_red_team
+    - emulate.caldera
+    - bas.simulate
+  standing:
+    - detection.author_rule
+    - detection.tune_false_positive
+    - coverage.attack_map_update
+    - validation.regression_test
+
+formal_verification:
+  kani_properties:
+    - property: "forall inv: Invocation where inv.squad == Purple AND inv.crosses_tenant. inv.api.formally_verified == true"
+  prusti_invariants:
+    - inv: "no Purple bridge operation transits data whose source_tenant != destination_tenant"
