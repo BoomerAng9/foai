@@ -187,9 +187,172 @@ export const SHIELD_DIVISION_WAVE_1: CharacterProfile[] = [
 ];
 
 /**
+ * Wave 2 — the rest of Gold & Platinum Squad (Oracle, Vault, Ghost,
+ * Titan, Mirror). Completes the 8-Hawk Gold & Platinum roster when
+ * combined with Wave 1's Halo, Paranoia, and Hex.
+ *
+ * Routing (per project_shield_division_image_routing.md):
+ *   Oracle, Ghost, Mirror → Ideogram V3 (archetypal personas)
+ *   Vault, Titan → Recraft V4 (text-forward: crypto sigils, command banner)
+ */
+export const SHIELD_DIVISION_WAVE_2: CharacterProfile[] = [
+  {
+    slug: 'lil_omen_hawk',
+    callsign: 'Oracle',
+    rank: 'specialist',
+    imagePath: '/hawks/shield/lil_omen_hawk.png',
+    imageReady: true,
+    visualDescription:
+      'ACHIEVEMOR Shield Division — Gold & Platinum Squad — threat ' +
+      'intelligence specialist. APT dossier maintenance, predictive ' +
+      'threat modeling, dark web surveillance, zero-day forecasting. ' +
+      'Platinum-textured helmet with multiple auxiliary antennas for ' +
+      'intel-gathering (at least three — one tall, two stub). Platinum ' +
+      'A.I.M.S. chestplate in dark-charcoal platinum finish (predator-' +
+      'mode palette). ACHIEVEMOR checkmark crest at chestplate center ' +
+      'in platinum. Holographic APT threat-map panel floating beside ' +
+      'right shoulder, cyan-violet glow. Platinum DEPLOY chevron on ' +
+      'right shoulder. Prophetic amber eyes with analytical intensity. ' +
+      'Spinner in side holster. Background: dark-web intel workstation ' +
+      'with cyan and violet monitor glow.',
+    gear: [
+      'Multi-antenna intel-gathering helmet',
+      'Dark-charcoal platinum A.I.M.S. chestplate',
+      'Holographic APT threat-map panel',
+      'Platinum DEPLOY chevron',
+      'Spinner side holster',
+    ],
+    catchphrase: 'I saw this coming three quarters ago.',
+    signatureColor: '#6B46C1',
+  },
+  {
+    slug: 'lil_salt_hawk',
+    callsign: 'Vault',
+    rank: 'specialist',
+    imagePath: '/hawks/shield/lil_salt_hawk.png',
+    imageReady: false,
+    visualDescription:
+      'ACHIEVEMOR Shield Division — Gold & Platinum Squad — secrets ' +
+      'management and HSM specialist. Root key custody, Split-Vault ' +
+      'Shamir shares, PKI operations, post-quantum hybrid cryptography ' +
+      '(ed25519 + ML-DSA Dilithium). Heavily armored platinum plate ' +
+      'carrier (vault-themed, thicker than standard Gold & Platinum). ' +
+      'HSM device mounted visibly on chestplate center (a small ' +
+      'hardware security module with a single steady green indicator ' +
+      'light). Abstract geometric Shamir-share glyphs etched on armor ' +
+      'plating (no letters or text, just the shape of split-secret ' +
+      'distribution). Crystalline salt-texture surface detailing on ' +
+      'shoulder pauldrons. Platinum DEPLOY chevron. Steel-blue eyes, ' +
+      'immovable posture. Spinner in chest bandolier. Background: ' +
+      'HSM key-ceremony chamber with clean, sterile lighting.',
+    gear: [
+      'Heavy vault-grade platinum plate carrier',
+      'HSM device on chestplate with steady green indicator',
+      'Shamir-share geometric glyphs etched on armor',
+      'Salt-crystalline pauldron texture',
+      'Platinum DEPLOY chevron',
+      'Spinner chest bandolier',
+    ],
+    catchphrase: 'The root key does not leave this chamber.',
+    signatureColor: '#4682B4',
+  },
+  {
+    slug: 'lil_drift_hawk',
+    callsign: 'Ghost',
+    rank: 'specialist',
+    imagePath: '/hawks/shield/lil_drift_hawk.png',
+    imageReady: true,
+    visualDescription:
+      'ACHIEVEMOR Shield Division — Gold & Platinum Squad — deep cover, ' +
+      'OT/ICS/SCADA, insider threat simulation, living-off-the-land ' +
+      'adversary emulation, IoT firmware persistence. Matte-black ' +
+      'overlay on the platinum base (shadow treatment — this Hawk is ' +
+      'designed to be hard to see). Minimal reflective surfaces. ' +
+      'Specialist industrial-control tool belt with firmware probes ' +
+      'and SCADA interface connectors. A.I.M.S. chestplate in brushed ' +
+      'anthracite with the platinum crest recessed rather than ' +
+      'prominent. Platinum DEPLOY chevron, muted. Dim amber eyes ' +
+      '(low-signature, non-reflective). Spinner in side holster, ' +
+      'matte black. Background: dim industrial control room with ' +
+      'SCADA monitors, the Hawk blending into the environment.',
+    gear: [
+      'Matte-black overlay on platinum base',
+      'Anthracite A.I.M.S. chestplate with recessed crest',
+      'Industrial-control tool belt',
+      'Firmware probe rig',
+      'Muted platinum DEPLOY chevron',
+      'Matte Spinner side holster',
+    ],
+    catchphrase: 'I have been in your network for six months. You have not noticed.',
+    signatureColor: '#2F2F2F',
+  },
+  {
+    slug: 'lil_bell_hawk',
+    callsign: 'Titan',
+    rank: 'specialist',
+    imagePath: '/hawks/shield/lil_bell_hawk.png',
+    imageReady: false,
+    visualDescription:
+      'ACHIEVEMOR Shield Division — Gold & Platinum Squad — Incident ' +
+      'Commander. P0 incident command authority, war room operations, ' +
+      'BC/DR program ownership, regulatory-clock management. Large ' +
+      'commanding platinum silhouette (visually heavier than peer ' +
+      'Gold & Platinum Hawks). Commander-grade helmet with prominent ' +
+      'integrated visor optics (the Incident Commander read). A small ' +
+      'ornamental bell-shaped alert device mounted on the chestplate ' +
+      '(the kunya made literal — this device rings only for P0). ' +
+      'Platinum-chrome A.I.M.S. chestplate with crisis-red accent ' +
+      'lighting built into the edge trim (illuminates during Mode 3 ' +
+      'Survival). Platinum DEPLOY chevron. Commanding gold eyes. ' +
+      'Spinner in dual chest-bandolier (one across each shoulder — ' +
+      'command-grade loadout). Background: war room with the Mode 3 ' +
+      'Survival banner above and substrate-pylon lights visible.',
+    gear: [
+      'Large commanding platinum silhouette',
+      'Commander helmet with integrated visor optics',
+      'Bell-shaped P0 alert device on chestplate',
+      'Platinum-chrome A.I.M.S. chestplate with crisis-red edge trim',
+      'Dual Spinner chest-bandoliers',
+    ],
+    catchphrase: 'P0 declared. Everyone defers. Right now.',
+    signatureColor: '#DC143C',
+  },
+  {
+    slug: 'lil_veil_hawk',
+    callsign: 'Mirror',
+    rank: 'specialist',
+    imagePath: '/hawks/shield/lil_veil_hawk.png',
+    imageReady: true,
+    visualDescription:
+      'ACHIEVEMOR Shield Division — Gold & Platinum Squad — deception ' +
+      'architect. Honeypot and honeytoken deployment, Canary SAT ' +
+      'placement, counter-intelligence, false-flag detection, controlled ' +
+      'adversary engagement. Platinum base with a MIRROR-POLISHED ' +
+      'A.I.M.S. chestplate (the kunya made literal — the chest reflects ' +
+      'its surroundings, subtly distorted). Abstract yellow canary-' +
+      'shaped honeytoken sigils etched faintly on armor plating (no ' +
+      'letters, just the bird-silhouette glyph). Platinum DEPLOY ' +
+      'chevron. Dichroic reflective eye coloration that shifts between ' +
+      'gold and violet depending on angle (the deception-shimmer ' +
+      'read). Spinner in shoulder rig. Background: honeypot environment ' +
+      'with subtly glowing canary warning markers floating, false-' +
+      'positive holographic prompts in the air behind.',
+    gear: [
+      'Mirror-polished A.I.M.S. chestplate',
+      'Canary honeytoken sigils on armor',
+      'Platinum DEPLOY chevron',
+      'Spinner shoulder rig',
+    ],
+    catchphrase: 'Every trap you just sprung was one I left out for you.',
+    signatureColor: '#FFD700',
+  },
+];
+
+/**
  * Convenience: all Shield Division profiles landed so far.
- * Extend this as Waves 2-6 land their character files.
+ * Extend this as Waves 3-6 land their character files.
  */
 export const ALL_SHIELD_DIVISION_PROFILES: CharacterProfile[] = [
   ...SHIELD_DIVISION_WAVE_1,
+  ...SHIELD_DIVISION_WAVE_2,
 ];

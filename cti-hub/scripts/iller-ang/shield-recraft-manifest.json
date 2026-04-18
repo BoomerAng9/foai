@@ -7,5 +7,23 @@
     "rendered_at": "2026-04-18T15:15:40.364Z",
     "model": "recraftv4",
     "cost_estimate_usd": 0.04
+  },
+  {
+    "slug": "lil_salt_hawk",
+    "callsign": "Vault",
+    "prompt": "Anthropomorphic eagle character (not human, not humanoid). Cinematic tactical-realistic character portrait. Heavy platinum-armored vault-grade plate carrier, thicker than standard tactical plate. Subject: an eagle-headed tactical operator with brown and white plumage and a sharp hooked yellow beak. Olive-drab tactical helmet with 3-tube emerald green night-vision mount. Boom microphone across cheek. HEAVILY ARMORED platinum chestplate with a small hardware security module device mounted on the center (a compact rectangular HSM box with one steady green indicator light). NO WORDMARKS, NO LETTERS, NO TEXT of any kind on the armor — just abstract geometric Shamir-secret-share glyphs etched subtly across the plate, resembling split-triangle lattice patterns without any letters. Salt-crystalline texture details on the shoulder pauldrons (matte crystal facets, platinum-gray). Military chevron patch on right shoulder in platinum. Tactical gloves. Steel-blue eyes, immovable sentinel posture. Weaponized boomerang in chest bandolier. Background: HSM key-ceremony chamber with clean, cold, sterile fluorescent lighting, gray walls with platinum panels. Dramatic key lighting from above. Square framing, production-quality illustrated digital painting style. The callsign is \"Vault\" — secrets-management and HSM specialist for the ACHIEVEMOR Shield Division.",
+    "url": "https://img.recraft.ai/qlGuOSj25nagMBUibEmBji2kjZR2WLlLStHW_7345jE/rs:fit:1024:1024:0/raw:1/plain/abs://external/images/af49148d-8bd5-49ae-991b-d82717accc21",
+    "rendered_at": "2026-04-18T16:23:03.491Z",
+    "model": "recraftv4",
+    "cost_estimate_usd": 0.04
+  },
+  {
+    "slug": "lil_bell_hawk",
+    "callsign": "Titan",
+    "prompt": "Anthropomorphic eagle character (not human, not humanoid). Cinematic tactical-realistic character portrait. COMMANDING presence — visually larger and heavier than peer tactical operators. Subject: an eagle-headed Incident Commander with brown and white plumage and a sharp hooked yellow beak. Commander-grade platinum helmet with prominent integrated wrap-around visor optics. Boom microphone. Small ornamental bell-shaped alert device mounted on the chestplate center (a distinct silhouette of a bell rendered in platinum — no text on it). Platinum-chrome chestplate armor with CRISIS-RED accent LED lighting built into the edge trim, currently illuminated. NO WORDMARKS, NO LETTERS, NO TEXT on the chestplate itself, just the bell device and the red-lit edge trim. Military chevron patch on right shoulder in platinum. Dual weaponized boomerang chest-bandoliers (one across each shoulder — command-grade loadout). Tactical gloves. Commanding gold eyes, decisive authoritative posture. Background: dramatic war room with red-orange crisis lighting, blurred out-of-focus technical displays behind, atmospheric haze. Dramatic cinematic key lighting with warm crisis-red fill. Square framing, illustrated digital painting style, production quality. The callsign is \"Titan\" — Incident Commander for the ACHIEVEMOR Shield Division.",
+    "url": "https://img.recraft.ai/Ppz1VfKZwbq1wdxx8NvzFd4Y87bufkoW2ICgeNubWwQ/rs:fit:1024:1024:0/raw:1/plain/abs://external/images/dff77a49-6fa6-42e1-9690-97c991f507cb",
+    "rendered_at": "2026-04-18T16:23:29.159Z",
+    "model": "recraftv4",
+    "cost_estimate_usd": 0.04
   }
 ]

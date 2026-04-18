@@ -54,6 +54,68 @@ function parseArgs(): { slug?: string } {
  * - Proof-obligation glyphs described as "abstract mathematical symbols etched
  *   subtly, no Latin letters"
  */
+/**
+ * Recraft-tuned prompt for Vault (Lil_Salt_Hawk). Text-forward because
+ * of HSM device + Shamir-share glyphs. Explicit no-text instruction.
+ */
+function buildVaultPrompt(profile: CharacterProfile): string {
+  return (
+    `Anthropomorphic eagle character (not human, not humanoid). ` +
+    `Cinematic tactical-realistic character portrait. Heavy platinum-` +
+    `armored vault-grade plate carrier, thicker than standard tactical ` +
+    `plate. Subject: an eagle-headed tactical operator with brown and ` +
+    `white plumage and a sharp hooked yellow beak. Olive-drab tactical ` +
+    `helmet with 3-tube emerald green night-vision mount. Boom ` +
+    `microphone across cheek. HEAVILY ARMORED platinum chestplate with ` +
+    `a small hardware security module device mounted on the center ` +
+    `(a compact rectangular HSM box with one steady green indicator ` +
+    `light). NO WORDMARKS, NO LETTERS, NO TEXT of any kind on the ` +
+    `armor — just abstract geometric Shamir-secret-share glyphs etched ` +
+    `subtly across the plate, resembling split-triangle lattice patterns ` +
+    `without any letters. Salt-crystalline texture details on the ` +
+    `shoulder pauldrons (matte crystal facets, platinum-gray). Military ` +
+    `chevron patch on right shoulder in platinum. Tactical gloves. ` +
+    `Steel-blue eyes, immovable sentinel posture. Weaponized boomerang ` +
+    `in chest bandolier. Background: HSM key-ceremony chamber with ` +
+    `clean, cold, sterile fluorescent lighting, gray walls with ` +
+    `platinum panels. Dramatic key lighting from above. Square framing, ` +
+    `production-quality illustrated digital painting style. ` +
+    `The callsign is "${profile.callsign}" — secrets-management and ` +
+    `HSM specialist for the ACHIEVEMOR Shield Division.`
+  );
+}
+
+/**
+ * Recraft-tuned prompt for Titan (Lil_Bell_Hawk). Text-forward because
+ * the Incident Commander role has banner text and crisis signage in scene.
+ */
+function buildTitanPrompt(profile: CharacterProfile): string {
+  return (
+    `Anthropomorphic eagle character (not human, not humanoid). ` +
+    `Cinematic tactical-realistic character portrait. COMMANDING ` +
+    `presence — visually larger and heavier than peer tactical ` +
+    `operators. Subject: an eagle-headed Incident Commander with brown ` +
+    `and white plumage and a sharp hooked yellow beak. Commander-grade ` +
+    `platinum helmet with prominent integrated wrap-around visor ` +
+    `optics. Boom microphone. Small ornamental bell-shaped alert device ` +
+    `mounted on the chestplate center (a distinct silhouette of a bell ` +
+    `rendered in platinum — no text on it). Platinum-chrome chestplate ` +
+    `armor with CRISIS-RED accent LED lighting built into the edge ` +
+    `trim, currently illuminated. NO WORDMARKS, NO LETTERS, NO TEXT on ` +
+    `the chestplate itself, just the bell device and the red-lit edge ` +
+    `trim. Military chevron patch on right shoulder in platinum. Dual ` +
+    `weaponized boomerang chest-bandoliers (one across each shoulder — ` +
+    `command-grade loadout). Tactical gloves. Commanding gold eyes, ` +
+    `decisive authoritative posture. Background: dramatic war room ` +
+    `with red-orange crisis lighting, blurred out-of-focus technical ` +
+    `displays behind, atmospheric haze. Dramatic cinematic key lighting ` +
+    `with warm crisis-red fill. Square framing, illustrated digital ` +
+    `painting style, production quality. ` +
+    `The callsign is "${profile.callsign}" — Incident Commander for ` +
+    `the ACHIEVEMOR Shield Division.`
+  );
+}
+
 function buildHexPrompt(profile: CharacterProfile): string {
   return (
     `Anthropomorphic eagle character (not human, not humanoid). ` +
@@ -159,10 +221,13 @@ async function main(): Promise<void> {
     process.exit(1);
   }
 
-  // For Wave 1 only Hex (lil_peel_hawk) has a tuned Recraft prompt.
-  // Add per-Hawk Recraft prompts here as future Hawks need the route.
+  // Per-Hawk Recraft prompt builders. Route text-forward personas here
+  // (crypto sigils, command banners, wordmark-heavy designs) — routing
+  // rule documented in memory project_shield_division_image_routing.md.
   const promptBuilders: Record<string, (p: CharacterProfile) => string> = {
     lil_peel_hawk: buildHexPrompt,
+    lil_salt_hawk: buildVaultPrompt,
+    lil_bell_hawk: buildTitanPrompt,
   };
   const builder = promptBuilders[args.slug];
   if (!builder) {
