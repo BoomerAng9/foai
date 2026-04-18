@@ -502,11 +502,182 @@ export const SHIELD_DIVISION_WAVE_3: CharacterProfile[] = [
 ];
 
 /**
+ * Wave 4 — Blue Squad (6 Hawks). Always-on standing authority.
+ * Palette: tactical-blue accents on olive plate carrier, distinct from
+ * Black Squad's gunmetal and Gold & Platinum's platinum.
+ * Route: all Ideogram V3 (archetypal defense personas).
+ */
+export const SHIELD_DIVISION_WAVE_4: CharacterProfile[] = [
+  {
+    slug: 'lil_watch_hawk',
+    callsign: 'Sentry',
+    rank: 'specialist',
+    imagePath: '/hawks/shield/lil_watch_hawk.png',
+    imageReady: true,
+    visualDescription:
+      'ACHIEVEMOR Shield Division — Blue Squad — Detection Engine. Real-time ' +
+      'telemetry ingestion and correlation across SIEM, XDR, SOAR, CSPM, ' +
+      'CIEM, CWPP, CNAPP. Multi-lens monitoring headset above the standard ' +
+      '3-tube NVG (extra auxiliary lenses for multi-screen correlation). ' +
+      'Olive plate carrier with tactical-blue accent webbing (Blue Squad ' +
+      'palette). Chestplate with a row of small blue telemetry indicator ' +
+      'LEDs along the top edge. DEPLOY olive chevron. Alert ice-blue eyes ' +
+      'with constant scanning intensity. Spinner in side holster. ' +
+      'Background: detection wall with multiple holographic alert panels.',
+    gear: [
+      'Multi-lens monitoring headset',
+      'Olive plate carrier with blue webbing',
+      'Blue telemetry indicator LEDs on chestplate',
+      'DEPLOY olive chevron',
+      'Spinner side holster',
+    ],
+    catchphrase: 'I see it before it lands.',
+    signatureColor: '#1E90FF',
+  },
+  {
+    slug: 'lil_wire_hawk',
+    callsign: 'Sparks',
+    rank: 'specialist',
+    imagePath: '/hawks/shield/lil_wire_hawk.png',
+    imageReady: true,
+    visualDescription:
+      'ACHIEVEMOR Shield Division — Blue Squad — Signal Intelligence / ' +
+      'Network Defense. Weak signal isolation, IDS/IPS, ZTNA, DNS security, ' +
+      'egress monitoring. Multiple auxiliary whip antennas on helmet (more ' +
+      'than standard single antenna — three tall antennas for multi-band ' +
+      'signal capture). Olive plate carrier with tactical-blue accent ' +
+      'webbing. Network-cable coil wrapped across shoulder rig. Small ' +
+      'signal-analyzer device on forearm with blue waveform display. ' +
+      'DEPLOY olive chevron. Electric bright-blue eyes. Spinner in side ' +
+      'holster. Background: SIGINT station with cable patches and signal ' +
+      'spectrum displays.',
+    gear: [
+      'Triple whip antenna helmet array',
+      'Network-cable shoulder coil',
+      'Forearm signal-analyzer with waveform display',
+      'Blue-accent plate carrier',
+      'DEPLOY olive chevron',
+      'Spinner side holster',
+    ],
+    catchphrase: 'That packet wasn\'t going to make it past me.',
+    signatureColor: '#00BFFF',
+  },
+  {
+    slug: 'lil_track_hawk',
+    callsign: 'Hound',
+    rank: 'specialist',
+    imagePath: '/hawks/shield/lil_track_hawk.png',
+    imageReady: true,
+    visualDescription:
+      'ACHIEVEMOR Shield Division — Blue Squad — Threat Hunter. Hypothesis-' +
+      'driven hunting via MITRE ATT&CK, UEBA, IOC retroactive search, ' +
+      'incident reconstruction. Tracker-kit aesthetic: auxiliary spotter ' +
+      'lens mounted off to one side of the helmet 3-tube NVG (offset hunter\'s ' +
+      'eye), rolled tactical map tucked at belt, IOC-sample pouches on plate ' +
+      'carrier. Olive plate carrier with tactical-blue webbing. DEPLOY olive ' +
+      'chevron. Amber hunter\'s eyes with persistent focus. Spinner in side ' +
+      'holster. Background: threat-hunt workspace with ATT&CK heatmap wall.',
+    gear: [
+      'Offset spotter lens helmet augmentation',
+      'Rolled tactical hunt-map at belt',
+      'IOC-sample pouches',
+      'Blue-accent plate carrier',
+      'DEPLOY olive chevron',
+      'Spinner side holster',
+    ],
+    catchphrase: 'I\'ve been following this footprint for six weeks.',
+    signatureColor: '#4682B4',
+  },
+  {
+    slug: 'lil_patch_hawk',
+    callsign: 'Doc',
+    rank: 'specialist',
+    imagePath: '/hawks/shield/lil_patch_hawk.png',
+    imageReady: true,
+    visualDescription:
+      'ACHIEVEMOR Shield Division — Blue Squad — Remediation specialist. ' +
+      'Surgical recovery (patching, config correction, rollback, ' +
+      'containment), DevSecOps (SAST/DAST/SCA), EPSS-based prioritization. ' +
+      'Surgeon-adjacent aesthetic — sterile white-blue accents over the ' +
+      'olive plate carrier. Small patch-kit pouches across chest (each ' +
+      'pouch represents a remediation tool). EPSS priority indicator on ' +
+      'wrist display, glowing cyan. Steady surgical posture. Olive plate ' +
+      'carrier with blue-white accent webbing. DEPLOY olive chevron. ' +
+      'Steady green-blue calm eyes. Spinner in side holster. Background: ' +
+      'patch-ops workstation with remediation-progress panels.',
+    gear: [
+      'Sterile white-blue accent plate carrier',
+      'Chest patch-kit pouches',
+      'Wrist EPSS priority display',
+      'DEPLOY olive chevron',
+      'Spinner side holster',
+    ],
+    catchphrase: 'Patched, verified, rolled back if it breaks — in that order.',
+    signatureColor: '#00CED1',
+  },
+  {
+    slug: 'lil_lab_hawk',
+    callsign: 'Cipher',
+    rank: 'specialist',
+    imagePath: '/hawks/shield/lil_lab_hawk.png',
+    imageReady: true,
+    visualDescription:
+      'ACHIEVEMOR Shield Division — Blue Squad — Digital Forensics. Causal ' +
+      'chain reconstruction, memory/disk/network/cloud/container forensics, ' +
+      'chain-of-custody integrity. Forensic-investigator kit: small ' +
+      'evidence bag clipped to belt, chain-of-custody tag display on ' +
+      'forearm, forensic-light attachment on helmet next to the standard ' +
+      'NVG. Olive plate carrier with tactical-blue webbing. DEPLOY olive ' +
+      'chevron. Methodical steel-blue analytical eyes. Spinner in side ' +
+      'holster. Background: digital forensics lab with evidence-reconstruction ' +
+      'display on monitor behind.',
+    gear: [
+      'Forensic-light helmet augmentation',
+      'Evidence bag clipped to belt',
+      'Chain-of-custody tag forearm display',
+      'Blue-accent plate carrier',
+      'DEPLOY olive chevron',
+      'Spinner side holster',
+    ],
+    catchphrase: 'I can reconstruct exactly what happened. I already did.',
+    signatureColor: '#5F9EA0',
+  },
+  {
+    slug: 'lil_pulse_hawk',
+    callsign: 'Latency',
+    rank: 'specialist',
+    imagePath: '/hawks/shield/lil_pulse_hawk.png',
+    imageReady: true,
+    visualDescription:
+      'ACHIEVEMOR Shield Division — Blue Squad — Performance Guard, ' +
+      'Degradation Spectrum manager (v1.6). SLO monitoring, shadow pipeline ' +
+      'orchestration, four-stage autonomic throttle (Nominal/Congested/' +
+      'Degraded/Survival). Distinctive heartbeat-monitor display across ' +
+      'chestplate showing four vertical LED bars in sequence (green/yellow/' +
+      'orange/red — the Degradation Spectrum made visible). Olive plate ' +
+      'carrier with pulsing teal accent LEDs along the edge trim. Rhythm-' +
+      'keeper aesthetic with a small metronome-like pendant at chest center. ' +
+      'DEPLOY olive chevron. Pulsing teal eyes. Spinner in side holster. ' +
+      'Background: SLO monitoring wall with real-time latency graphs.',
+    gear: [
+      'Four-LED Degradation Spectrum chestplate display',
+      'Pulsing teal accent LED plate trim',
+      'Metronome pendant at chest',
+      'DEPLOY olive chevron',
+      'Spinner side holster',
+    ],
+    catchphrase: 'Mode 2. Holding. You won\'t notice the throttle.',
+    signatureColor: '#008B8B',
+  },
+];
+
+/**
  * Convenience: all Shield Division profiles landed so far.
- * Extend this as Waves 4-6 land their character files.
+ * Extend this as Waves 5-6 land their character files.
  */
 export const ALL_SHIELD_DIVISION_PROFILES: CharacterProfile[] = [
   ...SHIELD_DIVISION_WAVE_1,
   ...SHIELD_DIVISION_WAVE_2,
   ...SHIELD_DIVISION_WAVE_3,
+  ...SHIELD_DIVISION_WAVE_4,
 ];

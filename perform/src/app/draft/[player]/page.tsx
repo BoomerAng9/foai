@@ -10,6 +10,7 @@ import { getVerticalTierLabel } from '@/lib/tie/verticals';
 import { positionColor } from '@/lib/ui/positions';
 import { staggerContainer, staggerItem, heroStagger, heroItem, scrollReveal } from '@/lib/motion';
 import PaywallGate from '@/components/PaywallGate';
+import { AnonymousHelmet } from '@/components/cards/AnonymousHelmet';
 
 interface PlayerRow {
   id: number;
@@ -219,20 +220,16 @@ export default function PlayerDetailPage({ params }: { params: Promise<{ player:
                 {/* Left: Name block */}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-3 mb-2">
-                    {/* Headshot */}
-                    {headshotUrl ? (
-                      <div className="shrink-0 w-14 h-14 sm:w-16 sm:h-16 rounded-full overflow-hidden ring-2 ring-white/10">
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={headshotUrl} alt={data.name} className="w-full h-full object-cover" />
-                      </div>
-                    ) : (
-                      <div
-                        className="shrink-0 w-14 h-14 sm:w-16 sm:h-16 rounded-full flex items-center justify-center ring-2 ring-white/10 font-outfit font-bold text-lg"
-                        style={{ background: `${posColor}25`, color: posColor }}
-                      >
-                        {data.name.split(' ').map((n) => n[0]).join('').slice(0, 2)}
-                      </div>
-                    )}
+                    {/* Anonymous helmet silhouette — canonical Per|Form rendering.
+                        `headshotUrl` is intentionally ignored by default (faceless rule).
+                        Flip the AnonymousHelmet prop to `allowImage` when that toggle is
+                        ever shipped (not v1.0 scope). */}
+                    <div
+                      className="shrink-0 w-14 h-14 sm:w-16 sm:h-16 rounded-full flex items-center justify-center ring-2 ring-white/10 overflow-hidden"
+                      style={{ background: `${posColor}18` }}
+                    >
+                      <AnonymousHelmet accentColor={posColor} size={56} />
+                    </div>
                     <h1 className="font-outfit text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-white truncate">
                       {data.name}
                     </h1>
