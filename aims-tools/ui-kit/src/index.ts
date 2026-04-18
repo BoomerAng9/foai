@@ -60,3 +60,20 @@ export type {
   LegalDataRightsView,
   AcceptanceView,
 } from './components/CharterDetailView.js';
+
+export {
+  TeslaVortexPricingPicker,
+  TESLA_VORTEX_FREQUENCIES,
+  TESLA_VORTEX_GROUPS,
+  TESLA_VORTEX_PILLARS,
+} from './components/TeslaVortexPricingPicker.js';
+export type {
+  TeslaVortexPricingPickerProps,
+  TeslaVortexQuote,
+  TeslaVortexFrequency,
+  TeslaVortexGroup,
+  TeslaVortexPillarSelection,
+  ConfidencePillar,
+  ConveniencePillar,
+  SecurityPillar,
+} from './components/TeslaVortexPricingPicker.js';
