@@ -29,6 +29,7 @@ Before generating any component, the result must NOT look like:
 | `MelaniumBalanceWidget` | `src/components/MelaniumBalanceWidget.tsx` | Differentiated — three-band vertical card (Bebas Neue balance + mono Earned/Spent + canonical Savings Plan explainer). Neon only on balance number. No fintech icons, no gradient, no arrows | Customer account surfaces, Charter sidebars |
 | `DigitalMaintenanceFeeLineItem` | `src/components/DigitalMaintenanceFeeLineItem.tsx` | Differentiated — mono flex-row, label left + amount right, optional canonical explainer beneath, optional inline (info) affordance. No borders, no icon, no stripe — stacks into host receipt surface | Charter Quote/PO cost summary, invoices, transaction receipts |
 | `CharterDetailView` | `src/components/CharterDetailView.tsx` | Differentiated — 60/40 record-cover grid. Left: 11 sections in canonical order with Bebas Neue section numbers. Right: sticky metadata + pinned tracker + optional Melanium widget. BAMARAM signal flips the right rail's top edge neon. Dog-foods every prior component | The customer-facing engagement artifact — Charter pages across every surface |
+| `TeslaVortexPricingPicker` | `src/components/TeslaVortexPricingPicker.tsx` | Differentiated — three-zone vortex: Frequency (3/6/9 Bebas Neue cards with Axis-of-Balance label) × V.I.B.E. Group chips × 3 Pillars (Confidence Shield / Convenience Boost / Security Vault) stacking. Neon-top summary strip shows monthly total + pillar stack %. Enterprise flips to CUSTOM quote flow | A.I.M.S. core pricing pages — aimanagedsolutions.cloud, onboarding, upgrade flows |
 
 ## Usage
 
@@ -56,7 +57,7 @@ Per the 2026-04-17 arbitration + session 2026-04-17 UI queue:
 5. ✅ `PickerAngBomRenderer` — #201
 6. ✅ `MelaniumBalanceWidget` — #202
 7. ✅ `DigitalMaintenanceFeeLineItem` — #203
-8. ⬜ `TeslaVortexPricingPicker` — 3-6-9 A.I.M.S. core
+8. ✅ `TeslaVortexPricingPicker` — this PR
 9. ⬜ `PerformSportsPricingSelector` — BMAC/Lite/Medium/Heavy/Superior
 10. ⬜ `FiveUseCasesPack` — GROC-ranked card set
 11. ⬜ `TermsOfServicePage` — Charter-aware legal
