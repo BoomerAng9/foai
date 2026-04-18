@@ -27,6 +27,7 @@ Before generating any component, the result must NOT look like:
 | `RfpBamaramProgressTracker` | `src/components/RfpBamaramProgressTracker.tsx` | Differentiated — horizontal 10-dot rail with gate-status glyphs (✓ ⟳ ✗ ↑), neon ring on current, mono stage labels below, special BAMARAM! outline at stage 10 | Anywhere an engagement is surfaced — Charter detail, admin dashboards, PiP windows |
 | `PickerAngBomRenderer` | `src/components/PickerAngBomRenderer.tsx` | Differentiated — card stack with Bebas Neue tool names, three-bar IIR micro-meters (neon dot on highest axis), outlined Security Addendum below. Operates only on customer-safe BoM — internal-only relabels arrive pre-scrubbed and render identically to named tools | Charter detail, Commercial Proposal surface, admin drill-down |
 | `MelaniumBalanceWidget` | `src/components/MelaniumBalanceWidget.tsx` | Differentiated — three-band vertical card (Bebas Neue balance + mono Earned/Spent + canonical Savings Plan explainer). Neon only on balance number. No fintech icons, no gradient, no arrows | Customer account surfaces, Charter sidebars |
+| `DigitalMaintenanceFeeLineItem` | `src/components/DigitalMaintenanceFeeLineItem.tsx` | Differentiated — mono flex-row, label left + amount right, optional canonical explainer beneath, optional inline (info) affordance. No borders, no icon, no stripe — stacks into host receipt surface | Charter Quote/PO cost summary, invoices, transaction receipts |
 
 ## Usage
 
@@ -52,8 +53,8 @@ Per the 2026-04-17 arbitration + session 2026-04-17 UI queue:
 3. ⬜ `CharterDetailView` — 11-component Charter renderer
 4. ✅ `RfpBamaramProgressTracker` — #200
 5. ✅ `PickerAngBomRenderer` — #201
-6. ✅ `MelaniumBalanceWidget` — this PR
-7. ⬜ `DigitalMaintenanceFeeLineItem` — generic Charter line
+6. ✅ `MelaniumBalanceWidget` — #202
+7. ✅ `DigitalMaintenanceFeeLineItem` — this PR
 8. ⬜ `TeslaVortexPricingPicker` — 3-6-9 A.I.M.S. core
 9. ⬜ `PerformSportsPricingSelector` — BMAC/Lite/Medium/Heavy/Superior
 10. ⬜ `FiveUseCasesPack` — GROC-ranked card set

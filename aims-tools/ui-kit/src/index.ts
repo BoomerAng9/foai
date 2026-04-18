@@ -36,3 +36,11 @@ export type {
 
 export { MelaniumBalanceWidget } from './components/MelaniumBalanceWidget.js';
 export type { MelaniumBalanceWidgetProps } from './components/MelaniumBalanceWidget.js';
+
+export {
+  DigitalMaintenanceFeeLineItem,
+  DIGITAL_MAINTENANCE_FEE_AMOUNT,
+  DIGITAL_MAINTENANCE_FEE_LABEL,
+  DIGITAL_MAINTENANCE_FEE_EXPLAINER,
+} from './components/DigitalMaintenanceFeeLineItem.js';
+export type { DigitalMaintenanceFeeLineItemProps } from './components/DigitalMaintenanceFeeLineItem.js';
