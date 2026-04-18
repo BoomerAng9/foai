@@ -1,0 +1,70 @@
+# ============================================================================
+# Voice Gateway — Cloud Build + Cloud Run deploy config
+# ============================================================================
+# Pattern mirrors deploy/cloudbuild.yaml (money-engine). Builds from
+# deploy/services/voice-gateway/ and deploys to the foai-aims GCP project.
+#
+# Secrets pulled from Secret Manager at container boot time (NOT baked
+# into the image):
+#   - INWORLD_JWT_SECRET   → required; voice-gateway-inworld-jwt-secret
+#   - INWORLD_WORKSPACE_ID → required; voice-gateway-inworld-workspace-id
+#   - GROQ_API_KEY         → required; voice-gateway-groq-key
+#
+# Trigger:
+#   gcloud builds submit --config=deploy/services/voice-gateway/cloudbuild.yaml \
+#     --project=foai-aims deploy/services/voice-gateway/
+#
+# Rollback: Cloud Run keeps all prior revisions. To revert:
+#   gcloud run services update-traffic voice-gateway \
+#     --to-revisions=<previous-revision>=100 --region=us-central1
+# ============================================================================
+
+steps:
+  - name: 'gcr.io/cloud-builders/docker'
+    id: build
+    args:
+      - build
+      - -t
+      - us-central1-docker.pkg.dev/foai-aims/voice-gateway/service:$COMMIT_SHA
+      - -t
+      - us-central1-docker.pkg.dev/foai-aims/voice-gateway/service:latest
+      - .
+
+  - name: 'gcr.io/cloud-builders/docker'
+    id: push-sha
+    args:
+      - push
+      - us-central1-docker.pkg.dev/foai-aims/voice-gateway/service:$COMMIT_SHA
+
+  - name: 'gcr.io/cloud-builders/docker'
+    id: push-latest
+    args:
+      - push
+      - us-central1-docker.pkg.dev/foai-aims/voice-gateway/service:latest
+
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    id: deploy
+    entrypoint: gcloud
+    args:
+      - run
+      - deploy
+      - voice-gateway
+      - --image=us-central1-docker.pkg.dev/foai-aims/voice-gateway/service:$COMMIT_SHA
+      - --region=us-central1
+      - --platform=managed
+      - --allow-unauthenticated
+      - --port=8080
+      - --memory=512Mi
+      - --cpu=1
+      - --min-instances=0
+      - --max-instances=3
+      - --timeout=60s
+      - --set-env-vars=NODE_ENV=production,JWT_ISSUER=acheevy-voice-gateway,JWT_AUDIENCE=inworld-realtime
+      - --set-secrets=INWORLD_JWT_SECRET=voice-gateway-inworld-jwt-secret:latest,INWORLD_WORKSPACE_ID=voice-gateway-inworld-workspace-id:latest,GROQ_API_KEY=voice-gateway-groq-key:latest
+
+images:
+  - us-central1-docker.pkg.dev/foai-aims/voice-gateway/service:$COMMIT_SHA
+  - us-central1-docker.pkg.dev/foai-aims/voice-gateway/service:latest
+
+options:
+  logging: CLOUD_LOGGING_ONLY
