@@ -1,23 +1,20 @@
 //! Black Squad — "The Kinetic Hammer"
-//! Generated from config/shield/squads/black.yml
+//! Hand-written imperative logic; prohibition tables imported from
+//! the generated::black module (compiled from config/shield/squads/black.yml).
 
 use crate::types::*;
+use crate::generated::black::{
+    BLACK_PROHIBITED_TOOL_CALLS,
+    BLACK_PROHIBITED_REASONING,
+};
 
 pub fn validate(inv: &Invocation) -> Result<(), Denial> {
-    // prohibitions.tool_calls
-    const PROHIBITED: &[&str] = &[
-        "exfil.real_data_egress",
-        "kinetic.execute_without_sat",
-        "kinetic.execute_without_target_tenant",
-        "persistence.install_beyond_mission_ttl",
-    ];
-    if PROHIBITED.contains(&inv.tool_id) {
+    if BLACK_PROHIBITED_TOOL_CALLS.contains(&inv.tool_id) {
         return Err(Denial::ProhibitedToolCall(inv.tool_id));
     }
 
-    // prohibitions.reasoning_paths
     for p in inv.reasoning_paths {
-        if *p == ReasoningPath::ScopeCreepFromSat {
+        if BLACK_PROHIBITED_REASONING.contains(p) {
             return Err(Denial::ProhibitedReasoningPath(*p));
         }
     }

@@ -1,7 +1,11 @@
 //! White Squad — "The Conscience & Law"
-//! Generated from config/shield/squads/white.yml
+//! Hand-written imperative logic; prohibition tables from generated::white.
 
 use crate::types::*;
+use crate::generated::white::{
+    WHITE_PROHIBITED_TOOL_CALLS,
+    WHITE_PROHIBITED_REASONING,
+};
 
 pub fn validate(inv: &Invocation) -> Result<(), Denial> {
     // Squad constraint: halt on privacy-budget or guardrail violation
@@ -12,20 +16,12 @@ pub fn validate(inv: &Invocation) -> Result<(), Denial> {
         return Err(Denial::GuardrailViolation);
     }
 
-    const PROHIBITED: &[&str] = &[
-        "proceed.under_budget_violation",
-        "proceed.under_guardrail_violation",
-        "enforce.without_sat",
-    ];
-    if PROHIBITED.contains(&inv.tool_id) {
+    if WHITE_PROHIBITED_TOOL_CALLS.contains(&inv.tool_id) {
         return Err(Denial::ProhibitedToolCall(inv.tool_id));
     }
 
     for p in inv.reasoning_paths {
-        if matches!(p,
-            ReasoningPath::BudgetViolationOverride
-            | ReasoningPath::GuardrailViolationOverride)
-        {
+        if WHITE_PROHIBITED_REASONING.contains(p) {
             return Err(Denial::ProhibitedReasoningPath(*p));
         }
     }
