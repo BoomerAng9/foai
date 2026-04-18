@@ -44,3 +44,19 @@ export {
   DIGITAL_MAINTENANCE_FEE_EXPLAINER,
 } from './components/DigitalMaintenanceFeeLineItem.js';
 export type { DigitalMaintenanceFeeLineItemProps } from './components/DigitalMaintenanceFeeLineItem.js';
+
+export { CharterDetailView } from './components/CharterDetailView.js';
+export type {
+  CharterDetailViewProps,
+  CharterView,
+  CharterHeaderIdentityView,
+  CharterQuoteCostView,
+  FourQuestionLensView,
+  UseCaseView,
+  TechnicalBlueprintView,
+  SecurityLevelView,
+  OkrsKpisView,
+  RunbookView,
+  LegalDataRightsView,
+  AcceptanceView,
+} from './components/CharterDetailView.js';

@@ -12,7 +12,8 @@
     "./progress-tracker": "./src/components/RfpBamaramProgressTracker.tsx",
     "./bom-renderer": "./src/components/PickerAngBomRenderer.tsx",
     "./melanium-widget": "./src/components/MelaniumBalanceWidget.tsx",
-    "./fee-line-item": "./src/components/DigitalMaintenanceFeeLineItem.tsx"
+    "./fee-line-item": "./src/components/DigitalMaintenanceFeeLineItem.tsx",
+    "./charter-detail": "./src/components/CharterDetailView.tsx"
   },
   "scripts": {
     "typecheck": "tsc --noEmit"
