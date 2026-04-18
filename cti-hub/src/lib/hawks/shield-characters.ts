@@ -349,10 +349,164 @@ export const SHIELD_DIVISION_WAVE_2: CharacterProfile[] = [
 ];
 
 /**
+ * Wave 3 — the rest of Black Squad (Captain, Specs, Tagger, Spider,
+ * Proof). Combined with Wave 1's Reaper this completes the 6-Hawk
+ * Black Squad. All archetypal personas — Ideogram V3 route.
+ *
+ * Palette: matte-black + gunmetal + tactical-dark-green accents.
+ * No platinum (reserved for Gold & Platinum Squad).
+ */
+export const SHIELD_DIVISION_WAVE_3: CharacterProfile[] = [
+  {
+    slug: 'lil_hook_hawk',
+    callsign: 'Captain',
+    rank: 'specialist',
+    imagePath: '/hawks/shield/lil_hook_hawk.png',
+    imageReady: true,
+    visualDescription:
+      'ACHIEVEMOR Shield Division — Black Squad — Mission Orchestrator and ' +
+      'squad lead. Manages the attack lifecycle, SAT coordination, ' +
+      'decomposes engagements, assembles proof packages. Matte-black ' +
+      'tactical plate carrier with gunmetal accents, slightly more decorated ' +
+      'than peer Black Squad operators (subtle captain\'s rank insignia on ' +
+      'collar — two small black bars). SAT authorization pouch visible on ' +
+      'hip (he carries the mission warrants). Tactical command earpiece ' +
+      'and small wrist-mounted mission tablet. Black-anodized A.I.M.S. ' +
+      'chestplate. DEPLOY chevron on right shoulder in olive. Sharp ' +
+      'steel-blue eyes, decisive commanding posture. Spinner in ' +
+      'quick-draw chest-rig. Background: sealed Black Squad wing at mission ' +
+      'briefing moment, dim amber alert lighting.',
+    gear: [
+      'Black-anodized A.I.M.S. chestplate',
+      'SAT authorization pouch on hip',
+      'Captain rank insignia on collar',
+      'Wrist-mounted mission tablet',
+      'Spinner quick-draw chest-rig',
+    ],
+    catchphrase: 'Engagement authorized. Move.',
+    signatureColor: '#2C2C2C',
+  },
+  {
+    slug: 'lil_recon_hawk',
+    callsign: 'Specs',
+    rank: 'specialist',
+    imagePath: '/hawks/shield/lil_recon_hawk.png',
+    imageReady: true,
+    visualDescription:
+      'ACHIEVEMOR Shield Division — Black Squad — Payload Architect. ' +
+      'Crafts context-specific exploit payloads, passive OSINT collection, ' +
+      'technology fingerprinting. Technical-operator look: thick specialized ' +
+      'multi-lens magnification rig on helmet above the standard 3-tube ' +
+      'NVG (the kunya "Specs" made literal — several auxiliary lenses for ' +
+      'close inspection work). Matte-black tactical plate carrier with ' +
+      'visible tool pouches for code-craft work, small screen modules on ' +
+      'forearm. Black-anodized A.I.M.S. chestplate with subtle circuit-' +
+      'pattern etching. DEPLOY chevron in olive. Analytical bright-green ' +
+      'eyes, intense focused posture. Spinner in side holster. Background: ' +
+      'dim workshop with half-finished payload schematics on monitors.',
+    gear: [
+      'Multi-lens magnification helmet rig',
+      'Black-anodized A.I.M.S. chestplate with circuit-pattern etching',
+      'Forearm screen modules',
+      'Tool-pouch plate carrier',
+      'Spinner side holster',
+    ],
+    catchphrase: 'I wrote the key before they locked the door.',
+    signatureColor: '#3A3A3A',
+  },
+  {
+    slug: 'lil_tag_hawk',
+    callsign: 'Tagger',
+    rank: 'specialist',
+    imagePath: '/hawks/shield/lil_tag_hawk.png',
+    imageReady: true,
+    visualDescription:
+      'ACHIEVEMOR Shield Division — Black Squad — Reconnaissance. High-' +
+      'speed asset discovery, active scanning, CVE matching, attack-' +
+      'surface tagging. Lighter-kit mobile operator — less bulky armor ' +
+      'than peers, more mobility-focused. Multiple small tagging-marker ' +
+      'pouches across a streamlined chest rig (kunya "Tagger" → marker ' +
+      'metaphor, the tags are cryptographic CVE-stamps he leaves on ' +
+      'discovered targets). Compact 3-tube NVG helmet. Matte-black plate ' +
+      'carrier, DEPLOY chevron in olive. Quick-motion amber eyes with ' +
+      'wide peripheral awareness. Spinner in side holster. Background: ' +
+      'broad attack-surface map with discovered nodes highlighted.',
+    gear: [
+      'Lightweight streamlined chest rig',
+      'Multiple tagging-marker pouches',
+      'Compact 3-tube NVG',
+      'DEPLOY olive chevron',
+      'Spinner side holster',
+    ],
+    catchphrase: 'Tagged, logged, and on your asset inventory before coffee.',
+    signatureColor: '#4B5320',
+  },
+  {
+    slug: 'lil_site_hawk',
+    callsign: 'Spider',
+    rank: 'specialist',
+    imagePath: '/hawks/shield/lil_site_hawk.png',
+    imageReady: true,
+    visualDescription:
+      'ACHIEVEMOR Shield Division — Black Squad — Lateral Movement ' +
+      'specialist. Pivoting between network segments, privilege ' +
+      'escalation, Active Directory enumeration, cloud lateral movement. ' +
+      'Multi-point tactical harness with eight small gear nodes ' +
+      'distributed across torso in a spider-geometry pattern (the kunya ' +
+      'made subtle — not literal eight legs, just an 8-node gear ' +
+      'distribution). Dark-pattern camouflage overlay on matte-black ' +
+      'plate carrier. Compact climbing-aid kit on belt. A.I.M.S. ' +
+      'chestplate in black-anodized finish. DEPLOY chevron in olive. ' +
+      'Alert all-around-aware dark-green eyes. Spinner in side holster. ' +
+      'Background: server room with cables running toward the ceiling, ' +
+      'suggesting vertical movement paths.',
+    gear: [
+      'Multi-point 8-node tactical harness',
+      'Black-anodized A.I.M.S. chestplate',
+      'Dark-pattern camouflage overlay',
+      'Climbing-aid belt kit',
+      'Spinner side holster',
+    ],
+    catchphrase: 'Three hops deep before your alert fires.',
+    signatureColor: '#1B1B1B',
+  },
+  {
+    slug: 'lil_test_hawk',
+    callsign: 'Proof',
+    rank: 'specialist',
+    imagePath: '/hawks/shield/lil_test_hawk.png',
+    imageReady: true,
+    visualDescription:
+      'ACHIEVEMOR Shield Division — Black Squad — Exfiltration Testing. ' +
+      'Bypasses DLP, egress filters, data boundary controls. Captures ' +
+      'proof artifacts via SIMULATED (never real) exfiltration. Compact ' +
+      'evidence-carrier rig on chest — looks like a sealed archival ' +
+      'case with tamper-evident markers (these are proof artifacts, not ' +
+      'stolen data). Small chest-mounted capture device with a single ' +
+      'green recording indicator. Matte-black plate carrier, A.I.M.S. ' +
+      'chestplate in anodized finish. DEPLOY olive chevron. Piercing ' +
+      'ice-blue eyes that read as seeing-through-controls. Subversive ' +
+      'but composed posture. Spinner in side holster. Background: egress ' +
+      'boundary checkpoint being bypassed, telemetry panels showing ' +
+      'green (control systems unaware).',
+    gear: [
+      'Sealed evidence-carrier chest case',
+      'Capture device with green recording indicator',
+      'Black-anodized A.I.M.S. chestplate',
+      'DEPLOY olive chevron',
+      'Spinner side holster',
+    ],
+    catchphrase: 'I didn\'t take it. I just proved you could.',
+    signatureColor: '#242424',
+  },
+];
+
+/**
  * Convenience: all Shield Division profiles landed so far.
- * Extend this as Waves 3-6 land their character files.
+ * Extend this as Waves 4-6 land their character files.
  */
 export const ALL_SHIELD_DIVISION_PROFILES: CharacterProfile[] = [
   ...SHIELD_DIVISION_WAVE_1,
   ...SHIELD_DIVISION_WAVE_2,
+  ...SHIELD_DIVISION_WAVE_3,
 ];
