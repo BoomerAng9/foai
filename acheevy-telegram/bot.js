@@ -18,6 +18,13 @@
  */
 
 const TelegramBot = require('node-telegram-bot-api');
+const {
+  scrubForCustomer,
+  createRfpIntake,
+  getEngagementStatus,
+  STAGE_LABELS,
+  STAGE_ORDINALS,
+} = require('./rfp-bamaram');
 
 const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
 const OPENROUTER_KEY = process.env.OPENROUTER_API_KEY;
@@ -107,6 +114,8 @@ bot.onText(/\/start/, (msg) => {
     `*Welcome to ACHEEVY* — The Deploy Platform\n\n` +
     `Hey ${name}. I'm your Digital CEO. Here's what I can do:\n\n` +
     `• *Ask me anything* — just type your question\n` +
+    `• */rfp <brief>* — open a new commercial engagement\n` +
+    `• */engagement <id>* — check engagement status\n` +
     `• */deploy* — start a deployment request\n` +
     `• */broadcast* — create a video scene\n` +
     `• */status* — platform health check\n\n` +
@@ -148,7 +157,7 @@ bot.onText(/\/deploy (.+)/, async (msg, match) => {
 
   session.messages.push({ role: 'user', content: `I want to deploy: ${request}. Give me a quick plan — what agents will handle this, estimated timeline, and next steps.` });
 
-  const response = await callLLM(session.messages.slice(-10));
+  const response = scrubForCustomer(await callLLM(session.messages.slice(-10)));
   session.messages.push({ role: 'assistant', content: response });
 
   bot.sendMessage(chatId, response, { parse_mode: 'Markdown' });
@@ -163,10 +172,93 @@ bot.onText(/\/broadcast (.+)/, async (msg, match) => {
 
   session.messages.push({ role: 'user', content: `[Broad|Cast Studio] I want to create a video scene: ${vision}. Interpret this cinematically — suggest camera, lens, lighting, movement, film profile. Give me the creative direction.` });
 
-  const response = await callLLM(session.messages.slice(-10));
+  const response = scrubForCustomer(await callLLM(session.messages.slice(-10)));
   session.messages.push({ role: 'assistant', content: response });
 
   bot.sendMessage(chatId, response, { parse_mode: 'Markdown' });
+});
+
+// ── RFP → BAMARAM commands ──
+//
+// /rfp <brief>        Opens a Charter + Ledger engagement (Step 1).
+// /engagement <id>    Returns customer-safe status for the engagement.
+//
+// The Charter is customer-facing; the Ledger stays internal. See
+// rfp-bamaram.js for the DB-level implementation. Outbound copy goes
+// through scrubForCustomer to prevent internal-name leaks.
+
+bot.onText(/\/rfp\s+([\s\S]+)/i, async (msg, match) => {
+  const chatId = msg.chat.id;
+  const brief = (match?.[1] ?? '').trim();
+  if (brief.length === 0) {
+    return bot.sendMessage(
+      chatId,
+      '*Usage:* `/rfp <describe what you need>`\n\n' +
+        'Example: `/rfp 25-QB NIL-compliant recruiting fleet, delivery Dec 1`',
+      { parse_mode: 'Markdown' },
+    );
+  }
+
+  bot.sendChatAction(chatId, 'typing');
+
+  try {
+    const result = await createRfpIntake({
+      brief,
+      telegramUserId: msg.from?.id ?? chatId,
+      telegramHandle: msg.from?.username ?? null,
+    });
+    const reply =
+      `*Engagement opened.*\n\n` +
+      `• ID: \`${result.engagementId}\`\n` +
+      `• Stage: 1/10 — Intake received\n` +
+      `• Next: we'll draft a response to your brief and come back with scope.\n\n` +
+      `Track it anytime with \`/engagement ${result.engagementId}\`.`;
+    return bot.sendMessage(chatId, scrubForCustomer(reply), { parse_mode: 'Markdown' });
+  } catch (err) {
+    console.error('[/rfp] error:', err.message);
+    return bot.sendMessage(
+      chatId,
+      'I could not open the engagement right now. Please try again shortly.',
+    );
+  }
+});
+
+bot.onText(/\/engagement\s+([0-9a-f-]{36})/i, async (msg, match) => {
+  const chatId = msg.chat.id;
+  const id = match?.[1];
+  if (!id) {
+    return bot.sendMessage(chatId, '*Usage:* `/engagement <id>`', {
+      parse_mode: 'Markdown',
+    });
+  }
+
+  bot.sendChatAction(chatId, 'typing');
+
+  try {
+    const status = await getEngagementStatus(id);
+    if (!status) {
+      return bot.sendMessage(chatId, 'No engagement found with that ID.');
+    }
+    const gate =
+      status.hitlGateStatus === 'approved'
+        ? '✅ approved'
+        : status.hitlGateStatus === 'pending'
+          ? '⏳ pending your approval'
+          : status.hitlGateStatus === 'rejected'
+            ? '✗ rejected'
+            : '↑ escalated';
+    const reply =
+      `*Engagement \`${id.slice(0, 8)}…\`*\n\n` +
+      `• Stage: ${status.stageOrdinal}/10 — ${status.label}\n` +
+      `• Gate: ${gate}\n` +
+      `• Opened: ${new Date(status.createdAt).toLocaleString()}`;
+    return bot.sendMessage(chatId, scrubForCustomer(reply), {
+      parse_mode: 'Markdown',
+    });
+  } catch (err) {
+    console.error('[/engagement] error:', err.message);
+    return bot.sendMessage(chatId, 'Status lookup failed. Please try again shortly.');
+  }
 });
 
 // ── General messages ──
@@ -187,7 +279,7 @@ bot.on('message', async (msg) => {
     session.messages = session.messages.slice(-14);
   }
 
-  const response = await callLLM(session.messages.slice(-10));
+  const response = scrubForCustomer(await callLLM(session.messages.slice(-10)));
   session.messages.push({ role: 'assistant', content: response });
 
   // Split long messages for Telegram (4096 char limit)
