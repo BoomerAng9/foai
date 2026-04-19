@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@aims/pricing-matrix": "file:../aims-tools/aims-pricing-matrix",
     "@aims/spinner": "file:../aims-tools/spinner",
     "@aims/tie-matrix": "file:../aims-tools/tie-matrix",
     "@dnd-kit/core": "^6.3.1",
