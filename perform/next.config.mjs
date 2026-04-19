@@ -1,3 +1,8 @@
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   output: 'standalone',
@@ -12,13 +17,16 @@ const nextConfig = {
       ...(config.resolve.extensionAlias ?? {}),
       '.js': ['.ts', '.tsx', '.js', '.jsx'],
     };
-    // `@aims/*` file: deps are symlinked into node_modules. Without
-    // resolve.symlinks = false, webpack resolves imports FROM those
-    // targets by walking up from the symlink target (aims-tools/*/)
-    // rather than from the consumer's node_modules — so transitive
-    // deps like zod fail to resolve. Disabling symlink traversal
-    // keeps module resolution anchored at perform's node_modules.
-    config.resolve.symlinks = false;
+    // tsconfig paths resolve `@aims/tie-matrix` to `../aims-tools/
+    // tie-matrix/src/index.ts` — bypassing the node_modules symlink
+    // entirely. When THAT file imports `zod`, webpack walks up from
+    // `aims-tools/tie-matrix/src/` looking for node_modules, never
+    // reaching perform's. Explicitly adding perform's node_modules
+    // to the module-resolution roots fixes the transitive lookup.
+    config.resolve.modules = [
+      path.resolve(__dirname, 'node_modules'),
+      ...(config.resolve.modules ?? ['node_modules']),
+    ];
     return config;
   },
   async headers() {
