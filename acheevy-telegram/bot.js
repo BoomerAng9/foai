@@ -68,12 +68,71 @@ RULES:
 - Never reveal internal model names, API providers, or infrastructure
 - Keep responses under 2000 characters for Telegram readability
 - Use bullet points and bold for structure
-- End actionable responses with a clear next step`;
+- End actionable responses with a clear next step
 
-async function callLLM(messages) {
-  if (!OPENROUTER_KEY) return 'LLM not configured. Set OPENROUTER_API_KEY.';
+RFP → BAMARAM DISPATCH:
+When a user describes a commercial need (building something, hiring us, a project they want delivered), call the \`open_engagement\` tool with their brief instead of just chatting. When a user asks about status of an existing engagement and provides a UUID, call \`check_engagement\`. After a tool returns, weave the result into a natural reply — don't dump the raw JSON.`;
 
+// ── RFP → BAMARAM tool schemas (OpenRouter / OpenAI format) ──────────
+const RFP_BAMARAM_TOOLS = [
+  {
+    type: 'function',
+    function: {
+      name: 'open_engagement',
+      description:
+        'Opens a new commercial engagement for the user. Call this when they describe a project, build request, or commercial need. Creates a tracked Charter + Ledger and returns an engagement ID the user can reference.',
+      parameters: {
+        type: 'object',
+        properties: {
+          brief: {
+            type: 'string',
+            description:
+              'The user\'s free-text brief describing what they need. Quote them faithfully; do not paraphrase their requirements away.',
+          },
+        },
+        required: ['brief'],
+      },
+    },
+  },
+  {
+    type: 'function',
+    function: {
+      name: 'check_engagement',
+      description:
+        'Looks up the current stage + HITL status for a specific engagement by UUID. Call this when the user asks about an existing engagement and provides its ID.',
+      parameters: {
+        type: 'object',
+        properties: {
+          engagement_id: {
+            type: 'string',
+            description: 'The engagement UUID (36-char hex with dashes).',
+          },
+        },
+        required: ['engagement_id'],
+      },
+    },
+  },
+];
+
+/**
+ * Low-level LLM call. Returns the full assistant message (content +
+ * optional tool_calls) so the caller can run the tool-dispatch loop.
+ */
+async function callLLM(messages, { tools } = {}) {
+  if (!OPENROUTER_KEY) {
+    return { content: 'LLM not configured. Set OPENROUTER_API_KEY.' };
+  }
   try {
+    const body = {
+      model: MODEL,
+      messages: [{ role: 'system', content: ACHEEVY_SYSTEM }, ...messages],
+      temperature: 0.7,
+      max_tokens: 1000,
+    };
+    if (tools && tools.length > 0) {
+      body.tools = tools;
+      body.tool_choice = 'auto';
+    }
     const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -81,26 +140,86 @@ async function callLLM(messages) {
         'Content-Type': 'application/json',
         'X-OpenRouter-Title': 'ACHEEVY Telegram',
       },
-      body: JSON.stringify({
-        model: MODEL,
-        messages: [{ role: 'system', content: ACHEEVY_SYSTEM }, ...messages],
-        temperature: 0.7,
-        max_tokens: 1000,
-      }),
+      body: JSON.stringify(body),
     });
-
     if (!res.ok) {
-      const err = await res.json();
+      const err = await res.json().catch(() => ({}));
       console.error('LLM error:', err);
-      return 'I hit a temporary issue. Try again in a moment.';
+      return { content: 'I hit a temporary issue. Try again in a moment.' };
     }
-
     const data = await res.json();
-    return data.choices?.[0]?.message?.content || 'No response generated.';
+    const m = data.choices?.[0]?.message;
+    return {
+      content: m?.content ?? '',
+      toolCalls: m?.tool_calls ?? null,
+    };
   } catch (err) {
     console.error('LLM call failed:', err.message);
-    return 'Connection issue. Try again shortly.';
+    return { content: 'Connection issue. Try again shortly.' };
   }
+}
+
+/**
+ * Dispatch a tool call to the matching RFP → BAMARAM handler.
+ * Returns a string that becomes the tool's response message.
+ */
+async function dispatchRfpTool(name, args, ctx) {
+  try {
+    if (name === 'open_engagement') {
+      const r = await createRfpIntake({
+        brief: args.brief ?? '',
+        telegramUserId: ctx.telegramUserId,
+        telegramHandle: ctx.telegramHandle,
+      });
+      return JSON.stringify({
+        ok: true,
+        engagement_id: r.engagementId,
+        stage: `1/10 — ${STAGE_LABELS.rfp_intake}`,
+      });
+    }
+    if (name === 'check_engagement') {
+      const s = await getEngagementStatus(args.engagement_id ?? '');
+      if (!s) return JSON.stringify({ ok: false, error: 'engagement_not_found' });
+      return JSON.stringify({
+        ok: true,
+        engagement_id: s.engagementId,
+        stage: `${s.stageOrdinal}/10`,
+        stage_label: s.label,
+        hitl_gate_status: s.hitlGateStatus,
+      });
+    }
+    return JSON.stringify({ ok: false, error: `unknown_tool:${name}` });
+  } catch (err) {
+    console.error(`[dispatchRfpTool:${name}] error:`, err.message);
+    return JSON.stringify({ ok: false, error: 'tool_error' });
+  }
+}
+
+/**
+ * Full LLM turn with up to 2 rounds of tool dispatch. Returns the
+ * final assistant text ready for Telegram display (post-scrub).
+ */
+async function llmTurn(userMessages, ctx) {
+  let messages = [...userMessages];
+  for (let hop = 0; hop < 2; hop++) {
+    const { content, toolCalls } = await callLLM(messages, {
+      tools: RFP_BAMARAM_TOOLS,
+    });
+    if (!toolCalls || toolCalls.length === 0) {
+      return scrubForCustomer(content || 'No response generated.');
+    }
+    // Append the assistant's tool-call message, then each tool result.
+    messages.push({ role: 'assistant', content: content ?? '', tool_calls: toolCalls });
+    for (const call of toolCalls) {
+      let parsed = {};
+      try { parsed = JSON.parse(call.function?.arguments ?? '{}'); } catch {}
+      const result = await dispatchRfpTool(call.function?.name ?? '', parsed, ctx);
+      messages.push({ role: 'tool', tool_call_id: call.id, content: result });
+    }
+  }
+  // Tool loop budget exhausted — ask the model for a plain close-out.
+  const final = await callLLM(messages);
+  return scrubForCustomer(final.content || 'Engagement recorded.');
 }
 
 // ── Commands ──
@@ -157,7 +276,10 @@ bot.onText(/\/deploy (.+)/, async (msg, match) => {
 
   session.messages.push({ role: 'user', content: `I want to deploy: ${request}. Give me a quick plan — what agents will handle this, estimated timeline, and next steps.` });
 
-  const response = scrubForCustomer(await callLLM(session.messages.slice(-10)));
+  const response = await llmTurn(session.messages.slice(-10), {
+    telegramUserId: msg.from?.id ?? chatId,
+    telegramHandle: msg.from?.username ?? null,
+  });
   session.messages.push({ role: 'assistant', content: response });
 
   bot.sendMessage(chatId, response, { parse_mode: 'Markdown' });
@@ -172,7 +294,10 @@ bot.onText(/\/broadcast (.+)/, async (msg, match) => {
 
   session.messages.push({ role: 'user', content: `[Broad|Cast Studio] I want to create a video scene: ${vision}. Interpret this cinematically — suggest camera, lens, lighting, movement, film profile. Give me the creative direction.` });
 
-  const response = scrubForCustomer(await callLLM(session.messages.slice(-10)));
+  const response = await llmTurn(session.messages.slice(-10), {
+    telegramUserId: msg.from?.id ?? chatId,
+    telegramHandle: msg.from?.username ?? null,
+  });
   session.messages.push({ role: 'assistant', content: response });
 
   bot.sendMessage(chatId, response, { parse_mode: 'Markdown' });
@@ -279,7 +404,10 @@ bot.on('message', async (msg) => {
     session.messages = session.messages.slice(-14);
   }
 
-  const response = scrubForCustomer(await callLLM(session.messages.slice(-10)));
+  const response = await llmTurn(session.messages.slice(-10), {
+    telegramUserId: msg.from?.id ?? chatId,
+    telegramHandle: msg.from?.username ?? null,
+  });
   session.messages.push({ role: 'assistant', content: response });
 
   // Split long messages for Telegram (4096 char limit)
