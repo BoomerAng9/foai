@@ -12,17 +12,42 @@ concurrency:
 
 jobs:
   # -----------------------------------------------------------------------
-  # Node.js projects — build check
+  # Node.js apps (perform / cti-hub / deploy/services/*) are intentionally
+  # NOT built here.
+  #
+  # Those apps ship via Cloud Build → Cloud Run (see deploy/cloudbuild.yaml
+  # and per-service cloudbuild.yaml files). GitHub Actions is not the
+  # deploy-verification surface for them; Cloud Build is the canonical
+  # pre-deploy gate.
+  #
+  # Library packages (@aims/*) ARE verified here — see aims-tools-tests
+  # below, since those packages don't deploy on their own.
   # -----------------------------------------------------------------------
-  node-build:
-    name: "Node.js Build (${{ matrix.project }})"
+
+  # -----------------------------------------------------------------------
+  # @aims/* package unit tests — pure, DB-free, no npm install required.
+  #
+  # These packages use `npx tsx --test` and consume cross-package types
+  # via type-only imports (stripped at load time). That lets us skip
+  # per-package `npm install` entirely, which matters because several
+  # packages declare `"@aims/contracts": "*"` — a workspace wildcard
+  # that npm can't resolve without a workspace root.
+  #
+  # When you add a new `@aims/*` package with a `test` script:
+  #   1. Verify the tests run with ONLY `npx tsx --test` (no node_modules)
+  #   2. Append the package name to the matrix below
+  # -----------------------------------------------------------------------
+  aims-tools-tests:
+    name: "aims-tools Tests (${{ matrix.package }})"
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
         include:
-          - project: perform
-            path: perform
+          - package: melanium        # Gate 7 — 70/30 split + fee projection
+          - package: picker-ang      # Gate 7 — IIR scoring
+          - package: tool-warehouse  # Gate 7 — customer-copy leak prevention
+          - package: forms           # Gate 5 — NIL contract reviewer
 
     steps:
       - uses: actions/checkout@v4
@@ -31,24 +56,15 @@ jobs:
         with:
           node-version: "22"
 
-      - name: Install dependencies
-        working-directory: ${{ matrix.path }}
-        run: |
-          if [ -f "pnpm-lock.yaml" ]; then
-            corepack enable
-            pnpm install --frozen-lockfile
-          elif [ -f "package-lock.json" ]; then
-            npm ci
-          else
-            npm install
-          fi
+      - name: Install tsx globally
+        # tsx resolves .ts files + strips type-only imports without
+        # requiring per-package node_modules. Single global install
+        # covers every package in the matrix.
+        run: npm install -g tsx@^4.19.0
 
-      - name: Build
-        working-directory: ${{ matrix.path }}
-        run: npm run build
-        env:
-          # Suppress Next.js telemetry
-          NEXT_TELEMETRY_DISABLED: "1"
+      - name: Run tests
+        working-directory: aims-tools/${{ matrix.package }}
+        run: tsx --test src/__tests__/*.test.ts
 
   # -----------------------------------------------------------------------
   # Python runtime — tests
