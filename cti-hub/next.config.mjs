@@ -10,6 +10,18 @@ const nextConfig = {
   turbopack: {
     root: projectRoot,
   },
+  // `@aims/*` packages are raw TypeScript (no build step) consumed via
+  // file: deps + tsconfig paths. transpilePackages runs them through SWC;
+  // extensionAlias maps `.js` → `.ts` so their barrels (which use ESM
+  // `./types.js`-style imports) resolve against the actual source files.
+  transpilePackages: ['@aims/pricing-matrix', '@aims/spinner'],
+  webpack: (config) => {
+    config.resolve.extensionAlias = {
+      ...(config.resolve.extensionAlias ?? {}),
+      '.js': ['.ts', '.tsx', '.js', '.jsx'],
+    };
+    return config;
+  },
   async headers() {
     return [
       {
