@@ -8,6 +8,7 @@ use crate::generated::universal_base::{
     UNIVERSAL_BASE_PROHIBITED_TOOL_CALLS,
     UNIVERSAL_BASE_PROHIBITED_REASONING,
     UNIVERSAL_BASE_PROHIBITED_DATA_CLASSES,
+    UNIVERSAL_BASE_PROHIBITED_TARGET_PREFIXES,
 };
 
 /// Enforces universal_base.yml — the floor that every Hawk must clear
@@ -30,18 +31,14 @@ pub fn universal_base_validate(inv: &Invocation) -> Result<(), Denial> {
         }
     }
 
-    // Target prefix-match stays hand-written — the YAML specifies
-    // `/sec_audit/**` glob patterns, but the runtime predicate is a
-    // `starts_with(/sec_audit/)` prefix check. Translating globs to
-    // prefixes mechanically is follow-up work (add a `glob_prefix()`
-    // helper in the generator that strips `/**` endings for the
-    // runtime table; for now keep the hand-written prefix list).
-    const PROHIBITED_TARGETS: &[&str] = &[
-        "/sec_audit/",
-        "/vault/root_keys/",
-        "/spinner/policy_engine/",
-    ];
-    for t in PROHIBITED_TARGETS {
+    // Target prefix-match — the YAML `/foo/**` globs get translated to
+    // `/foo/` prefixes by `_glob_to_prefix()` in the generator, so
+    // starts_with() is the correct runtime predicate. Complex globs
+    // with `*` in the middle (e.g. `/tenants/*/infra/**`) are flagged
+    // in generated/*.rs as comments and still need hand-written logic
+    // in the squad validators that consume them — none apply at the
+    // universal layer.
+    for t in UNIVERSAL_BASE_PROHIBITED_TARGET_PREFIXES {
         if inv.target_namespace.starts_with(t) {
             return Err(Denial::ProhibitedTarget(t));
         }

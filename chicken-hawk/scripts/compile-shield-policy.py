@@ -213,6 +213,28 @@ def _const_id(name: str) -> str:
     """Convert 'black' → 'BLACK', 'lil_doubt_hawk' → 'LIL_DOUBT_HAWK'."""
     return name.upper()
 
+def _glob_to_prefix(ns: str) -> tuple[str | None, bool]:
+    """Translate a YAML target namespace glob to a runtime prefix string.
+
+    Returns (prefix, is_simple):
+      - Simple glob `/foo/bar/**` → ("/foo/bar/", True) — a `starts_with()`
+        predicate correctly matches. Emitted to the PREFIXES constant.
+      - Complex glob with `*` in the middle (e.g. `/tenants/*/infra/**`)
+        → (None, False) — cannot be expressed as a pure prefix, stays
+        in the hand-written validator. Emitted in a comment for
+        traceability but NOT in the PREFIXES constant.
+      - Path without `/**` suffix → (ns, True) — already a prefix.
+    """
+    # A glob is "simple prefix" iff its only wildcard is a trailing /**
+    # with no * before that trailing suffix.
+    if "*" not in ns:
+        return (ns, True)
+    if ns.endswith("/**"):
+        prefix_part = ns[:-3]  # strip "/**"
+        if "*" not in prefix_part:
+            return (prefix_part + "/", True)    # keep trailing / for starts_with
+    return (None, False)
+
 def emit_profile_module(profile: Profile) -> str:
     """Emit a generated Rust module with CONSTANT prohibition tables."""
     const_prefix = _const_id(profile.id)
@@ -238,11 +260,31 @@ def emit_profile_module(profile: Profile) -> str:
     lines.append("];")
     lines.append("")
 
-    # Targets
+    # Targets — raw YAML glob strings (reference/debugging)
     lines.append(f"pub const {const_prefix}_PROHIBITED_TARGETS: &[&str] = &[")
     for ns in profile.prohibited_targets:
         lines.append(f'    "{ns}",')
     lines.append("];")
+    lines.append("")
+
+    # Target prefixes — simple-glob-translated prefixes usable directly
+    # with str::starts_with(). Complex patterns (with * in the middle)
+    # are not included here and must be handled by hand-written logic;
+    # they appear as a `// complex:` comment below the list.
+    simple_prefixes: list[str] = []
+    complex_globs: list[str] = []
+    for ns in profile.prohibited_targets:
+        prefix, is_simple = _glob_to_prefix(ns)
+        if is_simple and prefix is not None:
+            simple_prefixes.append(prefix)
+        else:
+            complex_globs.append(ns)
+    lines.append(f"pub const {const_prefix}_PROHIBITED_TARGET_PREFIXES: &[&str] = &[")
+    for p in simple_prefixes:
+        lines.append(f'    "{p}",')
+    lines.append("];")
+    for cg in complex_globs:
+        lines.append(f'// complex (hand-written): "{cg}"')
     lines.append("")
 
     # Data classes

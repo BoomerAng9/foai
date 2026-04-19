@@ -16,6 +16,9 @@ pub const BLUE_PROHIBITED_REASONING: &[ReasoningPath] = &[
 pub const BLUE_PROHIBITED_TARGETS: &[&str] = &[
 ];
 
+pub const BLUE_PROHIBITED_TARGET_PREFIXES: &[&str] = &[
+];
+
 pub const BLUE_PROHIBITED_DATA_CLASSES: &[DataClass] = &[
 ];
 
