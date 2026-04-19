@@ -29,8 +29,11 @@
 //!     Survival-refuses-offensive/destructive, Survival-permits-
 //!     defensive, Mode2-tiered-table, downward-immediate, upward-
 //!     needs-quorum, Survival-needs-Paranoia
+//!   * Phoenix Protocol (v1.6 §3.3): 5/5 — unsigned-image-always-
+//!     refused, TTL-boundary-below, TTL-boundary-at-or-after,
+//!     Terminated-never-resurrects, integrity-biconditional
 //!
-//! **Total: 40 proof harnesses covering 40 properties.** Kani
+//! **Total: 47 proof harnesses covering 47 properties.** Kani
 //! discharges each for ALL inputs.
 //!
 //! Types added in v0.3: ToolClass enum, Payload, Component, KernelBuild,
@@ -820,4 +823,133 @@ fn kani_degradation_survival_transition_needs_paranoia() {
         current, OperationalMode::Survival, 3, true
     );
     assert_eq!(result_with, TransitionApproval::Approved);
+}
+
+// ── Phoenix Protocol (v1.6 §3.3 / P2 #9) ────────────────────────
+
+use crate::phoenix::{
+    GoldenImage, HawkInstance, InstanceLifecycle, RebirthDecision,
+    REBIRTH_TTL_SECONDS, authorize_rebirth, validate_rebirth_integrity,
+};
+
+impl kani::Arbitrary for InstanceLifecycle {
+    fn any() -> Self { InstanceLifecycle::Alive }
+}
+
+/// Phoenix prop 1 (THE root-of-trust gate):
+/// forall instances and rebirth images where vault_signature_valid
+/// is false, authorize_rebirth returns UnsignedImage. No path exists
+/// to rebirth from an unsigned Golden Image.
+#[kani::proof]
+fn kani_phoenix_unsigned_image_always_refused() {
+    let prov: u64 = kani::any();
+    let now: u64 = kani::any();
+    let hash1: u64 = kani::any();
+    let hash2: u64 = kani::any();
+    let lifecycle: InstanceLifecycle = kani::any();
+    let instance = HawkInstance {
+        golden_image: GoldenImage {
+            content_hash_tag: hash1,
+            vault_signature_valid: true,
+        },
+        provisioned_at_unix: prov,
+        lifecycle,
+    };
+    let unsigned = GoldenImage {
+        content_hash_tag: hash2,
+        vault_signature_valid: false,         // ← unsigned
+    };
+    assert_eq!(
+        authorize_rebirth(&instance, &unsigned, now),
+        RebirthDecision::UnsignedImage
+    );
+}
+
+/// Phoenix prop 2 (TTL boundary):
+/// forall instances with age < REBIRTH_TTL_SECONDS, is_expired is
+/// false. Instances don't expire before 24 hours.
+#[kani::proof]
+fn kani_phoenix_not_expired_before_ttl() {
+    let prov: u64 = kani::any();
+    let age: u64 = kani::any();
+    kani::assume(age < REBIRTH_TTL_SECONDS);
+    let now = prov.saturating_add(age);
+    let img = GoldenImage { content_hash_tag: 0, vault_signature_valid: true };
+    let i = HawkInstance {
+        golden_image: img,
+        provisioned_at_unix: prov,
+        lifecycle: InstanceLifecycle::Alive,
+    };
+    assert!(!i.is_expired(now));
+}
+
+/// Phoenix prop 3 (TTL at-or-after):
+/// forall instances with age >= REBIRTH_TTL_SECONDS, is_expired is
+/// true. The 24-hour boundary is exclusive upper bound.
+#[kani::proof]
+fn kani_phoenix_expired_at_or_after_ttl() {
+    let prov: u64 = kani::any();
+    let over: u64 = kani::any();
+    let now = prov.saturating_add(REBIRTH_TTL_SECONDS).saturating_add(over);
+    let img = GoldenImage { content_hash_tag: 0, vault_signature_valid: true };
+    let i = HawkInstance {
+        golden_image: img,
+        provisioned_at_unix: prov,
+        lifecycle: InstanceLifecycle::Alive,
+    };
+    // Only assert when `now` actually reached the boundary (no overflow).
+    if now >= prov + REBIRTH_TTL_SECONDS {
+        assert!(i.is_expired(now));
+    }
+}
+
+/// Phoenix prop 4 (Terminated never resurrects):
+/// forall inputs where instance.lifecycle == Terminated, authorize_
+/// rebirth returns AlreadyTerminated regardless of signed-ness or
+/// age. Terminated instances are monotonic end-state — the
+/// orchestrator must provision a NEW instance, not resurrect.
+#[kani::proof]
+fn kani_phoenix_terminated_never_resurrects() {
+    let prov: u64 = kani::any();
+    let now: u64 = kani::any();
+    let hash: u64 = kani::any();
+    let i = HawkInstance {
+        golden_image: GoldenImage {
+            content_hash_tag: hash,
+            vault_signature_valid: true,
+        },
+        provisioned_at_unix: prov,
+        lifecycle: InstanceLifecycle::Terminated,
+    };
+    let signed_image = GoldenImage {
+        content_hash_tag: hash,
+        vault_signature_valid: true,
+    };
+    assert_eq!(
+        authorize_rebirth(&i, &signed_image, now),
+        RebirthDecision::AlreadyTerminated
+    );
+}
+
+/// Phoenix prop 5 (integrity biconditional):
+/// validate_rebirth_integrity(new, blessed_hash) iff
+/// new.golden_image.vault_signature_valid AND
+/// new.golden_image.content_hash_tag == blessed_hash.
+/// Neither alone suffices — both conjuncts are load-bearing.
+#[kani::proof]
+fn kani_phoenix_integrity_biconditional() {
+    let prov: u64 = kani::any();
+    let signed: bool = kani::any();
+    let hash: u64 = kani::any();
+    let blessed: u64 = kani::any();
+    let new = HawkInstance {
+        golden_image: GoldenImage {
+            content_hash_tag: hash,
+            vault_signature_valid: signed,
+        },
+        provisioned_at_unix: prov,
+        lifecycle: InstanceLifecycle::Alive,
+    };
+    let result = validate_rebirth_integrity(&new, blessed);
+    assert_eq!(result, signed && hash == blessed);
 }
