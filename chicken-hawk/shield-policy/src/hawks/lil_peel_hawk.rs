@@ -1,25 +1,18 @@
 //! Hex — Lil_Peel_Hawk — formal verifier, owns the 5 kernel components
-//! Generated from config/shield/hawks/Lil_Peel_Hawk.yml
+//! Hand-written imperative logic; prohibition tables from generated::lil_peel_hawk.
 
 use crate::types::*;
+use crate::generated::lil_peel_hawk::{
+    LIL_PEEL_HAWK_PROHIBITED_TOOL_CALLS,
+    LIL_PEEL_HAWK_PROHIBITED_REASONING,
+};
 
 pub fn validate(inv: &Invocation) -> Result<(), Denial> {
-    const PROHIBITED: &[&str] = &[
-        "build.release_without_kani_green",
-        "build.release_without_prusti_green",
-        "build.skip_cross_substrate_reproducibility_check",
-        "verify.modify_verified_code_without_reverify",
-        "verify.weaken_property_to_discharge",
-    ];
-    if PROHIBITED.contains(&inv.tool_id) {
+    if LIL_PEEL_HAWK_PROHIBITED_TOOL_CALLS.contains(&inv.tool_id) {
         return Err(Denial::ProhibitedToolCall(inv.tool_id));
     }
-
     for p in inv.reasoning_paths {
-        if matches!(p,
-            ReasoningPath::TrustTestsOverProof
-            | ReasoningPath::PartialVerificationAcceptable)
-        {
+        if LIL_PEEL_HAWK_PROHIBITED_REASONING.contains(p) {
             return Err(Denial::ProhibitedReasoningPath(*p));
         }
     }
