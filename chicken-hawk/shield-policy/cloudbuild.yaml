@@ -30,10 +30,12 @@ substitutions:
   # Default: verify + test. Set _RUN_KANI=yes to also discharge Kani
   # harnesses (~15 min cold, ~5 min incremental).
   _RUN_KANI: "no"
-  # Set _RUN_SUBSTRATES=yes to verify the crate compiles across all
-  # three v1.6 §3.1 substrate targets (Linux x86_64 / macOS ARM64 /
-  # WASM). Soft-gated until WASM no_std compatibility lands.
-  _RUN_SUBSTRATES: "no"
+  # Verify the crate compiles across all three v1.6 §3.1 substrate
+  # targets (Linux x86_64 / macOS ARM64 / WASM). As of 2026-04-19 all
+  # three pass without modification — graduated from soft-gate to
+  # required default. Set to "no" to skip (e.g. during Kani-only
+  # verification runs).
+  _RUN_SUBSTRATES: "yes"
 
 steps:
   # ── Step 1: YAML → Rust drift gate ──────────────────────────────
@@ -104,9 +106,9 @@ steps:
       - |
         if [ "${_RUN_SUBSTRATES}" = "yes" ]; then
           cd chicken-hawk/shield-policy
-          bash scripts/verify-substrates.sh
+          bash scripts/verify-substrates.sh --strict
         else
-          echo "skipping substrate verification (_RUN_SUBSTRATES=no). Set --substitutions=_RUN_SUBSTRATES=yes to verify."
+          echo "skipping substrate verification (_RUN_SUBSTRATES=no)."
         fi
 
   # ── Step 6: Kani proof discharge (optional, _RUN_KANI=yes) ──────
