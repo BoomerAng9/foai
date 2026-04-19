@@ -21,6 +21,7 @@
 
 pub mod types;
 pub mod kernel;
+pub mod cia;
 pub mod squads;
 pub mod hawks;
 
