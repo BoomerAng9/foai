@@ -30,6 +30,10 @@ substitutions:
   # Default: verify + test. Set _RUN_KANI=yes to also discharge Kani
   # harnesses (~15 min cold, ~5 min incremental).
   _RUN_KANI: "no"
+  # Set _RUN_SUBSTRATES=yes to verify the crate compiles across all
+  # three v1.6 §3.1 substrate targets (Linux x86_64 / macOS ARM64 /
+  # WASM). Soft-gated until WASM no_std compatibility lands.
+  _RUN_SUBSTRATES: "no"
 
 steps:
   # ── Step 1: YAML → Rust drift gate ──────────────────────────────
@@ -84,7 +88,28 @@ steps:
           echo "scene build_scene_plan.py not present — skipping (v1 of this pipeline)"
         fi
 
-  # ── Step 5: Kani proof discharge (optional, _RUN_KANI=yes) ──────
+  # ── Step 5: Substrate Heterogeneity verification (optional) ─────
+  # Per v1.6 §3.1, the policy engine runs on three substrates
+  # simultaneously for byzantine resilience. This step validates the
+  # crate compiles cleanly on each. Gated on _RUN_SUBSTRATES=yes.
+  # See SUBSTRATE_HETEROGENEITY.md for the current gap list (WASM
+  # no_std compat is the main outstanding item).
+  - id: substrate-verify
+    name: rust:1-bookworm
+    entrypoint: bash
+    waitFor: [cargo-test]
+    args:
+      - -eu
+      - -c
+      - |
+        if [ "${_RUN_SUBSTRATES}" = "yes" ]; then
+          cd chicken-hawk/shield-policy
+          bash scripts/verify-substrates.sh
+        else
+          echo "skipping substrate verification (_RUN_SUBSTRATES=no). Set --substitutions=_RUN_SUBSTRATES=yes to verify."
+        fi
+
+  # ── Step 6: Kani proof discharge (optional, _RUN_KANI=yes) ──────
   # Kani install on Cloud Build runners is ~3-5 min (faster than cold
   # GitHub runner due to better bandwidth). Full discharge ~5-7 min for
   # the 24 harnesses. Toggle on per-trigger via _RUN_KANI=yes override
