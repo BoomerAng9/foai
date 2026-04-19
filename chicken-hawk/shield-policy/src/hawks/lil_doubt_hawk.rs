@@ -43,6 +43,7 @@ mod tests {
         Invocation {
             hawk: Hawk::LilDoubtHawk,
             tool_id: "audit.hourly_compromise_simulate",
+            tool_class: ToolClass::Unknown,
             risk: RiskLevel::Low,
             commander: Persona::Acheevy,
             target_namespace: "/tenants/acme/shield_division",
@@ -51,6 +52,8 @@ mod tests {
             slct: Slct { issued_at_unix: 0, expires_at_unix: 60, is_live: true },
             sat: None,
             cia: None,
+            payload: None,
+            crosses_tenant: false,
             threat_confirmed: false,
             action_is_containment: false,
             privacy_budget_violated: false,

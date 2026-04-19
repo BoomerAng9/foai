@@ -145,6 +145,106 @@ impl CiaProof {
     }
 }
 
+/// Classification of what KIND of operation a tool_id represents.
+/// Used by per-Hawk properties that predicate on operation semantics
+/// rather than specific tool_id strings (e.g. "forall AiMlTest actions
+/// against ACHEEVY's persona, refuse").
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum ToolClass {
+    Unknown,
+    AiMlTest,
+    Emit,
+    CrossTenantSignal,
+    Enforce,
+    Execute,
+    RealExfil,
+    SimulatedCapture,
+    CoSign,
+    Redact,
+}
+
+/// Payload flags referenced by Privacy's kernel-class properties.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct Payload {
+    pub redaction_applied: bool,
+    pub is_zkp: bool,
+}
+
+/// Component with a Golden Image attestation — referenced by
+/// Gold & Platinum's trust property (v1.6 §5 Phoenix Protocol).
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct Component {
+    pub golden_image_signature_verified: bool,
+}
+
+impl Component {
+    /// v1.6 §5 invariant: trusted IFF signature verified.
+    pub fn trusted(&self) -> bool {
+        self.golden_image_signature_verified
+    }
+}
+
+/// Kernel build attestation referenced by Hex's release-gate properties.
+/// Kani's job is to prove that `release_permitted()` returns true only
+/// when ALL conditions hold.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct KernelBuild {
+    pub kani_all_green: bool,
+    pub prusti_all_green: bool,
+    pub substrate_hashes_match: bool,
+}
+
+impl KernelBuild {
+    /// v1.6 §3.1 / Hex's kani_properties: a kernel build is released
+    /// ONLY if all three verification gates pass.
+    pub fn release_permitted(&self) -> bool {
+        self.kani_all_green && self.prusti_all_green && self.substrate_hashes_match
+    }
+}
+
+/// A modification to kernel code referenced by Hex's reverify property.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct KernelModification {
+    pub reverified: bool,
+}
+
+impl KernelModification {
+    /// v1.6 Hex: a kernel modification is mergeable IFF reverified.
+    pub fn merge_permitted(&self) -> bool {
+        self.reverified
+    }
+}
+
+/// Paranoia's audit-report emission record.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct AuditReport {
+    pub first_recipient: Persona,
+}
+
+impl AuditReport {
+    /// v1.6 Paranoia: reports go to ACHEEVY first, always.
+    pub fn valid_routing(&self) -> bool {
+        self.first_recipient == Persona::Acheevy
+    }
+}
+
+/// Paranoia's compromise-simulation scope record.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct Simulation {
+    pub scope_includes_crypt_ang_infra: bool,
+    pub scope_is_narrow_approved_exception: bool,
+}
+
+impl Simulation {
+    /// v1.6 Paranoia: simulations must either include Crypt_Ang infra
+    /// (the normal case — the auditor tests the audited) OR be a
+    /// narrow pre-approved exception (e.g. a specific carve-out).
+    pub fn scope_valid(&self) -> bool {
+        self.scope_includes_crypt_ang_infra
+            || self.scope_is_narrow_approved_exception
+    }
+}
+
 /// The full invocation record that the Spinner policy engine passes to
 /// `validate()`. Every field is typed — there is no string-over-string
 /// escape hatch.
@@ -152,6 +252,7 @@ impl CiaProof {
 pub struct Invocation {
     pub hawk: Hawk,
     pub tool_id: ToolCallId,
+    pub tool_class: ToolClass,                  // v0.3 — for class-based predicates
     pub risk: RiskLevel,
     pub commander: Persona,
     pub target_namespace: &'static str, // glob-matched
@@ -160,6 +261,8 @@ pub struct Invocation {
     pub slct: Slct,
     pub sat: Option<Sat>,
     pub cia: Option<CiaProof>,
+    pub payload: Option<Payload>,               // v0.3 — for Privacy emit/ZKP properties
+    pub crosses_tenant: bool,                   // v0.3 — for Purple bridge property
     pub threat_confirmed: bool,
     pub action_is_containment: bool,
     pub privacy_budget_violated: bool,
