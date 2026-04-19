@@ -18,6 +18,9 @@ pub const LIL_DOUBT_HAWK_PROHIBITED_REASONING: &[ReasoningPath] = &[
 pub const LIL_DOUBT_HAWK_PROHIBITED_TARGETS: &[&str] = &[
 ];
 
+pub const LIL_DOUBT_HAWK_PROHIBITED_TARGET_PREFIXES: &[&str] = &[
+];
+
 pub const LIL_DOUBT_HAWK_PROHIBITED_DATA_CLASSES: &[DataClass] = &[
 ];
 

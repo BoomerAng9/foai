@@ -28,6 +28,12 @@ pub const UNIVERSAL_BASE_PROHIBITED_TARGETS: &[&str] = &[
     "/vault/root_keys/**",
 ];
 
+pub const UNIVERSAL_BASE_PROHIBITED_TARGET_PREFIXES: &[&str] = &[
+    "/sec_audit/",
+    "/spinner/policy_engine/",
+    "/vault/root_keys/",
+];
+
 pub const UNIVERSAL_BASE_PROHIBITED_DATA_CLASSES: &[DataClass] = &[
     DataClass::CanarySat,
     DataClass::RootKeyMaterial,

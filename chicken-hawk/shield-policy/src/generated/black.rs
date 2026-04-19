@@ -20,6 +20,11 @@ pub const BLACK_PROHIBITED_TARGETS: &[&str] = &[
     "/tenants/*/gold_platinum_infra/**",
 ];
 
+pub const BLACK_PROHIBITED_TARGET_PREFIXES: &[&str] = &[
+];
+// complex (hand-written): "/production/**/live_customers/**"
+// complex (hand-written): "/tenants/*/gold_platinum_infra/**"
+
 pub const BLACK_PROHIBITED_DATA_CLASSES: &[DataClass] = &[
 ];
 
