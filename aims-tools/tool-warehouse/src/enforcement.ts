@@ -14,18 +14,20 @@
 
 import { getToolById } from './queries.js';
 import type { Tool } from './schema.js';
+export { filterForCustomerCopy } from './filter-customer-copy.js';
 
 export class CustomerCopyLeakError extends Error {
-  constructor(
-    public toolId: string,
-    public surface: string,
-  ) {
+  readonly toolId: string;
+  readonly surface: string;
+  constructor(toolId: string, surface: string) {
     super(
       `[@aims/tool-warehouse] Tool '${toolId}' is marked internal_only and ` +
         `cannot appear in customer-facing surface '${surface}'. ` +
         `Use the tool's customer_safe_label, or swap for a surfaceable alternative.`,
     );
     this.name = 'CustomerCopyLeakError';
+    this.toolId = toolId;
+    this.surface = surface;
   }
 }
 
@@ -50,36 +52,5 @@ export async function assertNotSurfaceable(
   }
 }
 
-/**
- * Returns a filtered copy of a tool list with every internal_only row
- * removed — or replaced by a stub carrying the customer_safe_label only.
- *
- * @param mode `'strip'` removes internal tools entirely, `'relabel'`
- *             keeps them with the customer_safe_label applied and all
- *             other fields scrubbed.
- */
-export function filterForCustomerCopy(
-  tools: Tool[],
-  mode: 'strip' | 'relabel' = 'strip',
-): Tool[] {
-  if (mode === 'strip') {
-    return tools.filter((t) => !t.internalOnly);
-  }
-  return tools.map((t) => {
-    if (!t.internalOnly) return t;
-    return {
-      ...t,
-      name: t.customerSafeLabel ?? 'External Tool Coordination',
-      description: 'Platform-delegated workflow',
-      repoUrl: null,
-      vendor: null,
-      stars: null,
-      homepageUrl: null,
-      circuitBreakerId: null,
-      healthEndpoint: null,
-      ownerAng: null,
-      capabilities: [],
-      metadata: {},
-    } as Tool;
-  });
-}
+// filterForCustomerCopy is re-exported from `./filter-customer-copy.js`
+// to keep it consumable without a postgres dependency (pure module).
