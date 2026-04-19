@@ -23,6 +23,13 @@ jobs:
         include:
           - project: perform
             path: perform
+          # cti-hub build intentionally NOT in this matrix yet.
+          # Its build currently fails on main with two separate issues:
+          #   1. webpack cannot resolve `.js`-extension imports inside
+          #      raw-TS `@aims/*` packages — needs `extensionAlias` in
+          #      next.config.mjs
+          #   2. `zod` is missing from cti-hub's declared dependencies
+          # Separate PR will land the Next config fix + missing dep.
 
     steps:
       - uses: actions/checkout@v4
@@ -49,6 +56,48 @@ jobs:
         env:
           # Suppress Next.js telemetry
           NEXT_TELEMETRY_DISABLED: "1"
+
+  # -----------------------------------------------------------------------
+  # @aims/* package unit tests — pure, DB-free, no npm install required.
+  #
+  # These packages use `npx tsx --test` and consume cross-package types
+  # via type-only imports (stripped at load time). That lets us skip
+  # per-package `npm install` entirely, which matters because several
+  # packages declare `"@aims/contracts": "*"` — a workspace wildcard
+  # that npm can't resolve without a workspace root.
+  #
+  # When you add a new `@aims/*` package with a `test` script:
+  #   1. Verify the tests run with ONLY `npx tsx --test` (no node_modules)
+  #   2. Append the package name to the matrix below
+  # -----------------------------------------------------------------------
+  aims-tools-tests:
+    name: "aims-tools Tests (${{ matrix.package }})"
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - package: melanium        # Gate 7 — 70/30 split + fee projection
+          - package: picker-ang      # Gate 7 — IIR scoring
+          - package: tool-warehouse  # Gate 7 — customer-copy leak prevention
+          - package: forms           # Gate 5 — NIL contract reviewer
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Install tsx globally
+        # tsx resolves .ts files + strips type-only imports without
+        # requiring per-package node_modules. Single global install
+        # covers every package in the matrix.
+        run: npm install -g tsx@^4.19.0
+
+      - name: Run tests
+        working-directory: aims-tools/${{ matrix.package }}
+        run: tsx --test src/__tests__/*.test.ts
 
   # -----------------------------------------------------------------------
   # Python runtime — tests
