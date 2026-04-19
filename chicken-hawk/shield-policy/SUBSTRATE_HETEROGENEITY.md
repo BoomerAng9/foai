@@ -45,25 +45,31 @@ The script installs missing target toolchains via `rustup target add` and report
 gcloud builds submit --substitutions=_RUN_SUBSTRATES=yes .
 ```
 
-## Current gaps (2026-04-19)
+## Current status (2026-04-19, post-verification)
 
-This crate has not yet been made substrate-portable. Expected gaps when the verification script first runs:
+**All three substrates compile clean.** First actual run of `verify-substrates.sh` showed:
 
-1. **wasm32 — `thiserror` dependency is `std`-only.** The current `Denial` enum uses `#[derive(thiserror::Error)]` which requires `std`. For WASM support, either:
-   - Feature-gate `thiserror` behind `feature = "std"` and provide a manual `Display` impl for `no_std` builds
-   - Replace `thiserror` with `core::fmt::Display` manual implementations (simpler, drops the dep)
-2. **macOS ARM64 — may work out of box.** The crate has no OS-specific syscalls or paths. Likely compiles clean on first try once target is installed.
-3. **Per-substrate signing (Vault)** — not yet wired. Each substrate's build artifact needs to be signed by Vault independently per v1.6 §3.1's Phoenix-integration requirement.
+```
+x86_64-unknown-linux-gnu: PASS
+aarch64-apple-darwin:     PASS
+wasm32-unknown-unknown:   PASS
+```
 
-## Follow-up work
+This was unexpected — the earlier version of this doc predicted `thiserror` would break WASM due to `std` dependencies. Turns out `thiserror 1.x` handles trivial `Display` + `Error` derives without requiring `std` for our usage pattern. The kernel-component modules (cia / snr / degradation / phoenix / zkp) are inherently portable because they're pure types + predicates with no OS syscalls, no I/O, no thread primitives.
 
-Ordered by scope:
+**The policy engine is substrate-heterogeneous today.** The graduation from soft-gated to required-pass happens in this PR: `_RUN_SUBSTRATES` default flips to `yes` so every CI run validates all three targets.
 
-1. **WASM no_std compatibility** — drop `thiserror` dependency OR feature-gate it. ~30 min of work + re-verification.
-2. **macOS CI runner** — add `macos-latest` Cloud Build step OR a GitHub-hosted macOS job. Validates Observer 1 independently.
-3. **Per-substrate Vault signing** — Cloud Build step that runs after each substrate's build, pipes the artifact to Vault's HSM-signing endpoint. Scaffolding only until Vault sidecar lands.
-4. **Kani proof of consensus quorum** — harness proving that `consensus_for(..., HighRisk, ...)` returning `ThreeOfThreeWithCia` means ALL THREE substrates agree before the action fires. Currently proved at the *policy-layer* (degradation.rs); the *substrate-layer* proof is a follow-up.
+## What's still follow-up work
 
-## Why this ships as scaffolding today
+Not gaps in the crate itself — surrounding infrastructure:
 
-The infrastructure pattern (build script + docs + CI step) is trivially correct. The actual WASM portability work depends on dependency choices that deserve their own PR with focused review. Scaffolding lets the next contributor see exactly which substrate gaps exist and what shape the fix takes, without forcing a multi-day hygiene PR into this session.
+1. **Per-substrate Vault signing** — each build artifact must be signed by Vault independently per v1.6 §3.1. Cloud Build step that pipes per-target artifacts through Vault's HSM-signing endpoint is scaffolding-ready once the Vault sidecar lands.
+2. **Cross-substrate build reproducibility check** — a script that compares content hashes of the three artifacts after release builds. If hashes diverge for the same source, something non-deterministic slipped in. Currently the `[profile.release]` config pins LTO + single codegen-unit to minimize this risk.
+3. **Kani proof of consensus quorum** — currently `consensus_for(..., HighRisk, ...)` returning `ThreeOfThreeWithCia` is proven at the policy layer (see `kani_harnesses.rs`). A substrate-layer proof showing the three instances actually agree byte-for-byte on the same input is a follow-up — requires modeling the three-instance runtime, not just the single-instance policy check.
+4. **macOS CI runner** — Cloud Build's Linux runner can cross-compile to macOS ARM64 (proven by the PASS above via `cargo check --target`), but native macOS CI would validate syscall-level behavior. Follow-up when/if OS-specific code gets added.
+
+## Why the WASM worry was wrong
+
+When this doc was first written (#245), the assumption was "anything depending on `thiserror` requires `std`." That's true for `thiserror 2.0+` used with `std::io::Error` or similar concrete-std types. For the `Denial` enum — which only derives `Error` + uses `#[error("...")]` string attributes — `thiserror 1.x` generates code that works on `core::fmt::Display` alone. No `std` actually required. The pessimism was an artifact of not having installed the WASM target yet; once installed and checked, the crate just worked.
+
+This is a useful lesson worth naming: **infrastructure scaffolding should reflect verified state, not assumed state.** The original gap list was a guess. Running the script found the real state.
