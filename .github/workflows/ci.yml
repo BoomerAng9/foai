@@ -12,50 +12,17 @@ concurrency:
 
 jobs:
   # -----------------------------------------------------------------------
-  # Node.js projects — build check
+  # Node.js apps (perform / cti-hub / deploy/services/*) are intentionally
+  # NOT built here.
+  #
+  # Those apps ship via Cloud Build → Cloud Run (see deploy/cloudbuild.yaml
+  # and per-service cloudbuild.yaml files). GitHub Actions is not the
+  # deploy-verification surface for them; Cloud Build is the canonical
+  # pre-deploy gate.
+  #
+  # Library packages (@aims/*) ARE verified here — see aims-tools-tests
+  # below, since those packages don't deploy on their own.
   # -----------------------------------------------------------------------
-  node-build:
-    name: "Node.js Build (${{ matrix.project }})"
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - project: perform
-            path: perform
-          # cti-hub build intentionally NOT in this matrix yet.
-          # Its build currently fails on main with two separate issues:
-          #   1. webpack cannot resolve `.js`-extension imports inside
-          #      raw-TS `@aims/*` packages — needs `extensionAlias` in
-          #      next.config.mjs
-          #   2. `zod` is missing from cti-hub's declared dependencies
-          # Separate PR will land the Next config fix + missing dep.
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: "22"
-
-      - name: Install dependencies
-        working-directory: ${{ matrix.path }}
-        run: |
-          if [ -f "pnpm-lock.yaml" ]; then
-            corepack enable
-            pnpm install --frozen-lockfile
-          elif [ -f "package-lock.json" ]; then
-            npm ci
-          else
-            npm install
-          fi
-
-      - name: Build
-        working-directory: ${{ matrix.path }}
-        run: npm run build
-        env:
-          # Suppress Next.js telemetry
-          NEXT_TELEMETRY_DISABLED: "1"
 
   # -----------------------------------------------------------------------
   # @aims/* package unit tests — pure, DB-free, no npm install required.
