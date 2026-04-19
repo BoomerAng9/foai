@@ -318,15 +318,26 @@ def emit_mod_index(profiles: list[Profile]) -> str:
 # ── IO + diff ──────────────────────────────────────────────────────────
 
 def write_if_changed(path: Path, content: str, check_only: bool) -> bool:
-    """Return True if content would change (or did change). False if same."""
-    existing = path.read_text(encoding="utf-8") if path.exists() else ""
+    """Return True if content would change (or did change). False if same.
+
+    Reads and writes with explicit newline="\\n" on BOTH sides so the
+    generator produces byte-identical output across Windows and Linux.
+    Without this, `--check` in CI (Linux, LF) fails against files
+    committed from Windows (CRLF) even when semantically identical —
+    which is exactly what happened on the first real CI run.
+    """
+    existing = ""
+    if path.exists():
+        with path.open("r", encoding="utf-8", newline="") as f:
+            existing = f.read()
     if existing == content:
         return False
     if check_only:
         print(f"would change: {path.relative_to(REPO.parent)}")
         return True
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(content, encoding="utf-8")
+    with path.open("w", encoding="utf-8", newline="\n") as f:
+        f.write(content)
     print(f"wrote: {path.relative_to(REPO.parent)}")
     return True
 

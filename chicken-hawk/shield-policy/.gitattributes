@@ -1,0 +1,7 @@
+# Force LF line endings for all generated and source Rust files in
+# this crate so Windows authors don't produce CRLF that Linux CI then
+# rejects as drift. Applies to the shield-policy crate only.
+
+*.rs text eol=lf
+*.toml text eol=lf
+*.md text eol=lf
