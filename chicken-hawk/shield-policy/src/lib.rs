@@ -24,6 +24,7 @@ pub mod kernel;
 pub mod cia;
 pub mod snr;
 pub mod degradation;
+pub mod phoenix;
 pub mod squads;
 pub mod hawks;
 
