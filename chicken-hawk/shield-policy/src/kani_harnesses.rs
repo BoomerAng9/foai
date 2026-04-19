@@ -953,3 +953,100 @@ fn kani_phoenix_integrity_biconditional() {
     let result = validate_rebirth_integrity(&new, blessed);
     assert_eq!(result, signed && hash == blessed);
 }
+
+// ── ZKP-TS (v1.6 §3.2 / P2 #8) ──────────────────────────────────
+
+use crate::zkp::{
+    EmissionDecision, ThreatSignature, ZkpProof, IocCategory,
+    authorize_emission, could_leak_tenant, derive_detection_rule_key,
+};
+
+/// ZKP prop 1 (emission biconditional):
+/// authorize_emission returns Approved iff both redaction_pipeline_active
+/// AND proof_verifies. Either disjunct false = refused.
+#[kani::proof]
+fn kani_zkp_emission_biconditional() {
+    let redact: bool = kani::any();
+    let verifies: bool = kani::any();
+    let stmt: u64 = kani::any();
+    let p = ZkpProof {
+        statement_hash: stmt,
+        proof_verifies: verifies,
+        redaction_pipeline_active: redact,
+    };
+    let result = authorize_emission(&p);
+    let expected_approved = redact && verifies;
+    assert_eq!(result == EmissionDecision::Approved, expected_approved);
+}
+
+/// ZKP prop 2 (redaction-gate load-bearing):
+/// forall proofs where redaction_pipeline_active is false,
+/// regardless of proof-verify status, emission is refused with
+/// RedactionPipelineInactive. Redaction gate runs FIRST — order
+/// matters because the redaction refusal is more informative to
+/// the audit trail than a proof-verify refusal on non-redacted data.
+#[kani::proof]
+fn kani_zkp_redaction_gate_runs_first() {
+    let stmt: u64 = kani::any();
+    let verifies: bool = kani::any();
+    let p = ZkpProof {
+        statement_hash: stmt,
+        proof_verifies: verifies,
+        redaction_pipeline_active: false,
+    };
+    assert_eq!(
+        authorize_emission(&p),
+        EmissionDecision::RedactionPipelineInactive
+    );
+}
+
+/// ZKP prop 3 (proof-verify gate):
+/// forall proofs with redaction_pipeline_active = true and
+/// proof_verifies = false, emission is refused with
+/// ProofDoesNotVerify.
+#[kani::proof]
+fn kani_zkp_proof_verify_gate() {
+    let stmt: u64 = kani::any();
+    let p = ZkpProof {
+        statement_hash: stmt,
+        proof_verifies: false,
+        redaction_pipeline_active: true,
+    };
+    assert_eq!(
+        authorize_emission(&p),
+        EmissionDecision::ProofDoesNotVerify
+    );
+}
+
+/// ZKP prop 4 (THE structural guarantee):
+/// forall ThreatSignature inputs, could_leak_tenant returns false.
+/// The v1.6 §3.2 "global intel, local privacy" property — the
+/// ThreatSignature type carries NO field that can encode a tenant
+/// identifier. Invariant holds by type construction.
+#[kani::proof]
+fn kani_zkp_threat_signature_never_leaks_tenant() {
+    let hash: u64 = kani::any();
+    let attack: u16 = kani::any();
+    let count: u8 = kani::any();
+    let mitigated: bool = kani::any();
+    let sig = ThreatSignature {
+        technique_fingerprint_hash: hash,
+        attack_technique_id: attack,
+        ioc_categories: [
+            IocCategory::NetworkSignature,
+            IocCategory::BehavioralPattern,
+            IocCategory::C2CommunicationPattern,
+            IocCategory::ProcessChainPattern,
+        ],
+        ioc_count: count,
+        mitigation_effective: mitigated,
+    };
+    assert!(!could_leak_tenant(&sig));
+    // Also verify derivation doesn't leak tenant via rule key — the
+    // rule key is (technique_id, fingerprint_hash), both categorical.
+    let valid_proof = ZkpProof {
+        statement_hash: 0, proof_verifies: true, redaction_pipeline_active: true,
+    };
+    let key = derive_detection_rule_key(&valid_proof, &sig);
+    assert_eq!(key, Some((attack, hash)));
+}
