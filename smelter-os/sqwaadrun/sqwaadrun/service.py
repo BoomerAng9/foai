@@ -54,6 +54,10 @@ from sqwaadrun.security import (
     audit_log,
     check_dependencies,
 )
+from sqwaadrun.billing_middleware import (
+    customer_auth_middleware,
+    close_pool as close_billing_pool,
+)
 
 logger = logging.getLogger("Sqwaadrun.Service")
 
@@ -482,11 +486,17 @@ async def on_cleanup(app: web.Application) -> None:
 
     squad: FullScrappHawkSquadrun = app["squad"]
     await squad.shutdown()
+    await close_billing_pool()
 
 
 def build_app() -> web.Application:
     # CORS runs first so preflight never hits auth.
-    app = web.Application(middlewares=[cors_middleware, auth_middleware])
+    # customer_auth_middleware supersedes the legacy shared-key
+    # auth_middleware: it accepts SQWAADRUN_API_KEY (admin) AND
+    # `sqr_live_*` customer keys looked up in Neon with per-key quota.
+    app = web.Application(
+        middlewares=[cors_middleware, customer_auth_middleware]
+    )
 
     app.router.add_get("/", health)
     app.router.add_get("/health", health)
