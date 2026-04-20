@@ -65,7 +65,7 @@ steps:
       - --min-instances=0
       - --max-instances=5
       - --timeout=300s
-      - --set-env-vars=PYTHONUNBUFFERED=1,PYTHONUTF8=1,SQWAADRUN_BIND=0.0.0.0,SQWAADRUN_QUOTA_PER_DOMAIN=500,SQWAADRUN_CORS_ORIGINS=https://deploy.foai.cloud,https://cti.foai.cloud,https://sqwaadrun.foai.cloud
+      - --set-env-vars=^@^PYTHONUNBUFFERED=1@PYTHONUTF8=1@SQWAADRUN_BIND=0.0.0.0@SQWAADRUN_QUOTA_PER_DOMAIN=500@SQWAADRUN_CORS_ORIGINS=https://deploy.foai.cloud,https://cti.foai.cloud,https://sqwaadrun.foai.cloud
       - --set-secrets=SQWAADRUN_API_KEY=keystore-sqwaadrun-admin-key:latest,SQWAADRUN_KEY_PEPPER=keystore-sqwaadrun-key-pepper:latest,DATABASE_URL=database-url:latest
 
 images:
