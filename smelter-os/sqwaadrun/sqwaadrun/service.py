@@ -523,6 +523,15 @@ def main():
     parser.add_argument("--port", type=int, default=7700)
     args = parser.parse_args()
 
+    # Cloud Run (and other read-only-rootfs deployments) require all
+    # relative-path writes to land on a writable overlay. Pivot CWD
+    # into SQWAADRUN_DATA_DIR so hardcoded-relative paths created by
+    # individual Lil_Hawks (diff_history, schedule.json, etc.) resolve
+    # under the ephemeral tmpfs mount rather than the read-only image.
+    data_dir = Path(os.environ.get("SQWAADRUN_DATA_DIR", "./data"))
+    data_dir.mkdir(parents=True, exist_ok=True)
+    os.chdir(str(data_dir))
+
     logging.basicConfig(level=logging.INFO)
     app = build_app()
     logger.info(f"Sqwaadrun gateway listening on http://{args.host}:{args.port}")
