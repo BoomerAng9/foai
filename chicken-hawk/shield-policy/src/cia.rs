@@ -93,10 +93,11 @@ pub enum CiaFailure {
 }
 
 impl CiaFailure {
-    pub fn as_denial(&self) -> Denial {
+    pub fn as_denial(&self) -> Denial<'static> {
         // All CIA failures collapse to Denial::CiaRequired at the top
         // layer. The specific CiaFailure reason is recorded in the
-        // audit entry separately.
+        // audit entry separately. 'static because the returned Denial
+        // carries no borrowed data.
         Denial::CiaRequired
     }
 }

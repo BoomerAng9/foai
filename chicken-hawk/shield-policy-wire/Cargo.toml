@@ -1,0 +1,28 @@
+[package]
+name = "shield-policy-wire"
+version = "0.1.0"
+edition = "2021"
+description = "Protobuf wire format for ACHIEVEMOR Shield Division policy enforcement. Deploy.spinner.shield.v1 from runtime/spinner/schema/invocation.proto."
+license-file = "../../LICENSE"
+
+[lib]
+name = "shield_policy_wire"
+path = "src/lib.rs"
+
+[dependencies]
+# Exact pin — wire format is security-critical; reproducible builds require locked codegen.
+prost = "=0.14.3"
+shield-policy = { path = "../shield-policy" }
+# Matches the kernel's thiserror pin. Used for the WireConversionError enum.
+thiserror = "1"
+
+[dev-dependencies]
+# Regeneration from invocation.proto is handled by the separate regenerate.sh
+# script. prost-build is NOT a default dependency — the generated output is
+# committed under src/generated/ and compiled verbatim. This mirrors the
+# YAML → Rust generator pattern already used by shield-policy's
+# scripts/compile-shield-policy.py.
+
+[profile.release]
+lto = true
+codegen-units = 1

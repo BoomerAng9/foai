@@ -1,0 +1,108 @@
+# =====================================================================
+# Destinations AI — Cloud Build config
+# Project:  ai-managed-services (foai production)
+# Trigger:  push to main (GitHub → Cloud Build trigger)
+# Service:  destinations-ai  · region us-central1  · port 8080
+# =====================================================================
+
+steps:
+  # 1. Build the Docker image, threading public build-time envs.
+  - name: gcr.io/cloud-builders/docker
+    id: build
+    args:
+      - build
+      - --build-arg
+      - NEXT_PUBLIC_MAP_PROVIDER=${_NEXT_PUBLIC_MAP_PROVIDER}
+      - --build-arg
+      - NEXT_PUBLIC_MAPTILER_KEY=${_NEXT_PUBLIC_MAPTILER_KEY}
+      - --build-arg
+      - NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=${_NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}
+      - --build-arg
+      - NEXT_PUBLIC_FIREBASE_API_KEY=${_NEXT_PUBLIC_FIREBASE_API_KEY}
+      - --build-arg
+      - NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=${_NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN}
+      - --build-arg
+      - NEXT_PUBLIC_FIREBASE_PROJECT_ID=${_NEXT_PUBLIC_FIREBASE_PROJECT_ID}
+      - --build-arg
+      - NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=${_NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET}
+      - --build-arg
+      - NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=${_NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID}
+      - --build-arg
+      - NEXT_PUBLIC_FIREBASE_APP_ID=${_NEXT_PUBLIC_FIREBASE_APP_ID}
+      - --build-arg
+      - NEXT_PUBLIC_BASE_URL=${_NEXT_PUBLIC_BASE_URL}
+      - -t
+      - ${_IMAGE}:${SHORT_SHA}
+      - -t
+      - ${_IMAGE}:latest
+      - .
+
+  # 2. Push both tags to Artifact Registry.
+  - name: gcr.io/cloud-builders/docker
+    id: push-sha
+    args: [push, '${_IMAGE}:${SHORT_SHA}']
+  - name: gcr.io/cloud-builders/docker
+    id: push-latest
+    args: [push, '${_IMAGE}:latest']
+
+  # 3. Deploy to Cloud Run. Secret-backed envs come from Secret Manager.
+  - name: gcr.io/google.com/cloudsdktool/cloud-sdk
+    id: deploy
+    entrypoint: gcloud
+    args:
+      - run
+      - deploy
+      - destinations-ai
+      - --image=${_IMAGE}:${SHORT_SHA}
+      - --region=${_REGION}
+      - --platform=managed
+      - --port=8080
+      - --min-instances=0
+      - --max-instances=10
+      - --cpu=1
+      - --memory=512Mi
+      - --concurrency=80
+      - --timeout=60s
+      - --allow-unauthenticated
+      - --set-env-vars=GOOGLE_CLOUD_PROJECT=${PROJECT_ID},GOOGLE_CLOUD_LOCATION=${_REGION},NODE_ENV=production
+      - --set-secrets=DATABASE_URL=destinations-database-url:latest,FIREBASE_PROJECT_ID=destinations-firebase-project-id:latest,FIREBASE_CLIENT_EMAIL=destinations-firebase-client-email:latest,FIREBASE_PRIVATE_KEY=destinations-firebase-private-key:latest
+      - --service-account=destinations-ai@${PROJECT_ID}.iam.gserviceaccount.com
+
+  # 4. Explicitly grant allUsers invoker role — --allow-unauthenticated
+  #    is a silent no-op on some org policies (Gate 6b incident).
+  - name: gcr.io/google.com/cloudsdktool/cloud-sdk
+    id: iam-public
+    entrypoint: gcloud
+    args:
+      - run
+      - services
+      - add-iam-policy-binding
+      - destinations-ai
+      - --region=${_REGION}
+      - --member=allUsers
+      - --role=roles/run.invoker
+
+images:
+  - '${_IMAGE}:${SHORT_SHA}'
+  - '${_IMAGE}:latest'
+
+options:
+  logging: CLOUD_LOGGING_ONLY
+  machineType: E2_HIGHCPU_8
+
+substitutions:
+  _REGION: us-central1
+  _IMAGE: us-central1-docker.pkg.dev/${PROJECT_ID}/foai/destinations-ai
+  # Public build envs default to blank; Cloud Build trigger overrides them.
+  _NEXT_PUBLIC_MAP_PROVIDER: maplibre
+  _NEXT_PUBLIC_MAPTILER_KEY: ''
+  _NEXT_PUBLIC_GOOGLE_MAPS_API_KEY: ''
+  _NEXT_PUBLIC_FIREBASE_API_KEY: ''
+  _NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN: ''
+  _NEXT_PUBLIC_FIREBASE_PROJECT_ID: ''
+  _NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET: ''
+  _NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID: ''
+  _NEXT_PUBLIC_FIREBASE_APP_ID: ''
+  _NEXT_PUBLIC_BASE_URL: 'https://destinations.foai.cloud'
+
+timeout: 1200s

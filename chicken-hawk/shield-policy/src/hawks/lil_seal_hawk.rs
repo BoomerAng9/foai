@@ -8,7 +8,7 @@ use crate::generated::lil_seal_hawk::{
     LIL_SEAL_HAWK_PROHIBITED_DATA_CLASSES,
 };
 
-pub fn validate(inv: &Invocation) -> Result<(), Denial> {
+pub fn validate<'a>(inv: &Invocation<'a>) -> Result<(), Denial<'a>> {
     if LIL_SEAL_HAWK_PROHIBITED_TOOL_CALLS.contains(&inv.tool_id) {
         return Err(Denial::ProhibitedToolCall(inv.tool_id));
     }

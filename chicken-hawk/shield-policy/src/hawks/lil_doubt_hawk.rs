@@ -14,7 +14,7 @@ use crate::generated::lil_doubt_hawk::{
     LIL_DOUBT_HAWK_PROHIBITED_COMMANDERS,
 };
 
-pub fn validate(inv: &Invocation) -> Result<(), Denial> {
+pub fn validate<'a>(inv: &Invocation<'a>) -> Result<(), Denial<'a>> {
     // The commander prohibition — absolute, all scopes. Runs first so
     // the independent-auditor guarantee doesn't depend on tool_id.
     if LIL_DOUBT_HAWK_PROHIBITED_COMMANDERS.contains(&inv.commander) {
@@ -39,7 +39,7 @@ mod tests {
     use super::*;
     use crate::types::*;
 
-    fn para_inv() -> Invocation {
+    fn para_inv() -> Invocation<'static> {
         Invocation {
             hawk: Hawk::LilDoubtHawk,
             tool_id: "audit.hourly_compromise_simulate",
