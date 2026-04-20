@@ -91,6 +91,7 @@ export async function POST(request: NextRequest) {
                 sqwaadrun_tier = ${tierId},
                 sqwaadrun_status = ${subscriptionStatus},
                 sqwaadrun_monthly_quota = ${tier.monthly_missions},
+                sqwaadrun_missions_used = 0,
                 sqwaadrun_period_start = ${currentPeriodStart},
                 sqwaadrun_period_end = ${currentPeriodEnd}
               WHERE user_id = ${userId}
@@ -157,12 +158,19 @@ export async function POST(request: NextRequest) {
           const tierId = determineSqwaadrunTierFromPriceId(priceId);
           if (tierId) {
             const tier = SQWAADRUN_TIERS[tierId];
+            const newPeriodStart = toIsoFromUnix(
+              subscription.items.data[0]?.current_period_start,
+            );
             await sql`
               UPDATE profiles SET
                 sqwaadrun_tier = ${tierId},
                 sqwaadrun_status = ${subscription.status},
                 sqwaadrun_monthly_quota = ${tier.monthly_missions},
-                sqwaadrun_period_start = ${toIsoFromUnix(subscription.items.data[0]?.current_period_start)},
+                sqwaadrun_missions_used = CASE
+                  WHEN sqwaadrun_period_start IS DISTINCT FROM ${newPeriodStart} THEN 0
+                  ELSE sqwaadrun_missions_used
+                END,
+                sqwaadrun_period_start = ${newPeriodStart},
                 sqwaadrun_period_end = ${toIsoFromUnix(subscription.items.data[0]?.current_period_end)}
               WHERE user_id = ${userIdMeta}
             `;

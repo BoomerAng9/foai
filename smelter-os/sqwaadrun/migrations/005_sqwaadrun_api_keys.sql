@@ -63,3 +63,16 @@ CREATE TABLE IF NOT EXISTS sqwaadrun_key_handoffs (
 
 CREATE INDEX IF NOT EXISTS idx_sqwaadrun_key_handoffs_user
   ON sqwaadrun_key_handoffs (user_id);
+
+-- ═══════════════════════════════════════════════════════════════════
+--  profiles.sqwaadrun_missions_used — UI mirror for Deploy dashboard
+-- ═══════════════════════════════════════════════════════════════════
+-- The Deploy Platform dashboard at cti-hub/src/app/(dashboard)/sqwaadrun
+-- reads sqwaadrun_missions_used from profiles to render the quota bar.
+-- The gateway billing middleware increments BOTH this column and the
+-- authoritative sqwaadrun_api_keys.usage_this_period inside one txn,
+-- so UI stays consistent with quota enforcement. Stripe webhook resets
+-- this to 0 on period rollover (checkout.completed + subscription.updated).
+
+ALTER TABLE profiles
+  ADD COLUMN IF NOT EXISTS sqwaadrun_missions_used INTEGER NOT NULL DEFAULT 0;

@@ -115,8 +115,15 @@ async def resolve_customer_key(plaintext: str) -> Optional[dict[str, Any]]:
             }
 
 
-async def increment_usage(api_key_row_id: Any) -> None:
-    """Atomically add one to usage_this_period."""
+async def increment_usage(api_key_row_id: Any, user_id: str) -> None:
+    """Atomically add one to usage_this_period + mirror to profiles.
+
+    The api_keys row is the authoritative per-key counter. The
+    profiles.sqwaadrun_missions_used column is a UI mirror read by
+    the Deploy Platform dashboard (cti-hub (dashboard)/sqwaadrun).
+    Both are bumped in a single transaction so the dashboard stays
+    consistent with quota enforcement.
+    """
     pool = await get_pool()
     async with pool.connection() as conn:
         async with conn.cursor() as cur:
@@ -127,6 +134,15 @@ async def increment_usage(api_key_row_id: Any) -> None:
                 WHERE id = %s
                 """,
                 (api_key_row_id,),
+            )
+            await cur.execute(
+                """
+                UPDATE profiles
+                SET sqwaadrun_missions_used =
+                    COALESCE(sqwaadrun_missions_used, 0) + 1
+                WHERE user_id = %s
+                """,
+                (user_id,),
             )
 
 
@@ -203,7 +219,7 @@ async def customer_auth_middleware(request: web.Request, handler):
         )
         if is_metered and 200 <= response.status < 300:
             try:
-                await increment_usage(record["id"])
+                await increment_usage(record["id"], record["user_id"])
             except psycopg.Error:
                 logger.exception("usage_increment_failed")
 

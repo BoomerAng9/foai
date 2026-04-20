@@ -108,6 +108,8 @@ export async function POST(request: NextRequest) {
       priceId,
       product: 'sqwaadrun',
       origin,
+      successUrl: `/plug/sqwaadrun?success=true&tier=${tierId}&session_id={CHECKOUT_SESSION_ID}`,
+      cancelUrl: `/plug/sqwaadrun?canceled=true`,
       existingStripeCustomerId: profile?.stripe_customer_id ?? null,
       discountCouponId,
       extraMetadata: {
