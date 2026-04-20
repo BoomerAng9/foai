@@ -9,7 +9,6 @@ import { getGradeForScore } from '@/lib/tie/grades';
 import { getVerticalTierLabel } from '@/lib/tie/verticals';
 import { positionColor } from '@/lib/ui/positions';
 import { staggerContainer, staggerItem, heroStagger, heroItem, scrollReveal } from '@/lib/motion';
-import PaywallGate from '@/components/PaywallGate';
 import { AnonymousHelmet } from '@/components/cards/AnonymousHelmet';
 
 interface PlayerRow {
@@ -181,7 +180,6 @@ export default function PlayerDetailPage({ params }: { params: Promise<{ player:
   const intgScore = Math.min(Math.round(score * 0.95 + 3 + (score % 3)), 100);
 
   return (
-    <PaywallGate>
     <div className="min-h-screen flex flex-col" style={{ background: 'var(--pf-bg)', color: 'var(--pf-text)' }}>
       <Header />
 
@@ -619,6 +617,5 @@ export default function PlayerDetailPage({ params }: { params: Promise<{ player:
 
       <Footer />
     </div>
-    </PaywallGate>
   );
 }

@@ -17,6 +17,9 @@ import {
   normalizePosition,
   positionColor,
 } from '@/lib/ui/positions';
+import { LiveTicker } from '@/components/live/LiveTicker';
+import { PlayerIndexDrawer } from '@/components/player-index/PlayerIndexDrawer';
+import { AnonymousHelmet } from '@/components/cards/AnonymousHelmet';
 
 interface Player {
   id: number;
@@ -34,6 +37,15 @@ interface Player {
   strengths?: string | null;
   weaknesses?: string | null;
   nfl_comparison?: string | null;
+  // Consensus ranks from perform_consensus_ranks (migration 012 + ingest-consensus-board.ts).
+  // DrafTek/Yahoo/Ringer are ingested today; PFF/ESPN/NFL.com slots reserved for post-draft scrape.
+  consensus_drafttek?: number | null;
+  consensus_yahoo?: number | null;
+  consensus_ringer?: number | null;
+  consensus_avg?: number | null;
+  consensus_pff?: number | null;
+  consensus_espn?: number | null;
+  consensus_nflcom?: number | null;
 }
 
 // All surface + text tokens route through shared CSS vars so the page flips
@@ -98,6 +110,8 @@ export default function RankingsPage() {
 
   return (
     <div className="min-h-screen" style={{ background: T.bg, color: T.text, fontFamily: "'Inter', system-ui, sans-serif" }}>
+      <PlayerIndexDrawer />
+      <LiveTicker />
       {/* Nav ribbon */}
       <nav style={{ background: T.navyDeep, color: 'var(--pf-text)' }}>
         <div className="max-w-6xl mx-auto px-6 py-3 flex items-center justify-between text-xs font-semibold">
@@ -230,23 +244,32 @@ export default function RankingsPage() {
               </Link>
             </div>
 
-            {/* Table header */}
+            {/* Table header — 6 cols on mobile, 10 cols on md+ with consensus comparison */}
             <div
-              className="hidden md:grid items-center gap-4 px-4 py-2 text-xs font-semibold rounded-t-lg"
-              style={{ gridTemplateColumns: '48px 1fr 80px 120px 80px 60px', background: T.surfaceAlt, color: T.textMuted, borderBottom: `1px solid ${T.border}` }}
+              className="hidden md:grid items-center gap-3 px-4 py-2 text-xs font-semibold rounded-t-lg grid-cols-[40px_1fr_60px_100px_60px_45px_50px_50px_50px_55px]"
+              style={{ background: T.surfaceAlt, color: T.textMuted, borderBottom: `1px solid ${T.border}` }}
             >
               <span>Rank</span>
               <span>Player</span>
-              <span>Position</span>
+              <span>Pos</span>
               <span>School</span>
               <span className="text-right">Grade</span>
-              <span className="text-right">Round</span>
+              <span className="text-right">Rd</span>
+              <span className="text-right" title="DrafTek consensus rank">DrafTek</span>
+              <span className="text-right" title="Yahoo Sports (Charles McDonald) consensus rank">Yahoo</span>
+              <span className="text-right" title="The Ringer (Danny Kelly) consensus rank">Ringer</span>
+              <span className="text-right" title="Per|Form vs consensus delta">&Delta;</span>
             </div>
 
             {/* Rows */}
             <div className="divide-y" style={{ borderColor: T.border }}>
               {rest.map((p, i) => {
                 const accent = positionColor(p.position);
+                const perfRank = p.overall_rank ?? 9999;
+                const avg = p.consensus_avg ?? null;
+                const delta = avg != null ? avg - perfRank : null;
+                const deltaColor = delta == null ? T.textSubtle : delta > 0 ? '#16A34A' : delta < 0 ? T.red : T.textSubtle;
+                const deltaText = delta == null ? '—' : delta > 0 ? `+${delta}` : delta < 0 ? `${delta}` : '0';
                 return (
                   <motion.div
                     key={p.id}
@@ -257,8 +280,7 @@ export default function RankingsPage() {
                   >
                     <Link
                       href={`/draft/${encodeURIComponent(p.name)}`}
-                      className="group grid items-center gap-4 px-4 py-3 transition-colors hover:bg-gray-50"
-                      style={{ gridTemplateColumns: '48px 1fr 80px 120px 80px 60px' }}
+                      className="group grid items-center gap-3 px-4 py-3 transition-colors hover:bg-gray-50 grid-cols-[48px_1fr_80px_120px_80px_60px] md:grid-cols-[40px_1fr_60px_100px_60px_45px_50px_50px_50px_55px]"
                     >
                       {/* Rank */}
                       <span className="text-lg font-black tabular-nums" style={{ color: T.text, fontFamily: "'Outfit', sans-serif" }}>
@@ -294,6 +316,30 @@ export default function RankingsPage() {
                       <span className="text-right text-sm" style={{ color: T.textSubtle }}>
                         {p.projected_round ? `R${p.projected_round}` : '--'}
                       </span>
+
+                      {/* DrafTek — desktop only */}
+                      <span className="hidden md:inline text-right text-sm tabular-nums" style={{ color: T.textMuted }}>
+                        {p.consensus_drafttek != null ? `#${p.consensus_drafttek}` : '—'}
+                      </span>
+
+                      {/* Yahoo — desktop only */}
+                      <span className="hidden md:inline text-right text-sm tabular-nums" style={{ color: T.textMuted }}>
+                        {p.consensus_yahoo != null ? `#${p.consensus_yahoo}` : '—'}
+                      </span>
+
+                      {/* Ringer — desktop only */}
+                      <span className="hidden md:inline text-right text-sm tabular-nums" style={{ color: T.textMuted }}>
+                        {p.consensus_ringer != null ? `#${p.consensus_ringer}` : '—'}
+                      </span>
+
+                      {/* Delta — desktop only. Positive = Per|Form saw him earlier than consensus. */}
+                      <span
+                        className="hidden md:inline text-right text-xs font-bold tabular-nums"
+                        style={{ color: deltaColor }}
+                        title="Per|Form rank − consensus avg rank (positive = Per|Form ahead)"
+                      >
+                        {deltaText}
+                      </span>
                     </Link>
                   </motion.div>
                 );
@@ -303,30 +349,67 @@ export default function RankingsPage() {
         </section>
       )}
 
-      {/* Browse by position */}
+      {/* Browse by position — face card per position group */}
       {!loading && (
         <section style={{ background: T.bg }}>
           <div className="max-w-6xl mx-auto px-6 py-10">
-            <h3 className="text-lg font-bold mb-4">Browse by Position</h3>
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
+            <h3 className="text-lg font-bold mb-1">Browse by Position</h3>
+            <p className="text-xs mb-6" style={{ color: T.textMuted }}>
+              The #1 prospect at each position is the face of its card.
+            </p>
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
               {POSITION_GROUPS.map(({ key, label, color }) => {
                 const groupPlayers = grouped[key] || [];
                 const topPlayer = groupPlayers[0];
+                const isPrime = topPlayer && Number(topPlayer.grade ?? 0) >= 101;
                 return (
                   <Link
                     key={key}
                     href={`/rankings/${key}`}
-                    className="group block rounded-lg p-3 transition-all hover:-translate-y-0.5"
-                    style={{ background: T.surface, border: `1px solid ${T.border}`, borderLeft: `3px solid ${color}` }}
+                    className="group block rounded-lg p-4 transition-all hover:-translate-y-0.5"
+                    style={{
+                      background: T.surface,
+                      border: `1px solid ${T.border}`,
+                      borderLeft: `3px solid ${color}`,
+                      minHeight: 200,
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      textAlign: 'center',
+                    }}
                   >
-                    <div className="flex items-center justify-between mb-1">
+                    <div className="flex items-center justify-between w-full mb-2">
                       <span className="text-lg font-black" style={{ color, fontFamily: "'Outfit', sans-serif" }}>{key}</span>
                       <span className="text-xs" style={{ color: T.textSubtle }}>{groupPlayers.length}</span>
                     </div>
-                    <div className="text-xs font-semibold" style={{ color: T.textMuted }}>{label}</div>
-                    {topPlayer && (
-                      <div className="text-xs font-semibold mt-2 truncate" style={{ color: T.text }}>
-                        #{topPlayer.overall_rank} {topPlayer.name}
+
+                    {/* Face card — AnonymousHelmet of the #1 player at this position */}
+                    {topPlayer ? (
+                      <>
+                        <AnonymousHelmet
+                          accentColor={color}
+                          size={80}
+                          crown={isPrime}
+                          jerseyNumber={null}
+                          label={undefined}
+                        />
+                        <div className="mt-3 w-full">
+                          <div className="text-[11px] font-bold uppercase tracking-wider truncate" style={{ color: T.text }}>
+                            #{topPlayer.overall_rank} {topPlayer.name}
+                          </div>
+                          <div className="text-[10px] font-mono mt-0.5 truncate" style={{ color: T.textSubtle }}>
+                            {topPlayer.school}
+                          </div>
+                          {topPlayer.tie_tier && (
+                            <div className="inline-flex items-center mt-2 px-2 py-0.5 rounded text-[10px] font-extrabold tracking-wider" style={{ background: `${color}15`, color }}>
+                              {topPlayer.tie_tier.replace('_PLUS', '+').replace('_MINUS', '-')}
+                            </div>
+                          )}
+                        </div>
+                      </>
+                    ) : (
+                      <div className="flex-1 flex items-center justify-center text-[11px]" style={{ color: T.textSubtle }}>
+                        {label}
                       </div>
                     )}
                   </Link>

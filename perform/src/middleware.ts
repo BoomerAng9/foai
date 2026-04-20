@@ -45,6 +45,8 @@ const PUBLIC_PREFIXES = [
   '/api/sports/',
   '/api/auth/',
   '/api/players',
+  '/api/teams',         // Player Index Drawer — browse-first, public
+  '/api/rankings',      // SSE stream + snapshot — browse-first, public
   '/api/tie/',
   '/api/feed',
   '/api/news',

@@ -36,6 +36,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { sql, requireDb } from '@/lib/db';
 import { getNflTeam } from '@/lib/draft/nfl-teams';
 import { resolveHelmet } from '@/lib/images/team-helmet-resolver';
+import { emitPickEvent } from '@/lib/events/rankings-emitter';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -138,6 +139,19 @@ export async function POST(req: NextRequest) {
     school: row.school,
     drafted_by_team: row.drafted_by_team,
     college_color_phrase: row.college_color_phrase,
+  });
+
+  // Push the pick to all live SSE subscribers (rankings + big board clients)
+  const u = updated[0] as Record<string, unknown>;
+  emitPickEvent({
+    player_id: Number(u.id),
+    player_name: String(u.name ?? ''),
+    position: (u.position as string | null) ?? null,
+    school: (u.school as string | null) ?? null,
+    drafted_by_team: drafted_by_team!,
+    pick_number,
+    round,
+    drafted_at: drafted_at.toISOString(),
   });
 
   return NextResponse.json({
