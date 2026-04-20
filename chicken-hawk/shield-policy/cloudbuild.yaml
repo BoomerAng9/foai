@@ -27,9 +27,12 @@ options:
   machineType: E2_HIGHCPU_8     # cargo build parallelism
 
 substitutions:
-  # Default: verify + test. Set _RUN_KANI=yes to also discharge Kani
-  # harnesses (~15 min cold, ~5 min incremental).
-  _RUN_KANI: "no"
+  # Default: verify + test + Kani discharge. As of 2026-04-20 the 54
+  # Kani proof harnesses run on every PR — a regression in any kernel
+  # component invariant fails the build via Kani's non-zero exit code.
+  # Set _RUN_KANI=no to skip (e.g. for a non-kernel docs-only change
+  # where the ~5-7 min cold-start cost isn't worth it).
+  _RUN_KANI: "yes"
   # Verify the crate compiles across all three v1.6 §3.1 substrate
   # targets (Linux x86_64 / macOS ARM64 / WASM). As of 2026-04-19 all
   # three pass without modification — graduated from soft-gate to
@@ -151,11 +154,13 @@ steps:
           echo "skipping substrate verification (_RUN_SUBSTRATES=no)."
         fi
 
-  # ── Step 6: Kani proof discharge (optional, _RUN_KANI=yes) ──────
+  # ── Step 6: Kani proof discharge (required by default) ──────────
   # Kani install on Cloud Build runners is ~3-5 min (faster than cold
-  # GitHub runner due to better bandwidth). Full discharge ~5-7 min for
-  # the 24 harnesses. Toggle on per-trigger via _RUN_KANI=yes override
-  # (default: skip so most PRs don't pay the cost).
+  # GitHub runner due to better bandwidth). Full discharge ~5-7 min
+  # across the 54 harnesses (cia + snr + degradation + phoenix + zkp
+  # + substrate-consensus). Runs on every PR by default — a failing
+  # harness fails the build via Kani's non-zero exit code. Override
+  # with --substitutions=_RUN_KANI=no only for docs-only changes.
   - id: kani-discharge
     name: rust:1-bookworm
     entrypoint: bash
@@ -170,7 +175,7 @@ steps:
           cargo kani setup
           cargo kani --features kani
         else
-          echo "skipping kani (_RUN_KANI=no). Set --substitutions=_RUN_KANI=yes to discharge."
+          echo "skipping kani (_RUN_KANI=no). Remove the override to run the 54 harnesses."
         fi
 
 # No image artifacts produced — this is a verify pipeline, not a build
