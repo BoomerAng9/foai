@@ -1,0 +1,44 @@
+# Cloud Build upload exclusions for `gcloud builds submit perform/`
+# Keep the upload tarball small — Docker build only needs source + package files.
+
+.git/
+.github/
+.gitignore
+
+node_modules/
+.next/
+out/
+build/
+dist/
+
+# Local env files — never upload secrets to Cloud Build
+.env
+.env.local
+.env.*.local
+.env.development
+.env.production
+
+# Generated artifacts that don't belong in the image
+public/auditions/*.wav
+public/generated/
+*.tsbuildinfo
+coverage/
+
+# IDE / OS noise
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Test fixtures not needed at runtime
+__tests__/
+*.test.ts
+*.test.tsx
+*.spec.ts
+*.spec.tsx
