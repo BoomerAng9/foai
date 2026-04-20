@@ -1,0 +1,349 @@
+// ACHIEVEMOR Shield Division — Spinner Invocation wire format (Phase A).
+//
+// Contract-only schema. Locks the envelope exchanged between Python
+// Spinner (legacy) and the Rust shield-policy runtime (new), so a
+// progressive cutover is possible without a big-bang.
+//
+// See README.md in this directory for:
+//   - protobuf-vs-Cap'n-Proto decision record
+//   - schema-versioning policy
+//   - regeneration instructions for Rust (prost) and Python (grpcio-tools)
+//
+// Source of truth for field shapes:
+//   - chicken-hawk/shield-policy/src/types.rs  (Rust — canonical)
+//   - runtime/spinner/shield_policy_client.py  (Python — mirror)
+//
+// Changes to this file MUST be reviewed against both, and bump the
+// package version (deploy.spinner.shield.v1 → v2) for any
+// backwards-incompatible shape change. Additive changes (new optional
+// fields, new enum values appended) stay on v1.
+
+syntax = "proto3";
+
+package deploy.spinner.shield.v1;
+
+option optimize_for = SPEED;
+
+// ─────────────────────────────────────────────────────────────────────
+// Enums — mirror the closed Rust enums in src/types.rs.
+// Ordinal 0 is always an UNSPECIFIED sentinel per proto3 convention;
+// the Rust deserializer treats UNSPECIFIED as a decode error.
+// ─────────────────────────────────────────────────────────────────────
+
+// All 32 Shield Division Hawks. Ordering matches the Rust enum so
+// numeric comparisons stay stable across the wire.
+enum Hawk {
+  HAWK_UNSPECIFIED = 0;
+
+  // Black Squad (6)
+  HAWK_LIL_HOOK_HAWK = 1;
+  HAWK_LIL_RECON_HAWK = 2;
+  HAWK_LIL_TAG_HAWK = 3;
+  HAWK_LIL_SCOPE_HAWK = 4;
+  HAWK_LIL_SITE_HAWK = 5;
+  HAWK_LIL_TEST_HAWK = 6;
+
+  // Blue Squad (6)
+  HAWK_LIL_WATCH_HAWK = 7;
+  HAWK_LIL_WIRE_HAWK = 8;
+  HAWK_LIL_TRACK_HAWK = 9;
+  HAWK_LIL_PATCH_HAWK = 10;
+  HAWK_LIL_LAB_HAWK = 11;
+  HAWK_LIL_PULSE_HAWK = 12;
+
+  // Purple Squad (4)
+  HAWK_LIL_ARC_HAWK = 13;
+  HAWK_LIL_MIME_HAWK = 14;
+  HAWK_LIL_CHORD_HAWK = 15;
+  HAWK_LIL_LOOP_HAWK = 16;
+
+  // White Squad (8)
+  HAWK_LIL_SCRIPT_HAWK = 17;
+  HAWK_LIL_VANE_HAWK = 18;
+  HAWK_LIL_GRID_HAWK = 19;
+  HAWK_LIL_LOCK_HAWK = 20;
+  HAWK_LIL_BOOK_HAWK = 21;
+  HAWK_LIL_TELL_HAWK = 22;
+  HAWK_LIL_PLAY_HAWK = 23;
+  HAWK_LIL_SEAL_HAWK = 24;
+
+  // Gold & Platinum Squad (8)
+  HAWK_LIL_MAST_HAWK = 25;
+  HAWK_LIL_OMEN_HAWK = 26;
+  HAWK_LIL_SALT_HAWK = 27;
+  HAWK_LIL_DRIFT_HAWK = 28;
+  HAWK_LIL_BELL_HAWK = 29;
+  HAWK_LIL_VEIL_HAWK = 30;
+  HAWK_LIL_PEEL_HAWK = 31;
+  HAWK_LIL_DOUBT_HAWK = 32;
+}
+
+// Risk drives consensus depth (Degradation Spectrum §2.2).
+enum RiskLevel {
+  RISK_LEVEL_UNSPECIFIED = 0;
+  RISK_LEVEL_LOW = 1;     // 1-instance syntactic in Mode 2
+  RISK_LEVEL_MEDIUM = 2;  // 2-of-3 syntactic in Mode 2
+  RISK_LEVEL_HIGH = 3;    // 3-instance full + CIA always
+}
+
+// Closed set of reasoning-path patterns. Free text is rejected.
+enum ReasoningPath {
+  REASONING_PATH_UNSPECIFIED = 0;
+  REASONING_PATH_BYPASS_CIA = 1;
+  REASONING_PATH_BYPASS_SLCT = 2;
+  REASONING_PATH_BYPASS_PRIVACY_BUDGET = 3;
+  REASONING_PATH_DOWNGRADE_CONSENSUS = 4;
+  REASONING_PATH_STALE_MERKLE_ACCEPT = 5;
+  REASONING_PATH_SCOPE_CREEP_FROM_SAT = 6;
+  REASONING_PATH_DETECTION_PRIORITY_OVER_ISOLATION = 7;
+  REASONING_PATH_CROSS_SQUAD_DATA_LEAKAGE = 8;
+  REASONING_PATH_BUDGET_VIOLATION_OVERRIDE = 9;
+  REASONING_PATH_GUARDRAIL_VIOLATION_OVERRIDE = 10;
+  REASONING_PATH_TRUST_WITHOUT_ATTESTATION = 11;
+  REASONING_PATH_CRYPT_ANG_SAT_ACCEPTANCE = 12;
+  REASONING_PATH_COSIGN_BY_POLICY_NOT_VERIFICATION = 13;
+  REASONING_PATH_REAL_EXFIL_JUSTIFIED_BY_PROOF_VALUE = 14;
+  REASONING_PATH_ACCEPTABLE_PII_LEAK_FOR_UTILITY = 15;
+  REASONING_PATH_TRUST_TESTS_OVER_PROOF = 16;
+  REASONING_PATH_PARTIAL_VERIFICATION_ACCEPTABLE = 17;
+  REASONING_PATH_DEFER_TO_CRYPT_ANG_ON_AUDIT_CONFLICT = 18;
+  REASONING_PATH_EXCLUDE_CRYPT_ANG_FROM_SIMULATION_SCOPE = 19;
+}
+
+// Data classes tagged at ingestion by Sparks (Lil_Wire_Hawk).
+enum DataClass {
+  DATA_CLASS_UNSPECIFIED = 0;
+  DATA_CLASS_UNREDACTED_PII = 1;
+  DATA_CLASS_UNREDACTED_PHI = 2;
+  DATA_CLASS_TENANT_SECRET = 3;
+  DATA_CLASS_ROOT_KEY_MATERIAL = 4;
+  DATA_CLASS_CANARY_SAT = 5;
+  DATA_CLASS_CROSS_TENANT_IDENTIFIER = 6;
+}
+
+// Classification of what KIND of operation a tool_id represents.
+// Drives class-based predicates in per-Hawk overrides.
+enum ToolClass {
+  TOOL_CLASS_UNSPECIFIED = 0;
+  TOOL_CLASS_UNKNOWN = 1;
+  TOOL_CLASS_AI_ML_TEST = 2;
+  TOOL_CLASS_EMIT = 3;
+  TOOL_CLASS_CROSS_TENANT_SIGNAL = 4;
+  TOOL_CLASS_ENFORCE = 5;
+  TOOL_CLASS_EXECUTE = 6;
+  TOOL_CLASS_REAL_EXFIL = 7;
+  TOOL_CLASS_SIMULATED_CAPTURE = 8;
+  TOOL_CLASS_CO_SIGN = 9;
+  TOOL_CLASS_REDACT = 10;
+}
+
+// The substrate that actually ran validate(). Used by the audit
+// chain and the 2-of-3 quorum check in the dispatcher.
+enum Substrate {
+  SUBSTRATE_UNSPECIFIED = 0;
+  SUBSTRATE_X86_64_LINUX = 1;
+  SUBSTRATE_ARM64_DARWIN = 2;
+  SUBSTRATE_WASM32 = 3;
+}
+
+// ─────────────────────────────────────────────────────────────────────
+// Persona — mirrors Rust Persona including the Persona::Hawk(Hawk)
+// variant. Encoded as oneof so Hawk's payload is structural, not a
+// sentinel string.
+// ─────────────────────────────────────────────────────────────────────
+
+message Persona {
+  oneof kind {
+    // Flat variants — payload-less.
+    FlatPersona flat = 1;
+    // Hawk-as-commander variant — carries the specific Hawk enum.
+    Hawk hawk = 2;
+  }
+}
+
+enum FlatPersona {
+  FLAT_PERSONA_UNSPECIFIED = 0;
+  FLAT_PERSONA_ACHEEVY = 1;
+  FLAT_PERSONA_CRYPT_ANG = 2;
+  FLAT_PERSONA_PLATFORM_OWNER = 3;
+  FLAT_PERSONA_PMO_SHIELD_LEAD = 4;
+  FLAT_PERSONA_TENANT_ADMIN = 5;
+}
+
+// ─────────────────────────────────────────────────────────────────────
+// Supporting records — each is a direct shape-match of the Rust struct.
+// ─────────────────────────────────────────────────────────────────────
+
+// Short-Lived Capability Token state (60-second lifespan).
+// Rust carries both timestamps and the derived boolean so the
+// validator can re-check liveness under clock-skew policies; the
+// wire format preserves all three rather than collapsing to is_live.
+message Slct {
+  uint64 issued_at_unix = 1;
+  uint64 expires_at_unix = 2;
+  bool is_live = 3;
+}
+
+// Scope Authorization Token — ed25519-signed, required for Black
+// Squad ops. target_tenant_id and co_signer are optional; proto3
+// scalar/enum absence is represented via wrapper message, but for
+// this contract we use explicit has_* booleans to keep the Rust
+// deserializer simple (`prost`'s Option<T> for enums requires
+// message wrappers otherwise).
+message Sat {
+  Persona issuer = 1;
+  bool has_target_tenant_id = 2;
+  uint64 target_tenant_id = 3;
+  bool valid = 4;
+  bool has_co_signer = 5;
+  Hawk co_signer = 6;
+}
+
+// CIA Tri-Factor Intent proof — v1.6 §2.3.
+message CiaProof {
+  bool plan_signed = 1;
+  bool intent_token_present = 2;
+  bool intent_token_plan_hash_matches = 3;
+  bool merkle_scope_proof_valid = 4;
+  uint64 merkle_proof_age_seconds = 5;
+}
+
+// Payload flags referenced by Privacy's kernel-class properties.
+message Payload {
+  bool redaction_applied = 1;
+  bool is_zkp = 2;
+}
+
+// ─────────────────────────────────────────────────────────────────────
+// Invocation — the full record passed to shield_policy::validate().
+// Field numbers match the semantic groupings in the Rust struct
+// (identity → authorization → context → flags) so diffing across
+// versions stays readable.
+// ─────────────────────────────────────────────────────────────────────
+
+message Invocation {
+  // Identity
+  Hawk hawk = 1;
+  string tool_id = 2;
+  ToolClass tool_class = 3;
+
+  // Risk + commander
+  RiskLevel risk = 4;
+  Persona commander = 5;
+  string target_namespace = 6;    // glob-matched server-side
+
+  // Context
+  repeated DataClass data_classes = 7;
+  repeated ReasoningPath reasoning_paths = 8;
+
+  // Authorization tokens
+  Slct slct = 9;                   // required; shield-policy rejects absent slct
+  bool has_sat = 10;
+  Sat sat = 11;
+  bool has_cia = 12;
+  CiaProof cia = 13;
+  bool has_payload = 14;
+  Payload payload = 15;
+
+  // Flags
+  bool crosses_tenant = 16;
+  bool threat_confirmed = 17;
+  bool action_is_containment = 18;
+  bool privacy_budget_violated = 19;
+  bool guardrail_violated = 20;
+}
+
+// ─────────────────────────────────────────────────────────────────────
+// Denial — oneof union of the 14 Rust Denial variants. Unit variants
+// carry a trivial marker message so the oneof stays structurally
+// uniform for language bindings that don't handle empty payloads
+// cleanly (especially `prost`-generated Rust, which emits a struct
+// per oneof arm regardless).
+// ─────────────────────────────────────────────────────────────────────
+
+message DenialUnit {}  // marker for payload-less denial variants
+
+message ProhibitedToolCall {
+  string tool_id = 1;
+}
+
+message ProhibitedReasoningPath {
+  ReasoningPath reasoning_path = 1;
+}
+
+message ProhibitedTarget {
+  string target_namespace = 1;
+}
+
+message ProhibitedDataClass {
+  DataClass data_class = 1;
+}
+
+message ProhibitedCommander {
+  Persona commander = 1;
+}
+
+message Denial {
+  oneof reason {
+    ProhibitedToolCall prohibited_tool_call = 1;
+    ProhibitedReasoningPath prohibited_reasoning_path = 2;
+    ProhibitedTarget prohibited_target = 3;
+    ProhibitedDataClass prohibited_data_class = 4;
+    ProhibitedCommander prohibited_commander = 5;
+    DenialUnit slct_not_live = 6;
+    DenialUnit cia_required = 7;
+    DenialUnit sat_required = 8;
+    DenialUnit cosign_required = 9;
+    DenialUnit crypt_ang_barred_from_gold_sat = 10;
+    DenialUnit merkle_stale = 11;
+    DenialUnit privacy_budget_violation = 12;
+    DenialUnit guardrail_violation = 13;
+    DenialUnit detection_over_isolation = 14;
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────
+// Decision — pass-or-deny result returned from validate(). Modeled as
+// a oneof so the pass case doesn't need a sentinel Denial value.
+// ─────────────────────────────────────────────────────────────────────
+
+message Pass {}
+
+message Decision {
+  oneof outcome {
+    Pass pass = 1;
+    Denial deny = 2;
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────
+// AuditEntry — NEW in v1. Tamper-evident chain record for the
+// Paranoia audit loop (v1.6 §4.4). Every validate() call — pass
+// OR deny — produces one of these. Chain linkage is via prev_hash
+// (blake3 of the previous entry's canonical bytes) + this_hash
+// (blake3 of this entry's bytes, excluding the this_hash field
+// itself — the hash covers all OTHER fields including prev_hash).
+//
+// build_content_hash identifies the exact shield-policy build that
+// ran this decision. Divergence across substrates on the same
+// invocation indicates either a replay attack or a substrate
+// compromise — see Phoenix Protocol §3.3.
+//
+// PROPOSAL NOTE (review callout): this shape is new in Phase A, not
+// retrofitted from an existing Python/Rust type. The audit-loop PR
+// that wires sec_audit to this message is Phase B follow-up work.
+// ─────────────────────────────────────────────────────────────────────
+
+message AuditEntry {
+  // Chain linkage
+  uint64 sequence = 1;             // monotonic per-chain counter
+  bytes prev_hash = 2;             // blake3 of prior entry bytes (empty for genesis)
+  bytes this_hash = 3;             // blake3 of all OTHER fields in this message
+
+  // Decision record
+  uint64 emitted_at_unix_ms = 4;
+  Substrate substrate = 5;
+  bytes build_content_hash = 6;    // shield-policy artifact hash that ran validate()
+  Invocation invocation = 7;
+  Decision decision = 8;
+}
