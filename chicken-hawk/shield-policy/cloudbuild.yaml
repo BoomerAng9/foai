@@ -16,7 +16,7 @@
 #     --repo-owner=BoomerAng9 \
 #     --branch-pattern="^main$" \
 #     --build-config=chicken-hawk/shield-policy/cloudbuild.yaml \
-#     --included-files="chicken-hawk/shield-policy/**,chicken-hawk/config/shield/**,chicken-hawk/config/shield_personas.yml,chicken-hawk/scripts/compile-shield-policy.py"
+#     --included-files="chicken-hawk/shield-policy/**,chicken-hawk/shield-policy-wire/**,chicken-hawk/config/shield/**,chicken-hawk/config/shield_personas.yml,chicken-hawk/scripts/compile-shield-policy.py,runtime/spinner/schema/**,runtime/spinner/tests/fixtures/**"
 #
 # Same command with --pull-request-pattern=".*" for PR trigger.
 
@@ -73,6 +73,46 @@ steps:
       - |
         cd chicken-hawk/shield-policy
         cargo test --lib
+
+  # ── Step 3b: shield-policy-wire (sibling crate) ─────────────────
+  # Phase A step 2 of the P0 plan (runtime/spinner/RUST_REWRITE_PLAN.md).
+  # Compiles + tests the protobuf wire format adapter. Generated Rust
+  # is committed under chicken-hawk/shield-policy-wire/src/generated/
+  # so no protoc / C toolchain is required on this builder image.
+  - id: cargo-check-wire
+    name: rust:1-bookworm
+    entrypoint: bash
+    waitFor: [cargo-check]
+    args:
+      - -eu
+      - -c
+      - |
+        cd chicken-hawk/shield-policy-wire
+        cargo check --all-targets
+
+  - id: cargo-test-wire
+    name: rust:1-bookworm
+    entrypoint: bash
+    waitFor: [cargo-check-wire]
+    args:
+      - -eu
+      - -c
+      - |
+        cd chicken-hawk/shield-policy-wire
+        cargo test
+        # Parity fixture check — re-emit deterministically, diff
+        # against committed fixtures (both the crate-local copy and
+        # the Python-shared copy under runtime/spinner/tests/fixtures).
+        # Fails the build if the canonical invocation's encoded bytes
+        # drift from what was committed.
+        cargo test parity_emit_fixture -- --ignored
+        git diff --exit-code \
+          tests/fixtures/invocation.bin \
+          ../../runtime/spinner/tests/fixtures/invocation.bin \
+          || {
+            echo "Wire fixture drift detected — regenerate locally and commit."
+            exit 1
+          }
 
   # ── Step 4: Scene governance audit (if scene YAML changed) ──────
   - id: scene-audit
