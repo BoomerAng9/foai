@@ -1,0 +1,106 @@
+# Cloud Build pipeline for vault-signer.
+#
+# Two-phase: verify (runs on every PR) + deploy (gated on owner-run
+# trigger to main). Same pattern as Gate 6a deploy configs — actual
+# Cloud Run deploy is gated on explicit owner approval via the
+# _DEPLOY substitution flag.
+#
+# Trigger setup (one-time, after Priority 2 GitHub App install):
+#   gcloud builds triggers create github \
+#     --name=vault-signer-verify \
+#     --project=foai-aims \
+#     --region=us-central1 \
+#     --repo-name=foai \
+#     --repo-owner=BoomerAng9 \
+#     --pull-request-pattern=".*" \
+#     --build-config=runtime/vault-signer/cloudbuild.yaml \
+#     --included-files="runtime/vault-signer/**"
+#
+# Same command with --branch-pattern="^main$" and
+# --substitutions=_DEPLOY=yes for the deploy trigger.
+
+timeout: 900s
+
+options:
+  logging: CLOUD_LOGGING_ONLY
+  machineType: E2_STANDARD_4
+
+substitutions:
+  # Default: verify only (tests + Docker build, no deploy). Set to "yes"
+  # on the main-branch trigger to also push the image + replace the
+  # Cloud Run service.
+  _DEPLOY: "no"
+  _IMAGE: us-central1-docker.pkg.dev/foai-aims/vault-signer/vault-signer
+
+steps:
+  # ── Step 1: unit tests ──────────────────────────────────────────
+  - id: pytest
+    name: python:3.12-slim
+    entrypoint: bash
+    args:
+      - -eu
+      - -c
+      - |
+        cd runtime/vault-signer
+        pip install --quiet .[dev]
+        python -m pytest -v
+
+  # ── Step 2: docker build ────────────────────────────────────────
+  # Always runs — verifies the image assembles. Tag is commit-SHA
+  # pinned; only the deploy step pushes it.
+  - id: docker-build
+    name: gcr.io/cloud-builders/docker
+    waitFor: [pytest]
+    args:
+      - build
+      - -t
+      - ${_IMAGE}:${COMMIT_SHA}
+      - -t
+      - ${_IMAGE}:latest
+      - runtime/vault-signer
+
+  # ── Step 3: docker push (deploy only) ───────────────────────────
+  - id: docker-push
+    name: gcr.io/cloud-builders/docker
+    waitFor: [docker-build]
+    entrypoint: bash
+    args:
+      - -eu
+      - -c
+      - |
+        if [ "${_DEPLOY}" = "yes" ]; then
+          docker push ${_IMAGE}:${COMMIT_SHA}
+          docker push ${_IMAGE}:latest
+        else
+          echo "skipping push (_DEPLOY=no)"
+        fi
+
+  # ── Step 4: Cloud Run service replace (deploy only) ─────────────
+  # Applies service.yaml against the live service. Only fires when
+  # _DEPLOY=yes is passed explicitly via the main-branch trigger.
+  - id: run-replace
+    name: gcr.io/google.com/cloudsdktool/cloud-sdk:slim
+    waitFor: [docker-push]
+    entrypoint: bash
+    args:
+      - -eu
+      - -c
+      - |
+        if [ "${_DEPLOY}" = "yes" ]; then
+          # service.yaml pins to :latest. Point the specific revision
+          # at the commit-SHA tag so we have a stable pointer.
+          sed "s|:latest|:${COMMIT_SHA}|g" runtime/vault-signer/service.yaml \
+            > /tmp/service-pinned.yaml
+          gcloud run services replace /tmp/service-pinned.yaml \
+            --region=us-central1 \
+            --project=foai-aims
+        else
+          echo "skipping Cloud Run replace (_DEPLOY=no)"
+        fi
+
+# Images the build produces. Cloud Build records these as artifacts
+# even when _DEPLOY=no (they live in the build log, not Artifact
+# Registry, until the push step runs).
+images:
+  - ${_IMAGE}:${COMMIT_SHA}
+  - ${_IMAGE}:latest
