@@ -45,6 +45,10 @@ export default function SqwaadrunPage() {
   const { user } = useAuth();
   const [live, setLive] = useState<LiveRoster | null>(null);
   const [healthy, setHealthy] = useState<boolean | null>(null);
+  const [freshKey, setFreshKey] = useState<string | null>(null);
+  const [freshKeyStatus, setFreshKeyStatus] = useState<
+    'idle' | 'fetching' | 'delivered' | 'already_retrieved' | 'error'
+  >('idle');
 
   // Owner short-circuit — never show the pricing tiles to the owner.
   // Send straight to the authenticated control surface.
@@ -63,6 +67,45 @@ export default function SqwaadrunPage() {
       })
       .catch(() => setHealthy(false));
   }, []);
+
+  // Post-checkout key delivery — the Stripe success URL redirects back
+  // here with ?success=true&session_id=<cs_...>. Fetch the plaintext
+  // key from the one-time handoff endpoint. Shows once, then burned.
+  useEffect(() => {
+    if (!user) return;
+    if (typeof window === 'undefined') return;
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('success') !== 'true') return;
+    const sessionId = params.get('session_id');
+    if (!sessionId) return;
+
+    let cancelled = false;
+    setFreshKeyStatus('fetching');
+    (async () => {
+      try {
+        const token = await user.getIdToken();
+        const res = await fetch(
+          `/api/sqwaadrun/my-key?session_id=${encodeURIComponent(sessionId)}`,
+          { headers: { Authorization: `Bearer ${token}` } },
+        );
+        const data = await res.json();
+        if (cancelled) return;
+        if (data.apiKey) {
+          setFreshKey(data.apiKey);
+          setFreshKeyStatus('delivered');
+        } else if (data.status === 'already_retrieved') {
+          setFreshKeyStatus('already_retrieved');
+        } else {
+          setFreshKeyStatus('error');
+        }
+      } catch {
+        if (!cancelled) setFreshKeyStatus('error');
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [user]);
 
   // Inject live stats into card data
   const enrich = (cards: HawkCardData[]): HawkCardData[] =>
@@ -133,6 +176,68 @@ export default function SqwaadrunPage() {
           </Link>
         </div>
       </nav>
+
+      {/* ═══ FRESH API KEY BANNER — one-time delivery after Stripe success ═══ */}
+      {freshKeyStatus === 'delivered' && freshKey && (
+        <div
+          className="border-b px-6 py-5"
+          style={{
+            background: 'linear-gradient(90deg, rgba(34,211,238,0.12), rgba(245,166,35,0.08))',
+            borderColor: 'rgba(34,211,238,0.4)',
+          }}
+        >
+          <div className="max-w-6xl mx-auto">
+            <div className="text-[10px] font-mono tracking-[0.3em] mb-2" style={{ color: '#22D3EE' }}>
+              / SUBSCRIPTION ACTIVATED · YOUR SQWAADRUN API KEY
+            </div>
+            <div className="flex items-center gap-3 flex-wrap">
+              <code
+                className="px-4 py-2 font-mono text-sm break-all select-all"
+                style={{
+                  background: '#050810',
+                  border: '1px solid rgba(245,166,35,0.4)',
+                  borderRadius: '2px',
+                  color: '#F5A623',
+                }}
+              >
+                {freshKey}
+              </code>
+              <button
+                onClick={() => {
+                  navigator.clipboard.writeText(freshKey);
+                }}
+                className="px-4 py-2 text-[11px] font-mono tracking-[0.15em] font-bold"
+                style={{
+                  background: '#F5A623',
+                  color: '#050810',
+                  borderRadius: '2px',
+                }}
+              >
+                COPY
+              </button>
+            </div>
+            <p className="text-xs mt-3" style={{ color: '#94A3B8' }}>
+              This key is shown once. Store it securely — a copy was also emailed if SendGrid is configured.
+              Send <code className="font-mono text-[#22D3EE]">Authorization: Bearer &lt;key&gt;</code> with every request
+              to <code className="font-mono text-[#22D3EE]">https://sqwaadrun.foai.cloud/mission</code>.
+            </p>
+          </div>
+        </div>
+      )}
+      {freshKeyStatus === 'already_retrieved' && (
+        <div
+          className="border-b px-6 py-4 text-center"
+          style={{
+            background: 'rgba(245,166,35,0.08)',
+            borderColor: 'rgba(245,166,35,0.3)',
+          }}
+        >
+          <p className="text-xs" style={{ color: '#F5A623' }}>
+            Subscription active. Your API key was already retrieved — sign in to{' '}
+            <Link href="/sqwaadrun" className="underline font-bold">Hawk Bay</Link> to manage missions.
+          </p>
+        </div>
+      )}
 
       {/* ═══ HERO ═══ */}
       <section className="relative overflow-hidden">

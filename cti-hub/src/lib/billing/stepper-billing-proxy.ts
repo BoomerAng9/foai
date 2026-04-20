@@ -34,8 +34,12 @@ export interface CreateCheckoutSessionInput {
   priceId: string;
   /** Product scope — 'deploy' (default) or 'sqwaadrun'. */
   product?: 'deploy' | 'sqwaadrun';
-  /** Origin used for success/cancel URLs. */
+  /** Origin used as the base for successUrl/cancelUrl if not fully-qualified. */
   origin: string;
+  /** Success redirect path or full URL. Caller owns the UX. May include `{CHECKOUT_SESSION_ID}` placeholder. */
+  successUrl: string;
+  /** Cancel redirect path or full URL. Caller owns the UX. */
+  cancelUrl: string;
   /** Stripe customer id if already known. */
   existingStripeCustomerId?: string | null;
   /** Optional discount coupon id (e.g. 20% Deploy-subscriber discount for Sqwaadrun). */
@@ -126,11 +130,8 @@ export async function createCheckoutSession(
     ...(input.extraMetadata ?? {}),
   };
 
-  const successPath =
-    product === 'sqwaadrun'
-      ? '/hawks/dashboard?session_id={CHECKOUT_SESSION_ID}'
-      : '/billing/success?session_id={CHECKOUT_SESSION_ID}';
-  const cancelPath = product === 'sqwaadrun' ? '/hawks' : '/billing';
+  const resolveUrl = (url: string): string =>
+    url.startsWith('http') ? url : `${input.origin}${url}`;
 
   const session = await stripe.checkout.sessions.create({
     mode: 'subscription',
@@ -138,8 +139,8 @@ export async function createCheckoutSession(
     line_items: [{ price: input.priceId, quantity: 1 }],
     metadata,
     subscription_data: { metadata },
-    success_url: `${input.origin}${successPath}`,
-    cancel_url: `${input.origin}${cancelPath}`,
+    success_url: resolveUrl(input.successUrl),
+    cancel_url: resolveUrl(input.cancelUrl),
     allow_promotion_codes: true,
     discounts: input.discountCouponId
       ? [{ coupon: input.discountCouponId }]
