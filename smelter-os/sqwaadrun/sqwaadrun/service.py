@@ -212,7 +212,8 @@ async def scrape_intent(request: web.Request) -> web.Response:
         mission_id = result.get("mission_id")
         if mission_id and result.get("status") in ("completed", "failed"):
             mission_obj = _find_mission(squad, mission_id)
-            await _persist_mission(storage, mission_id, mission_obj, result)
+            user_id = request.get("sqwaadrun_user_id") or "admin"
+            await _persist_mission(storage, mission_id, mission_obj, result, user_id)
 
         # sanitize_output strips internal paths, IPs, and leaked secrets
         # before the response crosses the API boundary.
@@ -237,19 +238,24 @@ async def _persist_mission(
     mission_id: str,
     mission_obj: Optional[Mission],
     api_result: Dict[str, Any],
+    user_id: str,
 ) -> None:
+    """Persist to the caller's per-user namespace. user_id='admin' for
+    SQWAADRUN_API_KEY admin traffic; Firebase uid for customer traffic."""
     try:
         manifest: Dict[str, Any] = {
             "mission_id": mission_id,
+            "user_id": user_id,
             "intent": api_result.get("type") or (mission_obj.mission_type.value if mission_obj else None),
             "targets": mission_obj.targets if mission_obj else [],
             "config": mission_obj.config if mission_obj else {},
             "created_at": mission_obj.created_at if mission_obj else None,
         }
-        await storage.store_mission_manifest(mission_id, manifest)
+        await storage.store_mission_manifest(mission_id, manifest, user_id=user_id)
 
         payload: Dict[str, Any] = {
             "mission_id": mission_id,
+            "user_id": user_id,
             "status": api_result.get("status"),
             "target_count": api_result.get("target_count"),
             "results_count": api_result.get("results_count"),
@@ -257,10 +263,11 @@ async def _persist_mission(
             "results": mission_obj.results if mission_obj else [],
             "error": api_result.get("error"),
         }
-        storage_result = await storage.store_mission_result(mission_id, payload)
+        storage_result = await storage.store_mission_result(mission_id, payload, user_id=user_id)
         logger.info(
-            f"Mission {mission_id} persistence: "
-            f"puter={storage_result['puter']} gcs={storage_result['gcs']}"
+            f"Mission {mission_id} persistence (user={user_id}): "
+            f"puter={storage_result['puter']} gcs={storage_result['gcs']} "
+            f"path={storage_result.get('gcs_path')}"
         )
     except Exception as e:
         logger.warning(f"Mission {mission_id} persistence failed: {e}")
@@ -323,7 +330,8 @@ async def mission(request: web.Request) -> web.Response:
         }
 
         if m.status in ("completed", "failed"):
-            await _persist_mission(storage, m.mission_id, m, api_result)
+            user_id = request.get("sqwaadrun_user_id") or "admin"
+            await _persist_mission(storage, m.mission_id, m, api_result, user_id)
 
         return web.json_response(sanitize_output(api_result))
     except Exception as e:

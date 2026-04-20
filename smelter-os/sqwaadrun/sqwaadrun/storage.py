@@ -350,21 +350,52 @@ class SmelterStorage:
             f"gcs={'online' if self.gcs.available else 'offline'}"
         )
 
-    # ── Mission results ────────────────────────────────────────────────
+    # ── Mission results — per-user namespace ───────────────────────────
+    #
+    # Customer missions land under customer/<user_id>/missions/<id>/...
+    # Admin missions (SQWAADRUN_API_KEY bearer) land under admin/missions/
+    # so operator traffic doesn't pollute any customer prefix. The cti-hub
+    # signed-download route enforces that a caller can only resolve paths
+    # under their own user_id prefix, giving per-tenant isolation at the
+    # artifact layer.
+
+    @staticmethod
+    def _sanitize_user_id(user_id: Optional[str]) -> str:
+        """Harden user_id so it can't escape its own prefix via ../ or slashes."""
+        if not user_id or user_id == "admin":
+            return "admin"
+        # Firebase UIDs are [A-Za-z0-9]{28} in practice — strict allowlist
+        # still lets us tolerate internal test IDs while rejecting traversal.
+        safe = "".join(c for c in user_id if c.isalnum() or c in ("-", "_"))
+        return safe or "anonymous"
+
+    def _mission_prefix(self, user_id: Optional[str], mission_id: str) -> tuple[str, str]:
+        """(puter_prefix, gcs_prefix) — both scoped to the caller's namespace."""
+        safe = self._sanitize_user_id(user_id)
+        if safe == "admin":
+            return (
+                f"sqwaadrun/admin/missions/{mission_id}",
+                f"admin/missions/{mission_id}",
+            )
+        return (
+            f"sqwaadrun/customer/{safe}/missions/{mission_id}",
+            f"customer/{safe}/missions/{mission_id}",
+        )
 
     async def store_mission_result(
         self,
         mission_id: str,
         data: Dict[str, Any],
+        user_id: Optional[str] = None,
     ) -> Dict[str, Any]:
         """
-        Persist a completed mission to both backends.
-        Returns {puter: bool, gcs: bool}.
+        Persist a completed mission to both backends under the caller's
+        per-user namespace. Returns {puter: bool, gcs: bool}.
         """
         json_data = json.dumps(data, indent=2, default=str)
-
-        puter_path = f"sqwaadrun/missions/{mission_id}/results.json"
-        gcs_path = f"{mission_id}/results.json"
+        puter_prefix, gcs_prefix = self._mission_prefix(user_id, mission_id)
+        puter_path = f"{puter_prefix}/results.json"
+        gcs_path = f"{gcs_prefix}/results.json"
 
         puter_ok, gcs_ok = await asyncio.gather(
             self.puter.write(puter_path, json_data),
@@ -375,17 +406,20 @@ class SmelterStorage:
         return {
             "puter": bool(puter_ok) if not isinstance(puter_ok, Exception) else False,
             "gcs": bool(gcs_ok) if not isinstance(gcs_ok, Exception) else False,
+            "gcs_path": gcs_path,
         }
 
     async def store_mission_manifest(
         self,
         mission_id: str,
         manifest: Dict[str, Any],
+        user_id: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Write the mission manifest (intent, targets, config) separately."""
         json_data = json.dumps(manifest, indent=2, default=str)
-        puter_path = f"sqwaadrun/missions/{mission_id}/manifest.json"
-        gcs_path = f"{mission_id}/manifest.json"
+        puter_prefix, gcs_prefix = self._mission_prefix(user_id, mission_id)
+        puter_path = f"{puter_prefix}/manifest.json"
+        gcs_path = f"{gcs_prefix}/manifest.json"
 
         puter_ok, gcs_ok = await asyncio.gather(
             self.puter.write(puter_path, json_data),
@@ -395,6 +429,7 @@ class SmelterStorage:
         return {
             "puter": bool(puter_ok) if not isinstance(puter_ok, Exception) else False,
             "gcs": bool(gcs_ok) if not isinstance(gcs_ok, Exception) else False,
+            "gcs_path": gcs_path,
         }
 
     async def store_mission_artifact(
@@ -403,10 +438,12 @@ class SmelterStorage:
         artifact_name: str,
         data: Union[str, bytes],
         content_type: str = "application/octet-stream",
+        user_id: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Per-URL artifact (raw HTML, markdown, etc.) for a mission."""
-        puter_path = f"sqwaadrun/missions/{mission_id}/artifacts/{artifact_name}"
-        gcs_path = f"{mission_id}/artifacts/{artifact_name}"
+        puter_prefix, gcs_prefix = self._mission_prefix(user_id, mission_id)
+        puter_path = f"{puter_prefix}/artifacts/{artifact_name}"
+        gcs_path = f"{gcs_prefix}/artifacts/{artifact_name}"
 
         puter_ok, gcs_ok = await asyncio.gather(
             self.puter.write(puter_path, data, content_type),
@@ -416,11 +453,17 @@ class SmelterStorage:
         return {
             "puter": bool(puter_ok) if not isinstance(puter_ok, Exception) else False,
             "gcs": bool(gcs_ok) if not isinstance(gcs_ok, Exception) else False,
+            "gcs_path": gcs_path,
         }
 
-    async def read_mission(self, mission_id: str) -> Optional[Dict[str, Any]]:
-        """Puter first, GCS fallback."""
-        puter_path = f"sqwaadrun/missions/{mission_id}/results.json"
+    async def read_mission(
+        self,
+        mission_id: str,
+        user_id: Optional[str] = None,
+    ) -> Optional[Dict[str, Any]]:
+        """Puter first, GCS fallback — both scoped to caller's namespace."""
+        puter_prefix, gcs_prefix = self._mission_prefix(user_id, mission_id)
+        puter_path = f"{puter_prefix}/results.json"
         data = await self.puter.read(puter_path)
         if data:
             try:
@@ -428,7 +471,7 @@ class SmelterStorage:
             except json.JSONDecodeError:
                 pass
 
-        gcs_path = f"{mission_id}/results.json"
+        gcs_path = f"{gcs_prefix}/results.json"
         data = await self.gcs.read(self.artifacts_bucket, gcs_path)
         if data:
             try:
