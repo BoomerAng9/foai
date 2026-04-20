@@ -135,7 +135,35 @@ export async function GET(req: NextRequest) {
     const offsetParam = `$${paramIdx}`;
     values.push(offset);
 
-    const query = `SELECT ${columns} FROM perform_players ${where} ORDER BY ${safeSortField} ${safeSortDir} LIMIT ${limitParam} OFFSET ${offsetParam}`;
+    // Consensus rank pivot — joins perform_consensus_ranks (migration 012)
+    // and exposes one column per source so the /rankings comparison UI
+    // can render PFF/ESPN/NFL.com/DrafTek/Yahoo/Ringer/consensus_avg
+    // alongside Per|Form's own rank. FILTER aggregation is cheap here:
+    // perform_consensus_ranks.UNIQUE(player_id, source) guarantees at
+    // most one row per (player, source), so MAX() is a no-op pick.
+    const CONSENSUS_SELECT = `,
+      cr.consensus_drafttek,
+      cr.consensus_yahoo,
+      cr.consensus_ringer,
+      cr.consensus_avg,
+      cr.consensus_pff,
+      cr.consensus_espn,
+      cr.consensus_nflcom`;
+    const CONSENSUS_JOIN = `
+      LEFT JOIN LATERAL (
+        SELECT
+          MAX(rank) FILTER (WHERE source = 'drafttek')      AS consensus_drafttek,
+          MAX(rank) FILTER (WHERE source = 'yahoo')         AS consensus_yahoo,
+          MAX(rank) FILTER (WHERE source = 'ringer')        AS consensus_ringer,
+          MAX(rank) FILTER (WHERE source = 'consensus_avg') AS consensus_avg,
+          MAX(rank) FILTER (WHERE source = 'pff')           AS consensus_pff,
+          MAX(rank) FILTER (WHERE source = 'espn')          AS consensus_espn,
+          MAX(rank) FILTER (WHERE source = 'nflcom')        AS consensus_nflcom
+        FROM perform_consensus_ranks
+        WHERE player_id = perform_players.id
+      ) cr ON TRUE`;
+
+    const query = `SELECT ${columns}${CONSENSUS_SELECT} FROM perform_players${CONSENSUS_JOIN} ${where} ORDER BY ${safeSortField} ${safeSortDir} LIMIT ${limitParam} OFFSET ${offsetParam}`;
     const countQuery = `SELECT COUNT(*) as total FROM perform_players ${where}`;
 
     const [rows, countResult] = await Promise.all([

@@ -193,17 +193,18 @@ function buildPayload(req: SpeakRequest): EnginePayload {
 }
 
 /* ── Fallback chain ──
- * ElevenLabs eleven_v3 is PRIMARY for all Per|Form analysts.
- * Gemini 2.5 TTS is OUT — deprecated per Rish's latest-model-only
- * rule (no "per product line" rationalization). If ElevenLabs fails,
- * walk remaining engines as last resort.
+ * Gemini 2.5 Pro TTS is PRIMARY for all Per|Form analysts (owner
+ * directive 2026-04-20). ElevenLabs remains the fallback for solo
+ * analysts and the PRIMARY for The Colonel + Gino (Jersey Italian
+ * dialect not in Gemini 24-language set — documented exception).
+ * Walk this chain when the primary engine returns null.
  */
 const SOLO_FALLBACK_CHAIN: Array<EnginePayload['engine']> = [
-  'elevenlabs',      // ElevenLabs eleven_v3 — PRIMARY for all analysts
+  'gemini-live',     // Gemini 2.5 Pro TTS — PRIMARY for analysts
+  'elevenlabs',      // ElevenLabs eleven_v3 — fallback + Colonel/Gino primary
   'personaplex',     // NVIDIA on Vertex AI (free credits)
   'grok-voice',      // xAI Grok 4.20 voice (when team auth lands)
   'playht',          // Play.ht v3 — paid, regional accents
-  'elevenlabs',      // ElevenLabs Turbo v2 — paid refined last-resort
 ];
 
 /* ── Engine dispatch ── */
@@ -250,11 +251,12 @@ async function dispatchSynthesis(payload: EnginePayload): Promise<{ audioUrl: st
       // Detect duo dialog by counting unique voiceIds across turns.
       // buildPayload emits one entry per turn, not per speaker — so
       // an 8-turn Haze+Smoke conversation produces 8 payload.speakers
-      // entries across 2 unique voiceIds. Gemini 2.5 TTS supports up
-      // to 2 speakers via multiSpeakerVoiceConfig — use it when we
+      // entries across 2 unique voiceIds. Gemini 3.1 Flash TTS supports
+      // up to 2 speakers via multiSpeakerVoiceConfig — use it when we
       // have exactly 2 unique voiceIds and at least 2 turns.
-      // Colonel+Gino are NOT routed here (scoped ElevenLabs exception
-      // for Jersey Italian dialect per feedback_gemini_preferred_not_exclusive.md).
+      // Colonel+Gino ARE routed here per owner directive 2026-04-20
+      // (USE FOR ALL). The Jersey accent is carried by script vocabulary
+      // (feedback_dialect_in_script_not_voice.md), not voice selection.
       const uniqueVoices = Array.from(
         new Set(payload.speakers.map(s => s.voiceId).filter(Boolean)),
       );

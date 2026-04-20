@@ -1,27 +1,31 @@
 /**
  * Gemini TTS Client
  * ====================
- * Google Gemini 2.5 TTS — text-to-speech via generateContent with
- * audio response modality. Uses GEMINI_API_KEY. Returns 24kHz PCM
- * wrapped in a WAV container for browser playback.
+ * Google Gemini 3.1 Flash TTS — text-to-speech via generateContent with
+ * audio response modality. Uses GEMINI_API_KEY. Returns 24kHz PCM wrapped
+ * in a WAV container for browser playback.
  *
  * IMPORTANT — two Gemini voice products, don't confuse:
  *   - Gemini Live API (gemini-3.1-flash-live-preview): WebSocket
- *     real-time bidirectional voice CHAT. NOT usable via
- *     generateContent. Used by Grammar for user↔agent voice chat
- *     in cti-hub + deploy + SmelterOS.
- *   - Gemini TTS API (gemini-2.5-*-preview-tts): batch text-to-speech
- *     over generateContent, supports multi-speaker dialog natively.
- *     This file targets the TTS API for Per|Form analyst narration.
+ *     real-time bidirectional voice CHAT with barge-in + tool calling.
+ *     Accessed via WebSocket, not generateContent. Use for live agent
+ *     conversations.
+ *   - Gemini TTS API (gemini-3.1-flash-tts-preview): batch text-to-speech
+ *     over generateContent, supports multi-speaker dialog natively via
+ *     multiSpeakerVoiceConfig. THIS file targets the TTS API for Per|Form
+ *     analyst narration (pre-recorded podcasts, broadcast intros).
  *
- * Per feedback_latest_model_only_rule.md: "latest" is per product line.
- * TTS API latest = 2.5 (no 3.1 TTS shipped yet). Migrate when it ships.
+ * Per feedback_latest_model_only_rule.md: always use the latest model.
+ * Verified live against the Gemini API model list 2026-04-20 — the 3.1
+ * Flash TTS preview IS shipped (the prior "TTS latest = 2.5" comment was
+ * stale). Owner directive 2026-04-20: route analyst voices to 3.1 Flash.
  *
  * Models:
- *   - gemini-2.5-pro-preview-tts   (DEFAULT — podcast/audiobook grade)
- *   - gemini-2.5-flash-preview-tts (fast, cheaper)
+ *   - gemini-3.1-flash-tts-preview (DEFAULT — current generation)
+ *   - gemini-2.5-pro-preview-tts   (FALLBACK — prior generation podcast grade)
+ *   - gemini-2.5-flash-preview-tts (FALLBACK — prior generation fast tier)
  *
- * 30 prebuilt voices (astronomy themed):
+ * 30 prebuilt voices (astronomy themed) carry across the 2.5 → 3.1 line:
  *   Zephyr, Puck, Charon, Kore, Fenrir, Leda, Orus, Aoede,
  *   Callirrhoe, Autonoe, Enceladus, Iapetus, Umbriel, Algieba,
  *   Despina, Erinome, Algenib, Rasalgethi, Laomedeia, Achernar,
@@ -34,37 +38,59 @@
  *   Bun-E             → Aoede (warm alto) — audition flag
  *   Haze              → Puck (upbeat, punchy)
  *   Smoke             → Schedar (deep smooth)
- *   The Colonel + Gino → NOT routed here; ElevenLabs scoped exception
- *                        per feedback_gemini_preferred_not_exclusive.md
- *                        (Jersey Italian dialect not in Gemini 24-lang)
+ *   The Colonel       → Algieba (gravelly mid-range — Jersey accent
+ *                        delivered via SCRIPT vocabulary per
+ *                        feedback_dialect_in_script_not_voice.md)
+ *   Gino              → Rasalgethi (warmer baritone — same script-
+ *                        carried Jersey-Italian convention)
+ *
+ * Owner directive 2026-04-20: USE GEMINI FOR ALL ANALYSTS, INCLUDING
+ * Colonel/Gino multi-speaker. Verified live against API.
  */
 
 import fs from 'fs';
 import path from 'path';
 
 const getApiKey = () => process.env.GEMINI_API_KEY || '';
-// Gemini TTS runs on the 2.5 Pro preview TTS model (podcast grade).
-// DO NOT use gemini-3.1-flash-live-preview here — that's the Live API
-// model, accessible only via WebSocket (not generateContent). Using it
-// here silently 404s on every call. Fixed 2026-04-09.
-const DEFAULT_MODEL = 'gemini-2.5-pro-preview-tts';
+// Gemini TTS now runs on 3.1 Flash TTS preview (the current generation,
+// verified live against the API 2026-04-20). DO NOT use the Live API
+// model (gemini-3.1-flash-live-preview) here — Live is WebSocket-only,
+// not generateContent, and silently 404s on REST calls.
+const DEFAULT_MODEL = 'gemini-3.1-flash-tts-preview';
 const FLASH_FALLBACK = 'gemini-2.5-flash-preview-tts';
+const PRO_FALLBACK = 'gemini-2.5-pro-preview-tts';
 const BASE_URL = 'https://generativelanguage.googleapis.com/v1beta';
 
-// Logical voice name → Gemini prebuilt voice
+// Logical voice name → Gemini prebuilt voice (catalog-described character → analyst spec match).
+// Picks rooted in each persona's voiceHandoff spec + character bio. Owner-approved 2026-04-20.
 export const GEMINI_VOICE_MAP: Record<string, string> = {
-  // Void-Caster + refined solos
+  // Void-Caster — "rich baritone, velvet resonance, every word lands with weight"
+  // → Charon (Informative, deep & measured) = catalog's broadcast-anchor voice
   'idris-broadcast': 'Charon',
-  'astra-refined-tenor': 'Orus',  // refined tenor
-  'bun-e-cosmic-alto': 'Aoede',
 
-  // The Colonel + Gino (Jersey Italian approximation)
-  'colonel-jersey-italian': 'Algieba',
+  // Astra Novatos — "smooth tenor, polished like aged bourbon, lets silence land"
+  // → Orus (Firm, refined tenor)
+  'astra-refined-tenor': 'Orus',
+
+  // Bun-E — "commanding but warm, owns that mic, dynamic not monotone, sister of Void-Caster"
+  // → Kore (Firm, female commanding) — pairs acoustically with Charon for the sibling lore
+  'bun-e-cosmic-alto': 'Kore',
+
+  // The Colonel — "gravelly, hoarse from yelling, raises voice when animated"
+  // → Algenib (Gravelly) — direct catalog match
+  'colonel-jersey-italian': 'Algenib',
+
+  // Gino — "warmer baritone, dry wit, professor-adjacent pizzeria pragmatist"
+  // → Rasalgethi (Informative baritone)
   'gino-jersey-italian-pizzeria': 'Rasalgethi',
 
-  // Haze duo
-  'haze-nyc-golden': 'Puck',
-  'smoke-houston-southern': 'Schedar',
+  // Haze — "Cali Nipsey marathon DNA, mid-range with rasp, laid-back rhythmic"
+  // → Algieba (Smooth gravelly mid-range) — gravel without the shout
+  'haze-nyc-golden': 'Algieba',
+
+  // Smoke — "patient professor energy, deep chesty warmth, deliberate weighty pace"
+  // → Sadaltager (Knowledgeable) — catalog's teacher-voice
+  'smoke-houston-southern': 'Sadaltager',
 };
 
 export interface GeminiTtsRequest {
@@ -73,7 +99,7 @@ export interface GeminiTtsRequest {
   voiceId: string;
   /** Optional — adds style directives at the top of the prompt */
   styleHint?: string;
-  /** Override TTS model. Defaults to gemini-2.5-pro-preview-tts (podcast grade). */
+  /** Override TTS model. Defaults to gemini-3.1-flash-tts-preview (current generation). */
   model?: string;
 }
 

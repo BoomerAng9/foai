@@ -12,8 +12,6 @@ import { positionColor } from '@/lib/ui/positions';
 import { normalizePerForm, detectAgreement, generateNarrativeAngle } from '@/lib/tie/consensus';
 import type { ConsensusGrade } from '@/lib/tie/consensus';
 import { heroStagger, heroItem, staggerContainer, staggerItem, scrollReveal } from '@/lib/motion';
-import PaywallGate from '@/components/PaywallGate';
-
 interface PlayerRow {
   id: number;
   name: string;
@@ -108,7 +106,6 @@ export default function PlayerProfilePage({ params }: { params: Promise<{ name: 
   }
 
   return (
-    <PaywallGate>
       <div className="min-h-screen flex flex-col" style={{ background: 'var(--pf-bg)', color: 'var(--pf-text)' }}>
         <Header />
 
@@ -403,6 +400,5 @@ export default function PlayerProfilePage({ params }: { params: Promise<{ name: 
 
         <Footer />
       </div>
-    </PaywallGate>
   );
 }
