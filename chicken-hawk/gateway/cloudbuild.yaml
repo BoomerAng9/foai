@@ -1,0 +1,74 @@
+# ============================================================================
+# Chicken Hawk Gateway — Cloud Build + Cloud Run deploy config
+# ============================================================================
+# FastAPI gateway. Bearer GATEWAY_SECRET-gated. LLM intent classifier
+# dispatching to the Lil_Hawk fleet + Hermes (LearnAng) for memory/eval.
+#
+# Secrets pulled from Secret Manager at container boot:
+#   - GATEWAY_SECRET         → required; keystore-chicken-hawk-gateway-secret
+#   - ANTHROPIC_API_KEY      → required; keystore-anthropic-api-key
+#   - HERMES_API_KEY         → required (Hermes wiring); hermes-api-key
+#
+# Trigger:
+#   gcloud builds submit chicken-hawk/gateway/ \
+#     --config=chicken-hawk/gateway/cloudbuild.yaml \
+#     --substitutions="COMMIT_SHA=$(git rev-parse HEAD)" \
+#     --project=foai-aims
+#
+# Rollback:
+#   gcloud run services update-traffic chicken-hawk \
+#     --to-revisions=<previous-revision>=100 \
+#     --region=us-central1 --project=foai-aims
+# ============================================================================
+
+steps:
+  - name: 'gcr.io/cloud-builders/docker'
+    id: build
+    args:
+      - build
+      - -t
+      - us-central1-docker.pkg.dev/foai-aims/chicken-hawk/service:$COMMIT_SHA
+      - -t
+      - us-central1-docker.pkg.dev/foai-aims/chicken-hawk/service:latest
+      - -f
+      - Dockerfile
+      - .
+
+  - name: 'gcr.io/cloud-builders/docker'
+    id: push-sha
+    args:
+      - push
+      - us-central1-docker.pkg.dev/foai-aims/chicken-hawk/service:$COMMIT_SHA
+
+  - name: 'gcr.io/cloud-builders/docker'
+    id: push-latest
+    args:
+      - push
+      - us-central1-docker.pkg.dev/foai-aims/chicken-hawk/service:latest
+
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    id: deploy
+    entrypoint: gcloud
+    args:
+      - run
+      - deploy
+      - chicken-hawk
+      - --image=us-central1-docker.pkg.dev/foai-aims/chicken-hawk/service:$COMMIT_SHA
+      - --region=us-central1
+      - --platform=managed
+      - --no-allow-unauthenticated
+      - --port=8080
+      - --memory=1Gi
+      - --cpu=1
+      - --min-instances=0
+      - --max-instances=5
+      - --timeout=300s
+      - --set-env-vars=PYTHONUNBUFFERED=1,GATEWAY_HOST=0.0.0.0,GATEWAY_PORT=8080,ENVIRONMENT=production,LLM_PROVIDER=anthropic,LOG_LEVEL=INFO,HERMES_URL=https://hermes-apbgyi35aq-uc.a.run.app,DEFAULT_TENANT=cti
+      - --set-secrets=GATEWAY_SECRET=keystore-chicken-hawk-gateway-secret:latest,ANTHROPIC_API_KEY=keystore-anthropic-api-key:latest,HERMES_API_KEY=hermes-api-key:latest
+
+images:
+  - us-central1-docker.pkg.dev/foai-aims/chicken-hawk/service:$COMMIT_SHA
+  - us-central1-docker.pkg.dev/foai-aims/chicken-hawk/service:latest
+
+options:
+  logging: CLOUD_LOGGING_ONLY
