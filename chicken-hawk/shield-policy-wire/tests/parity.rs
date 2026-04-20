@@ -16,7 +16,7 @@ use shield_policy::types as k;
 use shield_policy_wire::{convert::invocation_to_wire, generated as w};
 use std::path::PathBuf;
 
-fn canonical() -> k::Invocation {
+fn canonical() -> k::Invocation<'static> {
     k::Invocation {
         hawk: k::Hawk::LilScopeHawk,
         tool_id: "registry.spinner.enforce.isolate_session",

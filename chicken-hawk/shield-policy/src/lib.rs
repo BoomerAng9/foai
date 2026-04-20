@@ -50,7 +50,7 @@ pub use types::{Denial, Invocation, Hawk, Squad, RiskLevel};
 ///
 /// The contract is monotonic: adding a new prohibition at any layer
 /// can only produce more `Err` results, never fewer.
-pub fn validate(invocation: &Invocation) -> Result<(), Denial> {
+pub fn validate<'a>(invocation: &Invocation<'a>) -> Result<(), Denial<'a>> {
     // Universal base applies to every Hawk.
     kernel::universal_base_validate(invocation)?;
 

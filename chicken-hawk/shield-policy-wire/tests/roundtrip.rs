@@ -17,7 +17,7 @@ use shield_policy_wire::{
     generated as w,
 };
 
-fn sample_invocation() -> k::Invocation {
+fn sample_invocation() -> k::Invocation<'static> {
     k::Invocation {
         hawk: k::Hawk::LilScopeHawk,
         tool_id: "registry.spinner.enforce.isolate_session",

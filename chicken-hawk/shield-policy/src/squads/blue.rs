@@ -7,7 +7,7 @@ use crate::generated::blue::{
     BLUE_PROHIBITED_REASONING,
 };
 
-pub fn validate(inv: &Invocation) -> Result<(), Denial> {
+pub fn validate<'a>(inv: &Invocation<'a>) -> Result<(), Denial<'a>> {
     // Squad constraint: containment priority over detection (imperative)
     if inv.threat_confirmed && !inv.action_is_containment {
         return Err(Denial::DetectionOverIsolation);

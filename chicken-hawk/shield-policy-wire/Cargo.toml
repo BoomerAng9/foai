@@ -13,6 +13,8 @@ path = "src/lib.rs"
 # Exact pin — wire format is security-critical; reproducible builds require locked codegen.
 prost = "=0.14.3"
 shield-policy = { path = "../shield-policy" }
+# Matches the kernel's thiserror pin. Used for the WireConversionError enum.
+thiserror = "1"
 
 [dev-dependencies]
 # Regeneration from invocation.proto is handled by the separate regenerate.sh

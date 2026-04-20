@@ -51,7 +51,12 @@ pub enum RiskLevel {
 /// Tool-call ID — canonical identifiers from the Shield registry.
 /// Represented as a string because the full catalog is open-ended; the
 /// validator matches against per-profile prohibition lists.
-pub type ToolCallId = &'static str;
+///
+/// The `'a` lifetime lets wire-deserialized invocations carry borrowed
+/// strings into `validate()` without forcing the Spinner sidecar to
+/// leak memory per request. Test harnesses that use string literals
+/// get `ToolCallId<'static>` automatically via lifetime promotion.
+pub type ToolCallId<'a> = &'a str;
 
 /// Named reasoning-path patterns. This is a CLOSED enum — free-text
 /// reasoning patterns are rejected by the YAML compiler (per SCHEMA.md).
@@ -249,15 +254,15 @@ impl Simulation {
 /// `validate()`. Every field is typed — there is no string-over-string
 /// escape hatch.
 #[derive(Debug, Clone)]
-pub struct Invocation {
+pub struct Invocation<'a> {
     pub hawk: Hawk,
-    pub tool_id: ToolCallId,
+    pub tool_id: ToolCallId<'a>,
     pub tool_class: ToolClass,                  // v0.3 — for class-based predicates
     pub risk: RiskLevel,
     pub commander: Persona,
-    pub target_namespace: &'static str, // glob-matched
-    pub data_classes: &'static [DataClass], // data touched by this call
-    pub reasoning_paths: &'static [ReasoningPath], // patterns the LLM plan matched
+    pub target_namespace: &'a str, // glob-matched
+    pub data_classes: &'a [DataClass], // data touched by this call
+    pub reasoning_paths: &'a [ReasoningPath], // patterns the LLM plan matched
     pub slct: Slct,
     pub sat: Option<Sat>,
     pub cia: Option<CiaProof>,
@@ -271,16 +276,20 @@ pub struct Invocation {
 
 /// Denial categories — emitted by `validate()` on failure. Every
 /// denial reason must reduce to one of these structural categories.
+///
+/// The `'a` lifetime matches the [`Invocation`] passed to `validate()`.
+/// Embedded string slices (tool_id, target_namespace) borrow from the
+/// invocation so no per-denial allocation is required on the hot path.
 #[derive(Debug, Clone, Error, PartialEq, Eq)]
-pub enum Denial {
+pub enum Denial<'a> {
     #[error("prohibited tool-call: {0}")]
-    ProhibitedToolCall(ToolCallId),
+    ProhibitedToolCall(ToolCallId<'a>),
 
     #[error("prohibited reasoning path: {0:?}")]
     ProhibitedReasoningPath(ReasoningPath),
 
     #[error("prohibited target namespace: {0}")]
-    ProhibitedTarget(&'static str),
+    ProhibitedTarget(&'a str),
 
     #[error("prohibited data class: {0:?}")]
     ProhibitedDataClass(DataClass),

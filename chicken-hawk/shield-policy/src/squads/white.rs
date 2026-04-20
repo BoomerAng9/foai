@@ -7,7 +7,7 @@ use crate::generated::white::{
     WHITE_PROHIBITED_REASONING,
 };
 
-pub fn validate(inv: &Invocation) -> Result<(), Denial> {
+pub fn validate<'a>(inv: &Invocation<'a>) -> Result<(), Denial<'a>> {
     // Squad constraint: halt on privacy-budget or guardrail violation
     if inv.privacy_budget_violated {
         return Err(Denial::PrivacyBudgetViolation);

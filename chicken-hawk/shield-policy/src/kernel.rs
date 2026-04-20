@@ -15,7 +15,7 @@ use crate::generated::universal_base::{
 /// before squad and per-Hawk validation runs. Prohibition DATA is
 /// imported from the generated module; imperative runtime checks
 /// (SLCT liveness, CIA-for-high-risk) stay hand-written.
-pub fn universal_base_validate(inv: &Invocation) -> Result<(), Denial> {
+pub fn universal_base_validate<'a>(inv: &Invocation<'a>) -> Result<(), Denial<'a>> {
     // Data-list prohibitions (consumed from generated module)
     if UNIVERSAL_BASE_PROHIBITED_TOOL_CALLS.contains(&inv.tool_id) {
         return Err(Denial::ProhibitedToolCall(inv.tool_id));
@@ -63,7 +63,7 @@ mod tests {
     use super::*;
     use crate::types::*;
 
-    fn base_inv() -> Invocation {
+    fn base_inv() -> Invocation<'static> {
         Invocation {
             hawk: Hawk::LilWatchHawk,
             tool_id: "hunt.execute",

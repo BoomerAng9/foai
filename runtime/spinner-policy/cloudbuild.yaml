@@ -1,0 +1,108 @@
+# Cloud Build pipeline for spinner-policy.
+#
+# Verify on every PR; deploy on main (with _DEPLOY=yes). Same Gate 6a
+# pattern as vault-signer (#257).
+#
+# Trigger setup (once Priority 2 — GitHub App install — is done):
+#   gcloud builds triggers create github \
+#     --name=spinner-policy-verify \
+#     --project=foai-aims \
+#     --region=us-central1 \
+#     --repo-name=foai \
+#     --repo-owner=BoomerAng9 \
+#     --pull-request-pattern=".*" \
+#     --build-config=runtime/spinner-policy/cloudbuild.yaml \
+#     --included-files="runtime/spinner-policy/**,chicken-hawk/shield-policy/**,chicken-hawk/shield-policy-wire/**,runtime/spinner/schema/**"
+#
+# Same command with --branch-pattern="^main$" and
+# --substitutions=_DEPLOY=yes for the deploy trigger.
+
+timeout: 1800s
+
+options:
+  logging: CLOUD_LOGGING_ONLY
+  machineType: E2_HIGHCPU_8
+
+substitutions:
+  _DEPLOY: "no"
+  _IMAGE: us-central1-docker.pkg.dev/foai-aims/spinner-policy/spinner-policy
+
+steps:
+  # ── Step 1: cargo test ──────────────────────────────────────────
+  - id: cargo-test
+    name: rust:1-bookworm
+    entrypoint: bash
+    args:
+      - -eu
+      - -c
+      - |
+        cd runtime/spinner-policy
+        cargo test --all-targets
+
+  # ── Step 2: cargo clippy (required lint gate) ───────────────────
+  - id: cargo-clippy
+    name: rust:1-bookworm
+    entrypoint: bash
+    waitFor: [cargo-test]
+    args:
+      - -eu
+      - -c
+      - |
+        cd runtime/spinner-policy
+        rustup component add clippy
+        cargo clippy --all-targets -- -D warnings
+
+  # ── Step 3: docker build ────────────────────────────────────────
+  # Always runs — confirms the image assembles regardless of deploy
+  # flag. Tagged with commit SHA + latest; pushed only on deploy.
+  - id: docker-build
+    name: gcr.io/cloud-builders/docker
+    waitFor: [cargo-clippy]
+    args:
+      - build
+      - -f
+      - runtime/spinner-policy/Dockerfile
+      - -t
+      - ${_IMAGE}:${COMMIT_SHA}
+      - -t
+      - ${_IMAGE}:latest
+      - .
+
+  # ── Step 4: docker push (deploy only) ───────────────────────────
+  - id: docker-push
+    name: gcr.io/cloud-builders/docker
+    waitFor: [docker-build]
+    entrypoint: bash
+    args:
+      - -eu
+      - -c
+      - |
+        if [ "${_DEPLOY}" = "yes" ]; then
+          docker push ${_IMAGE}:${COMMIT_SHA}
+          docker push ${_IMAGE}:latest
+        else
+          echo "skipping push (_DEPLOY=no)"
+        fi
+
+  # ── Step 5: Cloud Run replace (deploy only) ─────────────────────
+  - id: run-replace
+    name: gcr.io/google.com/cloudsdktool/cloud-sdk:slim
+    waitFor: [docker-push]
+    entrypoint: bash
+    args:
+      - -eu
+      - -c
+      - |
+        if [ "${_DEPLOY}" = "yes" ]; then
+          sed "s|:latest|:${COMMIT_SHA}|g" runtime/spinner-policy/service.yaml \
+            > /tmp/service-pinned.yaml
+          gcloud run services replace /tmp/service-pinned.yaml \
+            --region=us-central1 \
+            --project=foai-aims
+        else
+          echo "skipping Cloud Run replace (_DEPLOY=no)"
+        fi
+
+images:
+  - ${_IMAGE}:${COMMIT_SHA}
+  - ${_IMAGE}:latest
