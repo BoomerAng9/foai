@@ -1,0 +1,45 @@
+# ============================================================================
+# perform.foai.cloud path-based carveout → perform-draft-2026 Cloud Run
+# ============================================================================
+# The rest of Per|Form continues to route to the perform-perform-1 VPS
+# container (docker-label rule Host(`perform.foai.cloud`)). This file adds
+# two MORE SPECIFIC routers (Host + PathPrefix) that Traefik will prefer over
+# the bare Host rule, pulling /draft/*, /api/draft/center/*, /nba/*, and
+# /api/nba/* into the per-feature Cloud Run service.
+#
+# Why passHostHeader=false:
+#   Cloud Run validates Host against the *.run.app TLS cert. Traefik must
+#   forward the backend hostname, not perform.foai.cloud.
+# ============================================================================
+
+http:
+  routers:
+    perform-cloudrun-draft:
+      rule: "Host(`perform.foai.cloud`) && (PathPrefix(`/draft/`) || PathPrefix(`/api/draft/center/`))"
+      service: perform-cloudrun
+      entrypoints:
+        - websecure
+      priority: 100
+      tls:
+        certresolver: letsencrypt
+
+    perform-cloudrun-nba:
+      rule: "Host(`perform.foai.cloud`) && (PathPrefix(`/nba/`) || PathPrefix(`/api/nba/`))"
+      service: perform-cloudrun
+      entrypoints:
+        - websecure
+      priority: 100
+      tls:
+        certresolver: letsencrypt
+
+  services:
+    perform-cloudrun:
+      loadBalancer:
+        passHostHeader: false
+        serversTransport: cloudrun-transport
+        servers:
+          - url: "https://perform-draft-2026-apbgyi35aq-uc.a.run.app"
+
+  serversTransports:
+    cloudrun-transport:
+      insecureSkipVerify: false
