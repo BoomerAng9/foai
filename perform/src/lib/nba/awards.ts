@@ -464,6 +464,7 @@ interface OverrideCandidate {
   name: string;
   team: string;
   position?: string;
+  headshot?: string;
   statLine: string;
   projectedVoteShare: number;
   noteBadge?: string;
@@ -487,7 +488,7 @@ function applyOverride(cat: AwardCategory): AwardCategory {
     name: c.name,
     team: c.team,
     position: c.position,
-    headshot: '',
+    headshot: c.headshot ?? '',
     statLine: c.statLine,
     projectedVoteShare: c.projectedVoteShare,
     composite: c.projectedVoteShare * 100,
