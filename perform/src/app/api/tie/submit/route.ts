@@ -96,50 +96,121 @@ function rankToNilProxyUsd(consensusRank: number | null, grade: number | null): 
   return 18_000;
 }
 
+/**
+ * Build a cohort comparable NIL valuation using a tiered fallback
+ * so the submitter always gets a real benchmark instead of $0
+ * placeholders when the exact (class × position × tier) bucket is thin.
+ *
+ * MIM §46.3 no-stub rule: never return all-zero comparables when a
+ * broader comparable exists. Surface the scope explicitly so users see
+ * whether the benchmark is narrow (position+tier) or wide (grade band
+ * across class).
+ */
 async function buildNilCohort(
   classYear: string,
   position: string,
   tier: string,
 ): Promise<{
   cohortKey: string;
+  cohortScope: 'position_tier' | 'tier_only' | 'grade_band' | 'insufficient_evidence';
   cohortSize: number;
   medianUsd: number;
   p10Usd: number;
   p90Usd: number;
 }> {
-  const cohortKey = `${classYear}_${position}_${tier}`;
-  const rows = await sql!<Array<{
+  type Row = {
     id: number;
     overall_rank: number | null;
     grade: string | null;
     consensus_avg: number | null;
-  }>>`
+  };
+  const percentiles = (rows: Row[]): { median: number; p10: number; p90: number; n: number } => {
+    const values = rows
+      .map(r => rankToNilProxyUsd(r.consensus_avg, r.grade ? parseFloat(r.grade) : null))
+      .filter(v => v > 0)
+      .sort((a, b) => a - b);
+    if (values.length === 0) return { median: 0, p10: 0, p90: 0, n: 0 };
+    const pick = (q: number): number => {
+      const idx = Math.min(values.length - 1, Math.max(0, Math.floor(values.length * q)));
+      return values[idx] ?? 0;
+    };
+    return { median: pick(0.5), p10: pick(0.1), p90: pick(0.9), n: values.length };
+  };
+
+  // Tier A: exact position + tier within class
+  const tierA = await sql!<Row[]>`
+    SELECT p.id, p.overall_rank, p.grade,
+           (SELECT rank FROM perform_consensus_ranks WHERE player_id=p.id AND source='consensus_avg' LIMIT 1) AS consensus_avg
+    FROM perform_players p
+    WHERE p.class_year = ${classYear} AND p.position = ${position} AND p.tie_tier = ${tier}
+    LIMIT 200
+  `;
+  if (tierA.length >= 3) {
+    const stats = percentiles(tierA);
+    return {
+      cohortKey: `${classYear}_${position}_${tier}`,
+      cohortScope: 'position_tier',
+      cohortSize: stats.n,
+      medianUsd: stats.median,
+      p10Usd: stats.p10,
+      p90Usd: stats.p90,
+    };
+  }
+
+  // Tier B: same tier across all positions in the class
+  const tierB = await sql!<Row[]>`
+    SELECT p.id, p.overall_rank, p.grade,
+           (SELECT rank FROM perform_consensus_ranks WHERE player_id=p.id AND source='consensus_avg' LIMIT 1) AS consensus_avg
+    FROM perform_players p
+    WHERE p.class_year = ${classYear} AND p.tie_tier = ${tier}
+    LIMIT 300
+  `;
+  if (tierB.length >= 3) {
+    const stats = percentiles(tierB);
+    return {
+      cohortKey: `${classYear}_ANY_${tier}`,
+      cohortScope: 'tier_only',
+      cohortSize: stats.n,
+      medianUsd: stats.median,
+      p10Usd: stats.p10,
+      p90Usd: stats.p90,
+    };
+  }
+
+  // Tier C: grade band — pull players within ±3 grade points of the tier midpoint
+  const tierMidpoint: Record<string, number> = {
+    PRIME: 103, A_PLUS: 95, A: 87, A_MINUS: 82, B_PLUS: 77, B: 72, B_MINUS: 67, C_PLUS: 62, C: 55,
+  };
+  const mid = tierMidpoint[tier] ?? 75;
+  const tierC = await sql!<Row[]>`
     SELECT p.id, p.overall_rank, p.grade,
            (SELECT rank FROM perform_consensus_ranks WHERE player_id=p.id AND source='consensus_avg' LIMIT 1) AS consensus_avg
     FROM perform_players p
     WHERE p.class_year = ${classYear}
-      AND p.position = ${position}
-      AND p.tie_tier = ${tier}
-    LIMIT 200
+      AND p.grade IS NOT NULL
+      AND p.grade::NUMERIC BETWEEN ${mid - 3} AND ${mid + 3}
+    LIMIT 400
   `;
-  if (rows.length === 0) {
-    return { cohortKey, cohortSize: 0, medianUsd: 0, p10Usd: 0, p90Usd: 0 };
+  if (tierC.length >= 3) {
+    const stats = percentiles(tierC);
+    return {
+      cohortKey: `${classYear}_GRADE_${Math.round(mid)}±3`,
+      cohortScope: 'grade_band',
+      cohortSize: stats.n,
+      medianUsd: stats.median,
+      p10Usd: stats.p10,
+      p90Usd: stats.p90,
+    };
   }
-  const values = rows
-    .map(r => rankToNilProxyUsd(r.consensus_avg, r.grade ? parseFloat(r.grade) : null))
-    .filter(v => v > 0)
-    .sort((a, b) => a - b);
-  const pick = (q: number): number => {
-    if (values.length === 0) return 0;
-    const idx = Math.min(values.length - 1, Math.max(0, Math.floor(values.length * q)));
-    return values[idx] ?? 0;
-  };
+
+  // No cohort on any tier — explicit "insufficient evidence" per MIM §46.3
   return {
-    cohortKey,
-    cohortSize: values.length,
-    medianUsd: pick(0.5),
-    p10Usd: pick(0.1),
-    p90Usd: pick(0.9),
+    cohortKey: `${classYear}_${position}_${tier}`,
+    cohortScope: 'insufficient_evidence',
+    cohortSize: 0,
+    medianUsd: 0,
+    p10Usd: 0,
+    p90Usd: 0,
   };
 }
 
@@ -221,6 +292,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     nil: {
       valuationUsd: submitterNil,
       cohortKey: cohort.cohortKey,
+      cohortScope: cohort.cohortScope,
       cohortSize: cohort.cohortSize,
       cohortMedianUsd: cohort.medianUsd,
       cohortP10Usd: cohort.p10Usd,
