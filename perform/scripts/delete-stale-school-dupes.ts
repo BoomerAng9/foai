@@ -108,7 +108,10 @@ const STALE_IDS = [7, 9, 32, 44, 99, 102, 145, 206, 252, 354, 375, 449, 468, 475
   }
 
   // Transactional delete. Re-point any FK refs first (none expected for the 17 since they were never ranked).
-  await sql.begin(async (tx) => {
+  // tx is typed as TransactionSql which doesn't expose the template-literal call signature
+  // in the public typings; cast to the parent sql type for the DELETE/UPDATE template calls.
+  await sql.begin(async (txArg) => {
+    const tx = txArg as unknown as typeof sql;
     if (fkConsensus[0].cnt > 0) {
       const reAttached = await tx`DELETE FROM perform_consensus_ranks WHERE player_id = ANY(${safeIds})`;
       console.log(`[delete-stale]   removed ${reAttached.count} consensus rank references`);
