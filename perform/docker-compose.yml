@@ -1,6 +1,13 @@
 services:
   perform:
-    build: .
+    # Build context is the monorepo root (..) so the workspace deps
+    # @aims/tie-matrix + @aims/spinner (and their transitive deps
+    # @aims/pricing-matrix + @aims/pmo) resolve from aims-tools/*
+    # during `npm ci`. Uses the canonical multi-stage Dockerfile that
+    # Cloud Run also consumes — one build recipe for both surfaces.
+    build:
+      context: ..
+      dockerfile: perform/Dockerfile.cloudrun
     restart: unless-stopped
     env_file: .env.local
     volumes:
