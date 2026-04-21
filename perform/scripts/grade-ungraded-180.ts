@@ -64,7 +64,7 @@ function canonicalTierFromGrade(score: number): { tier: string; label: string } 
 function inferGrade(projectedRound: number | null, legacyTier: string | null): number {
   const round = projectedRound ?? 8;
   const base = ROUND_BASE[round] ?? 50;
-  const offset = (legacyTier && LEGACY_OFFSET[legacyTier]) ?? 0;
+  const offset: number = legacyTier ? (LEGACY_OFFSET[legacyTier] ?? 0) : 0;
   return Math.max(45, Math.min(95, base + offset));
 }
 

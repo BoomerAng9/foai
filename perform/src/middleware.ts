@@ -47,6 +47,9 @@ const PUBLIC_PREFIXES = [
   '/api/players',
   '/api/teams',         // Player Index Drawer — browse-first, public
   '/api/rankings',      // SSE stream + snapshot — browse-first, public
+  '/api/draft/center/', // Draft Center commentary endpoint (Class C Managed Agents)
+  '/nba/',              // NBA Playoffs tracker — public Class B surface
+  '/api/nba/',          // ESPN scoreboard proxy for /nba/playoffs
   '/api/tie/',
   '/api/feed',
   '/api/news',

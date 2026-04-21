@@ -1,0 +1,85 @@
+# ============================================================================
+# perform-draft-2026 — Class B Cloud Run service for NFL Draft 2026 broadcast
+# ============================================================================
+# Class B per perform/docs/ARCHITECTURE_2026_04_21.md. Per-feature service,
+# scoped to the live draft surfaces (/draft/*, /api/rankings/*, /api/draft/*).
+# VPS continues to host the rest of the platform at perform.foai.cloud.
+# Traffic to perform.foai.cloud/draft/* (or draft.perform.foai.cloud) routes
+# here via Traefik proxy on myclaw-vps.
+#
+# Why min/max-instances=1
+#   The SSE event bus is in-process Set<Subscriber>. Pinned single instance
+#   guarantees every subscriber sees every pick. Cross-container fanout =
+#   Redis pub/sub bridge, post-draft work.
+#
+# Why timeout=3600s + no-cpu-throttling + cpu-boost
+#   SSE long-hold connections; warm container avoids cold starts.
+#
+# Trigger (from staged dir, NOT from foai/ root):
+#   STAGE=/tmp/perform-draft-stage
+#   gcloud builds submit \
+#     --config=perform/cloudbuild-draft-2026.yaml \
+#     --substitutions="COMMIT_SHA=$(git rev-parse origin/main)" \
+#     --project=foai-aims \
+#     "$STAGE"
+#
+# Rollback:
+#   gcloud run services update-traffic perform-draft-2026 \
+#     --to-revisions=<previous-revision>=100 \
+#     --region=us-central1 --project=foai-aims
+# ============================================================================
+
+steps:
+  - name: 'gcr.io/cloud-builders/docker'
+    id: build
+    args:
+      - build
+      - -t
+      - us-central1-docker.pkg.dev/foai-aims/perform-draft-2026/service:$COMMIT_SHA
+      - -t
+      - us-central1-docker.pkg.dev/foai-aims/perform-draft-2026/service:latest
+      - -f
+      - perform/Dockerfile.cloudrun
+      - .
+
+  - name: 'gcr.io/cloud-builders/docker'
+    id: push-sha
+    args: [push, us-central1-docker.pkg.dev/foai-aims/perform-draft-2026/service:$COMMIT_SHA]
+
+  - name: 'gcr.io/cloud-builders/docker'
+    id: push-latest
+    args: [push, us-central1-docker.pkg.dev/foai-aims/perform-draft-2026/service:latest]
+
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    id: deploy
+    entrypoint: gcloud
+    args:
+      - run
+      - deploy
+      - perform-draft-2026
+      - --image=us-central1-docker.pkg.dev/foai-aims/perform-draft-2026/service:$COMMIT_SHA
+      - --region=us-central1
+      - --platform=managed
+      - --allow-unauthenticated
+      - --port=3000
+      - --memory=2Gi
+      - --cpu=2
+      - --min-instances=1
+      - --max-instances=1
+      - --timeout=3600s
+      - --concurrency=80
+      - --service-account=perform-draft-2026-sa@foai-aims.iam.gserviceaccount.com
+      - --no-cpu-throttling
+      - --cpu-boost
+      - --set-env-vars=NODE_ENV=production,NEXT_TELEMETRY_DISABLED=1,DRAFT_CENTER_MODE=production
+      - --set-secrets=DATABASE_URL=perform-draft-2026-database-url:latest,PIPELINE_AUTH_KEY=perform-draft-2026-pipeline-auth-key:latest,GEMINI_API_KEY=keystore-gemini-api-key:latest,OPENROUTER_API_KEY=keystore-openrouter-api-key:latest,ANTHROPIC_API_KEY=keystore-anthropic-api-key:latest,ELEVENLABS_API_KEY=keystore-elevenlabs-api-key:latest,IDEOGRAM_API_KEY=keystore-ideogram-api-key:latest,RECRAFT_API_KEY=keystore-recraft-api-key:latest,BRAVE_API_KEY=keystore-brave-api-key:latest
+
+images:
+  - us-central1-docker.pkg.dev/foai-aims/perform-draft-2026/service:$COMMIT_SHA
+  - us-central1-docker.pkg.dev/foai-aims/perform-draft-2026/service:latest
+
+options:
+  logging: CLOUD_LOGGING_ONLY
+  machineType: E2_HIGHCPU_8
+
+timeout: 1800s
