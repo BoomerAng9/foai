@@ -67,12 +67,18 @@ const EMPTY: FormState = {
 interface SubmitResult {
   submissionId: string;
   tie: { score: number; grade: string; tier: string; label: string; components: { performance: number; attributes: number; intangibles: number } };
-  nil: { valuationUsd: number; cohortKey: string; cohortSize: number; cohortMedianUsd: number; cohortP10Usd: number; cohortP90Usd: number };
+  nil: { valuationUsd: number; cohortKey: string; cohortScope?: 'position_tier' | 'tier_only' | 'grade_band' | 'insufficient_evidence'; cohortSize: number; cohortMedianUsd: number; cohortP10Usd: number; cohortP90Usd: number };
   matched?: { performPlayerId: number } | null;
 }
 
 const POSITIONS = ['QB', 'RB', 'WR', 'TE', 'OT', 'OG', 'C', 'EDGE', 'DL', 'LB', 'CB', 'S'];
 const ROLES: Role[] = ['player', 'school', 'team', 'agent', 'parent'];
+const SCOPE_LABEL: Record<string, string> = {
+  position_tier: 'position+tier comparable',
+  tier_only:     'tier-wide comparable',
+  grade_band:    'grade-band comparable',
+  insufficient_evidence: 'insufficient evidence',
+};
 
 export default function SubmitPage(): React.JSX.Element {
   const [form, setForm] = useState<FormState>(EMPTY);
@@ -268,6 +274,14 @@ export default function SubmitPage(): React.JSX.Element {
               </Section>
 
               <Section title="Consents" subtitle="All three required to submit">
+                <p className="text-[11px] text-white/60 leading-relaxed mb-4" style={{ fontFamily: 'Geist Mono, monospace' }}>
+                  Before you submit, review the{' '}
+                  <a href="/legal/tos" target="_blank" rel="noreferrer" className="underline hover:text-[#D4A853]">Terms of Service</a>
+                  {' · '}
+                  <a href="/legal/privacy" target="_blank" rel="noreferrer" className="underline hover:text-[#D4A853]">Privacy Policy</a>
+                  {'. '}
+                  NIL valuations are projections, not offers; Per|Form does not sell or share submitted data.
+                </p>
                 <div className="space-y-3">
                   <Consent label="NIL Disclosure — I authorize Per|Form to calculate + store an NIL valuation for this player."
                     checked={form.nilDisclosure} onChange={v => set('nilDisclosure', v)} />
@@ -410,7 +424,9 @@ function ResultCard({ result, onReset }: { result: SubmitResult; onReset: () => 
             NIL VALUATION
           </h2>
           <span className="text-[10px] text-white/40 uppercase tracking-[0.24em]" style={{ fontFamily: 'Geist Mono, monospace' }}>
-            Cohort · {nil.cohortKey} · n={nil.cohortSize}
+            {nil.cohortScope === 'insufficient_evidence'
+              ? 'Cohort · insufficient evidence — broaden grading set to benchmark'
+              : `Cohort · ${nil.cohortKey} · n=${nil.cohortSize} · ${SCOPE_LABEL[nil.cohortScope ?? 'position_tier']}`}
           </span>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
