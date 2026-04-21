@@ -47,6 +47,7 @@ export interface AwardCandidate {
   statLine: string;              // human-readable stat summary
   projectedVoteShare: number;    // 0..1 (softmax within the top-N pool)
   composite: number;             // raw composite score (for trend diffs later)
+  noteBadge?: string;            // "WINNER" / "FAVE" / "FINALIST" — authoritative override tag
 }
 
 export interface AwardCategory {
@@ -56,6 +57,8 @@ export interface AwardCategory {
   subtitle: string;              // projection basis explanation
   candidates: AwardCandidate[];  // top 3 only for the UI card
   active: boolean;               // false when conditional (Finals MVP before Finals)
+  awardStatus?: string;          // "ANNOUNCED" / "FINALISTS_NAMED" / "ODDS_LIVE" / undefined (stat projection)
+  announcedAt?: string;          // ISO date when the NBA announced the winner
 }
 
 export interface AwardsPayload {
@@ -488,12 +491,15 @@ function applyOverride(cat: AwardCategory): AwardCategory {
     statLine: c.statLine,
     projectedVoteShare: c.projectedVoteShare,
     composite: c.projectedVoteShare * 100,
+    noteBadge: c.noteBadge,
   }));
   return {
     ...cat,
     subtitle: ov.subtitle ?? cat.subtitle,
     candidates,
     active: true,
+    awardStatus: ov.status,
+    announcedAt: ov.announcedAt,
   };
 }
 

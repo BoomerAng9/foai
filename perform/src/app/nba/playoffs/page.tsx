@@ -316,6 +316,7 @@ interface AwardCandidateUI {
   statLine: string;
   projectedVoteShare: number;
   composite: number;
+  noteBadge?: string;
 }
 
 interface AwardCategoryUI {
@@ -325,7 +326,30 @@ interface AwardCategoryUI {
   subtitle: string;
   candidates: AwardCandidateUI[];
   active: boolean;
+  awardStatus?: string;
+  announcedAt?: string;
 }
+
+const AWARD_STATUS_STYLE: Record<string, { label: string; bg: string; fg: string; border: string }> = {
+  ANNOUNCED: {
+    label: 'WINNER',
+    bg: 'rgba(212,168,83,0.14)',
+    fg: '#F4D47A',
+    border: 'rgba(212,168,83,0.55)',
+  },
+  FINALISTS_NAMED: {
+    label: 'FINALISTS',
+    bg: 'rgba(255,107,0,0.10)',
+    fg: '#FFB27A',
+    border: 'rgba(255,107,0,0.45)',
+  },
+  ODDS_LIVE: {
+    label: 'VEGAS',
+    bg: 'rgba(96,165,250,0.10)',
+    fg: '#93C5FD',
+    border: 'rgba(96,165,250,0.45)',
+  },
+};
 
 interface AwardsPayloadUI {
   season: number;
@@ -361,6 +385,8 @@ function AwardsWatch({ finalsInProgress }: { finalsInProgress: boolean }): React
   }, [finalsInProgress]);
 
   const visible = (awards?.categories ?? []).filter(c => c.active && c.candidates.length > 0);
+  const trophies = visible.filter(c => c.awardStatus === 'ANNOUNCED' || c.awardStatus === 'ODDS_LIVE');
+  const liveRace = visible.filter(c => c.awardStatus !== 'ANNOUNCED' && c.awardStatus !== 'ODDS_LIVE');
 
   return (
     <section>
@@ -369,7 +395,7 @@ function AwardsWatch({ finalsInProgress }: { finalsInProgress: boolean }): React
           AWARDS WATCH
         </h2>
         <div className="flex items-center gap-3 text-[10px] text-white/40 uppercase tracking-widest" style={{ fontFamily: 'Geist Mono, monospace' }}>
-          <span>{visible.length} categor{visible.length === 1 ? 'y' : 'ies'}</span>
+          <span>2025-26 SEASON</span>
           {updatedAt > 0 && <span>· {formatAge(Date.now() - updatedAt)}</span>}
           {error && <span className="text-red-400/80">· {error}</span>}
         </div>
@@ -381,18 +407,210 @@ function AwardsWatch({ finalsInProgress }: { finalsInProgress: boolean }): React
         </div>
       )}
 
-      {visible.length > 0 && (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
-          {visible.map(cat => <AwardCard key={cat.key} category={cat} />)}
+      {trophies.length > 0 && (
+        <div className="mb-4">
+          <div className="mb-2 flex items-baseline gap-3">
+            <span className="text-[#F4D47A] uppercase" style={{ fontFamily: 'Bebas Neue, sans-serif', fontSize: '14px', letterSpacing: '0.22em' }}>
+              TROPHIES
+            </span>
+            <span className="text-[9px] text-white/35 uppercase tracking-[0.28em]" style={{ fontFamily: 'Geist Mono, monospace' }}>
+              Announced winners + live Finals futures
+            </span>
+          </div>
+          <div className="grid grid-cols-1 gap-3">
+            {trophies.map(cat => <HeroAwardCard key={cat.key} category={cat} />)}
+          </div>
+        </div>
+      )}
+
+      {liveRace.length > 0 && (
+        <div>
+          <div className="mb-2 flex items-baseline gap-3">
+            <span className="text-[#FF6B00] uppercase" style={{ fontFamily: 'Bebas Neue, sans-serif', fontSize: '14px', letterSpacing: '0.22em' }}>
+              LIVE RACE
+            </span>
+            <span className="text-[9px] text-white/35 uppercase tracking-[0.28em]" style={{ fontFamily: 'Geist Mono, monospace' }}>
+              {liveRace.length} categor{liveRace.length === 1 ? 'y' : 'ies'} pre-announcement · stat projection
+            </span>
+          </div>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+            {liveRace.map(cat => <AwardCard key={cat.key} category={cat} />)}
+          </div>
         </div>
       )}
     </section>
   );
 }
 
+function HeroAwardCard({ category }: { category: AwardCategoryUI }): React.JSX.Element {
+  const isAnnounced = category.awardStatus === 'ANNOUNCED';
+  const isOdds = category.awardStatus === 'ODDS_LIVE';
+  const accent = isAnnounced ? '#F4D47A' : '#93C5FD';
+  const accentSoft = isAnnounced ? 'rgba(244,212,122,0.14)' : 'rgba(147,197,253,0.10)';
+  const accentBorder = isAnnounced ? 'rgba(244,212,122,0.45)' : 'rgba(147,197,253,0.40)';
+  const statusLabel = isAnnounced ? 'UNANIMOUS WINNER' : 'VEGAS FUTURES';
+
+  return (
+    <motion.div
+      layout
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ type: 'spring', stiffness: 200, damping: 26 }}
+      className="relative rounded-2xl overflow-hidden backdrop-blur-xl"
+      style={{
+        border: `1px solid ${accentBorder}`,
+        background: `linear-gradient(135deg, ${accentSoft} 0%, rgba(255,255,255,0.02) 55%, rgba(255,255,255,0.01) 100%)`,
+        boxShadow: isAnnounced ? '0 0 48px rgba(244,212,122,0.22)' : '0 0 36px rgba(147,197,253,0.16)',
+      }}
+    >
+      {/* Aurora accent bar */}
+      <div
+        className="absolute top-0 left-0 right-0 h-[2px]"
+        style={{
+          background: `linear-gradient(90deg, transparent 0%, ${accent} 20%, ${accent} 80%, transparent 100%)`,
+        }}
+      />
+
+      <div className="px-5 pt-4 pb-2 flex items-center justify-between gap-3">
+        <div className="flex items-baseline gap-3 min-w-0">
+          <span
+            style={{
+              fontFamily: 'Bebas Neue, sans-serif',
+              fontSize: '32px',
+              letterSpacing: '0.06em',
+              color: accent,
+              lineHeight: 1,
+            }}
+          >
+            {category.short}
+          </span>
+          <span className="text-white/70 uppercase text-[11px] tracking-[0.24em]" style={{ fontFamily: 'Geist Mono, monospace' }}>
+            {category.label}
+          </span>
+        </div>
+        <span
+          className="shrink-0 px-2.5 py-1 rounded-full uppercase tracking-[0.22em] flex items-center gap-1.5"
+          style={{
+            fontFamily: 'Geist Mono, monospace',
+            fontSize: '9px',
+            background: accentSoft,
+            color: accent,
+            border: `1px solid ${accentBorder}`,
+          }}
+        >
+          <span
+            className="inline-block w-1.5 h-1.5 rounded-full"
+            style={{ background: accent, boxShadow: `0 0 8px ${accent}` }}
+          />
+          {statusLabel}
+        </span>
+      </div>
+
+      <div className="px-5 pb-3 text-[11px] text-white/55 leading-snug" style={{ fontFamily: 'Geist Mono, monospace' }}>
+        {category.subtitle}
+      </div>
+
+      <div className={category.candidates.length > 1 ? 'grid grid-cols-1 md:grid-cols-2 gap-3 px-5 pb-5' : 'px-5 pb-5'}>
+        {category.candidates.map(c => <HeroCandidate key={c.playerId} candidate={c} accent={accent} accentSoft={accentSoft} accentBorder={accentBorder} isAnnounced={isAnnounced} />)}
+      </div>
+    </motion.div>
+  );
+}
+
+function HeroCandidate({ candidate, accent, accentSoft, accentBorder, isAnnounced }: {
+  candidate: AwardCandidateUI;
+  accent: string;
+  accentSoft: string;
+  accentBorder: string;
+  isAnnounced: boolean;
+}): React.JSX.Element {
+  return (
+    <motion.div
+      layout
+      initial={{ opacity: 0, x: -6 }}
+      animate={{ opacity: 1, x: 0 }}
+      transition={{ type: 'spring', stiffness: 220, damping: 28 }}
+      className="relative rounded-xl p-4 flex items-center gap-4"
+      style={{
+        background: `linear-gradient(135deg, ${accentSoft} 0%, rgba(255,255,255,0.02) 100%)`,
+        border: `1px solid ${accentBorder}`,
+      }}
+    >
+      <div className="relative shrink-0">
+        {candidate.headshot ? (
+          <img
+            src={candidate.headshot}
+            alt={candidate.name}
+            className="h-20 w-20 rounded-full object-cover"
+            style={{ border: `2px solid ${accentBorder}`, boxShadow: `0 0 20px ${accentSoft}` }}
+            loading="lazy"
+          />
+        ) : (
+          <div
+            className="h-20 w-20 rounded-full bg-white/5"
+            style={{ border: `2px solid ${accentBorder}` }}
+          />
+        )}
+        {isAnnounced && (
+          <span
+            className="absolute -top-1 -right-1 rounded-full px-1.5 py-0.5"
+            style={{
+              fontFamily: 'Bebas Neue, sans-serif',
+              fontSize: '14px',
+              lineHeight: 1,
+              background: accent,
+              color: '#1A0F00',
+              boxShadow: `0 0 12px ${accent}`,
+            }}
+          >
+            ★
+          </span>
+        )}
+      </div>
+      <div className="flex-1 min-w-0">
+        <div className="flex items-baseline gap-2 flex-wrap">
+          <span
+            className="truncate"
+            style={{ fontFamily: 'Bebas Neue, sans-serif', fontSize: '26px', letterSpacing: '0.02em', color: accent, lineHeight: 1.05 }}
+          >
+            {candidate.name}
+          </span>
+          <span className="text-[10px] text-white/55 uppercase tracking-[0.2em] shrink-0" style={{ fontFamily: 'Geist Mono, monospace' }}>
+            {candidate.team}{candidate.position ? ` · ${candidate.position}` : ''}
+          </span>
+        </div>
+        <div className="mt-1 text-[11px] text-white/60 truncate" style={{ fontFamily: 'Geist Mono, monospace' }}>
+          {candidate.statLine}
+        </div>
+        {!isAnnounced && (
+          <div className="mt-2 flex items-center gap-2">
+            <div className="flex-1 h-1 rounded-full bg-white/5 overflow-hidden">
+              <motion.div
+                initial={{ width: 0 }}
+                animate={{ width: `${Math.round(candidate.projectedVoteShare * 100)}%` }}
+                transition={{ type: 'spring', stiffness: 160, damping: 26 }}
+                className="h-full rounded-full"
+                style={{ background: accent }}
+              />
+            </div>
+            <span
+              className="tabular-nums shrink-0"
+              style={{ fontFamily: 'Geist Mono, monospace', fontSize: '11px', color: accent, minWidth: '36px', textAlign: 'right' }}
+            >
+              {Math.round(candidate.projectedVoteShare * 100)}%
+            </span>
+          </div>
+        )}
+      </div>
+    </motion.div>
+  );
+}
+
 function AwardCard({ category }: { category: AwardCategoryUI }): React.JSX.Element {
   const leader = category.candidates[0];
   const leadShare = leader ? Math.round(leader.projectedVoteShare * 100) : 0;
+  const statusStyle = category.awardStatus ? AWARD_STATUS_STYLE[category.awardStatus] : undefined;
+  const isAnnounced = category.awardStatus === 'ANNOUNCED';
 
   return (
     <motion.div
@@ -400,21 +618,54 @@ function AwardCard({ category }: { category: AwardCategoryUI }): React.JSX.Eleme
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ type: 'spring', stiffness: 220, damping: 26 }}
-      className="rounded-2xl border border-white/5 bg-white/[0.02] backdrop-blur-xl overflow-hidden"
-      style={{ boxShadow: leadShare >= 50 ? '0 0 24px rgba(255,107,0,0.18)' : 'none' }}
+      className="rounded-2xl overflow-hidden backdrop-blur-xl"
+      style={{
+        border: `1px solid ${isAnnounced ? 'rgba(212,168,83,0.35)' : 'rgba(255,255,255,0.06)'}`,
+        background: isAnnounced
+          ? 'linear-gradient(180deg, rgba(212,168,83,0.06) 0%, rgba(255,255,255,0.02) 100%)'
+          : 'rgba(255,255,255,0.02)',
+        boxShadow: isAnnounced
+          ? '0 0 32px rgba(212,168,83,0.22)'
+          : leadShare >= 50
+          ? '0 0 24px rgba(255,107,0,0.18)'
+          : 'none',
+      }}
     >
       <div className="px-4 py-3 border-b border-white/5 flex items-baseline justify-between gap-3">
         <div className="flex items-baseline gap-2 min-w-0">
-          <span className="text-[#D4A853] shrink-0" style={{ fontFamily: 'Bebas Neue, sans-serif', fontSize: '20px', letterSpacing: '0.06em' }}>
+          <span
+            className="shrink-0"
+            style={{
+              fontFamily: 'Bebas Neue, sans-serif',
+              fontSize: '20px',
+              letterSpacing: '0.06em',
+              color: isAnnounced ? '#F4D47A' : '#D4A853',
+            }}
+          >
             {category.short}
           </span>
           <span className="text-white/60 uppercase text-[10px] tracking-[0.24em] truncate" style={{ fontFamily: 'Geist Mono, monospace' }}>
             {category.label}
           </span>
         </div>
-        <span className="text-[9px] text-white/35 uppercase tracking-widest shrink-0" style={{ fontFamily: 'Geist Mono, monospace' }}>
-          Top {category.candidates.length}
-        </span>
+        {statusStyle ? (
+          <span
+            className="shrink-0 px-2 py-0.5 rounded-full uppercase tracking-[0.18em]"
+            style={{
+              fontFamily: 'Geist Mono, monospace',
+              fontSize: '9px',
+              background: statusStyle.bg,
+              color: statusStyle.fg,
+              border: `1px solid ${statusStyle.border}`,
+            }}
+          >
+            {statusStyle.label}
+          </span>
+        ) : (
+          <span className="text-[9px] text-white/35 uppercase tracking-widest shrink-0" style={{ fontFamily: 'Geist Mono, monospace' }}>
+            Top {category.candidates.length}
+          </span>
+        )}
       </div>
 
       <div className="px-4 py-3 text-[10px] text-white/45 leading-snug border-b border-white/5" style={{ fontFamily: 'Geist Mono, monospace' }}>
@@ -433,6 +684,9 @@ function AwardCard({ category }: { category: AwardCategoryUI }): React.JSX.Eleme
 function CandidateRow({ candidate }: { candidate: AwardCandidateUI }): React.JSX.Element {
   const pct = Math.max(0, Math.min(1, candidate.projectedVoteShare));
   const isLeader = candidate.rank === 1;
+  const isWinner = candidate.noteBadge === 'WINNER';
+  const isFave = candidate.noteBadge === 'FAVE';
+  const accent = isWinner ? '#F4D47A' : isLeader ? '#FF6B00' : '#D4A853';
   return (
     <motion.div
       layout
@@ -441,33 +695,63 @@ function CandidateRow({ candidate }: { candidate: AwardCandidateUI }): React.JSX
       transition={{ type: 'spring', stiffness: 240, damping: 28 }}
       className="relative rounded-xl px-3 py-2 flex items-center gap-3"
       style={{
-        background: isLeader ? 'linear-gradient(90deg, rgba(255,107,0,0.08) 0%, rgba(255,107,0,0.0) 100%)' : 'transparent',
+        background: isWinner
+          ? 'linear-gradient(90deg, rgba(212,168,83,0.18) 0%, rgba(212,168,83,0.04) 100%)'
+          : isLeader
+          ? 'linear-gradient(90deg, rgba(255,107,0,0.08) 0%, rgba(255,107,0,0.0) 100%)'
+          : 'transparent',
+        border: isWinner ? '1px solid rgba(212,168,83,0.35)' : '1px solid transparent',
       }}
     >
       <span
-        className={`tabular-nums shrink-0 w-5 text-center ${isLeader ? 'text-[#FF6B00]' : 'text-white/40'}`}
-        style={{ fontFamily: 'Bebas Neue, sans-serif', fontSize: '22px', letterSpacing: '0.02em' }}
+        className="tabular-nums shrink-0 w-5 text-center"
+        style={{
+          fontFamily: 'Bebas Neue, sans-serif',
+          fontSize: '22px',
+          letterSpacing: '0.02em',
+          color: isWinner ? accent : isLeader ? accent : 'rgba(255,255,255,0.4)',
+        }}
       >
-        {candidate.rank}
+        {isWinner ? '★' : candidate.rank}
       </span>
       {candidate.headshot ? (
         <img
           src={candidate.headshot}
           alt={candidate.name}
-          className="h-10 w-10 rounded-full object-cover border border-white/10 shrink-0"
+          className="h-10 w-10 rounded-full object-cover shrink-0"
+          style={{ border: isWinner ? '2px solid rgba(212,168,83,0.55)' : '1px solid rgba(255,255,255,0.1)' }}
           loading="lazy"
         />
       ) : (
-        <div className="h-10 w-10 rounded-full border border-white/10 bg-white/5 shrink-0" />
+        <div
+          className="h-10 w-10 rounded-full bg-white/5 shrink-0"
+          style={{ border: isWinner ? '2px solid rgba(212,168,83,0.55)' : '1px solid rgba(255,255,255,0.1)' }}
+        />
       )}
       <div className="flex-1 min-w-0">
-        <div className="flex items-baseline gap-2">
-          <span className={`text-[13px] truncate ${isLeader ? 'text-white' : 'text-white/75'}`}>
+        <div className="flex items-baseline gap-2 flex-wrap">
+          <span
+            className="text-[13px] truncate"
+            style={{ color: isWinner ? '#F4D47A' : isLeader ? '#FFFFFF' : 'rgba(255,255,255,0.75)' }}
+          >
             {candidate.name}
           </span>
           {candidate.team && (
             <span className="text-[9px] text-white/40 uppercase tracking-[0.2em] shrink-0" style={{ fontFamily: 'Geist Mono, monospace' }}>
               {candidate.team}{candidate.position ? ` · ${candidate.position}` : ''}
+            </span>
+          )}
+          {candidate.noteBadge && (
+            <span
+              className="text-[8px] uppercase tracking-[0.22em] shrink-0 px-1.5 py-0.5 rounded"
+              style={{
+                fontFamily: 'Geist Mono, monospace',
+                background: isWinner ? 'rgba(212,168,83,0.25)' : 'rgba(96,165,250,0.15)',
+                color: isWinner ? '#F4D47A' : '#93C5FD',
+                border: `1px solid ${isWinner ? 'rgba(212,168,83,0.45)' : 'rgba(96,165,250,0.35)'}`,
+              }}
+            >
+              {candidate.noteBadge}
             </span>
           )}
         </div>
@@ -480,13 +764,18 @@ function CandidateRow({ candidate }: { candidate: AwardCandidateUI }): React.JSX
             animate={{ width: `${Math.round(pct * 100)}%` }}
             transition={{ type: 'spring', stiffness: 160, damping: 26 }}
             className="h-full rounded-full"
-            style={{ background: isLeader ? '#FF6B00' : '#D4A853' }}
+            style={{ background: accent }}
           />
         </div>
       </div>
       <span
-        className={`tabular-nums shrink-0 text-right ${isLeader ? 'text-[#FF6B00]' : 'text-white/55'}`}
-        style={{ fontFamily: 'Geist Mono, monospace', fontSize: '12px', minWidth: '38px' }}
+        className="tabular-nums shrink-0 text-right"
+        style={{
+          fontFamily: 'Geist Mono, monospace',
+          fontSize: '12px',
+          minWidth: '38px',
+          color: isWinner ? '#F4D47A' : isLeader ? '#FF6B00' : 'rgba(255,255,255,0.55)',
+        }}
       >
         {Math.round(pct * 100)}%
       </span>
