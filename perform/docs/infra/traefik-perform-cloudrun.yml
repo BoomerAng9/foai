@@ -13,7 +13,7 @@
 http:
   routers:
     perform-cloudrun-draft:
-      rule: "Host(`perform.foai.cloud`) && (PathPrefix(`/draft/`) || PathPrefix(`/api/draft/center/`))"
+      rule: "Host(`perform.foai.cloud`) && (PathPrefix(`/draft/`) || PathPrefix(`/api/draft/center/`) || PathPrefix(`/api/rankings/`))"
       service: perform-cloudrun
       entrypoints:
         - websecure
@@ -22,7 +22,7 @@ http:
         certresolver: letsencrypt
 
     perform-cloudrun-nba:
-      rule: "Host(`perform.foai.cloud`) && (PathPrefix(`/nba/`) || PathPrefix(`/api/nba/`))"
+      rule: "Host(`perform.foai.cloud`) && (PathPrefix(`/nba/`) || PathPrefix(`/api/nba/`) || PathPrefix(`/tie/submit`) || PathPrefix(`/api/tie/`))"
       service: perform-cloudrun
       entrypoints:
         - websecure
