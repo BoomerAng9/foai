@@ -1,15 +1,13 @@
 # ============================================================================
 # perform.foai.cloud path-based carveout → perform-draft-2026 Cloud Run
 # ============================================================================
-# The rest of Per|Form continues to route to the perform-perform-1 VPS
-# container (docker-label rule Host(`perform.foai.cloud`)). This file adds
-# two MORE SPECIFIC routers (Host + PathPrefix) that Traefik will prefer over
-# the bare Host rule, pulling /draft/*, /api/draft/center/*, /nba/*, and
-# /api/nba/* into the per-feature Cloud Run service.
+# More-specific Host+PathPrefix rules beat the bare Host(\`perform.foai.cloud\`)
+# docker router on perform-perform-1 (VPS container), so these paths serve
+# from Cloud Run while everything else keeps routing to the VPS.
 #
-# Why passHostHeader=false:
-#   Cloud Run validates Host against the *.run.app TLS cert. Traefik must
-#   forward the backend hostname, not perform.foai.cloud.
+# /cr/* is the Cloud Run assetPrefix — Traefik strips the /cr prefix before
+# forwarding, so Cloud Run receives /_next/... unchanged. The VPS perform
+# container still owns /_next/... with its own build hashes; no collision.
 # ============================================================================
 
 http:
@@ -31,6 +29,23 @@ http:
       priority: 100
       tls:
         certresolver: letsencrypt
+
+    perform-cloudrun-assets:
+      rule: "Host(`perform.foai.cloud`) && PathPrefix(`/cr/`)"
+      service: perform-cloudrun
+      entrypoints:
+        - websecure
+      priority: 110
+      middlewares:
+        - strip-cr-prefix
+      tls:
+        certresolver: letsencrypt
+
+  middlewares:
+    strip-cr-prefix:
+      stripPrefix:
+        prefixes:
+          - /cr
 
   services:
     perform-cloudrun:
