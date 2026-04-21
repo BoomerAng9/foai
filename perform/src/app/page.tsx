@@ -114,6 +114,17 @@ function FreshnessBadge({ iso, now, label }: { iso?: string | null; now: Date; l
  *  HOMEPAGE — season-aware, algorithmic featured hub
  * ═════════════════════════════════════════════════════ */
 export default function HomePage() {
+  // Respect ?redirect=/some/path from auth or share links — forward the
+  // browser immediately so /?redirect=%2Fbasketball%2Fnba doesn't land
+  // users on the NFL Draft hero when they asked for NBA.
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const target = new URL(window.location.href).searchParams.get('redirect');
+    if (!target) return;
+    if (!target.startsWith('/') || target.startsWith('//')) return; // only same-origin paths
+    window.location.replace(target);
+  }, []);
+
   const now = useTicker();
   const tint = useMemo(() => seasonTint(now), [now]);
   const moments = useMemo(() => scoreMoments(now), [now]);

@@ -158,6 +158,20 @@ const HAND_CURATED: CuratedSheet[] = [
       AWR: 84, PRC: 82, MTR: 88, LDR: 84, CLU: 84, COMP: 88, INJ: 92, TGH: 92, DISC: 88, CHR: 88,
     },
   },
+  {
+    name: 'Drew Allar',
+    school: 'Penn State',
+    position: 'QB',
+    note: 'Big-bodied pocket QB (6-5 228) with a strong arm. 2025 season underwhelmed — accuracy regressed, decision-making inconsistent. Beast 3rd-4th grade. Late Day-2 projection.',
+    ratings: {
+      // Performance (QB) — strong arm drags up, accuracy + processing drag down
+      THP: 87, TAS: 72, TAM: 70, TAD: 76, PAC: 68, RUN: 70, BCV: 70, SAC: 66,
+      // Attributes — size is the calling card, not explosive
+      SPD: 76, ACC: 76, AGI: 72, CHG: 70, STR: 86, JMP: 74, SIZ: 92, STA: 82, BAL: 76, EXP: 72,
+      // Intangibles — leader + tough, middling awareness
+      AWR: 74, PRC: 72, MTR: 82, LDR: 84, CLU: 72, COMP: 80, INJ: 84, TGH: 88, DISC: 74, CHR: 82,
+    },
+  },
 ];
 
 /* ── Heuristic generator for ranks 11-50 ───────────────────────────── */
