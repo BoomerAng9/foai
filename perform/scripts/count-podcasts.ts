@@ -19,7 +19,7 @@ const sql = postgres(process.env.DATABASE_URL!, { ssl: 'require', max: 2 });
     for (const t of tables) {
       try {
         const rows = await sql.unsafe(`SELECT COUNT(*)::int n FROM ${t.table_name}`);
-        const n = (rows[0] as { n: number }).n;
+        const n = (rows[0] as unknown as { n: number }).n;
         const cols = await sql<{ column_name: string }[]>`
           SELECT column_name FROM information_schema.columns
           WHERE table_name = ${t.table_name}

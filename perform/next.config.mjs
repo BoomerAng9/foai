@@ -2,6 +2,17 @@
 const nextConfig = {
   output: 'standalone',
   poweredByHeader: false,
+  // Workspace packages live as raw TypeScript at ../aims-tools/*. Next.js
+  // must transpile them (no compiled JS exists) and resolve `.js` import
+  // specifiers to `.ts` files (TS path-alias convention).
+  transpilePackages: ['@aims/tie-matrix', '@aims/spinner'],
+  webpack: (config) => {
+    config.resolve.extensionAlias = {
+      ...(config.resolve.extensionAlias || {}),
+      '.js': ['.ts', '.tsx', '.js', '.jsx'],
+    };
+    return config;
+  },
   async headers() {
     return [{
       source: '/(.*)',
