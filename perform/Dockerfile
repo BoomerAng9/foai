@@ -2,22 +2,45 @@
 # Per|Form Cloud Run image — Next.js 15 standalone build
 # ============================================================================
 # Build context: foai/ monorepo root (NOT perform/) so file:../aims-tools/*
-# workspace dependencies resolve. Submit via:
-#   gcloud builds submit --config=perform/cloudbuild.yaml \
-#     --ignore-file=perform/cloudbuild.gcloudignore --project=foai-aims foai/
+# workspace dependencies resolve. Staged via /tmp/perform-build-stage/ (only
+# perform + aims-tools/{tie-matrix, spinner, aims-pricing-matrix, aims-pmo})
+# and submitted with cloudbuild.yaml.
+#
+# Workspace dep graph (file: links):
+#   perform        -> @aims/{tie-matrix, spinner}
+#   tie-matrix     -> zod
+#   spinner        -> zod, ws, @aims/{pricing-matrix, pmo}
+#   pricing-matrix -> zod, postgres
+#   pmo            -> zod, postgres
+# Deepest-first install order: pricing-matrix, pmo -> tie-matrix, spinner ->
+# perform. Each `npm install` materializes the file: symlinks for the layer
+# above it.
 # ============================================================================
 
-# ── deps stage ──────────────────────────────────────────────────────────────
-# Install npm deps with workspace siblings present so file:../aims-tools/*
-# entries in perform/package.json resolve correctly.
-FROM node:20-alpine AS deps
+# ── workspace-deps stage ────────────────────────────────────────────────────
+# Install each raw-TS workspace package's own deps so its node_modules is
+# populated. Symlinks for sibling @aims/* packages are created during the
+# install (npm follows file:../ paths).
+FROM node:20-alpine AS workspace-deps
 WORKDIR /workspace
 
-# Workspace siblings first — must be present BEFORE npm ci so file: deps work.
-COPY aims-tools/tie-matrix ./aims-tools/tie-matrix
-COPY aims-tools/spinner    ./aims-tools/spinner
+# Copy workspace package sources first (sibling order matters for file: deps)
+COPY aims-tools/aims-pricing-matrix ./aims-tools/aims-pricing-matrix
+COPY aims-tools/aims-pmo            ./aims-tools/aims-pmo
+COPY aims-tools/tie-matrix          ./aims-tools/tie-matrix
+COPY aims-tools/spinner             ./aims-tools/spinner
 
-# Install perform's deps; npm ci will install + symlink the workspace siblings.
+# Deepest-first install. --no-audit --no-fund keep logs clean.
+RUN cd aims-tools/aims-pricing-matrix && npm install --no-audit --no-fund \
+ && cd /workspace/aims-tools/aims-pmo            && npm install --no-audit --no-fund \
+ && cd /workspace/aims-tools/tie-matrix          && npm install --no-audit --no-fund \
+ && cd /workspace/aims-tools/spinner             && npm install --no-audit --no-fund
+
+# ── perform-deps stage ──────────────────────────────────────────────────────
+FROM node:20-alpine AS deps
+WORKDIR /workspace
+COPY --from=workspace-deps /workspace/aims-tools ./aims-tools
+
 WORKDIR /workspace/perform
 COPY perform/package.json perform/package-lock.json ./
 RUN npm ci --production=false
@@ -38,7 +61,6 @@ ENV NODE_ENV=production
 RUN addgroup --system --gid 1001 nodejs \
  && adduser  --system --uid 1001 nextjs
 
-# Next.js standalone output already bundles needed node_modules.
 COPY --from=builder /workspace/perform/public                       ./public
 COPY --from=builder --chown=nextjs:nodejs /workspace/perform/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /workspace/perform/.next/static     ./.next/static
