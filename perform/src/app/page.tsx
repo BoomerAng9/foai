@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowRight, Clock3, Radio } from 'lucide-react';
+import { ArrowRight, Clock3, Radio, Zap, Upload } from 'lucide-react';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { getGradeForScore } from '@/lib/tie/grades';
@@ -21,6 +21,10 @@ interface Prospect {
   tie_grade: string | null;
   grade: string | null;
   nfl_comparison: string | null;
+  tie_tier?: string | null;
+  versatility_flex?: string | null;
+  prime_sub_tags?: string[] | null;
+  attribute_badges?: string[] | null;
 }
 
 interface Episode {
@@ -196,6 +200,12 @@ export default function HomePage() {
         {hero?.sport === 'nfl' && hero.kind === 'draft' && teamNeeds.length > 0 && (
           <TeamNeedsBoard teams={teamNeeds} freshness={freshness?.teamNeeds} now={now} />
         )}
+
+        {/* ═══ PRIME FEATURE — flagship #1 player hero ═══ */}
+        {!loading && prospects[0] && <PrimeFeatureCard prospect={prospects[0]} tint={tint} />}
+
+        {/* ═══ TIE + NIL INVITE ═══ */}
+        <TieNilInviteBanner />
 
         {/* ═══ TOP 10 BIG BOARD ═══ */}
         <section className="max-w-7xl mx-auto px-4 md:px-8 pb-16">
@@ -486,6 +496,229 @@ function TeamNeedsBoard({ teams, freshness, now }: { teams: TeamNeed[]; freshnes
             </div>
           </motion.div>
         ))}
+      </motion.div>
+    </section>
+  );
+}
+
+/* ── PRIME Feature Card — flagship #1 player ──────────────────── */
+const PRIME_SUB_TAG_ICON: Record<string, { icon: string; label: string }> = {
+  franchise_cornerstone:     { icon: '🏗️', label: 'Franchise Cornerstone' },
+  talent_character_concerns: { icon: '⚠️', label: 'Talent w/ Character Concerns' },
+  nil_ready:                 { icon: '🎤', label: 'NIL Ready' },
+  quiet_but_elite:           { icon: '🔒', label: 'Quiet but Elite' },
+  ultra_competitive:         { icon: '🤯', label: 'Ultra-Competitive' },
+};
+
+function PrimeFeatureCard({ prospect, tint }: { prospect: Prospect; tint: ReturnType<typeof seasonTint> }) {
+  const grade = prospect.grade ? parseFloat(prospect.grade) : 0;
+  const isPrime = prospect.tie_tier === 'PRIME' || grade >= 101;
+  const primeTags = (prospect.prime_sub_tags ?? []).map(t => PRIME_SUB_TAG_ICON[t]).filter(Boolean);
+  const badgeCount = prospect.attribute_badges?.length ?? 0;
+  const hofBadges = (prospect.attribute_badges ?? []).filter(b => b.endsWith('_hof')).length;
+  const versatility = prospect.versatility_flex && prospect.versatility_flex !== 'none' ? prospect.versatility_flex : null;
+  const accent = isPrime ? '#F4D47A' : tint.accent;
+  const accentSoft = isPrime ? 'rgba(244,212,122,0.14)' : `${tint.accent}22`;
+  const accentBorder = isPrime ? 'rgba(244,212,122,0.55)' : `${tint.accent}60`;
+
+  return (
+    <section className="max-w-7xl mx-auto px-4 md:px-8 pb-10">
+      <motion.div
+        variants={staggerContainer}
+        initial="hidden" whileInView="visible" viewport={{ once: true, margin: '-40px' }}
+      >
+        <motion.div
+          variants={staggerItem}
+          className="rounded-2xl overflow-hidden backdrop-blur-xl relative"
+          style={{
+            border: `1px solid ${accentBorder}`,
+            background: `linear-gradient(135deg, ${accentSoft} 0%, rgba(255,255,255,0.02) 55%, rgba(255,255,255,0.01) 100%)`,
+            boxShadow: isPrime ? `0 0 48px rgba(244,212,122,0.22)` : `0 0 28px ${accentSoft}`,
+          }}
+        >
+          <div
+            className="absolute top-0 left-0 right-0"
+            style={{
+              height: '2px',
+              background: `linear-gradient(90deg, transparent 0%, ${accent} 20%, ${accent} 80%, transparent 100%)`,
+            }}
+          />
+          <div className="grid md:grid-cols-[1fr_auto] gap-6 p-6 md:p-8">
+            <div className="min-w-0">
+              <div className="flex items-baseline gap-3 mb-2 flex-wrap">
+                <span
+                  className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full"
+                  style={{
+                    fontFamily: 'Geist Mono, monospace',
+                    fontSize: '10px',
+                    letterSpacing: '0.2em',
+                    background: accentSoft,
+                    color: accent,
+                    border: `1px solid ${accentBorder}`,
+                    textTransform: 'uppercase',
+                  }}
+                >
+                  <span className="inline-block w-1.5 h-1.5 rounded-full" style={{ background: accent, boxShadow: `0 0 8px ${accent}` }} />
+                  {isPrime ? 'PRIME — Generational Talent' : 'Per|Form #1 Overall'}
+                </span>
+                {versatility && (
+                  <span
+                    className="text-[9px] uppercase tracking-[0.2em] px-2 py-0.5 rounded-full"
+                    style={{ fontFamily: 'Geist Mono, monospace', background: 'rgba(147,197,253,0.10)', color: '#93C5FD', border: '1px solid rgba(147,197,253,0.35)' }}
+                  >
+                    {versatility.replace('_', '-')}
+                  </span>
+                )}
+              </div>
+
+              <h2
+                className="font-outfit font-extrabold tracking-tight mb-1"
+                style={{ color: accent, fontSize: 'clamp(44px, 6vw, 76px)', lineHeight: 1.02 }}
+              >
+                {prospect.name}
+                {isPrime && <span className="ml-3" style={{ fontSize: '0.7em' }}>🛸</span>}
+                {primeTags.map(t => (
+                  <span key={t.label} className="ml-2" style={{ fontSize: '0.5em' }} title={t.label}>{t.icon}</span>
+                ))}
+              </h2>
+              <div className="flex items-baseline gap-3 mb-4 text-white/70 text-sm font-mono uppercase tracking-widest">
+                <span>{prospect.position}</span>
+                <span>·</span>
+                <span>{prospect.school}</span>
+                {prospect.projected_round && (
+                  <>
+                    <span>·</span>
+                    <span>Projected R{prospect.projected_round}</span>
+                  </>
+                )}
+              </div>
+              {primeTags.length > 0 && (
+                <div className="flex flex-wrap gap-2 mb-4">
+                  {primeTags.map(t => (
+                    <span
+                      key={t.label}
+                      className="inline-flex items-center gap-1.5 px-2 py-1 rounded-full text-[10px] uppercase tracking-[0.18em]"
+                      style={{
+                        fontFamily: 'Geist Mono, monospace',
+                        background: accentSoft,
+                        color: accent,
+                        border: `1px solid ${accentBorder}`,
+                      }}
+                    >
+                      <span style={{ fontSize: '11px' }}>{t.icon}</span>
+                      {t.label}
+                    </span>
+                  ))}
+                </div>
+              )}
+              <div className="flex items-center gap-3 flex-wrap">
+                <Link
+                  href="/draft/center"
+                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-xs font-mono font-bold tracking-wider uppercase transition-all hover:scale-[1.02]"
+                  style={{ background: accent, color: '#0A0A0F', boxShadow: `0 0 24px ${accent}44` }}
+                >
+                  Open Draft Desk <ArrowRight className="w-3.5 h-3.5" />
+                </Link>
+                <Link
+                  href={`/players/${encodeURIComponent(prospect.name)}`}
+                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-xs font-mono font-bold tracking-wider uppercase transition-colors"
+                  style={{ background: accentSoft, border: `1px solid ${accentBorder}`, color: accent }}
+                >
+                  See full sheet
+                </Link>
+              </div>
+            </div>
+            <div className="flex flex-col items-end justify-between gap-4">
+              <div className="text-right">
+                <div className="text-[10px] font-mono tracking-[0.25em] uppercase text-white/40 mb-1">Grade</div>
+                <div
+                  className="font-outfit font-extrabold tabular-nums"
+                  style={{ color: accent, fontSize: 'clamp(56px, 8vw, 104px)', lineHeight: 1, textShadow: isPrime ? `0 0 28px ${accent}66` : 'none' }}
+                >
+                  {grade.toFixed(1)}
+                </div>
+                <div className="text-right font-mono uppercase tracking-[0.2em] text-white/60 text-xs mt-1">
+                  {prospect.tie_grade ?? '--'}
+                </div>
+              </div>
+              {badgeCount > 0 && (
+                <div className="text-right">
+                  <div className="text-[10px] font-mono tracking-[0.22em] uppercase text-white/40 mb-1">Badges</div>
+                  <div className="flex items-center gap-2 text-[11px] font-mono" style={{ color: accent }}>
+                    <span>{badgeCount} total</span>
+                    <span className="text-white/30">·</span>
+                    <span>{hofBadges} HOF</span>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </motion.div>
+      </motion.div>
+    </section>
+  );
+}
+
+/* ── TIE + NIL Invite Banner — schools/teams/players upload CTA ─────── */
+function TieNilInviteBanner() {
+  return (
+    <section className="max-w-7xl mx-auto px-4 md:px-8 pb-12">
+      <motion.div
+        initial={{ opacity: 0, y: 8 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: '-40px' }}
+        transition={{ type: 'spring', stiffness: 220, damping: 26 }}
+        className="rounded-2xl overflow-hidden relative"
+        style={{
+          border: '1px solid rgba(255,107,0,0.28)',
+          background: 'linear-gradient(120deg, rgba(255,107,0,0.10) 0%, rgba(212,168,83,0.08) 40%, rgba(96,165,250,0.06) 100%)',
+          boxShadow: '0 0 32px rgba(255,107,0,0.12)',
+        }}
+      >
+        <div className="absolute top-0 left-0 right-0 h-[2px]"
+          style={{ background: 'linear-gradient(90deg, transparent 0%, #FF6B00 20%, #D4A853 50%, #60A5FA 80%, transparent 100%)' }}
+        />
+        <div className="grid md:grid-cols-[auto_1fr_auto] gap-5 items-center p-5 md:p-7">
+          <div
+            className="inline-flex items-center justify-center rounded-xl shrink-0"
+            style={{
+              width: 56, height: 56,
+              background: 'rgba(255,107,0,0.15)',
+              border: '1px solid rgba(255,107,0,0.45)',
+            }}
+          >
+            <Upload className="w-6 h-6" style={{ color: '#FF6B00' }} />
+          </div>
+          <div className="min-w-0">
+            <div className="flex items-center gap-2 mb-1">
+              <Zap className="w-3.5 h-3.5" style={{ color: '#FF6B00' }} />
+              <span className="text-[10px] font-mono tracking-[0.24em] uppercase" style={{ color: '#FF6B00' }}>
+                TIE + NIL · Open to players, schools, teams, agents
+              </span>
+            </div>
+            <h3 className="font-outfit text-xl md:text-2xl font-extrabold tracking-tight mb-1" style={{ color: 'var(--pf-text)' }}>
+              Get your TIE grade + NIL cohort valuation.
+            </h3>
+            <p className="text-[13px] leading-relaxed" style={{ color: 'var(--pf-text-muted)' }}>
+              Upload a player profile (combine numbers + scout ratings) and Per|Form grades it through the canonical
+              40/30/30 Performance·Attributes·Intangibles engine. Returns an NIL valuation anchored to peers at the
+              same class + position + tier.
+            </p>
+          </div>
+          <div className="flex md:justify-end">
+            <Link
+              href="/tie/submit"
+              className="inline-flex items-center gap-2 px-6 py-3 rounded-lg text-xs font-mono font-bold tracking-wider uppercase transition-all hover:scale-[1.02]"
+              style={{
+                background: 'linear-gradient(135deg, #FF6B00 0%, #D4A853 100%)',
+                color: '#1A0F00',
+                boxShadow: '0 0 24px rgba(255,107,0,0.4)',
+              }}
+            >
+              Run TIE + NIL <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
+          </div>
+        </div>
       </motion.div>
     </section>
   );
