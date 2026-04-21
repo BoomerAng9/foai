@@ -448,6 +448,55 @@ export function finalsMVPStub(active: boolean): AwardCategory {
   };
 }
 
+// ── Sqwaadrun-pulled authoritative overrides ─────────────────────────────
+// When the NBA announces an award winner (DPOY as of 2026-04-21) or Vegas
+// publishes hardened futures odds, those beat any stat-heuristic projection.
+// The override JSON is refreshed by a Sqwaadrun recon pass and checked in
+// alongside the code — read it and merge into the stat-computed payload.
+
+import overridesJson from './awards-overrides-2025-26.json' assert { type: 'json' };
+
+interface OverrideCandidate {
+  rank: number;
+  name: string;
+  team: string;
+  position?: string;
+  statLine: string;
+  projectedVoteShare: number;
+  noteBadge?: string;
+}
+interface OverrideCategory {
+  status: string;        // ANNOUNCED | FINALISTS_NAMED | ODDS_LIVE
+  announcedAt?: string;
+  subtitle?: string;
+  candidates: OverrideCandidate[];
+}
+
+const OVERRIDES: Record<string, OverrideCategory | undefined> =
+  (overridesJson as { overrides?: Record<string, OverrideCategory> }).overrides ?? {};
+
+function applyOverride(cat: AwardCategory): AwardCategory {
+  const ov = OVERRIDES[cat.key];
+  if (!ov || !ov.candidates.length) return cat;
+  const candidates: AwardCandidate[] = ov.candidates.map(c => ({
+    rank: c.rank,
+    playerId: `override-${cat.key}-${c.rank}`,
+    name: c.name,
+    team: c.team,
+    position: c.position,
+    headshot: '',
+    statLine: c.statLine,
+    projectedVoteShare: c.projectedVoteShare,
+    composite: c.projectedVoteShare * 100,
+  }));
+  return {
+    ...cat,
+    subtitle: ov.subtitle ?? cat.subtitle,
+    candidates,
+    active: true,
+  };
+}
+
 // ── Orchestrator ──────────────────────────────────────────────────────────
 
 export async function buildAwardsPayload(
@@ -458,7 +507,7 @@ export async function buildAwardsPayload(
   const merged = [...pool.allMerged.values()];
   const standings = await fetchStandings().catch(() => []);
 
-  const categories: AwardCategory[] = [
+  const baseCategories: AwardCategory[] = [
     projectMVP(pool.topScorers),
     projectDPOY(pool.topStealers, pool.topBlockers),
     projectROY(pool.topScorers),
@@ -469,10 +518,14 @@ export async function buildAwardsPayload(
     finalsMVPStub(finalsInProgress),
   ];
 
+  // Merge Sqwaadrun-pulled authoritative overrides on top (winner-announced
+  // or hardened Vegas odds replace the stat projection for that category).
+  const categories = baseCategories.map(applyOverride);
+
   return {
     season: seasonYear,
     categories,
-    source: 'ESPN NBA stats + standings (public)',
+    source: 'ESPN NBA stats + standings (public) + Sqwaadrun-scraped award-announcement overrides',
     updatedAt: new Date().toISOString(),
     freshnessSec: 60,
   };

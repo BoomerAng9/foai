@@ -1,0 +1,52 @@
+{
+  "season": "2025-26",
+  "sourceNotes": [
+    "Sqwaadrun-pulled 2026-04-21 from ESPN NBA news feed + award-announcement articles",
+    "DPOY: https://www.espn.com/nba/story/_/id/48544568/spurs-victor-wembanyama-captures-first-career-dpoy",
+    "Finals MVP odds: https://www.espn.com/espn/betting/story/_/id/45539787/2025-nba-finals-odds-mvp-2025-26-championship-betting",
+    "MVP finalists mentioned in DPOY article body: SGA, Jokic",
+    "6MOY finalist mentioned: Keldon Johnson (SA)"
+  ],
+  "overrides": {
+    "dpoy": {
+      "status": "ANNOUNCED",
+      "announcedAt": "2026-04-20",
+      "subtitle": "2025-26 WINNER — Victor Wembanyama (unanimous, youngest ever at 22).",
+      "candidates": [
+        {
+          "rank": 1,
+          "name": "Victor Wembanyama",
+          "team": "SA",
+          "position": "C-F",
+          "statLine": "UNANIMOUS WINNER — youngest DPOY ever at 22",
+          "projectedVoteShare": 1.0,
+          "noteBadge": "WINNER"
+        }
+      ]
+    },
+    "finals_mvp": {
+      "status": "ODDS_LIVE",
+      "subtitle": "Finals not started — Vegas favorites via ESPN futures (2026-04-21).",
+      "candidates": [
+        {
+          "rank": 1,
+          "name": "Shai Gilgeous-Alexander",
+          "team": "OKC",
+          "position": "G",
+          "statLine": "Finals MVP favorite (tied w/ Wemby)",
+          "projectedVoteShare": 0.45,
+          "noteBadge": "FAVE"
+        },
+        {
+          "rank": 2,
+          "name": "Victor Wembanyama",
+          "team": "SA",
+          "position": "C-F",
+          "statLine": "Co-favorite for Finals MVP",
+          "projectedVoteShare": 0.45,
+          "noteBadge": "FAVE"
+        }
+      ]
+    }
+  }
+}
