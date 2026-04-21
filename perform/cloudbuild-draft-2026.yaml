@@ -38,6 +38,11 @@ steps:
       - us-central1-docker.pkg.dev/foai-aims/perform-draft-2026/service:$COMMIT_SHA
       - -t
       - us-central1-docker.pkg.dev/foai-aims/perform-draft-2026/service:latest
+      - --build-arg
+      # /cr is a Traefik-stripped prefix: browser → perform.foai.cloud/cr/_next/*
+      # → Traefik stripPrefix → Cloud Run /_next/*. Keeps assets same-origin
+      # under perform.foai.cloud so CSP/cookies/CORS stay simple.
+      - CLOUD_RUN_ASSET_PREFIX=/cr
       - -f
       - perform/Dockerfile.cloudrun
       - .

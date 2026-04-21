@@ -1,0 +1,53 @@
+{
+  "season": "2025-26",
+  "sourceNotes": [
+    "Sqwaadrun-pulled 2026-04-21 from ESPN NBA news feed + award-announcement articles",
+    "DPOY: https://www.espn.com/nba/story/_/id/48544568/spurs-victor-wembanyama-captures-first-career-dpoy",
+    "Finals MVP odds: https://www.espn.com/espn/betting/story/_/id/45539787/2025-nba-finals-odds-mvp-2025-26-championship-betting"
+  ],
+  "overrides": {
+    "dpoy": {
+      "status": "ANNOUNCED",
+      "announcedAt": "2026-04-20",
+      "subtitle": "2025-26 WINNER \u2014 Victor Wembanyama. First UNANIMOUS DPOY in NBA history. Youngest ever at 22.",
+      "candidates": [
+        {
+          "rank": 1,
+          "name": "Victor Wembanyama",
+          "team": "SA",
+          "position": "C-F",
+          "headshot": "https://a.espncdn.com/i/headshots/nba/players/full/5104157.png",
+          "statLine": "UNANIMOUS \u00b7 100/100 first-place votes \u00b7 22 yo",
+          "projectedVoteShare": 1.0,
+          "noteBadge": "WINNER"
+        }
+      ]
+    },
+    "finals_mvp": {
+      "status": "ODDS_LIVE",
+      "subtitle": "Finals not started \u2014 Vegas co-favorites via ESPN NBA Futures (2026-04-21).",
+      "candidates": [
+        {
+          "rank": 1,
+          "name": "Shai Gilgeous-Alexander",
+          "team": "OKC",
+          "position": "G",
+          "headshot": "https://a.espncdn.com/i/headshots/nba/players/full/4278073.png",
+          "statLine": "Co-favorite \u00b7 reigning MVP (2024-25)",
+          "projectedVoteShare": 0.5,
+          "noteBadge": "FAVE"
+        },
+        {
+          "rank": 2,
+          "name": "Victor Wembanyama",
+          "team": "SA",
+          "position": "C-F",
+          "headshot": "https://a.espncdn.com/i/headshots/nba/players/full/5104157.png",
+          "statLine": "Co-favorite \u00b7 unanimous DPOY 2025-26",
+          "projectedVoteShare": 0.5,
+          "noteBadge": "FAVE"
+        }
+      ]
+    }
+  }
+}

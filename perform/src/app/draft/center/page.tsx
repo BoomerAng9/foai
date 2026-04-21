@@ -41,7 +41,62 @@ interface SnapshotPlayer {
   projected_round: number | null;
   drafted_by_team: string | null;
   drafted_pick_number: number | null;
+  attribute_ratings: Record<string, number> | null;
+  attribute_badges: string[] | null;
+  versatility_flex: string | null;
+  prime_sub_tags: string[] | null;
 }
+
+/* ── Madden/2K-style attribute metadata for the drawer ─────────────── */
+const ATTR_LABEL: Record<string, string> = {
+  SPD: 'Speed', ACC: 'Acceleration', AGI: 'Agility', CHG: 'Change of Dir',
+  STR: 'Strength', JMP: 'Jumping', SIZ: 'Size', STA: 'Stamina', BAL: 'Balance', EXP: 'Explosiveness',
+  AWR: 'Awareness', PRC: 'Play Rec', MTR: 'Motor', LDR: 'Leadership', CLU: 'Clutch',
+  COMP: 'Competitiveness', INJ: 'Medical Durability', TGH: 'Toughness', DISC: 'Discipline', CHR: 'Character',
+  THP: 'Throw Power', TAS: 'Accuracy Short', TAM: 'Accuracy Medium', TAD: 'Accuracy Deep',
+  PAC: 'Play Action', RUN: 'Running (QB)', BCV: 'BC Vision', SAC: 'SA Control',
+  TRK: 'Trucking', ELU: 'Elusiveness', BTK: 'Break Tackle', CAR: 'Carrying', JKM: 'Juke Move',
+  SPM: 'Spin Move', SFA: 'Stiff Arm', CTH: 'Catching', CIT: 'Catch in Traffic',
+  SPC: 'Spectacular Catch', RLS: 'Release', SRR: 'Short Routes', MRR: 'Medium Routes', DRR: 'Deep Routes',
+  RBK: 'Run Block', PBK: 'Pass Block', RBP: 'RB Power', RBF: 'RB Footwork',
+  PBP: 'PB Power', PBF: 'PB Footwork', IBL: 'Impact Block', LBK: 'Lead Block',
+  BSH: 'Block Shed', PMV: 'Power Moves', FMV: 'Finesse Moves', TAK: 'Tackle', PUR: 'Pursuit',
+  HPW: 'Hit Power', MCV: 'Man Coverage', ZCV: 'Zone Coverage', PRS: 'Press', PLR: 'Play Rec (D)',
+};
+
+const PERFORMANCE_CODES = new Set(['THP','TAS','TAM','TAD','PAC','RUN','BCV','SAC','TRK','ELU','BTK','CAR','JKM','SPM','SFA','PBK','CTH','CIT','SPC','RLS','SRR','MRR','DRR','RBK','IBL','RBP','RBF','PBP','PBF','LBK','BSH','PMV','FMV','TAK','PUR','HPW','MCV','ZCV','PRS','PLR']);
+const ATTRIBUTE_CODES = new Set(['SPD','ACC','AGI','CHG','STR','JMP','SIZ','STA','BAL','EXP']);
+const INTANGIBLE_CODES = new Set(['AWR','PRC','MTR','LDR','CLU','COMP','INJ','TGH','DISC','CHR']);
+
+const PRIME_TAG: Record<string, { icon: string; label: string }> = {
+  franchise_cornerstone:    { icon: '🏗️', label: 'Franchise Cornerstone' },
+  talent_character_concerns:{ icon: '⚠️', label: 'Talent w/ Character Concerns' },
+  nil_ready:                { icon: '🎤', label: 'NIL Ready' },
+  quiet_but_elite:          { icon: '🔒', label: 'Quiet but Elite' },
+  ultra_competitive:        { icon: '🤯', label: 'Ultra-Competitive' },
+};
+
+const VERSATILITY_META: Record<string, { label: string; bonus: number }> = {
+  none:        { label: 'Single-role specialist', bonus: 0 },
+  situational: { label: 'Situational package',    bonus: 3 },
+  two_way:     { label: 'Two-way anchor',          bonus: 5 },
+  unicorn:     { label: 'Schematic unicorn',       bonus: 7 },
+};
+
+function badgeTier(rating: number): 'hof' | 'gold' | 'silver' | 'bronze' | null {
+  if (rating >= 95) return 'hof';
+  if (rating >= 90) return 'gold';
+  if (rating >= 85) return 'silver';
+  if (rating >= 80) return 'bronze';
+  return null;
+}
+
+const TIER_COLOR: Record<string, { fg: string; bg: string; border: string }> = {
+  hof:    { fg: '#F4D47A', bg: 'rgba(244,212,122,0.18)', border: 'rgba(244,212,122,0.55)' },
+  gold:   { fg: '#FFB27A', bg: 'rgba(255,178,122,0.14)', border: 'rgba(255,178,122,0.45)' },
+  silver: { fg: '#D9DEE8', bg: 'rgba(217,222,232,0.10)', border: 'rgba(217,222,232,0.40)' },
+  bronze: { fg: '#C89C6B', bg: 'rgba(200,156,107,0.10)', border: 'rgba(200,156,107,0.40)' },
+};
 
 interface PickEvent {
   type: 'pick';
@@ -176,6 +231,7 @@ export default function DraftCenterPage(): React.JSX.Element {
 
 // ── Board Panel — left rail ───────────────────────────────────────────────
 function BoardPanel({ board }: { board: SnapshotPlayer[] }): React.JSX.Element {
+  const [expandedId, setExpandedId] = useState<number | null>(null);
   return (
     <div className="rounded-2xl border border-white/5 bg-white/[0.02] backdrop-blur-md overflow-hidden">
       <div className="flex items-baseline justify-between px-4 py-3 border-b border-white/5">
@@ -187,47 +243,189 @@ function BoardPanel({ board }: { board: SnapshotPlayer[] }): React.JSX.Element {
         </span>
       </div>
       <div className="max-h-[78vh] overflow-y-auto">
-        {board.slice(0, 100).map((p) => {
-          const tier = p.tie_tier ?? 'C';
-          const drafted = !!p.drafted_by_team;
+        {board.slice(0, 100).map((p) => (
+          <BigBoardRow key={p.id} player={p} expanded={expandedId === p.id} onToggle={() => setExpandedId(expandedId === p.id ? null : p.id)} />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function BigBoardRow({ player, expanded, onToggle }: { player: SnapshotPlayer; expanded: boolean; onToggle: () => void }): React.JSX.Element {
+  const tier = player.tie_tier ?? 'C';
+  const drafted = !!player.drafted_by_team;
+  const isPrime = tier === 'PRIME';
+  const primeTags = (player.prime_sub_tags ?? []).map(t => PRIME_TAG[t]).filter(Boolean);
+  const hasSheet = player.attribute_ratings && Object.keys(player.attribute_ratings).length > 0;
+
+  return (
+    <div className="border-b border-white/[0.03]">
+      <motion.button
+        type="button"
+        onClick={hasSheet ? onToggle : undefined}
+        initial={{ opacity: 0, x: -8 }}
+        animate={{ opacity: drafted ? 0.35 : 1, x: 0 }}
+        transition={{ type: 'spring', stiffness: 240, damping: 28 }}
+        className={`w-full text-left flex items-center gap-3 px-4 py-2 hover:bg-white/[0.04] transition-colors ${hasSheet ? 'cursor-pointer' : 'cursor-default'}`}
+        style={{ boxShadow: drafted ? 'none' : TIER_GLOW[tier] }}
+      >
+        <span
+          className="w-9 text-right tabular-nums shrink-0"
+          style={{
+            fontFamily: 'Bebas Neue, sans-serif',
+            fontSize: '20px',
+            color: isPrime ? '#F4D47A' : '#D4A853',
+            textShadow: isPrime ? '0 0 12px rgba(244,212,122,0.6)' : 'none',
+          }}
+        >
+          {player.overall_rank ?? '—'}
+        </span>
+        <div className="flex-1 min-w-0">
+          <div className="text-[13px] text-white truncate flex items-center gap-1.5">
+            {drafted && <span className="text-emerald-400 mr-1">✓</span>}
+            {player.name}
+            {isPrime && <span title="PRIME" style={{ fontSize: '12px' }}>🛸</span>}
+            {primeTags.map(t => (
+              <span key={t.label} title={t.label} style={{ fontSize: '11px' }}>{t.icon}</span>
+            ))}
+          </div>
+          <div className="text-[10px] text-white/40 uppercase tracking-wider truncate" style={{ fontFamily: 'Geist Mono, monospace' }}>
+            {player.position} · {player.school}{player.versatility_flex && player.versatility_flex !== 'none' ? ` · ${player.versatility_flex.replace('_', '-')}` : ''}
+          </div>
+        </div>
+        <span
+          className="px-1.5 py-0.5 rounded text-[10px] uppercase tracking-wider shrink-0"
+          style={{
+            background: isPrime ? 'rgba(244,212,122,0.18)' : 'rgba(212,168,83,0.12)',
+            color: isPrime ? '#F4D47A' : '#D4A853',
+            fontFamily: 'Geist Mono, monospace',
+            border: `1px solid ${isPrime ? 'rgba(244,212,122,0.55)' : 'rgba(212,168,83,0.2)'}`,
+          }}
+        >
+          {TIER_LABEL[tier] ?? tier}
+        </span>
+        {hasSheet && (
+          <span className="text-[10px] text-white/30 shrink-0 ml-1" style={{ fontFamily: 'Geist Mono, monospace' }}>
+            {expanded ? '▾' : '▸'}
+          </span>
+        )}
+      </motion.button>
+      <AnimatePresence initial={false}>
+        {expanded && hasSheet && player.attribute_ratings && (
+          <motion.div
+            key="drawer"
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ type: 'spring', stiffness: 200, damping: 28 }}
+            className="overflow-hidden"
+          >
+            <AttributeSheet player={player} />
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
+function AttributeSheet({ player }: { player: SnapshotPlayer }): React.JSX.Element {
+  const ratings = player.attribute_ratings ?? {};
+  const entries = Object.entries(ratings) as Array<[string, number]>;
+  const perf = entries.filter(([k]) => PERFORMANCE_CODES.has(k)).sort((a, b) => b[1] - a[1]);
+  const attr = entries.filter(([k]) => ATTRIBUTE_CODES.has(k)).sort((a, b) => b[1] - a[1]);
+  const intg = entries.filter(([k]) => INTANGIBLE_CODES.has(k)).sort((a, b) => b[1] - a[1]);
+  const badges = (player.attribute_badges ?? []).slice(0, 12);
+  const versatility = player.versatility_flex && player.versatility_flex !== 'none' ? VERSATILITY_META[player.versatility_flex] : null;
+
+  return (
+    <div
+      className="px-4 py-3 border-t border-white/[0.04]"
+      style={{ background: 'linear-gradient(180deg, rgba(212,168,83,0.03) 0%, rgba(255,255,255,0.01) 100%)' }}
+    >
+      {/* Badge strip + versatility pill */}
+      <div className="flex items-center gap-2 flex-wrap mb-3">
+        {badges.map(code => {
+          const [attrCode, tier] = code.split('_');
+          const rating = ratings[attrCode];
+          const tc = TIER_COLOR[tier];
+          if (!tc || rating == null) return null;
           return (
-            <motion.div
-              key={p.id}
-              initial={{ opacity: 0, x: -8 }}
-              animate={{ opacity: drafted ? 0.35 : 1, x: 0 }}
-              transition={{ type: 'spring', stiffness: 240, damping: 28 }}
-              className="flex items-center gap-3 px-4 py-2 border-b border-white/[0.03] hover:bg-white/[0.04] transition-colors"
-              style={{ boxShadow: drafted ? 'none' : TIER_GLOW[tier] }}
+            <span
+              key={code}
+              title={`${ATTR_LABEL[attrCode] ?? attrCode} · ${rating}`}
+              className="px-1.5 py-0.5 rounded uppercase"
+              style={{
+                fontFamily: 'Geist Mono, monospace',
+                fontSize: '9px',
+                letterSpacing: '0.08em',
+                background: tc.bg,
+                color: tc.fg,
+                border: `1px solid ${tc.border}`,
+              }}
             >
-              <span
-                className="w-9 text-right text-[#D4A853] tabular-nums"
-                style={{ fontFamily: 'Bebas Neue, sans-serif', fontSize: '20px' }}
-              >
-                {p.overall_rank ?? '—'}
-              </span>
-              <div className="flex-1 min-w-0">
-                <div className="text-[13px] text-white truncate">
-                  {drafted && <span className="text-emerald-400 mr-1">✓</span>}
-                  {p.name}
-                </div>
-                <div className="text-[10px] text-white/40 uppercase tracking-wider truncate" style={{ fontFamily: 'Geist Mono, monospace' }}>
-                  {p.position} · {p.school}
-                </div>
-              </div>
-              <span
-                className="px-1.5 py-0.5 rounded text-[10px] uppercase tracking-wider"
-                style={{
-                  background: 'rgba(212,168,83,0.12)',
-                  color: '#D4A853',
-                  fontFamily: 'Geist Mono, monospace',
-                  border: '1px solid rgba(212,168,83,0.2)',
-                }}
-              >
-                {TIER_LABEL[tier] ?? tier}
-              </span>
-            </motion.div>
+              {attrCode} {rating}
+            </span>
           );
         })}
+        {versatility && (
+          <span
+            className="px-1.5 py-0.5 rounded uppercase ml-auto"
+            style={{
+              fontFamily: 'Geist Mono, monospace',
+              fontSize: '9px',
+              letterSpacing: '0.12em',
+              background: 'rgba(147,197,253,0.10)',
+              color: '#93C5FD',
+              border: '1px solid rgba(147,197,253,0.40)',
+            }}
+            title={versatility.label}
+          >
+            +{versatility.bonus} {player.versatility_flex?.replace('_', '-')}
+          </span>
+        )}
+      </div>
+
+      {/* Three-pillar grid */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+        <PillarColumn label="Performance" accent="#FF6B00" items={perf} ratings={ratings} />
+        <PillarColumn label="Attributes"   accent="#D4A853" items={attr} ratings={ratings} />
+        <PillarColumn label="Intangibles"  accent="#93C5FD" items={intg} ratings={ratings} />
+      </div>
+    </div>
+  );
+}
+
+function PillarColumn({ label, accent, items }: { label: string; accent: string; items: Array<[string, number]>; ratings: Record<string, number> }): React.JSX.Element {
+  return (
+    <div>
+      <div
+        className="text-[10px] uppercase mb-1.5"
+        style={{ fontFamily: 'Geist Mono, monospace', letterSpacing: '0.18em', color: accent }}
+      >
+        {label}
+      </div>
+      <div className="space-y-1">
+        {items.map(([code, rating]) => {
+          const t = badgeTier(rating);
+          const tc = t ? TIER_COLOR[t] : null;
+          const textColor = tc ? tc.fg : 'rgba(255,255,255,0.65)';
+          return (
+            <div key={code} className="flex items-center gap-2 text-[11px]">
+              <span className="text-white/50 w-6 shrink-0" style={{ fontFamily: 'Geist Mono, monospace' }}>{code}</span>
+              <span className="flex-1 truncate text-white/80">{ATTR_LABEL[code] ?? code}</span>
+              <div className="w-16 h-1 rounded-full bg-white/5 overflow-hidden shrink-0">
+                <div
+                  className="h-full rounded-full"
+                  style={{ width: `${rating}%`, background: accent, opacity: 0.65 + (rating / 99) * 0.35 }}
+                />
+              </div>
+              <span className="tabular-nums shrink-0 w-7 text-right" style={{ fontFamily: 'Geist Mono, monospace', color: textColor }}>
+                {rating}
+              </span>
+            </div>
+          );
+        })}
+        {items.length === 0 && <span className="text-[10px] text-white/30 italic">no ratings</span>}
       </div>
     </div>
   );
