@@ -36,6 +36,7 @@ const PUBLIC_PREFIXES = [
   '/tie/',
   '/draft/',
   '/players/',
+  '/legal/',            // ToS + Privacy — must be reachable pre-auth (MIM §45)
   '/rankings/',
   '/analysts/',
   '/studio/',
