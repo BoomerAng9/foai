@@ -86,8 +86,13 @@ interface EspnStatsResponse {
   athletes?: RawAthlete[];
 }
 
+// seasontype=2 pins ESPN's byathlete endpoint to REGULAR-SEASON averages
+// (82-game sample per player). Without it the endpoint defaults to the
+// current period — during playoffs that returns single-game playoff lines
+// (GP=1, Cade at 39 PPG, Wemby at 35) which are unrepresentative of award
+// voting. Season awards are voted on regular-season body of work.
 const ESPN_STATS_URL =
-  'https://site.web.api.espn.com/apis/common/v3/sports/basketball/nba/statistics/byathlete';
+  'https://site.web.api.espn.com/apis/common/v3/sports/basketball/nba/statistics/byathlete?seasontype=2';
 
 // ── Parsing helpers ───────────────────────────────────────────────────────
 
@@ -148,7 +153,7 @@ export function fromAthlete(a: RawAthlete): Player {
 // ── ESPN fetchers ─────────────────────────────────────────────────────────
 
 async function fetchSorted(sort: string, limit: number): Promise<Player[]> {
-  const url = `${ESPN_STATS_URL}?limit=${limit}&sort=${encodeURIComponent(sort)}`;
+  const url = `${ESPN_STATS_URL}&limit=${limit}&sort=${encodeURIComponent(sort)}`;
   const res = await fetch(url, { next: { revalidate: 60 } });
   if (!res.ok) return [];
   const data = (await res.json()) as EspnStatsResponse;
