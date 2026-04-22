@@ -7,3 +7,9 @@ out/
 src/lib/draft/beast-measurements.json
 src/lib/draft/regraded-prospects.json
 public/generated/
+
+# Playwright E2E + Lighthouse CI outputs (Gate 2 γ)
+playwright-report/
+test-results/
+lighthouse-report/
+.lighthouseci/
