@@ -382,7 +382,7 @@ function HeroMoment({ moment, now, tint }: { moment: ScoredMoment; now: Date; ti
             `${SPORT_LABEL[moment.sport]} — wrapped ${Math.abs(moment.daysAway)}d ago`}
         </motion.div>
 
-        <motion.h1 variants={heroItem}
+        <motion.h1 initial={false}
           className="font-outfit text-4xl md:text-6xl lg:text-7xl font-extrabold tracking-tight leading-[0.95] mb-6"
           style={{ color: 'var(--pf-text)' }}>
           {live || moment.state === 'live' ? <>Right now: <span style={{ color: tint.accent }}>{moment.name}</span></> :
