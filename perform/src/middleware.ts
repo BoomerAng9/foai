@@ -28,6 +28,7 @@ const PUBLIC_PATHS = [
   '/login',
   '/signup',
   '/forgot',
+  '/help',
   '/teams',
   '/podcasters',
   '/franchise',
