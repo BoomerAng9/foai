@@ -40,6 +40,12 @@
     "vega-lite": "^6.4.2",
     "zustand": "^5.0.12"
   },
+  "overrides": {
+    "protobufjs": "^7.5.5",
+    "fast-xml-parser": "^5.7.1",
+    "gaxios": "^7.1.4",
+    "uuid": "^14.0.0"
+  },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
     "@lhci/cli": "^0.14.0",
