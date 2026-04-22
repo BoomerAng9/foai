@@ -1,0 +1,64 @@
+name: Per|Form Healthcheck
+
+# Gate 5 · Item 31 — alert firing within 5 minutes of outage.
+#
+# Runs /api/health every 5 minutes. On non-200 or degraded status, fails
+# the workflow AND posts to Slack if SLACK_WEBHOOK_URL is configured in
+# repo secrets. GitHub's default "send email on first failed workflow"
+# notifies repo admins even without the Slack webhook.
+#
+# Shortest recovery loop:
+#   container crashes → next 5-min poll fails → Slack ping + GitHub email
+#   → operator runs docs/ROLLBACK.md Path A → verify /api/health → done.
+
+on:
+  schedule:
+    - cron: '*/5 * * * *'
+  workflow_dispatch: {}
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Probe /api/health
+        id: probe
+        run: |
+          set +e
+          RESPONSE=$(curl -sS -o /tmp/health.json -w '%{http_code}|%{time_total}' \
+            --max-time 30 \
+            https://perform.foai.cloud/api/health)
+          HTTP_CODE=$(echo "$RESPONSE" | cut -d'|' -f1)
+          LATENCY=$(echo "$RESPONSE" | cut -d'|' -f2)
+          BODY=$(cat /tmp/health.json 2>/dev/null || echo '{}')
+          STATUS=$(echo "$BODY" | jq -r '.status // "unknown"' 2>/dev/null || echo 'parse_error')
+
+          echo "http_code=$HTTP_CODE" >> "$GITHUB_OUTPUT"
+          echo "status=$STATUS" >> "$GITHUB_OUTPUT"
+          echo "latency=$LATENCY" >> "$GITHUB_OUTPUT"
+          echo "body<<EOF" >> "$GITHUB_OUTPUT"
+          echo "$BODY" >> "$GITHUB_OUTPUT"
+          echo "EOF" >> "$GITHUB_OUTPUT"
+
+          if [ "$HTTP_CODE" != "200" ] || [ "$STATUS" != "ok" ]; then
+            echo "::error::Healthcheck failed — HTTP $HTTP_CODE status=$STATUS latency=${LATENCY}s"
+            exit 1
+          fi
+          echo "Healthcheck OK — HTTP $HTTP_CODE status=$STATUS latency=${LATENCY}s"
+
+      - name: Notify Slack on failure
+        if: failure() && env.SLACK_WEBHOOK_URL != ''
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          HTTP_CODE: ${{ steps.probe.outputs.http_code }}
+          STATUS: ${{ steps.probe.outputs.status }}
+          LATENCY: ${{ steps.probe.outputs.latency }}
+          BODY: ${{ steps.probe.outputs.body }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          cat > /tmp/slack.json <<EOF
+          {
+            "text": ":rotating_light: *Per|Form healthcheck FAILED*\nHTTP: \`${HTTP_CODE}\`  status: \`${STATUS}\`  latency: \`${LATENCY}s\`\nRun: ${RUN_URL}\n\`\`\`${BODY}\`\`\`\nRecovery: \`docs/ROLLBACK.md\`"
+          }
+          EOF
+          curl -sS -X POST -H 'Content-Type: application/json' --data @/tmp/slack.json "$SLACK_WEBHOOK_URL" || true
