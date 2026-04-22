@@ -117,12 +117,21 @@ export default function HomePage() {
   // Respect ?redirect=/some/path from auth or share links — forward the
   // browser immediately so /?redirect=%2Fbasketball%2Fnba doesn't land
   // users on the NFL Draft hero when they asked for NBA.
+  //
+  // Open-redirect defense (Gate 6 Item 35 — Semgrep js-open-redirect):
+  //   1. must be a non-empty string
+  //   2. must start with exactly one '/' (rejects '//evil.com',
+  //      'http://evil.com', 'javascript:void(0)')
+  //   3. must not contain '://' anywhere (defense-in-depth against
+  //      '/foo:/bar://evil.com' style smuggling)
+  //   4. must not contain a backslash (Windows-style path injection)
   useEffect(() => {
     if (typeof window === 'undefined') return;
-    const target = new URL(window.location.href).searchParams.get('redirect');
-    if (!target) return;
-    if (!target.startsWith('/') || target.startsWith('//')) return; // only same-origin paths
-    window.location.replace(target);
+    const raw = new URL(window.location.href).searchParams.get('redirect');
+    if (!raw || typeof raw !== 'string') return;
+    if (!raw.startsWith('/') || raw.startsWith('//')) return;
+    if (raw.includes('://') || raw.includes('\\')) return;
+    window.location.replace(raw);
   }, []);
 
   const now = useTicker();
