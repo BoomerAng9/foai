@@ -64,6 +64,7 @@ const PUBLIC_PREFIXES = [
   '/huddle/',
   '/podcasters/',
   '/api/health',
+  '/api/pricing',
   '/api/podcasters/upgrade-plan',
   '/api/webhooks/',
   '/api/draft/tokens/webhook',

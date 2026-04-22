@@ -62,12 +62,17 @@ export const TOKEN_PACKAGES: Record<string, TokenPackage> = {
 // DB-backed token store (replaces the volatile Map from v1)
 // ---------------------------------------------------------------------------
 
+import type { Tier } from '@/lib/billing/tiers';
+
 export interface TokenRecord {
   user_id: string;
   balance: number;
   total_purchased: number;
   is_unlimited: boolean;
   unlimited_until: string | null;
+  tier: Tier;
+  subscription_status: 'none' | 'active' | 'cancel_scheduled' | 'cancelled';
+  stripe_subscription_id: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -86,35 +91,44 @@ type Row = {
   total_purchased: number;
   is_unlimited: boolean;
   unlimited_until: string | null;
+  tier: Tier;
+  subscription_status: TokenRecord['subscription_status'];
+  stripe_subscription_id: string | null;
   created_at: string;
   updated_at: string;
 };
 
+const ROW_COLUMNS = 'user_id, balance, total_purchased, is_unlimited, unlimited_until, tier, subscription_status, stripe_subscription_id, created_at, updated_at';
+
 async function ensureRecord(userId: string): Promise<TokenRecord> {
   const db = requireSql();
-  // INSERT-or-NOOP, then SELECT — keeps the "3 free tokens on first use"
-  // semantics atomic even under concurrent requests for the same user.
   await db`
-    INSERT INTO draft_tokens (user_id, balance, total_purchased, is_unlimited)
-    VALUES (${userId}, ${STARTER_BALANCE}, 0, FALSE)
+    INSERT INTO draft_tokens (user_id, balance, total_purchased, is_unlimited, tier, subscription_status)
+    VALUES (${userId}, ${STARTER_BALANCE}, 0, FALSE, 'free', 'none')
     ON CONFLICT (user_id) DO NOTHING
   `;
   const rows = await db<Row[]>`
-    SELECT user_id, balance, total_purchased, is_unlimited, unlimited_until, created_at, updated_at
+    SELECT ${db.unsafe(ROW_COLUMNS)}
     FROM draft_tokens WHERE user_id = ${userId} LIMIT 1
   `;
   const r = rows[0];
   if (!r) throw new Error('record_missing_after_upsert');
 
-  // Late-expire unlimited subscriptions lazily on read — avoids a cron job
-  // just to flip the flag. If unlimited_until is in the past, demote to
-  // paid balance (if any) and clear the flag before returning the record.
+  // Lazy expiry: if the unlimited window has elapsed, demote the account
+  // in-place. Status transitions in one shot:
+  //   'cancel_scheduled' → 'cancelled'  (user opted out; now fully off)
+  //   'active'           → 'cancelled'  (renewal failed; Stripe will retry,
+  //                                       but until it does, no access)
   if (r.is_unlimited && r.unlimited_until && new Date(r.unlimited_until) < new Date()) {
     const demoted = await db<Row[]>`
       UPDATE draft_tokens
-      SET is_unlimited = FALSE, unlimited_until = NULL, updated_at = NOW()
+      SET is_unlimited = FALSE,
+          unlimited_until = NULL,
+          subscription_status = 'cancelled',
+          tier = CASE WHEN total_purchased > 0 THEN 'standard' ELSE 'free' END,
+          updated_at = NOW()
       WHERE user_id = ${userId}
-      RETURNING user_id, balance, total_purchased, is_unlimited, unlimited_until, created_at, updated_at
+      RETURNING ${db.unsafe(ROW_COLUMNS)}
     `;
     return normalize(demoted[0]);
   }
@@ -129,6 +143,9 @@ function normalize(r: Row): TokenRecord {
     total_purchased: Number(r.total_purchased),
     is_unlimited: !!r.is_unlimited,
     unlimited_until: r.unlimited_until,
+    tier: r.tier,
+    subscription_status: r.subscription_status,
+    stripe_subscription_id: r.stripe_subscription_id,
     created_at: r.created_at,
     updated_at: r.updated_at,
   };
@@ -149,7 +166,8 @@ export async function creditTokens(userId: string, packageId: string): Promise<T
   if (pkg.tokens === -1) {
     // Unlimited subscription — set flag + extend the window by 30 days from
     // now (or from the existing expiry if it's still in the future, so
-    // renewals stack cleanly).
+    // renewals stack cleanly). Also flips tier to premium and status to
+    // active — the fresh subscription erases a prior cancel_scheduled state.
     const rows = await db<Row[]>`
       UPDATE draft_tokens
       SET is_unlimited = TRUE,
@@ -157,21 +175,74 @@ export async function creditTokens(userId: string, packageId: string): Promise<T
             COALESCE(unlimited_until, NOW()),
             NOW()
           ) + INTERVAL '30 days',
+          tier = 'premium',
+          subscription_status = 'active',
           updated_at = NOW()
       WHERE user_id = ${userId}
-      RETURNING user_id, balance, total_purchased, is_unlimited, unlimited_until, created_at, updated_at
+      RETURNING ${db.unsafe(ROW_COLUMNS)}
     `;
     return normalize(rows[0]);
   }
 
+  // Bundle purchase — credit tokens, bump tier to standard if still free.
   const rows = await db<Row[]>`
     UPDATE draft_tokens
     SET balance = balance + ${pkg.tokens},
         total_purchased = total_purchased + ${pkg.tokens},
+        tier = CASE WHEN tier = 'free' THEN 'standard' ELSE tier END,
         updated_at = NOW()
     WHERE user_id = ${userId}
-    RETURNING user_id, balance, total_purchased, is_unlimited, unlimited_until, created_at, updated_at
+    RETURNING ${db.unsafe(ROW_COLUMNS)}
   `;
+  return normalize(rows[0]);
+}
+
+/**
+ * Lifecycle: cancel an active unlimited subscription (SHIP-CHECKLIST Gate 4 · Item 22).
+ * Per Code_Ang gate rule "downgrade → feature lockout at period end, NOT
+ * immediately": we flip subscription_status to 'cancel_scheduled' and leave
+ * unlimited_until in place. The lazy expiry in ensureRecord() demotes the
+ * account when that date passes.
+ */
+export async function cancelSubscription(userId: string): Promise<TokenRecord> {
+  const db = requireSql();
+  await ensureRecord(userId);
+  const rows = await db<Row[]>`
+    UPDATE draft_tokens
+    SET subscription_status = 'cancel_scheduled',
+        updated_at = NOW()
+    WHERE user_id = ${userId}
+      AND is_unlimited = TRUE
+      AND subscription_status != 'cancelled'
+    RETURNING ${db.unsafe(ROW_COLUMNS)}
+  `;
+  if (rows.length === 0) {
+    // User has no active subscription — idempotent no-op, return current state.
+    return ensureRecord(userId);
+  }
+  return normalize(rows[0]);
+}
+
+/**
+ * Lifecycle: resume a cancelled-but-not-yet-expired subscription.
+ * Flips status back to 'active' as long as the grace window hasn't elapsed.
+ */
+export async function resumeSubscription(userId: string): Promise<TokenRecord> {
+  const db = requireSql();
+  await ensureRecord(userId);
+  const rows = await db<Row[]>`
+    UPDATE draft_tokens
+    SET subscription_status = 'active',
+        updated_at = NOW()
+    WHERE user_id = ${userId}
+      AND is_unlimited = TRUE
+      AND subscription_status = 'cancel_scheduled'
+      AND unlimited_until > NOW()
+    RETURNING ${db.unsafe(ROW_COLUMNS)}
+  `;
+  if (rows.length === 0) {
+    return ensureRecord(userId);
+  }
   return normalize(rows[0]);
 }
 
@@ -190,7 +261,7 @@ export async function deductToken(
     UPDATE draft_tokens
     SET balance = balance - 1, updated_at = NOW()
     WHERE user_id = ${userId} AND is_unlimited = FALSE AND balance > 0
-    RETURNING user_id, balance, total_purchased, is_unlimited, unlimited_until, created_at, updated_at
+    RETURNING ${db.unsafe(ROW_COLUMNS)}
   `;
   if (rows.length === 0) {
     return { success: false, record: await ensureRecord(userId) };
@@ -257,9 +328,30 @@ async function getStripe() {
 export async function createTokenCheckout(
   packageId: string,
   userId: string,
-): Promise<{ url: string | null; error?: string }> {
+): Promise<{ url: string | null; error?: string; via?: 'stepper' | 'stripe' }> {
   const pkg = TOKEN_PACKAGES[packageId];
   if (!pkg) return { url: null, error: `Unknown package: ${packageId}` };
+
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+
+  // Stepper-first routing per canonical billing spine ("Stripe→Stepper→
+  // Taskade→plug APIs, Stripe NEVER called directly"). Fall back to direct
+  // Stripe only when Stepper isn't configured yet — lets the migration land
+  // gradually without breaking checkout during the Taskade workflow buildout.
+  const { stepperBillingConfigured, createCheckoutViaStepper } = await import('@/lib/billing/stepper-billing');
+  if (stepperBillingConfigured()) {
+    const stepperRes = await createCheckoutViaStepper({
+      userId,
+      packageId,
+      pkg,
+      returnUrl: `${baseUrl}/draft?purchase=success&package=${packageId}`,
+    });
+    if (stepperRes.url) return { url: stepperRes.url, via: 'stepper' };
+    // If Stepper is configured but errored, prefer visible failure over silent
+    // fallback — the owner wants traffic on Stepper and a silent fall-through
+    // would hide that the Taskade workflow is broken.
+    return { url: null, error: stepperRes.error || 'stepper_failed', via: 'stepper' };
+  }
 
   const stripe = await getStripe();
   if (!stripe) {
@@ -268,8 +360,6 @@ export async function createTokenCheckout(
       error: 'Stripe is not configured. Set STRIPE_SECRET_KEY in env.',
     };
   }
-
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
 
   try {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -308,9 +398,9 @@ export async function createTokenCheckout(
       `;
     }
 
-    return { url: session.url };
+    return { url: session.url, via: 'stripe' };
   } catch (err) {
     const msg = err instanceof Error ? err.message : 'Stripe checkout creation failed';
-    return { url: null, error: msg };
+    return { url: null, error: msg, via: 'stripe' };
   }
 }
