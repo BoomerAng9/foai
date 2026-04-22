@@ -84,6 +84,46 @@ export async function POST(req: NextRequest) {
         break;
       }
 
+      case 'billing.credited': {
+        // Stepper forwards Stripe checkout.session.completed through its
+        // Taskade workflow; we credit the user here. Idempotent via
+        // stripe_checkout_sessions audit table (PR ζ).
+        const sessionId = payload.session_id as string;
+        const userId = payload.user_id as string;
+        const packageId = payload.package_id as string;
+        if (!sessionId || !userId || !packageId) {
+          throw new Error('billing.credited requires session_id, user_id, package_id');
+        }
+        const { creditFromStripeSession } = await import('@/lib/stripe/tokens');
+        const { credited, record } = await creditFromStripeSession({ sessionId, userId, packageId });
+        result = {
+          credited,
+          session_id: sessionId,
+          user_id: userId,
+          package_id: packageId,
+          balance: record.balance,
+          tier: record.tier,
+          is_unlimited: record.is_unlimited,
+        };
+        break;
+      }
+
+      case 'billing.cancelled': {
+        // Stepper forwards Stripe customer.subscription.deleted events.
+        // Flip the user's subscription_status to cancel_scheduled; lazy
+        // expiry in ensureRecord() will demote at unlimited_until.
+        const userId = payload.user_id as string;
+        if (!userId) throw new Error('billing.cancelled requires user_id');
+        const { cancelSubscription } = await import('@/lib/stripe/tokens');
+        const record = await cancelSubscription(userId);
+        result = {
+          user_id: userId,
+          subscription_status: record.subscription_status,
+          unlimited_until: record.unlimited_until,
+        };
+        break;
+      }
+
       case 'content': {
         // Request content generation
         result = { status: 'acknowledged', action: 'content', note: 'Content request received' };
