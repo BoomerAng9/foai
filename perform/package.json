@@ -9,7 +9,10 @@
     "lint": "next lint",
     "setup": "npm install --prefix ../aims-tools/aims-pricing-matrix && npm install --prefix ../aims-tools/aims-pmo && npm install --prefix ../aims-tools/tie-matrix && npm install --prefix ../aims-tools/spinner && npm install",
     "db:migrate": "tsx scripts/apply-all-migrations.ts",
-    "db:migrate:one": "tsx scripts/apply-migration.ts"
+    "db:migrate:one": "tsx scripts/apply-migration.ts",
+    "test:e2e": "playwright test",
+    "test:e2e:install": "playwright install chromium",
+    "test:lh": "lhci autorun --config=./lighthouserc.json"
   },
   "engines": {
     "node": "^20.0.0 || ^22.0.0",
@@ -39,6 +42,8 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
+    "@lhci/cli": "^0.14.0",
+    "@playwright/test": "^1.59.1",
     "@types/node": "^22.0.0",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
