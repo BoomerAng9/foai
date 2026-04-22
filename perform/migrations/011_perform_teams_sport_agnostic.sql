@@ -87,7 +87,11 @@ CREATE INDEX IF NOT EXISTS perform_team_rosters_player_link_idx
   ON perform_team_rosters (perform_player_id);
 
 -- ── Convenience view: roster count per team (drives side panel team-card UI) ──
-CREATE OR REPLACE VIEW perform_teams_with_roster_counts AS
+-- DROP + CREATE rather than CREATE OR REPLACE so this migration stays idempotent
+-- after sibling migrations (e.g. 012 adds perform_teams.slug) shift the column
+-- order of t.*. Postgres forbids column renames in CREATE OR REPLACE VIEW.
+DROP VIEW IF EXISTS perform_teams_with_roster_counts CASCADE;
+CREATE VIEW perform_teams_with_roster_counts AS
   SELECT
     t.*,
     COALESCE(r.roster_count, 0) AS roster_count
