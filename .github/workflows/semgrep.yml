@@ -1,0 +1,46 @@
+name: Semgrep Security Scan
+
+# Gate 6 · Item 35 — input-handling static analysis on every push + PR.
+# Blocks merge on any ERROR severity; surfaces WARNING for review.
+#
+# Baseline established 2026-04-22 in PR ξ: 1 WARNING on src/app/page.tsx:125
+# (js-open-redirect). Fixed in same PR with tighter guard. Subsequent
+# regressions get caught here.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'perform/src/**'
+      - 'perform/scripts/**'
+      - '.github/workflows/semgrep.yml'
+  pull_request:
+    paths:
+      - 'perform/src/**'
+      - 'perform/scripts/**'
+      - '.github/workflows/semgrep.yml'
+  schedule:
+    - cron: '0 14 * * 1'   # weekly Monday at 14:00 UTC — catches rule updates
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    container:
+      image: returntocorp/semgrep:latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run Semgrep
+        run: |
+          semgrep \
+            --config=p/typescript \
+            --config=p/nextjs \
+            --config=p/owasp-top-ten \
+            --config=p/javascript \
+            --severity=ERROR \
+            --severity=WARNING \
+            --error \
+            --timeout=300 \
+            --metrics=off \
+            perform/src perform/scripts
