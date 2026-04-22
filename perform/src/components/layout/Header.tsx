@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { Menu, X, ChevronLeft, Home } from 'lucide-react';
@@ -39,8 +40,14 @@ export function Header() {
           </div>
         )}
         <Link href="/" className="flex items-center gap-3">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/brand/perform-logo-dark.png" alt="Per|Form" className="w-7 h-7 object-contain" />
+          <Image
+            src="/brand/perform-logo-dark.png"
+            alt="Per|Form"
+            width={28}
+            height={28}
+            priority
+            className="w-7 h-7 object-contain"
+          />
           <span className="font-outfit text-lg font-extrabold tracking-[0.15em]" style={{ color: '#D4A853' }}>
             PER<span style={{ color: '#C0C0C0', opacity: 0.6 }}>|</span>FORM
           </span>
