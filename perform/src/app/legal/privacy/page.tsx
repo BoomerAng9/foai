@@ -21,7 +21,25 @@ export default function PrivacyPage(): React.JSX.Element {
           <h1 style={{ fontFamily: 'Bebas Neue, sans-serif', fontSize: '48px', letterSpacing: '0.04em' }} className="text-[#D4A853]">
             Privacy Policy
           </h1>
-          <p className="text-xs text-white/40 mt-1 font-mono">Last updated: 2026-04-21 · Template pending counsel review before public GA.</p>
+          <p className="text-xs text-white/40 mt-1 font-mono">Last updated: 2026-04-22</p>
+        </div>
+
+        {/* Legal-review disclosure banner (Gate 8 · Item 46) */}
+        <div
+          className="rounded-lg px-4 py-3 text-xs font-mono"
+          style={{
+            background: 'rgba(212,168,83,0.08)',
+            border: '1px solid rgba(212,168,83,0.25)',
+            color: 'rgba(255,255,255,0.75)',
+          }}
+          role="note"
+        >
+          <strong style={{ color: '#D4A853' }}>REVIEW STATUS:</strong>{' '}
+          Template reviewed by product owner. <u>Not yet reviewed by outside counsel.</u>{' '}
+          Questions about how we handle your data:{' '}
+          <a href="mailto:bpo@achievemor.io?subject=Per%7CForm%20Privacy%20question" className="underline" style={{ color: '#D4A853' }}>
+            bpo@achievemor.io
+          </a>.
         </div>
 
         <Section title="1. What we collect">
