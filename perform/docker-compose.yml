@@ -21,3 +21,35 @@ services:
       - "traefik.http.routers.perform.entrypoints=websecure"
       - "traefik.http.routers.perform.tls.certresolver=letsencrypt"
       - "traefik.http.services.perform.loadbalancer.server.port=3000"
+
+  # ── Staging (SHIP-CHECKLIST Gate 5 · Item 30) ─────────────────────────
+  # Dormant until docs/STAGING-PROVISIONING.md is run — specifically:
+  #   1. Create Neon branch `performdb-staging` and populate .env.staging
+  #   2. Add DNS A-record perform-staging.foai.cloud → 31.97.133.29
+  #   3. Start via `docker compose --profile staging up -d --build perform-staging`
+  # Traefik auto-issues a Let's Encrypt cert on first request to the host.
+  # Lives behind the `staging` profile so `docker compose up -d perform`
+  # never accidentally boots it when the staging env isn't ready.
+  perform-staging:
+    profiles: [staging]
+    build:
+      context: ..
+      dockerfile: perform/Dockerfile.cloudrun
+    restart: unless-stopped
+    env_file: .env.staging
+    environment:
+      - NODE_ENV=staging
+      - NEXT_PUBLIC_PERFORM_ENV=staging
+    volumes:
+      # Separate data volume so generated artifacts don't bleed across envs
+      - /opt/foai-data/perform-staging/generated:/app/public/generated
+      - /opt/foai-data/perform-staging/secrets:/app/secrets:ro
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.perform-staging.rule=Host(`perform-staging.foai.cloud`)"
+      - "traefik.http.routers.perform-staging.entrypoints=websecure"
+      - "traefik.http.routers.perform-staging.tls.certresolver=letsencrypt"
+      - "traefik.http.services.perform-staging.loadbalancer.server.port=3000"
+      # Gate 5 Item 30: prod and staging MUST NOT share router names; the
+      # dedicated `perform-staging` service + `-staging` router suffix is
+      # what keeps them independently addressable by Traefik.
