@@ -29,7 +29,26 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import { calculateTIE } from '@/lib/tie/engine';
 import { requireDb, sql } from '@/lib/db';
+import { getAdminAuth } from '@/lib/firebase/admin';
 import type { PerformanceInput, AttributesInput, IntangiblesInput } from '@/lib/tie/types';
+
+const AUTH_COOKIE = 'firebase-auth-token';
+
+/**
+ * Best-effort Firebase UID extraction — the POST route is public (anon
+ * submissions are allowed for draft-week onboarding) but if the caller
+ * IS signed in we capture their uid for ownership on subsequent retrieval.
+ */
+async function maybeUid(req: NextRequest): Promise<string | null> {
+  const token = req.cookies.get(AUTH_COOKIE)?.value;
+  if (!token) return null;
+  try {
+    const decoded = await getAdminAuth().verifyIdToken(token);
+    return decoded.uid ?? null;
+  } catch {
+    return null;
+  }
+}
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -252,10 +271,13 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
   // Match to existing prospect if present
   const existingId = await matchExistingPlayer(body.player.name, body.player.school, body.player.classYear);
 
+  // Best-effort Firebase UID capture for ownership on GET retrieval.
+  const submitterUid = await maybeUid(req);
+
   // Persist submission
   const inserted = await sql!<Array<{ id: string }>>`
     INSERT INTO perform_submissions (
-      submitter_email, submitter_role, submitter_org,
+      submitter_email, submitter_role, submitter_org, submitter_uid,
       player_name, player_school, player_position, player_class_year,
       player_height_inches, player_weight_lbs, player_dob,
       perform_player_id,
@@ -266,7 +288,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       consent_nil_disclosure, consent_public_visibility, consent_transfer_portal,
       status
     ) VALUES (
-      ${body.submitter.email}, ${body.submitter.role}, ${body.submitter.org ?? null},
+      ${body.submitter.email}, ${body.submitter.role}, ${body.submitter.org ?? null}, ${submitterUid},
       ${body.player.name}, ${body.player.school ?? null}, ${body.player.position}, ${body.player.classYear},
       ${body.player.heightInches ?? null}, ${body.player.weightLbs ?? null}, ${body.player.dob ?? null},
       ${existingId},
