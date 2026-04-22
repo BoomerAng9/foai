@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
+import { UnverifiedBanner } from '@/components/auth/UnverifiedBanner';
 import {
   scrollReveal,
   staggerContainer,
@@ -160,6 +161,7 @@ export default function DashboardPage() {
   return (
     <div className="min-h-screen flex flex-col" style={{ background: 'var(--pf-bg)' }}>
       <Header />
+      <UnverifiedBanner />
 
       <main className="flex-1 px-6 py-20 max-w-7xl mx-auto w-full">
         {/* Hero Header */}
