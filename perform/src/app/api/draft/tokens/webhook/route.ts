@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { creditTokens } from '@/lib/stripe/tokens';
+import { creditFromStripeSession } from '@/lib/stripe/tokens';
 
 /**
  * Stripe Webhook Handler
@@ -53,20 +53,32 @@ export async function POST(req: NextRequest) {
   return handleEvent(event);
 }
 
-function handleEvent(event: Record<string, unknown>): NextResponse {
+async function handleEvent(event: Record<string, unknown>): Promise<NextResponse> {
   const type = event.type as string;
 
   if (type === 'checkout.session.completed') {
-    const session = event.data as Record<string, unknown>;
-    const obj = (session.object || session) as Record<string, unknown>;
-    const metadata = (obj.metadata || {}) as Record<string, string>;
+    const data = (event.data as Record<string, unknown>) || {};
+    const obj = (data.object as Record<string, unknown>) || (data as Record<string, unknown>);
+    const metadata = (obj.metadata as Record<string, string>) || {};
+    const sessionId = (obj.id as string) || '';
 
-    const userId = metadata.user_id || 'anonymous';
+    const userId = metadata.user_id;
     const packageId = metadata.package_id;
 
-    if (packageId) {
-      const record = creditTokens(userId, packageId);
-      console.log(`[webhook] Credited ${packageId} to ${userId}. Balance: ${record.balance}`);
+    if (!sessionId || !userId || !packageId) {
+      console.warn('[webhook] checkout.session.completed missing required fields', { sessionId, userId, packageId });
+      return NextResponse.json({ received: true, skipped: true });
+    }
+
+    try {
+      const { credited, record } = await creditFromStripeSession({ sessionId, userId, packageId });
+      console.log(`[webhook] session=${sessionId} user=${userId} pkg=${packageId} credited=${credited} balance=${record.balance} unlimited=${record.is_unlimited}`);
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      console.error(`[webhook] credit failed session=${sessionId}: ${msg}`);
+      // Return 500 so Stripe retries the webhook — we'd rather handle a
+      // duplicate (idempotent) than miss a credit on a transient DB blip.
+      return NextResponse.json({ error: 'credit_failed' }, { status: 500 });
     }
   }
 
