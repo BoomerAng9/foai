@@ -26,6 +26,8 @@ const PUBLIC_PATHS = [
   '/huddle',
   '/grading',
   '/login',
+  '/signup',
+  '/forgot',
   '/teams',
   '/podcasters',
   '/franchise',

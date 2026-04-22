@@ -2,6 +2,7 @@
 
 import { useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import Link from 'next/link';
 import type { Auth } from 'firebase/auth';
 
 async function getFirebaseAuth(): Promise<{ auth: Auth; signInWithPopup: typeof import('firebase/auth').signInWithPopup; GoogleAuthProvider: typeof import('firebase/auth').GoogleAuthProvider; signInWithEmailAndPassword: typeof import('firebase/auth').signInWithEmailAndPassword }> {
@@ -233,6 +234,16 @@ function LoginForm() {
           >
             {loading ? 'SIGNING IN...' : 'SIGN IN'}
           </button>
+
+          <div className="flex items-center justify-between pt-2 text-[11px] font-mono">
+            <Link href="/forgot" className="underline" style={{ color: COLORS.textMuted }}>
+              Forgot password?
+            </Link>
+            <Link href={`/signup${rawRedirect ? `?redirect=${encodeURIComponent(rawRedirect)}` : ''}`}
+              className="underline" style={{ color: COLORS.gold }}>
+              Create account
+            </Link>
+          </div>
         </form>
       </div>
     </div>

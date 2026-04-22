@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { Menu, X, ChevronLeft, Home } from 'lucide-react';
 import { ThemeToggle } from '@/components/ThemeToggle';
+import { AuthButton } from '@/components/auth/AuthButton';
 import { PRIMARY_NAV_ITEMS, isActiveNavRoute } from '@/lib/platform/config';
 
 export function Header() {
@@ -75,6 +76,8 @@ export function Header() {
         <ThemeToggle />
         <div className="w-2 h-2 rounded-full" style={{ background: '#22C55E' }} />
         <span className="text-[9px] font-mono text-white/30">LIVE</span>
+        <div className="w-px h-4 bg-white/10 mx-1" />
+        <AuthButton />
       </div>
 
       {/* Mobile dropdown */}
