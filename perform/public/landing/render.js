@@ -427,8 +427,98 @@
     if (btn) renderLeague(btn.dataset.league);
   });
 
+  // ── Real-data wiring ──────────────────────────────────────────────
+  // Swap the example board rows in LEAGUE_DATA with live /api/players
+  // data before first render. Each league maps to a `sport` param; when
+  // the API returns rows we overwrite LEAGUE_DATA[league].board +
+  // LEAGUE_DATA[league].tie so the visible big board + TIE output card
+  // reflect actual prospects, not the static examples shipped in
+  // league-data.js.
+  const LEAGUE_SPORT_PARAM = {
+    ncaa: 'football',     // college football prospects (same table, NCAA-framed)
+    nfl:  'football',     // 2026 NFL Draft prospects
+    nba:  'basketball',
+    mlb:  'baseball',
+    nhl:  'hockey',
+  };
+  const SCHOOL_ABBREV = {
+    'Texas':'TX','Alabama':'ALA','Georgia':'UGA','Ohio State':'OSU','Michigan':'MICH',
+    'LSU':'LSU','Clemson':'CU','Oregon':'ORE','Notre Dame':'ND','Penn State':'PSU',
+    'Miami':'MIA','Miami (FL)':'MIA','USC':'USC','Oklahoma':'OU','Tennessee':'TN',
+    'Auburn':'AUB','Florida':'UF','Florida State':'FSU','Texas A&M':'TAM',
+    'South Carolina':'SC','Washington':'UW','Utah':'UTA','TCU':'TCU',
+    'Kansas State':'KSU','Iowa':'IA','Wisconsin':'WIS','North Carolina':'UNC',
+    'UCLA':'UCLA','California':'CAL','Stanford':'STAN','Duke':'DUKE',
+    'Kentucky':'UK','Arkansas':'ARK','Ole Miss':'OM','Mississippi State':'MSU',
+  };
+  function schoolChip(school) {
+    if (!school) return '—';
+    if (SCHOOL_ABBREV[school]) return SCHOOL_ABBREV[school];
+    // fallback: take first letter of each word, cap at 3 chars
+    return school.split(/\s+/).map(w => w[0] || '').join('').slice(0,3).toUpperCase() || school.slice(0,3).toUpperCase();
+  }
+  function mapPlayerToBoardRow(p, idx) {
+    const raw = (p.grade ?? p.tie_grade ?? 0);
+    const grade = typeof raw === 'number' ? raw : parseFloat(raw) || 0;
+    const tierRaw = (p.tie_tier || '').toUpperCase();
+    // Display tier: keep PRIME / S / A+ / A / B+ as-is; collapse others to B
+    let tier = 'B';
+    if (tierRaw === 'PRIME') tier = 'PRIME';
+    else if (tierRaw === 'S' || grade >= 95) tier = 'S';
+    else if (tierRaw === 'A_PLUS' || tierRaw === 'A+' || grade >= 90) tier = 'A+';
+    else if (tierRaw === 'A' || grade >= 85) tier = 'A';
+    else if (tierRaw === 'B_PLUS' || tierRaw === 'B+' || grade >= 80) tier = 'B+';
+    return {
+      rk: p.overall_rank ?? (idx + 1),
+      name: p.name || '—',
+      pos: p.position || '—',
+      school: p.school || '—',
+      chip: schoolChip(p.school),
+      grade,
+      tier,
+    };
+  }
+  async function fetchRealBoards() {
+    const targets = Object.entries(LEAGUE_SPORT_PARAM).filter(([lg]) => window.LEAGUE_DATA[lg]);
+    await Promise.all(targets.map(async ([lg, sport]) => {
+      try {
+        const res = await fetch(`/api/players?limit=5&sort=overall_rank:asc&sport=${encodeURIComponent(sport)}`, { cache: 'no-store' });
+        if (!res.ok) return;
+        const data = await res.json();
+        const rows = Array.isArray(data.players) ? data.players : [];
+        if (rows.length === 0) return;
+        const mapped = rows.map(mapPlayerToBoardRow);
+        window.LEAGUE_DATA[lg].board = mapped;
+        // Also refresh the TIE output card with the #1 prospect for the league
+        const top = mapped[0];
+        if (top) {
+          const proj = top.tier === 'PRIME' ? 'Generational · Top 5' :
+                       top.tier === 'S' ? 'Top 10 Pick' :
+                       top.tier === 'A+' ? 'Round 1 Early' :
+                       top.tier === 'A' ? 'Round 1' : 'Round 2+';
+          window.LEAGUE_DATA[lg].tie = Object.assign({}, window.LEAGUE_DATA[lg].tie || {}, {
+            name: 'TIE OUTPUT · #1 ' + lg.toUpperCase(),
+            grade: top.grade,
+            tier: top.tier,
+            pos: `${top.pos} · ${top.school}`,
+            proj,
+            rank: `#${top.rk} Overall`,
+          });
+        }
+      } catch (_) {
+        // Fetch failure — leave static data as fallback
+      }
+    }));
+  }
+
   const saved = (() => { try { return localStorage.getItem(LS_KEY); } catch (_) { return null; } })();
   applyTweaks();
   wireTweaks();
+  // Render once immediately so the page isn't blank during the fetch,
+  // then re-render after live data arrives. Keeps first paint fast +
+  // swaps to real rosters ~300-800ms later.
   renderLeague(saved || 'ncaa');
+  fetchRealBoards().then(() => {
+    renderLeague(document.body.dataset.league || saved || 'ncaa');
+  });
 })();
