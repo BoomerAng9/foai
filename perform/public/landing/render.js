@@ -26,13 +26,33 @@
     return 'tier-c';
   }
 
+  // Map landing nav labels → real in-app routes so every tab doors into
+  // the live product surfaces (not dead hrefs). Unknown labels fall
+  // through to '#' for graceful degradation.
+  const NAV_ROUTE_MAP = {
+    'NFL DRAFT':         '/draft',
+    'COLLEGE FOOTBALL':  '/players?sport=football',
+    'RECRUITING':        '/players?sport=football',
+    'NIL':               '/tie/submit',
+    'TRANSFER PORTAL':   '/players?sport=football&trend=rising',
+    'RANKINGS & GRADES': '/rankings',
+    'TEAMS':             '/teams',
+    'SCHOOLS':           '/teams',
+    'CFB PLAYOFF':       '/rankings?sport=football',
+    'MEDIA':             '/analysts',
+    'ABOUT':             '/help',
+  };
+
   function renderNav(d) {
     const nav = $('main-nav'); nav.innerHTML = '';
     d.nav.forEach(label => {
-      const a = h('a', { href:'#', class: label === d.navActive ? 'active' : '' }, label);
+      const href = NAV_ROUTE_MAP[label] || '#';
+      const a = h('a', { href, class: label === d.navActive ? 'active' : '' }, label);
       nav.appendChild(a);
     });
     $('cta-primary').textContent = d.cta;
+    const ctaBtn = $('cta-primary');
+    if (ctaBtn) ctaBtn.onclick = () => { window.location.href = '/signup'; };
   }
 
   function renderHero(d, league) {
@@ -41,6 +61,13 @@
     hero.innerHTML = `${d.hero.h1[0]}<span class="line2">${d.hero.h1[1]}</span>`;
     $('hero-sub').textContent = d.hero.sub;
     $('hero-cta-1').textContent = d.hero.cta1;
+    const heroCta1 = $('hero-cta-1');
+    if (heroCta1) {
+      const heroTarget = league === 'nfl' ? '/draft' :
+                         league === 'ncaa' ? '/players?sport=football' :
+                         '/rankings';
+      heroCta1.onclick = () => { window.location.href = heroTarget; };
+    }
     $('countdown-h').textContent = d.hero.countdownH;
     const cnums = $('countdown-nums'); cnums.innerHTML = '';
     Object.entries(d.hero.countdown).forEach(([l, n]) => {
@@ -58,13 +85,27 @@
     $('event-where').textContent  = d.hero.event.where;
   }
 
+  const RAIL_ROUTE_MAP = {
+    'top risers':             '/players?sport=football&trend=rising',
+    'top risers (tie)':       '/players?sport=football&trend=rising',
+    'top fallers':            '/players?sport=football&trend=falling',
+    'team needs (top 5)':     '/draft',
+    'transfer portal impact': '/players?sport=football&trend=rising',
+    'top portal entries':     '/players?sport=football&trend=rising',
+    'nil market movers':      '/tie/submit',
+    'nil movers ($$)':        '/tie/submit',
+    'commits this week':      '/players?sport=football',
+    'roster cost (top 5)':    '/teams',
+  };
+
   function renderRail(d) {
     const rail = $('rail-5'); rail.innerHTML = '';
     d.rail.forEach(col => {
+      const viewAllHref = RAIL_ROUTE_MAP[(col.h || '').toLowerCase()] || '/rankings';
       const p = h('div', {class:'panel'}, [
         h('div', {class:'panel-head'}, [
           h('h3', {}, col.h.toUpperCase()),
-          h('a', {}, 'View All')
+          h('a', { href: viewAllHref }, 'View All')
         ]),
         h('div', {class:'panel-body'}, col.rows.map(r => {
           const [n, name, pos, meta] = r;
@@ -85,9 +126,9 @@
   function renderMain(d) {
     const m = $('main-grid'); m.innerHTML = '';
 
-    // Headlines
+    // Headlines — "View All →" routes to the news/analysts surface.
     const headlines = h('div', {class:'panel'}, [
-      h('div', {class:'panel-head'}, [h('h3',{},'LATEST HEADLINES'), h('a',{},'View All →')]),
+      h('div', {class:'panel-head'}, [h('h3',{},'LATEST HEADLINES'), h('a',{ href:'/analysts' },'View All →')]),
       h('div', {class:'panel-body'}, d.headlines.map(hd => h('div',{class:'headline'},[
         h('div',{class:'thumb'},'IMG'),
         h('div',{},[
@@ -99,23 +140,32 @@
     ]);
     m.appendChild(headlines);
 
-    // Board
+    // Board — "View Full Board →" deep-links to /draft/board; each
+    // player row click-throughs to their /draft/[name] detail page so
+    // cards + grades + scouting are one click away (answering the
+    // "no player cards / grades / index / rankings" complaint).
     const board = h('div', {class:'panel'}, [
-      h('div',{class:'panel-head'},[h('h3',{},d.boardH), h('a',{},'View Full Board →')]),
+      h('div',{class:'panel-head'},[h('h3',{},d.boardH), h('a',{ href:'/draft/board' },'View Full Board →')]),
       h('div',{class:'panel-body'},[
         (() => {
           const head = h('div',{class:'board-head'},[
             h('span',{},'RANK'), h('span',{},'PLAYER'), h('span',{},'POS'), h('span',{},'SCHOOL'), h('span',{style:'text-align:right'},'TIE GRADE'), h('span',{style:'text-align:center'},'TIER')
           ]); return head;
         })(),
-        ...d.board.map(r => h('div',{class:'board-row'}, [
-          h('span',{class:'rk'}, String(r.rk)),
-          h('div',{class:'player'},[h('div',{class:'headshot'}), h('span',{}, r.name)]),
-          h('span',{class:'pos'}, r.pos),
-          h('div',{class:'school'},[h('div',{class:'school-chip'}, r.chip.slice(0,3)), h('span',{}, r.school)]),
-          h('span',{class:'grade-n'}, r.grade.toFixed(1)),
-          h('span',{style:'text-align:center'}, h('span',{class:'tier-chip ' + tierClass(r.tier)}, r.tier)),
-        ])),
+        ...d.board.map(r => {
+          const row = h('div',{class:'board-row', style:'cursor:pointer'}, [
+            h('span',{class:'rk'}, String(r.rk)),
+            h('div',{class:'player'},[h('div',{class:'headshot'}), h('span',{}, r.name)]),
+            h('span',{class:'pos'}, r.pos),
+            h('div',{class:'school'},[h('div',{class:'school-chip'}, r.chip.slice(0,3)), h('span',{}, r.school)]),
+            h('span',{class:'grade-n'}, r.grade.toFixed(1)),
+            h('span',{style:'text-align:center'}, h('span',{class:'tier-chip ' + tierClass(r.tier)}, r.tier)),
+          ]);
+          row.addEventListener('click', () => {
+            window.location.href = '/draft/' + encodeURIComponent(r.name);
+          });
+          return row;
+        }),
         h('div',{class:'board-foot'},[
           h('div',{},[
             h('span',{style:'margin-right:10px'},'Filter: '),
@@ -155,7 +205,13 @@
           h('div',{class:'tie-stat'},[h('div',{class:'label'},'NIL / VALUE (MEDIAN)'), h('div',{class:'val accent'}, t.nil)]),
         ]),
         h('div',{class:'tie-rank'},[h('span',{class:'k'},'RANK'), h('span',{class:'v'}, t.rank)]),
-        h('a',{class:'tie-cta', href:'#'}, 'View Player Profile →'),
+        (() => {
+          // Deep-link the TIE output CTA to the underlying player's detail page.
+          // Falls back to /draft/board if we don't have a clean name on the card.
+          const topName = (d.board && d.board[0] && d.board[0].name) || '';
+          const cardHref = topName ? ('/draft/' + encodeURIComponent(topName)) : '/draft/board';
+          return h('a',{class:'tie-cta', href: cardHref}, 'View Player Profile →');
+        })(),
       ])
     ]);
     m.appendChild(tie);
@@ -291,14 +347,14 @@
       setText('pp-portal',  '412 Spring Entries');
       setText('pp-combine', 'Feb \'27 · 332');
       setText('pp-draft',   'Apr \'27 · 258');
-      const btn = $('pipeline-switch'); if (btn) { btn.textContent = 'Switch to NFL →'; btn.dataset.target = 'nfl'; }
+      const btn = $('pipeline-switch'); if (btn) { btn.textContent = 'View NFL Side →'; btn.dataset.target = 'nfl'; }
     } else {
       setText('pp-commit',  '247 Tracked');
       setText('pp-roster',  '$22.4M Top Rost.');
       setText('pp-portal',  '412 Portal');
       setText('pp-combine', 'Feb \'26 · 332');
       setText('pp-draft',   'TONIGHT · 257');
-      const btn = $('pipeline-switch'); if (btn) { btn.textContent = '← Switch to NCAA'; btn.dataset.target = 'ncaa'; }
+      const btn = $('pipeline-switch'); if (btn) { btn.textContent = 'View NCAA Side →'; btn.dataset.target = 'ncaa'; }
     }
   }
 
