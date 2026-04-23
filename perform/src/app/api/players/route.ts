@@ -54,7 +54,7 @@ const PREVIEW_COLUMNS = `
   id, name, school, position, class_year,
   height, weight, overall_rank, position_rank, projected_round,
   grade, tie_grade, tie_tier, nfl_comparison, trend,
-  versatility_flex, prime_sub_tags, attribute_badges
+  versatility_flex, prime_sub_tags, attribute_badges, image_url
 `.replace(/\s+/g, ' ').trim();
 const PREVIEW_LIMIT = 25;
 

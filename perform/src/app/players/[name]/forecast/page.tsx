@@ -191,11 +191,12 @@ export default function ForecastPage({ params }: { params: Promise<{ name: strin
                   background: 'radial-gradient(circle at 50% 30%, #1A2A4A, #06122A)',
                 }}
               >
-                {/* Anonymous helmet silhouette — canonical Per|Form rendering.
-                    `headshotUrl` is deliberately ignored by default (faceless rule).
-                    Flip AnonymousHelmet's `allowImage` prop when that toggle ships. */}
                 <div className="absolute inset-0 flex items-center justify-center">
-                  <AnonymousHelmet size={200} />
+                  <AnonymousHelmet
+                    size={200}
+                    allowImage={!!p.identity.headshotUrl}
+                    imageUrl={p.identity.headshotUrl}
+                  />
                 </div>
               </div>
             </div>

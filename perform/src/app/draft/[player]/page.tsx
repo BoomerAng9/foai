@@ -31,21 +31,27 @@ function formatHeight(h?: string | null): string {
 }
 
 /* ── Projected round → career outlook copy ───────────────────────── */
+// Tier-led so the round and tier text can't contradict each other.
+// Previously this glued together two independent DB values, which could
+// produce "Projected Round 2. Projects as a generational prospect."
+// when projected_round was stale relative to tie_tier. Now each tier
+// carries an expected round; if the DB round is higher (worse) than
+// tier expects, we prefer the tier-derived round.
+const TIER_SPEC: Record<string, { round: number; text: string }> = {
+  PRIME:   { round: 1, text: 'generational, build-your-franchise-around prospect' },
+  A_PLUS:  { round: 1, text: 'immediate NFL starter with Pro Bowl ceiling' },
+  A:       { round: 1, text: 'first-round starter with All-Pro upside in the right scheme' },
+  A_MINUS: { round: 1, text: 'high-floor Day-1 contributor' },
+  B_PLUS:  { round: 2, text: 'second-round value with starter-level potential by year 2' },
+  B:       { round: 2, text: 'Day-2 contributor, projected rotational starter' },
+  B_MINUS: { round: 3, text: 'late Day-2 / early Day-3 developmental' },
+  C_PLUS:  { round: 4, text: 'Day-3 depth with special-teams upside' },
+};
 function careerOutlookCopy(tier: string | null, round: number | null, nflComp: string | null): string {
-  const tierText = (() => {
-    switch (tier) {
-      case 'PRIME':    return 'generational, build-your-franchise-around prospect';
-      case 'A_PLUS':   return 'immediate NFL starter with Pro Bowl ceiling';
-      case 'A':        return 'first-round starter with All-Pro upside in the right scheme';
-      case 'A_MINUS':  return 'high-floor Day-1 contributor';
-      case 'B_PLUS':   return 'second-round value with starter-level potential by year 2';
-      case 'B':        return 'Day-2 contributor, projected rotational starter';
-      case 'B_MINUS':  return 'late Day-2 / early Day-3 developmental';
-      case 'C_PLUS':   return 'Day-3 depth with special-teams upside';
-      default:         return 'late-round flier / UDFA';
-    }
-  })();
-  const rd = round ? `Projected Round ${round}` : 'Projection pending';
+  const spec = tier ? TIER_SPEC[tier] : undefined;
+  const effectiveRound = spec ? Math.min(spec.round, round ?? spec.round) : round;
+  const rd = effectiveRound ? `Projected Round ${effectiveRound}` : 'Projection pending';
+  const tierText = spec?.text ?? 'late-round flier / UDFA';
   const comp = nflComp ? ` NFL comp profile reads closest to ${nflComp}.` : '';
   return `${rd}. Projects as a ${tierText}.${comp}`;
 }
@@ -273,15 +279,16 @@ export default function PlayerDetailPage({ params }: { params: Promise<{ player:
                 {/* Left: Name block */}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-3 mb-2">
-                    {/* Anonymous helmet silhouette — canonical Per|Form rendering.
-                        `headshotUrl` is intentionally ignored by default (faceless rule).
-                        Flip the AnonymousHelmet prop to `allowImage` when that toggle is
-                        ever shipped (not v1.0 scope). */}
                     <div
                       className="shrink-0 w-14 h-14 sm:w-16 sm:h-16 rounded-full flex items-center justify-center ring-2 ring-white/10 overflow-hidden"
                       style={{ background: `${posColor}18` }}
                     >
-                      <AnonymousHelmet accentColor={posColor} size={56} />
+                      <AnonymousHelmet
+                        accentColor={posColor}
+                        size={56}
+                        allowImage={!!headshotUrl}
+                        imageUrl={headshotUrl}
+                      />
                     </div>
                     <h1 className="font-outfit text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-white truncate">
                       {data.name}
