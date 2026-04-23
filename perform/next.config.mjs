@@ -58,5 +58,18 @@ const nextConfig = {
       },
     ],
   },
+  // Simulation surfaces retired 2026-04-23 per owner directive
+  // ("kill this simulation all together"). These paths 308-redirect to the
+  // live draft landing so old bookmarks/links don't 404.
+  async redirects() {
+    return [
+      { source: '/draft/simulate', destination: '/draft', permanent: true },
+      { source: '/draft/simulate/:path*', destination: '/draft', permanent: true },
+      { source: '/draft/war-room', destination: '/draft', permanent: true },
+      { source: '/draft/war-room/:path*', destination: '/draft', permanent: true },
+      { source: '/draft/mock', destination: '/draft', permanent: true },
+      { source: '/draft/results/:path*', destination: '/draft', permanent: true },
+    ];
+  },
 };
 export default nextConfig;

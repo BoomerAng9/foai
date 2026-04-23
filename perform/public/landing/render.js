@@ -413,6 +413,32 @@
     if (btn) renderLeague(btn.dataset.target || 'nfl');
   });
 
+  // Global delegation: any element with data-href navigates; keeps HTML
+  // button nav simple without writing per-button handlers in render.js.
+  document.addEventListener('click', (e) => {
+    const el = e.target.closest('[data-href]');
+    if (el && el.dataset.href) {
+      e.preventDefault();
+      window.location.href = el.dataset.href;
+    }
+  });
+
+  // "What's Hot" sidebar items route by league tag
+  const WH_ROUTES = {
+    ncaa: '/rankings',
+    nfl:  '/draft',
+    nba:  '/nba/playoffs',
+    mlb:  '/rankings',
+    nhl:  '/rankings',
+  };
+  document.addEventListener('click', (e) => {
+    const item = e.target.closest('.wh-item');
+    if (!item) return;
+    const lg = item.querySelector('.lg');
+    const key = lg && Array.from(lg.classList).find(c => WH_ROUTES[c]);
+    if (key) window.location.href = WH_ROUTES[key];
+  });
+
   // Edit-mode protocol — register listener BEFORE announcing availability
   window.addEventListener('message', (e) => {
     const t = e.data && e.data.type;
