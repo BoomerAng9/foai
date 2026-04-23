@@ -12,12 +12,32 @@
   --tie-amber: #FFB300;
   --tie-dark: #0A0A0F;
 
-  /* Per|Form theme variables (dark default) */
-  --pf-bg: #0A0A0F;
-  --pf-bg-secondary: #111118;
-  --pf-text: #FFFFFF;
-  --pf-text-muted: rgba(255,255,255,0.4);
-  --pf-text-subtle: rgba(255,255,255,0.15);
+  /* Per|Form broadcast tokens — mirror public/landing/index.html exactly
+     so routed pages wake up in the same visual system as the landing.
+     PR γ wires the Header + routed chrome to these; per-page inline
+     colors (e.g. #D4A853 gold) get migrated in follow-up passes. */
+  --pf-bg: #070b14;
+  --pf-bg-secondary: #0e1524;
+  --pf-panel: #0e1524;
+  --pf-panel-2: #131b2e;
+  --pf-panel-3: #1a2338;
+  --pf-line: #1f2a43;
+  --pf-line-soft: #16213b;
+  --pf-ink: #e9eefb;
+  --pf-ink-dim: #9aa6c2;
+  --pf-ink-faint: #5c6a88;
+  --pf-accent: #2b7fff;
+  --pf-accent-ink: #5fa0ff;
+  --pf-accent-deep: #1a5cc6;
+  --pf-green: #27c98b;
+  --pf-red-broadcast: #ff5f6d;
+  --pf-amber: #ffb627;
+
+  /* Legacy aliases kept so existing components keep rendering until
+     they migrate to the tokens above. Demoted, not removed. */
+  --pf-text: #e9eefb;
+  --pf-text-muted: #9aa6c2;
+  --pf-text-subtle: #5c6a88;
   --pf-gold: #D4A853;
   --pf-gold-dim: rgba(212,168,83,0.5);
   --pf-gold-glow: rgba(212,168,83,0.08);
@@ -25,7 +45,7 @@
   --pf-gold-border-strong: rgba(212,168,83,0.4);
   --pf-divider: rgba(255,255,255,0.05);
   --pf-card-shadow: rgba(0,0,0,0.4);
-  --pf-overlay: rgba(10,10,15,0.75);
+  --pf-overlay: rgba(7,11,20,0.85);
 
   /* Broadcast brand anchors — used by analysts/draft pages.
      Fixed across light/dark themes to preserve broadcast-booth feel. */
@@ -53,6 +73,14 @@
   --pf-text: #0A0A0F;
   --pf-text-muted: rgba(10,10,15,0.5);
   --pf-text-subtle: rgba(10,10,15,0.15);
+  --pf-ink: #0A0A0F;
+  --pf-ink-dim: rgba(10,10,15,0.6);
+  --pf-ink-faint: rgba(10,10,15,0.35);
+  --pf-panel: #FFFFFF;
+  --pf-panel-2: #F4F5F9;
+  --pf-panel-3: #EBEDF3;
+  --pf-line: #D9DCE4;
+  --pf-line-soft: #E4E6EC;
   --pf-gold: #B8912E;
   --pf-gold-dim: rgba(184,145,46,0.6);
   --pf-gold-glow: rgba(184,145,46,0.06);
@@ -61,6 +89,61 @@
   --pf-divider: rgba(0,0,0,0.06);
   --pf-card-shadow: rgba(0,0,0,0.08);
   --pf-overlay: rgba(250,250,250,0.8);
+}
+
+/* League palettes — each one overrides accent + chrome tokens so every
+   routed page picks up league-aware theming from the body[data-league]
+   attribute set in layout.tsx. Landing uses the identical values. */
+body[data-league="nfl"] {
+  --pf-accent: #2b7fff;
+  --pf-accent-ink: #5fa0ff;
+  --pf-accent-deep: #1a5cc6;
+}
+body[data-league="ncaa"] {
+  --pf-accent: #ffcf40;
+  --pf-accent-ink: #ffd95c;
+  --pf-accent-deep: #b88a00;
+  --pf-ink: #f3efe2;
+  --pf-bg: #0a0d08;
+  --pf-panel: #121710;
+  --pf-panel-2: #19201a;
+  --pf-panel-3: #222a1e;
+  --pf-line: #2a3322;
+  --pf-line-soft: #1c241a;
+}
+body[data-league="nba"] {
+  --pf-accent: #ff6b2b;
+  --pf-accent-ink: #ff9159;
+  --pf-accent-deep: #c84b17;
+  --pf-bg: #0a0716;
+  --pf-panel: #14102b;
+  --pf-panel-2: #1b163a;
+  --pf-panel-3: #24204d;
+  --pf-line: #2b2550;
+  --pf-line-soft: #1f1b3f;
+  --pf-ink: #ece6ff;
+}
+body[data-league="mlb"] {
+  --pf-accent: #d62b2b;
+  --pf-accent-ink: #ff5f5f;
+  --pf-accent-deep: #9a1c1c;
+  --pf-bg: #070c12;
+  --pf-panel: #0f1622;
+  --pf-panel-2: #151e2e;
+  --pf-panel-3: #1c2738;
+  --pf-line: #263248;
+  --pf-ink: #eef1f7;
+}
+body[data-league="nhl"] {
+  --pf-accent: #8ce3ff;
+  --pf-accent-ink: #b3eaff;
+  --pf-accent-deep: #3b9fcf;
+  --pf-bg: #05080d;
+  --pf-panel: #0b1119;
+  --pf-panel-2: #121a25;
+  --pf-panel-3: #1a2432;
+  --pf-line: #1f2b3d;
+  --pf-ink: #e7f1fb;
 }
 
 /* ═══════════════════════════════════════════════════════════════════
