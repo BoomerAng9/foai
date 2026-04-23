@@ -478,6 +478,63 @@
       tier,
     };
   }
+  // ── News + ticker wiring ─────────────────────────────────────────
+  // /api/news returns { articles: [{title, url, description, publishedAt, source}], ... }.
+  // We map the first N titles into two surfaces: per-league `hero.ticker`
+  // (6 short items) and `headlines` (3 items with kicker/title/date).
+  // Only NCAA + NFL get wired because /api/news is football-biased right
+  // now; NBA/MLB/NHL keep their static headlines until sport-specific
+  // feeds are added.
+  function shortTickerText(article) {
+    const t = (article.title || '').replace(/\s+\|\s+.*$/, '').trim();
+    return t.length > 48 ? t.slice(0, 45) + '…' : t;
+  }
+  function kickerFromArticle(article) {
+    const title = (article.title || '').toUpperCase();
+    if (title.includes('MOCK')) return 'MOCK DRAFT';
+    if (title.includes('PORTAL')) return 'TRANSFER PORTAL';
+    if (title.includes('COMBINE')) return 'COMBINE';
+    if (title.includes('NIL')) return 'NIL';
+    if (title.includes('RANK') || title.includes('BIG BOARD')) return 'BIG BOARD';
+    if (title.includes('RECRUIT')) return 'RECRUITING';
+    return 'DRAFT WIRE';
+  }
+  function fmtDateShort(iso) {
+    if (!iso) return '';
+    try {
+      const d = new Date(iso);
+      return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    } catch { return ''; }
+  }
+  async function fetchNewsAndTicker() {
+    try {
+      const res = await fetch('/api/news?limit=10', { cache: 'no-store' });
+      if (!res.ok) return;
+      const data = await res.json();
+      const articles = Array.isArray(data.articles) ? data.articles : [];
+      if (articles.length === 0) return;
+
+      const tickerItems = articles.slice(0, 6).map(shortTickerText).filter(Boolean);
+      const headlines = articles.slice(0, 3).map(a => ({
+        kicker: kickerFromArticle(a),
+        t: (a.title || '').replace(/\s+\|\s+.*$/, '').trim(),
+        d: fmtDateShort(a.publishedAt || a.published_at),
+      }));
+
+      for (const lg of ['nfl', 'ncaa']) {
+        if (!window.LEAGUE_DATA[lg]) continue;
+        if (tickerItems.length > 0 && window.LEAGUE_DATA[lg].hero) {
+          window.LEAGUE_DATA[lg].hero.ticker = tickerItems;
+        }
+        if (headlines.length > 0) {
+          window.LEAGUE_DATA[lg].headlines = headlines;
+        }
+      }
+    } catch (_) {
+      // Fetch failure — static ticker + headlines remain
+    }
+  }
+
   async function fetchRealBoards() {
     const targets = Object.entries(LEAGUE_SPORT_PARAM).filter(([lg]) => window.LEAGUE_DATA[lg]);
     await Promise.all(targets.map(async ([lg, sport]) => {
@@ -518,7 +575,7 @@
   // then re-render after live data arrives. Keeps first paint fast +
   // swaps to real rosters ~300-800ms later.
   renderLeague(saved || 'ncaa');
-  fetchRealBoards().then(() => {
+  Promise.all([fetchRealBoards(), fetchNewsAndTicker()]).then(() => {
     renderLeague(document.body.dataset.league || saved || 'ncaa');
   });
 })();
