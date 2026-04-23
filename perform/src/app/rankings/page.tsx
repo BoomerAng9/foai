@@ -46,6 +46,7 @@ interface Player {
   consensus_pff?: number | null;
   consensus_espn?: number | null;
   consensus_nflcom?: number | null;
+  image_url?: string | null;
 }
 
 // All surface + text tokens route through shared CSS vars so the page flips
@@ -392,6 +393,8 @@ export default function RankingsPage() {
                           crown={isPrime}
                           jerseyNumber={null}
                           label={undefined}
+                          allowImage={!!topPlayer.image_url}
+                          imageUrl={topPlayer.image_url}
                         />
                         <div className="mt-3 w-full">
                           <div className="text-[11px] font-bold uppercase tracking-wider truncate" style={{ color: T.text }}>

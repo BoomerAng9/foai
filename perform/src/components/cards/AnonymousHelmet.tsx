@@ -46,7 +46,10 @@ export function AnonymousHelmet({
   label,
   className = '',
 }: AnonymousHelmetProps) {
-  // Custom mode: show the real photo (explicit opt-in)
+  // Custom mode: show the real photo (explicit opt-in).
+  // ESPN CDN headshots are 350x254 (landscape) — we render them square with
+  // object-cover so the player's face fills the badge/circle cleanly instead
+  // of letterboxing. Caller controls outer border-radius (square vs full).
   if (allowImage && imageUrl) {
     return (
       <div
@@ -64,8 +67,9 @@ export function AnonymousHelmet({
           alt={label || 'Player'}
           style={{
             width: size,
-            height: 'auto',
-            objectFit: 'contain',
+            height: size,
+            objectFit: 'cover',
+            objectPosition: 'center 18%',
             borderRadius: 8,
           }}
         />
