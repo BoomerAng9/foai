@@ -72,6 +72,7 @@ const PUBLIC_PREFIXES = [
   '/generated/',
   '/franchise/',
   '/api/franchise/',
+  '/landing/',  // multi-league landing prototype (static /public drop)
 ];
 
 /** API paths that allow unauthenticated GET but protect POST/PUT/DELETE. */
