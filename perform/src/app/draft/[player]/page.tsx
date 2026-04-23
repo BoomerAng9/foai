@@ -273,15 +273,16 @@ export default function PlayerDetailPage({ params }: { params: Promise<{ player:
                 {/* Left: Name block */}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-3 mb-2">
-                    {/* Anonymous helmet silhouette — canonical Per|Form rendering.
-                        `headshotUrl` is intentionally ignored by default (faceless rule).
-                        Flip the AnonymousHelmet prop to `allowImage` when that toggle is
-                        ever shipped (not v1.0 scope). */}
                     <div
                       className="shrink-0 w-14 h-14 sm:w-16 sm:h-16 rounded-full flex items-center justify-center ring-2 ring-white/10 overflow-hidden"
                       style={{ background: `${posColor}18` }}
                     >
-                      <AnonymousHelmet accentColor={posColor} size={56} />
+                      <AnonymousHelmet
+                        accentColor={posColor}
+                        size={56}
+                        allowImage={!!headshotUrl}
+                        imageUrl={headshotUrl}
+                      />
                     </div>
                     <h1 className="font-outfit text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-white truncate">
                       {data.name}
