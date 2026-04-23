@@ -506,6 +506,54 @@
       return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
     } catch { return ''; }
   }
+  // ── Team needs + trend movers from Neon ──────────────────────────
+  // Overwrite rail entries [0], [1], [2] with live data on top of the
+  // static fallback. Keeps the visual structure intact; just swaps rows.
+  function initials(name) {
+    if (!name) return '?';
+    const parts = name.split(/\s+/);
+    if (parts.length === 1) return parts[0].slice(0, 1).toUpperCase();
+    return parts[0][0].toUpperCase() + '. ' + parts.slice(1).join(' ').trim();
+  }
+  async function fetchTeamNeedsAndMovers() {
+    if (!window.LEAGUE_DATA.nfl) return;
+    try {
+      const [tnRes, plRes] = await Promise.all([
+        fetch('/api/draft/team-needs', { cache: 'no-store' }),
+        fetch('/api/players?sport=football&limit=50&sort=overall_rank:asc', { cache: 'no-store' }),
+      ]);
+
+      // Team Needs (top 5 picks) → rail[2]
+      if (tnRes.ok) {
+        const tnData = await tnRes.json();
+        const teams = Array.isArray(tnData.teams) ? tnData.teams.slice(0, 5) : [];
+        if (teams.length > 0 && window.LEAGUE_DATA.nfl.rail && window.LEAGUE_DATA.nfl.rail[2]) {
+          window.LEAGUE_DATA.nfl.rail[2].rows = teams.map((t, i) => {
+            const abbrevMap = { 'Las Vegas Raiders':'LV','New York Jets':'NYJ','Arizona Cardinals':'ARI','Tennessee Titans':'TEN','New York Giants':'NYG','Cleveland Browns':'CLE','Chicago Bears':'CHI','New England Patriots':'NE','Carolina Panthers':'CAR','Atlanta Falcons':'ATL','Denver Broncos':'DEN','Washington Commanders':'WAS','Indianapolis Colts':'IND','Seattle Seahawks':'SEA','Cincinnati Bengals':'CIN','Miami Dolphins':'MIA','San Francisco 49ers':'SF','Dallas Cowboys':'DAL','Pittsburgh Steelers':'PIT','Jacksonville Jaguars':'JAX','Los Angeles Rams':'LAR','Los Angeles Chargers':'LAC','Green Bay Packers':'GB','Houston Texans':'HOU','Minnesota Vikings':'MIN','New Orleans Saints':'NO','Tampa Bay Buccaneers':'TB','Baltimore Ravens':'BAL','Philadelphia Eagles':'PHI','Buffalo Bills':'BUF','Detroit Lions':'DET','Kansas City Chiefs':'KC' };
+            const abbr = abbrevMap[t.team] || (t.team || '').split(' ').pop().slice(0, 3).toUpperCase();
+            return [String(i + 1), abbr, (t.needs || []).slice(0, 3).join(', '), 0];
+          });
+        }
+      }
+
+      // Risers + Fallers (trend column) → rail[0], rail[1]
+      if (plRes.ok) {
+        const plData = await plRes.json();
+        const players = Array.isArray(plData.players) ? plData.players : [];
+        const risers = players.filter(p => p.trend === 'rising').slice(0, 3);
+        const fallers = players.filter(p => p.trend === 'falling').slice(0, 3);
+        if (risers.length > 0 && window.LEAGUE_DATA.nfl.rail && window.LEAGUE_DATA.nfl.rail[0]) {
+          window.LEAGUE_DATA.nfl.rail[0].rows = risers.map((p, i) => [String(i + 1), initials(p.name), p.position || '', 1]);
+        }
+        if (fallers.length > 0 && window.LEAGUE_DATA.nfl.rail && window.LEAGUE_DATA.nfl.rail[1]) {
+          window.LEAGUE_DATA.nfl.rail[1].rows = fallers.map((p, i) => [String(i + 1), initials(p.name), p.position || '', -1]);
+        }
+      }
+    } catch (_) {
+      // Static fallback remains
+    }
+  }
+
   async function fetchNewsAndTicker() {
     try {
       const res = await fetch('/api/news?limit=10', { cache: 'no-store' });
@@ -575,7 +623,7 @@
   // then re-render after live data arrives. Keeps first paint fast +
   // swaps to real rosters ~300-800ms later.
   renderLeague(saved || 'ncaa');
-  Promise.all([fetchRealBoards(), fetchNewsAndTicker()]).then(() => {
+  Promise.all([fetchRealBoards(), fetchNewsAndTicker(), fetchTeamNeedsAndMovers()]).then(() => {
     renderLeague(document.body.dataset.league || saved || 'ncaa');
   });
 })();
