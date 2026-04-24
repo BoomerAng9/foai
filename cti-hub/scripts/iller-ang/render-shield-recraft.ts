@@ -213,13 +213,23 @@ async function main(): Promise<void> {
     process.exit(1);
   }
 
-  const profile = ALL_SHIELD_DIVISION_PROFILES.find(
-    (p) => p.slug === args.slug
-  );
-  if (!profile) {
+  const rawProfile = ALL_SHIELD_DIVISION_PROFILES.find((p) => p.slug === args.slug);
+  if (!rawProfile) {
     console.error(`No Shield Division profile with slug: ${args.slug}`);
     process.exit(1);
   }
+
+  const profile: CharacterProfile = {
+    ...rawProfile,
+    rank: 'shield',
+    callsign: rawProfile.name,
+    catchphrase: rawProfile.personality,
+    imagePath: rawProfile.imagePath || `/hawks/shield/${rawProfile.slug}.png`,
+    imageReady: rawProfile.imageReady || false,
+    visualDescription: rawProfile.visual,
+    gear: rawProfile.gear || [rawProfile.unit],
+    signatureColor: rawProfile.signatureColor || '#22D3EE',
+  };
 
   // Per-Hawk Recraft prompt builders. Route text-forward personas here
   // (crypto sigils, command banners, wordmark-heavy designs) — routing

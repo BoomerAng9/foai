@@ -182,7 +182,17 @@ async function flipImageReady(slug: string): Promise<void> {
 async function main(): Promise<void> {
   const args = parseArgs();
 
-  let targets: CharacterProfile[] = ALL_SHIELD_DIVISION_PROFILES;
+  let targets: CharacterProfile[] = (ALL_SHIELD_DIVISION_PROFILES as any[]).map(p => ({
+    ...p,
+    rank: 'shield',
+    callsign: p.name,
+    catchphrase: p.personality,
+    imagePath: p.imagePath || `/hawks/shield/${p.slug}.png`,
+    imageReady: p.imageReady || false,
+    visualDescription: p.visual,
+    gear: p.gear || [p.unit],
+    signatureColor: p.signatureColor || '#22D3EE'
+  }));
   if (args.slug) {
     targets = targets.filter((p) => p.slug === args.slug);
     if (targets.length === 0) {
