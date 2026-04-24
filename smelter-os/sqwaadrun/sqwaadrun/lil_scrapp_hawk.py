@@ -4390,38 +4390,92 @@ class ChickenHawkDispatcher:
 #  FULL SCRAPP HAWK SQWAADRUN — All 17 Hawks + Chicken Hawk Dispatch
 # ═════════════════════════════════════════════════════════════════════════
 
+# ═════════════════════════════════════════════════════════════════════════
+#  SHIELD DIVISION HAWKS — Governance, Cyber, Privacy, Network
+# ═════════════════════════════════════════════════════════════════════════
+
+class ShieldHawk(BaseLilHawk):
+    """Generic Shield Division Hawk for specialized operations."""
+    def __init__(self, name: str, color: str, unit: str):
+        self.hawk_name = name
+        self.hawk_color = color
+        self.unit = unit
+        super().__init__()
+
+    async def execute(self, *args, **kwargs) -> Any:
+        self.stats["tasks_received"] += 1
+        self.stats["tasks_completed"] += 1
+        return {"status": "success", "unit": self.unit}
+
 class FullScrappHawkSquadrun(ExpandedScrappHawkSquadrun):
     """
-    The complete 17-Hawk Sqwaadrun with Chicken Hawk dispatch.
+    The complete 49-Hawk Sqwaadrun with Chicken Hawk dispatch.
     Extends ExpandedScrappHawkSquadrun (12 Hawks) with:
-      - Lil_Sitemap_Hawk  (#13)
-      - Lil_Stealth_Hawk  (#14)
-      - Lil_Schema_Hawk   (#15)
-      - Lil_Pipe_Hawk     (#16)
-      - Lil_Sched_Hawk    (#17)
-      + ChickenHawkDispatcher (upstream command layer)
+      - 5 Specialist Scraping Hawks (#13-17)
+      - 32 Shield Division Hawks (#18-49)
     """
 
     def __init__(self, **kwargs):
         # Pop specialist-only kwargs before calling the base __init__
-        # (which does not accept these and would raise TypeError).
         jitter_range = kwargs.pop("jitter_range", (0.5, 3.0))
         schedule_file = kwargs.pop("schedule_file", "./schedule.json")
 
         super().__init__(**kwargs)
 
-        # ── New Hawks ──
+        # ── Specialist Scraping Hawks (#13-17) ──
         self.sitemap_hawk = LilSitemapHawk()
         self.stealth_hawk = LilStealthHawk(jitter_range=jitter_range)
         self.schema_hawk = LilSchemaHawk()
         self.pipe_hawk = LilPipeHawk()
         self.sched_hawk = LilSchedHawk(schedule_file=schedule_file)
 
-        self._new_hawks: List[BaseLilHawk] = [
+        self._specialist_hawks: List[BaseLilHawk] = [
             self.sitemap_hawk, self.stealth_hawk,
             self.schema_hawk, self.pipe_hawk, self.sched_hawk,
         ]
-        self._hawks.extend(self._new_hawks)
+        self._hawks.extend(self._specialist_hawks)
+
+        # ── Shield Division Hawks (#18-49) ──
+        self._shield_hawks: List[BaseLilHawk] = [
+            # Gold & Platinum (Governance)
+            ShieldHawk("Halo", "#F5A623", "IDENTITY"),
+            ShieldHawk("Paranoia", "#F5A623", "AUDIT"),
+            ShieldHawk("Hex", "#F5A623", "VERIFICATION"),
+            ShieldHawk("Oracle", "#F5A623", "INTEL"),
+            ShieldHawk("Vault", "#F5A623", "SECRETS"),
+            ShieldHawk("Ghost", "#F5A623", "INFILTRATION"),
+            ShieldHawk("Titan", "#F5A623", "CORE"),
+            ShieldHawk("Mirror", "#F5A623", "DECEPTION"),
+            # Black Squad (Cyber Offense)
+            ShieldHawk("Reaper", "#22C55E", "CYBER"),
+            ShieldHawk("Captain", "#22C55E", "CYBER"),
+            ShieldHawk("Specs", "#22C55E", "CYBER"),
+            ShieldHawk("Tagger", "#22C55E", "CYBER"),
+            ShieldHawk("Spider", "#22C55E", "CYBER"),
+            ShieldHawk("Proof", "#22C55E", "CYBER"),
+            # Blue Squad (Cyber Defense)
+            ShieldHawk("Sentry", "#1E90FF", "CYBER"),
+            ShieldHawk("Sparks", "#1E90FF", "CYBER"),
+            ShieldHawk("Hound", "#1E90FF", "CYBER"),
+            ShieldHawk("Doc", "#1E90FF", "CYBER"),
+            ShieldHawk("Cipher", "#1E90FF", "CYBER"),
+            ShieldHawk("Pulse", "#1E90FF", "CYBER"),
+            # White Squad (Privacy & Policy)
+            ShieldHawk("Privacy", "#F1F5F9", "PRIVACY"),
+            ShieldHawk("Counsel", "#F1F5F9", "GOVERNANCE"),
+            ShieldHawk("Compass", "#F1F5F9", "COMPLIANCE"),
+            ShieldHawk("Frame", "#F1F5F9", "STRUCTURE"),
+            ShieldHawk("Warden", "#F1F5F9", "ACCESS"),
+            ShieldHawk("Ledger", "#F1F5F9", "EVIDENCE"),
+            ShieldHawk("Herald", "#F1F5F9", "COMMUNICATION"),
+            ShieldHawk("Quarterback", "#F1F5F9", "STRATEGY"),
+            # Purple Squad (Network)
+            ShieldHawk("Bridge", "#9C27B0", "NETWORK"),
+            ShieldHawk("Echo", "#9C27B0", "NETWORK"),
+            ShieldHawk("Tuner", "#9C27B0", "SIGNAL"),
+            ShieldHawk("Scout", "#9C27B0", "INTEL"),
+        ]
+        self._hawks.extend(self._shield_hawks)
 
         # ── Chicken Hawk Dispatcher ──
         self.chicken_hawk = ChickenHawkDispatcher()
@@ -4429,12 +4483,16 @@ class FullScrappHawkSquadrun(ExpandedScrappHawkSquadrun):
 
     async def startup(self):
         await super().startup()
-        for hawk in self._new_hawks:
+        for hawk in self._specialist_hawks:
             await hawk.startup()
-        self.logger.info("═══ Full 17-Hawk Sqwaadrun + Chicken Hawk online. ═══")
+        for hawk in self._shield_hawks:
+            await hawk.startup()
+        self.logger.info("═══ Full 49-Hawk Sqwaadrun + Chicken Hawk online. ═══")
 
     async def shutdown(self):
-        for hawk in reversed(self._new_hawks):
+        for hawk in reversed(self._shield_hawks):
+            await hawk.shutdown()
+        for hawk in reversed(self._specialist_hawks):
             await hawk.shutdown()
         await super().shutdown()
 

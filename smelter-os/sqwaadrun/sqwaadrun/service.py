@@ -139,7 +139,7 @@ async def health(request: web.Request) -> web.Response:
     return web.json_response({
         "status": "ok",
         "service": "sqwaadrun-gateway",
-        "version": "2.0.0",
+        "version": "3.3.0",
         "hawks_online": online,
         "hawks_total": len(squad._hawks),
     })
@@ -451,7 +451,7 @@ async def _heartbeat_loop(
             report = {
                 "timestamp": datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ"),
                 "gateway": "sqwaadrun",
-                "version": "2.0.0",
+                "version": "3.3.0",
                 "hawks_online": active_hawks,
                 "hawks_total": len(squad._hawks),
                 "mission_log_size": len(squad.chicken_hawk._mission_log),  # type: ignore[attr-defined]
