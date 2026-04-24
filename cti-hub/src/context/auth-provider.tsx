@@ -190,6 +190,38 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
 
     return () => unsubscribe();
+
+  // Refresh session token immediately on mount AND every 25 minutes
+  useEffect(() => {
+    if (!user) return;
+
+    const refreshSession = async () => {
+      try {
+        const freshToken = await user.getIdToken(true);
+        await fetch('/api/auth/session', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ accessToken: freshToken }),
+        });
+      } catch (err) {
+        console.error('[Auth] Token refresh error:', err);
+      }
+    };
+
+    refreshSession();
+
+    const handleVisibility = () => {
+      if (document.visibilityState === 'visible') refreshSession();
+    };
+
+    window.addEventListener('visibilitychange', handleVisibility);
+    const interval = setInterval(refreshSession, 25 * 60 * 1000);
+
+    return () => {
+      window.removeEventListener('visibilitychange', handleVisibility);
+      clearInterval(interval);
+    };
+  }, [user]);
   }, [hydrateProfile]);
 
   // Refresh session token immediately on mount AND every 25 minutes
