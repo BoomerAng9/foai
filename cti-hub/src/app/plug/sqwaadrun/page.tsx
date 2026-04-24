@@ -27,6 +27,7 @@ import {
   SPECIALIST_HAWKS,
 } from '@/lib/hawks/roster';
 import { COMMAND_PROFILES } from '@/lib/hawks/characters';
+import { SHIELD_DIVISION } from '@/lib/hawks/shield-characters';
 
 interface LiveHawk {
   name: string;
@@ -45,6 +46,23 @@ export default function SqwaadrunPage() {
   const { user } = useAuth();
   const [live, setLive] = useState<LiveRoster | null>(null);
   const [healthy, setHealthy] = useState<boolean | null>(null);
+
+  // Filter Shield squads
+  const getSquad = (squadName: string): HawkCardData[] => 
+    SHIELD_DIVISION.filter(h => h.squad === squadName).map(p => ({
+      profile: { 
+        name: p.name,
+        callsign: p.name, 
+        slug: p.slug, 
+        rank: 'specialist', 
+        catchphrase: p.personality, 
+        avatar: `/hawks/${p.slug}.png`, 
+        themeColor: '#22D3EE' 
+      },
+      role: p.role,
+      capabilities: [p.unit, p.personality],
+      sampleMission: `Deploy for ${p.unit} operations.`
+    }));
 
   // Owner short-circuit — never show the pricing tiles to the owner.
   // Send straight to the authenticated control surface.
@@ -161,19 +179,17 @@ export default function SqwaadrunPage() {
           <h1
             className="text-5xl sm:text-6xl md:text-8xl font-black leading-[0.95] mb-6 tracking-tighter"
           >
-            No Job Too Big.
-            <br />
-            <span style={{ color: '#F5A623' }}>No Job Too Small.</span>
+            The 32-Hawk <br />
+            <span style={{ color: '#F5A623' }}>Shield Division.</span>
           </h1>
 
           <p
             className="text-lg md:text-xl max-w-3xl mx-auto leading-snug mb-3"
             style={{ color: '#CBD5E1' }}
           >
-            Seventeen specialized agents under one command. The Sqwaadrun deploys
-            for scraping, monitoring, structured data extraction, scheduled jobs,
-            and the kind of web intelligence work that runs in the background
-            while you sleep.
+            The full 32-hawk fleet is now landed. From Gold & Platinum governance 
+            to the kinetic Black Squad, Sqwaadrun provides "Glass Box" operational 
+            transparency across five unique tactical units.
           </p>
           <p className="text-sm max-w-2xl mx-auto" style={{ color: '#64748B' }}>
             Pure compute. Zero language-model overhead. Pay for missions, not tokens.
@@ -211,14 +227,14 @@ export default function SqwaadrunPage() {
 
           <div className="mt-10 flex gap-3 justify-center flex-wrap">
             <Link
-              href="#deploy"
+              href="/plug/sqwaadrun/cyber-hawks"
               className="h-12 px-8 font-bold text-sm flex items-center gap-2 transition"
-              style={{ background: '#F5A623', color: '#050810', borderRadius: '2px' }}
+              style={{ background: '#22C55E', color: '#050704', borderRadius: '2px' }}
             >
-              DEPLOY THE SQWAAD →
+              VIEW CYBER HAWKS (SQUAD SUBPAGE) →
             </Link>
             <Link
-              href="#roster"
+              href="#shield"
               className="h-12 px-8 border text-sm flex items-center gap-2 transition"
               style={{
                 borderColor: 'rgba(34,211,238,0.5)',
@@ -253,9 +269,9 @@ export default function SqwaadrunPage() {
         </div>
       </section>
 
-      {/* ═══ ROSTER ═══ */}
+      {/* ═══ SHIELD DIVISION ═══ */}
       <section
-        id="roster"
+        id="shield"
         className="max-w-7xl mx-auto px-6 py-16 border-t"
         style={{ borderColor: 'rgba(245,166,35,0.15)' }}
       >
@@ -264,14 +280,40 @@ export default function SqwaadrunPage() {
             className="font-mono text-[10px] tracking-[0.3em] uppercase mb-3"
             style={{ color: '#F5A623' }}
           >
-            / THE 17-HAWK ROSTER
+            / SHIELD DIVISION FLEET
           </p>
           <h2 className="text-3xl md:text-5xl font-black tracking-tight">
-            Meet the Hawks
+            The 32 Operational Units
           </h2>
           <p className="text-sm mt-3 max-w-2xl mx-auto" style={{ color: '#64748B' }}>
-            Each Hawk owns a single responsibility. Tap any card to flip the dossier.
+            The full Shield Division has landed. Every hawk represents a specialized unit in the 
+            Gemini Enterprise Agent Architecture.
           </p>
+        </div>
+
+        <RosterRow title="Gold & Platinum Squad" subtitle="GOVERNANCE / IDENTITY / AUDIT" hawks={getSquad('Gold & Platinum')} />
+        <RosterRow title="Black Squad" subtitle="KINETIC / OFFENSE / PEN-TEST" hawks={getSquad('Black')} />
+        <RosterRow title="Blue Squad" subtitle="DEFENSE / DETECTION / SIGINT" hawks={getSquad('Blue')} />
+        <RosterRow title="White Squad" subtitle="PRIVACY / POLICY / REDACTION" hawks={getSquad('White')} />
+        <RosterRow title="Purple Squad" subtitle="NETWORK / BRIDGE / SIGNAL" hawks={getSquad('Purple')} />
+      </section>
+
+      {/* ═══ SCRAPING SWARM ═══ */}
+      <section
+        id="swarm"
+        className="max-w-7xl mx-auto px-6 py-16 border-t"
+        style={{ borderColor: 'rgba(245,166,35,0.15)' }}
+      >
+        <div className="text-center mb-12">
+          <p
+            className="font-mono text-[10px] tracking-[0.3em] uppercase mb-3"
+            style={{ color: '#22D3EE' }}
+          >
+            / THE 17-HAWK SCRAPING SWARM
+          </p>
+          <h2 className="text-3xl md:text-5xl font-black tracking-tight">
+            Intelligence Gathering
+          </h2>
         </div>
 
         <RosterRow title="Core Hawks" subtitle="Squad foundation" hawks={enrich(CORE_HAWKS)} />

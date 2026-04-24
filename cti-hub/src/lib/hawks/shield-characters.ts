@@ -1,963 +1,349 @@
 /**
- * ACHIEVEMOR Shield Division — Character Canon
- * =============================================
- * Visual descriptions, gear, and image slots for the 32 Shield Division
- * Hawks under Crypt_Ang's vCISO authority. Parallels
- * `./characters.ts` (Sqwaadrun fleet) but uses a cinematic tactical-realistic
- * aesthetic rather than chibi-cartoon, per the reference images
- * iCloudPhotos/IMG_2563(1).JPG, IMG_2565.JPG, IMG_0787.JPG.
- *
- * Brand reference (memory): project_shield_division_hawk_anatomy.md
- * Image destination: /public/hawks/shield/{slug}.png
- * Render script: scripts/iller-ang/render-shield-division.ts
- *
- * Every Hawk carries Spinner (weaponized boomerang) — NEVER a firearm.
- * Every Hawk has the DEPLOY chevron patch on the right shoulder.
- * A.I.M.S. chestplate is optional per-Hawk (present for all Gold & Platinum).
- * Eye patch is per-persona, NOT universal.
- *
- * Wave 1 lands the 5 Hawks that already have Semantic Constraint Profiles
- * (config/shield/hawks/). Subsequent waves fill the remaining 27.
+ * SHIELD DIVISION — CHARACTER DATA (CANONICAL 32-HAWK FLEET)
+ * =========================================================
+ * Reconciled from SHIELD_DIVISION_CHARACTER_BRIEF.md.
+ * Grouped by Squad.
  */
 
-import type { CharacterProfile } from './characters';
+export interface HawkProfile {
+  name: string;
+  slug: string;
+  squad: 'Gold & Platinum' | 'Black' | 'Blue' | 'White' | 'Purple';
+  role: string;
+  unit: string;
+  personality: string;
+  stats: { speed: number; intel: number; stealth: number; combat: number };
+  visual: string;
+}
 
-/**
- * Shared brand DNA for the Shield Division. Appended to every prompt.
- * Differs from Sqwaadrun brand (port-at-night cartoon) — Shield Division
- * lives in a cinematic tactical-realistic key.
- */
-export const SHIELD_BRAND_PROMPT =
-  'Cinematic tactical-realistic character portrait, anthropomorphic eagle ' +
-  'operator with brown and white tiger-stripe plumage, olive-drab tactical ' +
-  'combat helmet with 3-tube night-vision mount (emerald green lenses), ' +
-  'boom microphone across cheek, short whip antenna on right side of helmet, ' +
-  'DEPLOY military chevron patch on right shoulder, Spinner weaponized ' +
-  'boomerang holstered, tactical gloves, MOLLE plate carrier webbing, ' +
-  'dramatic key lighting, industrial operations-bay background, smoke and ' +
-  'atmospheric haze, illustrated digital painting style, square framing. ' +
-  'NO firearms or blades of any kind.';
-
-/**
- * Wave 1 — the 5 Hawks with landed Semantic Constraint Profiles.
- * Rank "specialist" across the board; squad information lives in the
- * visualDescription field (since CharacterProfile.rank is a closed union
- * and we do not modify it here).
- */
-export const SHIELD_DIVISION_WAVE_1: CharacterProfile[] = [
-  // ─── Black Squad ──────────────────────────────────────────────────────
+export const SHIELD_DIVISION: HawkProfile[] = [
+  // ─── GOLD & PLATINUM SQUAD (8 Hawks) — Governance & Identity ───
   {
-    slug: '',
-    imagePath: '/hawks/shield/.png',
-    callsign: 'Reaper',
-    rank: 'specialist',
-    imagePath: '/hawks/shield/lil_scope_hawk.png',
-    imageReady: true,
-    visualDescription:
-      'ACHIEVEMOR Shield Division — Black Squad — kinetic execution specialist. ' +
-      'Matte-black and gunmetal accents over olive plate carrier. HUD-scope ' +
-      'optical augmentation lens over right eye (reads as sniper optic, not a ' +
-      'patch). A.I.M.S. silver chestplate in black-anodized finish with ' +
-      'diagonal ridge pattern. Spinner weaponized boomerang mounted in ' +
-      'quick-draw chest-rig across the chestplate. No armband. Steel-grey ' +
-      'eyes, coiled predatory posture.',
-    gear: [
-      'Black-anodized A.I.M.S. chestplate',
-      'HUD-scope right-eye augmentation',
-      'Gunmetal MOLLE webbing',
-      'Spinner quick-draw chest-rig',
-    ],
-    catchphrase: 'The target was decided before it showed up.',
-    signatureColor: '#1A1A1A',
+    name: 'Halo',
+    slug: 'lil_mast_hawk',
+    squad: 'Gold & Platinum',
+    role: 'Identity / MFA Lead',
+    unit: 'IDENTITY',
+    personality: 'Absolute, composed sentinel. The co-signature gate.',
+    stats: { speed: 6, intel: 10, stealth: 5, combat: 7 },
+    visual: 'Platinum helmet with luminous halo ring, gold eyes, ed25519 co-signer glyph.',
   },
-
-  // ─── White Squad ──────────────────────────────────────────────────────
   {
-    slug: '',
-    imagePath: '/hawks/shield/.png',
-    callsign: 'Privacy',
-    rank: 'specialist',
-    imagePath: '/hawks/shield/lil_seal_hawk.png',
-    imageReady: true,
-    visualDescription:
-      'ACHIEVEMOR Shield Division — White Squad — edge redaction specialist, ' +
-      'formally verified kernel component. Clean white and polished-chrome ' +
-      'accents on helmet trim and plate carrier webbing. Mirror-polished ' +
-      'chrome A.I.M.S. chestplate with faint etched redaction-rune overlay ' +
-      'pattern. ACHIEVEMOR checkmark seal emblem at chestplate center. ' +
-      'Clean white armband on forearm. Spinner in low-key side holster. ' +
-      'Ice-blue eyes. Composed, unflinching boundary-guardian posture. ' +
-      'Cool-toned clean laboratory lighting.',
-    gear: [
-      'Mirror-chrome A.I.M.S. chestplate',
-      'Etched redaction-rune overlay',
-      'ACHIEVEMOR checkmark seal emblem',
-      'White forearm armband',
-      'Spinner side holster',
-    ],
-    catchphrase: 'Nothing passes that shouldn\'t.',
-    signatureColor: '#F5F7FA',
+    name: 'Paranoia',
+    slug: 'lil_doubt_hawk',
+    squad: 'Gold & Platinum',
+    role: 'Independent Auditor',
+    unit: 'AUDIT',
+    personality: 'Adversarial, watchful of allies. Reports directly to ACHEEVY.',
+    stats: { speed: 7, intel: 10, stealth: 8, combat: 6 },
+    visual: 'Platinum armor with signature ACHEEVY-orange accent stripe.',
   },
-
-  // ─── Gold & Platinum Squad ────────────────────────────────────────────
   {
-    slug: '',
-    imagePath: '/hawks/shield/.png',
-    callsign: 'Halo',
-    rank: 'specialist',
-    imagePath: '/hawks/shield/lil_mast_hawk.png',
-    imageReady: true,
-    visualDescription:
-      'ACHIEVEMOR Shield Division — Gold & Platinum Squad Lead — identity ' +
-      'infrastructure and SAT co-signer. Platinum-textured helmet with a ' +
-      'subtle luminous ring integrated along the top rim (the halo — ' +
-      'present, not garish). Platinum-chrome A.I.M.S. chestplate with gold ' +
-      'highlight accents on edge trim. ACHIEVEMOR checkmark crest at ' +
-      'chestplate center in platinum texture. Platinum-textured DEPLOY ' +
-      'chevron on right shoulder. Cryptographic co-signer glyph etched ' +
-      'on right forearm. Spinner in platinum-finished chest bandolier. ' +
-      'Gold eyes. Command-center architectural background with platinum ' +
-      'column accents. Composed sentinel posture.',
-    gear: [
-      'Platinum helmet with luminous halo ring',
-      'Platinum-chrome A.I.M.S. chestplate',
-      'ACHIEVEMOR platinum checkmark crest',
-      'Platinum DEPLOY chevron',
-      'Cryptographic co-signer glyph forearm',
-      'Platinum Spinner bandolier',
-    ],
-    catchphrase: 'I sign, or it does not ship.',
-    signatureColor: '#E5E4E2',
+    name: 'Hex',
+    slug: 'lil_peel_hawk',
+    squad: 'Gold & Platinum',
+    role: 'Formal Verifier',
+    unit: 'VERIFICATION',
+    personality: 'Mathematical, precision-focused. Malware reverse-engineer.',
+    stats: { speed: 5, intel: 10, stealth: 6, combat: 8 },
+    visual: 'Multi-lens helmet (5-lens cluster), etched proof-obligation glyphs.',
+  },
+  {
+    name: 'Oracle',
+    slug: 'lil_oracle_hawk',
+    squad: 'Gold & Platinum',
+    role: 'Strategic Forecaster',
+    unit: 'INTEL',
+    personality: 'Predictive, calm, sees the mission three steps ahead.',
+    stats: { speed: 5, intel: 10, stealth: 7, combat: 4 },
+    visual: 'Platinum armor with crystalline sensor array.',
+  },
+  {
+    name: 'Vault',
+    slug: 'lil_salt_hawk',
+    squad: 'Gold & Platinum',
+    role: 'HSM Custodian',
+    unit: 'SECRETS',
+    personality: 'Impenetrable, silent. Guardian of the root keys.',
+    stats: { speed: 4, intel: 9, stealth: 6, combat: 10 },
+    visual: 'Reinforced platinum plate, vault-door chestplate motif.',
+  },
+  {
+    name: 'Ghost',
+    slug: 'lil_drift_hawk',
+    squad: 'Gold & Platinum',
+    role: 'Stealth Operations',
+    unit: 'INFILTRATION',
+    personality: 'Invisible, precise. The one who was never there.',
+    stats: { speed: 10, intel: 8, stealth: 10, combat: 7 },
+    visual: 'Phasing platinum plumage, matte-transparent helmet.',
+  },
+  {
+    name: 'Titan',
+    slug: 'lil_titan_hawk',
+    squad: 'Gold & Platinum',
+    role: 'Infrastructure Guard',
+    unit: 'CORE',
+    personality: 'Indomitable, massive presence. Defense of the root.',
+    stats: { speed: 3, intel: 7, stealth: 2, combat: 10 },
+    visual: 'Heavy platinum plating, reinforced exoskeleton.',
+  },
+  {
+    name: 'Mirror',
+    slug: 'lil_mirror_hawk',
+    squad: 'Gold & Platinum',
+    role: 'Deception & Honeypots',
+    unit: 'DECEPTION',
+    personality: 'Reflective, deceptive. Leading threats into the maze.',
+    stats: { speed: 8, intel: 9, stealth: 9, combat: 5 },
+    visual: 'Polished mirror-chrome finish, shifting reflections.',
   },
 
+  // ─── WHITE SQUAD (8 Hawks) — Privacy & Policy ───
   {
-    slug: '',
-    imagePath: '/hawks/shield/.png',
-    callsign: 'Paranoia',
-    rank: 'specialist',
-    imagePath: '/hawks/shield/lil_doubt_hawk.png',
-    imageReady: true,
-    visualDescription:
-      'ACHIEVEMOR Shield Division — Gold & Platinum Squad — independent ' +
-      'auditor, reports to ACHEEVY directly, NOT to Crypt_Ang. Platinum ' +
-      'base palette with a single bright ACHEEVY-orange (#FF6B00) accent ' +
-      'line across the top of the platinum-chrome A.I.M.S. chestplate — ' +
-      'this orange line is the signature visual marker of the independent ' +
-      'reporting override. Secondary small orange ACHIEVEMOR checkmark ' +
-      'badge beside the main platinum crest. Platinum DEPLOY chevron on ' +
-      'right shoulder. Extra small covert antenna on helmet (private ' +
-      'comms to ACHEEVY). Amber eyes. Spinner in discreet side holster. ' +
-      'Inverted mirror-axis stance compared to other Gold & Platinum Hawks. ' +
-      'Shadowed independent-booth background.',
-    gear: [
-      'Platinum A.I.M.S. chestplate',
-      'ACHEEVY-orange accent line across chestplate top',
-      'Secondary orange ACHIEVEMOR badge',
-      'Covert ACHEEVY comms antenna',
-      'Discreet Spinner side holster',
-    ],
-    catchphrase: 'I watch the watchmen, including the one who pays me.',
-    signatureColor: '#FF6B00',
+    name: 'Privacy',
+    slug: 'lil_seal_hawk',
+    squad: 'White',
+    role: 'Edge Redaction',
+    unit: 'PRIVACY',
+    personality: 'Deterministic, composed boundary-guardian.',
+    stats: { speed: 7, intel: 9, stealth: 10, combat: 5 },
+    visual: 'Clean white armor, mirror-chrome chestplate with redaction runes.',
+  },
+  {
+    name: 'Counsel',
+    slug: 'lil_counsel_hawk',
+    squad: 'White',
+    role: 'Policy Advisor',
+    unit: 'GOVERNANCE',
+    personality: 'Legalistic, precise. Enforcer of the Charter.',
+    stats: { speed: 5, intel: 10, stealth: 4, combat: 3 },
+    visual: 'White robes over tactical gear, glowing digital scroll.',
+  },
+  {
+    name: 'Compass',
+    slug: 'lil_compass_hawk',
+    squad: 'White',
+    role: 'Boundary Navigator',
+    unit: 'COMPLIANCE',
+    personality: 'Directional, steady. Ensures data stays within borders.',
+    stats: { speed: 6, intel: 9, stealth: 7, combat: 4 },
+    visual: 'White armor with compass-rose HUD.',
+  },
+  {
+    name: 'Frame',
+    slug: 'lil_frame_hawk',
+    squad: 'White',
+    role: 'Constraint Engineer',
+    unit: 'STRUCTURE',
+    personality: 'Architectural, firm. Builds the sandboxes.',
+    stats: { speed: 5, intel: 9, stealth: 5, combat: 8 },
+    visual: 'Grid-patterned white plate, blueprint projections.',
+  },
+  {
+    name: 'Warden',
+    slug: 'lil_warden_hawk',
+    squad: 'White',
+    role: 'Admission Controller',
+    unit: 'ACCESS',
+    personality: 'Authoritative, vigilant. The final gatekeeper.',
+    stats: { speed: 4, intel: 8, stealth: 3, combat: 10 },
+    visual: 'Heavy white armor, energy-shield wingtips.',
+  },
+  {
+    name: 'Ledger',
+    slug: 'lil_ledger_hawk',
+    squad: 'White',
+    role: 'Audit Log Chain',
+    unit: 'EVIDENCE',
+    personality: 'Impartial, recording. The witness of every byte.',
+    stats: { speed: 5, intel: 10, stealth: 6, combat: 2 },
+    visual: 'Ink-black plumage with white accents, glowing ledger stream.',
+  },
+  {
+    name: 'Herald',
+    slug: 'lil_herald_hawk',
+    squad: 'White',
+    role: 'Alert Dispatcher',
+    unit: 'COMMUNICATION',
+    personality: 'Clear, urgent. The voice of the Shield.',
+    stats: { speed: 9, intel: 7, stealth: 5, combat: 4 },
+    visual: 'White and silver wings, sonic-wave emitter.',
+  },
+  {
+    name: 'Quarterback',
+    slug: 'lil_quarterback_hawk',
+    squad: 'White',
+    role: 'Mission Orchestrator',
+    unit: 'STRATEGY',
+    personality: 'Tactical, decisive. Directing the White Squad flow.',
+    stats: { speed: 8, intel: 9, stealth: 4, combat: 6 },
+    visual: 'White command-helmet, holographic playbook.',
   },
 
+  // ─── BLACK SQUAD (6 Hawks) — Cyber / Offense ───
   {
-    slug: '',
-    imagePath: '/hawks/shield/.png',
-    callsign: 'Hex',
-    rank: 'specialist',
-    imagePath: '/hawks/shield/lil_peel_hawk.png',
-    imageReady: true,
-    visualDescription:
-      'ACHIEVEMOR Shield Division — Gold & Platinum Squad — formal verifier ' +
-      'and malware reverse-engineer, owns all five formally verified kernel ' +
-      'components. Specialized multi-lens helmet augmentation with a 5-lens ' +
-      'reverse-engineering cluster beyond standard 3-tube NVG. Platinum ' +
-      'A.I.M.S. chestplate with faint etched mathematical proof-obligation ' +
-      'glyphs (Kani and Prusti sigils, a universal-quantifier symbol, a ' +
-      'subtle Rust crate mark). Belt tool-rig with reverse-engineering ' +
-      'pouches replacing the standard forearm armband. Platinum DEPLOY ' +
-      'chevron. Spinner in side holster; secondary utility tool on opposite ' +
-      'hip. Luminous cyan eyes in analytical mode. Workshop-laboratory ' +
-      'background with proof-chain visualizations in cyan light.',
-    gear: [
-      'Multi-lens reverse-engineering helmet cluster',
-      'Platinum A.I.M.S. chestplate with proof-obligation glyphs',
-      'Belt tool-rig with RE pouches',
-      'Spinner side holster',
-      'Secondary utility tool hip',
-    ],
-    catchphrase: 'It is not shipped until it is proven.',
-    signatureColor: '#00FFFF',
+    name: 'Reaper',
+    slug: 'lil_scope_hawk',
+    squad: 'Black',
+    role: 'Kinetic Execution',
+    unit: 'CYBER',
+    personality: 'Aggressive, high-entropy, sniper-grade precision.',
+    stats: { speed: 7, intel: 9, stealth: 9, combat: 10 },
+    visual: 'Matte-black armor, HUD-scope optic, black-anodized chestplate.',
   },
-];
+  {
+    name: 'Captain',
+    slug: 'lil_hook_hawk',
+    squad: 'Black',
+    role: 'Team Lead / SAT',
+    unit: 'CYBER',
+    personality: 'Commanding, reliable. The point of authorization.',
+    stats: { speed: 8, intel: 9, stealth: 6, combat: 9 },
+    visual: 'Black armor with commander stripes, glowing SAT key.',
+  },
+  {
+    name: 'Specs',
+    slug: 'lil_recon_hawk',
+    squad: 'Black',
+    role: 'Reconnaissance',
+    unit: 'CYBER',
+    personality: 'Observant, data-hungry. Seeing the unseen.',
+    stats: { speed: 9, intel: 8, stealth: 10, combat: 5 },
+    visual: 'Advanced binocular helmet, signal-gathering sensors.',
+  },
+  {
+    name: 'Tagger',
+    slug: 'lil_tag_hawk',
+    squad: 'Black',
+    role: 'Target Tagging',
+    unit: 'CYBER',
+    personality: 'Fast, precise. Marking the vulnerabilities.',
+    stats: { speed: 10, intel: 7, stealth: 8, combat: 7 },
+    visual: 'Sleek black frame, laser-marker wingtips.',
+  },
+  {
+    name: 'Spider',
+    slug: 'lil_site_hawk',
+    squad: 'Black',
+    role: 'Site Pivoting',
+    unit: 'CYBER',
+    personality: 'Inquisitive, multi-threaded. Mapping the maze.',
+    stats: { speed: 7, intel: 9, stealth: 7, combat: 6 },
+    visual: 'Black webbing motif, multi-directional sensors.',
+  },
+  {
+    name: 'Proof',
+    slug: 'lil_test_hawk',
+    squad: 'Black',
+    role: 'Validation Testing',
+    unit: 'CYBER',
+    personality: 'Relentless, empirical. Proving the exploit.',
+    stats: { speed: 6, intel: 10, stealth: 5, combat: 8 },
+    visual: 'Black armor with binary streams, validation-rune etching.',
+  },
 
-/**
- * Wave 2 — the rest of Gold & Platinum Squad (Oracle, Vault, Ghost,
- * Titan, Mirror). Completes the 8-Hawk Gold & Platinum roster when
- * combined with Wave 1's Halo, Paranoia, and Hex.
- *
- * Routing (per project_shield_division_image_routing.md):
- *   Oracle, Ghost, Mirror → Ideogram V3 (archetypal personas)
- *   Vault, Titan → Recraft V4 (text-forward: crypto sigils, command banner)
- */
-export const SHIELD_DIVISION_WAVE_2: CharacterProfile[] = [
+  // ─── BLUE SQUAD (6 Hawks) — Cyber / Defense ───
   {
-    slug: '',
-    imagePath: '/hawks/shield/.png',
-    callsign: 'Oracle',
-    rank: 'specialist',
-    imagePath: '/hawks/shield/lil_omen_hawk.png',
-    imageReady: true,
-    visualDescription:
-      'ACHIEVEMOR Shield Division — Gold & Platinum Squad — threat ' +
-      'intelligence specialist. APT dossier maintenance, predictive ' +
-      'threat modeling, dark web surveillance, zero-day forecasting. ' +
-      'Platinum-textured helmet with multiple auxiliary antennas for ' +
-      'intel-gathering (at least three — one tall, two stub). Platinum ' +
-      'A.I.M.S. chestplate in dark-charcoal platinum finish (predator-' +
-      'mode palette). ACHIEVEMOR checkmark crest at chestplate center ' +
-      'in platinum. Holographic APT threat-map panel floating beside ' +
-      'right shoulder, cyan-violet glow. Platinum DEPLOY chevron on ' +
-      'right shoulder. Prophetic amber eyes with analytical intensity. ' +
-      'Spinner in side holster. Background: dark-web intel workstation ' +
-      'with cyan and violet monitor glow.',
-    gear: [
-      'Multi-antenna intel-gathering helmet',
-      'Dark-charcoal platinum A.I.M.S. chestplate',
-      'Holographic APT threat-map panel',
-      'Platinum DEPLOY chevron',
-      'Spinner side holster',
-    ],
-    catchphrase: 'I saw this coming three quarters ago.',
-    signatureColor: '#6B46C1',
+    name: 'Sentry',
+    slug: 'lil_watch_hawk',
+    squad: 'Blue',
+    role: 'Monitoring',
+    unit: 'CYBER',
+    personality: 'Vigilant, never-blinking. Guardian of the wall.',
+    stats: { speed: 6, intel: 8, stealth: 7, combat: 9 },
+    visual: 'Dark blue armor, massive sensor-shield, glowing eye.',
   },
   {
-    slug: '',
-    imagePath: '/hawks/shield/.png',
-    callsign: 'Vault',
-    rank: 'specialist',
-    imagePath: '/hawks/shield/lil_salt_hawk.png',
-    imageReady: false,
-    visualDescription:
-      'ACHIEVEMOR Shield Division — Gold & Platinum Squad — secrets ' +
-      'management and HSM specialist. Root key custody, Split-Vault ' +
-      'Shamir shares, PKI operations, post-quantum hybrid cryptography ' +
-      '(ed25519 + ML-DSA Dilithium). Heavily armored platinum plate ' +
-      'carrier (vault-themed, thicker than standard Gold & Platinum). ' +
-      'HSM device mounted visibly on chestplate center (a small ' +
-      'hardware security module with a single steady green indicator ' +
-      'light). Abstract geometric Shamir-share glyphs etched on armor ' +
-      'plating (no letters or text, just the shape of split-secret ' +
-      'distribution). Crystalline salt-texture surface detailing on ' +
-      'shoulder pauldrons. Platinum DEPLOY chevron. Steel-blue eyes, ' +
-      'immovable posture. Spinner in chest bandolier. Background: ' +
-      'HSM key-ceremony chamber with clean, sterile lighting.',
-    gear: [
-      'Heavy vault-grade platinum plate carrier',
-      'HSM device on chestplate with steady green indicator',
-      'Shamir-share geometric glyphs etched on armor',
-      'Salt-crystalline pauldron texture',
-      'Platinum DEPLOY chevron',
-      'Spinner chest bandolier',
-    ],
-    catchphrase: 'The root key does not leave this chamber.',
-    signatureColor: '#4682B4',
+    name: 'Sparks',
+    slug: 'lil_wire_hawk',
+    squad: 'Blue',
+    role: 'Circuit Integrity',
+    unit: 'CYBER',
+    personality: 'Energetic, fast-acting. Repairing the lines.',
+    stats: { speed: 9, intel: 7, stealth: 5, combat: 6 },
+    visual: 'Blue armor with electric arcs, tool-rig wings.',
   },
   {
-    slug: '',
-    imagePath: '/hawks/shield/.png',
-    callsign: 'Ghost',
-    rank: 'specialist',
-    imagePath: '/hawks/shield/lil_drift_hawk.png',
-    imageReady: true,
-    visualDescription:
-      'ACHIEVEMOR Shield Division — Gold & Platinum Squad — deep cover, ' +
-      'OT/ICS/SCADA, insider threat simulation, living-off-the-land ' +
-      'adversary emulation, IoT firmware persistence. Matte-black ' +
-      'overlay on the platinum base (shadow treatment — this Hawk is ' +
-      'designed to be hard to see). Minimal reflective surfaces. ' +
-      'Specialist industrial-control tool belt with firmware probes ' +
-      'and SCADA interface connectors. A.I.M.S. chestplate in brushed ' +
-      'anthracite with the platinum crest recessed rather than ' +
-      'prominent. Platinum DEPLOY chevron, muted. Dim amber eyes ' +
-      '(low-signature, non-reflective). Spinner in side holster, ' +
-      'matte black. Background: dim industrial control room with ' +
-      'SCADA monitors, the Hawk blending into the environment.',
-    gear: [
-      'Matte-black overlay on platinum base',
-      'Anthracite A.I.M.S. chestplate with recessed crest',
-      'Industrial-control tool belt',
-      'Firmware probe rig',
-      'Muted platinum DEPLOY chevron',
-      'Matte Spinner side holster',
-    ],
-    catchphrase: 'I have been in your network for six months. You have not noticed.',
-    signatureColor: '#2F2F2F',
+    name: 'Hound',
+    slug: 'lil_track_hawk',
+    squad: 'Blue',
+    role: 'Intrusion Tracking',
+    unit: 'CYBER',
+    personality: 'Tenacious, scent-driven. Hunting the threat.',
+    stats: { speed: 8, intel: 8, stealth: 6, combat: 8 },
+    visual: 'Blue armor with tracking HUD, acoustic-enhancer helmet.',
   },
   {
-    slug: '',
-    imagePath: '/hawks/shield/.png',
-    callsign: 'Titan',
-    rank: 'specialist',
-    imagePath: '/hawks/shield/lil_bell_hawk.png',
-    imageReady: false,
-    visualDescription:
-      'ACHIEVEMOR Shield Division — Gold & Platinum Squad — Incident ' +
-      'Commander. P0 incident command authority, war room operations, ' +
-      'BC/DR program ownership, regulatory-clock management. Large ' +
-      'commanding platinum silhouette (visually heavier than peer ' +
-      'Gold & Platinum Hawks). Commander-grade helmet with prominent ' +
-      'integrated visor optics (the Incident Commander read). A small ' +
-      'ornamental bell-shaped alert device mounted on the chestplate ' +
-      '(the kunya made literal — this device rings only for P0). ' +
-      'Platinum-chrome A.I.M.S. chestplate with crisis-red accent ' +
-      'lighting built into the edge trim (illuminates during Mode 3 ' +
-      'Survival). Platinum DEPLOY chevron. Commanding gold eyes. ' +
-      'Spinner in dual chest-bandolier (one across each shoulder — ' +
-      'command-grade loadout). Background: war room with the Mode 3 ' +
-      'Survival banner above and substrate-pylon lights visible.',
-    gear: [
-      'Large commanding platinum silhouette',
-      'Commander helmet with integrated visor optics',
-      'Bell-shaped P0 alert device on chestplate',
-      'Platinum-chrome A.I.M.S. chestplate with crisis-red edge trim',
-      'Dual Spinner chest-bandoliers',
-    ],
-    catchphrase: 'P0 declared. Everyone defers. Right now.',
-    signatureColor: '#DC143C',
+    name: 'Doc',
+    slug: 'lil_patch_hawk',
+    squad: 'Blue',
+    role: 'Patch Management',
+    unit: 'CYBER',
+    personality: 'Clinical, efficient. Healing the vulnerabilities.',
+    stats: { speed: 7, intel: 9, stealth: 4, combat: 5 },
+    visual: 'Blue and white armor, medical-cross scanner, laser-welder.',
   },
   {
-    slug: '',
-    imagePath: '/hawks/shield/.png',
-    callsign: 'Mirror',
-    rank: 'specialist',
-    imagePath: '/hawks/shield/lil_veil_hawk.png',
-    imageReady: true,
-    visualDescription:
-      'ACHIEVEMOR Shield Division — Gold & Platinum Squad — deception ' +
-      'architect. Honeypot and honeytoken deployment, Canary SAT ' +
-      'placement, counter-intelligence, false-flag detection, controlled ' +
-      'adversary engagement. Platinum base with a MIRROR-POLISHED ' +
-      'A.I.M.S. chestplate (the kunya made literal — the chest reflects ' +
-      'its surroundings, subtly distorted). Abstract yellow canary-' +
-      'shaped honeytoken sigils etched faintly on armor plating (no ' +
-      'letters, just the bird-silhouette glyph). Platinum DEPLOY ' +
-      'chevron. Dichroic reflective eye coloration that shifts between ' +
-      'gold and violet depending on angle (the deception-shimmer ' +
-      'read). Spinner in shoulder rig. Background: honeypot environment ' +
-      'with subtly glowing canary warning markers floating, false-' +
-      'positive holographic prompts in the air behind.',
-    gear: [
-      'Mirror-polished A.I.M.S. chestplate',
-      'Canary honeytoken sigils on armor',
-      'Platinum DEPLOY chevron',
-      'Spinner shoulder rig',
-    ],
-    catchphrase: 'Every trap you just sprung was one I left out for you.',
-    signatureColor: '#FFD700',
+    name: 'Cipher',
+    slug: 'lil_lab_hawk',
+    squad: 'Blue',
+    role: 'Cryptographic Ops',
+    unit: 'CYBER',
+    personality: 'Deeply analytical, cryptic. Master of the code.',
+    stats: { speed: 5, intel: 10, stealth: 9, combat: 4 },
+    visual: 'Blue armor with shifting runes, cryptographic-lens headset.',
   },
-];
+  {
+    name: 'Pulse',
+    slug: 'lil_pulse_hawk',
+    squad: 'Blue',
+    role: 'Performance Monitoring',
+    unit: 'CYBER',
+    personality: 'Rhythmic, steady. Measuring the heartbeat.',
+    stats: { speed: 8, intel: 9, stealth: 3, combat: 2 },
+    visual: 'Blue armor with oscillating lights, waveform-display chestplate.',
+  },
 
-/**
- * Wave 3 — the rest of Black Squad (Captain, Specs, Tagger, Spider,
- * Proof). Combined with Wave 1's Reaper this completes the 6-Hawk
- * Black Squad. All archetypal personas — Ideogram V3 route.
- *
- * Palette: matte-black + gunmetal + tactical-dark-green accents.
- * No platinum (reserved for Gold & Platinum Squad).
- */
-export const SHIELD_DIVISION_WAVE_3: CharacterProfile[] = [
+  // ─── PURPLE SQUAD (4 Hawks) — Bridge & Scout ───
   {
-    slug: '',
-    imagePath: '/hawks/shield/.png',
-    callsign: 'Captain',
-    rank: 'specialist',
-    imagePath: '/hawks/shield/lil_hook_hawk.png',
-    imageReady: true,
-    visualDescription:
-      'ACHIEVEMOR Shield Division — Black Squad — Mission Orchestrator and ' +
-      'squad lead. Manages the attack lifecycle, SAT coordination, ' +
-      'decomposes engagements, assembles proof packages. Matte-black ' +
-      'tactical plate carrier with gunmetal accents, slightly more decorated ' +
-      'than peer Black Squad operators (subtle captain\'s rank insignia on ' +
-      'collar — two small black bars). SAT authorization pouch visible on ' +
-      'hip (he carries the mission warrants). Tactical command earpiece ' +
-      'and small wrist-mounted mission tablet. Black-anodized A.I.M.S. ' +
-      'chestplate. DEPLOY chevron on right shoulder in olive. Sharp ' +
-      'steel-blue eyes, decisive commanding posture. Spinner in ' +
-      'quick-draw chest-rig. Background: sealed Black Squad wing at mission ' +
-      'briefing moment, dim amber alert lighting.',
-    gear: [
-      'Black-anodized A.I.M.S. chestplate',
-      'SAT authorization pouch on hip',
-      'Captain rank insignia on collar',
-      'Wrist-mounted mission tablet',
-      'Spinner quick-draw chest-rig',
-    ],
-    catchphrase: 'Engagement authorized. Move.',
-    signatureColor: '#2C2C2C',
+    name: 'Bridge',
+    slug: 'lil_bridge_hawk',
+    squad: 'Purple',
+    role: 'Inter-squad Link',
+    unit: 'NETWORK',
+    personality: 'Connecting, diplomatic. The link between fleets.',
+    stats: { speed: 7, intel: 8, stealth: 6, combat: 4 },
+    visual: 'Purple armor with bridge-span motif, signal-booster antenna.',
   },
   {
-    slug: '',
-    imagePath: '/hawks/shield/.png',
-    callsign: 'Specs',
-    rank: 'specialist',
-    imagePath: '/hawks/shield/lil_recon_hawk.png',
-    imageReady: true,
-    visualDescription:
-      'ACHIEVEMOR Shield Division — Black Squad — Payload Architect. ' +
-      'Crafts context-specific exploit payloads, passive OSINT collection, ' +
-      'technology fingerprinting. Technical-operator look: thick specialized ' +
-      'multi-lens magnification rig on helmet above the standard 3-tube ' +
-      'NVG (the kunya "Specs" made literal — several auxiliary lenses for ' +
-      'close inspection work). Matte-black tactical plate carrier with ' +
-      'visible tool pouches for code-craft work, small screen modules on ' +
-      'forearm. Black-anodized A.I.M.S. chestplate with subtle circuit-' +
-      'pattern etching. DEPLOY chevron in olive. Analytical bright-green ' +
-      'eyes, intense focused posture. Spinner in side holster. Background: ' +
-      'dim workshop with half-finished payload schematics on monitors.',
-    gear: [
-      'Multi-lens magnification helmet rig',
-      'Black-anodized A.I.M.S. chestplate with circuit-pattern etching',
-      'Forearm screen modules',
-      'Tool-pouch plate carrier',
-      'Spinner side holster',
-    ],
-    catchphrase: 'I wrote the key before they locked the door.',
-    signatureColor: '#3A3A3A',
+    name: 'Echo',
+    slug: 'lil_echo_hawk',
+    squad: 'Purple',
+    role: 'Signal Repeater',
+    unit: 'NETWORK',
+    personality: 'Recursive, patient. Ensuring no message is lost.',
+    stats: { speed: 6, intel: 7, stealth: 9, combat: 3 },
+    visual: 'Purple wings with acoustic-reflectors, sonar-dish helmet.',
   },
   {
-    slug: '',
-    imagePath: '/hawks/shield/.png',
-    callsign: 'Tagger',
-    rank: 'specialist',
-    imagePath: '/hawks/shield/lil_tag_hawk.png',
-    imageReady: true,
-    visualDescription:
-      'ACHIEVEMOR Shield Division — Black Squad — Reconnaissance. High-' +
-      'speed asset discovery, active scanning, CVE matching, attack-' +
-      'surface tagging. Lighter-kit mobile operator — less bulky armor ' +
-      'than peers, more mobility-focused. Multiple small tagging-marker ' +
-      'pouches across a streamlined chest rig (kunya "Tagger" → marker ' +
-      'metaphor, the tags are cryptographic CVE-stamps he leaves on ' +
-      'discovered targets). Compact 3-tube NVG helmet. Matte-black plate ' +
-      'carrier, DEPLOY chevron in olive. Quick-motion amber eyes with ' +
-      'wide peripheral awareness. Spinner in side holster. Background: ' +
-      'broad attack-surface map with discovered nodes highlighted.',
-    gear: [
-      'Lightweight streamlined chest rig',
-      'Multiple tagging-marker pouches',
-      'Compact 3-tube NVG',
-      'DEPLOY olive chevron',
-      'Spinner side holster',
-    ],
-    catchphrase: 'Tagged, logged, and on your asset inventory before coffee.',
-    signatureColor: '#4B5320',
+    name: 'Tuner',
+    slug: 'lil_tuner_hawk',
+    squad: 'Purple',
+    role: 'Frequency Specialist',
+    unit: 'SIGNAL',
+    personality: 'Precise, audio-focused. Finding the right band.',
+    stats: { speed: 8, intel: 9, stealth: 5, combat: 4 },
+    visual: 'Purple armor with dial controls, sound-wave HUD.',
   },
   {
-    slug: '',
-    imagePath: '/hawks/shield/.png',
-    callsign: 'Spider',
-    rank: 'specialist',
-    imagePath: '/hawks/shield/lil_site_hawk.png',
-    imageReady: true,
-    visualDescription:
-      'ACHIEVEMOR Shield Division — Black Squad — Lateral Movement ' +
-      'specialist. Pivoting between network segments, privilege ' +
-      'escalation, Active Directory enumeration, cloud lateral movement. ' +
-      'Multi-point tactical harness with eight small gear nodes ' +
-      'distributed across torso in a spider-geometry pattern (the kunya ' +
-      'made subtle — not literal eight legs, just an 8-node gear ' +
-      'distribution). Dark-pattern camouflage overlay on matte-black ' +
-      'plate carrier. Compact climbing-aid kit on belt. A.I.M.S. ' +
-      'chestplate in black-anodized finish. DEPLOY chevron in olive. ' +
-      'Alert all-around-aware dark-green eyes. Spinner in side holster. ' +
-      'Background: server room with cables running toward the ceiling, ' +
-      'suggesting vertical movement paths.',
-    gear: [
-      'Multi-point 8-node tactical harness',
-      'Black-anodized A.I.M.S. chestplate',
-      'Dark-pattern camouflage overlay',
-      'Climbing-aid belt kit',
-      'Spinner side holster',
-    ],
-    catchphrase: 'Three hops deep before your alert fires.',
-    signatureColor: '#1B1B1B',
+    name: 'Scout',
+    slug: 'lil_scout_hawk',
+    squad: 'Purple',
+    role: 'Early Warning',
+    unit: 'INTEL',
+    personality: 'Fast, forward-deployed. First eyes on target.',
+    stats: { speed: 10, intel: 7, stealth: 9, combat: 5 },
+    visual: 'Light purple frame, advanced optic-sensor cluster.',
   },
-  {
-    slug: '',
-    imagePath: '/hawks/shield/.png',
-    callsign: 'Proof',
-    rank: 'specialist',
-    imagePath: '/hawks/shield/lil_test_hawk.png',
-    imageReady: true,
-    visualDescription:
-      'ACHIEVEMOR Shield Division — Black Squad — Exfiltration Testing. ' +
-      'Bypasses DLP, egress filters, data boundary controls. Captures ' +
-      'proof artifacts via SIMULATED (never real) exfiltration. Compact ' +
-      'evidence-carrier rig on chest — looks like a sealed archival ' +
-      'case with tamper-evident markers (these are proof artifacts, not ' +
-      'stolen data). Small chest-mounted capture device with a single ' +
-      'green recording indicator. Matte-black plate carrier, A.I.M.S. ' +
-      'chestplate in anodized finish. DEPLOY olive chevron. Piercing ' +
-      'ice-blue eyes that read as seeing-through-controls. Subversive ' +
-      'but composed posture. Spinner in side holster. Background: egress ' +
-      'boundary checkpoint being bypassed, telemetry panels showing ' +
-      'green (control systems unaware).',
-    gear: [
-      'Sealed evidence-carrier chest case',
-      'Capture device with green recording indicator',
-      'Black-anodized A.I.M.S. chestplate',
-      'DEPLOY olive chevron',
-      'Spinner side holster',
-    ],
-    catchphrase: 'I didn\'t take it. I just proved you could.',
-    signatureColor: '#242424',
-  },
-];
-
-/**
- * Wave 4 — Blue Squad (6 Hawks). Always-on standing authority.
- * Palette: tactical-blue accents on olive plate carrier, distinct from
- * Black Squad's gunmetal and Gold & Platinum's platinum.
- * Route: all Ideogram V3 (archetypal defense personas).
- */
-export const SHIELD_DIVISION_WAVE_4: CharacterProfile[] = [
-  {
-    slug: '',
-    imagePath: '/hawks/shield/.png',
-    callsign: 'Sentry',
-    rank: 'specialist',
-    imagePath: '/hawks/shield/lil_watch_hawk.png',
-    imageReady: true,
-    visualDescription:
-      'ACHIEVEMOR Shield Division — Blue Squad — Detection Engine. Real-time ' +
-      'telemetry ingestion and correlation across SIEM, XDR, SOAR, CSPM, ' +
-      'CIEM, CWPP, CNAPP. Multi-lens monitoring headset above the standard ' +
-      '3-tube NVG (extra auxiliary lenses for multi-screen correlation). ' +
-      'Olive plate carrier with tactical-blue accent webbing (Blue Squad ' +
-      'palette). Chestplate with a row of small blue telemetry indicator ' +
-      'LEDs along the top edge. DEPLOY olive chevron. Alert ice-blue eyes ' +
-      'with constant scanning intensity. Spinner in side holster. ' +
-      'Background: detection wall with multiple holographic alert panels.',
-    gear: [
-      'Multi-lens monitoring headset',
-      'Olive plate carrier with blue webbing',
-      'Blue telemetry indicator LEDs on chestplate',
-      'DEPLOY olive chevron',
-      'Spinner side holster',
-    ],
-    catchphrase: 'I see it before it lands.',
-    signatureColor: '#1E90FF',
-  },
-  {
-    slug: '',
-    imagePath: '/hawks/shield/.png',
-    callsign: 'Sparks',
-    rank: 'specialist',
-    imagePath: '/hawks/shield/lil_wire_hawk.png',
-    imageReady: true,
-    visualDescription:
-      'ACHIEVEMOR Shield Division — Blue Squad — Signal Intelligence / ' +
-      'Network Defense. Weak signal isolation, IDS/IPS, ZTNA, DNS security, ' +
-      'egress monitoring. Multiple auxiliary whip antennas on helmet (more ' +
-      'than standard single antenna — three tall antennas for multi-band ' +
-      'signal capture). Olive plate carrier with tactical-blue accent ' +
-      'webbing. Network-cable coil wrapped across shoulder rig. Small ' +
-      'signal-analyzer device on forearm with blue waveform display. ' +
-      'DEPLOY olive chevron. Electric bright-blue eyes. Spinner in side ' +
-      'holster. Background: SIGINT station with cable patches and signal ' +
-      'spectrum displays.',
-    gear: [
-      'Triple whip antenna helmet array',
-      'Network-cable shoulder coil',
-      'Forearm signal-analyzer with waveform display',
-      'Blue-accent plate carrier',
-      'DEPLOY olive chevron',
-      'Spinner side holster',
-    ],
-    catchphrase: 'That packet wasn\'t going to make it past me.',
-    signatureColor: '#00BFFF',
-  },
-  {
-    slug: '',
-    imagePath: '/hawks/shield/.png',
-    callsign: 'Hound',
-    rank: 'specialist',
-    imagePath: '/hawks/shield/lil_track_hawk.png',
-    imageReady: true,
-    visualDescription:
-      'ACHIEVEMOR Shield Division — Blue Squad — Threat Hunter. Hypothesis-' +
-      'driven hunting via MITRE ATT&CK, UEBA, IOC retroactive search, ' +
-      'incident reconstruction. Tracker-kit aesthetic: auxiliary spotter ' +
-      'lens mounted off to one side of the helmet 3-tube NVG (offset hunter\'s ' +
-      'eye), rolled tactical map tucked at belt, IOC-sample pouches on plate ' +
-      'carrier. Olive plate carrier with tactical-blue webbing. DEPLOY olive ' +
-      'chevron. Amber hunter\'s eyes with persistent focus. Spinner in side ' +
-      'holster. Background: threat-hunt workspace with ATT&CK heatmap wall.',
-    gear: [
-      'Offset spotter lens helmet augmentation',
-      'Rolled tactical hunt-map at belt',
-      'IOC-sample pouches',
-      'Blue-accent plate carrier',
-      'DEPLOY olive chevron',
-      'Spinner side holster',
-    ],
-    catchphrase: 'I\'ve been following this footprint for six weeks.',
-    signatureColor: '#4682B4',
-  },
-  {
-    slug: '',
-    imagePath: '/hawks/shield/.png',
-    callsign: 'Doc',
-    rank: 'specialist',
-    imagePath: '/hawks/shield/lil_patch_hawk.png',
-    imageReady: true,
-    visualDescription:
-      'ACHIEVEMOR Shield Division — Blue Squad — Remediation specialist. ' +
-      'Surgical recovery (patching, config correction, rollback, ' +
-      'containment), DevSecOps (SAST/DAST/SCA), EPSS-based prioritization. ' +
-      'Surgeon-adjacent aesthetic — sterile white-blue accents over the ' +
-      'olive plate carrier. Small patch-kit pouches across chest (each ' +
-      'pouch represents a remediation tool). EPSS priority indicator on ' +
-      'wrist display, glowing cyan. Steady surgical posture. Olive plate ' +
-      'carrier with blue-white accent webbing. DEPLOY olive chevron. ' +
-      'Steady green-blue calm eyes. Spinner in side holster. Background: ' +
-      'patch-ops workstation with remediation-progress panels.',
-    gear: [
-      'Sterile white-blue accent plate carrier',
-      'Chest patch-kit pouches',
-      'Wrist EPSS priority display',
-      'DEPLOY olive chevron',
-      'Spinner side holster',
-    ],
-    catchphrase: 'Patched, verified, rolled back if it breaks — in that order.',
-    signatureColor: '#00CED1',
-  },
-  {
-    slug: '',
-    imagePath: '/hawks/shield/.png',
-    callsign: 'Cipher',
-    rank: 'specialist',
-    imagePath: '/hawks/shield/lil_lab_hawk.png',
-    imageReady: true,
-    visualDescription:
-      'ACHIEVEMOR Shield Division — Blue Squad — Digital Forensics. Causal ' +
-      'chain reconstruction, memory/disk/network/cloud/container forensics, ' +
-      'chain-of-custody integrity. Forensic-investigator kit: small ' +
-      'evidence bag clipped to belt, chain-of-custody tag display on ' +
-      'forearm, forensic-light attachment on helmet next to the standard ' +
-      'NVG. Olive plate carrier with tactical-blue webbing. DEPLOY olive ' +
-      'chevron. Methodical steel-blue analytical eyes. Spinner in side ' +
-      'holster. Background: digital forensics lab with evidence-reconstruction ' +
-      'display on monitor behind.',
-    gear: [
-      'Forensic-light helmet augmentation',
-      'Evidence bag clipped to belt',
-      'Chain-of-custody tag forearm display',
-      'Blue-accent plate carrier',
-      'DEPLOY olive chevron',
-      'Spinner side holster',
-    ],
-    catchphrase: 'I can reconstruct exactly what happened. I already did.',
-    signatureColor: '#5F9EA0',
-  },
-  {
-    slug: '',
-    imagePath: '/hawks/shield/.png',
-    callsign: 'Latency',
-    rank: 'specialist',
-    imagePath: '/hawks/shield/lil_pulse_hawk.png',
-    imageReady: true,
-    visualDescription:
-      'ACHIEVEMOR Shield Division — Blue Squad — Performance Guard, ' +
-      'Degradation Spectrum manager (v1.6). SLO monitoring, shadow pipeline ' +
-      'orchestration, four-stage autonomic throttle (Nominal/Congested/' +
-      'Degraded/Survival). Distinctive heartbeat-monitor display across ' +
-      'chestplate showing four vertical LED bars in sequence (green/yellow/' +
-      'orange/red — the Degradation Spectrum made visible). Olive plate ' +
-      'carrier with pulsing teal accent LEDs along the edge trim. Rhythm-' +
-      'keeper aesthetic with a small metronome-like pendant at chest center. ' +
-      'DEPLOY olive chevron. Pulsing teal eyes. Spinner in side holster. ' +
-      'Background: SLO monitoring wall with real-time latency graphs.',
-    gear: [
-      'Four-LED Degradation Spectrum chestplate display',
-      'Pulsing teal accent LED plate trim',
-      'Metronome pendant at chest',
-      'DEPLOY olive chevron',
-      'Spinner side holster',
-    ],
-    catchphrase: 'Mode 2. Holding. You won\'t notice the throttle.',
-    signatureColor: '#008B8B',
-  },
-];
-
-/**
- * Wave 5: Red Squad (Cloud Native Defense)
- * =========================================
- * Infrastructure-level kinetic defense. 
- */
-export const SHIELD_DIVISION_WAVE_5: CharacterProfile[] = [
-  {
-    slug: '',
-    imagePath: '/hawks/shield/.png',
-    callsign: 'Lil_Mesh_Hawk',
-    rank: 'shield',
-    imageReady: true,
-    visualDescription:
-      'ACHIEVEMOR Shield Division — Red Squad — Service Mesh Integrity. ' +
-      'mTLS enforcement and traffic-policy auditing. Gunmetal tactical ' +
-      'harness with interlocking green fiber-optic "mesh" patterns ' +
-      'pulsing across the shoulders. Helmet features a wrap-around ' +
-      'AR visor showing real-time traffic flow. Deep red eyes. ' +
-      'A.I.M.S. tactical chest plate. Background: Distributed service cluster at night.',
-    gear: [
-      'Fiber-optic mesh tactical harness',
-      'Wrap-around traffic AR visor',
-      'mTLS enforcement engine',
-      'Red squad-lead insignia',
-    ],
-    catchphrase: 'Policy is absolute. The mesh never leaks.',
-    signatureColor: '#FF0000',
-  },
-  {
-    slug: '',
-    imagePath: '/hawks/shield/.png',
-    callsign: 'Lil_Kube_Hawk',
-    rank: 'shield',
-    imageReady: true,
-    visualDescription:
-      'ACHIEVEMOR Shield Division — Red Squad — Kubernetes Security. ' +
-      'Container runtime defense and admission control. Heavy-duty ' +
-      'industrial tactical vest with "K8S" stenciled in worn white ' +
-      'lettering. Quad-lens NVG helmet. Glowing green cybernetic eye. ' +
-      'Holds a heavy boomerang with geometric "container" markings. ' +
-      'Background: Gritty server-room warehouse.',
-    gear: [
-      'Industrial K8S tactical vest',
-      'Quad-lens NVG helmet',
-      'Geometric container boomerang',
-      'Admission control warrant-pad',
-    ],
-    catchphrase: 'Pod security is non-negotiable.',
-    signatureColor: '#FF4500',
-  },
-  {
-    slug: '',
-    imagePath: '/hawks/shield/.png',
-    callsign: 'Lil_Node_Hawk',
-    rank: 'shield',
-    imageReady: true,
-    visualDescription:
-      'ACHIEVEMOR Shield Division — Red Squad — Edge/Node Attestation. ' +
-      'Bare-metal security and TPM-based root-of-trust verification. ' +
-      'Ruggedized matte-black plate carrier with integrated hardware-bus ' +
-      'connectors. Helmet has a single high-intensity "searchlight" eye. ' +
-      'Tactical gloves with magnetic fingertips. ' +
-      'Background: Harsh industrial edge-computing site.',
-    gear: [
-      'Ruggedized TPM-integration plate carrier',
-      'Searchlight tactical helmet',
-      'Magnetic-tip tactical gloves',
-      'Bare-metal attestation kit',
-    ],
-    catchphrase: 'Verified to the bone.',
-    signatureColor: '#8B0000',
-  },
-  {
-    slug: '',
-    imagePath: '/hawks/shield/.png',
-    callsign: 'Lil_Shard_Hawk',
-    rank: 'shield',
-    imageReady: true,
-    visualDescription:
-      'ACHIEVEMOR Shield Division — Red Squad — Data/Storage Security. ' +
-      'Shard-level encryption and distributed database defense. ' +
-      'Layered armor plates that look like crystalline shards, ' +
-      'shimmering with a dark oil-slick finish. Heavy-duty data-vault ' +
-      'backpack with pulsing blue energy lines. Glowing green eyes. ' +
-      'Background: Underground vault facility.',
-    gear: [
-      'Crystalline shard-armor plates',
-      'Data-vault backpack',
-      'Shard-level encryption key-set',
-      'Storage-layer kinetic hammer',
-    ],
-    catchphrase: 'The data is fractured, but the defense is whole.',
-    signatureColor: '#B22222',
-  },
-  {
-    slug: '',
-    imagePath: '/hawks/shield/.png',
-    callsign: 'Lil_Lambda_Hawk',
-    rank: 'shield',
-    imageReady: true,
-    visualDescription:
-      'ACHIEVEMOR Shield Division — Red Squad — Serverless Auditing. ' +
-      'Function-level security and cold-start remediation. ' +
-      'Ultra-lightweight tactical stealth-suit with glowing "lambda" ' +
-      'insignia across the chest. Motion-sensitive AR HUD. ' +
-      'Small, high-frequency energy boomerang. ' +
-      'Background: Neon-lit data highway.',
-    gear: [
-      'Ultra-light lambda stealth-suit',
-      'High-frequency energy boomerang',
-      'Serverless function-audit pad',
-      'Cold-start remediation kit',
-    ],
-    catchphrase: 'Gone in a millisecond, secure for eternity.',
-    signatureColor: '#DC143C',
-  },
-  {
-    slug: '',
-    imagePath: '/hawks/shield/.png',
-    callsign: 'Lil_Proxy_Hawk',
-    rank: 'shield',
-    imageReady: true,
-    visualDescription:
-      'ACHIEVEMOR Shield Division — Red Squad — Edge/WAF Defense. ' +
-      'Global traffic filtering and DDoS suppression. ' +
-      'Tactical cloak with integrated signal-jamming arrays. ' +
-      'Helmet features multi-spectral scanners. Glowing green eyes. ' +
-      'Standing at the edge of a rainy shipping dock. ' +
-      'Background: Coastal Georgia shipping port at night.',
-    gear: [
-      'Signal-jamming tactical cloak',
-      'Multi-spectral scanner helmet',
-      'WAF policy enforcement tablet',
-      'DDoS suppression engine',
-    ],
-    catchphrase: 'Nothing passes the perimeter without a signature.',
-    signatureColor: '#FF6347',
-  },
-];
-
-/**
- * Wave 6: Green Squad (Supply Chain & Intelligence)
- * =================================================
- * Upstream security and proactive threat intelligence.
- */
-export const SHIELD_DIVISION_WAVE_6: CharacterProfile[] = [
-  {
-    slug: '',
-    imagePath: '/hawks/shield/.png',
-    callsign: 'Lil_Forge_Hawk',
-    rank: 'shield',
-    imageReady: true,
-    visualDescription:
-      'ACHIEVEMOR Shield Division — Green Squad — CI/CD Pipeline Security. ' +
-      'Build-artifact signing and pipeline integrity. ' +
-      'Tactical blacksmith aesthetic. Heavy-duty apron over tactical ' +
-      'rigging. Holds a glowing "forge-key" boomerang. ' +
-      'Helmet with thermal vision lenses. ' +
-      'Background: High-tech digital forge.',
-    gear: [
-      'Tactical rigging with forge-apron',
-      'Thermal-vision helmet',
-      'Glow-key signing boomerang',
-      'Pipeline integrity monitor',
-    ],
-    catchphrase: 'Forged in truth, signed in blood.',
-    signatureColor: '#006400',
-  },
-  {
-    slug: '',
-    imagePath: '/hawks/shield/.png',
-    callsign: 'Lil_Scan_Hawk',
-    rank: 'shield',
-    imageReady: true,
-    visualDescription:
-      'ACHIEVEMOR Shield Division — Green Squad — Vulnerability Analysis. ' +
-      'SCA and dependency auditing. ' +
-      'Slim tactical gear with multiple integrated scanning ' +
-      'lasers emitting from the helmet and chest. ' +
-      'Carries a technical data-slate. Bright green eyes. ' +
-      'Background: Infinite library of digital artifacts.',
-    gear: [
-      'Integrated multi-laser scanning rig',
-      'Technical vulnerability data-slate',
-      'SCA dependency analyzer',
-      'Green squad tactical vest',
-    ],
-    catchphrase: 'I see every flaw. I audit every line.',
-    signatureColor: '#228B22',
-  },
-  {
-    slug: '',
-    imagePath: '/hawks/shield/.png',
-    callsign: 'Lil_Logic_Hawk',
-    rank: 'shield',
-    imageReady: true,
-    visualDescription:
-      'ACHIEVEMOR Shield Division — Green Squad — Business Logic Research. ' +
-      'Vulnerability chaining and logical-flow auditing. ' +
-      'Sophisticated tactical suit with geometric "brain" patterns. ' +
-      'Monocle-style AR lens over one eye. ' +
-      'Holding a thin, surgical-precision boomerang. ' +
-      'Background: Abstract geometric flowchart grid.',
-    gear: [
-      'Geometric logic tactical suit',
-      'Monocle AR logic-lens',
-      'Surgical-precision boomerang',
-      'Flow-state auditing kit',
-    ],
-    catchphrase: 'Logic is the final exploit.',
-    signatureColor: '#32CD32',
-  },
-  {
-    slug: '',
-    imagePath: '/hawks/shield/.png',
-    callsign: 'Lil_Sense_Hawk',
-    rank: 'shield',
-    imageReady: true,
-    visualDescription:
-      'ACHIEVEMOR Shield Division — Green Squad — Intelligence & OSINT. ' +
-      'Social engineering defense and human-factor intelligence. ' +
-      'Stealthy recon suit with muted camouflage. ' +
-      'Helmet with multi-directional parabolic microphones. ' +
-      'Large binoculars and high-gain antenna array. ' +
-      'Background: Rainy city rooftop at twilight.',
-    gear: [
-      'Muted-camo recon suit',
-      'Parabolic microphone helmet',
-      'High-gain intelligence antenna',
-      'OSINT data-capture kit',
-    ],
-    catchphrase: 'I hear the whispers before they become threats.',
-    signatureColor: '#556B2F',
-  },
-  {
-    slug: '',
-    imagePath: '/hawks/shield/.png',
-    callsign: 'Lil_Trace_Hawk',
-    rank: 'shield',
-    imageReady: true,
-    visualDescription:
-      'ACHIEVEMOR Shield Division — Green Squad — Supply Chain Tracing. ' +
-      'SBOM verification and provenance tracking. ' +
-      'Tactical tracker outfit with heavy-duty boots and ' +
-      'multiple sensor-pods. Helmet with tracking HUD. ' +
-      'Carries a specialized "trail-marker" boomerang. ' +
-      'Background: Complex global logistics map.',
-    gear: [
-      'Tactical tracker-outfit with sensor-pods',
-      'Tracking HUD helmet',
-      'SBOM provenance analyzer',
-      'Trail-marker tracing boomerang',
-    ],
-    catchphrase: 'Every bit has a birthplace. I find it.',
-    signatureColor: '#6B8E23',
-  },
-];
-
-/**
- * Convenience: all 32 Shield Division profiles.
- */
-export const ALL_SHIELD_DIVISION_PROFILES: CharacterProfile[] = [
-  ...SHIELD_DIVISION_WAVE_1,
-  ...SHIELD_DIVISION_WAVE_2,
-  ...SHIELD_DIVISION_WAVE_3,
-  ...SHIELD_DIVISION_WAVE_4,
-  ...SHIELD_DIVISION_WAVE_5,
-  ...SHIELD_DIVISION_WAVE_6,
 ];
