@@ -47,7 +47,8 @@ export const SHIELD_BRAND_PROMPT =
 export const SHIELD_DIVISION_WAVE_1: CharacterProfile[] = [
   // ─── Black Squad ──────────────────────────────────────────────────────
   {
-    slug: 'lil_scope_hawk',
+    slug: '',
+    imagePath: '/hawks/shield/.png',
     callsign: 'Reaper',
     rank: 'specialist',
     imagePath: '/hawks/shield/lil_scope_hawk.png',
@@ -72,7 +73,8 @@ export const SHIELD_DIVISION_WAVE_1: CharacterProfile[] = [
 
   // ─── White Squad ──────────────────────────────────────────────────────
   {
-    slug: 'lil_seal_hawk',
+    slug: '',
+    imagePath: '/hawks/shield/.png',
     callsign: 'Privacy',
     rank: 'specialist',
     imagePath: '/hawks/shield/lil_seal_hawk.png',
@@ -99,7 +101,8 @@ export const SHIELD_DIVISION_WAVE_1: CharacterProfile[] = [
 
   // ─── Gold & Platinum Squad ────────────────────────────────────────────
   {
-    slug: 'lil_mast_hawk',
+    slug: '',
+    imagePath: '/hawks/shield/.png',
     callsign: 'Halo',
     rank: 'specialist',
     imagePath: '/hawks/shield/lil_mast_hawk.png',
@@ -128,7 +131,8 @@ export const SHIELD_DIVISION_WAVE_1: CharacterProfile[] = [
   },
 
   {
-    slug: 'lil_doubt_hawk',
+    slug: '',
+    imagePath: '/hawks/shield/.png',
     callsign: 'Paranoia',
     rank: 'specialist',
     imagePath: '/hawks/shield/lil_doubt_hawk.png',
@@ -157,7 +161,8 @@ export const SHIELD_DIVISION_WAVE_1: CharacterProfile[] = [
   },
 
   {
-    slug: 'lil_peel_hawk',
+    slug: '',
+    imagePath: '/hawks/shield/.png',
     callsign: 'Hex',
     rank: 'specialist',
     imagePath: '/hawks/shield/lil_peel_hawk.png',
@@ -197,7 +202,8 @@ export const SHIELD_DIVISION_WAVE_1: CharacterProfile[] = [
  */
 export const SHIELD_DIVISION_WAVE_2: CharacterProfile[] = [
   {
-    slug: 'lil_omen_hawk',
+    slug: '',
+    imagePath: '/hawks/shield/.png',
     callsign: 'Oracle',
     rank: 'specialist',
     imagePath: '/hawks/shield/lil_omen_hawk.png',
@@ -226,7 +232,8 @@ export const SHIELD_DIVISION_WAVE_2: CharacterProfile[] = [
     signatureColor: '#6B46C1',
   },
   {
-    slug: 'lil_salt_hawk',
+    slug: '',
+    imagePath: '/hawks/shield/.png',
     callsign: 'Vault',
     rank: 'specialist',
     imagePath: '/hawks/shield/lil_salt_hawk.png',
@@ -257,7 +264,8 @@ export const SHIELD_DIVISION_WAVE_2: CharacterProfile[] = [
     signatureColor: '#4682B4',
   },
   {
-    slug: 'lil_drift_hawk',
+    slug: '',
+    imagePath: '/hawks/shield/.png',
     callsign: 'Ghost',
     rank: 'specialist',
     imagePath: '/hawks/shield/lil_drift_hawk.png',
@@ -287,7 +295,8 @@ export const SHIELD_DIVISION_WAVE_2: CharacterProfile[] = [
     signatureColor: '#2F2F2F',
   },
   {
-    slug: 'lil_bell_hawk',
+    slug: '',
+    imagePath: '/hawks/shield/.png',
     callsign: 'Titan',
     rank: 'specialist',
     imagePath: '/hawks/shield/lil_bell_hawk.png',
@@ -318,7 +327,8 @@ export const SHIELD_DIVISION_WAVE_2: CharacterProfile[] = [
     signatureColor: '#DC143C',
   },
   {
-    slug: 'lil_veil_hawk',
+    slug: '',
+    imagePath: '/hawks/shield/.png',
     callsign: 'Mirror',
     rank: 'specialist',
     imagePath: '/hawks/shield/lil_veil_hawk.png',
@@ -358,7 +368,8 @@ export const SHIELD_DIVISION_WAVE_2: CharacterProfile[] = [
  */
 export const SHIELD_DIVISION_WAVE_3: CharacterProfile[] = [
   {
-    slug: 'lil_hook_hawk',
+    slug: '',
+    imagePath: '/hawks/shield/.png',
     callsign: 'Captain',
     rank: 'specialist',
     imagePath: '/hawks/shield/lil_hook_hawk.png',
@@ -387,7 +398,8 @@ export const SHIELD_DIVISION_WAVE_3: CharacterProfile[] = [
     signatureColor: '#2C2C2C',
   },
   {
-    slug: 'lil_recon_hawk',
+    slug: '',
+    imagePath: '/hawks/shield/.png',
     callsign: 'Specs',
     rank: 'specialist',
     imagePath: '/hawks/shield/lil_recon_hawk.png',
@@ -415,7 +427,8 @@ export const SHIELD_DIVISION_WAVE_3: CharacterProfile[] = [
     signatureColor: '#3A3A3A',
   },
   {
-    slug: 'lil_tag_hawk',
+    slug: '',
+    imagePath: '/hawks/shield/.png',
     callsign: 'Tagger',
     rank: 'specialist',
     imagePath: '/hawks/shield/lil_tag_hawk.png',
@@ -442,7 +455,8 @@ export const SHIELD_DIVISION_WAVE_3: CharacterProfile[] = [
     signatureColor: '#4B5320',
   },
   {
-    slug: 'lil_site_hawk',
+    slug: '',
+    imagePath: '/hawks/shield/.png',
     callsign: 'Spider',
     rank: 'specialist',
     imagePath: '/hawks/shield/lil_site_hawk.png',
@@ -471,7 +485,8 @@ export const SHIELD_DIVISION_WAVE_3: CharacterProfile[] = [
     signatureColor: '#1B1B1B',
   },
   {
-    slug: 'lil_test_hawk',
+    slug: '',
+    imagePath: '/hawks/shield/.png',
     callsign: 'Proof',
     rank: 'specialist',
     imagePath: '/hawks/shield/lil_test_hawk.png',
@@ -509,7 +524,8 @@ export const SHIELD_DIVISION_WAVE_3: CharacterProfile[] = [
  */
 export const SHIELD_DIVISION_WAVE_4: CharacterProfile[] = [
   {
-    slug: 'lil_watch_hawk',
+    slug: '',
+    imagePath: '/hawks/shield/.png',
     callsign: 'Sentry',
     rank: 'specialist',
     imagePath: '/hawks/shield/lil_watch_hawk.png',
@@ -535,7 +551,8 @@ export const SHIELD_DIVISION_WAVE_4: CharacterProfile[] = [
     signatureColor: '#1E90FF',
   },
   {
-    slug: 'lil_wire_hawk',
+    slug: '',
+    imagePath: '/hawks/shield/.png',
     callsign: 'Sparks',
     rank: 'specialist',
     imagePath: '/hawks/shield/lil_wire_hawk.png',
@@ -563,7 +580,8 @@ export const SHIELD_DIVISION_WAVE_4: CharacterProfile[] = [
     signatureColor: '#00BFFF',
   },
   {
-    slug: 'lil_track_hawk',
+    slug: '',
+    imagePath: '/hawks/shield/.png',
     callsign: 'Hound',
     rank: 'specialist',
     imagePath: '/hawks/shield/lil_track_hawk.png',
@@ -589,7 +607,8 @@ export const SHIELD_DIVISION_WAVE_4: CharacterProfile[] = [
     signatureColor: '#4682B4',
   },
   {
-    slug: 'lil_patch_hawk',
+    slug: '',
+    imagePath: '/hawks/shield/.png',
     callsign: 'Doc',
     rank: 'specialist',
     imagePath: '/hawks/shield/lil_patch_hawk.png',
@@ -616,7 +635,8 @@ export const SHIELD_DIVISION_WAVE_4: CharacterProfile[] = [
     signatureColor: '#00CED1',
   },
   {
-    slug: 'lil_lab_hawk',
+    slug: '',
+    imagePath: '/hawks/shield/.png',
     callsign: 'Cipher',
     rank: 'specialist',
     imagePath: '/hawks/shield/lil_lab_hawk.png',
@@ -643,7 +663,8 @@ export const SHIELD_DIVISION_WAVE_4: CharacterProfile[] = [
     signatureColor: '#5F9EA0',
   },
   {
-    slug: 'lil_pulse_hawk',
+    slug: '',
+    imagePath: '/hawks/shield/.png',
     callsign: 'Latency',
     rank: 'specialist',
     imagePath: '/hawks/shield/lil_pulse_hawk.png',
@@ -672,12 +693,271 @@ export const SHIELD_DIVISION_WAVE_4: CharacterProfile[] = [
 ];
 
 /**
- * Convenience: all Shield Division profiles landed so far.
- * Extend this as Waves 5-6 land their character files.
+ * Wave 5: Red Squad (Cloud Native Defense)
+ * =========================================
+ * Infrastructure-level kinetic defense. 
+ */
+export const SHIELD_DIVISION_WAVE_5: CharacterProfile[] = [
+  {
+    slug: '',
+    imagePath: '/hawks/shield/.png',
+    callsign: 'Lil_Mesh_Hawk',
+    rank: 'shield',
+    imageReady: true,
+    visualDescription:
+      'ACHIEVEMOR Shield Division — Red Squad — Service Mesh Integrity. ' +
+      'mTLS enforcement and traffic-policy auditing. Gunmetal tactical ' +
+      'harness with interlocking green fiber-optic "mesh" patterns ' +
+      'pulsing across the shoulders. Helmet features a wrap-around ' +
+      'AR visor showing real-time traffic flow. Deep red eyes. ' +
+      'A.I.M.S. tactical chest plate. Background: Distributed service cluster at night.',
+    gear: [
+      'Fiber-optic mesh tactical harness',
+      'Wrap-around traffic AR visor',
+      'mTLS enforcement engine',
+      'Red squad-lead insignia',
+    ],
+    catchphrase: 'Policy is absolute. The mesh never leaks.',
+    signatureColor: '#FF0000',
+  },
+  {
+    slug: '',
+    imagePath: '/hawks/shield/.png',
+    callsign: 'Lil_Kube_Hawk',
+    rank: 'shield',
+    imageReady: true,
+    visualDescription:
+      'ACHIEVEMOR Shield Division — Red Squad — Kubernetes Security. ' +
+      'Container runtime defense and admission control. Heavy-duty ' +
+      'industrial tactical vest with "K8S" stenciled in worn white ' +
+      'lettering. Quad-lens NVG helmet. Glowing green cybernetic eye. ' +
+      'Holds a heavy boomerang with geometric "container" markings. ' +
+      'Background: Gritty server-room warehouse.',
+    gear: [
+      'Industrial K8S tactical vest',
+      'Quad-lens NVG helmet',
+      'Geometric container boomerang',
+      'Admission control warrant-pad',
+    ],
+    catchphrase: 'Pod security is non-negotiable.',
+    signatureColor: '#FF4500',
+  },
+  {
+    slug: '',
+    imagePath: '/hawks/shield/.png',
+    callsign: 'Lil_Node_Hawk',
+    rank: 'shield',
+    imageReady: true,
+    visualDescription:
+      'ACHIEVEMOR Shield Division — Red Squad — Edge/Node Attestation. ' +
+      'Bare-metal security and TPM-based root-of-trust verification. ' +
+      'Ruggedized matte-black plate carrier with integrated hardware-bus ' +
+      'connectors. Helmet has a single high-intensity "searchlight" eye. ' +
+      'Tactical gloves with magnetic fingertips. ' +
+      'Background: Harsh industrial edge-computing site.',
+    gear: [
+      'Ruggedized TPM-integration plate carrier',
+      'Searchlight tactical helmet',
+      'Magnetic-tip tactical gloves',
+      'Bare-metal attestation kit',
+    ],
+    catchphrase: 'Verified to the bone.',
+    signatureColor: '#8B0000',
+  },
+  {
+    slug: '',
+    imagePath: '/hawks/shield/.png',
+    callsign: 'Lil_Shard_Hawk',
+    rank: 'shield',
+    imageReady: true,
+    visualDescription:
+      'ACHIEVEMOR Shield Division — Red Squad — Data/Storage Security. ' +
+      'Shard-level encryption and distributed database defense. ' +
+      'Layered armor plates that look like crystalline shards, ' +
+      'shimmering with a dark oil-slick finish. Heavy-duty data-vault ' +
+      'backpack with pulsing blue energy lines. Glowing green eyes. ' +
+      'Background: Underground vault facility.',
+    gear: [
+      'Crystalline shard-armor plates',
+      'Data-vault backpack',
+      'Shard-level encryption key-set',
+      'Storage-layer kinetic hammer',
+    ],
+    catchphrase: 'The data is fractured, but the defense is whole.',
+    signatureColor: '#B22222',
+  },
+  {
+    slug: '',
+    imagePath: '/hawks/shield/.png',
+    callsign: 'Lil_Lambda_Hawk',
+    rank: 'shield',
+    imageReady: true,
+    visualDescription:
+      'ACHIEVEMOR Shield Division — Red Squad — Serverless Auditing. ' +
+      'Function-level security and cold-start remediation. ' +
+      'Ultra-lightweight tactical stealth-suit with glowing "lambda" ' +
+      'insignia across the chest. Motion-sensitive AR HUD. ' +
+      'Small, high-frequency energy boomerang. ' +
+      'Background: Neon-lit data highway.',
+    gear: [
+      'Ultra-light lambda stealth-suit',
+      'High-frequency energy boomerang',
+      'Serverless function-audit pad',
+      'Cold-start remediation kit',
+    ],
+    catchphrase: 'Gone in a millisecond, secure for eternity.',
+    signatureColor: '#DC143C',
+  },
+  {
+    slug: '',
+    imagePath: '/hawks/shield/.png',
+    callsign: 'Lil_Proxy_Hawk',
+    rank: 'shield',
+    imageReady: true,
+    visualDescription:
+      'ACHIEVEMOR Shield Division — Red Squad — Edge/WAF Defense. ' +
+      'Global traffic filtering and DDoS suppression. ' +
+      'Tactical cloak with integrated signal-jamming arrays. ' +
+      'Helmet features multi-spectral scanners. Glowing green eyes. ' +
+      'Standing at the edge of a rainy shipping dock. ' +
+      'Background: Coastal Georgia shipping port at night.',
+    gear: [
+      'Signal-jamming tactical cloak',
+      'Multi-spectral scanner helmet',
+      'WAF policy enforcement tablet',
+      'DDoS suppression engine',
+    ],
+    catchphrase: 'Nothing passes the perimeter without a signature.',
+    signatureColor: '#FF6347',
+  },
+];
+
+/**
+ * Wave 6: Green Squad (Supply Chain & Intelligence)
+ * =================================================
+ * Upstream security and proactive threat intelligence.
+ */
+export const SHIELD_DIVISION_WAVE_6: CharacterProfile[] = [
+  {
+    slug: '',
+    imagePath: '/hawks/shield/.png',
+    callsign: 'Lil_Forge_Hawk',
+    rank: 'shield',
+    imageReady: true,
+    visualDescription:
+      'ACHIEVEMOR Shield Division — Green Squad — CI/CD Pipeline Security. ' +
+      'Build-artifact signing and pipeline integrity. ' +
+      'Tactical blacksmith aesthetic. Heavy-duty apron over tactical ' +
+      'rigging. Holds a glowing "forge-key" boomerang. ' +
+      'Helmet with thermal vision lenses. ' +
+      'Background: High-tech digital forge.',
+    gear: [
+      'Tactical rigging with forge-apron',
+      'Thermal-vision helmet',
+      'Glow-key signing boomerang',
+      'Pipeline integrity monitor',
+    ],
+    catchphrase: 'Forged in truth, signed in blood.',
+    signatureColor: '#006400',
+  },
+  {
+    slug: '',
+    imagePath: '/hawks/shield/.png',
+    callsign: 'Lil_Scan_Hawk',
+    rank: 'shield',
+    imageReady: true,
+    visualDescription:
+      'ACHIEVEMOR Shield Division — Green Squad — Vulnerability Analysis. ' +
+      'SCA and dependency auditing. ' +
+      'Slim tactical gear with multiple integrated scanning ' +
+      'lasers emitting from the helmet and chest. ' +
+      'Carries a technical data-slate. Bright green eyes. ' +
+      'Background: Infinite library of digital artifacts.',
+    gear: [
+      'Integrated multi-laser scanning rig',
+      'Technical vulnerability data-slate',
+      'SCA dependency analyzer',
+      'Green squad tactical vest',
+    ],
+    catchphrase: 'I see every flaw. I audit every line.',
+    signatureColor: '#228B22',
+  },
+  {
+    slug: '',
+    imagePath: '/hawks/shield/.png',
+    callsign: 'Lil_Logic_Hawk',
+    rank: 'shield',
+    imageReady: true,
+    visualDescription:
+      'ACHIEVEMOR Shield Division — Green Squad — Business Logic Research. ' +
+      'Vulnerability chaining and logical-flow auditing. ' +
+      'Sophisticated tactical suit with geometric "brain" patterns. ' +
+      'Monocle-style AR lens over one eye. ' +
+      'Holding a thin, surgical-precision boomerang. ' +
+      'Background: Abstract geometric flowchart grid.',
+    gear: [
+      'Geometric logic tactical suit',
+      'Monocle AR logic-lens',
+      'Surgical-precision boomerang',
+      'Flow-state auditing kit',
+    ],
+    catchphrase: 'Logic is the final exploit.',
+    signatureColor: '#32CD32',
+  },
+  {
+    slug: '',
+    imagePath: '/hawks/shield/.png',
+    callsign: 'Lil_Sense_Hawk',
+    rank: 'shield',
+    imageReady: true,
+    visualDescription:
+      'ACHIEVEMOR Shield Division — Green Squad — Intelligence & OSINT. ' +
+      'Social engineering defense and human-factor intelligence. ' +
+      'Stealthy recon suit with muted camouflage. ' +
+      'Helmet with multi-directional parabolic microphones. ' +
+      'Large binoculars and high-gain antenna array. ' +
+      'Background: Rainy city rooftop at twilight.',
+    gear: [
+      'Muted-camo recon suit',
+      'Parabolic microphone helmet',
+      'High-gain intelligence antenna',
+      'OSINT data-capture kit',
+    ],
+    catchphrase: 'I hear the whispers before they become threats.',
+    signatureColor: '#556B2F',
+  },
+  {
+    slug: '',
+    imagePath: '/hawks/shield/.png',
+    callsign: 'Lil_Trace_Hawk',
+    rank: 'shield',
+    imageReady: true,
+    visualDescription:
+      'ACHIEVEMOR Shield Division — Green Squad — Supply Chain Tracing. ' +
+      'SBOM verification and provenance tracking. ' +
+      'Tactical tracker outfit with heavy-duty boots and ' +
+      'multiple sensor-pods. Helmet with tracking HUD. ' +
+      'Carries a specialized "trail-marker" boomerang. ' +
+      'Background: Complex global logistics map.',
+    gear: [
+      'Tactical tracker-outfit with sensor-pods',
+      'Tracking HUD helmet',
+      'SBOM provenance analyzer',
+      'Trail-marker tracing boomerang',
+    ],
+    catchphrase: 'Every bit has a birthplace. I find it.',
+    signatureColor: '#6B8E23',
+  },
+];
+
+/**
+ * Convenience: all 32 Shield Division profiles.
  */
 export const ALL_SHIELD_DIVISION_PROFILES: CharacterProfile[] = [
   ...SHIELD_DIVISION_WAVE_1,
   ...SHIELD_DIVISION_WAVE_2,
   ...SHIELD_DIVISION_WAVE_3,
   ...SHIELD_DIVISION_WAVE_4,
+  ...SHIELD_DIVISION_WAVE_5,
+  ...SHIELD_DIVISION_WAVE_6,
 ];
