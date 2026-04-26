@@ -102,25 +102,20 @@ async def login(request: Request) -> HTMLResponse:
         f"Access code (expires in 15 min):\n{link}\n\n"
         f"Tap once. If you didn't request this, ignore."
     )
-    # Wave 1 Step C: route through Hermes Agent (multi-channel HITL).
-    # Falls back to direct Telegram if Hermes is unreachable so magic-link
-    # login never breaks on a notifier outage.
-    delivered = False
+    # Wave 1 Step C (Path 1): magic-link delivery stays on direct Telegram.
+    # Hermes Agent is the INBOUND owner command surface (chat → tool calls),
+    # not an outbound notifier. notifier.py is a Wave 2 placeholder for
+    # outbound multi-channel; calling it here would always return False
+    # and add a needless try/except for zero benefit today. Wave 2 wires
+    # outbound multi-channel by replacing this _send_telegram call with a
+    # notifier.notify_owner(...) try-then-fallback chain.
     try:
-        from notifier import notify_owner
-
-        delivered = await notify_owner(channel="telegram", message=msg, urgency="approval")
-    except Exception:
-        delivered = False
-    if not delivered:
-        try:
-            await _send_telegram(msg)
-            delivered = True
-        except Exception as e:
-            return _html_response(
-                "Delivery failed",
-                f"Could not send via Telegram: {e}. Check server logs.",
-            )
+        await _send_telegram(msg)
+    except Exception as e:
+        return _html_response(
+            "Delivery failed",
+            f"Could not send via Telegram: {e}. Check server logs.",
+        )
     return _html_response(
         "Check your Telegram",
         "Code sent. Tap once. Expires in 15 min.",

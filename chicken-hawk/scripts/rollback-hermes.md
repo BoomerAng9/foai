@@ -1,60 +1,66 @@
-# Rollback — Hermes Agent → direct Telegram fallback
+# Rollback — Hermes Agent (Wave 1 Step C, Path 1)
 
-Per Betty-Anne_Ang's coaching note on Wave 1 Step C scope: explicit
-rollback path so any operator can revert at 2 a.m. without reading code.
+Hermes Agent runs on aims-vps as the owner's INBOUND command surface
+(owner chats Telegram/Slack/etc → Hermes invokes chicken-hawk tools).
+It is NOT in the magic-link login critical path — that stays on direct
+Telegram via `auth._send_telegram`. So "rollback" here means stopping
+Hermes, not unwinding any chicken-hawk-side wiring.
 
 ## When to use this
 
-- Hermes Agent container won't come up cleanly on aims-vps
-- `/notify` returning non-2xx for >5 min
-- Owner reports Telegram messages stop arriving after Step C deploy
-- Any other reason you want to bypass Hermes and go straight to Telegram
+- Hermes container won't come up cleanly on aims-vps
+- Hermes is responding slowly or failing to invoke chicken-hawk tools
+- Owner wants to stop Hermes (e.g. cost burn, channel testing breakage)
 
 ## Rollback (one-liner — no code revert needed)
 
-The notifier already degrades gracefully — flipping `HERMES_BASE_URL` to
-empty string makes every magic-link call short-circuit to the existing
-direct-Telegram path on the very next request:
-
 ```bash
-ssh myclaw-vps
-cd /opt/chicken-hawk
-sed -i 's|^HERMES_BASE_URL=.*|HERMES_BASE_URL=|' .env
-docker compose restart hawk-gateway
+ssh aims-vps
+cd ~/foai/coastal-brewing
+docker compose stop hermes
 ```
 
-Verify:
+That's it. Owner can still:
+- Log in via magic link (direct Telegram path — unchanged)
+- Browse the Chicken Hawk operator dashboard at `/me`
+- Use `curl` against `https://hawk.foai.cloud/run` directly
 
-```bash
-curl -i -X POST https://hawk.foai.cloud/login -d 'email=asg@achievemor.io'
-# expect: 200 + Telegram message arrives via direct path
-docker logs chicken-hawk-hawk-gateway-1 --tail 50 | grep -i hermes
-# expect: "hermes_not_configured" log line + zero "hermes_dispatch_*" lines
-```
+What stops working:
+- Owner can't dispatch tools by chatting Telegram/Slack/etc
+- Hermes' approval-button HITL flow is offline
 
 ## Re-engage Hermes (after fix)
 
-Once Hermes is back to healthy:
-
 ```bash
-ssh myclaw-vps
-cd /opt/chicken-hawk
-sed -i 's|^HERMES_BASE_URL=.*|HERMES_BASE_URL=http://hermes:7080|' .env
-docker compose restart hawk-gateway
+ssh aims-vps
+cd ~/foai/coastal-brewing
+docker compose up -d hermes
+docker logs hermes --tail 50
+# wait for "gateway started" line
 ```
 
 Smoke:
-
 ```bash
-curl -X POST https://hermes.foai.cloud/notify \
-  -H "Authorization: Bearer $HERMES_BEARER" \
-  -d '{"channel":"telegram","message":"hermes re-engaged","urgency":"low"}'
-# expect: 200 + Telegram arrives
+# DM the Hermes Telegram bot with "what is the audit trail for task xyz"
+# expect: Hermes calls chicken-hawk /audit/{id} → reply with receipts
 ```
 
-## Why this works without a code revert
+## Why no chicken-hawk-side rollback is needed
 
-`gateway/notifier.py:notify_owner()` returns False on any
-unconfigured/unreachable/non-2xx response. `gateway/auth.py` checks the
-return value and falls through to `_send_telegram(msg)` when False. The
-direct path was never removed — it's the always-available safety net.
+`gateway/notifier.py` is a Wave 2 placeholder — `notify_owner()` always
+returns False so `auth.py`'s fallback chain transparently routes around
+it to direct Telegram. Hermes outage has zero impact on magic-link
+delivery. The only thing Hermes carries is the inbound chat surface,
+which is owner convenience, not infra-critical.
+
+## If you actually want to nuke Hermes entirely
+
+```bash
+ssh aims-vps
+cd ~/foai/coastal-brewing
+docker compose stop hermes
+docker compose rm -f hermes
+docker rmi hermes-agent:9be83728  # remove the locally-built image
+```
+
+(Re-deploy from the compose service block + Dockerfile in the repo.)
