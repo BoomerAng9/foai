@@ -26,10 +26,19 @@ ARCHIVE="${SNAPSHOT}.gz"
 
 mkdir -p "${BACKUP_DIR}"
 
-# SQLite online backup — safe under concurrent writes (uses .backup VACUUM).
-# Exec into the runner so we use its sqlite3 binary against the live DB path.
-docker exec coastal-runner sqlite3 /app/audit_ledger/coastal_brewing.db \
-  ".backup '/tmp/audit-snapshot-${TS}.db'"
+# SQLite online backup — safe under concurrent writes via Python stdlib's
+# sqlite3.Connection.backup(). The coastal-runner container is python:3.13-slim
+# and has no sqlite3 CLI, but stdlib sqlite3 is always available.
+docker exec coastal-runner python3 -c "
+import sqlite3, sys
+src = sqlite3.connect('/app/audit_ledger/coastal_brewing.db')
+dst = sqlite3.connect('/tmp/audit-snapshot-${TS}.db')
+with dst:
+    src.backup(dst)
+src.close()
+dst.close()
+print('snapshot ok')
+"
 
 docker cp "coastal-runner:/tmp/audit-snapshot-${TS}.db" "${SNAPSHOT}"
 docker exec coastal-runner rm -f "/tmp/audit-snapshot-${TS}.db"
