@@ -16,3 +16,9 @@ tenacity==9.0.0
 # Repo: https://github.com/agentscope-ai/ReMe (Apache-2.0, ~2.8k stars)
 # Pip: pypi.org/project/reme-ai/
 reme-ai>=0.3.1
+
+# Wave 1 Step G — AgentScope multi-agent fan-out beneath squad mode.
+# Default-off behind SQUAD_BACKEND env (asyncio | agentscope). Wraps the
+# existing _dispatch_squad asyncio.gather() pattern with MsgHub primitives.
+# Repo: https://github.com/agentscope-ai/agentscope (Apache-2.0)
+agentscope==1.0.19

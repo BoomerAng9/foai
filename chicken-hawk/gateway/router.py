@@ -359,20 +359,91 @@ class Router:
         DeerFlow squad dispatch: decompose mission into sub-tasks,
         dispatch to multiple Lil_Hawks, aggregate results.
         This implements the lead-agent -> sub-agent pattern from DeerFlow 2.0.
+
+        Backend selection via SQUAD_BACKEND env (Wave 1 Step G):
+          asyncio    — default; raw asyncio.gather() over per-sub-task coros
+          agentscope — wraps the same coros in AgentScope's MsgHub for typed
+                       message envelopes + future middleware hooks. Falls
+                       back to asyncio on import/runtime error.
         """
         import asyncio
+        import squad_agentscope
 
         await self._emit(TaskEvent(
             trace_id=decision.trace_id,
             task_name="squad_orchestration",
             status=TaskStatus.RUNNING,
             hawk="Lil_Deep_Hawk",
-            detail=f"Coordinating {len(decision.sub_tasks)} sub-tasks",
+            detail=f"Coordinating {len(decision.sub_tasks)} sub-tasks (backend={squad_agentscope.SQUAD_BACKEND})",
         ))
+
+        async def _run_sub(
+            idx: int, h_name: str, h_url: str, t_desc: str
+        ) -> str:
+            await self._emit(TaskEvent(
+                trace_id=decision.trace_id,
+                task_name=f"sub_task_{idx}_{h_name}",
+                status=TaskStatus.RUNNING,
+                hawk=h_name,
+                detail=t_desc[:200],
+            ))
+            try:
+                result = await self._dispatch(h_url, t_desc, decision.trace_id)
+                await self._emit(TaskEvent(
+                    trace_id=decision.trace_id,
+                    task_name=f"sub_task_{idx}_{h_name}",
+                    status=TaskStatus.COMPLETED,
+                    hawk=h_name,
+                ))
+                return f"[{h_name}] {result}"
+            except Exception as exc:
+                await self._emit(TaskEvent(
+                    trace_id=decision.trace_id,
+                    task_name=f"sub_task_{idx}_{h_name}",
+                    status=TaskStatus.FAILED,
+                    hawk=h_name,
+                    detail=str(exc),
+                ))
+                return f"[{h_name}] Failed: {exc}"
+
+        endpoint_map = {
+            role.value: url for role, url in self._settings.hawk_endpoints.items()
+        }
+
+        if squad_agentscope.is_enabled():
+            try:
+                results = await squad_agentscope.fan_out(
+                    sub_tasks=decision.sub_tasks,
+                    dispatch_one=_run_sub,
+                    hawk_endpoints=endpoint_map,
+                )
+            except Exception as exc:
+                logger.warning("agentscope_fanout_failed_falling_back", error=str(exc))
+                results = await self._asyncio_fan_out(decision, message, _run_sub)
+        else:
+            results = await self._asyncio_fan_out(decision, message, _run_sub)
+
+        await self._emit(TaskEvent(
+            trace_id=decision.trace_id,
+            task_name="squad_orchestration",
+            status=TaskStatus.COMPLETED,
+            hawk="Lil_Deep_Hawk",
+            detail=f"Completed {len(results)} sub-tasks",
+        ))
+
+        return "\n\n---\n\n".join(results)
+
+    async def _asyncio_fan_out(
+        self,
+        decision: RoutingDecision,
+        message: str,
+        run_sub: Any,
+    ) -> list[str]:
+        """Original asyncio.gather() fan-out kept as the default backend."""
+        import asyncio
 
         results: list[str] = []
         tasks = []
-
         for i, sub_task in enumerate(decision.sub_tasks):
             hawk_name = sub_task.get("hawk", "Lil_Deep_Hawk")
             task_desc = sub_task.get("task", message)
@@ -387,49 +458,11 @@ class Router:
                 results.append(f"[{hawk_name}] No endpoint configured")
                 continue
 
-            async def _run_sub(
-                idx: int, h_name: str, h_url: str, t_desc: str
-            ) -> str:
-                await self._emit(TaskEvent(
-                    trace_id=decision.trace_id,
-                    task_name=f"sub_task_{idx}_{h_name}",
-                    status=TaskStatus.RUNNING,
-                    hawk=h_name,
-                    detail=t_desc[:200],
-                ))
-                try:
-                    result = await self._dispatch(h_url, t_desc, decision.trace_id)
-                    await self._emit(TaskEvent(
-                        trace_id=decision.trace_id,
-                        task_name=f"sub_task_{idx}_{h_name}",
-                        status=TaskStatus.COMPLETED,
-                        hawk=h_name,
-                    ))
-                    return f"[{h_name}] {result}"
-                except Exception as exc:
-                    await self._emit(TaskEvent(
-                        trace_id=decision.trace_id,
-                        task_name=f"sub_task_{idx}_{h_name}",
-                        status=TaskStatus.FAILED,
-                        hawk=h_name,
-                        detail=str(exc),
-                    ))
-                    return f"[{h_name}] Failed: {exc}"
-
-            tasks.append(_run_sub(i, hawk_name, url, task_desc))
+            tasks.append(run_sub(i, hawk_name, url, task_desc))
 
         if tasks:
-            results = await asyncio.gather(*tasks)
-
-        await self._emit(TaskEvent(
-            trace_id=decision.trace_id,
-            task_name="squad_orchestration",
-            status=TaskStatus.COMPLETED,
-            hawk="Lil_Deep_Hawk",
-            detail=f"Completed {len(results)} sub-tasks",
-        ))
-
-        return "\n\n---\n\n".join(results)
+            results = list(await asyncio.gather(*tasks))
+        return results
 
     # ------------------------------------------------------------------
     # Low-level dispatch
