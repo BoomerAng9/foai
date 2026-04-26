@@ -10,6 +10,7 @@ service-level audit ledger; it is NOT the Hermes Agent.
 """
 from __future__ import annotations
 
+import hashlib
 import json
 import os
 import pathlib
@@ -17,6 +18,8 @@ import sqlite3
 import threading
 from datetime import datetime, timezone
 from typing import Any, Optional
+
+GENESIS_HASH = "GENESIS"
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 DB_PATH_DEFAULT = ROOT / "audit_ledger" / "coastal_brewing.db"
@@ -111,6 +114,79 @@ def _utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
 
+def _canonical_json(payload: dict) -> str:
+    """Stable, reproducible JSON encoding for hashing.
+
+    sort_keys + tight separators + ASCII-only ensures that byte-for-byte
+    identical input always produces identical output across Python builds.
+    """
+    return json.dumps(payload, sort_keys=True, separators=(",", ":"), ensure_ascii=True)
+
+
+def _chain_append(conn: sqlite3.Connection, source_table: str,
+                  source_id: str, payload: dict) -> str:
+    """Append one entry to the global audit_chain.
+
+    Each entry's `entry_hash = SHA256(prev_hash || payload_hash || source_table
+    || source_id || created_at)`. Mutating any historical row invalidates
+    every subsequent entry. Caller must already hold the audit lock.
+    Returns the new entry_hash.
+    """
+    canonical = _canonical_json(payload)
+    payload_hash = hashlib.sha256(canonical.encode("utf-8")).hexdigest()
+    prev_row = conn.execute(
+        "SELECT entry_hash FROM audit_chain ORDER BY chain_id DESC LIMIT 1"
+    ).fetchone()
+    prev_hash = prev_row[0] if prev_row else GENESIS_HASH
+    created_at = _utc_now()
+    seed = f"{prev_hash}|{payload_hash}|{source_table}|{source_id}|{created_at}"
+    entry_hash = hashlib.sha256(seed.encode("utf-8")).hexdigest()
+    conn.execute(
+        """INSERT INTO audit_chain
+           (created_at, source_table, source_id, payload_hash, prev_hash, entry_hash)
+           VALUES (?, ?, ?, ?, ?, ?)""",
+        (created_at, source_table, source_id, payload_hash, prev_hash, entry_hash),
+    )
+    return entry_hash
+
+
+def verify_chain() -> dict:
+    """Walk the chain start→end. Return {ok, chain_length, broken_at}.
+
+    Re-derives every entry's hash from its declared prev_hash + payload_hash.
+    Any tampered row breaks the chain. broken_at is the chain_id of the
+    first entry whose hash doesn't match expectations.
+    """
+    init_schema()
+    with _lock:
+        conn = _connect()
+        try:
+            rows = conn.execute(
+                """SELECT chain_id, source_table, source_id, payload_hash,
+                          prev_hash, entry_hash, created_at
+                   FROM audit_chain ORDER BY chain_id ASC"""
+            ).fetchall()
+        finally:
+            conn.close()
+
+    if not rows:
+        return {"ok": True, "chain_length": 0, "broken_at": None}
+
+    expected_prev = GENESIS_HASH
+    for r in rows:
+        chain_id, st, sid, ph, prev, eh, ca = r
+        if prev != expected_prev:
+            return {"ok": False, "chain_length": len(rows), "broken_at": chain_id,
+                    "reason": "prev_hash mismatch"}
+        seed = f"{prev}|{ph}|{st}|{sid}|{ca}"
+        recomputed = hashlib.sha256(seed.encode("utf-8")).hexdigest()
+        if eh != recomputed:
+            return {"ok": False, "chain_length": len(rows), "broken_at": chain_id,
+                    "reason": "entry_hash mismatch"}
+        expected_prev = eh
+    return {"ok": True, "chain_length": len(rows), "broken_at": None}
+
+
 def _risk_level_from_tags(tags: list[str]) -> str:
     """Map risk_tags list to the legacy risk_level enum the kit schema uses."""
     high_tags = {"legal", "money", "certification", "health", "fda", "final_public",
@@ -123,6 +199,7 @@ def _risk_level_from_tags(tags: list[str]) -> str:
 def insert_task_packet(packet: dict, decision: dict, receipt_path: Optional[str]) -> None:
     init_schema()
     risk_tags = packet.get("risk_tags") or []
+    task_id = packet.get("task_id") or f"unknown_{int(datetime.now().timestamp())}"
     with _lock:
         conn = _connect()
         try:
@@ -132,7 +209,7 @@ def insert_task_packet(packet: dict, decision: dict, receipt_path: Optional[str]
                     route, risk_level, approval_required, status, receipt_path, risk_tags)
                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
                 (
-                    packet.get("task_id") or f"unknown_{int(datetime.now().timestamp())}",
+                    task_id,
                     _utc_now(),
                     packet.get("owner_goal") or "",
                     packet.get("department") or "unspecified",
@@ -145,6 +222,15 @@ def insert_task_packet(packet: dict, decision: dict, receipt_path: Optional[str]
                     json.dumps(risk_tags),
                 ),
             )
+            _chain_append(conn, "task_packets", task_id, {
+                "task_id": task_id,
+                "owner_goal": packet.get("owner_goal") or "",
+                "department": packet.get("department") or "unspecified",
+                "task_type": packet.get("task_type") or "unknown",
+                "route": decision.get("route") or "unknown",
+                "risk_tags": risk_tags,
+                "approval_required": bool(decision.get("approval_required")),
+            })
         finally:
             conn.close()
 
@@ -156,6 +242,7 @@ def insert_research_receipt(task_id: str, ticket_path: str,
                             allowed_claims: str = "",
                             rejected_claims: str = "") -> None:
     init_schema()
+    receipt_id = f"rsrch_{task_id}"
     with _lock:
         conn = _connect()
         try:
@@ -165,17 +252,16 @@ def insert_research_receipt(task_id: str, ticket_path: str,
                     source_count, confidence, allowed_claims, rejected_claims, receipt_path)
                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)""",
                 (
-                    f"rsrch_{task_id}",
-                    task_id,
-                    _utc_now(),
-                    research_topic,
-                    source_count,
-                    confidence,
-                    allowed_claims,
-                    rejected_claims,
-                    ticket_path,
+                    receipt_id, task_id, _utc_now(), research_topic,
+                    source_count, confidence, allowed_claims, rejected_claims, ticket_path,
                 ),
             )
+            _chain_append(conn, "research_receipts", receipt_id, {
+                "receipt_id": receipt_id, "task_id": task_id,
+                "research_topic": research_topic, "source_count": source_count,
+                "confidence": confidence, "allowed_claims": allowed_claims,
+                "rejected_claims": rejected_claims,
+            })
         finally:
             conn.close()
 
@@ -187,6 +273,7 @@ def insert_model_call_receipt(task_id: str, route: str, provider: str,
                               success: bool = True,
                               error: Optional[str] = None) -> None:
     init_schema()
+    receipt_id = f"mcall_{task_id}_{int(datetime.now().timestamp() * 1000)}"
     with _lock:
         conn = _connect()
         try:
@@ -196,18 +283,16 @@ def insert_model_call_receipt(task_id: str, route: str, provider: str,
                     route, prompt_summary, output_summary, success, error)
                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
                 (
-                    f"mcall_{task_id}_{int(datetime.now().timestamp() * 1000)}",
-                    task_id,
-                    _utc_now(),
-                    provider,
-                    model or "",
-                    route,
-                    prompt_summary,
-                    output_summary,
-                    1 if success else 0,
-                    error or "",
+                    receipt_id, task_id, _utc_now(), provider, model or "",
+                    route, prompt_summary, output_summary, 1 if success else 0, error or "",
                 ),
             )
+            _chain_append(conn, "model_call_receipts", receipt_id, {
+                "receipt_id": receipt_id, "task_id": task_id, "provider": provider,
+                "model": model or "", "route": route,
+                "prompt_summary": prompt_summary, "output_summary": output_summary,
+                "success": bool(success), "error": error or "",
+            })
         finally:
             conn.close()
 
@@ -227,16 +312,15 @@ def insert_risk_event(severity: str, category: str, description: str,
                     description, actor, metadata)
                    VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
                 (
-                    event_id,
-                    task_id,
-                    _utc_now(),
-                    severity,
-                    category,
-                    description,
-                    actor or "",
-                    json.dumps(metadata or {}),
+                    event_id, task_id, _utc_now(), severity, category,
+                    description, actor or "", json.dumps(metadata or {}),
                 ),
             )
+            _chain_append(conn, "risk_events", event_id, {
+                "event_id": event_id, "task_id": task_id, "severity": severity,
+                "category": category, "description": description,
+                "actor": actor or "", "metadata": metadata or {},
+            })
         finally:
             conn.close()
     return event_id
@@ -247,6 +331,7 @@ def insert_action_receipt(task_id: str, executor: str, action_type: str,
                           status: str = "pending",
                           result_summary: str = "") -> None:
     init_schema()
+    action_id = f"act_{task_id}_{int(datetime.now().timestamp() * 1000)}"
     with _lock:
         conn = _connect()
         try:
@@ -256,16 +341,15 @@ def insert_action_receipt(task_id: str, executor: str, action_type: str,
                     action_type, destination, status, result_summary)
                    VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
                 (
-                    f"act_{task_id}_{int(datetime.now().timestamp() * 1000)}",
-                    task_id,
-                    _utc_now(),
-                    executor,
-                    action_type,
-                    destination,
-                    status,
-                    result_summary,
+                    action_id, task_id, _utc_now(), executor,
+                    action_type, destination, status, result_summary,
                 ),
             )
+            _chain_append(conn, "action_receipts", action_id, {
+                "action_id": action_id, "task_id": task_id, "executor": executor,
+                "action_type": action_type, "destination": destination,
+                "status": status, "result_summary": result_summary,
+            })
         finally:
             conn.close()
 
@@ -315,16 +399,15 @@ def insert_approval_decision(approval_id: str, task_id: str, decision: str,
                     risk_tags, decision, decided_by, notes)
                    VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
                 (
-                    approval_id,
-                    task_id,
-                    _utc_now(),
-                    requested_action,
-                    json.dumps(risk_tags or []),
-                    decision,
-                    decided_by,
-                    note or "",
+                    approval_id, task_id, _utc_now(), requested_action,
+                    json.dumps(risk_tags or []), decision, decided_by, note or "",
                 ),
             )
+            _chain_append(conn, "approval_receipts", approval_id, {
+                "approval_id": approval_id, "task_id": task_id,
+                "requested_action": requested_action, "risk_tags": risk_tags or [],
+                "decision": decision, "decided_by": decided_by, "notes": note or "",
+            })
         finally:
             conn.close()
 

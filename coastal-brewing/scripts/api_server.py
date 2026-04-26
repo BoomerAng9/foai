@@ -537,6 +537,24 @@ def healthz() -> dict:
     }
 
 
+@app.get("/audit/integrity-check")
+def audit_integrity_check(authorization: str = Header(default="")) -> dict:
+    """Verify the audit_chain hash chain end-to-end.
+
+    Bearer-gated (same NemoClaw token as /run). Returns
+    `{ok, chain_length, broken_at, reason?}`. broken_at is the chain_id
+    of the first row whose hash doesn't match expectations; null if clean.
+
+    Wave 1 Step B replacement: this is the AOF buyer-pitch evidence —
+    "every action ACHEEVY takes is signed into a tamper-evident chain,
+    and you can prove it any time."
+    """
+    token = authorization.removeprefix("Bearer ").strip() if authorization else ""
+    if NEMOCLAW_API_KEY and token != NEMOCLAW_API_KEY:
+        raise HTTPException(status_code=401, detail="invalid token")
+    return audit_ledger.verify_chain()
+
+
 @app.post("/route")
 def route(packet: TaskPacket, x_coastal_token: Optional[str] = Header(default=None)) -> dict:
     _auth(x_coastal_token)
