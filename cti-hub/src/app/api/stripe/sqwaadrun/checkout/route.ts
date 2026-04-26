@@ -1,41 +1,30 @@
 /**
- * Stripe Sqwaadrun add-on checkout — OUTBOUND path (sibling of
- * `/api/stripe/checkout/route.ts`). Same Gate 1c canon status: direct
- * Stripe calls are Phase-A interim; Phase-B turns this into a thin
- * proxy over `@/lib/billing/stepper-billing-proxy.createCheckoutSession`
- * with `product: 'sqwaadrun'`. See
- * `docs/canon/stripe_architecture_carveout.md`.
+ * Sqwaadrun add-on checkout — OUTBOUND path.
+ *
+ * CANON STATUS (docs/canon/stripe_architecture_carveout.md, Gate 1c):
+ * Phase B MIGRATION COMPLETE on this route. Stripe SDK is no longer
+ * imported here — all Stripe calls go through Stepper's
+ * `createCheckoutSession`. The only direct Stripe touchpoint left in
+ * cti-hub is `/api/stripe/webhook/route.ts`, which holds the sanctioned
+ * signature-verification carveout.
+ *
+ * Behavior preserved end-to-end: owner bypass, rate limiting, Deploy
+ * 20% discount detection, identical response shape for the landing
+ * page's existing fetch call.
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import Stripe from 'stripe';
 import {
-  getSqwaadrunPriceId,
   SQWAADRUN_TIERS,
   SQWAADRUN_DEPLOY_DISCOUNT_PERCENT,
+  getSqwaadrunPriceId,
   type SqwaadrunTierId,
 } from '@/lib/billing/plans';
+import { createCheckoutSession } from '@/lib/billing/stepper-billing-proxy';
 import { applyRateLimit } from '@/lib/rate-limit';
 import { requireAuthenticatedRequest } from '@/lib/server-auth';
 import { isOwner } from '@/lib/allowlist';
 import { sql } from '@/lib/insforge';
-
-/* ──────────────────────────────────────────────────────────────
- *  POST /api/stripe/sqwaadrun/checkout
- *  Body: { tier: 'lil_hawk_solo' | 'sqwaad' | 'sqwaadrun_commander' }
- *
- *  Creates a Stripe checkout session for a Sqwaadrun tier. If the
- *  user has an active Deploy Platform subscription, applies the
- *  20% discount automatically via a Stripe coupon.
- * ────────────────────────────────────────────────────────────── */
-
-function getStripeClient() {
-  const secretKey = process.env.STRIPE_SECRET_KEY;
-  if (!secretKey) {
-    throw new Error('STRIPE_SECRET_KEY is not configured.');
-  }
-  return new Stripe(secretKey, { apiVersion: '2026-02-25.clover' });
-}
 
 const VALID_TIERS = new Set<SqwaadrunTierId>([
   'lil_hawk_solo',
@@ -50,9 +39,7 @@ export async function POST(request: NextRequest) {
       return authResult.response;
     }
 
-    // --- OWNER BYPASS (Phase 0) ---
-    // Owners never trigger Stripe customer or session creation on the
-    // Sqwaadrun checkout path either.
+    // Owner bypass — no Stripe interaction, go straight to control surface
     if (isOwner(authResult.context.user.email)) {
       return NextResponse.json({
         owner_bypass: true,
@@ -60,23 +47,23 @@ export async function POST(request: NextRequest) {
         message: 'Owner clearance — no checkout required.',
       });
     }
-    // --- END OWNER BYPASS ---
 
     const rateLimitResponse = applyRateLimit(request, 'sqwaadrun-checkout', {
       maxRequests: 5,
       windowMs: 60 * 1000,
       subject: authResult.context.user.uid,
     });
-    if (rateLimitResponse) {
-      return rateLimitResponse;
-    }
+    if (rateLimitResponse) return rateLimitResponse;
 
     const body = await request.json().catch(() => ({}));
-    const tierId = typeof body.tier === 'string' ? (body.tier as SqwaadrunTierId) : null;
-
+    const tierId =
+      typeof body.tier === 'string' ? (body.tier as SqwaadrunTierId) : null;
     if (!tierId || !VALID_TIERS.has(tierId)) {
       return NextResponse.json(
-        { error: 'Invalid tier. Choose: lil_hawk_solo, sqwaad, or sqwaadrun_commander.' },
+        {
+          error:
+            'Invalid tier. Choose: lil_hawk_solo, sqwaad, or sqwaadrun_commander.',
+        },
         { status: 400 },
       );
     }
@@ -94,88 +81,68 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Database unavailable' }, { status: 503 });
     }
 
-    const stripe = getStripeClient();
-
-    // Get or create Stripe customer
-    let customerId = authResult.context.profile?.stripe_customer_id || null;
-    if (!customerId) {
-      const customer = await stripe.customers.create({
-        email: authResult.context.user.email || undefined,
-        name: authResult.context.profile?.display_name || undefined,
-        metadata: { user_id: authResult.context.user.uid },
-      });
-      customerId = customer.id;
-      await sql`
-        UPDATE profiles SET stripe_customer_id = ${customerId}
-        WHERE user_id = ${authResult.context.user.uid}
-      `;
-    }
-
-    // Detect active Deploy Platform subscription for discount eligibility
-    const profileRows = await sql`
-      SELECT plan, plan_status FROM profiles
+    // Discount detection — Phase A read path per stepper_read_path_carveout
+    const profileRows = await sql<
+      { plan: string | null; plan_status: string | null; stripe_customer_id: string | null }[]
+    >`
+      SELECT plan, plan_status, stripe_customer_id
+      FROM profiles
       WHERE user_id = ${authResult.context.user.uid}
       LIMIT 1
     `;
+    const profile = profileRows[0];
     const hasActiveDeployPlan =
-      profileRows.length > 0 &&
-      profileRows[0].plan_status === 'active' &&
-      ['bucket_list', 'premium', 'lfg'].includes(profileRows[0].plan);
-
-    // Build the discount block (only if eligible)
-    const discounts = hasActiveDeployPlan
-      ? [{
-          coupon: process.env.STRIPE_SQWAADRUN_DEPLOY_DISCOUNT_COUPON || '',
-        }]
-      : undefined;
+      profile?.plan_status === 'active' &&
+      ['bucket_list', 'premium', 'lfg'].includes(profile?.plan ?? '');
+    const discountCouponId = hasActiveDeployPlan
+      ? process.env.STRIPE_SQWAADRUN_DEPLOY_DISCOUNT_COUPON ?? null
+      : null;
 
     const origin = process.env.DOMAIN_CLIENT || new URL(request.url).origin;
-    const session = await stripe.checkout.sessions.create({
-      mode: 'subscription',
-      customer: customerId || undefined,
-      client_reference_id: authResult.context.user.uid,
-      allow_promotion_codes: true,
-      line_items: [{ price: priceId, quantity: 1 }],
-      ...(discounts && discounts[0].coupon ? { discounts } : {}),
-      metadata: {
-        user_id: authResult.context.user.uid,
-        product: 'sqwaadrun',
+
+    const result = await createCheckoutSession({
+      userId: authResult.context.user.uid,
+      userEmail: authResult.context.user.email ?? '',
+      displayName: authResult.context.profile?.display_name ?? null,
+      plan: tierId,
+      priceId,
+      product: 'sqwaadrun',
+      origin,
+      successUrl: `/plug/sqwaadrun?success=true&tier=${tierId}&session_id={CHECKOUT_SESSION_ID}`,
+      cancelUrl: `/plug/sqwaadrun?canceled=true`,
+      existingStripeCustomerId: profile?.stripe_customer_id ?? null,
+      discountCouponId,
+      extraMetadata: {
         tier: tierId,
-        price_id: priceId,
+        tier_name: tier.name,
+        monthly_quota: String(tier.monthly_missions),
         deploy_discount_applied: hasActiveDeployPlan ? 'true' : 'false',
       },
-      subscription_data: {
-        metadata: {
-          user_id: authResult.context.user.uid,
-          product: 'sqwaadrun',
-          tier: tierId,
-          price_id: priceId,
-        },
-      },
-      success_url: `${origin}/plug/sqwaadrun?success=true&tier=${tierId}&session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${origin}/plug/sqwaadrun?canceled=true`,
     });
 
-    if (!session.url) {
-      return NextResponse.json({ error: 'Stripe did not return a checkout URL.' }, { status: 502 });
-    }
-
     return NextResponse.json({
-      url: session.url,
-      sessionId: session.id,
+      url: result.checkoutUrl,
+      sessionId: result.sessionId,
       tier: tierId,
       tier_name: tier.name,
       monthly_price: tier.price_monthly,
       monthly_missions: tier.monthly_missions,
-      discount_applied: hasActiveDeployPlan,
-      discount_percent: hasActiveDeployPlan ? SQWAADRUN_DEPLOY_DISCOUNT_PERCENT : 0,
+      discount_applied: hasActiveDeployPlan && !!discountCouponId,
+      discount_percent:
+        hasActiveDeployPlan && !!discountCouponId
+          ? SQWAADRUN_DEPLOY_DISCOUNT_PERCENT
+          : 0,
     });
   } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : 'Sqwaadrun checkout failed';
+    const message =
+      error instanceof Error ? error.message : 'Sqwaadrun checkout failed';
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }
 
 export async function GET() {
-  return NextResponse.json({ error: 'Use POST to create a Sqwaadrun checkout session.' }, { status: 405 });
+  return NextResponse.json(
+    { error: 'Use POST to create a Sqwaadrun checkout session.' },
+    { status: 405 },
+  );
 }

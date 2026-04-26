@@ -1,0 +1,76 @@
+# ============================================================================
+# Sqwaadrun gateway — Cloud Build + Cloud Run deploy config
+# ============================================================================
+# aiohttp service (port 7700). Dual-auth: SQWAADRUN_API_KEY (admin) +
+# per-customer sqr_live_* keys validated against Neon sqwaadrun_api_keys
+# with HMAC-SHA256 + SQWAADRUN_KEY_PEPPER. Per-tier monthly quota
+# enforced in-middleware.
+#
+# Secrets pulled from Secret Manager at container boot:
+#   - SQWAADRUN_API_KEY      → keystore-sqwaadrun-admin-key
+#   - SQWAADRUN_KEY_PEPPER   → keystore-sqwaadrun-key-pepper
+#   - DATABASE_URL           → database-url (shared with cti-hub)
+#
+# Trigger:
+#   gcloud builds submit smelter-os/sqwaadrun/ \
+#     --config=smelter-os/sqwaadrun/cloudbuild.yaml \
+#     --substitutions="COMMIT_SHA=$(git rev-parse HEAD)" \
+#     --project=foai-aims
+#
+# Rollback:
+#   gcloud run services update-traffic sqwaadrun \
+#     --to-revisions=<previous-revision>=100 \
+#     --region=us-central1 --project=foai-aims
+# ============================================================================
+
+steps:
+  - name: 'gcr.io/cloud-builders/docker'
+    id: build
+    args:
+      - build
+      - -t
+      - us-central1-docker.pkg.dev/foai-aims/sqwaadrun/service:$COMMIT_SHA
+      - -t
+      - us-central1-docker.pkg.dev/foai-aims/sqwaadrun/service:latest
+      - -f
+      - Dockerfile
+      - .
+
+  - name: 'gcr.io/cloud-builders/docker'
+    id: push-sha
+    args:
+      - push
+      - us-central1-docker.pkg.dev/foai-aims/sqwaadrun/service:$COMMIT_SHA
+
+  - name: 'gcr.io/cloud-builders/docker'
+    id: push-latest
+    args:
+      - push
+      - us-central1-docker.pkg.dev/foai-aims/sqwaadrun/service:latest
+
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    id: deploy
+    entrypoint: gcloud
+    args:
+      - run
+      - deploy
+      - sqwaadrun
+      - --image=us-central1-docker.pkg.dev/foai-aims/sqwaadrun/service:$COMMIT_SHA
+      - --region=us-central1
+      - --platform=managed
+      - --allow-unauthenticated
+      - --port=7700
+      - --memory=2Gi
+      - --cpu=2
+      - --min-instances=0
+      - --max-instances=5
+      - --timeout=300s
+      - --set-env-vars=^@^PYTHONUNBUFFERED=1@PYTHONUTF8=1@SQWAADRUN_BIND=0.0.0.0@SQWAADRUN_DATA_DIR=/tmp/sqwaadrun@SQWAADRUN_QUOTA_PER_DOMAIN=500@SQWAADRUN_CORS_ORIGINS=https://deploy.foai.cloud,https://cti.foai.cloud,https://sqwaadrun.foai.cloud
+      - --set-secrets=SQWAADRUN_API_KEY=keystore-sqwaadrun-admin-key:latest,SQWAADRUN_KEY_PEPPER=keystore-sqwaadrun-key-pepper:latest,DATABASE_URL=database-url:latest
+
+images:
+  - us-central1-docker.pkg.dev/foai-aims/sqwaadrun/service:$COMMIT_SHA
+  - us-central1-docker.pkg.dev/foai-aims/sqwaadrun/service:latest
+
+options:
+  logging: CLOUD_LOGGING_ONLY

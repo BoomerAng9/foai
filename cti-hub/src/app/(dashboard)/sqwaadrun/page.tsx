@@ -48,6 +48,13 @@ interface LiveRoster {
   hawks: Array<{ name: string; status: 'active' | 'standby'; tasks_completed: number }>;
 }
 
+interface VaultMission {
+  missionId: string;
+  createdAt: string;
+  sizeBytes: number;
+  gcsPath: string;
+}
+
 function SqwaadrunDashboardPageInner() {
   const { user, profile } = useAuth();
   const searchParams = useSearchParams();
@@ -56,6 +63,8 @@ function SqwaadrunDashboardPageInner() {
   const [healthy, setHealthy] = useState<boolean | null>(null);
   const [loading, setLoading] = useState(true);
   const [builderOpen, setBuilderOpen] = useState(false);
+  const [vault, setVault] = useState<VaultMission[] | null>(null);
+  const [downloadingMission, setDownloadingMission] = useState<string | null>(null);
   const liveAbortRef = useRef<AbortController | null>(null);
 
   const slice: ProfileSqwaadrunSlice = useMemo(() => {
@@ -115,6 +124,48 @@ function SqwaadrunDashboardPageInner() {
       liveAbortRef.current?.abort();
     };
   }, [refresh]);
+
+  // File Vault — lists missions persisted to the customer's own GCS
+  // namespace. Re-fetched on login and after any mission completes.
+  const refreshVault = useCallback(async () => {
+    if (!user) return;
+    try {
+      const token = await user.getIdToken();
+      const res = await fetch('/api/sqwaadrun/missions/mine', {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!res.ok) return;
+      const data = await res.json();
+      setVault((data.missions ?? []) as VaultMission[]);
+    } catch {
+      // Leave vault as-is on transient failure
+    }
+  }, [user]);
+
+  useEffect(() => {
+    refreshVault();
+  }, [refreshVault]);
+
+  const downloadMission = useCallback(
+    async (missionId: string, format: 'json' | 'manifest') => {
+      if (!user) return;
+      setDownloadingMission(`${missionId}:${format}`);
+      try {
+        const token = await user.getIdToken();
+        const res = await fetch(
+          `/api/sqwaadrun/missions/${encodeURIComponent(missionId)}/download?format=${format}`,
+          { headers: { Authorization: `Bearer ${token}` } },
+        );
+        const data = await res.json();
+        if (res.ok && data.downloadUrl) {
+          window.open(data.downloadUrl, '_blank', 'noopener');
+        }
+      } finally {
+        setDownloadingMission(null);
+      }
+    },
+    [user],
+  );
 
   // ── Profile refresh after Stripe success ──
   // The webhook updates profile.sqwaadrun_* server-side, but the
@@ -448,6 +499,109 @@ function SqwaadrunDashboardPageInner() {
                   </>
                 )}
               </div>
+            </div>
+
+            {/* ═══ FILE VAULT — GCS-persisted missions with signed-URL download ═══ */}
+            <div
+              className="mt-10 border p-5"
+              style={{
+                borderColor: 'rgba(34,211,238,0.25)',
+                background: 'rgba(34,211,238,0.03)',
+                borderRadius: '3px',
+              }}
+            >
+              <div className="flex items-baseline justify-between mb-4">
+                <div>
+                  <div className="text-[9px] font-mono tracking-[0.25em]" style={{ color: '#22D3EE' }}>
+                    / FILE VAULT
+                  </div>
+                  <div className="text-xs mt-1" style={{ color: '#94A3B8' }}>
+                    Scraped artifacts stored in your own namespace · 15-min signed links
+                  </div>
+                </div>
+                <button
+                  onClick={refreshVault}
+                  className="text-[10px] font-mono opacity-60 hover:opacity-100"
+                >
+                  REFRESH ⟳
+                </button>
+              </div>
+
+              {vault === null && (
+                <div className="text-[10px] font-mono opacity-50 py-6 text-center">
+                  Loading vault…
+                </div>
+              )}
+
+              {vault !== null && vault.length === 0 && (
+                <div className="text-center py-8">
+                  <div className="text-[10px] font-mono opacity-50 mb-2">
+                    No archived missions yet.
+                  </div>
+                  <div className="text-[10px] font-mono opacity-40">
+                    Dispatch a mission — results are auto-persisted under
+                    <span className="mx-1" style={{ color: '#22D3EE' }}>
+                      customer/&lt;uid&gt;/missions/
+                    </span>
+                    in the secure artifacts bucket.
+                  </div>
+                </div>
+              )}
+
+              {vault && vault.length > 0 && (
+                <div className="space-y-2">
+                  {vault.map((m) => {
+                    const jsonKey = `${m.missionId}:json`;
+                    const manifestKey = `${m.missionId}:manifest`;
+                    return (
+                      <div
+                        key={m.missionId}
+                        className="flex items-center justify-between gap-3 px-3 py-2.5 border-l-2"
+                        style={{
+                          borderLeftColor: '#22D3EE',
+                          background: 'rgba(255,255,255,0.02)',
+                        }}
+                      >
+                        <div className="flex-1 min-w-0">
+                          <div className="text-[11px] font-mono truncate" style={{ color: '#F5A623' }}>
+                            {m.missionId}
+                          </div>
+                          <div className="text-[9px] font-mono opacity-50 mt-0.5">
+                            {new Date(m.createdAt).toLocaleString()} ·{' '}
+                            {(m.sizeBytes / 1024).toFixed(1)} KB
+                          </div>
+                        </div>
+                        <div className="flex gap-2 shrink-0">
+                          <button
+                            onClick={() => downloadMission(m.missionId, 'json')}
+                            disabled={downloadingMission === jsonKey}
+                            className="px-3 py-1.5 text-[9px] font-mono tracking-[0.15em] font-bold disabled:opacity-40"
+                            style={{
+                              background: '#22D3EE',
+                              color: '#050810',
+                              borderRadius: '2px',
+                            }}
+                          >
+                            {downloadingMission === jsonKey ? '…' : 'JSON'}
+                          </button>
+                          <button
+                            onClick={() => downloadMission(m.missionId, 'manifest')}
+                            disabled={downloadingMission === manifestKey}
+                            className="px-3 py-1.5 text-[9px] font-mono tracking-[0.15em] disabled:opacity-40"
+                            style={{
+                              border: '1px solid rgba(34,211,238,0.4)',
+                              color: '#22D3EE',
+                              borderRadius: '2px',
+                            }}
+                          >
+                            {downloadingMission === manifestKey ? '…' : 'MANIFEST'}
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
             </div>
 
             {/* Manage subscription */}

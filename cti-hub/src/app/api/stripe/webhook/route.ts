@@ -21,6 +21,10 @@ import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import { determinePlanFromPriceId, determineSqwaadrunTierFromPriceId, SQWAADRUN_TIERS } from '@/lib/billing/plans';
 import { sql } from '@/lib/insforge';
+import {
+  issueSqwaadrunKey,
+  emailSqwaadrunKey,
+} from '@/lib/billing/sqwaadrun-key-issuance';
 
 function toIsoFromUnix(timestamp?: number | null) {
   if (!timestamp) return null;
@@ -87,9 +91,41 @@ export async function POST(request: NextRequest) {
                 sqwaadrun_tier = ${tierId},
                 sqwaadrun_status = ${subscriptionStatus},
                 sqwaadrun_monthly_quota = ${tier.monthly_missions},
+                sqwaadrun_missions_used = 0,
                 sqwaadrun_period_start = ${currentPeriodStart},
                 sqwaadrun_period_end = ${currentPeriodEnd}
               WHERE user_id = ${userId}
+            `;
+
+            // Issue per-customer gateway API key + best-effort email delivery
+            const issued = await issueSqwaadrunKey({
+              userId,
+              userEmail: session.customer_details?.email ?? '',
+              tierId,
+              stripeCustomerId: customerId ?? null,
+              stripeSubscriptionId: subscriptionId ?? null,
+              periodStart: currentPeriodStart,
+              periodEnd: currentPeriodEnd,
+            });
+
+            if (session.customer_details?.email) {
+              await emailSqwaadrunKey(
+                session.customer_details.email,
+                issued.plaintextKey,
+                tier.name,
+              );
+            }
+
+            // Stash the freshly-issued plaintext key on the session
+            // row so the dashboard can retrieve it via session_id on
+            // the success redirect. This is the canonical delivery
+            // surface; email is a convenience copy.
+            await sql`
+              INSERT INTO sqwaadrun_key_handoffs
+                (stripe_session_id, user_id, api_key_row_id, plaintext_key, created_at, retrieved_at)
+              VALUES
+                (${session.id}, ${userId}, ${issued.rowId}, ${issued.plaintextKey}, NOW(), NULL)
+              ON CONFLICT (stripe_session_id) DO NOTHING
             `;
           }
           break;
@@ -122,12 +158,19 @@ export async function POST(request: NextRequest) {
           const tierId = determineSqwaadrunTierFromPriceId(priceId);
           if (tierId) {
             const tier = SQWAADRUN_TIERS[tierId];
+            const newPeriodStart = toIsoFromUnix(
+              subscription.items.data[0]?.current_period_start,
+            );
             await sql`
               UPDATE profiles SET
                 sqwaadrun_tier = ${tierId},
                 sqwaadrun_status = ${subscription.status},
                 sqwaadrun_monthly_quota = ${tier.monthly_missions},
-                sqwaadrun_period_start = ${toIsoFromUnix(subscription.items.data[0]?.current_period_start)},
+                sqwaadrun_missions_used = CASE
+                  WHEN sqwaadrun_period_start IS DISTINCT FROM ${newPeriodStart} THEN 0
+                  ELSE sqwaadrun_missions_used
+                END,
+                sqwaadrun_period_start = ${newPeriodStart},
                 sqwaadrun_period_end = ${toIsoFromUnix(subscription.items.data[0]?.current_period_end)}
               WHERE user_id = ${userIdMeta}
             `;

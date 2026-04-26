@@ -29,7 +29,8 @@ COPY sqwaadrun/__init__.py sqwaadrun/__init__.py
 RUN pip install --no-cache-dir --upgrade pip && \
     pip install --no-cache-dir \
       aiohttp aiofiles beautifulsoup4 lxml html2text tldextract \
-      'psycopg[binary]>=3.1' \
+      'brotli>=1.1' \
+      'psycopg[binary]>=3.1' 'psycopg_pool>=3.2' \
       'google-cloud-storage>=2.18' \
       playwright && \
     playwright install chromium

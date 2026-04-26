@@ -54,6 +54,10 @@ from sqwaadrun.security import (
     audit_log,
     check_dependencies,
 )
+from sqwaadrun.billing_middleware import (
+    customer_auth_middleware,
+    close_pool as close_billing_pool,
+)
 
 logger = logging.getLogger("Sqwaadrun.Service")
 
@@ -208,7 +212,8 @@ async def scrape_intent(request: web.Request) -> web.Response:
         mission_id = result.get("mission_id")
         if mission_id and result.get("status") in ("completed", "failed"):
             mission_obj = _find_mission(squad, mission_id)
-            await _persist_mission(storage, mission_id, mission_obj, result)
+            user_id = request.get("sqwaadrun_user_id") or "admin"
+            await _persist_mission(storage, mission_id, mission_obj, result, user_id)
 
         # sanitize_output strips internal paths, IPs, and leaked secrets
         # before the response crosses the API boundary.
@@ -233,19 +238,24 @@ async def _persist_mission(
     mission_id: str,
     mission_obj: Optional[Mission],
     api_result: Dict[str, Any],
+    user_id: str,
 ) -> None:
+    """Persist to the caller's per-user namespace. user_id='admin' for
+    SQWAADRUN_API_KEY admin traffic; Firebase uid for customer traffic."""
     try:
         manifest: Dict[str, Any] = {
             "mission_id": mission_id,
+            "user_id": user_id,
             "intent": api_result.get("type") or (mission_obj.mission_type.value if mission_obj else None),
             "targets": mission_obj.targets if mission_obj else [],
             "config": mission_obj.config if mission_obj else {},
             "created_at": mission_obj.created_at if mission_obj else None,
         }
-        await storage.store_mission_manifest(mission_id, manifest)
+        await storage.store_mission_manifest(mission_id, manifest, user_id=user_id)
 
         payload: Dict[str, Any] = {
             "mission_id": mission_id,
+            "user_id": user_id,
             "status": api_result.get("status"),
             "target_count": api_result.get("target_count"),
             "results_count": api_result.get("results_count"),
@@ -253,10 +263,11 @@ async def _persist_mission(
             "results": mission_obj.results if mission_obj else [],
             "error": api_result.get("error"),
         }
-        storage_result = await storage.store_mission_result(mission_id, payload)
+        storage_result = await storage.store_mission_result(mission_id, payload, user_id=user_id)
         logger.info(
-            f"Mission {mission_id} persistence: "
-            f"puter={storage_result['puter']} gcs={storage_result['gcs']}"
+            f"Mission {mission_id} persistence (user={user_id}): "
+            f"puter={storage_result['puter']} gcs={storage_result['gcs']} "
+            f"path={storage_result.get('gcs_path')}"
         )
     except Exception as e:
         logger.warning(f"Mission {mission_id} persistence failed: {e}")
@@ -319,7 +330,8 @@ async def mission(request: web.Request) -> web.Response:
         }
 
         if m.status in ("completed", "failed"):
-            await _persist_mission(storage, m.mission_id, m, api_result)
+            user_id = request.get("sqwaadrun_user_id") or "admin"
+            await _persist_mission(storage, m.mission_id, m, api_result, user_id)
 
         return web.json_response(sanitize_output(api_result))
     except Exception as e:
@@ -385,6 +397,8 @@ async def on_startup(app: web.Application) -> None:
 
     squad = FullScrappHawkSquadrun(
         output_dir=str(data_dir / "output"),
+        screenshots_dir=str(data_dir / "screenshots"),
+        db_path=str(data_dir / "scrape_cache.db"),
         schedule_file=str(data_dir / "schedule.json"),
         enable_screenshots=os.environ.get("ENABLE_SCREENSHOTS", "").lower() in ("1", "true", "yes"),
     )
@@ -482,11 +496,17 @@ async def on_cleanup(app: web.Application) -> None:
 
     squad: FullScrappHawkSquadrun = app["squad"]
     await squad.shutdown()
+    await close_billing_pool()
 
 
 def build_app() -> web.Application:
     # CORS runs first so preflight never hits auth.
-    app = web.Application(middlewares=[cors_middleware, auth_middleware])
+    # customer_auth_middleware supersedes the legacy shared-key
+    # auth_middleware: it accepts SQWAADRUN_API_KEY (admin) AND
+    # `sqr_live_*` customer keys looked up in Neon with per-key quota.
+    app = web.Application(
+        middlewares=[cors_middleware, customer_auth_middleware]
+    )
 
     app.router.add_get("/", health)
     app.router.add_get("/health", health)
@@ -510,6 +530,15 @@ def main():
     parser.add_argument("--host", default=os.environ.get("SQWAADRUN_BIND", "127.0.0.1"))
     parser.add_argument("--port", type=int, default=7700)
     args = parser.parse_args()
+
+    # Cloud Run (and other read-only-rootfs deployments) require all
+    # relative-path writes to land on a writable overlay. Pivot CWD
+    # into SQWAADRUN_DATA_DIR so hardcoded-relative paths created by
+    # individual Lil_Hawks (diff_history, schedule.json, etc.) resolve
+    # under the ephemeral tmpfs mount rather than the read-only image.
+    data_dir = Path(os.environ.get("SQWAADRUN_DATA_DIR", "./data"))
+    data_dir.mkdir(parents=True, exist_ok=True)
+    os.chdir(str(data_dir))
 
     logging.basicConfig(level=logging.INFO)
     app = build_app()
