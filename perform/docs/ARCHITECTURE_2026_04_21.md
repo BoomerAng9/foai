@@ -45,7 +45,7 @@ Per|Form is composed of three deployment classes. Every feature belongs to exact
 - **Public PaaS API v1** (`/api/v1/*` metered) — separable from the marketing site once API keys + LUC metering are wired.
 - Heavy image-gen workers (Recraft / Ideogram batch) if/when bulk regen exceeds VPS comfort.
 
-**Pattern reference (correct):** how `hermes`, `ttd-dr`, `voice-gateway`, `chicken-hawk`, `sqwaadrun`, `vault-signer`, `nemoclaw-service` are scoped on `foai-aims`.
+**Pattern reference (correct):** how `audit-ledger`, `ttd-dr`, `voice-gateway`, `chicken-hawk`, `sqwaadrun`, `vault-signer`, `nemoclaw-service` are scoped on `foai-aims`.
 
 **Pattern reference (incorrect):** what I did 2026-04-20 — provisioning the entire perform Next.js as one Cloud Run service. That's been torn down.
 
