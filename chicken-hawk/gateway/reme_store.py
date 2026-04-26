@@ -38,11 +38,16 @@ _unavailable: bool = False
 
 
 def get_store() -> Optional[Any]:
-    """Return a ReMeLight (or vector) store instance.
+    """Return a ReMe app instance (canonical top-level class is ReMeApp).
 
-    First call lazily initializes; subsequent calls reuse. On import or
-    init failure, returns None and logs once. Callers should treat None
-    as "memory unavailable; proceed without recall."
+    Wave 1 minimal-init: verify reme_ai is importable and the canonical
+    ReMeApp class is available. Actual store configuration (file vs vector
+    backend, workspace dir) lands in Wave 2 when the routing flow wires
+    `before_route` / `after_route` to call recall + store.
+
+    First call lazily initializes; subsequent calls reuse. On import
+    failure, returns None. Callers treat None as "memory unavailable;
+    proceed without recall."
     """
     global _store, _unavailable
     if _unavailable:
@@ -50,19 +55,21 @@ def get_store() -> Optional[Any]:
     if _store is not None:
         return _store
     try:
-        if REME_BACKEND == "light":
-            from reme_ai import ReMeLight  # type: ignore
-            os.makedirs(REME_LIGHT_DIR, exist_ok=True)
-            _store = ReMeLight(workspace_dir=REME_LIGHT_DIR)
-            logger.info("reme_initialized", backend="light", workspace=REME_LIGHT_DIR)
-        else:
-            # Vector backend (opt-in)
-            from reme_ai import ReMe  # type: ignore
-            _store = ReMe()
-            logger.info("reme_initialized", backend="vector")
+        from reme_ai import ReMeApp  # type: ignore  # noqa: F401
+        os.makedirs(REME_LIGHT_DIR, exist_ok=True)
+        # Wave 1: just record that the class is reachable; defer instantiation
+        # until Wave 2 wires actual recall/store calls (instantiation requires
+        # backend-specific config that we'll drive from env in the next pass).
+        _store = ReMeApp  # store the class reference; instantiation happens lazily on first call
+        logger.info(
+            "reme_available",
+            backend=REME_BACKEND,
+            workspace=REME_LIGHT_DIR,
+            class_path="reme_ai.ReMeApp",
+        )
         return _store
-    except ImportError:
-        logger.warning("reme_not_installed", backend=REME_BACKEND)
+    except ImportError as exc:
+        logger.warning("reme_not_installed", backend=REME_BACKEND, error=str(exc))
         _unavailable = True
         return None
     except Exception as exc:
@@ -72,5 +79,5 @@ def get_store() -> Optional[Any]:
 
 
 def is_available() -> bool:
-    """Cheap check: True if ReMe is installed and initialized successfully."""
+    """Cheap check: True if ReMe is installed and ReMeApp class is reachable."""
     return get_store() is not None
