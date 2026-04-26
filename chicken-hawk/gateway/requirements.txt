@@ -10,3 +10,9 @@ PyYAML==6.0.2
 python-jose[cryptography]==3.3.0
 structlog==24.4.0
 tenacity==9.0.0
+
+# Wave 1 Step F — ReMe (AgentScope) for long-term agent memory.
+# File-based ReMeLight backend by default; vector backend opt-in via env.
+# Repo: https://github.com/agentscope-ai/ReMe (Apache-2.0, ~2.8k stars)
+# Pip: pypi.org/project/reme-ai/
+reme-ai>=0.3.1
