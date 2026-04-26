@@ -1,8 +1,9 @@
 /**
- * Hermes TTS Router — Mode-Based Voice Dispatch
- * ================================================
+ * Mode TTS Router — Mode-Based Voice Dispatch
+ * =============================================
  * Routes TTS requests to the right provider based on use case.
- * Named after Hermes (LearnAng infrastructure engine).
+ * Renamed from `hermes-tts-router.ts` 2026-04-26 to free the "Hermes" name
+ * for the canonical Hermes Agent (NousResearch). This is internal voice infra.
  *
  * Routing modes:
  *   live_chat          → ElevenLabs v3 (lowest latency, 75ms)

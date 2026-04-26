@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth-guard';
-import { routeTTS, type TTSMode } from '@/lib/voice/hermes-tts-router';
+import { routeTTS, type TTSMode } from '@/lib/voice/mode-tts-router';
 
 /**
  * POST /api/voice/speak

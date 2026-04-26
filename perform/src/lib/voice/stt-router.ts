@@ -1,5 +1,5 @@
 /**
- * Hermes STT Router — Multi-Provider Speech-to-Text Dispatch
+ * STT Router — Multi-Provider Speech-to-Text Dispatch
  * ============================================================
  * Routes STT requests across three providers based on use case.
  *
