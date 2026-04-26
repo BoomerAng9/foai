@@ -11,6 +11,7 @@ from fastapi import FastAPI
 from config import PORT, VERSION
 from logging_config import setup_logging
 from routers import compare, evaluate, history, hr_pmo, memory_routes, trends
+from routers.autoresearch_router import router as autoresearch_router
 from scheduler import start_scheduler, stop_scheduler
 
 setup_logging()
@@ -42,6 +43,7 @@ app.include_router(trends.router)
 app.include_router(compare.router)
 app.include_router(memory_routes.router)
 app.include_router(hr_pmo.router)
+app.include_router(autoresearch_router)
 
 
 @app.get("/health")
