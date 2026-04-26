@@ -109,12 +109,18 @@ services:
     depends_on:
       coastal-runner:
         condition: service_healthy
+    # Process-alive healthcheck — checks the hermes gateway PID is running
+    # without requiring interactive `hermes gateway setup` to have completed.
+    # Why not /v1/models: upstream activates the API server only after the
+    # operator runs the setup CLI, so the prior HTTP healthcheck failed in a
+    # fresh deploy until setup. PID-based check passes on first start; the
+    # operator can DM the bot once setup is registered to verify end-to-end.
     healthcheck:
-      test: ["CMD", "curl", "-fsS", "-H", "Authorization: Bearer $${API_SERVER_KEY}", "http://127.0.0.1:9119/v1/models"]
+      test: ["CMD-SHELL", "pgrep -f 'hermes gateway' >/dev/null || exit 1"]
       interval: 30s
-      timeout: 10s
+      timeout: 5s
       retries: 3
-      start_period: 60s
+      start_period: 30s
 
 volumes:
   hermes-data:
