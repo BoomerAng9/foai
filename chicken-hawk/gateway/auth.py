@@ -102,13 +102,25 @@ async def login(request: Request) -> HTMLResponse:
         f"Access code (expires in 15 min):\n{link}\n\n"
         f"Tap once. If you didn't request this, ignore."
     )
+    # Wave 1 Step C: route through Hermes Agent (multi-channel HITL).
+    # Falls back to direct Telegram if Hermes is unreachable so magic-link
+    # login never breaks on a notifier outage.
+    delivered = False
     try:
-        await _send_telegram(msg)
-    except Exception as e:
-        return _html_response(
-            "Delivery failed",
-            f"Could not send via Telegram: {e}. Check server logs.",
-        )
+        from notifier import notify_owner
+
+        delivered = await notify_owner(channel="telegram", message=msg, urgency="approval")
+    except Exception:
+        delivered = False
+    if not delivered:
+        try:
+            await _send_telegram(msg)
+            delivered = True
+        except Exception as e:
+            return _html_response(
+                "Delivery failed",
+                f"Could not send via Telegram: {e}. Check server logs.",
+            )
     return _html_response(
         "Check your Telegram",
         "Code sent. Tap once. Expires in 15 min.",
