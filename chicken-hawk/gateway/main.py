@@ -26,6 +26,11 @@ from config import get_settings
 from event_bus import EventBus, TaskEvent, TaskStatus, get_event_bus
 from router import HawkResponse, Router
 
+# Pre-flight wiring (Wave 1, ecosystem-wide): NemoClaw policy gate + magic-link auth.
+# Both modules already implement their FastAPI routers; main.py mounts them below.
+from auth import router as auth_router, _send_telegram  # noqa: E402
+from nemoclaw import router as nemoclaw_router, _evaluate, _append_event  # noqa: E402
+
 # ---------------------------------------------------------------------------
 # Structured logging setup
 # ---------------------------------------------------------------------------
@@ -123,6 +128,19 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
 
 
 app.add_middleware(SecurityHeadersMiddleware)
+
+
+# ---------------------------------------------------------------------------
+# Pre-flight wired routers (Wave 1, ecosystem-wide)
+#
+# `nemoclaw_router` exposes /check, /risk-event, /risk-events (Bearer-gated)
+# `auth_router`     exposes /login, /login/verify, /logout, /me (magic-link)
+#
+# These were defined as APIRouters but never mounted. Wave 1 mounts them so
+# every project that calls hawk.foai.cloud inherits policy gating + auth.
+# ---------------------------------------------------------------------------
+app.include_router(nemoclaw_router, prefix="", tags=["NemoClaw"])
+app.include_router(auth_router, prefix="", tags=["Auth"])
 
 
 # ---------------------------------------------------------------------------
@@ -245,6 +263,144 @@ async def list_hawks() -> dict:
     """Return the configured Lil_Hawk endpoints."""
     settings = get_settings()
     return {"hawks": list(settings.hawk_endpoints.keys())}
+
+
+# ---------------------------------------------------------------------------
+# /run action handler — Wave 1 ecosystem-wide contract
+#
+# Any FOAI project (Coastal, Per|Form, AIMS, future apps) POSTs:
+#   {"action": str, "payload": dict}
+# The gateway evaluates against NemoClaw and routes to:
+#   200 {ok, verdict: "allow",     ...} on allow + dispatch
+#   202 {ok, verdict: "escalate",  ...} on escalate (owner Telegram pinged)
+#   403 {ok, verdict: "denied",    ...} on deny    (risk event recorded)
+# Receipts are written to an in-memory ledger keyed by task_id (Wave 1).
+# Wave 2 migrates the ledger to AuditLedger (renamed Hermes SQLite).
+# ---------------------------------------------------------------------------
+import asyncio
+import time as _time
+import uuid as _uuid
+from datetime import datetime, timezone
+
+# In-memory receipt ledger (Wave 1). Keyed by task_id; bounded buffer.
+_RUN_LEDGER: list[dict] = []
+_RUN_LEDGER_MAX = 5000
+_RUN_LEDGER_LOCK = asyncio.Lock()
+
+
+class RunRequest(BaseModel):
+    action: str = Field(..., min_length=1, max_length=128)
+    payload: dict = Field(default_factory=dict)
+
+
+async def _record_run_receipt(receipt: dict) -> None:
+    async with _RUN_LEDGER_LOCK:
+        _RUN_LEDGER.append(receipt)
+        if len(_RUN_LEDGER) > _RUN_LEDGER_MAX:
+            del _RUN_LEDGER[: len(_RUN_LEDGER) - _RUN_LEDGER_MAX]
+
+
+@app.post("/run", tags=["Run"])
+async def run_action(req: RunRequest, _: None = Depends(require_auth)) -> JSONResponse:
+    """Execute an action through the NemoClaw policy gate.
+
+    Caller (FOAI agent) sends {action, payload}. Gateway maps `action` to
+    NemoClaw `action_type`, evaluates, and either dispatches, escalates,
+    or denies. Always writes a receipt to the in-memory ledger.
+    """
+    started = _time.perf_counter()
+    task_id = req.payload.get("task_id") or req.payload.get("session_id") or f"task_{_uuid.uuid4().hex[:12]}"
+    risk_tags = req.payload.get("risk_tags") or []
+    approval_id = req.payload.get("approval_id")
+    actor = req.payload.get("actor") or "agent"
+
+    verdict = _evaluate(req.action, risk_tags, approval_id)
+    decided_at = datetime.now(timezone.utc).isoformat()
+    receipt: dict = {
+        "receipt_id": f"rcpt_{_uuid.uuid4().hex[:16]}",
+        "task_id": task_id,
+        "action": req.action,
+        "actor": actor,
+        "verdict": verdict["verdict"],
+        "reason": verdict["reason"],
+        "basis": verdict["basis"],
+        "decided_at": decided_at,
+    }
+
+    if verdict["verdict"] == "deny":
+        # Record blocked-action attempt as a risk event, return 403.
+        _append_event({
+            "event_id": f"risk_{_uuid.uuid4().hex[:16]}",
+            "severity": "high",
+            "category": "blocked_action_attempt",
+            "description": f"NemoClaw denied '{req.action}': {verdict['reason']}",
+            "task_id": task_id,
+            "actor": actor,
+            "metadata": {"action": req.action, "risk_tags": risk_tags},
+            "recorded_at": decided_at,
+        })
+        receipt["elapsed_ms"] = (_time.perf_counter() - started) * 1000
+        await _record_run_receipt(receipt)
+        return JSONResponse(
+            status_code=403,
+            content={
+                "ok": False,
+                "verdict": "denied",
+                "message": "NemoClaw denied this action.",
+                "detail": verdict,
+                "receipt": receipt,
+            },
+        )
+
+    if verdict["verdict"] == "escalate":
+        # Notify owner via Telegram (auth._send_telegram); 202 pending approval.
+        try:
+            await _send_telegram(
+                f"⚠️ Approval needed for action '{req.action}' (task {task_id}).\n"
+                f"Reason: {verdict['reason']}"
+            )
+        except Exception as exc:
+            logger.warning("escalate_telegram_failed", error=str(exc))
+        receipt["elapsed_ms"] = (_time.perf_counter() - started) * 1000
+        await _record_run_receipt(receipt)
+        return JSONResponse(
+            status_code=202,
+            content={
+                "ok": False,
+                "verdict": "escalated",
+                "message": "Owner approval required; routed to Telegram.",
+                "detail": verdict,
+                "receipt": receipt,
+            },
+        )
+
+    # Verdict == allow: receipt the action; runtime dispatch is action-specific
+    # and handled by callers' own /chat round-trip. Wave 2 wires action→Lil_Hawk
+    # mapping inside this handler.
+    receipt["elapsed_ms"] = (_time.perf_counter() - started) * 1000
+    await _record_run_receipt(receipt)
+    return JSONResponse(
+        status_code=200,
+        content={
+            "ok": True,
+            "verdict": "allow",
+            "message": "Action allowed; receipt recorded.",
+            "detail": verdict,
+            "receipt": receipt,
+        },
+    )
+
+
+@app.get("/audit/{task_id}", tags=["Audit"], dependencies=[Depends(require_auth)])
+async def get_audit_trail(task_id: str) -> dict:
+    """Return the in-memory receipt trail for a task_id.
+
+    Wave 1 reads from `_RUN_LEDGER` (bounded in-memory buffer). Wave 2
+    upgrades to AuditLedger (the renamed Coastal SQLite, migrated to Neon).
+    """
+    async with _RUN_LEDGER_LOCK:
+        receipts = [r for r in _RUN_LEDGER if r.get("task_id") == task_id]
+    return {"ok": True, "task_id": task_id, "count": len(receipts), "receipts": receipts}
 
 
 # ---------------------------------------------------------------------------
