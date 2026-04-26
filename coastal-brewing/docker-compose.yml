@@ -1,0 +1,56 @@
+services:
+  coastal-runner:
+    image: python:3.13-slim
+    container_name: coastal-runner
+    restart: unless-stopped
+    mem_limit: 512m
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    working_dir: /app
+    command: >
+      bash -c "
+        apt-get update && apt-get install -y --no-install-recommends curl &&
+        pip install --no-cache-dir -r requirements.txt &&
+        python -m uvicorn scripts.api_server:app --host 0.0.0.0 --port 8080 --log-level info
+      "
+    ports:
+      - "127.0.0.1:8080:8080"
+    volumes:
+      - .:/app
+    environment:
+      COASTAL_GATEWAY_TOKEN: "${COASTAL_GATEWAY_TOKEN}"
+      DATABASE_URL: "sqlite:///hermes/coastal_brewing.db"
+      ENVIRONMENT: "production"
+      COMPANY_NAME: "Coastal Brewing"
+      OWNER_APPROVAL_EMAIL: "${OWNER_APPROVAL_EMAIL}"
+      TASKADE_ACCESS_TOKEN: "${TASKADE_ACCESS_TOKEN}"
+      NVIDIA_API_KEY: "${NVIDIA_API_KEY:-}"
+      NVIDIA_BASE_URL: "${NVIDIA_BASE_URL:-https://integrate.api.nvidia.com/v1}"
+      COASTAL_PUBLIC_URL: "${COASTAL_PUBLIC_URL:-https://brewing.foai.cloud}"
+      STRIPE_SECRET_KEY: "${STRIPE_SECRET_KEY:-}"
+      STRIPE_WEBHOOK_SECRET: "${STRIPE_WEBHOOK_SECRET:-}"
+      STRIPE_COASTAL_COFFEE_SUB_PRICE_ID: "${STRIPE_COASTAL_COFFEE_SUB_PRICE_ID:-}"
+      STRIPE_COASTAL_TEA_SUB_PRICE_ID: "${STRIPE_COASTAL_TEA_SUB_PRICE_ID:-}"
+      STRIPE_COASTAL_COMBO_SUB_PRICE_ID: "${STRIPE_COASTAL_COMBO_SUB_PRICE_ID:-}"
+      NEMOCLAW_URL: "${NEMOCLAW_URL:-https://hawk.foai.cloud}"
+      NEMOCLAW_API_KEY: "${NEMOCLAW_API_KEY:-}"
+      TELEGRAM_BOT_TOKEN: "${TELEGRAM_BOT_TOKEN:-}"
+      TELEGRAM_CHAT_ID: "${TELEGRAM_CHAT_ID:-}"
+      COASTAL_APPROVE_SECRET: "${COASTAL_APPROVE_SECRET:-}"
+      TZ: "UTC"
+    networks:
+      - foai-internal
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/healthz"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 90s
+
+networks:
+  foai-internal:
+    external: true
+    name: foai-internal

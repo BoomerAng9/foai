@@ -51,13 +51,15 @@ export default function SqwaadrunPage() {
   const getSquad = (squadName: string): HawkCardData[] => 
     SHIELD_DIVISION.filter(h => h.squad === squadName).map(p => ({
       profile: { 
-        name: p.name,
-        callsign: p.name, 
         slug: p.slug, 
-        rank: 'specialist', 
-        catchphrase: p.personality, 
-        avatar: `/hawks/${p.slug}.png`, 
-        themeColor: '#22D3EE' 
+        callsign: p.name, 
+        rank: 'shield', 
+        imagePath: `/hawks/shield/${p.slug}.png`,
+        imageReady: true,
+        visualDescription: p.visual,
+        gear: [p.unit],
+        catchphrase: p.personality,
+        signatureColor: '#22D3EE' 
       },
       role: p.role,
       capabilities: [p.unit, p.personality],

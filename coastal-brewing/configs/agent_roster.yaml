@@ -1,0 +1,40 @@
+company: Coastal Brewing
+version: "3.0-one-direction"
+
+orchestrator:
+  id: acheevy
+  prompt: agents/prompts/acheevy_orchestrator.md
+  memory: hermes
+  executor: openclaw
+  watchdog: chicken_hawk
+
+departments:
+  - id: boomer_ops
+    prompt: agents/prompts/boomer_ops.md
+    routes: [feynman, nvidia, owner]
+  - id: boomer_cx
+    prompt: agents/prompts/boomer_cx.md
+    routes: [nvidia, owner]
+  - id: boomer_marketing
+    prompt: agents/prompts/boomer_marketing.md
+    routes: [nvidia, feynman, owner]
+  - id: boomer_growth
+    prompt: agents/prompts/boomer_growth.md
+    routes: [feynman, nvidia, owner]
+  - id: boomer_finance
+    prompt: agents/prompts/boomer_finance.md
+    routes: [nvidia, owner]
+  - id: boomer_quality
+    prompt: agents/prompts/boomer_quality.md
+    routes: [feynman, owner]
+
+specialists:
+  - id: feynman_research_cell
+    prompt: agents/prompts/feynman_research_cell.md
+    purpose: source-backed research and verification
+  - id: nvidia_model_router
+    prompt: agents/prompts/model_router.md
+    purpose: low-cost generation, classification, and summarization
+  - id: chicken_hawk
+    prompt: agents/prompts/chicken_hawk.md
+    purpose: risk review and approval boundary enforcement

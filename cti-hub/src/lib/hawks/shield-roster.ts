@@ -416,12 +416,22 @@ const SHIELD_OPS: ShieldOpsMeta[] = [
 ];
 
 export const SHIELD_ROSTER: HawkCardData[] = SHIELD_OPS.map((op) => {
-  const profile = ALL_SHIELD_DIVISION_PROFILES.find((p) => p.slug === op.slug);
-  if (!profile) {
+  const p = ALL_SHIELD_DIVISION_PROFILES.find((profile) => profile.slug === op.slug);
+  if (!p) {
     throw new Error(`No shield profile for ${op.slug}`);
   }
   return {
-    profile,
+    profile: {
+      slug: p.slug,
+      callsign: p.name,
+      rank: 'shield',
+      imagePath: `/hawks/shield/${p.slug}.png`,
+      imageReady: true,
+      visualDescription: p.visual,
+      gear: [p.unit],
+      catchphrase: p.personality,
+      signatureColor: '#22D3EE', // Default cyan for Shield Division
+    },
     role: op.role,
     capabilities: op.capabilities,
     sampleMission: op.sampleMission,

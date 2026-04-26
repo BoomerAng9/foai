@@ -1,0 +1,10 @@
+{
+  "task_id": "task_bulk_caption_drafts_001",
+  "owner_goal": "Create low-risk launch captions for coffee and tea content.",
+  "objective": "Draft 20 coastal-themed captions without certification or health claims.",
+  "department": "boomer_marketing",
+  "task_type": "draft_caption",
+  "risk_tags": [],
+  "approval_required": false,
+  "desired_output": "caption draft variants"
+}

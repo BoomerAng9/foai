@@ -14,7 +14,16 @@ export interface HawkProfile {
   personality: string;
   stats: { speed: number; intel: number; stealth: number; combat: number };
   visual: string;
+  // CharacterProfile compat
+  callsign?: string;
+  imagePath?: string;
+  imageReady?: boolean;
+  visualDescription?: string;
+  gear?: string[];
+  signatureColor?: string;
 }
+
+export const SHIELD_BRAND_PROMPT = "Shield Division: Tactical-realistic, cinematic sci-fi, dark navy port at night, high-contrast neon green and cyan accents, ed25519 glyphs, 5-lens helmet clusters.";
 
 export const SHIELD_DIVISION: HawkProfile[] = [
   // ─── GOLD & PLATINUM SQUAD (8 Hawks) — Governance & Identity ───
@@ -347,3 +356,6 @@ export const SHIELD_DIVISION: HawkProfile[] = [
     visual: 'Light purple frame, advanced optic-sensor cluster.',
   },
 ];
+
+export const ALL_SHIELD_DIVISION_PROFILES = SHIELD_DIVISION;
+

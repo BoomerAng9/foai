@@ -32,8 +32,15 @@ export default function CyberHawksPage() {
   const getCyberSquad = (squadName: string) => 
     SHIELD_DIVISION.filter(h => h.squad === squadName).map(p => ({
       profile: { 
-        ...p,
-        rank: 'shield' as const
+        slug: p.slug,
+        callsign: p.name,
+        rank: 'shield' as const,
+        imagePath: `/hawks/shield/${p.slug}.png`,
+        imageReady: true,
+        visualDescription: p.visual,
+        gear: [p.unit],
+        catchphrase: p.personality,
+        signatureColor: '#22D3EE'
       },
       role: p.role,
       capabilities: [p.unit, p.personality],
