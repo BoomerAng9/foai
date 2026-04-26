@@ -294,7 +294,7 @@ class Router:
             raise RuntimeError("ANTHROPIC_API_KEY is not set")
         client = anthropic.AsyncAnthropic(api_key=key.get_secret_value())
         response = await client.messages.create(
-            model="claude-3-haiku-20240307",
+            model="claude-haiku-4-5-20251001",
             max_tokens=512,
             system=_CLASSIFICATION_SYSTEM,
             messages=[{"role": "user", "content": message}],

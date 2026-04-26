@@ -24,6 +24,7 @@ from starlette.middleware.base import BaseHTTPMiddleware
 
 from config import get_settings
 from event_bus import EventBus, TaskEvent, TaskStatus, get_event_bus
+from hermes_client import HermesClient, HermesNotConfigured
 from router import HawkResponse, Router
 
 # ---------------------------------------------------------------------------
@@ -51,20 +52,28 @@ logger = structlog.get_logger(__name__)
 # ---------------------------------------------------------------------------
 _router: Router | None = None
 _event_bus: EventBus | None = None
+_hermes: HermesClient | None = None
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncIterator[None]:
-    global _router, _event_bus
+    global _router, _event_bus, _hermes
     settings = get_settings()
     _event_bus = get_event_bus()
     _router = Router(settings, event_bus=_event_bus)
-    logger.info("gateway_started", provider=settings.llm_provider)
+    _hermes = HermesClient()
+    logger.info(
+        "gateway_started",
+        provider=settings.llm_provider,
+        hermes_configured=_hermes.configured,
+    )
     yield
     if _event_bus:
         await _event_bus.close()
     if _router:
         await _router.aclose()
+    if _hermes:
+        await _hermes.aclose()
     logger.info("gateway_stopped")
 
 
@@ -245,6 +254,67 @@ async def list_hawks() -> dict:
     """Return the configured Lil_Hawk endpoints."""
     settings = get_settings()
     return {"hawks": list(settings.hawk_endpoints.keys())}
+
+
+# ---------------------------------------------------------------------------
+# Hermes bridge — memory recall + evaluation trigger via the LearnAng engine
+# ---------------------------------------------------------------------------
+class HermesRecallRequest(BaseModel):
+    query: str = Field(..., min_length=1, max_length=8192)
+    tenant_id: str = Field("cti", max_length=64)
+    top_k: int = Field(5, ge=1, le=50)
+
+
+class HermesEvaluateRequest(BaseModel):
+    tenant_id: str = Field("cti", max_length=64)
+    eval_type: str = Field("daily", pattern=r"^(daily|weekly)$")
+
+
+@app.post("/hermes/recall", tags=["Hermes"], dependencies=[Depends(require_auth)])
+async def hermes_recall(payload: HermesRecallRequest) -> dict:
+    """Recall semantically-relevant past evaluations from the Hermes memory."""
+    if _hermes is None:
+        raise HTTPException(status_code=503, detail="Hermes client not initialised")
+    try:
+        results = await _hermes.recall_memory(
+            query=payload.query,
+            tenant_id=payload.tenant_id,
+            top_k=payload.top_k,
+        )
+    except HermesNotConfigured as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
+    return {"results": results, "count": len(results)}
+
+
+@app.post("/hermes/evaluate", tags=["Hermes"], dependencies=[Depends(require_auth)])
+async def hermes_evaluate(payload: HermesEvaluateRequest) -> dict:
+    """Trigger a Deep Think evaluation cycle on the Hermes engine."""
+    if _hermes is None:
+        raise HTTPException(status_code=503, detail="Hermes client not initialised")
+    try:
+        return await _hermes.trigger_evaluation(
+            tenant_id=payload.tenant_id,
+            eval_type=payload.eval_type,
+        )
+    except HermesNotConfigured as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
+    except Exception as exc:
+        logger.error("hermes_evaluate_failed", error=str(exc))
+        raise HTTPException(status_code=502, detail=f"Hermes call failed: {exc}") from exc
+
+
+@app.get("/hermes/health", tags=["Hermes"], dependencies=[Depends(require_auth)])
+async def hermes_health() -> dict:
+    """Return Hermes engine liveness + client configuration."""
+    if _hermes is None:
+        raise HTTPException(status_code=503, detail="Hermes client not initialised")
+    if not _hermes.configured:
+        return {"configured": False, "upstream": None}
+    try:
+        upstream = await _hermes.health()
+    except Exception as exc:
+        return {"configured": True, "upstream": None, "error": str(exc)}
+    return {"configured": True, "upstream": upstream}
 
 
 # ---------------------------------------------------------------------------
