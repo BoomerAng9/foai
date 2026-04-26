@@ -50,6 +50,75 @@ services:
       retries: 3
       start_period: 90s
 
+  # Wave 1 Step C (Path 1) — Hermes Agent (NousResearch).
+  # Owner's INBOUND chat command surface: Telegram/Slack/Discord etc →
+  # Hermes invokes chicken-hawk's /run, /check, /audit/{id} as registered
+  # tools. Magic-link login stays on direct Telegram in chicken-hawk; this
+  # is purely additive and reversible (`docker compose stop hermes`).
+  #
+  # Build context: upstream repo pinned to specific SHA (118k★ MIT, MIT,
+  # pushed 2026-04-26). Compose pulls + builds on first `up`; the result
+  # is a local image we control. No registry pull — the SHA pin is our
+  # supply-chain guarantee.
+  hermes:
+    build:
+      context: https://github.com/NousResearch/hermes-agent.git#9be83728a67c794daa20c553919f4869675a2edc
+    image: hermes-agent:9be83728
+    container_name: hermes
+    restart: unless-stopped
+    mem_limit: 1g
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    # Override upstream's `network_mode: host` default — we want bridge
+    # so we can publish only the API server port to localhost, and so
+    # Hermes can reach chicken-hawk via internal DNS on foai-internal.
+    networks:
+      - foai-internal
+    ports:
+      # API server localhost-only. nginx fronts it at hermes.foai.cloud
+      # with mTLS; never expose 9119 publicly.
+      - "127.0.0.1:9119:9119"
+      # Dashboard stays SSH-tunnel-only per upstream guidance:
+      #   ssh -L 9118:localhost:9118 aims-vps
+      - "127.0.0.1:9118:9118"
+    volumes:
+      - hermes-data:/opt/data
+    environment:
+      HERMES_UID: "10000"
+      HERMES_GID: "10000"
+      # Enable the OpenAI-compatible API server so chicken-hawk tools
+      # can be invoked from Hermes' chat handlers via HTTP. Without
+      # API_SERVER_KEY set, the API stays bound to 127.0.0.1 only.
+      API_SERVER_HOST: "0.0.0.0"
+      API_SERVER_KEY: "${HERMES_API_SERVER_KEY}"
+      # Bearer used by Hermes' tool calls to authenticate against
+      # chicken-hawk /run, /check, /audit. Reuses the existing token —
+      # one secret to rotate, not two.
+      CHICKEN_HAWK_BASE_URL: "https://hawk.foai.cloud"
+      CHICKEN_HAWK_BEARER: "${CHICKEN_HAWK_BEARER}"
+      # LLM provider — defaults to OpenRouter. Owner can swap to direct
+      # Anthropic / OpenAI / local Ollama at any time without rebuild.
+      OPENROUTER_API_KEY: "${OPENROUTER_API_KEY:-}"
+      TELEGRAM_BOT_TOKEN: "${TELEGRAM_BOT_TOKEN:-}"
+      TELEGRAM_CHAT_ID: "${TELEGRAM_CHAT_ID:-}"
+      TZ: "UTC"
+    command: ["gateway", "run"]
+    depends_on:
+      coastal-runner:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "-H", "Authorization: Bearer $${API_SERVER_KEY}", "http://127.0.0.1:9119/v1/models"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+volumes:
+  hermes-data:
+
 networks:
   foai-internal:
     external: true
