@@ -1,0 +1,12 @@
+{
+  "task_id": "task_supplier_due_diligence_001",
+  "owner_goal": "Check whether the supplier is suitable for organic coffee and tea fulfillment.",
+  "objective": "Research supplier quality, fulfillment model, certifications, tea catalog, coffee catalog, and claims we can legally repeat.",
+  "department": "boomer_ops",
+  "task_type": "supplier_due_diligence",
+  "risk_tags": [
+    "supplier_change"
+  ],
+  "approval_required": true,
+  "desired_output": "supplier due diligence receipt"
+}

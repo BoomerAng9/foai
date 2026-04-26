@@ -1,0 +1,29 @@
+version: "3.0"
+executor: openclaw
+
+allowed_without_owner_approval:
+  - create_internal_draft
+  - classify_message
+  - write_internal_summary
+  - create_research_ticket
+  - write_receipt
+  - prepare_owner_approval_request
+
+requires_owner_approval:
+  - publish_public_content
+  - change_supplier
+  - update_live_product_claims
+  - issue_refund_above_threshold
+  - spend_money
+  - change_ad_budget
+  - sign_contract
+  - file_legal_document
+  - access_payment_data
+  - approve_certification_language
+
+pre_execution_checks:
+  - task_packet_exists
+  - route_complete
+  - chicken_hawk_review_complete
+  - hermes_receipt_target_exists
+  - owner_approval_present_if_required
