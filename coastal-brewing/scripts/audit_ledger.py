@@ -1,8 +1,12 @@
-"""SQLite Hermes adapter for Coastal Brewing.
+"""SQLite AuditLedger adapter for Coastal Brewing.
 
 Initializes the schema on import and provides write helpers for /run and /approve.
 Pure synchronous SQLite — single-writer pattern, fine for runner-scale traffic.
 Future: swap to Postgres adapter behind same surface when production load justifies it.
+
+Renamed from hermes_db.py on 2026-04-26 to free the "Hermes" name in the FOAI
+namespace for the canonical Hermes Agent (NousResearch). This module is the
+service-level audit ledger; it is NOT the Hermes Agent.
 """
 from __future__ import annotations
 
@@ -15,8 +19,8 @@ from datetime import datetime, timezone
 from typing import Any, Optional
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
-DB_PATH_DEFAULT = ROOT / "hermes" / "coastal_brewing.db"
-SCHEMA_PATH = ROOT / "memory" / "hermes_one_direction_schema.sql"
+DB_PATH_DEFAULT = ROOT / "audit_ledger" / "coastal_brewing.db"
+SCHEMA_PATH = ROOT / "memory" / "audit_ledger_schema.sql"
 
 
 def _resolve_db_path() -> pathlib.Path:

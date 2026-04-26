@@ -1,8 +1,8 @@
 """Chicken Hawk gateway client.
 
 Every Spinner tool call routes through Chicken Hawk before any external side effect.
-Chicken Hawk hosts the embedded NemoClaw policy gate and writes Hermes receipts as
-a side effect of allowed actions.
+Chicken Hawk hosts the embedded NemoClaw policy gate and writes AuditLedger receipts
+as a side effect of allowed actions.
 """
 from __future__ import annotations
 
@@ -16,7 +16,7 @@ CHICKEN_HAWK_BEARER = os.environ.get("CHICKEN_HAWK_BEARER", "")
 
 
 def dispatch(action: str, payload: dict[str, Any], timeout: int = 30) -> dict[str, Any]:
-    """Send a tool call through Chicken Hawk → NemoClaw → Hermes → execution.
+    """Send a tool call through Chicken Hawk → NemoClaw → AuditLedger → execution.
 
     Returns the gateway envelope. On failure returns an error envelope so the
     caller (the LLM agent) can surface a graceful message to the user.

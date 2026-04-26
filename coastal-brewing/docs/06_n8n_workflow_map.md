@@ -16,4 +16,4 @@ All workflows should begin in manual/test mode. Do not connect live publishing, 
 
 ## Receipt standard
 
-Every workflow should write a receipt to Hermes or `/receipts`.
+Every workflow should write a receipt to AuditLedger or `/receipts`.

@@ -5,7 +5,7 @@
 - Create repo.
 - Load agent prompts.
 - Configure environment variables.
-- Create Hermes database tables.
+- Create AuditLedger database tables.
 - Run smoke tests.
 
 ## Day 2: Commerce shell

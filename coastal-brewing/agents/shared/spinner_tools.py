@@ -11,7 +11,7 @@ from __future__ import annotations
 
 from typing import Any, Optional
 
-from . import chicken_hawk, nemoclaw, hermes
+from . import chicken_hawk, nemoclaw, audit_ledger
 
 
 # ---------------------------------------------------------------------------
@@ -26,7 +26,7 @@ def recommend_bundle(category: str, budget: Optional[float] = None, flavor: Opti
         budget: optional max spend in USD
         flavor: optional flavor preference ("dark", "light", "earthy", etc.)
 
-    Returns the bundle envelope. Read-only — no Hermes receipt.
+    Returns the bundle envelope. Read-only — no AuditLedger receipt.
     """
     return chicken_hawk.dispatch(
         "recommend_bundle",
@@ -179,8 +179,8 @@ def query_catalog(category: Optional[str] = None) -> dict:
 
 
 def query_audit_trail(task_id: str) -> dict:
-    """Read the Hermes audit trail for a task_id."""
-    return hermes.query_audit(task_id)
+    """Read the AuditLedger trail for a task_id."""
+    return audit_ledger.query_audit(task_id)
 
 
 def policy_check(action: str, context: dict) -> dict:

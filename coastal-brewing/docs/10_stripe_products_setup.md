@@ -91,7 +91,7 @@ ssh aims-vps 'ls -la /docker/coastal-brewing/stripe_events/ | tail -5'
 4. Verify:
    - Browser redirects to `https://brewing.foai.cloud/checkout/success?session_id=cs_test_...`
    - Stripe webhook fires `checkout.session.completed` → file appears in `stripe_events/`
-   - Coastal-runner Hermes records the new subscription (manual: query stripe_events file for the customer + plan)
+   - Coastal-runner AuditLedger records the new subscription (manual: query stripe_events file for the customer + plan)
 
 ## Step 7 — switch to LIVE mode
 
@@ -118,7 +118,7 @@ Per kit + memory:
 
 - Currently no public-facing checkout button on `brewing.foai.cloud/` landing — owner triggers /checkout via API, not yet UI-driven
 - No customer self-serve cancellation page — handled via owner approval Telegram for now
-- Hermes doesn't yet have a `subscriptions` table — webhook events land as JSON files, not DB rows. Migration when subscription volume justifies it.
+- AuditLedger doesn't yet have a `subscriptions` table — webhook events land as JSON files, not DB rows. Migration when subscription volume justifies it.
 
 ## Owner action checklist
 

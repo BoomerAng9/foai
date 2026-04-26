@@ -4,10 +4,10 @@
 Cron at 06:00 local time (Stepper schedule).
 
 ## Inputs
-- (none — pulls from Hermes + Hostinger Ecommerce data feeds when live)
+- (none — pulls from AuditLedger + Hostinger Ecommerce data feeds when live)
 
 ## Workflow
-1. Stepper queries Hermes for the last 24h:
+1. Stepper queries AuditLedger for the last 24h:
    - new task_packets (count + by route)
    - new approval_requests (count + status breakdown)
    - new model_call_receipts (count + by provider)
@@ -33,7 +33,7 @@ Cron at 06:00 local time (Stepper schedule).
 7. Stepper emails the digest to `OWNER_APPROVAL_EMAIL` (read-only, no approval requested — owner consumes).
 
 ## Outputs
-- Hermes route receipt
+- AuditLedger route receipt
 - Daily digest at `drafts/<task_id>_digest.md`
 - Email to owner (read-only)
 
@@ -45,7 +45,7 @@ Not required (no external action). The digest is an internal daily read.
 
 ## Failure modes
 - NVIDIA unavailable → fall through to premium_review route; owner gets a brief manual-author request instead
-- Hermes query times out → digest renders with a "data partial" header; alert filed
+- AuditLedger query times out → digest renders with a "data partial" header; alert filed
 - Email delivery fails → digest still on disk; owner pings if missed
 
 ## Cadence escalation

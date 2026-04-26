@@ -11,7 +11,7 @@ Owner replies to an approval-request email (sent by another workflow) OR clicks 
 - note (optional)
 
 ## Workflow
-1. Stepper validates that `approval_id` corresponds to an open approval request in Hermes.
+1. Stepper validates that `approval_id` corresponds to an open approval request in AuditLedger.
 2. POST to `https://brewing.foai.cloud/approve` with `X-Coastal-Token` header and:
    ```json
    {
@@ -22,14 +22,14 @@ Owner replies to an approval-request email (sent by another workflow) OR clicks 
      "note": "<optional>"
    }
    ```
-3. Runner writes a decision file at `owner_approvals/<approval_id>_decision.json` and updates the Hermes `approval_receipts` row.
+3. Runner writes a decision file at `owner_approvals/<approval_id>_decision.json` and updates the AuditLedger `approval_receipts` row.
 4. Stepper notifies the originating workflow:
    - `approved` → originating workflow proceeds to its next step (transmit, send, publish)
    - `rejected` → originating workflow halts, files a `risk_event` with `severity='medium'` and `category='owner_rejected'`, notifies the originator (Boomer_Ang department) with the note
 
 ## Outputs
 - Decision file at `owner_approvals/<approval_id>_decision.json`
-- Hermes `approval_receipts` row with `decision` + `decided_at`
+- AuditLedger `approval_receipts` row with `decision` + `decided_at`
 - Risk event row (if rejected)
 
 ## Risk tags applied

@@ -31,7 +31,7 @@ A `customer_order_intake`, `customer_subscription_start`, or routine restock eve
 6. Owner approval request fires.
 
 ## Outputs
-- Hermes route receipt
+- AuditLedger route receipt
 - Validated supplier order draft (claim-audit'd) at `drafts/<task_id>_supplier_email_audited.md`
 - Claim audit row in `claim_verification_receipts` for any flagged term
 - Owner approval request at `owner_approvals/<task_id>_request.md`

@@ -37,4 +37,4 @@ Every Feynman output must be saved as a research receipt in:
 research/receipts/
 ```
 
-Then Hermes records the receipt path.
+Then AuditLedger records the receipt path.

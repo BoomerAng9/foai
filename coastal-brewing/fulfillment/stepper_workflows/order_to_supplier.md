@@ -16,16 +16,16 @@ Owner approval of a `customer_order_intake` task packet (POST to `/approve` with
      "task_type": "supplier_order_transmit",
      "risk_tags": ["supplier_change", "money"],
      "approval_required": true,
-     "desired_output": "supplier order transmitted; Hermes receipt with timestamp + recipient"
+     "desired_output": "supplier order transmitted; AuditLedger receipt with timestamp + recipient"
    }
    ```
 4. POST to `https://brewing.foai.cloud/run`.
 5. Until owner authorizes a live email channel, the workflow stops at draft and notifies owner with the rendered email body for manual send.
-6. After live channel is authorized, the workflow sends via the configured channel and writes a Hermes `model_call_receipts` row with `provider='manual'` or `provider='taskade'` plus the supplier acknowledgement payload.
+6. After live channel is authorized, the workflow sends via the configured channel and writes a AuditLedger `model_call_receipts` row with `provider='manual'` or `provider='taskade'` plus the supplier acknowledgement payload.
 
 ## Outputs
 - Supplier order email body in `drafts/<task_id>_supplier_email.md`
-- Hermes receipt at `receipts/<task_id>_route_receipt.json`
+- AuditLedger receipt at `receipts/<task_id>_route_receipt.json`
 - Owner approval request at `owner_approvals/<task_id>_request.md` (one for the transmission step itself)
 - After transmission: `action_receipts` row with status `transmitted`
 

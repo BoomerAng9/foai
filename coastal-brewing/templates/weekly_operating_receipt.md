@@ -40,7 +40,7 @@
 2. {{priority_2}}
 3. {{priority_3}}
 
-## Linked Hermes receipts
+## Linked AuditLedger receipts
 
 {{linked_receipt_paths}}
 

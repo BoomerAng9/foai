@@ -5,7 +5,7 @@ Stepper-based fulfillment for Coastal Brewing. Replaces a traditional storefront
 Every fulfillment action either:
 
 1. Is allowed without owner approval (drafts, internal notes, classifications), OR
-2. Has an `approval_required=true` row in Hermes with `decision='approved'` before OpenClaw executes.
+2. Has an `approval_required=true` row in AuditLedger with `decision='approved'` before OpenClaw executes.
 
 Nothing publishes, sends, orders, refunds, or spends without that gate.
 
@@ -24,7 +24,7 @@ Each workflow spec describes:
 - Trigger
 - Inputs (form fields or upstream payload)
 - Calls to the runner (`POST /run`, `POST /approve`)
-- Outputs (Hermes receipts, drafts, owner approval requests)
+- Outputs (AuditLedger receipts, drafts, owner approval requests)
 - Risk tags applied
 - Owner approval gate
 

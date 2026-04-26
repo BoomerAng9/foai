@@ -7,7 +7,7 @@ Use both systems, but give them one direction.
 - **NVIDIA** is the low-cost model worker lane.
 - **Feynman** is the research and verification lane.
 - **ACHEEVY** is the only router.
-- **Hermes** stores the receipts.
+- **AuditLedger** stores the receipts.
 - **Chicken_Hawk** checks risk.
 - **OpenClaw** executes approved work.
 - **Boomer_Angs** operate the departments.
@@ -23,7 +23,7 @@ Owner intent
       -> Owner/premium route for risk
     -> Boomer_Ang output
     -> Chicken_Hawk review
-    -> Hermes receipt
+    -> AuditLedger receipt
     -> OpenClaw execution
 ```
 

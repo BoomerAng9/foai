@@ -25,5 +25,5 @@ pre_execution_checks:
   - task_packet_exists
   - route_complete
   - chicken_hawk_review_complete
-  - hermes_receipt_target_exists
+  - audit_ledger_receipt_target_exists
   - owner_approval_present_if_required

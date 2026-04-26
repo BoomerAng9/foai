@@ -50,7 +50,7 @@ export default function AboutPage() {
             <ul className="mt-4 space-y-2 text-sm text-muted-foreground">
               <li>15+ years AI Forward Deployment Engineer &amp; Product Architect</li>
               <li>IBM-Certified Product Manager · Lean Six Sigma Black Belt</li>
-              <li>Architect of the Hermes audit system &amp; NemoClaw policy gate</li>
+              <li>Architect of the AuditLedger audit system &amp; NemoClaw policy gate</li>
               <li>Past responsibility: $2.9M government contracts under ISO 9001:2015</li>
               <li>Founder of the broader ACHIEVEMOR / FOAI ecosystem</li>
             </ul>

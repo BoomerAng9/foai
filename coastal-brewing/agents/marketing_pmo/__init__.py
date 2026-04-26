@@ -7,6 +7,6 @@ position is the branded office, never customer-facing).
 
 Per Sett Charter §3, the Sett reports directly to ACHEEVY, NOT through
 Chicken Hawk's tactical command. Cross-team execution still routes through
-Chicken Hawk → NemoClaw → Hermes (the four-layer separation holds).
+Chicken Hawk → NemoClaw → AuditLedger (the four-layer separation holds).
 """
 from .melli_capensi import agent  # noqa: F401

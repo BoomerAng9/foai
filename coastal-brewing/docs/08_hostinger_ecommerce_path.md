@@ -18,7 +18,7 @@ The planned storefront for Coastal Brewing is **Hostinger Ecommerce** at https:/
 - The runner — `coastal-runner` keeps doing routing, receipts, approvals, drafts.
 - The model lanes — Feynman / NVIDIA / premium / owner.
 - The one-direction flow — Hostinger Ecommerce becomes another upstream surface, not a new operator.
-- Hermes — every Hostinger Ecommerce event lands as a receipt.
+- AuditLedger — every Hostinger Ecommerce event lands as a receipt.
 - OpenClaw policy — no auto-publish, no auto-send, no auto-refund.
 
 ## What changes

@@ -23,7 +23,7 @@ Stripe webhook `checkout.session.completed` for a Coastal Brewing subscription. 
      "task_type": "draft_order_confirmation",
      "risk_tags": ["money"],
      "approval_required": true,
-     "desired_output": "first shipment scheduled; welcome email draft; Hermes subscription row"
+     "desired_output": "first shipment scheduled; welcome email draft; AuditLedger subscription row"
    }
    ```
 2. POST to `https://brewing.foai.cloud/run` with `X-Coastal-Token` header.
@@ -32,11 +32,11 @@ Stripe webhook `checkout.session.completed` for a Coastal Brewing subscription. 
 5. Owner approves both drafts before any send/transmit.
 
 ## Outputs
-- Hermes route receipt at `receipts/<task_id>_route_receipt.json`
+- AuditLedger route receipt at `receipts/<task_id>_route_receipt.json`
 - Supplier first-shipment draft at `drafts/<task_id>_supplier_email.md`
 - Welcome email draft at `drafts/<task_id>_welcome_email.md`
 - Owner approval request at `owner_approvals/<task_id>_request.md`
-- After approval: subscription row in Hermes `task_packets` with `status='active'`
+- After approval: subscription row in AuditLedger `task_packets` with `status='active'`
 
 ## Risk tags applied
 - `money` — every subscription moves money on a recurring basis

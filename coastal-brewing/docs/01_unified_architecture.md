@@ -10,7 +10,7 @@ Owner
         -> Premium/Owner Lane
     -> Boomer_Ang Department
     -> Chicken_Hawk Review
-    -> Hermes Receipt
+    -> AuditLedger Receipt
     -> OpenClaw Action
 ```
 
@@ -43,7 +43,7 @@ Departments:
 
 Risk checker. It reviews outputs before execution or publication.
 
-### Hermes
+### AuditLedger
 
 Memory and receipts. It stores task packets, model-call receipts, research receipts, approval records, and action logs.
 

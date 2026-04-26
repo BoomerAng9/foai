@@ -28,7 +28,7 @@ import requests
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 from model_router import decide_route, make_receipt, utc_now  # noqa: E402
-import hermes_db  # noqa: E402
+import audit_ledger  # noqa: E402
 import catalog  # noqa: E402
 
 try:
@@ -532,7 +532,7 @@ def healthz() -> dict:
         "nemoclaw_configured": bool(NEMOCLAW_URL and NEMOCLAW_API_KEY),
         "stripe_configured": bool(STRIPE_AVAILABLE and _stripe_is_configured()),
         "telegram_configured": bool(TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID),
-        "hermes_db": str(hermes_db.DB_PATH),
+        "audit_ledger": str(audit_ledger.DB_PATH),
         "time": utc_now(),
     }
 
@@ -555,7 +555,7 @@ def run(packet: TaskPacket, x_coastal_token: Optional[str] = Header(default=None
     nemoclaw_verdict = _call_nemoclaw(packet)
     if nemoclaw_verdict and nemoclaw_verdict.get("verdict") == "deny":
         try:
-            hermes_db.insert_risk_event(
+            audit_ledger.insert_risk_event(
                 severity="high",
                 category="blocked_action_attempt",
                 description=f"NemoClaw denied '{packet.task_type}': {nemoclaw_verdict.get('reason', '')}",
@@ -589,7 +589,7 @@ def run(packet: TaskPacket, x_coastal_token: Optional[str] = Header(default=None
     receipt_path.write_text(json.dumps(receipt, indent=2), encoding="utf-8")
 
     try:
-        hermes_db.insert_task_packet(p, decision, str(receipt_path))
+        audit_ledger.insert_task_packet(p, decision, str(receipt_path))
     except Exception:
         pass
 
@@ -608,7 +608,7 @@ def run(packet: TaskPacket, x_coastal_token: Optional[str] = Header(default=None
         )
         placeholder_path = str(path)
         try:
-            hermes_db.insert_research_receipt(
+            audit_ledger.insert_research_receipt(
                 task_id=packet.task_id,
                 ticket_path=str(path),
                 research_topic=packet.objective or packet.task_type,
@@ -628,7 +628,7 @@ def run(packet: TaskPacket, x_coastal_token: Optional[str] = Header(default=None
         )
         placeholder_path = str(path)
         try:
-            hermes_db.insert_model_call_receipt(
+            audit_ledger.insert_model_call_receipt(
                 task_id=packet.task_id,
                 route="nvidia",
                 provider="placeholder",
@@ -687,7 +687,7 @@ def approve(decision: ApprovalDecision, x_coastal_token: Optional[str] = Header(
     out_path.write_text(json.dumps(record, indent=2), encoding="utf-8")
 
     try:
-        hermes_db.insert_approval_decision(
+        audit_ledger.insert_approval_decision(
             approval_id=decision.approval_id,
             task_id=decision.task_id,
             decision=decision.decision,
@@ -1586,7 +1586,7 @@ def audit_view(task_id: str, token: str = Query(...)) -> HTMLResponse:
                 footer="No audit shown.",
             ),
         )
-    trail = hermes_db.query_audit_trail(task_id)
+    trail = audit_ledger.query_audit_trail(task_id)
     return HTMLResponse(content=_render_audit_trail(task_id, trail))
 
 
@@ -1616,7 +1616,7 @@ def approve_click(token: str = Query(...)) -> HTMLResponse:
     out_path = OWNER_APPROVALS_DIR / f"{payload['approval_id']}_decision.json"
     out_path.write_text(json.dumps(record, indent=2), encoding="utf-8")
     try:
-        hermes_db.insert_approval_decision(
+        audit_ledger.insert_approval_decision(
             approval_id=payload["approval_id"],
             task_id=payload["task_id"],
             decision=decision_label,
@@ -1628,7 +1628,7 @@ def approve_click(token: str = Query(...)) -> HTMLResponse:
     if decision_label == "approved":
         title, accent, msg = "Approved", "#5dd0c0", "Decision recorded. Coastal will proceed with allowed actions."
         try:
-            hermes_db.insert_action_receipt(
+            audit_ledger.insert_action_receipt(
                 task_id=payload["task_id"],
                 executor="openclaw_authorized",
                 action_type="owner_approved",
@@ -1641,7 +1641,7 @@ def approve_click(token: str = Query(...)) -> HTMLResponse:
     else:
         title, accent, msg = "Rejected", "#f59e0b", "Decision recorded. Coastal will halt and notify originating department."
         try:
-            hermes_db.insert_action_receipt(
+            audit_ledger.insert_action_receipt(
                 task_id=payload["task_id"],
                 executor="openclaw_blocked",
                 action_type="owner_rejected",

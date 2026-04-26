@@ -13,7 +13,7 @@ const PROMISES = [
     detail: "Allowed actions go. Threshold-crossers route to Jarrett. Forbidden actions die.",
   },
   {
-    title: "Hermes records six fields for every action.",
+    title: "AuditLedger records six fields for every action.",
     detail:
       "Agent intent, policy verdict, human approval (if required), tool execution, system response, finalized receipt. Immutable.",
   },

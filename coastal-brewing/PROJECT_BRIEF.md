@@ -2,7 +2,7 @@
 
 ## What this company is
 
-Coastal Brewing is a **100% virtual coffee and tea company**, AI-managed, with a single human owner. The owner approves; ACHEEVY routes; Boomer_Angs perform; Chicken_Hawk reviews; Hermes records; OpenClaw executes within bounded permissions.
+Coastal Brewing is a **100% virtual coffee and tea company**, AI-managed, with a single human owner. The owner approves; ACHEEVY routes; Boomer_Angs perform; Chicken_Hawk reviews; AuditLedger records; OpenClaw executes within bounded permissions.
 
 ## What we sell at launch
 
@@ -44,7 +44,7 @@ Until those gates are met, we do not roast.
 
 ## Operating posture
 
-Every action passes through the one-direction flow (`docs/00_one_direction_decision.md`). ACHEEVY is the sole router. Boomer_Angs handle department work. Chicken_Hawk reviews risk. Hermes records. OpenClaw executes within action policy. The owner approves the rest.
+Every action passes through the one-direction flow (`docs/00_one_direction_decision.md`). ACHEEVY is the sole router. Boomer_Angs handle department work. Chicken_Hawk reviews risk. AuditLedger records. OpenClaw executes within action policy. The owner approves the rest.
 
 ## Brand voice
 

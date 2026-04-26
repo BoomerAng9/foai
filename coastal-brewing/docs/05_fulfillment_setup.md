@@ -15,7 +15,7 @@ customer intent
   → templates/supplier_certification_request.md → manual supplier email (owner-sent until live channel approved)
   → supplier fulfills + ships
   → customer confirmation routed back through Stepper
-  → Hermes records every step
+  → AuditLedger records every step
 ```
 
 ## Stepper workflows required

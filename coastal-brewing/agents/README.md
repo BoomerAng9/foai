@@ -7,7 +7,7 @@
 ```
                   Jarrett Risher (HITL · sole human approver)
                               │
-                              │ governs via Telegram @CoastalBrewBot + Hermes audit
+                              │ governs via Telegram @CoastalBrewBot + AuditLedger
               ┌───────────────┴────────────────┐
               ▼                                ▼
       Operations PMO                   Marketing PMO
@@ -28,7 +28,7 @@
 
 - **Operations PMO** — client-facing, sales-focused. Sal_Ang is the first member; the team grows as the venture scales.
 - **Marketing PMO** — the back office; designed as an Illumin clone (unified-journey advertising platform). Melli Capensi heads the PMO. The 12 BG'z report to Melli, not to Chicken Hawk (per Sett charter §3).
-- Both PMOs route every action through the existing Chicken Hawk gateway → NemoClaw policy gate → Hermes audit. ADK is the *agent factory*; Chicken Hawk is the *runtime orchestrator*; NemoClaw is the *policy gate*; Hermes is the *audit trail*. Four-layer separation — non-negotiable.
+- Both PMOs route every action through the existing Chicken Hawk gateway → NemoClaw policy gate → AuditLedger. ADK is the *agent factory*; Chicken Hawk is the *runtime orchestrator*; NemoClaw is the *policy gate*; AuditLedger is the *audit trail*. Four-layer separation — non-negotiable.
 
 ## Run locally
 
@@ -54,7 +54,7 @@ On Windows: prefix with `PYTHONIOENCODING=utf-8` if you see `UnicodeEncodeError`
 
 These agents are designed to delegate execution to **Chicken Hawk** (`https://hawk.foai.cloud/chat`) for any tool call that touches money, suppliers, public claims, or compliance. Their local Spinner tool stubs are the negotiation/dialog surface; the real-world side effects happen behind the gateway. See `shared/chicken_hawk.py` and `shared/nemoclaw.py`.
 
-Audit receipts for every executed action are written to **Hermes** (currently SQLite at `~/foai/coastal-brewing/hermes/coastal_brewing.db`, migrating to Neon). See `shared/hermes.py`.
+Audit receipts for every executed action are written to **AuditLedger** (currently SQLite at `~/foai/coastal-brewing/audit_ledger/coastal_brewing.db`, migrating to Neon). See `shared/audit_ledger.py`.
 
 ## Reference assets
 
@@ -66,7 +66,7 @@ Audit receipts for every executed action are written to **Hermes** (currently SQ
 
 1. `mkdir agents/<pmo>/<agent_name>` with `__init__.py` exposing `agent` and `agent.py` defining `root_agent: LlmAgent`.
 2. Document role + Spinner kit at the top of `agent.py`.
-3. Wire any new tools through `shared/spinner_tools.py` so every call goes through Chicken Hawk + NemoClaw + Hermes.
+3. Wire any new tools through `shared/spinner_tools.py` so every call goes through Chicken Hawk + NemoClaw + AuditLedger.
 4. Add the agent to its PMO's roster (`operations_pmo/__init__.py` or `marketing_pmo/melli_capensi/agent.py` `sub_agents=[...]`).
 5. Update the org chart in this README.
 

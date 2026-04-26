@@ -13,7 +13,7 @@
 |---|---|---|
 | Frontend | FastAPI + inline HTML strings | **Next.js 15 App Router (React 19, TS strict)** |
 | Backend API | FastAPI on `:8000` | FastAPI stays — API-only (`/api/*`, `/route`, `/run`, `/check`) |
-| DB | SQLite (`hermes/coastal_brewing.db`) | **Neon Postgres** (same 6 tables) |
+| DB | SQLite (`audit_ledger/coastal_brewing.db`) | **Neon Postgres** (same 6 tables) |
 | Static | StaticFiles mount | Next.js `public/` + Iller_Ang-generated assets |
 | Routing | nginx → FastAPI :8000 | nginx → Next.js :3000 (`/*`) + FastAPI :8000 (`/api/*`, `/route`, `/run`, `/check`, `/approve/click`) |
 | Host | aims-vps (`brewing.foai.cloud`) | aims-vps (unchanged — VPS-only per FOAI rule) |
@@ -97,7 +97,7 @@ Other BG'z (**Moscha Tah** video stack, **Orien Talis** social/native) hold seat
 Every BG dispatches via `hawk.foai.cloud/chat` (already wired in `scripts/adapters/lil_hawks.py`). Internal Sett dispatch goes Melli → BG'z. Customer-facing output always passes through `/summarize` to render polished English with the Cultural Attribution header.
 
 ### 3.3 Owner-loop (unchanged)
-- All Spinner calls write Hermes receipts (Neon-backed).
+- All Spinner calls write AuditLedger receipts (Neon-backed).
 - NemoClaw `/check` (embedded in Chicken Hawk) gates `escalate_to_owner` and any `BLOCKED_ACTIONS` attempt.
 - One-click HMAC approve/reject preserved via `@CoastalBrewBot` Telegram bot.
 - Melli's `sign_for_culture_attribution` writes a dedicated receipt row before any public-facing asset goes live.
@@ -153,7 +153,7 @@ Every BG dispatches via `hawk.foai.cloud/chat` (already wired in `scripts/adapte
 
 ## 5. Backend changes (Neon migration)
 
-### Replace `scripts/hermes_db.py` (sqlite3 → psycopg async)
+### Replace `scripts/audit_ledger.py` (sqlite3 → psycopg async)
 - Same 6 tables, same column shapes
 - Connection: `DATABASE_URL=postgres://...neon.tech/...`
 - Pool via `psycopg_pool.AsyncConnectionPool`
@@ -241,7 +241,7 @@ No code touched until this doc is signed off.
 ### Phase 3 — Neon migration
 - Provision Neon DB
 - Run `migrate_sqlite_to_neon.py`
-- Swap `hermes_db.py` to psycopg async
+- Swap `audit_ledger.py` to psycopg async
 - Smoke-test all 6 tables
 
 ### Phase 4 — Live Look In surface (feature-flagged)

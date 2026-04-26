@@ -69,7 +69,7 @@ if decision["route"] == "feynman":
     if sqwaadrun_configured():
         result = dispatch_sqwaadrun_recon(packet.objective or packet.task_type, depth="shallow")
         # save result.payload.markdown to research/notes/<task_id>.md
-        # update hermes_db.insert_research_receipt with real source_count + confidence
+        # update audit_ledger.insert_research_receipt with real source_count + confidence
     else:
         # current filesystem placeholder behavior
         ...
@@ -79,7 +79,7 @@ elif decision["route"] == "nvidia":
         msg = f"{packet.task_type}: {packet.desired_output or packet.objective or '(no detail)'}"
         result = dispatch_chicken_hawk(msg)
         # save result.content to drafts/<task_id>_draft.md
-        # update hermes_db.insert_model_call_receipt with real provider + output_summary
+        # update audit_ledger.insert_model_call_receipt with real provider + output_summary
     else:
         # current filesystem placeholder behavior
         ...
@@ -101,7 +101,7 @@ curl -sS -X POST https://brewing.foai.cloud/run \
   -d '{"task_id":"recon_test_001","task_type":"competitor_research","risk_tags":["market_watch"],"objective":"Survey direct competitor pricing for monthly coffee subscriptions in the $15-30 range"}'
 ```
 
-Both should return Hermes rows with `provider != "placeholder"` and `confidence != "pending"` in the audit trail.
+Both should return AuditLedger rows with `provider != "placeholder"` and `confidence != "pending"` in the audit trail.
 
 ### Step 5 — `/healthz` will report
 
