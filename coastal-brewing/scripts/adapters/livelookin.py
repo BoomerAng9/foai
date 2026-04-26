@@ -32,7 +32,7 @@ poll `/api/livelookin/session/{id}` to discover when they upgrade from
 fallback → live.
 
 Owner-side observability: every session creation writes an action_receipt
-to Hermes so GPU-minutes burned per agent / per day are queryable.
+to AuditLedger so GPU-minutes burned per agent / per day are queryable.
 """
 from __future__ import annotations
 
@@ -150,7 +150,7 @@ def get_session(session_id: str) -> dict[str, Any]:
     For now sessions are stateless — re-running create_session for the same
     agent returns the current best-available mode. When GPU providers are
     wired and sessions become long-lived, this hook becomes the warm-state
-    lookup (Redis / Hermes).
+    lookup (Redis / AuditLedger).
     """
     # Stateless stub: derive agent from session_id prefix when present.
     parts = session_id.split("_", 2)

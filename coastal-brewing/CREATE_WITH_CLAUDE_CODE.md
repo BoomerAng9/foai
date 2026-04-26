@@ -16,7 +16,7 @@ Create a working virtual-company repo where:
 2. The route engine sends evidence tasks to Feynman.
 3. The route engine sends low-risk generation/classification tasks to NVIDIA.
 4. High-risk tasks require Chicken_Hawk review and owner approval.
-5. Hermes logs receipts for model calls, research outputs, approvals, and actions.
+5. AuditLedger logs receipts for model calls, research outputs, approvals, and actions.
 6. OpenClaw executes only approved low-risk or owner-approved actions.
 7. Boomer_Ang departments handle ops, CX, marketing, growth, finance, and quality.
 8. The company launches with supplier fulfillment first, no roaster purchase, and no brick-and-mortar overhead.
@@ -33,7 +33,7 @@ automations/n8n/
 configs/
 docs/
 examples/task_packets/
-hermes/
+audit_ledger/
 memory/
 openclaw/
 prompts/
@@ -98,12 +98,12 @@ Feynman handles:
 - product evidence packets
 - public-copy research review
 
-### 5. Hermes memory
+### 5. AuditLedger memory
 
 Apply:
 
 ```text
-memory/hermes_one_direction_schema.sql
+memory/audit_ledger_schema.sql
 ```
 
 Every task should produce a receipt row or receipt file.

@@ -4,7 +4,7 @@
 
 Coastal Brewing will use a single orchestration design:
 
-**ACHEEVY routes every task. Feynman verifies evidence. NVIDIA produces low-cost model work. Chicken_Hawk checks risk. Hermes remembers. OpenClaw executes only when allowed.**
+**ACHEEVY routes every task. Feynman verifies evidence. NVIDIA produces low-cost model work. Chicken_Hawk checks risk. AuditLedger remembers. OpenClaw executes only when allowed.**
 
 ## Why this is one direction
 

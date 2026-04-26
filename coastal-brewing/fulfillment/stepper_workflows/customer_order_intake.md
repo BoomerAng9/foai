@@ -25,7 +25,7 @@ Stepper form submission on the public Coastal Brewing intake page (linked from `
      "task_type": "draft_order_confirmation",
      "risk_tags": ["money"],
      "approval_required": true,
-     "desired_output": "draft confirmation email + supplier order draft + Hermes receipt"
+     "desired_output": "draft confirmation email + supplier order draft + AuditLedger receipt"
    }
    ```
 3. POST to `https://brewing.foai.cloud/run` with header `X-Coastal-Token: $COASTAL_GATEWAY_TOKEN`.
@@ -34,7 +34,7 @@ Stepper form submission on the public Coastal Brewing intake page (linked from `
 6. Owner-approval workflow fires (see `templates/owner_approval_request.md`).
 
 ## Outputs
-- Hermes receipt at `receipts/<task_id>_route_receipt.json`
+- AuditLedger receipt at `receipts/<task_id>_route_receipt.json`
 - Owner approval request at `owner_approvals/<task_id>_request.md`
 - (after approval) supplier order draft at `drafts/<task_id>_supplier_email.md`
 - (after approval) customer confirmation draft at `drafts/<task_id>_customer_confirmation.md`
@@ -46,7 +46,7 @@ Stepper form submission on the public Coastal Brewing intake page (linked from `
 Mandatory. The order does not transmit to the supplier and the customer confirmation does not send until the owner approves both drafts.
 
 ## Failure modes
-- Form validation fails → Stepper error to customer; no Hermes write.
+- Form validation fails → Stepper error to customer; no AuditLedger write.
 - Runner unreachable → Stepper retries up to 3 times with exponential backoff; on final failure, Stepper queues a Taskade alert to owner.
 - Owner rejects → customer is told the order cannot be fulfilled at this time; refund flow if any payment was captured.
 

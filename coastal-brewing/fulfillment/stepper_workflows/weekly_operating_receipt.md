@@ -4,10 +4,10 @@
 Cron at Monday 09:00 local time (Stepper schedule).
 
 ## Inputs
-- (none — pulls from Hermes + Hostinger Ecommerce when live)
+- (none — pulls from AuditLedger + Hostinger Ecommerce when live)
 
 ## Workflow
-1. Stepper queries Hermes for the prior 7 days:
+1. Stepper queries AuditLedger for the prior 7 days:
    - all metrics from `daily_operating_digest` aggregated
    - week-over-week deltas
    - open approvals (pending > 24h)
@@ -32,10 +32,10 @@ Cron at Monday 09:00 local time (Stepper schedule).
 6. Owner reviews and approves the next-week plan via `owner_approval_decision`.
 
 ## Outputs
-- Hermes route receipt
+- AuditLedger route receipt
 - Rendered weekly receipt at `drafts/<task_id>_weekly_receipt.md`
 - Owner approval request — required to lock the next-week plan
-- After approval: Hermes `approval_receipts` row with `decision='approved'` and the plan as `note`
+- After approval: AuditLedger `approval_receipts` row with `decision='approved'` and the plan as `note`
 
 ## Risk tags applied
 - (none on the receipt itself; any embedded action items inherit their own risk tags when they fire)

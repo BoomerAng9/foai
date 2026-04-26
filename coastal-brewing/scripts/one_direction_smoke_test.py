@@ -11,7 +11,7 @@ REQUIRED = [
     "CREATE_WITH_CLAUDE_CODE.md",
     "configs/model_router.yaml",
     "configs/agent_roster.yaml",
-    "memory/hermes_one_direction_schema.sql",
+    "memory/audit_ledger_schema.sql",
     "scripts/model_router.py",
     "scripts/create_feynman_ticket.py",
     "openclaw/action_policy.yaml",

@@ -30,7 +30,7 @@ The `stepper-billing-proxy.ts` type discriminator now accepts `'coastal-brewing'
 
 - Add a `/checkout` endpoint to `scripts/api_server.py`.
 - Runner calls Stripe SDK directly; webhook lands at `brewing.foai.cloud/stripe/webhook`.
-- Subscriber record lives in Coastal's own Hermes DB (`hermes/coastal_brewing.db`).
+- Subscriber record lives in Coastal's own AuditLedger (`audit_ledger/coastal_brewing.db`).
 - cti-hub's `stepper-billing-proxy.ts` is NOT involved.
 
 **Pros:** clean separation — Coastal Brewing is its own commerce surface; coffee buyers never see Deploy Platform infrastructure; Hostinger Ecommerce migration is simpler (just swap the runner's checkout for the Hostinger storefront).
@@ -47,7 +47,7 @@ The `stepper-billing-proxy.ts` type discriminator now accepts `'coastal-brewing'
 3. The `stepper-billing-proxy.ts` type extension is still useful: when the runner publishes Stripe webhooks back to Stepper for receipt logging, it can cite `product: 'coastal-brewing'` consistently with the rest of FOAI.
 4. Keeps cti-hub's auth model clean (Deploy Platform users only).
 
-When Hostinger Ecommerce launches, **Option C migrates seamlessly:** the runner's checkout endpoint is replaced by Hostinger Ecommerce's checkout, but webhook ingestion + Hermes receipt writing stay the same.
+When Hostinger Ecommerce launches, **Option C migrates seamlessly:** the runner's checkout endpoint is replaced by Hostinger Ecommerce's checkout, but webhook ingestion + AuditLedger receipt writing stay the same.
 
 ## Next concrete step (after owner picks)
 

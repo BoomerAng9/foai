@@ -1,4 +1,4 @@
--- Hermes One Direction Schema
+-- AuditLedger One Direction Schema (renamed from Hermes 2026-04-26)
 
 CREATE TABLE IF NOT EXISTS task_packets (
   task_id TEXT PRIMARY KEY,

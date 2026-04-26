@@ -22,7 +22,7 @@ services:
       - .:/app
     environment:
       COASTAL_GATEWAY_TOKEN: "${COASTAL_GATEWAY_TOKEN}"
-      DATABASE_URL: "sqlite:///hermes/coastal_brewing.db"
+      DATABASE_URL: "sqlite:///audit_ledger/coastal_brewing.db"
       ENVIRONMENT: "production"
       COMPANY_NAME: "Coastal Brewing"
       OWNER_APPROVAL_EMAIL: "${OWNER_APPROVAL_EMAIL}"

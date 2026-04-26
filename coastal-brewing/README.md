@@ -4,7 +4,7 @@ A 100% virtual, AI-managed coffee and tea company. Local-first scaffolding plus 
 
 ## What this is
 
-- One-direction architecture: owner intent → ACHEEVY → task packet → route → Boomer_Ang → Chicken_Hawk review → Hermes receipt → OpenClaw execution.
+- One-direction architecture: owner intent → ACHEEVY → task packet → route → Boomer_Ang → Chicken_Hawk review → AuditLedger receipt → OpenClaw execution.
 - Three model lanes: NVIDIA (low-cost drafts), Feynman (verification + research), premium/owner (high-judgment).
 - Fulfillment via Stepper (Taskade-backed workflows) with owner approval on every customer-visible action.
 - Storefront strategy: hold for **Hostinger Ecommerce** (planned). Until then, intake + checkout flow through Stepper forms with manual supplier fulfillment.
@@ -30,7 +30,7 @@ owner intent
         → premium_review (high-judgment fallback)
     → Boomer_Ang department output
     → Chicken_Hawk risk review
-    → Hermes receipt (memory/hermes_one_direction_schema.sql)
+    → AuditLedger receipt (memory/audit_ledger_schema.sql)
     → OpenClaw execution (openclaw/action_policy.yaml)
 ```
 
@@ -91,13 +91,13 @@ See `docs/05_fulfillment_setup.md` and `fulfillment/README.md`. Short version:
 4. Owner approves the supplier order (drafted from `templates/supplier_certification_request.md`).
 5. Manual supplier email until owner authorizes a live send.
 6. Customer confirmation routed back through Stepper.
-7. Every step lands in Hermes as a receipt.
+7. Every step lands in AuditLedger as a receipt.
 
 When Hostinger Ecommerce launches, the storefront layer migrates per `docs/08_hostinger_ecommerce_path.md`. The runner and Stepper backbone stay.
 
 ## Owner approval boundaries
 
-See `docs/04_owner_approval_boundaries.md`. Short version: anything that publishes, sends, orders, refunds, claims, spends, or signs requires an `approval_required=true` row in Hermes with `decision='approved'` before OpenClaw executes.
+See `docs/04_owner_approval_boundaries.md`. Short version: anything that publishes, sends, orders, refunds, claims, spends, or signs requires an `approval_required=true` row in AuditLedger with `decision='approved'` before OpenClaw executes.
 
 ## Layout
 
@@ -120,7 +120,7 @@ coastal-brewing/
 │   └── one_direction_smoke_test.py
 ├── examples/task_packets/      # 4 packets
 ├── agents/prompts/             # 10 role prompts
-├── memory/hermes_one_direction_schema.sql
+├── memory/audit_ledger_schema.sql
 ├── openclaw/action_policy.yaml
 ├── automations/n8n/            # 6 workflow skeletons (topology reference; actual workflows live in Taskade)
 ├── fulfillment/                # Stepper-based fulfillment specs
@@ -130,12 +130,12 @@ coastal-brewing/
 ├── research/feynman/           # research lane setup
 ├── docs/                       # 9 docs (00–08)
 ├── templates/                  # 7 templates
-├── receipts/                   # runtime — Hermes receipts
+├── receipts/                   # runtime — AuditLedger receipts
 ├── drafts/                     # runtime — NVIDIA drafts
 ├── owner_approvals/            # runtime — approval requests
-└── hermes/                     # runtime — SQLite
+└── audit_ledger/               # runtime — SQLite
 ```
 
 ## Operating contract
 
-This system does not publish, send, order, refund, or spend without an owner-approval row in Hermes. If any agent appears to bypass that, file a `risk_events` row with severity `critical` immediately.
+This system does not publish, send, order, refund, or spend without an owner-approval row in AuditLedger. If any agent appears to bypass that, file a `risk_events` row with severity `critical` immediately.
