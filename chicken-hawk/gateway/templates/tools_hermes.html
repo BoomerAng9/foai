@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Agent Runtime · Tool Chest</title>
+<link rel="stylesheet" href="/static/css/main.css">
+</head>
+<body class="theme-dark">
+<div class="tc-shell">
+  <aside class="tc-sidebar">
+    <h2>Tool Chest</h2>
+    <nav class="tc-nav">
+      <a href="/tools">Overview</a>
+      <a href="/tools/autoresearch">Autoresearch</a>
+      <a href="/tools/nemoclaw">Policy Gate</a>
+      <a href="/tools/hermes">Agent Runtime</a>
+      <a href="/tools/lil-hawks">Lil_Hawks</a>
+      <a href="/tools/cron">Scheduled Jobs</a>
+      <a href="/tools/audit">Audit Chain</a>
+      <hr style="border:0;border-top:1px solid var(--border);margin:12px 0">
+      <a href="/">← Customer chat</a>
+    </nav>
+  </aside>
+  <main class="tc-main">
+    <div class="tc-header">
+      <div>
+        <h1>Agent Runtime</h1>
+        <div class="subtitle">The execution shell — 15+ HITL channels, skill registry, MCP servers.</div>
+      </div>
+      <div id="tc-health"></div>
+    </div>
+
+    <div class="tc-card">
+      <h3>Channels</h3>
+      <p class="desc">Where the runtime can reach you for approvals + status.</p>
+      <table class="tc-table">
+        <thead><tr><th>Channel</th><th>Status</th><th>Direction</th></tr></thead>
+        <tbody>
+          <tr><td>Telegram</td><td><span class="tc-pill ok">live</span></td><td>both</td></tr>
+          <tr><td>Slack</td><td><span class="tc-pill muted">configurable</span></td><td>both</td></tr>
+          <tr><td>Discord</td><td><span class="tc-pill muted">configurable</span></td><td>both</td></tr>
+          <tr><td>Email (SMTP)</td><td><span class="tc-pill muted">configurable</span></td><td>outbound</td></tr>
+          <tr><td>SMS (Twilio)</td><td><span class="tc-pill muted">configurable</span></td><td>both</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="tc-card">
+      <h3>Skills + MCP Servers</h3>
+      <p class="desc">Capabilities the runtime can invoke. The full registry is managed inside the runtime container.</p>
+      <ul style="color:var(--muted);font-size:14px">
+        <li><strong>Native MCP:</strong> sequential-thinking · coastal-fs · memory · chicken-hawk</li>
+        <li><strong>Skills (curated subset):</strong> rfp-intake · audit-ledger · live-task-plan · spinner-voice</li>
+      </ul>
+    </div>
+
+    <div class="tc-card">
+      <h3>Approval flow</h3>
+      <p class="desc">
+        Wave 1 = Telegram-only. When the Policy Gate escalates, the runtime DMs the owner;
+        approve via Telegram inline buttons. Wave 2 will add in-GUI approval at this panel.
+      </p>
+    </div>
+  </main>
+</div>
+<script src="/static/js/tools_common.js" defer></script>
+</body>
+</html>
