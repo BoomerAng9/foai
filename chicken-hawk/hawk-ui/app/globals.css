@@ -1,0 +1,62 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Inter+Tight:wght@500;600;700;800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* A.I.M.S. light theme — source of truth at
+   ~/.claude/projects/C--Users-rishj/memory/reference_aims_light_theme_canon.md */
+
+:root {
+  color-scheme: light;
+  --foai-bg: #F8FAFC;
+  --foai-surface: #FFFFFF;
+  --foai-surface-2: #F1F5F9;
+  --foai-border: #E2E8F0;
+  --foai-text: #0F172A;
+  --foai-muted: #475569;
+  --foai-dim: #94A3B8;
+  --foai-gold: #D97706;
+  --foai-gold-hover: #B45309;
+}
+
+html, body {
+  background: var(--foai-bg);
+  color: var(--foai-text);
+  font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+::selection {
+  background: rgba(217, 119, 6, 0.18);
+  color: var(--foai-text);
+}
+
+@layer utilities {
+  /* Light-mode-appropriate emphasis utilities. The names are kept so
+     existing components keep rendering, but the visual is now subtle
+     drop-shadow + tinted text instead of glow-on-dark. */
+  .glow-gold {
+    color: var(--foai-gold);
+    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.6);
+  }
+  .glow-cyan {
+    color: #3B82F6; /* blue-500 status accent */
+  }
+  .ring-gold {
+    box-shadow: 0 0 0 1px rgba(217, 119, 6, 0.4), 0 4px 12px rgba(217, 119, 6, 0.15);
+  }
+  .ring-cyan {
+    box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.35), 0 4px 12px rgba(59, 130, 246, 0.12);
+  }
+  .gradient-edge {
+    background: linear-gradient(135deg, rgba(217, 119, 6, 0.6), rgba(217, 119, 6, 0.1) 60%, transparent);
+  }
+}
+
+/* Custom scrollbar — slate, narrow, polite on a light surface */
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: #F1F5F9; }
+::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: #94A3B8; }

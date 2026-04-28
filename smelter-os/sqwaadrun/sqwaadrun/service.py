@@ -385,6 +385,9 @@ async def on_startup(app: web.Application) -> None:
 
     squad = FullScrappHawkSquadrun(
         output_dir=str(data_dir / "output"),
+        screenshots_dir=str(data_dir / "screenshots"),
+        db_path=str(data_dir / "scrape_cache.db"),
+        diff_history_dir=str(data_dir / "diff_history"),
         schedule_file=str(data_dir / "schedule.json"),
         enable_screenshots=os.environ.get("ENABLE_SCREENSHOTS", "").lower() in ("1", "true", "yes"),
     )

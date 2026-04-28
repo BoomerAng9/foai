@@ -1,6 +1,6 @@
 # A.I.M.S. — Interview Evaluation Form
 
-Source: Notion `HIDT-Interview Evaluation Form` doc, ingested 2026-04-08, HIDT → A.I.M.S. rename applied.
+Source: Notion `A.I.M.S. Interview Evaluation Form` doc, ingested 2026-04-08, A.I.M.S. rename applied.
 Use: Betty-Anne_Ang's HR PMO Office uses this when interviewing new agents or human contractors. Paired with the A.I.M.S. Org Fit Index for full evaluation.
 
 ---

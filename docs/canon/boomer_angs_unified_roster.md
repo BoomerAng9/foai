@@ -56,7 +56,7 @@ specialists reporting in. Reconciled from `ACHEEVY Agent Logic vFinal`,
 | **CMO_Ang** | Chief Marketing Officer | Brand, positioning. |
 | **CDO_Ang** | Chief Design Officer | Parent office of Iller_Ang (see `.claude/skills/iller-ang`). |
 | **CPO_Ang** | Chief Product Officer | Product surfaces, PRD. |
-| **CHRO_Ang** | Chief HR Officer | Betty-Anne_Ang. HIDT Org Fit Index scoring. Reports up to AVVA NOON per existing canon. |
+| **CHRO_Ang** | Chief HR Officer | Betty-Anne_Ang. A.I.M.S. Org Fit Index scoring. Reports up to AVVA NOON per existing canon. |
 
 ### Wing B — Core Infrastructure Specialists (Tier 1, 4 agents)
 
