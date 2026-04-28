@@ -37,7 +37,7 @@ execution surfaces for this first deployment.
 ## Deploy On aims-vps
 
 ```bash
-cd /root/foai/coastal-brewing
+cd /docker/coastal-brewing
 docker compose config
 docker compose build paperclip
 docker compose up -d paperclip-postgres paperclip
