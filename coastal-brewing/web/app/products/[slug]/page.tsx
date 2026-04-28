@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Nav } from "@/components/nav";
 import { Footer } from "@/components/footer";
 import { ChatPanel } from "@/components/chat-panel";
+import { OrderButton } from "@/components/order-button";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { api, type Product } from "@/lib/api";
@@ -41,7 +42,12 @@ export default async function ProductDetail({ params }: { params: Promise<{ slug
               ${product.msrp.toFixed(2)} <span className="text-sm font-normal text-muted-foreground">/ {product.unit}</span>
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
-              <Button size="lg" variant="accent">Add to cart</Button>
+              <OrderButton
+                sku={product.sku}
+                productName={product.name}
+                unit={product.unit}
+                msrp={product.msrp}
+              />
               <Button asChild size="lg" variant="ghost">
                 <Link href={`/chat?sku=${product.sku}`}>Ask the team</Link>
               </Button>

@@ -193,6 +193,51 @@ services:
       retries: 5
       start_period: 120s
 
+  # Coastal storefront — Next.js 15 + React 19, standalone build.
+  # Public-facing at brewing.foai.cloud (nginx terminates TLS and proxies to
+  # 127.0.0.1:3010). The /api/order/intake route handler runs server-side
+  # and forwards customer orders to coastal-runner /run with X-Coastal-Token
+  # — the token never reaches the browser.
+  coastal-web:
+    build:
+      context: ./web
+    image: coastal-brewing-coastal-web
+    container_name: coastal-web
+    restart: unless-stopped
+    mem_limit: 512m
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    ports:
+      - "127.0.0.1:3010:3000"
+    environment:
+      NODE_ENV: "production"
+      # Bind IPv4 — Next.js standalone defaults to IPv6 :: which breaks the
+      # IPv4 wget healthcheck. HOSTNAME=0.0.0.0 forces IPv4 server bind.
+      HOSTNAME: "0.0.0.0"
+      PORT: "3000"
+      # Same-origin browser fetches; nginx routes /api/* to coastal-runner.
+      NEXT_PUBLIC_API_BASE: ""
+      NEXT_PUBLIC_LIVELOOKIN_ENABLED: "${NEXT_PUBLIC_LIVELOOKIN_ENABLED:-true}"
+      # Server-only — used by /api/order/intake route handler. Never exposed
+      # to the browser. Same token coastal-runner expects on /run.
+      COASTAL_GATEWAY_TOKEN: "${COASTAL_GATEWAY_TOKEN}"
+      COASTAL_RUNNER_INTERNAL: "http://coastal-runner:8080"
+      TZ: "UTC"
+    networks:
+      - foai-internal
+    depends_on:
+      coastal-runner:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:3000/ >/dev/null || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
 volumes:
   hermes-data:
   paperclip-data:
