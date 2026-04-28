@@ -18,7 +18,15 @@ from fastapi import APIRouter, Cookie, HTTPException, Request, Response
 from fastapi.responses import HTMLResponse, RedirectResponse
 from pydantic import BaseModel
 
-OWNER_EMAIL = os.getenv("OWNER_EMAIL", "").lower().strip()
+# Owner identity may map to multiple email aliases (Telegram-bound,
+# project-bound, executive). Provide as comma-separated `OWNER_EMAIL` OR
+# `OWNER_EMAILS`. Either works; first listed email is the canonical sub
+# when external systems need a single value.
+_owner_email_raw = os.getenv("OWNER_EMAILS", os.getenv("OWNER_EMAIL", ""))
+OWNER_EMAILS: tuple[str, ...] = tuple(
+    e for e in (x.lower().strip() for x in _owner_email_raw.split(",")) if e
+)
+OWNER_EMAIL: str = OWNER_EMAILS[0] if OWNER_EMAILS else ""
 JWT_SECRET = os.getenv("JWT_SECRET", "")
 JWT_ALG = "HS256"
 SESSION_COOKIE = "ch_session"
@@ -87,7 +95,7 @@ async def login(request: Request) -> HTMLResponse:
         form = await request.form()
         email = (form.get("email") or "").lower().strip()
 
-    if not email or email != OWNER_EMAIL:
+    if not email or email not in OWNER_EMAILS:
         return _html_response(
             "Check your Telegram",
             "If the email is recognized, a magic link has been sent. Single-click consumes it.",
@@ -95,7 +103,7 @@ async def login(request: Request) -> HTMLResponse:
 
     now = int(time.time())
     token = _sign(
-        {"sub": OWNER_EMAIL, "iat": now, "exp": now + MAGIC_LINK_TTL_SEC, "kind": "magic_link"}
+        {"sub": email, "iat": now, "exp": now + MAGIC_LINK_TTL_SEC, "kind": "magic_link"}
     )
     link = f"{PORTAL_BASE}/login/verify?token={token}"
     msg = (

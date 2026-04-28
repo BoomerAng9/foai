@@ -34,7 +34,7 @@ from auth import (  # noqa: E402
     router as auth_router,
     _send_telegram,
     get_owner_from_session,
-    OWNER_EMAIL,
+    OWNER_EMAILS,
     SESSION_COOKIE,
 )
 from nemoclaw import router as nemoclaw_router, _evaluate, _append_event  # noqa: E402
@@ -178,11 +178,12 @@ async def require_auth(request: Request) -> None:
     if token_param and token_param == secret:
         return
 
-    # Check owner-tier magic-link session cookie (JWT, bound to OWNER_EMAIL).
+    # Check owner-tier magic-link session cookie (JWT, bound to one of the
+    # OWNER_EMAILS aliases — Telegram-bound / project-bound / executive).
     ch_session = request.cookies.get(SESSION_COOKIE)
     if ch_session:
         owner = get_owner_from_session(ch_session)
-        if owner and OWNER_EMAIL and owner == OWNER_EMAIL:
+        if owner and OWNER_EMAILS and owner in OWNER_EMAILS:
             return
 
     raise HTTPException(
