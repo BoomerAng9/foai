@@ -6,6 +6,7 @@ A 100% virtual, AI-managed coffee and tea company. Local-first scaffolding plus 
 
 - One-direction architecture: owner intent → ACHEEVY → task packet → route → Boomer_Ang → Chicken_Hawk review → AuditLedger receipt → OpenClaw execution.
 - Three model lanes: NVIDIA (low-cost drafts), Feynman (verification + research), premium/owner (high-judgment).
+- Paperclip control plane: org chart, agent budgets, governance, issue threads, and workforce audit for the AI company.
 - Fulfillment via Stepper (Taskade-backed workflows) with owner approval on every customer-visible action.
 - Storefront strategy: hold for **Hostinger Ecommerce** (planned). Until then, intake + checkout flow through Stepper forms with manual supplier fulfillment.
 - No Shopify. No third-party storefront platform.
@@ -43,10 +44,13 @@ See `docs/01_unified_architecture.md`.
 | Runner | aims-vps Docker container | `coastal-runner` on `127.0.0.1:8080` |
 | TLS termination | aims-vps nginx | server block `brewing.foai.cloud` + certbot |
 | Routing engine | inside container | FastAPI shim wrapping kit scripts |
+| Workforce control plane | aims-vps Docker container | Paperclip `v2026.427.0` on `127.0.0.1:3100`, backed by Paperclip-owned Postgres |
 | Fulfillment workflows | Taskade (Stepper) | webhooks into runner `/run` and `/approve` |
 | Billing (future) | cti-hub Stripe via stepper-billing-proxy | extend `product` discriminator with `'coastal-brewing'` |
 | Storefront (future) | Hostinger Ecommerce | placeholder env vars wired |
 | Secrets vault | myclaw-vps openclaw | relayed to aims-vps `.env` at deploy time |
+
+Paperclip is intentionally separate from Coastal AuditLedger in this pass. It gets its own Postgres database for control-plane state; `coastal-runner` continues using `sqlite:///audit_ledger/coastal_brewing.db` until the AuditLedger adapter is explicitly migrated.
 
 ## Setup (local Phase 0)
 
@@ -57,6 +61,8 @@ cp configs/env.example .env.local        # leave secrets blank for local
 python3 scripts/one_direction_smoke_test.py
 python3 scripts/run_task_packet.py examples/task_packets/verify_organic_claim.json --dry-run
 ```
+
+For the Paperclip control-plane deployment, see `docs/13_paperclip_control_plane.md`.
 
 ## Runner endpoints (when deployed)
 
@@ -128,7 +134,7 @@ coastal-brewing/
 │   └── stepper_workflows/
 ├── storefront/                 # placeholder for Hostinger Ecommerce migration
 ├── research/feynman/           # research lane setup
-├── docs/                       # 9 docs (00–08)
+├── docs/                       # system docs and deployment runbooks
 ├── templates/                  # 7 templates
 ├── receipts/                   # runtime — AuditLedger receipts
 ├── drafts/                     # runtime — NVIDIA drafts
