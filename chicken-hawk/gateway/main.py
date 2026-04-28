@@ -228,9 +228,9 @@ async def tools_index_page() -> FileResponse:
     return _serve("tools_index.html")
 
 
-@app.get("/tools/autoresearch", include_in_schema=False, dependencies=[Depends(require_auth)])
-async def tools_autoresearch_page() -> FileResponse:
-    return _serve("tools_autoresearch.html")
+@app.get("/tools/tuning-loop", include_in_schema=False, dependencies=[Depends(require_auth)])
+async def tools_tuning_loop_page() -> FileResponse:
+    return _serve("tools_tuning_loop.html")
 
 
 @app.get("/tools/nemoclaw", include_in_schema=False, dependencies=[Depends(require_auth)])

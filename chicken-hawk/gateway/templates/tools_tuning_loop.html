@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Autoresearch · Tool Chest</title>
+<title>Tuning Loop · Tool Chest</title>
 <link rel="stylesheet" href="/static/css/main.css">
 </head>
 <body class="theme-dark">
@@ -12,7 +12,7 @@
     <h2>Tool Chest</h2>
     <nav class="tc-nav">
       <a href="/tools">Overview</a>
-      <a href="/tools/autoresearch">Autoresearch</a>
+      <a href="/tools/tuning-loop">Tuning Loop</a>
       <a href="/tools/nemoclaw">Policy Gate</a>
       <a href="/tools/hermes">Agent Runtime</a>
       <a href="/tools/lil-hawks">Lil_Hawks</a>
@@ -25,8 +25,8 @@
   <main class="tc-main">
     <div class="tc-header">
       <div>
-        <h1>Autoresearch</h1>
-        <div class="subtitle">Autonomous experiment loop — Karpathy pattern (`program.md` → modify → train 5min → keep-or-revert).</div>
+        <h1>Tuning Loop</h1>
+        <div class="subtitle">Autonomous experiment engine — reads a target metric, modifies the training script, trains briefly, keeps the change if it helps, reverts if it doesn't.</div>
       </div>
       <div id="tc-health"></div>
     </div>
@@ -35,7 +35,7 @@
       <h3>Status</h3>
       <span class="tc-pill warn">deployment pending</span>
       <p class="desc" style="margin-top:14px">
-        The Karpathy autoresearch engine isn't deployed yet. When it lands, this panel
+        The autonomous-experiment engine isn't wired up yet. When it lands, this panel
         will show:
       </p>
       <ul style="color:var(--muted);font-size:14px">
@@ -49,7 +49,7 @@
     <div class="tc-card">
       <h3>What this isn't</h3>
       <p class="desc">
-        Not a research-citation lane. Not a web-search wrapper. Not TTD-DR. Customer "research" or "fact-check"
+        Not a research-citation lane. Not a web-search wrapper. Customer "research" or "fact-check"
         intents route through the Agent Runtime with web tools, not through this panel.
       </p>
     </div>
