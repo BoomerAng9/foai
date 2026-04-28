@@ -183,6 +183,10 @@ class TaskPacket(BaseModel):
     risk_tags: List[str] = Field(default_factory=list)
     approval_required: bool = False
     desired_output: Optional[str] = None
+    # Free-form payload for task-type-specific data (e.g., draft_order_confirmation
+    # carries customer + shipping + product info used to render the supplier and
+    # customer-facing email drafts).
+    payload: Dict[str, Any] = Field(default_factory=dict)
 
 
 class ApprovalDecision(BaseModel):
@@ -555,6 +559,169 @@ def audit_integrity_check(authorization: str = Header(default="")) -> dict:
     return audit_ledger.verify_chain()
 
 
+# ---------------------------------------------------------------------------
+# Order draft generation + post-approval email send
+# ---------------------------------------------------------------------------
+def _format_address(s: Dict[str, Any]) -> str:
+    if not s:
+        return "(no shipping address)"
+    line1 = str(s.get("address", "")).strip()
+    city = str(s.get("city", "")).strip()
+    state = str(s.get("state", "")).strip()
+    pc = str(s.get("postal_code", "")).strip()
+    return "\n".join(filter(None, [line1, ", ".join(filter(None, [city, state, pc]))]))
+
+
+def _render_supplier_draft(packet: "TaskPacket") -> Dict[str, str]:
+    p = packet.payload or {}
+    customer = p.get("customer") or {}
+    shipping = p.get("shipping") or {}
+    sku = p.get("sku") or "(unknown sku)"
+    name = p.get("product_name") or sku
+    qty = p.get("quantity") or 1
+    company = os.environ.get("COMPANY_NAME", "Coastal Brewing")
+    body = (
+        f"# Wholesale order — {company}\n\n"
+        f"Order id: {packet.task_id}\n\n"
+        f"## Order\n\n"
+        f"- SKU: {sku}\n"
+        f"- Product: {name}\n"
+        f"- Quantity: {qty}\n\n"
+        f"## Ship to\n\n"
+        f"{customer.get('name') or '(no name)'}\n"
+        f"{_format_address(shipping)}\n\n"
+        f"## Notes\n\n"
+        f"- Delivery preference: {p.get('delivery_window_preference') or 'no preference'}\n"
+        f"- Gift message: {p.get('gift_message') or '(none)'}\n\n"
+        f"This order has been owner-approved. Please confirm receipt and ship under the {company} brand per the wholesale agreement.\n"
+    )
+    return {
+        "subject": f"[Wholesale order — {company}] {packet.task_id}",
+        "body": body,
+    }
+
+
+def _render_customer_draft(packet: "TaskPacket") -> Dict[str, str]:
+    p = packet.payload or {}
+    customer = p.get("customer") or {}
+    shipping = p.get("shipping") or {}
+    sku = p.get("sku") or "(unknown sku)"
+    name = p.get("product_name") or sku
+    qty = p.get("quantity") or 1
+    company = os.environ.get("COMPANY_NAME", "Coastal Brewing")
+    body = (
+        f"# Order confirmed — thanks for choosing {company}\n\n"
+        f"Hi {customer.get('name', 'there')},\n\n"
+        f"Your order is in. Here's what we've got for you:\n\n"
+        f"- {name} × {qty}\n\n"
+        f"## Shipping to\n\n"
+        f"{_format_address(shipping)}\n\n"
+        f"## What happens next\n\n"
+        f"We've sent the order to our roaster. You'll get a tracking note from us as soon as it ships. If anything looks off, just reply to this email — a real person reads it.\n\n"
+        f"Order id: {packet.task_id}\n\n"
+        f"— {company}\n"
+    )
+    return {
+        "subject": f"Your {company} order — {name}",
+        "body": body,
+    }
+
+
+def _generate_order_drafts(packet: "TaskPacket") -> Dict[str, str]:
+    """Write supplier + customer drafts to disk for `draft_order_confirmation`
+    task type. Returns a dict of {kind: path}. Idempotent — overwrites on rerun."""
+    if packet.task_type != "draft_order_confirmation":
+        return {}
+    supplier = _render_supplier_draft(packet)
+    customer = _render_customer_draft(packet)
+    supplier_path = DRAFTS_DIR / f"{packet.task_id}_supplier_email.md"
+    customer_path = DRAFTS_DIR / f"{packet.task_id}_customer_confirmation.md"
+    supplier_path.write_text(
+        f"# To: {os.environ.get('COASTAL_SUPPLIER_EMAIL') or '(supplier email not configured)'}\n"
+        f"# Subject: {supplier['subject']}\n\n{supplier['body']}",
+        encoding="utf-8",
+    )
+    p = packet.payload or {}
+    customer_to = (p.get("customer") or {}).get("email") or "(customer email missing)"
+    customer_path.write_text(
+        f"# To: {customer_to}\n# Subject: {customer['subject']}\n\n{customer['body']}",
+        encoding="utf-8",
+    )
+    return {"supplier": str(supplier_path), "customer": str(customer_path)}
+
+
+def _read_draft_file(path: pathlib.Path) -> Dict[str, str]:
+    """Parse a draft file written by _generate_order_drafts. Returns {to, subject, body}."""
+    text = path.read_text(encoding="utf-8")
+    lines = text.splitlines()
+    to_addr = ""
+    subject = ""
+    body_start = 0
+    for i, line in enumerate(lines):
+        if line.startswith("# To: "):
+            to_addr = line[6:].strip()
+        elif line.startswith("# Subject: "):
+            subject = line[11:].strip()
+            body_start = i + 1
+            break
+    body = "\n".join(lines[body_start:]).lstrip("\n")
+    return {"to": to_addr, "subject": subject, "body": body}
+
+
+def _send_post_approval_emails(task_id: str, approval_id: str) -> Dict[str, Any]:
+    """When an order is approved, attempt to send the supplier + customer drafts.
+
+    Returns a structured report. Receipts are also written into AuditLedger
+    (action_receipts) so the chain captures every send attempt — including
+    skipped sends (RESEND_API_KEY not configured) marked truthfully."""
+    report: Dict[str, Any] = {"task_id": task_id, "sends": []}
+    drafts = [
+        ("supplier", DRAFTS_DIR / f"{task_id}_supplier_email.md"),
+        ("customer", DRAFTS_DIR / f"{task_id}_customer_confirmation.md"),
+    ]
+    for kind, path in drafts:
+        if not path.exists():
+            report["sends"].append({"kind": kind, "status": "missing", "detail": str(path)})
+            continue
+        d = _read_draft_file(path)
+        # Customer draft uses the captured email; supplier draft uses env override
+        # if the supplier line in the draft says "(supplier email not configured)".
+        to_addr = d["to"]
+        if kind == "supplier" and "not configured" in to_addr:
+            to_addr = os.environ.get("COASTAL_SUPPLIER_EMAIL", "")
+        result = email_sender.send(
+            to=to_addr,
+            subject=d["subject"],
+            body_markdown=d["body"],
+        )
+        status = "sent" if result.sent else ("skipped" if result.skipped else "failed")
+        try:
+            audit_ledger.insert_action_receipt(
+                task_id=task_id,
+                executor="coastal-runner",
+                action_type=f"email_{kind}",
+                destination=to_addr or "(no recipient)",
+                status=status,
+                result_summary=(
+                    f"provider={result.provider} message_id={result.message_id or '(none)'} "
+                    f"approval_id={approval_id} detail={result.detail or ''}"
+                )[:480],
+            )
+        except Exception:
+            pass
+        report["sends"].append(
+            {
+                "kind": kind,
+                "to": to_addr,
+                "status": status,
+                "message_id": result.message_id,
+                "detail": result.detail,
+                "error": result.error,
+            }
+        )
+    return report
+
+
 @app.post("/route")
 def route(packet: TaskPacket, x_coastal_token: Optional[str] = Header(default=None)) -> dict:
     _auth(x_coastal_token)
@@ -670,6 +837,12 @@ def run(packet: TaskPacket, x_coastal_token: Optional[str] = Header(default=None
             encoding="utf-8",
         )
         placeholder_path = str(path)
+        # When the task is a customer order, also pre-render the supplier
+        # and customer drafts so the post-approval email send has source.
+        try:
+            _generate_order_drafts(packet)
+        except Exception:
+            pass
 
     telegram_sent = False
     if receipt["approval_required"]:
@@ -715,7 +888,16 @@ def approve(decision: ApprovalDecision, x_coastal_token: Optional[str] = Header(
     except Exception:
         pass
 
-    return {"recorded": True, "decision_path": str(out_path)}
+    email_report: Optional[Dict[str, Any]] = None
+    if decision.decision == "approved":
+        try:
+            email_report = _send_post_approval_emails(
+                task_id=decision.task_id, approval_id=decision.approval_id
+            )
+        except Exception as e:
+            email_report = {"error": str(e)}
+
+    return {"recorded": True, "decision_path": str(out_path), "email_report": email_report}
 
 
 class CheckoutRequest(BaseModel):
@@ -1276,6 +1458,7 @@ def recommend(req: RecommendRequest) -> dict:
 
 
 from adapters import livelookin  # noqa: E402
+from adapters import email_sender  # noqa: E402
 
 
 class LiveLookInRequest(BaseModel):
@@ -1653,6 +1836,15 @@ def approve_click(token: str = Query(...)) -> HTMLResponse:
                 destination="downstream_executor",
                 status="authorized",
                 result_summary=f"approval_id={payload['approval_id']} via Telegram one-click",
+            )
+        except Exception:
+            pass
+        # Fire post-approval execution: send supplier + customer drafts via
+        # email_sender. Each send attempt records its own action_receipt to
+        # AuditLedger (sent / skipped / failed). Never raises.
+        try:
+            _send_post_approval_emails(
+                task_id=payload["task_id"], approval_id=payload["approval_id"]
             )
         except Exception:
             pass

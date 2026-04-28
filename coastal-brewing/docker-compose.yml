@@ -40,6 +40,17 @@ services:
       TELEGRAM_BOT_TOKEN: "${TELEGRAM_BOT_TOKEN:-}"
       TELEGRAM_CHAT_ID: "${TELEGRAM_CHAT_ID:-}"
       COASTAL_APPROVE_SECRET: "${COASTAL_APPROVE_SECRET:-}"
+      # Resend transactional email (post-approval supplier + customer sends).
+      # If RESEND_API_KEY is empty, sends are skipped + recorded as 'skipped'
+      # in AuditLedger — no fake completion. Set RESEND_FROM to the verified
+      # brand domain once owner adds DNS records at Resend.
+      RESEND_API_KEY: "${RESEND_API_KEY:-}"
+      RESEND_FROM: "${RESEND_FROM:-Coastal Brewing <onboarding@resend.dev>}"
+      # Where supplier wholesale orders go. Defaults to the owner approval
+      # email so orders land where the owner can manually forward to Temecula
+      # Coffee Roasters until the wholesale agreement is digitally signed
+      # (Documenso, Wave 2 of Coastal).
+      COASTAL_SUPPLIER_EMAIL: "${COASTAL_SUPPLIER_EMAIL:-${OWNER_APPROVAL_EMAIL}}"
       TZ: "UTC"
     networks:
       - foai-internal
