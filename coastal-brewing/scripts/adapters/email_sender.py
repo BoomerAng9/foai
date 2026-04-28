@@ -1,8 +1,13 @@
-"""Email send adapter — Resend-first, env-gated.
+"""Email send adapter — SMTP via Google Workspace, env-gated.
 
-If RESEND_API_KEY is set, transactional email goes through Resend.
-If not set, the adapter returns a skip-receipt without sending — keeps
-the system functional for dev/no-creds without faking completion.
+Defaults to Google's SMTP relay (smtp.gmail.com:587 with STARTTLS) using
+an App Password generated from the owner's Workspace account. No new
+vendor. No new Python dependencies — Python's stdlib smtplib + ssl
+handle the entire transport.
+
+If SMTP_USER + SMTP_PASSWORD are not set, send returns skipped=True
+without contacting the SMTP server. The system stays functional for
+dev/no-creds without faking completion.
 
 Receipts are recorded to AuditLedger.action_receipts via the caller.
 This module only handles the send + result shape.
@@ -10,12 +15,12 @@ This module only handles the send + result shape.
 from __future__ import annotations
 
 import os
+import smtplib
+import ssl
 from dataclasses import dataclass
+from email.message import EmailMessage
+from email.utils import formataddr, make_msgid
 from typing import Optional
-
-import requests
-
-RESEND_API_BASE = "https://api.resend.com"
 
 
 @dataclass
@@ -28,19 +33,39 @@ class EmailSendResult:
     error: Optional[str] = None
 
 
-def _resend_api_key() -> str:
-    return os.environ.get("RESEND_API_KEY", "").strip()
+def _smtp_host() -> str:
+    return os.environ.get("SMTP_HOST", "smtp.gmail.com")
+
+
+def _smtp_port() -> int:
+    try:
+        return int(os.environ.get("SMTP_PORT", "587"))
+    except ValueError:
+        return 587
+
+
+def _smtp_user() -> str:
+    return os.environ.get("SMTP_USER", "").strip()
+
+
+def _smtp_password() -> str:
+    return os.environ.get("SMTP_PASSWORD", "")
 
 
 def _default_from() -> str:
-    """Sender address. Owner overrides via RESEND_FROM env.
-    Falls back to Resend's verified onboarding domain so transactional
-    email works before owner verifies a brand domain."""
-    return os.environ.get("RESEND_FROM", "Coastal Brewing <onboarding@resend.dev>")
+    """Sender address. Owner sets EMAIL_FROM (display + address). If not
+    set, falls back to the SMTP_USER raw address."""
+    explicit = os.environ.get("EMAIL_FROM", "").strip()
+    if explicit:
+        return explicit
+    user = _smtp_user()
+    if user:
+        return formataddr(("Coastal Brewing", user))
+    return ""
 
 
 def is_configured() -> bool:
-    return bool(_resend_api_key())
+    return bool(_smtp_user() and _smtp_password())
 
 
 def send(
@@ -51,16 +76,14 @@ def send(
     from_addr: Optional[str] = None,
     reply_to: Optional[str] = None,
 ) -> EmailSendResult:
-    """Send a transactional email. Returns a structured result; never raises.
-
-    body_markdown is rendered as both plain-text and a minimal HTML wrap.
-    """
-    if not _resend_api_key():
+    """Send a transactional email via SMTP. Never raises; returns a
+    structured result that the caller records into AuditLedger."""
+    if not is_configured():
         return EmailSendResult(
             sent=False,
             message_id=None,
-            provider="resend",
-            detail="RESEND_API_KEY not configured — email skipped",
+            provider="smtp",
+            detail="SMTP_USER + SMTP_PASSWORD not configured — email skipped",
             skipped=True,
         )
 
@@ -68,63 +91,79 @@ def send(
         return EmailSendResult(
             sent=False,
             message_id=None,
-            provider="resend",
+            provider="smtp",
             detail=f"invalid recipient: {to!r}",
             error="invalid_recipient",
         )
 
-    payload: dict = {
-        "from": from_addr or _default_from(),
-        "to": [to],
-        "subject": subject or "(no subject)",
-        "text": body_markdown,
-        "html": _markdown_to_html(body_markdown),
-    }
-    if reply_to:
-        payload["reply_to"] = [reply_to]
-
-    headers = {
-        "Authorization": f"Bearer {_resend_api_key()}",
-        "Content-Type": "application/json",
-    }
-
-    try:
-        r = requests.post(
-            f"{RESEND_API_BASE}/emails",
-            json=payload,
-            headers=headers,
-            timeout=20.0,
-        )
-        if r.status_code >= 400:
-            return EmailSendResult(
-                sent=False,
-                message_id=None,
-                provider="resend",
-                detail=f"HTTP {r.status_code}: {r.text[:240]}",
-                error=f"http_{r.status_code}",
-            )
-        data = r.json()
-        return EmailSendResult(
-            sent=True,
-            message_id=str(data.get("id") or ""),
-            provider="resend",
-            detail=f"to={to} subject={subject!r}",
-        )
-    except requests.RequestException as e:
+    sender = from_addr or _default_from()
+    if not sender:
         return EmailSendResult(
             sent=False,
             message_id=None,
-            provider="resend",
-            detail=f"network error: {e}",
-            error="network",
+            provider="smtp",
+            detail="no sender configured (set EMAIL_FROM or SMTP_USER)",
+            error="no_sender",
+        )
+
+    msg = EmailMessage()
+    msg["From"] = sender
+    msg["To"] = to
+    msg["Subject"] = subject or "(no subject)"
+    msg_id = make_msgid(domain=_smtp_user().split("@")[-1] if "@" in _smtp_user() else "coastal-brewing.local")
+    msg["Message-ID"] = msg_id
+    if reply_to:
+        msg["Reply-To"] = reply_to
+    msg.set_content(body_markdown)
+    msg.add_alternative(_markdown_to_html(body_markdown), subtype="html")
+
+    host = _smtp_host()
+    port = _smtp_port()
+    user = _smtp_user()
+    password = _smtp_password()
+
+    try:
+        if port == 465:
+            context = ssl.create_default_context()
+            with smtplib.SMTP_SSL(host, port, context=context, timeout=20) as s:
+                s.login(user, password)
+                s.send_message(msg)
+        else:
+            with smtplib.SMTP(host, port, timeout=20) as s:
+                s.ehlo()
+                s.starttls(context=ssl.create_default_context())
+                s.ehlo()
+                s.login(user, password)
+                s.send_message(msg)
+        return EmailSendResult(
+            sent=True,
+            message_id=msg_id,
+            provider="smtp",
+            detail=f"to={to} subject={subject!r} via {host}:{port}",
+        )
+    except smtplib.SMTPAuthenticationError as e:
+        return EmailSendResult(
+            sent=False,
+            message_id=None,
+            provider="smtp",
+            detail=f"SMTP auth failed: {e}",
+            error="smtp_auth",
+        )
+    except (smtplib.SMTPException, OSError) as e:
+        return EmailSendResult(
+            sent=False,
+            message_id=None,
+            provider="smtp",
+            detail=f"SMTP error: {e}",
+            error="smtp_error",
         )
 
 
 def _markdown_to_html(md: str) -> str:
     """Minimal markdown → HTML wrap for transactional email.
-    Not a full markdown engine — handles paragraphs, line breaks, headers,
-    and unordered lists. Sufficient for owner-drafted emails where the
-    source already reads cleanly."""
+    Handles paragraphs, line breaks, headers (h1–h3), and unordered lists.
+    Sufficient for owner-drafted emails where the source already reads
+    cleanly. Escapes &, <, >."""
     if not md:
         return "<p></p>"
     safe = (

@@ -40,12 +40,18 @@ services:
       TELEGRAM_BOT_TOKEN: "${TELEGRAM_BOT_TOKEN:-}"
       TELEGRAM_CHAT_ID: "${TELEGRAM_CHAT_ID:-}"
       COASTAL_APPROVE_SECRET: "${COASTAL_APPROVE_SECRET:-}"
-      # Resend transactional email (post-approval supplier + customer sends).
-      # If RESEND_API_KEY is empty, sends are skipped + recorded as 'skipped'
-      # in AuditLedger — no fake completion. Set RESEND_FROM to the verified
-      # brand domain once owner adds DNS records at Resend.
-      RESEND_API_KEY: "${RESEND_API_KEY:-}"
-      RESEND_FROM: "${RESEND_FROM:-Coastal Brewing <onboarding@resend.dev>}"
+      # Transactional email via Google Workspace SMTP (post-approval supplier
+      # + customer sends). If SMTP_USER + SMTP_PASSWORD are empty, sends are
+      # recorded as 'skipped' in AuditLedger — no fake completion. Owner
+      # generates an App Password at https://myaccount.google.com/apppasswords
+      # (requires 2FA on the Workspace account) and pastes it as
+      # SMTP_PASSWORD. EMAIL_FROM is the visible sender; supports
+      # "Display Name <addr@domain>" format.
+      SMTP_HOST: "${SMTP_HOST:-smtp.gmail.com}"
+      SMTP_PORT: "${SMTP_PORT:-587}"
+      SMTP_USER: "${SMTP_USER:-}"
+      SMTP_PASSWORD: "${SMTP_PASSWORD:-}"
+      EMAIL_FROM: "${EMAIL_FROM:-}"
       # Where supplier wholesale orders go. Defaults to the owner approval
       # email so orders land where the owner can manually forward to Temecula
       # Coffee Roasters until the wholesale agreement is digitally signed
