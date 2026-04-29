@@ -4,6 +4,7 @@ import { randomUUID } from "node:crypto";
 // Server-only. The X-Coastal-Token never reaches the browser.
 const RUNNER_BASE = process.env.COASTAL_RUNNER_INTERNAL || "http://coastal-runner:8080";
 const TOKEN = process.env.COASTAL_GATEWAY_TOKEN || "";
+const PUBLIC_BASE = process.env.NEXT_PUBLIC_COASTAL_PUBLIC_URL || "https://brewing.foai.cloud";
 
 interface IntakeBody {
   sku: string;
@@ -54,6 +55,28 @@ function validate(body: Partial<IntakeBody>): { ok: true; body: IntakeBody } | {
   return { ok: true, body: { ...body, quantity: qty } as IntakeBody };
 }
 
+async function isStripeConfigured(): Promise<boolean> {
+  try {
+    const res = await fetch(`${RUNNER_BASE}/healthz`, { cache: "no-store" });
+    if (!res.ok) return false;
+    const data = (await res.json()) as { stripe_configured?: boolean };
+    return Boolean(data?.stripe_configured);
+  } catch {
+    return false;
+  }
+}
+
+async function fetchProductPrice(sku: string): Promise<number | null> {
+  try {
+    const res = await fetch(`${RUNNER_BASE}/api/catalog/${encodeURIComponent(sku)}`, { cache: "no-store" });
+    if (!res.ok) return null;
+    const data = (await res.json()) as { msrp?: number };
+    return typeof data?.msrp === "number" ? data.msrp : null;
+  } catch {
+    return null;
+  }
+}
+
 export async function POST(req: NextRequest) {
   if (!TOKEN) {
     return NextResponse.json(
@@ -72,8 +95,89 @@ export async function POST(req: NextRequest) {
   const v = validate(body);
   if (!v.ok) return NextResponse.json({ error: v.error }, { status: 400 });
   const f = v.body;
-
   const taskId = `order_${randomUUID()}`;
+
+  // If Stripe is configured, route through the Stepper checkout flow:
+  // intake details → Stripe Checkout (payment) → checkout.session.completed
+  // webhook auto-fires /run on the runner. The customer doesn't bounce back
+  // to coastal-web after Stripe — Stripe redirects to /checkout/success on
+  // the runner.
+  if (await isStripeConfigured()) {
+    // Server-side authoritative price — never trust client. msrp from runner.
+    const msrp = await fetchProductPrice(f.sku);
+    if (msrp === null || msrp <= 0) {
+      return NextResponse.json({ error: "Product price unavailable. Try again." }, { status: 502 });
+    }
+    const amountCents = Math.round(msrp * 100);
+    const productName = f.product_name || f.sku;
+
+    // Stripe metadata is flat key→string. Prefix intake fields with `intake_`
+    // so the webhook can rehydrate them into a TaskPacket.
+    const checkoutMetadata = {
+      task_id: taskId,
+      sku: f.sku,
+      customer_email: f.customer_email,
+      intake_task_id: taskId,
+      intake_product_name: productName,
+      intake_customer_name: f.customer_name,
+      intake_customer_email: f.customer_email,
+      intake_quantity: String(f.quantity),
+      intake_shipping_address: f.shipping_address,
+      intake_shipping_city: f.shipping_city,
+      intake_shipping_state: f.shipping_state,
+      intake_shipping_postal_code: f.shipping_postal_code,
+      intake_delivery_window_preference: f.delivery_window_preference || "",
+      intake_gift_message: (f.gift_message || "").slice(0, 480),
+    };
+
+    const checkoutPayload = {
+      sku: f.sku,
+      product_name: productName,
+      amount_cents: amountCents,
+      quantity: f.quantity,
+      customer_email: f.customer_email,
+      success_url: `${PUBLIC_BASE}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${PUBLIC_BASE}/products/${encodeURIComponent(f.sku)}?canceled=1`,
+      metadata: checkoutMetadata,
+    };
+
+    let runnerRes: Response;
+    try {
+      runnerRes = await fetch(`${RUNNER_BASE}/checkout`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "X-Coastal-Token": TOKEN },
+        body: JSON.stringify(checkoutPayload),
+        cache: "no-store",
+      });
+    } catch {
+      return NextResponse.json({ error: "Coastal runner unreachable. Try again in a moment." }, { status: 502 });
+    }
+    const runnerJson = (await runnerRes.json().catch(() => ({}))) as {
+      checkout_url?: string;
+      session_id?: string;
+      detail?: unknown;
+    };
+    if (!runnerRes.ok || !runnerJson.checkout_url) {
+      return NextResponse.json(
+        { error: "Could not start checkout", runner_status: runnerRes.status, detail: runnerJson?.detail ?? null },
+        { status: 502 },
+      );
+    }
+    return NextResponse.json(
+      {
+        ok: true,
+        path: "stripe_checkout",
+        task_id: taskId,
+        checkout_url: runnerJson.checkout_url,
+        session_id: runnerJson.session_id,
+      },
+      { status: 200 },
+    );
+  }
+
+  // Fallback path: Stripe not configured → fire /run directly (no payment).
+  // Owner handles payment out-of-band per the project brief
+  // (invoice-after-approval until Hostinger Ecommerce or Stripe activate).
   const packet = {
     task_id: taskId,
     owner_goal: "Process new customer order",
@@ -82,16 +186,12 @@ export async function POST(req: NextRequest) {
     task_type: "draft_order_confirmation",
     risk_tags: ["money"],
     approval_required: true,
-    desired_output:
-      "draft confirmation email + supplier order draft + AuditLedger receipt",
+    desired_output: "draft confirmation email + supplier order draft + AuditLedger receipt",
     payload: {
       sku: f.sku,
       product_name: f.product_name,
       quantity: f.quantity,
-      customer: {
-        email: f.customer_email,
-        name: f.customer_name,
-      },
+      customer: { email: f.customer_email, name: f.customer_name },
       shipping: {
         address: f.shipping_address,
         city: f.shipping_city,
@@ -109,29 +209,19 @@ export async function POST(req: NextRequest) {
   try {
     runnerRes = await fetch(`${RUNNER_BASE}/run`, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "X-Coastal-Token": TOKEN,
-      },
+      headers: { "Content-Type": "application/json", "X-Coastal-Token": TOKEN },
       body: JSON.stringify(packet),
       cache: "no-store",
     });
-  } catch (err) {
-    return NextResponse.json(
-      { error: "Coastal runner unreachable. Try again in a moment." },
-      { status: 502 },
-    );
+  } catch {
+    return NextResponse.json({ error: "Coastal runner unreachable. Try again in a moment." }, { status: 502 });
   }
-
   const runnerJson = (await runnerRes.json().catch(() => ({}))) as {
     receipt?: { task_id?: string };
-    receipt_path?: string;
-    placeholder_path?: string;
     telegram_notified?: boolean;
     next_action?: string;
     detail?: unknown;
   };
-
   if (!runnerRes.ok) {
     return NextResponse.json(
       {
@@ -142,10 +232,10 @@ export async function POST(req: NextRequest) {
       { status: runnerRes.status === 403 ? 403 : 502 },
     );
   }
-
   return NextResponse.json(
     {
       ok: true,
+      path: "direct_run",
       task_id: runnerJson?.receipt?.task_id || taskId,
       telegram_notified: !!runnerJson?.telegram_notified,
       next_action: runnerJson?.next_action || "owner_sign_off_required",

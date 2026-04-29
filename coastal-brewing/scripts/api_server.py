@@ -35,6 +35,7 @@ import catalog  # noqa: E402
 try:
     from adapters.stripe_adapter import (  # noqa: E402
         create_checkout_session as _stripe_create_checkout_session,
+        create_one_time_checkout_session as _stripe_create_one_time_checkout_session,
         is_configured as _stripe_is_configured,
         verify_webhook as _stripe_verify_webhook,
     )
@@ -902,7 +903,18 @@ def approve(decision: ApprovalDecision, x_coastal_token: Optional[str] = Header(
 
 
 class CheckoutRequest(BaseModel):
-    tier: str
+    """Either `tier` (subscription) or `sku`+amount_cents (one-time).
+    Order intake metadata (customer + shipping + product details) flows
+    through `metadata` so /stripe/webhook can build a TaskPacket on
+    checkout.session.completed and auto-fire /run."""
+    # Subscription path
+    tier: Optional[str] = None
+    # One-time path
+    sku: Optional[str] = None
+    product_name: Optional[str] = None
+    amount_cents: Optional[int] = None
+    quantity: int = 1
+    # Common
     customer_email: str
     success_url: Optional[str] = None
     cancel_url: Optional[str] = None
@@ -915,12 +927,29 @@ def checkout(req: CheckoutRequest, x_coastal_token: Optional[str] = Header(defau
     if not STRIPE_AVAILABLE:
         raise HTTPException(status_code=503, detail="Stripe SDK not installed")
     if not _stripe_is_configured():
-        raise HTTPException(status_code=503, detail="Stripe is not configured (set STRIPE_SECRET_KEY + price IDs)")
+        raise HTTPException(status_code=503, detail="Stripe is not configured (set STRIPE_SECRET_KEY)")
     success_url = req.success_url or f"{COASTAL_PUBLIC_URL}/checkout/success?session_id={{CHECKOUT_SESSION_ID}}"
     cancel_url = req.cancel_url or f"{COASTAL_PUBLIC_URL}/checkout/cancel"
     try:
-        return _stripe_create_checkout_session(
-            tier=req.tier,
+        # Subscription if tier provided; otherwise one-time on the catalog SKU.
+        if req.tier:
+            return _stripe_create_checkout_session(
+                tier=req.tier,
+                customer_email=req.customer_email,
+                success_url=success_url,
+                cancel_url=cancel_url,
+                metadata=req.metadata,
+            )
+        if not req.sku or not req.amount_cents:
+            raise HTTPException(
+                status_code=400,
+                detail="checkout requires either `tier` (subscription) or `sku`+`amount_cents` (one-time)",
+            )
+        return _stripe_create_one_time_checkout_session(
+            sku=req.sku,
+            product_name=req.product_name or req.sku,
+            amount_cents=int(req.amount_cents),
+            quantity=int(req.quantity or 1),
             customer_email=req.customer_email,
             success_url=success_url,
             cancel_url=cancel_url,
@@ -930,6 +959,57 @@ def checkout(req: CheckoutRequest, x_coastal_token: Optional[str] = Header(defau
         raise HTTPException(status_code=400, detail=str(e))
     except RuntimeError as e:
         raise HTTPException(status_code=503, detail=str(e))
+
+
+def _build_task_packet_from_session(session_metadata: Dict[str, Any]) -> Optional["TaskPacket"]:
+    """Reconstruct a TaskPacket from Stripe session metadata. The Stepper
+    intake flattens nested customer/shipping into prefixed keys when
+    stashing; rehydrate them here. Returns None if the session wasn't from
+    the Coastal Stepper flow (e.g. legacy subscription with only tier)."""
+    if session_metadata.get("product") != "coastal-brewing":
+        return None
+    sku = session_metadata.get("sku")
+    if not sku:
+        return None
+    customer_email = (
+        session_metadata.get("customer_email")
+        or session_metadata.get("intake_customer_email")
+        or ""
+    )
+    customer_name = session_metadata.get("intake_customer_name", "")
+    payload = {
+        "sku": sku,
+        "product_name": session_metadata.get("intake_product_name", sku),
+        "quantity": int(session_metadata.get("intake_quantity", "1")),
+        "customer": {"email": customer_email, "name": customer_name},
+        "shipping": {
+            "address": session_metadata.get("intake_shipping_address", ""),
+            "city": session_metadata.get("intake_shipping_city", ""),
+            "state": session_metadata.get("intake_shipping_state", ""),
+            "postal_code": session_metadata.get("intake_shipping_postal_code", ""),
+        },
+        "delivery_window_preference": session_metadata.get("intake_delivery_window_preference") or None,
+        "gift_message": session_metadata.get("intake_gift_message") or None,
+        "consent_to_receive_email": True,  # Stripe Checkout completion is consent
+        "stripe_session_id": session_metadata.get("checkout_session_id"),
+        "submitted_at": utc_now(),
+    }
+    task_id = (
+        session_metadata.get("task_id")
+        or session_metadata.get("intake_task_id")
+        or f"order_{session_metadata.get('checkout_session_id', '')}"
+    )
+    return TaskPacket(
+        task_id=task_id,
+        owner_goal="Process new customer order (Stripe-paid)",
+        objective=f"Stripe-paid order: {sku} x{payload['quantity']} for {customer_email}",
+        department="boomer_ops",
+        task_type="draft_order_confirmation",
+        risk_tags=["money"],
+        approval_required=True,
+        desired_output="draft confirmation email + supplier order draft + AuditLedger receipt",
+        payload=payload,
+    )
 
 
 @app.post("/stripe/webhook")
@@ -947,7 +1027,35 @@ async def stripe_webhook(request: Request) -> dict:
 
     out_path = STRIPE_EVENTS_DIR / f"{event['id']}.json"
     out_path.write_text(json.dumps(event, indent=2, default=str), encoding="utf-8")
-    return {"received": True, "event_id": event["id"], "type": event["type"], "path": str(out_path)}
+
+    # On successful Checkout, auto-fire /run with the order packet so the
+    # round trip closes without a second API call from the storefront:
+    # Stripe paid → /run → NemoClaw → Telegram approval → SMTP send.
+    run_report: Optional[Dict[str, Any]] = None
+    if event.get("type") == "checkout.session.completed":
+        try:
+            session = event["data"]["object"]
+            session_meta = dict(session.get("metadata") or {})
+            session_meta["checkout_session_id"] = session.get("id")
+            packet = _build_task_packet_from_session(session_meta)
+            if packet is not None:
+                # Inject the gateway token so the internal call to /run passes _auth.
+                run_resp = run(packet=packet, x_coastal_token=GATEWAY_TOKEN)
+                run_report = {
+                    "task_id": packet.task_id,
+                    "next_action": run_resp.get("next_action"),
+                    "telegram_notified": run_resp.get("telegram_notified", False),
+                }
+        except Exception as e:
+            run_report = {"error": str(e)}
+
+    return {
+        "received": True,
+        "event_id": event["id"],
+        "type": event["type"],
+        "path": str(out_path),
+        "run_report": run_report,
+    }
 
 
 def _gmail_compose_url(to: str, subject: str, body: str) -> str:
