@@ -24,14 +24,28 @@
  *   - ./registry       — character → voice resolution
  *   - ./sponsorship    — cross-vertical brand directory + plug engine
  *
- * TBD submodules (declared in package.json, files coming):
+ * Pipeline submodules (orchestrator interfaces; per-provider adapters
+ * register at runtime — see PIPELINE.md for the full design):
  *   - ./ingest         — Brave discovery, Sqwaadrun scrape, user upload
- *   - ./clone          — Async, Vertex AI Chirp 3 HD Custom Voice
+ *   - ./clone          — Gemini Live (preferred), Async (volume), Chirp 3 HD (premium)
  *   - ./alter          — pitch / formant / tempo / blend (creative, not a gate)
  *   - ./storage        — SmelterOS (Puter metadata + GCS bytes)
  */
 
 export * from './types.js';
+
+// Pipeline orchestrators (Stage 1-4 — per-provider adapters register at runtime)
+export type { IngestRequest, IngestAdapter } from './ingest/index.js';
+export { registerIngestAdapter, getIngestAdapter, ingest } from './ingest/index.js';
+
+export type { CloneAdapter } from './clone/index.js';
+export { registerCloneAdapter, getCloneAdapter, cloneVoice } from './clone/index.js';
+
+export type { AlterRequest, AlterAdapter } from './alter/index.js';
+export { registerAlterAdapter, getAlterAdapter, alterVoice } from './alter/index.js';
+
+export type { StorageAdapter } from './storage/index.js';
+export { setStorageAdapter, getStorageAdapter } from './storage/index.js';
 
 // Attestation (compliance gate)
 export {
