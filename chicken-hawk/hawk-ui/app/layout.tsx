@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { Permanent_Marker } from 'next/font/google';
+import { MenuNav } from '@/components/menu-nav';
 import './globals.css';
 
 // Permanent Marker — used ONLY on brand-words (DEPLOY, AUTOMATION, A.I.M.S.).
@@ -23,6 +24,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" className={`dark ${permanentMarker.variable}`} data-theme="chicken-hawk">
       <body className="bg-foai-bg text-foai-text font-sans antialiased min-h-screen">
+        <MenuNav />
         {children}
       </body>
     </html>
