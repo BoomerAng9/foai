@@ -60,3 +60,84 @@ html, body {
 ::-webkit-scrollbar-track { background: #F1F5F9; }
 ::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 4px; }
 ::-webkit-scrollbar-thumb:hover { background: #94A3B8; }
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Chicken Hawk theme tokens — Phase 1 foundation. Scoped under
+   [data-theme="chicken-hawk"] so AIMS-Light remains the default for any
+   surface that hasn't opted in. Token names + values come straight from
+   CHICKEN_HAWK_DESIGN.md §2 + §3 — change there first, mirror here.
+   ───────────────────────────────────────────────────────────────────────── */
+
+[data-theme="chicken-hawk"] {
+  color-scheme: dark;
+
+  /* Surfaces */
+  --ch-bg:           #0A0A0A;
+  --ch-surface:      #141414;
+  --ch-surface-2:    #1F1F1F;
+  --ch-surface-glass: rgba(255,255,255,0.04);
+  --ch-border:       rgba(255,255,255,0.08);
+  --ch-border-hi:    rgba(255,255,255,0.18);
+
+  /* Text */
+  --ch-text:         #FFFFFF;
+  --ch-text-soft:    #D1D5DB;
+  --ch-text-muted:   #94A3B8;
+  --ch-text-dim:     #64748B;
+
+  /* Accents — neon (each carries semantic weight per §2 color semantics) */
+  --ch-deploy-green: #5DFF40;
+  --ch-deploy-orange:#FF6500;
+  --ch-acheevy-yellow:#FACC15;
+  --ch-cyan:         #22D3EE;
+  --ch-gold:         #D4AF37;
+  --ch-magenta:      #EC4899;
+  --ch-red:          #EF4444;
+
+  /* Tints */
+  --ch-deploy-green-tint: rgba(93,255,64,0.10);
+  --ch-deploy-orange-tint: rgba(255,101,0,0.10);
+  --ch-cyan-tint: rgba(34,211,238,0.10);
+  --ch-gold-tint: rgba(212,175,55,0.12);
+
+  /* Glow / shadow */
+  --ch-glow-green:   0 0 24px rgba(93,255,64,0.45), 0 0 4px rgba(93,255,64,0.7);
+  --ch-glow-orange:  0 0 24px rgba(255,101,0,0.45), 0 0 4px rgba(255,101,0,0.7);
+  --ch-glow-cyan:    0 0 24px rgba(34,211,238,0.45), 0 0 4px rgba(34,211,238,0.7);
+  --ch-shelf-light:  0 -1px 0 rgba(255,255,255,0.30) inset, 0 1px 0 rgba(255,255,255,0.10) inset;
+
+  /* Typography stack — `--ch-font-marker` arrives from next/font (see app/layout.tsx) */
+  --ch-font-sans:   'Inter', ui-sans-serif, system-ui, sans-serif;
+  --ch-font-mono:   ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+}
+
+/* Brand-word treatment — Permanent Marker, only on the literal words
+   DEPLOY / AUTOMATION / A.I.M.S. Body copy stays Inter (Geist Sans lands
+   in Wave 2 Step 3). Per §3 "When to use Permanent Marker" rule. */
+.ch-brand-word {
+  font-family: var(--ch-font-marker), 'Caveat', cursive;
+  font-weight: 400;
+  letter-spacing: 0.01em;
+  text-transform: none;
+  display: inline-block;
+  transform: rotate(-1.5deg);
+}
+.ch-brand-word--deploy {
+  color: var(--ch-deploy-green);
+  text-shadow: var(--ch-glow-green);
+}
+.ch-brand-word--automation {
+  color: var(--ch-deploy-orange);
+  text-shadow: var(--ch-glow-orange);
+}
+.ch-brand-word--aims {
+  color: var(--ch-acheevy-yellow);
+}
+.ch-brand-word--cyan {
+  color: var(--ch-cyan);
+  text-shadow: var(--ch-glow-cyan);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ch-brand-word { transform: none; }
+}
