@@ -17,6 +17,7 @@ import os
 import pathlib
 import secrets
 import sys
+import urllib.parse
 from typing import Any, Dict, List, Optional
 
 from fastapi import FastAPI, Header, HTTPException, Query, Request
@@ -949,6 +950,57 @@ async def stripe_webhook(request: Request) -> dict:
     return {"received": True, "event_id": event["id"], "type": event["type"], "path": str(out_path)}
 
 
+def _gmail_compose_url(to: str, subject: str, body: str) -> str:
+    """Build a Gmail web-compose URL with prefilled fields.
+    Owner taps it from the approval page and Gmail opens compose with
+    everything filled in — owner just hits Send. Bypasses SMTP entirely."""
+    qs = urllib.parse.urlencode(
+        {"view": "cm", "fs": "1", "to": to, "su": subject, "body": body},
+        quote_via=urllib.parse.quote,
+    )
+    return f"https://mail.google.com/mail/?{qs}"
+
+
+def _render_send_buttons(task_id: str) -> str:
+    """When an order is approved, look for the supplier + customer drafts on
+    disk and emit big 'Open Gmail to send' buttons that prefill compose for
+    each. Returns empty string if no drafts exist (non-order tasks)."""
+    drafts = [
+        ("Supplier", DRAFTS_DIR / f"{task_id}_supplier_email.md"),
+        ("Customer", DRAFTS_DIR / f"{task_id}_customer_confirmation.md"),
+    ]
+    rows: list[str] = []
+    for label, path in drafts:
+        if not path.exists():
+            continue
+        try:
+            d = _read_draft_file(path)
+        except Exception:
+            continue
+        to_addr = d.get("to") or ""
+        if "not configured" in to_addr or not to_addr:
+            to_addr = os.environ.get("COASTAL_SUPPLIER_EMAIL", "") if label == "Supplier" else ""
+        if not to_addr:
+            continue
+        url = _gmail_compose_url(to=to_addr, subject=d.get("subject", ""), body=d.get("body", ""))
+        rows.append(
+            f'<a class="send-btn" href="{url}" target="_blank" rel="noopener noreferrer">'
+            f'<span class="send-btn-label">→ Open Gmail to send {label.lower()} draft</span>'
+            f'<span class="send-btn-to">{to_addr}</span></a>'
+        )
+    if not rows:
+        return ""
+    return (
+        '<div class="send-block">'
+        '<div class="eyebrow" style="margin-top:32px">[ next: send ]</div>'
+        '<p style="font-size:14px;margin-bottom:16px">'
+        'Two drafts are queued. Click each to open Gmail with the message prefilled — review, then hit Send.'
+        '</p>'
+        + "".join(rows)
+        + '</div>'
+    )
+
+
 _APPROVE_RESULT_HTML = """<!DOCTYPE html>
 <html lang="en"><head><meta charset="UTF-8"><title>{title} &mdash; coastal brewing</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -975,6 +1027,14 @@ color:var(--ink);word-break:break-all}}
 color:var(--muted);font-family:'JetBrains Mono',ui-monospace,monospace;letter-spacing:0.05em}}
 .tag-line{{font-style:italic;color:var(--ink-soft);font-family:'Space Grotesk',sans-serif;
 font-size:13px;letter-spacing:0;margin-top:8px;display:block}}
+.send-btn{{display:flex;flex-direction:column;gap:4px;padding:16px 20px;margin-top:12px;
+background:var(--surface);border:1px solid var(--rule);border-left:3px solid var(--accent);
+text-decoration:none;color:var(--ink);transition:border-color .15s,transform .15s}}
+.send-btn:hover{{border-color:var(--accent);transform:translateX(2px)}}
+.send-btn-label{{font-weight:700;font-size:15px}}
+.send-btn-to{{font-family:'JetBrains Mono',ui-monospace,monospace;font-size:11px;
+color:var(--muted);letter-spacing:0.02em}}
+.send-block{{margin-top:8px}}
 </style></head>
 <body><div class="wrap">
 <a class="brand" href="https://brewing.foai.cloud/">coastal brewing<span class="dot">.</span></a>
@@ -982,6 +1042,7 @@ font-size:13px;letter-spacing:0;margin-top:8px;display:block}}
 <h1>{title}.</h1>
 <p>{message}</p>
 <div class="task">{task_id}</div>
+{actions_html}
 <div class="foot">
   {footer}
   <span class="tag-line">Nothing chemically, ever.</span>
@@ -1785,6 +1846,7 @@ def audit_view(task_id: str, token: str = Query(...)) -> HTMLResponse:
                 message="This trail link is no longer valid. Generate a new one or use a fresh approval-required packet.",
                 task_id=task_id,
                 footer="No audit shown.",
+                actions_html="",
             ),
         )
     trail = audit_ledger.query_audit_trail(task_id)
@@ -1803,6 +1865,7 @@ def approve_click(token: str = Query(...)) -> HTMLResponse:
                 message="This approval link is no longer valid. Request a new packet to retry.",
                 task_id="—",
                 footer="No decision recorded.",
+                actions_html="",
             ),
         )
     decision_label = payload["decision"]
@@ -1861,6 +1924,9 @@ def approve_click(token: str = Query(...)) -> HTMLResponse:
             )
         except Exception:
             pass
+    actions_html = (
+        _render_send_buttons(payload["task_id"]) if decision_label == "approved" else ""
+    )
     return HTMLResponse(
         content=_APPROVE_RESULT_HTML.format(
             accent=accent,
@@ -1868,6 +1934,7 @@ def approve_click(token: str = Query(...)) -> HTMLResponse:
             message=msg,
             task_id=payload["task_id"],
             footer=f"approval_id: {payload['approval_id']} · {record['decided_at']}",
+            actions_html=actions_html,
         )
     )
 
@@ -1881,6 +1948,7 @@ def checkout_success(session_id: str = Query(...)) -> HTMLResponse:
             message="Thanks for subscribing to Coastal Brewing. Watch your inbox for confirmation. The owner approves the first dispatch before any shipment leaves.",
             task_id=session_id,
             footer=f"session_id &middot; {session_id[:24]}...",
+            actions_html="",
         )
     )
 
@@ -1894,5 +1962,6 @@ def checkout_cancel() -> HTMLResponse:
             message="Checkout canceled. Come back when you're ready. We'll be here.",
             task_id="—",
             footer="no payment captured",
+            actions_html="",
         )
     )
