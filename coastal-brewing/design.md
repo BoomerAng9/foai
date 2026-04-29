@@ -313,4 +313,145 @@ Every design decision on this surface should trace back to one of the two refere
 
 ---
 
+## 11. Brand canon — Sales-team cast + setting + wardrobe (owner brief 2026-04-29)
+
+Extends §1-§10. The earlier sections give the **dark/light theme system**; this section gives the **storefront-environment + cast visual canon** so every image generated for Coastal lands consistent.
+
+### 11.0 Reference images (load-bearing — image gen always traces back here)
+
+| Asset | Path | What it sets |
+|---|---|---|
+| Logo | `~/iCloudPhotos/Photos/Official coastal brewing co. logo.png` | Hand-drawn line-art stork in flight, stacked COASTAL/BREWING/CO. typography, dark sepia ink on parchment |
+| Sal_Ang reference (canonical theme) | `~/iCloudPhotos/Photos/Coffee Shop Sal_Ang.png` | Setting + wardrobe + counter dressing for ALL cast images |
+| Black-male hair reference | `~/iCloudPhotos/Photos/IMG_1343.PNG` | Low Caesar with half-moon part — applies to every Black male cast member EXCEPT Sal_Ang (who keeps his canonical braids) |
+
+### 11.1 Setting palette
+
+The Sal_Ang reference establishes the setting register every Coastal image inherits:
+
+- **Light**: warm golden-hour, never harsh
+- **Surfaces**: cream / parchment / sepia ink / warm wood / copper accents
+- **Botanical**: palm fronds outside; jasmine flowers in vases throughout the interior; cut jasmine branches beside the Jasmine Tea tins; large glass jars across the rafters filled with dried citrus fruits + cinnamon sticks
+- **Materials**: burlap (coffee bags), twine (wrapped around tea jars), glass (5-gallon specialty-tea jars + rafter citrus jars), ceramic (cups), copper (long-spouted Ethiopian-style coffee pot)
+- **Branded counter dressing** (always present in any counter scene):
+  - Cream coffee bag with stork glyph + "COASTAL BREWING / [variety]" copy
+  - Three small white cylindrical tins labeled MATCHA / TEA / COFFEE
+  - Two-three small ceramic coffee cups on a wooden tray
+  - Wooden sign: "COFFEE TEA MATCHA · PURPOSE"
+  - Banner / wall: "COASTAL BREWING CO — Nothing chemically, ever."
+  - Long-spouted copper Ethiopian-style coffee pot (the Sal canonical)
+
+### 11.2 Storefront locations (4 cities — atmosphere imagery, not real retail)
+
+Each location keeps the §11.1 setting palette but gets locale-specific exterior cues:
+
+| Location | Cues |
+|---|---|
+| **Bluffton Downtown** | Historic coastal village, low-rise cypress/cedar buildings, Spanish moss on live oaks, narrow brick walks, marsh peeking past the alley, bicycles + adirondack chairs |
+| **Downtown Savannah** | Bull Street / Broughton Street, brick + ironwork balconies, garden squares with Spanish moss, gas-lamp fixtures, cobblestone gutter strips |
+| **Downtown Charleston** | King Street / Market District, pastel rowhouses, palmetto trees, cobblestone streets, wrought-iron gates |
+| **Beachfront Hilton Head** | Open coastal light, tropical palms, sandy sidewalks, ocean breeze (loose linen, fewer layers), more relaxed/outdoor seating |
+
+Mood across all four: **cozy but bustling shopping boutique center**. Foot traffic visible but never crowded; the storefront is the warm anchor in a walkable scene.
+
+### 11.3 Warehouse imagery
+
+Same palette as §11.1, applied to the back-of-house:
+
+- **Coffee bags**: realistic burlap (not exaggerated in size — hip-height stacks, not cartoonish) with COASTAL BREWING + stork stencil
+- **Tea drums**: stainless steel with cream paper labels, banded in twine
+- **5-gallon glass jars**: filled with whole-leaf specialty teas, rolled and wrapped in twine across the body, hand-tied bows; arranged on wooden shelving with chalkboard labels
+- **Rafter glass jars**: above eye-line, filled with dried citrus slices (orange, lemon, grapefruit) and whole cinnamon sticks; backlit by the warm overhead lighting
+- **Jasmine**: cut branches in tall glass vases on the floor beside the entrance; small bouquets at the work counters; specifically beside the Jasmine Tea tins on retail shelves
+- **Lighting**: warm Edison bulbs / soft pendant fixtures; never sterile / never industrial-cold
+
+### 11.4 Wardrobe canon (load-bearing — all cast images must comply)
+
+#### Men (uniform = Sal_Ang's outfit, per the canonical reference)
+
+- **Jacket**: cream / off-white linen long-sleeve work jacket, lightweight, soft drape; chest pocket carries the embroidered Coastal Brewing stork-and-wordmark patch; small embroidered name patch (e.g., `SAL`, `MARCUS`, `HOLT`) on the collar/lapel
+- **Mask**: black cloth dust-mask with the cast member's name in **orange block letters with white outline** centered across the front (matches the §8.1 Boomer_Ang ANG-patch convention; mask version of the visor)
+- **Shirt under jacket**: dark crew-neck (charcoal/black)
+- **Pants**: dark canvas / chinos
+- **Apron** (when at the bar): cream linen or natural denim, single chest-pocket, clipped pen visible
+
+#### Women (Southern Belle dresses + sun dresses)
+
+- **Bar shift / formal-front**: Southern Belle dress — fitted bodice, modest neckline, knee-or-tea-length skirt, cap or short sleeves; cream/parchment base with subtle floral accents (jasmine motif allowed)
+- **Open-air shift / Hilton Head / casual front**: sun dress — knee-length, light cotton, soft pastel or cream, simple silhouette
+- **Apron** (when at the bar): same cream linen as men, ribbon-tied at waist
+- **Coastal patch**: small embroidered stork-and-wordmark patch sewn onto apron chest pocket OR dress collar (subtle, not centered)
+
+#### Hair (mandatory rules)
+
+- **All women**, regardless of race or hair type: **French braids, shoulder length** (no longer, no shorter; no buns, no loose hair, no ponytails)
+- **Men, by race**:
+  - **Sal_Ang**: medium-thick locs / braids pulled back — *canonical exception, do not change*
+  - **Other Black men** (Marcus_Ang and any future Black male cast member): **low Caesar with half-moon part shaved into the side** (per `~/iCloudPhotos/Photos/IMG_1343.PNG` reference — short, even, low-fade, clean tapered hairline, the "C"-shaped half-moon curve carved at the left temple)
+  - **White men**: short side-part / medium-length neatly combed / clean fade-to-side
+  - **Asian men**: short textured cut, slight side sweep
+  - **Latino men**: short tapered cut, neat finish
+  - **Mixed-race men**: dealer's choice within the "groomed, professional, low-maintenance" register; never a man-bun, never long loose hair
+- Beards across all men: clean-shaven OR closely-trimmed beard; no goatees, no full bushy beards
+
+### 11.5 Cast visual specs (12 Sales-team Boomer_Angs + Luc_Ang)
+
+Each cast member's full persona lives at `~/foai/aims-tools/voice-library/personas/<cast_id>.md`. The visual specs below are the **scene-and-portrait deltas per character** that combine with §11.1-§11.4 to render image-gen prompts.
+
+| cast_id | gender / race | hair (per §11.4) | scene cue | apparel deltas |
+|---|---|---|---|---|
+| `sal_ang` | M / Black | locs/braids (canonical) | marsh-edge pop-up at golden hour, Ethiopian copper pot | name-mask `SAL`, jacket as canon |
+| `lou_ang` | F / mixed | French braids, shoulder length | front-of-house counter, regulars walking in | sun dress (cream), apron, name-tag `LOU` |
+| `tate_ang` | M / Black | low Caesar + half-moon part | pour-over station, percussive rhythm | name-mask `TATE`, jacket as canon |
+| `wren_ang` | F / Black | French braids, shoulder length | consultative cup-finder station | Southern Belle dress (cream), name-tag `WREN` |
+| `holt_ang` | M / White | short side-part | tasting bar, gentleman pacing, comfortable silence | name-mask `HOLT`, jacket as canon |
+| `eliza_ang` | F / White | French braids, shoulder length | afternoon tea hour, Charleston debutante warmth | Southern Belle dress (parchment + jasmine accent), name-tag `ELIZA` |
+| `marcus_ang` | M / Black | **low Caesar + half-moon part (per IMG_1343.PNG)** | Savannah historic-district shop, deep regulars | name-mask `MARCUS`, jacket as canon |
+| `naya_ang` | F / Black | French braids, shoulder length | morning shift, regulars-by-name | sun dress (cream), apron, name-tag `NAYA` |
+| `pip_ang` | M / White | short side-part, slightly polished | trans-Atlantic gentleman, harbor-view tasting | name-mask `PIP`, jacket as canon |
+| `vi_ang` | F / White | French braids, shoulder length | finishing-school polish, harbor crowd | Southern Belle dress (parchment), name-tag `VI` |
+| `trey_ang` | M / White | short side-part / clean fade-to-side | quick student-shift, Coastal Carolina U energy | name-mask `TREY`, jacket as canon |
+| `mads_ang` | F / White | French braids, shoulder length | summer-break shift, UGA energy | sun dress (cream, light cotton), name-tag `MADS` |
+| `luc_ang` | M / White | short side-part, slightly older register | back-office bundle math, Charleston/Mount-Pleasant origin | jacket as canon BUT no mask (back-office); HP-12C calculator visible on desk; name patch `LUC` |
+
+### 11.6 Page-by-page scene placements
+
+When the storefront site rebuilds (Wave 4 of the 2026-04-29 brief), each page gets specific cast-interaction scenes:
+
+| Page | Scene |
+|---|---|
+| `/` (hero) | Sal_Ang at the marsh-edge pop-up, pouring from the copper pot — the canonical reference image |
+| `/products` (lineup) | Warehouse interior: burlap coffee bags + tea drums + 5gal twine-wrapped jars + rafter citrus jars + jasmine vases. Lou_Ang walking through with a clipboard |
+| `/about` | Storefront exterior in one of the four cities (cycle by visit, or pick Bluffton as primary); Sal + Marcus visible through the window |
+| `/team` | Per-cast portraits using §11.5 visual specs (each character framed in their own scene cue) |
+| `/chat` | Sal-style branded counter (the canonical reference scene), chat-input UI overlaid on the right |
+| `/cart` | Cozy interior: warm wood, jasmine in vases, rafter citrus jars, Eliza_Ang at the register with a Southern-Belle-ribbon-tied package |
+| Storefront cycle | One image per city; rotate through hero or background imagery so a return visitor sees variation |
+
+### 11.7 Image-generation provider
+
+Per `feedback_gpt_image_2_standard.md` memory: **GPT Image 2.0** is the default for complex multi-text photorealism. All Coastal brand imagery generated through this pipeline uses GPT Image 2.0 unless owner specifies otherwise.
+
+When a generated image violates §11.4 (wardrobe/hair) or §11.1 (setting palette), reject and re-spin — the canon is non-negotiable.
+
+### 11.8 Anti-patterns (from this thread's CANT failures)
+
+- Treating the Coastal site as inheriting the FOAI dark-admin palette (the AIMS-Light variant + cream-parchment cast is the canon; do not reach for FOAI gold-on-slate)
+- Naming characters after dialect words ("Beratna" = Belter for "brother") or archetype labels ("Beau", "Belle"); see `feedback_character_names_must_be_real_not_register_labels.md`
+- Inventing visual cues that aren't traceable to a §11.0 reference image
+- Loose / different hair on women (canon = French braids, shoulder length, all races)
+- Modern slang on customer surfaces (canon = warm Lowcountry / specialty-coffee register)
+
+---
+
+## 12. The promise of this document (consolidated)
+
+Every design decision — color, type, wardrobe, scene, hair, prop — traces back to:
+- §1-§10 reference images (dark theme + light theme + Sal/Melli portraits)
+- §11.0 reference images (logo + Coffee Shop Sal_Ang + IMG_1343 hairstyle)
+
+If a future component or generated image cannot point to a specific cell in those references as its source, **it doesn't belong on Coastal Brewing Co.**
+
+---
+
 *Owner red-line welcomed. Component rebuild waits on sign-off.*
