@@ -48,7 +48,7 @@ def generate_long_context(approx_tokens: int = 10000) -> str:
         "The AIMS pricing matrix at foai/aims-tools/aims-pricing-matrix/ serves as the single source of truth for models, plans, bundles, and workforce pricing across the ecosystem.",
         "Infrastructure runs on myclaw-vps (srv1492108) with Docker containers behind Traefik routing, plus GCP Cloud Run services in the ai-managed-services project.",
         "The TIE framework operates across six domains: Sports, Workforce, Student, Contractor, Founder, and Creative. Per|Form is one domain instantiation of this broader platform.",
-        "Betty-Anne_Ang serves as the HR PMO evaluator with shop-steward personality, using HIDT 7 Core Values scoring. She reports to AVVA NOON and advocates for Lil_Hawks.",
+        "Betty-Anne_Ang serves as the HR PMO evaluator with shop-steward personality, using A.I.M.S. 7 Core Values scoring. She reports to AVVA NOON and advocates for Lil_Hawks.",
         "The Spinner feature provides autonomous chat-execution similar to Genspark's Speakly, using RFP-BAMARAM intent detection with background execution and Live Look In visualization.",
     ]
 
@@ -93,7 +93,7 @@ def test_02_summarize_preserves_key_information():
         "Per|Form handles NFL Draft analytics with a 40/30/30 TRCC formula. "
         "The platform runs on myclaw-vps with Docker and Traefik routing. "
         "SmelterOS uses AVVA NOON as its brain with dual consciousness. "
-        "Betty-Anne_Ang evaluates agents using HIDT 7 Core Values scoring. "
+        "Betty-Anne_Ang evaluates agents using A.I.M.S. 7 Core Values scoring. "
         "The Deploy Platform serves at deploy.foai.cloud with aiPLUG containers. "
         "Grammar NTNTN runs as the intention engine filter, never an executor."
     )
@@ -105,7 +105,7 @@ def test_02_summarize_preserves_key_information():
     # Key entities that should survive compression
     # The extractive summarizer selects highest-scored sentences; check terms
     # that appear in those sentences (entities, proper nouns, numbers)
-    key_terms = ["TRCC", "NTNTN", "HIDT", "NFL", "Betty-Anne"]
+    key_terms = ["TRCC", "NTNTN", "A.I.M.S.", "NFL", "Betty-Anne"]
     found = sum(1 for t in key_terms if t in result)
     print(f"  Key terms preserved: {found}/{len(key_terms)}")
     print(f"  Result preview: {result[:300]}...")

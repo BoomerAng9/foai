@@ -7,6 +7,7 @@ const nextConfig = {
   output: 'standalone',
   compress: true,
   poweredByHeader: false,
+  transpilePackages: ['@aims/pricing-matrix', '@aims/spinner'],
   turbopack: {
     root: projectRoot,
   },

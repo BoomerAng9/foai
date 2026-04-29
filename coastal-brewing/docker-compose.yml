@@ -40,6 +40,23 @@ services:
       TELEGRAM_BOT_TOKEN: "${TELEGRAM_BOT_TOKEN:-}"
       TELEGRAM_CHAT_ID: "${TELEGRAM_CHAT_ID:-}"
       COASTAL_APPROVE_SECRET: "${COASTAL_APPROVE_SECRET:-}"
+      # Transactional email via Google Workspace SMTP (post-approval supplier
+      # + customer sends). If SMTP_USER + SMTP_PASSWORD are empty, sends are
+      # recorded as 'skipped' in AuditLedger — no fake completion. Owner
+      # generates an App Password at https://myaccount.google.com/apppasswords
+      # (requires 2FA on the Workspace account) and pastes it as
+      # SMTP_PASSWORD. EMAIL_FROM is the visible sender; supports
+      # "Display Name <addr@domain>" format.
+      SMTP_HOST: "${SMTP_HOST:-smtp.gmail.com}"
+      SMTP_PORT: "${SMTP_PORT:-587}"
+      SMTP_USER: "${SMTP_USER:-}"
+      SMTP_PASSWORD: "${SMTP_PASSWORD:-}"
+      EMAIL_FROM: "${EMAIL_FROM:-}"
+      # Where supplier wholesale orders go. Defaults to the owner approval
+      # email so orders land where the owner can manually forward to Temecula
+      # Coffee Roasters until the wholesale agreement is digitally signed
+      # (Documenso, Wave 2 of Coastal).
+      COASTAL_SUPPLIER_EMAIL: "${COASTAL_SUPPLIER_EMAIL:-${OWNER_APPROVAL_EMAIL}}"
       TZ: "UTC"
     networks:
       - foai-internal
@@ -122,8 +139,126 @@ services:
       retries: 3
       start_period: 30s
 
+  paperclip-postgres:
+    image: postgres:16-alpine
+    container_name: paperclip-postgres
+    restart: unless-stopped
+    mem_limit: 512m
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    environment:
+      POSTGRES_USER: paperclip
+      POSTGRES_PASSWORD: "${PAPERCLIP_POSTGRES_PASSWORD}"
+      POSTGRES_DB: paperclip
+      TZ: "UTC"
+    volumes:
+      - paperclip-postgres-data:/var/lib/postgresql/data
+    networks:
+      - foai-internal
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U paperclip -d paperclip"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+  # Coastal AI workforce control plane. First pass is localhost-bound and
+  # Paperclip-owned Postgres only; AuditLedger stays SQLite in coastal-runner.
+  paperclip:
+    build:
+      context: https://github.com/paperclipai/paperclip.git#v2026.427.0
+    image: paperclip:v2026.427.0
+    container_name: paperclip
+    restart: unless-stopped
+    mem_limit: 2g
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    ports:
+      - "127.0.0.1:3100:3100"
+    volumes:
+      - paperclip-data:/paperclip
+    environment:
+      DATABASE_URL: "postgres://paperclip:${PAPERCLIP_POSTGRES_PASSWORD}@paperclip-postgres:5432/paperclip"
+      HOST: "0.0.0.0"
+      PORT: "3100"
+      SERVE_UI: "true"
+      PAPERCLIP_HOME: "/paperclip"
+      PAPERCLIP_INSTANCE_ID: "coastal"
+      PAPERCLIP_CONFIG: "/paperclip/instances/coastal/config.json"
+      PAPERCLIP_PUBLIC_URL: "${PAPERCLIP_PUBLIC_URL:-https://paperclip.foai.cloud}"
+      PAPERCLIP_DEPLOYMENT_MODE: "authenticated"
+      PAPERCLIP_DEPLOYMENT_EXPOSURE: "private"
+      PAPERCLIP_TELEMETRY_DISABLED: "1"
+      DO_NOT_TRACK: "1"
+      BETTER_AUTH_SECRET: "${PAPERCLIP_BETTER_AUTH_SECRET}"
+      TZ: "UTC"
+    networks:
+      - foai-internal
+    depends_on:
+      paperclip-postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:3100/ >/dev/null || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 120s
+
+  # Coastal storefront — Next.js 15 + React 19, standalone build.
+  # Public-facing at brewing.foai.cloud (nginx terminates TLS and proxies to
+  # 127.0.0.1:3010). The /api/order/intake route handler runs server-side
+  # and forwards customer orders to coastal-runner /run with X-Coastal-Token
+  # — the token never reaches the browser.
+  coastal-web:
+    build:
+      context: ./web
+    image: coastal-brewing-coastal-web
+    container_name: coastal-web
+    restart: unless-stopped
+    mem_limit: 512m
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    ports:
+      - "127.0.0.1:3010:3000"
+    environment:
+      NODE_ENV: "production"
+      # Bind IPv4 — Next.js standalone defaults to IPv6 :: which breaks the
+      # IPv4 wget healthcheck. HOSTNAME=0.0.0.0 forces IPv4 server bind.
+      HOSTNAME: "0.0.0.0"
+      PORT: "3000"
+      # Same-origin browser fetches; nginx routes /api/* to coastal-runner.
+      NEXT_PUBLIC_API_BASE: ""
+      NEXT_PUBLIC_LIVELOOKIN_ENABLED: "${NEXT_PUBLIC_LIVELOOKIN_ENABLED:-true}"
+      # Server-only — used by /api/order/intake route handler. Never exposed
+      # to the browser. Same token coastal-runner expects on /run.
+      COASTAL_GATEWAY_TOKEN: "${COASTAL_GATEWAY_TOKEN}"
+      COASTAL_RUNNER_INTERNAL: "http://coastal-runner:8080"
+      TZ: "UTC"
+    networks:
+      - foai-internal
+    depends_on:
+      coastal-runner:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:3000/ >/dev/null || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
 volumes:
   hermes-data:
+  paperclip-data:
+  paperclip-postgres-data:
 
 networks:
   foai-internal:

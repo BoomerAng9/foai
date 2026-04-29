@@ -2,7 +2,7 @@
 
 > **Sample plug** for users to clone when launching a new product, service, or vertical into a new market.
 >
-> Renamed from "HIDT Planning" per Rish 2026-04-08. Agnostic of any specific market — user fills in their target.
+> A.I.M.S.-branded Market Entry template (Rish, 2026-04-08). Agnostic of any specific market — user fills in their target.
 
 ## What this is
 

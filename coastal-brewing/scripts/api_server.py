@@ -17,6 +17,7 @@ import os
 import pathlib
 import secrets
 import sys
+import urllib.parse
 from typing import Any, Dict, List, Optional
 
 from fastapi import FastAPI, Header, HTTPException, Query, Request
@@ -34,6 +35,7 @@ import catalog  # noqa: E402
 try:
     from adapters.stripe_adapter import (  # noqa: E402
         create_checkout_session as _stripe_create_checkout_session,
+        create_one_time_checkout_session as _stripe_create_one_time_checkout_session,
         is_configured as _stripe_is_configured,
         verify_webhook as _stripe_verify_webhook,
     )
@@ -183,6 +185,10 @@ class TaskPacket(BaseModel):
     risk_tags: List[str] = Field(default_factory=list)
     approval_required: bool = False
     desired_output: Optional[str] = None
+    # Free-form payload for task-type-specific data (e.g., draft_order_confirmation
+    # carries customer + shipping + product info used to render the supplier and
+    # customer-facing email drafts).
+    payload: Dict[str, Any] = Field(default_factory=dict)
 
 
 class ApprovalDecision(BaseModel):
@@ -555,6 +561,169 @@ def audit_integrity_check(authorization: str = Header(default="")) -> dict:
     return audit_ledger.verify_chain()
 
 
+# ---------------------------------------------------------------------------
+# Order draft generation + post-approval email send
+# ---------------------------------------------------------------------------
+def _format_address(s: Dict[str, Any]) -> str:
+    if not s:
+        return "(no shipping address)"
+    line1 = str(s.get("address", "")).strip()
+    city = str(s.get("city", "")).strip()
+    state = str(s.get("state", "")).strip()
+    pc = str(s.get("postal_code", "")).strip()
+    return "\n".join(filter(None, [line1, ", ".join(filter(None, [city, state, pc]))]))
+
+
+def _render_supplier_draft(packet: "TaskPacket") -> Dict[str, str]:
+    p = packet.payload or {}
+    customer = p.get("customer") or {}
+    shipping = p.get("shipping") or {}
+    sku = p.get("sku") or "(unknown sku)"
+    name = p.get("product_name") or sku
+    qty = p.get("quantity") or 1
+    company = os.environ.get("COMPANY_NAME", "Coastal Brewing")
+    body = (
+        f"# Wholesale order — {company}\n\n"
+        f"Order id: {packet.task_id}\n\n"
+        f"## Order\n\n"
+        f"- SKU: {sku}\n"
+        f"- Product: {name}\n"
+        f"- Quantity: {qty}\n\n"
+        f"## Ship to\n\n"
+        f"{customer.get('name') or '(no name)'}\n"
+        f"{_format_address(shipping)}\n\n"
+        f"## Notes\n\n"
+        f"- Delivery preference: {p.get('delivery_window_preference') or 'no preference'}\n"
+        f"- Gift message: {p.get('gift_message') or '(none)'}\n\n"
+        f"This order has been owner-approved. Please confirm receipt and ship under the {company} brand per the wholesale agreement.\n"
+    )
+    return {
+        "subject": f"[Wholesale order — {company}] {packet.task_id}",
+        "body": body,
+    }
+
+
+def _render_customer_draft(packet: "TaskPacket") -> Dict[str, str]:
+    p = packet.payload or {}
+    customer = p.get("customer") or {}
+    shipping = p.get("shipping") or {}
+    sku = p.get("sku") or "(unknown sku)"
+    name = p.get("product_name") or sku
+    qty = p.get("quantity") or 1
+    company = os.environ.get("COMPANY_NAME", "Coastal Brewing")
+    body = (
+        f"# Order confirmed — thanks for choosing {company}\n\n"
+        f"Hi {customer.get('name', 'there')},\n\n"
+        f"Your order is in. Here's what we've got for you:\n\n"
+        f"- {name} × {qty}\n\n"
+        f"## Shipping to\n\n"
+        f"{_format_address(shipping)}\n\n"
+        f"## What happens next\n\n"
+        f"We've sent the order to our roaster. You'll get a tracking note from us as soon as it ships. If anything looks off, just reply to this email — a real person reads it.\n\n"
+        f"Order id: {packet.task_id}\n\n"
+        f"— {company}\n"
+    )
+    return {
+        "subject": f"Your {company} order — {name}",
+        "body": body,
+    }
+
+
+def _generate_order_drafts(packet: "TaskPacket") -> Dict[str, str]:
+    """Write supplier + customer drafts to disk for `draft_order_confirmation`
+    task type. Returns a dict of {kind: path}. Idempotent — overwrites on rerun."""
+    if packet.task_type != "draft_order_confirmation":
+        return {}
+    supplier = _render_supplier_draft(packet)
+    customer = _render_customer_draft(packet)
+    supplier_path = DRAFTS_DIR / f"{packet.task_id}_supplier_email.md"
+    customer_path = DRAFTS_DIR / f"{packet.task_id}_customer_confirmation.md"
+    supplier_path.write_text(
+        f"# To: {os.environ.get('COASTAL_SUPPLIER_EMAIL') or '(supplier email not configured)'}\n"
+        f"# Subject: {supplier['subject']}\n\n{supplier['body']}",
+        encoding="utf-8",
+    )
+    p = packet.payload or {}
+    customer_to = (p.get("customer") or {}).get("email") or "(customer email missing)"
+    customer_path.write_text(
+        f"# To: {customer_to}\n# Subject: {customer['subject']}\n\n{customer['body']}",
+        encoding="utf-8",
+    )
+    return {"supplier": str(supplier_path), "customer": str(customer_path)}
+
+
+def _read_draft_file(path: pathlib.Path) -> Dict[str, str]:
+    """Parse a draft file written by _generate_order_drafts. Returns {to, subject, body}."""
+    text = path.read_text(encoding="utf-8")
+    lines = text.splitlines()
+    to_addr = ""
+    subject = ""
+    body_start = 0
+    for i, line in enumerate(lines):
+        if line.startswith("# To: "):
+            to_addr = line[6:].strip()
+        elif line.startswith("# Subject: "):
+            subject = line[11:].strip()
+            body_start = i + 1
+            break
+    body = "\n".join(lines[body_start:]).lstrip("\n")
+    return {"to": to_addr, "subject": subject, "body": body}
+
+
+def _send_post_approval_emails(task_id: str, approval_id: str) -> Dict[str, Any]:
+    """When an order is approved, attempt to send the supplier + customer drafts.
+
+    Returns a structured report. Receipts are also written into AuditLedger
+    (action_receipts) so the chain captures every send attempt — including
+    skipped sends (RESEND_API_KEY not configured) marked truthfully."""
+    report: Dict[str, Any] = {"task_id": task_id, "sends": []}
+    drafts = [
+        ("supplier", DRAFTS_DIR / f"{task_id}_supplier_email.md"),
+        ("customer", DRAFTS_DIR / f"{task_id}_customer_confirmation.md"),
+    ]
+    for kind, path in drafts:
+        if not path.exists():
+            report["sends"].append({"kind": kind, "status": "missing", "detail": str(path)})
+            continue
+        d = _read_draft_file(path)
+        # Customer draft uses the captured email; supplier draft uses env override
+        # if the supplier line in the draft says "(supplier email not configured)".
+        to_addr = d["to"]
+        if kind == "supplier" and "not configured" in to_addr:
+            to_addr = os.environ.get("COASTAL_SUPPLIER_EMAIL", "")
+        result = email_sender.send(
+            to=to_addr,
+            subject=d["subject"],
+            body_markdown=d["body"],
+        )
+        status = "sent" if result.sent else ("skipped" if result.skipped else "failed")
+        try:
+            audit_ledger.insert_action_receipt(
+                task_id=task_id,
+                executor="coastal-runner",
+                action_type=f"email_{kind}",
+                destination=to_addr or "(no recipient)",
+                status=status,
+                result_summary=(
+                    f"provider={result.provider} message_id={result.message_id or '(none)'} "
+                    f"approval_id={approval_id} detail={result.detail or ''}"
+                )[:480],
+            )
+        except Exception:
+            pass
+        report["sends"].append(
+            {
+                "kind": kind,
+                "to": to_addr,
+                "status": status,
+                "message_id": result.message_id,
+                "detail": result.detail,
+                "error": result.error,
+            }
+        )
+    return report
+
+
 @app.post("/route")
 def route(packet: TaskPacket, x_coastal_token: Optional[str] = Header(default=None)) -> dict:
     _auth(x_coastal_token)
@@ -670,6 +839,12 @@ def run(packet: TaskPacket, x_coastal_token: Optional[str] = Header(default=None
             encoding="utf-8",
         )
         placeholder_path = str(path)
+        # When the task is a customer order, also pre-render the supplier
+        # and customer drafts so the post-approval email send has source.
+        try:
+            _generate_order_drafts(packet)
+        except Exception:
+            pass
 
     telegram_sent = False
     if receipt["approval_required"]:
@@ -715,11 +890,31 @@ def approve(decision: ApprovalDecision, x_coastal_token: Optional[str] = Header(
     except Exception:
         pass
 
-    return {"recorded": True, "decision_path": str(out_path)}
+    email_report: Optional[Dict[str, Any]] = None
+    if decision.decision == "approved":
+        try:
+            email_report = _send_post_approval_emails(
+                task_id=decision.task_id, approval_id=decision.approval_id
+            )
+        except Exception as e:
+            email_report = {"error": str(e)}
+
+    return {"recorded": True, "decision_path": str(out_path), "email_report": email_report}
 
 
 class CheckoutRequest(BaseModel):
-    tier: str
+    """Either `tier` (subscription) or `sku`+amount_cents (one-time).
+    Order intake metadata (customer + shipping + product details) flows
+    through `metadata` so /stripe/webhook can build a TaskPacket on
+    checkout.session.completed and auto-fire /run."""
+    # Subscription path
+    tier: Optional[str] = None
+    # One-time path
+    sku: Optional[str] = None
+    product_name: Optional[str] = None
+    amount_cents: Optional[int] = None
+    quantity: int = 1
+    # Common
     customer_email: str
     success_url: Optional[str] = None
     cancel_url: Optional[str] = None
@@ -732,12 +927,29 @@ def checkout(req: CheckoutRequest, x_coastal_token: Optional[str] = Header(defau
     if not STRIPE_AVAILABLE:
         raise HTTPException(status_code=503, detail="Stripe SDK not installed")
     if not _stripe_is_configured():
-        raise HTTPException(status_code=503, detail="Stripe is not configured (set STRIPE_SECRET_KEY + price IDs)")
+        raise HTTPException(status_code=503, detail="Stripe is not configured (set STRIPE_SECRET_KEY)")
     success_url = req.success_url or f"{COASTAL_PUBLIC_URL}/checkout/success?session_id={{CHECKOUT_SESSION_ID}}"
     cancel_url = req.cancel_url or f"{COASTAL_PUBLIC_URL}/checkout/cancel"
     try:
-        return _stripe_create_checkout_session(
-            tier=req.tier,
+        # Subscription if tier provided; otherwise one-time on the catalog SKU.
+        if req.tier:
+            return _stripe_create_checkout_session(
+                tier=req.tier,
+                customer_email=req.customer_email,
+                success_url=success_url,
+                cancel_url=cancel_url,
+                metadata=req.metadata,
+            )
+        if not req.sku or not req.amount_cents:
+            raise HTTPException(
+                status_code=400,
+                detail="checkout requires either `tier` (subscription) or `sku`+`amount_cents` (one-time)",
+            )
+        return _stripe_create_one_time_checkout_session(
+            sku=req.sku,
+            product_name=req.product_name or req.sku,
+            amount_cents=int(req.amount_cents),
+            quantity=int(req.quantity or 1),
             customer_email=req.customer_email,
             success_url=success_url,
             cancel_url=cancel_url,
@@ -747,6 +959,57 @@ def checkout(req: CheckoutRequest, x_coastal_token: Optional[str] = Header(defau
         raise HTTPException(status_code=400, detail=str(e))
     except RuntimeError as e:
         raise HTTPException(status_code=503, detail=str(e))
+
+
+def _build_task_packet_from_session(session_metadata: Dict[str, Any]) -> Optional["TaskPacket"]:
+    """Reconstruct a TaskPacket from Stripe session metadata. The Stepper
+    intake flattens nested customer/shipping into prefixed keys when
+    stashing; rehydrate them here. Returns None if the session wasn't from
+    the Coastal Stepper flow (e.g. legacy subscription with only tier)."""
+    if session_metadata.get("product") != "coastal-brewing":
+        return None
+    sku = session_metadata.get("sku")
+    if not sku:
+        return None
+    customer_email = (
+        session_metadata.get("customer_email")
+        or session_metadata.get("intake_customer_email")
+        or ""
+    )
+    customer_name = session_metadata.get("intake_customer_name", "")
+    payload = {
+        "sku": sku,
+        "product_name": session_metadata.get("intake_product_name", sku),
+        "quantity": int(session_metadata.get("intake_quantity", "1")),
+        "customer": {"email": customer_email, "name": customer_name},
+        "shipping": {
+            "address": session_metadata.get("intake_shipping_address", ""),
+            "city": session_metadata.get("intake_shipping_city", ""),
+            "state": session_metadata.get("intake_shipping_state", ""),
+            "postal_code": session_metadata.get("intake_shipping_postal_code", ""),
+        },
+        "delivery_window_preference": session_metadata.get("intake_delivery_window_preference") or None,
+        "gift_message": session_metadata.get("intake_gift_message") or None,
+        "consent_to_receive_email": True,  # Stripe Checkout completion is consent
+        "stripe_session_id": session_metadata.get("checkout_session_id"),
+        "submitted_at": utc_now(),
+    }
+    task_id = (
+        session_metadata.get("task_id")
+        or session_metadata.get("intake_task_id")
+        or f"order_{session_metadata.get('checkout_session_id', '')}"
+    )
+    return TaskPacket(
+        task_id=task_id,
+        owner_goal="Process new customer order (Stripe-paid)",
+        objective=f"Stripe-paid order: {sku} x{payload['quantity']} for {customer_email}",
+        department="boomer_ops",
+        task_type="draft_order_confirmation",
+        risk_tags=["money"],
+        approval_required=True,
+        desired_output="draft confirmation email + supplier order draft + AuditLedger receipt",
+        payload=payload,
+    )
 
 
 @app.post("/stripe/webhook")
@@ -764,7 +1027,86 @@ async def stripe_webhook(request: Request) -> dict:
 
     out_path = STRIPE_EVENTS_DIR / f"{event['id']}.json"
     out_path.write_text(json.dumps(event, indent=2, default=str), encoding="utf-8")
-    return {"received": True, "event_id": event["id"], "type": event["type"], "path": str(out_path)}
+
+    # On successful Checkout, auto-fire /run with the order packet so the
+    # round trip closes without a second API call from the storefront:
+    # Stripe paid → /run → NemoClaw → Telegram approval → SMTP send.
+    run_report: Optional[Dict[str, Any]] = None
+    if event.get("type") == "checkout.session.completed":
+        try:
+            session = event["data"]["object"]
+            session_meta = dict(session.get("metadata") or {})
+            session_meta["checkout_session_id"] = session.get("id")
+            packet = _build_task_packet_from_session(session_meta)
+            if packet is not None:
+                # Inject the gateway token so the internal call to /run passes _auth.
+                run_resp = run(packet=packet, x_coastal_token=GATEWAY_TOKEN)
+                run_report = {
+                    "task_id": packet.task_id,
+                    "next_action": run_resp.get("next_action"),
+                    "telegram_notified": run_resp.get("telegram_notified", False),
+                }
+        except Exception as e:
+            run_report = {"error": str(e)}
+
+    return {
+        "received": True,
+        "event_id": event["id"],
+        "type": event["type"],
+        "path": str(out_path),
+        "run_report": run_report,
+    }
+
+
+def _gmail_compose_url(to: str, subject: str, body: str) -> str:
+    """Build a Gmail web-compose URL with prefilled fields.
+    Owner taps it from the approval page and Gmail opens compose with
+    everything filled in — owner just hits Send. Bypasses SMTP entirely."""
+    qs = urllib.parse.urlencode(
+        {"view": "cm", "fs": "1", "to": to, "su": subject, "body": body},
+        quote_via=urllib.parse.quote,
+    )
+    return f"https://mail.google.com/mail/?{qs}"
+
+
+def _render_send_buttons(task_id: str) -> str:
+    """When an order is approved, look for the supplier + customer drafts on
+    disk and emit big 'Open Gmail to send' buttons that prefill compose for
+    each. Returns empty string if no drafts exist (non-order tasks)."""
+    drafts = [
+        ("Supplier", DRAFTS_DIR / f"{task_id}_supplier_email.md"),
+        ("Customer", DRAFTS_DIR / f"{task_id}_customer_confirmation.md"),
+    ]
+    rows: list[str] = []
+    for label, path in drafts:
+        if not path.exists():
+            continue
+        try:
+            d = _read_draft_file(path)
+        except Exception:
+            continue
+        to_addr = d.get("to") or ""
+        if "not configured" in to_addr or not to_addr:
+            to_addr = os.environ.get("COASTAL_SUPPLIER_EMAIL", "") if label == "Supplier" else ""
+        if not to_addr:
+            continue
+        url = _gmail_compose_url(to=to_addr, subject=d.get("subject", ""), body=d.get("body", ""))
+        rows.append(
+            f'<a class="send-btn" href="{url}" target="_blank" rel="noopener noreferrer">'
+            f'<span class="send-btn-label">→ Open Gmail to send {label.lower()} draft</span>'
+            f'<span class="send-btn-to">{to_addr}</span></a>'
+        )
+    if not rows:
+        return ""
+    return (
+        '<div class="send-block">'
+        '<div class="eyebrow" style="margin-top:32px">[ next: send ]</div>'
+        '<p style="font-size:14px;margin-bottom:16px">'
+        'Two drafts are queued. Click each to open Gmail with the message prefilled — review, then hit Send.'
+        '</p>'
+        + "".join(rows)
+        + '</div>'
+    )
 
 
 _APPROVE_RESULT_HTML = """<!DOCTYPE html>
@@ -793,6 +1135,14 @@ color:var(--ink);word-break:break-all}}
 color:var(--muted);font-family:'JetBrains Mono',ui-monospace,monospace;letter-spacing:0.05em}}
 .tag-line{{font-style:italic;color:var(--ink-soft);font-family:'Space Grotesk',sans-serif;
 font-size:13px;letter-spacing:0;margin-top:8px;display:block}}
+.send-btn{{display:flex;flex-direction:column;gap:4px;padding:16px 20px;margin-top:12px;
+background:var(--surface);border:1px solid var(--rule);border-left:3px solid var(--accent);
+text-decoration:none;color:var(--ink);transition:border-color .15s,transform .15s}}
+.send-btn:hover{{border-color:var(--accent);transform:translateX(2px)}}
+.send-btn-label{{font-weight:700;font-size:15px}}
+.send-btn-to{{font-family:'JetBrains Mono',ui-monospace,monospace;font-size:11px;
+color:var(--muted);letter-spacing:0.02em}}
+.send-block{{margin-top:8px}}
 </style></head>
 <body><div class="wrap">
 <a class="brand" href="https://brewing.foai.cloud/">coastal brewing<span class="dot">.</span></a>
@@ -800,6 +1150,7 @@ font-size:13px;letter-spacing:0;margin-top:8px;display:block}}
 <h1>{title}.</h1>
 <p>{message}</p>
 <div class="task">{task_id}</div>
+{actions_html}
 <div class="foot">
   {footer}
   <span class="tag-line">Nothing chemically, ever.</span>
@@ -1276,6 +1627,7 @@ def recommend(req: RecommendRequest) -> dict:
 
 
 from adapters import livelookin  # noqa: E402
+from adapters import email_sender  # noqa: E402
 
 
 class LiveLookInRequest(BaseModel):
@@ -1602,6 +1954,7 @@ def audit_view(task_id: str, token: str = Query(...)) -> HTMLResponse:
                 message="This trail link is no longer valid. Generate a new one or use a fresh approval-required packet.",
                 task_id=task_id,
                 footer="No audit shown.",
+                actions_html="",
             ),
         )
     trail = audit_ledger.query_audit_trail(task_id)
@@ -1620,6 +1973,7 @@ def approve_click(token: str = Query(...)) -> HTMLResponse:
                 message="This approval link is no longer valid. Request a new packet to retry.",
                 task_id="—",
                 footer="No decision recorded.",
+                actions_html="",
             ),
         )
     decision_label = payload["decision"]
@@ -1656,6 +2010,15 @@ def approve_click(token: str = Query(...)) -> HTMLResponse:
             )
         except Exception:
             pass
+        # Fire post-approval execution: send supplier + customer drafts via
+        # email_sender. Each send attempt records its own action_receipt to
+        # AuditLedger (sent / skipped / failed). Never raises.
+        try:
+            _send_post_approval_emails(
+                task_id=payload["task_id"], approval_id=payload["approval_id"]
+            )
+        except Exception:
+            pass
     else:
         title, accent, msg = "Rejected", "#f59e0b", "Decision recorded. Coastal will halt and notify originating department."
         try:
@@ -1669,6 +2032,9 @@ def approve_click(token: str = Query(...)) -> HTMLResponse:
             )
         except Exception:
             pass
+    actions_html = (
+        _render_send_buttons(payload["task_id"]) if decision_label == "approved" else ""
+    )
     return HTMLResponse(
         content=_APPROVE_RESULT_HTML.format(
             accent=accent,
@@ -1676,6 +2042,7 @@ def approve_click(token: str = Query(...)) -> HTMLResponse:
             message=msg,
             task_id=payload["task_id"],
             footer=f"approval_id: {payload['approval_id']} · {record['decided_at']}",
+            actions_html=actions_html,
         )
     )
 
@@ -1689,6 +2056,7 @@ def checkout_success(session_id: str = Query(...)) -> HTMLResponse:
             message="Thanks for subscribing to Coastal Brewing. Watch your inbox for confirmation. The owner approves the first dispatch before any shipment leaves.",
             task_id=session_id,
             footer=f"session_id &middot; {session_id[:24]}...",
+            actions_html="",
         )
     )
 
@@ -1702,5 +2070,6 @@ def checkout_cancel() -> HTMLResponse:
             message="Checkout canceled. Come back when you're ready. We'll be here.",
             task_id="—",
             footer="no payment captured",
+            actions_html="",
         )
     )

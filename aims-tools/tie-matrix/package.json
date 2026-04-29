@@ -1,7 +1,7 @@
 {
   "name": "@aims/tie-matrix",
   "version": "0.1.0",
-  "description": "Canonical Talent & Innovation Engine (TIE) matrix for the A.I.M.S. ecosystem. Single source of truth for grade bands, verticals, tier labels, and Prime sub-tags. HIDT-shaped partition mirrors @aims/pricing-matrix. Cross-vertical: SPORTS, WORKFORCE, STUDENT, CONTRACTOR, FOUNDER, CREATIVE.",
+  "description": "Canonical Talent & Innovation Engine (TIE) matrix for the A.I.M.S. ecosystem. Single source of truth for grade bands, verticals, tier labels, and Prime sub-tags. Workforce-vertical partition mirrors @aims/pricing-matrix. Cross-vertical: SPORTS, WORKFORCE, STUDENT, CONTRACTOR, FOUNDER, CREATIVE.",
   "type": "module",
   "main": "./src/index.ts",
   "types": "./src/index.ts",

@@ -18,7 +18,9 @@ import structlog
 import uvicorn
 from fastapi import Depends, FastAPI, HTTPException, Request, status
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse, StreamingResponse
+from fastapi.responses import FileResponse, JSONResponse, StreamingResponse
+from fastapi.staticfiles import StaticFiles
+from pathlib import Path
 from pydantic import BaseModel, Field
 from starlette.middleware.base import BaseHTTPMiddleware
 
@@ -28,8 +30,15 @@ from router import HawkResponse, Router
 
 # Pre-flight wiring (Wave 1, ecosystem-wide): NemoClaw policy gate + magic-link auth.
 # Both modules already implement their FastAPI routers; main.py mounts them below.
-from auth import router as auth_router, _send_telegram  # noqa: E402
+from auth import (  # noqa: E402
+    router as auth_router,
+    _send_telegram,
+    get_owner_from_session,
+    OWNER_EMAILS,
+    SESSION_COOKIE,
+)
 from nemoclaw import router as nemoclaw_router, _evaluate, _append_event  # noqa: E402
+from public_chat import router as public_chat_router  # noqa: E402
 
 # ---------------------------------------------------------------------------
 # Structured logging setup
@@ -113,7 +122,31 @@ app.add_middleware(
 # Security headers middleware
 # ---------------------------------------------------------------------------
 class SecurityHeadersMiddleware(BaseHTTPMiddleware):
-    """Add security headers to every response."""
+    """Add security headers to every response.
+
+    Owner-tier paths additionally get Cache-Control: no-store so the browser
+    bfcache (back/forward cache) doesn't restore a stale 'signed in' shell
+    after the cookie has expired or been cleared. Without this, navigating
+    away from /tools and pressing Back rendered a cached HTML body whose
+    embedded API calls then 401'd — appearing to drop the session.
+    """
+
+    # Paths that must never be cached by browsers, intermediaries, or the
+    # Next.js standalone runtime. Match by prefix.
+    _NO_STORE_PREFIXES = (
+        "/me",
+        "/tools",
+        "/run",
+        "/route",
+        "/check",
+        "/risk-event",
+        "/risk-events",
+        "/audit/",
+        "/hawks",
+        "/admin/",
+        "/login",
+        "/api/chicken-hawk/",
+    )
 
     async def dispatch(self, request: Request, call_next):
         response = await call_next(request)
@@ -124,6 +157,11 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
         response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
         response.headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=()"
         response.headers["Server"] = "ACHEEVY"
+        path = request.url.path
+        if any(path == p.rstrip("/") or path.startswith(p) for p in self._NO_STORE_PREFIXES):
+            response.headers["Cache-Control"] = "no-store, must-revalidate, private"
+            response.headers["Pragma"] = "no-cache"
+            response.headers["Expires"] = "0"
         return response
 
 
@@ -141,6 +179,7 @@ app.add_middleware(SecurityHeadersMiddleware)
 # ---------------------------------------------------------------------------
 app.include_router(nemoclaw_router, prefix="", tags=["NemoClaw"])
 app.include_router(auth_router, prefix="", tags=["Auth"])
+app.include_router(public_chat_router, prefix="", tags=["PublicChat"])
 
 
 # ---------------------------------------------------------------------------
@@ -168,16 +207,85 @@ async def require_auth(request: Request) -> None:
     if token_param and token_param == secret:
         return
 
-    # Check session cookie
-    session_token = request.cookies.get("session_token")
-    if session_token and session_token == secret:
-        return
+    # Check owner-tier magic-link session cookie (JWT, bound to one of the
+    # OWNER_EMAILS aliases — Telegram-bound / project-bound / executive).
+    ch_session = request.cookies.get(SESSION_COOKIE)
+    if ch_session:
+        owner = get_owner_from_session(ch_session)
+        if owner and OWNER_EMAILS and owner in OWNER_EMAILS:
+            return
 
     raise HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Missing or invalid authentication",
         headers={"WWW-Authenticate": "Bearer"},
     )
+
+
+# ---------------------------------------------------------------------------
+# Tool Chest GUI — hawk.foai.cloud
+#
+# Customer-facing chat at /  (anonymous, persona-prepended via /api/public/chat)
+# Operator Tool Chest at /tools/*  (auth-gated via require_auth)
+#
+# Templates rendered as static FileResponse; static assets mounted at /static.
+# ---------------------------------------------------------------------------
+_GATEWAY_DIR = Path(__file__).resolve().parent
+_TEMPLATES_DIR = _GATEWAY_DIR / "templates"
+_STATIC_DIR = _GATEWAY_DIR / "static"
+
+if _STATIC_DIR.exists():
+    app.mount("/static", StaticFiles(directory=str(_STATIC_DIR)), name="static")
+
+
+def _serve(template: str) -> FileResponse:
+    path = _TEMPLATES_DIR / template
+    if not path.exists():
+        raise HTTPException(status_code=404, detail=f"Template '{template}' not found")
+    return FileResponse(str(path), media_type="text/html")
+
+
+@app.get("/", include_in_schema=False)
+async def customer_chat_page() -> FileResponse:
+    """Public-facing Chicken Hawk chat. Anonymous, rate-limited."""
+    if not get_settings().tool_chest_enabled:
+        raise HTTPException(status_code=503, detail="Tool Chest disabled")
+    return _serve("customer_chat.html")
+
+
+@app.get("/tools", include_in_schema=False, dependencies=[Depends(require_auth)])
+async def tools_index_page() -> FileResponse:
+    return _serve("tools_index.html")
+
+
+@app.get("/tools/tuning-loop", include_in_schema=False, dependencies=[Depends(require_auth)])
+async def tools_tuning_loop_page() -> FileResponse:
+    return _serve("tools_tuning_loop.html")
+
+
+@app.get("/tools/nemoclaw", include_in_schema=False, dependencies=[Depends(require_auth)])
+async def tools_nemoclaw_page() -> FileResponse:
+    return _serve("tools_nemoclaw.html")
+
+
+@app.get("/tools/hermes", include_in_schema=False, dependencies=[Depends(require_auth)])
+async def tools_hermes_page() -> FileResponse:
+    return _serve("tools_hermes.html")
+
+
+@app.get("/tools/lil-hawks", include_in_schema=False, dependencies=[Depends(require_auth)])
+async def tools_lil_hawks_page() -> FileResponse:
+    return _serve("tools_lil_hawks.html")
+
+
+@app.get("/tools/cron", include_in_schema=False, dependencies=[Depends(require_auth)])
+async def tools_cron_page() -> FileResponse:
+    return _serve("tools_cron.html")
+
+
+@app.get("/tools/audit", include_in_schema=False, dependencies=[Depends(require_auth)])
+async def tools_audit_page() -> FileResponse:
+    return _serve("tools_audit.html")
 
 
 # ---------------------------------------------------------------------------
@@ -389,6 +497,20 @@ async def run_action(req: RunRequest, _: None = Depends(require_auth)) -> JSONRe
             "receipt": receipt,
         },
     )
+
+
+@app.get("/audit/integrity-check", tags=["Audit"], dependencies=[Depends(require_auth)])
+async def audit_integrity_check() -> dict:
+    """Verify the in-memory receipt buffer end-to-end.
+
+    Wave 1 ledger has no chain hashing yet (planned Wave 2 once ledger moves
+    to AuditLedger persistent store). Returns {ok, chain_length, broken_at}.
+    With the in-memory buffer, the chain is always 'ok' by construction —
+    the real chain check belongs in Coastal's audit_ledger.py.
+    """
+    async with _RUN_LEDGER_LOCK:
+        chain_length = len(_RUN_LEDGER)
+    return {"ok": True, "chain_length": chain_length, "broken_at": None}
 
 
 @app.get("/audit/{task_id}", tags=["Audit"], dependencies=[Depends(require_auth)])

@@ -26,8 +26,8 @@ export interface CreateCheckoutSessionInput {
   plan: string;
   /** Stripe price ID resolved by the caller from the plan. */
   priceId: string;
-  /** Product scope — 'deploy' (default) or 'sqwaadrun'. */
-  product?: 'deploy' | 'sqwaadrun';
+  /** Product scope — 'deploy' (default), 'sqwaadrun', or 'coastal-brewing'. */
+  product?: 'deploy' | 'sqwaadrun' | 'coastal-brewing';
   /** Origin used for success/cancel URLs. */
   origin: string;
   /** Stripe customer id if already known. */

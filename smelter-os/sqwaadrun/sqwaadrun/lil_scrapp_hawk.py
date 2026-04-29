@@ -1193,6 +1193,7 @@ class ScrappHawkSquadrun:
         allowed_domains: Optional[List[str]] = None,
         concurrency: int = 5,
         enable_screenshots: bool = False,
+        **kwargs,
     ):
         self.concurrency = concurrency
         self.enable_screenshots = enable_screenshots
