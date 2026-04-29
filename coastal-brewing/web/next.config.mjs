@@ -4,6 +4,10 @@ const API_BASE = process.env.NEXT_PUBLIC_API_BASE || "http://localhost:8000";
 const nextConfig = {
   output: "standalone",
   reactStrictMode: true,
+  // Allow Next.js to compile the sibling @aims/voice-library package, which
+  // is imported via the tsconfig path alias and lives outside this Next app's
+  // root. Without this, the build emits "Module parse failed" on the .ts files.
+  transpilePackages: ["@aims/voice-library"],
   async rewrites() {
     return [
       { source: "/api/:path*", destination: `${API_BASE}/api/:path*` },

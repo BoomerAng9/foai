@@ -13,7 +13,9 @@
     "./alter": "./src/alter/index.ts",
     "./attestation": "./src/attestation/index.ts",
     "./storage": "./src/storage/index.ts",
-    "./registry": "./src/registry/character-voices.ts"
+    "./registry": "./src/registry/index.ts",
+    "./dialect": "./src/dialect/index.ts",
+    "./sponsorship": "./src/sponsorship/index.ts"
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",
