@@ -1,7 +1,6 @@
 import Link from 'next/link';
 import { Code2, Terminal, Workflow, Database, Brain, Network, ServerCog, BarChart3, Box, Zap, Sparkles, ArrowRight } from 'lucide-react';
 import { FoaiBackground } from '@/components/foai-background';
-import { MenuNav } from '@/components/menu-nav';
 import { HawkFooter } from '@/components/hawk-footer';
 
 export const metadata = {
@@ -34,7 +33,6 @@ export default function LilHawksPage() {
   return (
     <div className="relative min-h-screen w-full overflow-x-hidden">
       <FoaiBackground />
-      <MenuNav />
 
       <section className="relative z-10 mx-auto max-w-6xl px-6 pt-12 lg:pt-16 pb-8">
         <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-foai-text leading-[1.05]">

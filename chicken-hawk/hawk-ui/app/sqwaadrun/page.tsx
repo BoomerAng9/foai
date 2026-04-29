@@ -1,7 +1,6 @@
 import Link from 'next/link';
 import { ExternalLink, Search, Globe, Layers, ArrowRight } from 'lucide-react';
 import { FoaiBackground } from '@/components/foai-background';
-import { MenuNav } from '@/components/menu-nav';
 import { HawkFooter } from '@/components/hawk-footer';
 import { SqwaadrunGallery } from '@/components/sqwaadrun-gallery';
 
@@ -18,7 +17,6 @@ export default function SqwaadrunPage() {
   return (
     <div className="relative min-h-screen w-full overflow-x-hidden">
       <FoaiBackground />
-      <MenuNav />
 
       {/* HERO */}
       <section className="relative z-10 mx-auto max-w-6xl px-6 pt-12 lg:pt-16 pb-10">

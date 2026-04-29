@@ -8,7 +8,6 @@ import { motion } from 'framer-motion';
 import { ArrowRight, Wrench, Bird, FlaskConical, Shield } from 'lucide-react';
 import { FoaiBackground } from '@/components/foai-background';
 import { HawkChatInput, type Attachment } from '@/components/hawk-chat-input';
-import { MenuNav } from '@/components/menu-nav';
 import { HawkFooter } from '@/components/hawk-footer';
 import { HeroChatDemo } from '@/components/hero-chat-demo';
 import { HawkAvatar } from '@/components/hawk-avatar';
@@ -93,7 +92,6 @@ function HomePageInner() {
   return (
     <div className="relative min-h-screen w-full overflow-x-hidden">
       <FoaiBackground />
-      <MenuNav />
 
       <section className="relative z-10 mx-auto max-w-6xl px-6 pt-12 pb-16 lg:pt-20 lg:pb-24">
         <div className="grid lg:grid-cols-12 gap-10 lg:gap-12 items-center">
