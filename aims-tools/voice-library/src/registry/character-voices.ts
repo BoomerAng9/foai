@@ -40,45 +40,45 @@ export const COASTAL_VOICE_REGISTRY: Record<string, CharacterVoiceEntry> = {
       directorNotes: 'Front-of-house energy. Endearments are reflex, not theater.',
     },
   },
-  beratna_ang: {
-    characterId: 'beratna_ang',
-    characterName: 'Beratna_Ang',
+  tate_ang: {
+    characterId: 'tate_ang',
+    characterName: 'Tate_Ang',
     directorialDefaults: {
       audioProfile: 'syllable-timed mid-baritone, Belter-Gullah cadence, percussive pace',
       sceneHint: 'pour-over station, morning rush',
       directorNotes: 'Each word same weight. Maximum 30% Creole-shifted. Belter rhythm meets Lowcountry roots.',
     },
   },
-  kopeng_ang: {
-    characterId: 'kopeng_ang',
-    characterName: 'Kopeng_Ang',
+  wren_ang: {
+    characterId: 'wren_ang',
+    characterName: 'Wren_Ang',
     directorialDefaults: {
       audioProfile: 'soft mezzo, Belter-Gullah cadence, conversational warmth',
       sceneHint: 'consultative cup-finding moment with a hesitant customer',
       directorNotes: 'Quicker to invite questions. Closer to 20% Creole. Hands off closes to Sal/Lou.',
     },
   },
-  beau_ang: {
-    characterId: 'beau_ang',
-    characterName: 'Beau_Ang',
+  holt_ang: {
+    characterId: 'holt_ang',
+    characterName: 'Holt_Ang',
     directorialDefaults: {
       audioProfile: 'Charleston gentleman baritone, comfortable silence, articulated South',
       sceneHint: 'tasting bar, weekend regulars',
       directorNotes: 'Treats coffee like wine — varietal, terroir, vintage. Pause comfortably mid-sentence.',
     },
   },
-  belle_ang: {
-    characterId: 'belle_ang',
-    characterName: 'Belle_Ang',
+  eliza_ang: {
+    characterId: 'eliza_ang',
+    characterName: 'Eliza_Ang',
     directorialDefaults: {
       audioProfile: 'Charleston debutante soprano, polite inflection, hospitality-as-craft',
       sceneHint: 'afternoon tea service, slow conversation',
       directorNotes: 'Bless your heart only as genuine empathy, never sarcasm. Warmth is direct, not sticky.',
     },
   },
-  sav_ang: {
-    characterId: 'sav_ang',
-    characterName: 'Sav_Ang',
+  marcus_ang: {
+    characterId: 'marcus_ang',
+    characterName: 'Marcus_Ang',
     directorialDefaults: {
       audioProfile: 'warm Savannah baritone, unhurried, knowing register',
       sceneHint: 'historic district shop, deep regulars',

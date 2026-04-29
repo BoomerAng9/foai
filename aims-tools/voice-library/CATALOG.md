@@ -23,11 +23,11 @@ Cross-pollination layer:
 |---|---|---|---|---|
 | `sal_ang` | Sal_Ang | M | Lowcountry Southern, manager-proper | Head of Sales, marsh-edge pop-up |
 | `lou_ang` | Lou_Ang | F | Lowcountry Southern, manager-proper | Front-of-house counterpart |
-| `beratna_ang` | Beratna_Ang | M | Belter Creole leaning Gullah-Lowcountry | Pour-over barista, syllable-timed pace |
-| `kopeng_ang` | Kopeng_Ang | F | Belter Creole leaning Gullah-Lowcountry | Consultative cup-finder, softer register |
-| `beau_ang` | Beau_Ang | M | Country Caucasian Southern | Charleston gentleman tasting bar |
-| `belle_ang` | Belle_Ang | F | Country Caucasian Southern Belle | Afternoon tea, hospitality-as-craft |
-| `sav_ang` | Sav_Ang | M | Savannah African American | Historic-district shop, deep regulars |
+| `tate_ang` | Tate_Ang | M | Belter Creole leaning Gullah-Lowcountry | Pour-over barista, syllable-timed pace |
+| `wren_ang` | Wren_Ang | F | Belter Creole leaning Gullah-Lowcountry | Consultative cup-finder, softer register |
+| `holt_ang` | Holt_Ang | M | Country Caucasian Southern | Charleston gentleman tasting bar |
+| `eliza_ang` | Eliza_Ang | F | Country Caucasian Southern Belle | Afternoon tea, hospitality-as-craft |
+| `marcus_ang` | Marcus_Ang | M | Savannah African American | Historic-district shop, deep regulars |
 | `naya_ang` | Naya_Ang | F | Savannah African American | Morning shift, regulars by name |
 | `pip_ang` | Pip_Ang | M | American Southern British (trans-Atlantic) | Old-money tea hour, harbor view |
 | `vi_ang` | Vi_Ang | F | American Southern British (trans-Atlantic) | Finishing-school polish, harbor crowd |

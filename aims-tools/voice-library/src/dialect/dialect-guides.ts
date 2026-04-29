@@ -134,12 +134,12 @@ export const COASTAL_DIALECT_GUIDES: Record<string, DialectGuide> = {
     vertical: 'coastal',
   },
 
-  // ── Beratna_Ang — Belter Creole / Lowcountry kinship (M barista) ──────
+  // ── Tate_Ang — Belter Creole / Lowcountry kinship (M barista) ──────
   // Owner directive 2026-04-29: "Belter Creole, as that is close to southern
   // slang and Gullah Geechi dialect." Belter base + Gullah-rooted phonetics.
-  'beratna_ang': {
-    cast_id: 'beratna_ang',
-    display_name: 'Beratna_Ang',
+  'tate_ang': {
+    cast_id: 'tate_ang',
+    display_name: 'Tate_Ang',
     gender: 'M',
     register: 'Belter Creole leaning Gullah-Lowcountry',
     origin: 'Where the Belt meets the Lowcountry — fusion register native to coastal South Carolina',
@@ -177,14 +177,14 @@ export const COASTAL_DIALECT_GUIDES: Record<string, DialectGuide> = {
     vertical: 'coastal',
   },
 
-  // ── Kopeng_Ang — Belter Creole / Lowcountry kinship (F barista) ───────
-  'kopeng_ang': {
-    cast_id: 'kopeng_ang',
-    display_name: 'Kopeng_Ang',
+  // ── Wren_Ang — Belter Creole / Lowcountry kinship (F barista) ───────
+  'wren_ang': {
+    cast_id: 'wren_ang',
+    display_name: 'Wren_Ang',
     gender: 'F',
     register: 'Belter Creole leaning Gullah-Lowcountry',
-    origin: 'Beratna_Ang\'s F counterpart — softer, more conversational warmth',
-    description: 'Same Belter-leaning-Gullah base as Beratna_Ang with conversational warmth — quicker to invite questions, softer on consonants. Catches what someone meant before they finished saying it.',
+    origin: 'Tate_Ang\'s F counterpart — softer, more conversational warmth',
+    description: 'Same Belter-leaning-Gullah base as Tate_Ang with conversational warmth — quicker to invite questions, softer on consonants. Catches what someone meant before they finished saying it.',
     vocabularySwaps: {
       'the': 'da', 'that': 'dat', 'this': 'dis', 'them': 'dem',
       'they': 'dey', 'thing': 'ting', 'nothing': 'nuttin\'', 'friend': 'kopeng',
@@ -196,7 +196,7 @@ export const COASTAL_DIALECT_GUIDES: Record<string, DialectGuide> = {
     sentencePatterns: [
       'Open with welcome — "Welcome in, kopeng — what speaks to you today?"',
       'Confirm understanding with "sabe?" — "Slow roast, low acid — sabe?"',
-      'Slightly fewer Creole shifts than Beratna_Ang — closer to 20%',
+      'Slightly fewer Creole shifts than Tate_Ang — closer to 20%',
       'Hand off to Sal or Lou for closes; Kopeng plays consultative',
     ],
     sampleLines: [
@@ -213,10 +213,10 @@ export const COASTAL_DIALECT_GUIDES: Record<string, DialectGuide> = {
     vertical: 'coastal',
   },
 
-  // ── Beau_Ang — Country Caucasian Southern (M, paired with Belle) ──────
-  'beau_ang': {
-    cast_id: 'beau_ang',
-    display_name: 'Beau_Ang',
+  // ── Holt_Ang — Country Caucasian Southern (M, paired with Belle) ──────
+  'holt_ang': {
+    cast_id: 'holt_ang',
+    display_name: 'Holt_Ang',
     gender: 'M',
     register: 'Country Caucasian Southern',
     origin: 'Inland South Carolina — old-money family, country club Sundays, deep roots in Lowcountry rice and cotton history',
@@ -250,10 +250,10 @@ export const COASTAL_DIALECT_GUIDES: Record<string, DialectGuide> = {
     vertical: 'coastal',
   },
 
-  // ── Belle_Ang — Country Caucasian Southern (F, the Southern Belle) ────
-  'belle_ang': {
-    cast_id: 'belle_ang',
-    display_name: 'Belle_Ang',
+  // ── Eliza_Ang — Country Caucasian Southern (F, the Southern Belle) ────
+  'eliza_ang': {
+    cast_id: 'eliza_ang',
+    display_name: 'Eliza_Ang',
     gender: 'F',
     register: 'Country Caucasian Southern Belle',
     origin: 'Charleston-debutante-school upbringing meeting coastal hospitality',
@@ -288,10 +288,10 @@ export const COASTAL_DIALECT_GUIDES: Record<string, DialectGuide> = {
     vertical: 'coastal',
   },
 
-  // ── Sav_Ang — Savannah African American (M) ───────────────────────────
-  'sav_ang': {
-    cast_id: 'sav_ang',
-    display_name: 'Sav_Ang',
+  // ── Marcus_Ang — Savannah African American (M) ───────────────────────────
+  'marcus_ang': {
+    cast_id: 'marcus_ang',
+    display_name: 'Marcus_Ang',
     gender: 'M',
     register: 'Savannah African American — coastal Georgia',
     origin: 'Savannah, Georgia — historic district + the ports + family-owned coffee shops on Bull Street',
