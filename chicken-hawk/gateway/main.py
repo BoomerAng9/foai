@@ -122,7 +122,31 @@ app.add_middleware(
 # Security headers middleware
 # ---------------------------------------------------------------------------
 class SecurityHeadersMiddleware(BaseHTTPMiddleware):
-    """Add security headers to every response."""
+    """Add security headers to every response.
+
+    Owner-tier paths additionally get Cache-Control: no-store so the browser
+    bfcache (back/forward cache) doesn't restore a stale 'signed in' shell
+    after the cookie has expired or been cleared. Without this, navigating
+    away from /tools and pressing Back rendered a cached HTML body whose
+    embedded API calls then 401'd — appearing to drop the session.
+    """
+
+    # Paths that must never be cached by browsers, intermediaries, or the
+    # Next.js standalone runtime. Match by prefix.
+    _NO_STORE_PREFIXES = (
+        "/me",
+        "/tools",
+        "/run",
+        "/route",
+        "/check",
+        "/risk-event",
+        "/risk-events",
+        "/audit/",
+        "/hawks",
+        "/admin/",
+        "/login",
+        "/api/chicken-hawk/",
+    )
 
     async def dispatch(self, request: Request, call_next):
         response = await call_next(request)
@@ -133,6 +157,11 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
         response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
         response.headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=()"
         response.headers["Server"] = "ACHEEVY"
+        path = request.url.path
+        if any(path == p.rstrip("/") or path.startswith(p) for p in self._NO_STORE_PREFIXES):
+            response.headers["Cache-Control"] = "no-store, must-revalidate, private"
+            response.headers["Pragma"] = "no-cache"
+            response.headers["Expires"] = "0"
         return response
 
 

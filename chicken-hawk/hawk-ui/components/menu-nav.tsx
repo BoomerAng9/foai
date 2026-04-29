@@ -1,65 +1,37 @@
-'use client';
+import { cookies } from 'next/headers';
+import { MenuNavLinks } from './menu-nav-links';
 
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import Image from 'next/image';
-import { cn } from '@/lib/utils';
+const GATEWAY_URL = process.env.NEXT_PUBLIC_GATEWAY_URL || 'http://hawk-gateway:8000';
 
-const items = [
-  { href: '/', label: 'Home' },
-  { href: '/lil-hawks', label: 'Lil_Hawks' },
-  { href: '/sqwaadrun', label: 'Sqwaadrun' },
-  { href: '/about', label: 'About' },
-];
+interface MeResponse {
+  email?: string;
+  ok?: boolean;
+}
 
-export function MenuNav() {
-  const pathname = usePathname();
-  return (
-    <header className="relative z-30 sticky top-0 backdrop-blur-md bg-foai-bg/80 border-b border-foai-border">
-      <div className="mx-auto max-w-6xl px-6 h-16 flex items-center justify-between">
-        <Link href="/" className="flex items-center gap-2.5">
-          <Image
-            src="/chicken-hawk.svg"
-            alt="Chicken Hawk"
-            width={36}
-            height={36}
-            className="size-9"
-            priority
-          />
-          <span className="font-semibold tracking-tight text-foai-text text-base hidden sm:inline">
-            Chicken Hawk
-          </span>
-        </Link>
+async function probeOwner(): Promise<{ signedIn: boolean; owner: string | null }> {
+  const jar = await cookies();
+  const session = jar.get('ch_session')?.value;
+  if (!session) return { signedIn: false, owner: null };
+  try {
+    const res = await fetch(`${GATEWAY_URL}/me`, {
+      headers: { Cookie: `ch_session=${session}`, Accept: 'application/json' },
+      cache: 'no-store',
+    });
+    if (!res.ok) return { signedIn: false, owner: null };
+    // /me returns HTML for browsers, but the server-rendered body always
+    // contains the owner email when signed in. The presence of a 200 is
+    // sufficient signal for nav state — owner email is best-effort.
+    const text = await res.text();
+    const match = text.match(/Signed in as[^<]*<[^>]+>([^<]+)</i)
+      || text.match(/Signed in as\s+<[^>]+>([^<]+)</i)
+      || text.match(/Signed in as\s+([\w.+-]+@[\w.-]+\.[a-z]{2,})/i);
+    return { signedIn: true, owner: match ? match[1].trim() : null };
+  } catch {
+    return { signedIn: false, owner: null };
+  }
+}
 
-        <nav className="hidden md:flex items-center gap-1">
-          {items.map((it) => {
-            const active = pathname === it.href || (it.href !== '/' && pathname.startsWith(it.href));
-            return (
-              <Link
-                key={it.href}
-                href={it.href}
-                className={cn(
-                  'px-3.5 py-1.5 rounded-md text-sm font-medium transition-colors',
-                  active
-                    ? 'text-foai-gold bg-foai-gold-tint'
-                    : 'text-foai-muted hover:text-foai-text hover:bg-foai-surface-2',
-                )}
-              >
-                {it.label}
-              </Link>
-            );
-          })}
-        </nav>
-
-        <div className="flex items-center gap-2">
-          <Link
-            href="/login"
-            className="hidden sm:inline-flex items-center px-4 py-1.5 rounded-md text-sm font-semibold text-white bg-foai-gold hover:bg-foai-gold-hover shadow-amber-soft hover:shadow-amber-press transition-all"
-          >
-            Sign in
-          </Link>
-        </div>
-      </div>
-    </header>
-  );
+export async function MenuNav() {
+  const { signedIn, owner } = await probeOwner();
+  return <MenuNavLinks signedIn={signedIn} owner={owner} />;
 }

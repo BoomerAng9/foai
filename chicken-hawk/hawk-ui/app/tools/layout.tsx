@@ -1,12 +1,46 @@
 import Link from 'next/link';
+import { cookies } from 'next/headers';
+import { redirect } from 'next/navigation';
 import { ToolsNav } from '@/components/tools-nav';
 
 export const metadata = {
   title: 'Tool Chest · Chicken Hawk',
-  description: 'Operator surface for our Super Agent.',
+  description: 'Owner-only operator console for Chicken Hawk.',
 };
 
-export default function ToolsLayout({ children }: { children: React.ReactNode }) {
+// Force SSR on every request — no bfcache, no stale RSC prefetch. Owner-tier
+// pages must reflect live session state every navigation, including back-
+// button restores. Without this, browsers were serving a cached "Signed in"
+// shell after the cookie expired or after a forward/back navigation, which
+// produced the "Not signed in" regression on /me prefetches.
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
+const GATEWAY_URL = process.env.NEXT_PUBLIC_GATEWAY_URL || 'http://hawk-gateway:8000';
+
+async function requireOwner(): Promise<void> {
+  const jar = await cookies();
+  const session = jar.get('ch_session')?.value;
+  if (!session) {
+    redirect('/login');
+  }
+  try {
+    const res = await fetch(`${GATEWAY_URL}/me`, {
+      headers: { Cookie: `ch_session=${session}` },
+      cache: 'no-store',
+    });
+    if (!res.ok) {
+      redirect('/login');
+    }
+  } catch {
+    // Gateway unreachable — fail closed, send to /login rather than serve a
+    // potentially-stale shell.
+    redirect('/login');
+  }
+}
+
+export default async function ToolsLayout({ children }: { children: React.ReactNode }) {
+  await requireOwner();
   return (
     <div className="min-h-screen bg-foai-bg text-foai-text grid grid-cols-1 md:grid-cols-[260px_1fr]">
       <aside className="hidden md:block bg-foai-surface/60 backdrop-blur border-r border-foai-border p-6">
