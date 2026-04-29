@@ -15,9 +15,17 @@
     "incremental": true,
     "plugins": [{ "name": "next" }],
     "paths": {
-      "@/*": ["./*"]
+      "@/*": ["./*"],
+      "@aims/voice-library": ["../../aims-tools/voice-library/src/index.ts"],
+      "@aims/voice-library/*": ["../../aims-tools/voice-library/src/*"]
     }
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    ".next/types/**/*.ts",
+    "../../aims-tools/voice-library/src/**/*.ts"
+  ],
   "exclude": ["node_modules"]
 }
