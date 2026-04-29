@@ -41,7 +41,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html
       lang="en"
-      className={`dark ${inter.variable} ${fraunces.variable} ${mono.variable}`}
+      className={`${inter.variable} ${fraunces.variable} ${mono.variable}`}
     >
       <body className="min-h-screen antialiased font-sans">
         <script

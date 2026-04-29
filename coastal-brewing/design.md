@@ -313,33 +313,62 @@ Every design decision on this surface should trace back to one of the two refere
 
 ---
 
-## 11. Brand canon — Sales-team cast + setting + wardrobe (owner brief 2026-04-29)
+## 11. Brand canon — Sales-team cast + setting + wardrobe + product names (owner brief 2026-04-29)
 
-Extends §1-§10. The earlier sections give the **dark/light theme system**; this section gives the **storefront-environment + cast visual canon** so every image generated for Coastal lands consistent.
+Extends §1-§10. The earlier sections give the **dark/light theme system**; this section gives the **storefront-environment + cast visual canon** + **canonical product names** + **uniform detail spec**.
+
+> **2026-04-29 owner correction:** "you changed it to match with the NURDSCODE and it looks dumb." The currently-deployed dark Coastal theme is RETIRED. The cream/parchment + sepia LIGHT register from the reference images is now the **PRIMARY** Coastal surface. Section 1 of this doc is superseded by §11.1 below. **Dark theme** demoted to admin-only / operator-only surfaces (NOT customer-facing).
 
 ### 11.0 Reference images (load-bearing — image gen always traces back here)
 
 | Asset | Path | What it sets |
 |---|---|---|
 | Logo | `~/iCloudPhotos/Photos/Official coastal brewing co. logo.png` | Hand-drawn line-art stork in flight, stacked COASTAL/BREWING/CO. typography, dark sepia ink on parchment |
-| Sal_Ang reference (canonical theme) | `~/iCloudPhotos/Photos/Coffee Shop Sal_Ang.png` | Setting + wardrobe + counter dressing for ALL cast images |
-| Black-male hair reference | `~/iCloudPhotos/Photos/IMG_1343.PNG` | Low Caesar with half-moon part — applies to every Black male cast member EXCEPT Sal_Ang (who keeps his canonical braids) |
+| Sal_Ang inside the location | `~/iCloudPhotos/Photos/Coffee Shop Sal_Ang.png` | The CANONICAL brand reference — setting + uniform detail + product naming + counter dressing for ALL cast images and product packaging |
+| Black-male hair reference | `~/iCloudPhotos/Photos/IMG_1343.PNG` | Low Caesar with half-moon part — applies to every Black male cast member EXCEPT Sal_Ang (canonical braids) |
 
-### 11.1 Setting palette
+### 11.1 Setting palette (PRIMARY — supersedes §1 dark theme for customer surfaces)
 
-The Sal_Ang reference establishes the setting register every Coastal image inherits:
+Customer-facing Coastal surfaces (storefront, product pages, hero, chat) live in this register:
 
 - **Light**: warm golden-hour, never harsh
+- **Page background**: cream / parchment (`#f3efe6` per §2 light theme — that token graduates to PRIMARY)
+- **Foreground / type**: near-black warm cast (`#1a1612`) — sepia-ink feel, never pure black
 - **Surfaces**: cream / parchment / sepia ink / warm wood / copper accents
+- **Type**: serif headlines (Fraunces) + Inter body — per §3 light theme
 - **Botanical**: palm fronds outside; jasmine flowers in vases throughout the interior; cut jasmine branches beside the Jasmine Tea tins; large glass jars across the rafters filled with dried citrus fruits + cinnamon sticks
 - **Materials**: burlap (coffee bags), twine (wrapped around tea jars), glass (5-gallon specialty-tea jars + rafter citrus jars), ceramic (cups), copper (long-spouted Ethiopian-style coffee pot)
-- **Branded counter dressing** (always present in any counter scene):
-  - Cream coffee bag with stork glyph + "COASTAL BREWING / [variety]" copy
-  - Three small white cylindrical tins labeled MATCHA / TEA / COFFEE
-  - Two-three small ceramic coffee cups on a wooden tray
-  - Wooden sign: "COFFEE TEA MATCHA · PURPOSE"
-  - Banner / wall: "COASTAL BREWING CO — Nothing chemically, ever."
-  - Long-spouted copper Ethiopian-style coffee pot (the Sal canonical)
+- **Sage green** (`#6b8e4e` per §2) is the only chromatic accent allowed, and only on matcha-related elements
+
+**Branded counter dressing (always present in any counter scene — verbatim from Sal-inside reference):**
+  - **Coffee bag**: cream/parchment, stork glyph + stacked "COASTAL / BREWING / CO" + product name (e.g., "COASTAL BLEND") + flavor notes line (e.g., "JASMINE, KEY LIME, COCOA") + "WHOLE BEAN COFFEE" + net wt "12OZ (340G)"
+  - **Tea/matcha tins** (small cylindrical, cream with brown band — except Chai which is darker):
+    - "COASTAL BREWING CO / MATCHA / CEREMONIAL GRADE / NET WT. 2OZ (56G)"
+    - "COASTAL BREWING CO / LOWCOUNTRY TEA / JASMINE GREEN / NET WT. 2OZ (56G)"
+    - "COASTAL / CHAI / SPICED BLACK TEA / NET WT. 2.1OZ (56G)" (DARKER tin design — distinct from the cream tins)
+  - **Ceramic cups**: small dark cups with white geometric (Ethiopian-style) patterns on a wooden tray
+  - **Wooden sign**: "COFFEE. TEA. MATCHA. PURPOSE." (with stork glyph; periods are intentional)
+  - **Banner above**: "COASTAL BREWING CO / Nothing chemically, ever." (with stork)
+  - **Counter base wall**: large stork glyph + stacked "COASTAL BREWING CO / Nothing chemically, ever."
+  - **Wicker baskets** below the counter
+  - **Long-spouted copper Ethiopian-style coffee pot** (jebena style — Sal's canonical pour vessel)
+  - **Pour-over carafes** + small espresso machine on the side
+  - **Burlap coffee bag with stork stencil** at the floor by the counter
+  - **Background**: marsh + palm tree + cloudy sky (location-dependent)
+
+### 11.1.1 Canonical product names (LOCKED — these names ship verbatim on packaging)
+
+| Product | Canonical name (on packaging) | Tin/bag color |
+|---|---|---|
+| Flagship coffee | **Coastal Blend** — *whole bean coffee* — *Jasmine, Key Lime, Cocoa* | Cream/parchment paper bag |
+| Single-origin coffees | **Coastal [Origin] Fairtrade** (e.g., Coastal Colombia Fairtrade) | Cream/parchment paper bag |
+| Matcha | **Coastal Brewing Co Matcha** — *Ceremonial Grade* | Cream cylindrical tin with brown band |
+| Tea (umbrella sub-brand) | **Lowcountry Tea — [Variant]** (e.g., Jasmine Green) | Cream cylindrical tin with brown band |
+| Chai (separate SKU, distinct visual) | **Coastal Chai** — *Spiced Black Tea* | Darker cylindrical tin (charcoal/dark brown) |
+
+> "Lowcountry House Blend" is RETIRED as a SKU name — owner directive 2026-04-29: "No" to that name. The flagship coffee is **Coastal Blend** (verbatim from packaging).
+>
+> "Lowcountry Tea" is the umbrella sub-brand for the tea line, NOT a SKU on its own. Variants (Jasmine Green, English Breakfast, Hibiscus Berry, etc.) ship as "Lowcountry Tea — [Variant]".
 
 ### 11.2 Storefront locations (4 cities — atmosphere imagery, not real retail)
 
@@ -367,13 +396,19 @@ Same palette as §11.1, applied to the back-of-house:
 
 ### 11.4 Wardrobe canon (load-bearing — all cast images must comply)
 
-#### Men (uniform = Sal_Ang's outfit, per the canonical reference)
+#### Men (uniform = Sal_Ang's outfit, locked verbatim from `Coffee Shop Sal_Ang.png`)
 
-- **Jacket**: cream / off-white linen long-sleeve work jacket, lightweight, soft drape; chest pocket carries the embroidered Coastal Brewing stork-and-wordmark patch; small embroidered name patch (e.g., `SAL`, `MARCUS`, `HOLT`) on the collar/lapel
-- **Mask**: black cloth dust-mask with the cast member's name in **orange block letters with white outline** centered across the front (matches the §8.1 Boomer_Ang ANG-patch convention; mask version of the visor)
-- **Shirt under jacket**: dark crew-neck (charcoal/black)
-- **Pants**: dark canvas / chinos
-- **Apron** (when at the bar): cream linen or natural denim, single chest-pocket, clipped pen visible
+- **Jacket**: cream / off-white linen long-sleeve work jacket, lightweight, soft drape, sleeves often rolled to mid-forearm; partially open at chest
+- **Right-chest patch**: stacked **"COASTAL / BREWING / CO"** in dark sepia ink (matches the bag/tin packaging style — small, clean, no stork glyph here; the stork sits on the larger banner behind)
+- **Left-chest "Made in PLR" badge**: small circular sepia-stamped badge worn over the heart, **above** the name badge; round emblem with stork glyph + "Made in PLR" text — preserve verbatim, do NOT expand "PLR"
+- **Name badge**: small **black** rectangular badge with the cast member's name in **cream/light** lettering — worn on the LEFT chest, just below the "Made in PLR" badge (e.g., `SAL`, `MARCUS`, `HOLT`)
+- **Visor / mask**: black tactical visor across the eyes with the cast member's name in **glowing orange LED-style block letters** centered (Sal's visor in the canonical image reads `SAL`); a black cloth mask covers the lower face below the visor
+- **Shirt under jacket**: high-collar dark charcoal/black under-shirt — visible at the neck above the open jacket
+- **Pants**: cream / khaki chinos (NOT dark — this is a 2026-04-29 correction from the prior dark-canvas spec; the canonical reference shows light cream chinos)
+- **Belt**: brown leather belt
+- **Watch**: gold-toned timepiece on the right wrist
+- **Bracelet**: dark beaded bracelet on the right wrist (Sal's canonical detail; optional for other cast — set per persona)
+- **Apron** (when at the bar — optional): cream linen, ribbon or buckle waist tie
 
 #### Women (Southern Belle dresses + sun dresses)
 
