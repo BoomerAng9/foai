@@ -1,3 +1,4 @@
+<<<<<<< Updated upstream
 # Coastal Brewing Co. — Proposed Product List
 
 **Drafted by**: Sqwaadrun research lane
@@ -295,11 +296,248 @@ If owner approves PIVOT to Numi or Rishi for verified dual-cert teas, the SKUs b
 - **Proposed margin floor**: $7.00
 - **Customer-facing blurb**: "30g of single-estate ceremonial matcha every month. The slow-morning subscription."
 - **Pricing rationale**: $2 below single-purchase MSRP. Niche but high-LTV audience.
+=======
+# Coastal Brewing Co. — Proposed Product List (v2)
+
+**Drafted by**: Sqwaadrun research lane + inline finish
+**Date**: 2026-04-29 (v2)
+**Authority**: Owner directives 2026-04-29 — single Organic OR Fairtrade cert acceptable; Coastal MSRPs deferred (competitor reference bands only); Temecula primary; Lowcountry House Blend OK if Temecula offers custom-mix
+**Sources**: `vendor-temecula-organic-fairtrade.csv` + `industry-pricing-comparison.csv` + `temecula-custom-blend.md` (this folder)
+
+> **What changed from v1:** Single-cert filter (relaxed from dual-cert). Coastal MSRPs / wholesale costs / margin floors REMOVED — owner deferred pricing decisions. Competitor reference price bands replace them. Lowcountry House Blend resolution updated per the Temecula custom-blend memo (private-label rebrand OK; from-scratch custom recipes are not self-serve).
+
+---
+
+## Owner status of the three v1 decisions
+
+1. ~~Tea/matcha cert problem (dual-cert required)~~ → **RESOLVED** by owner directive 2026-04-29: single cert acceptable.
+2. ~~Pricing band (hold $18 vs move $19-20)~~ → **DEFERRED** by owner directive 2026-04-29: pricing not important right now.
+3. ~~Lowcountry House Blend keep vs rename~~ → **RESOLVED** by owner directive 2026-04-29: keep IF Temecula offers a custom mix. Per `temecula-custom-blend.md` verdict: PARTIAL (private-label OK with no MOQ, same-day shipping; from-scratch custom recipe is a sales-rep conversation).
+
+---
+
+## SKU summary
+
+| Category | Source vendor | Coastal SKUs |
+|---|---|---|
+| Coffee — Fairtrade single-origin | Temecula (verified) | 6 |
+| Coffee — Lowcountry House Blend (private-label rebrand) | Temecula | 1 |
+| Tea — Organic ingredient-level | Temecula (verified) | 4 |
+| Tea — Jasmine (brand-canon §11 motif requirement) | Numi or Rishi (Temecula doesn't qualify) | 1 |
+| Matcha — JAS Organic ceremonial | Mizuba (Temecula doesn't qualify) | 1 |
+| Subscriptions | Composed from above | 3 |
+| Bundles | Composed from above | 3 |
+| **Total** | — | **19** |
+
+---
+
+## Coffee SKUs
+
+### `coastal-colombia-fairtrade-12oz`
+- **Name**: Coastal Colombia Fairtrade
+- **Category**: coffee · single-origin · medium roast
+- **Size**: 12oz
+- **Vendor source SKU**: TCR-FT-COLOMBIA-12OZ
+- **Certifications**: Fairtrade ✅
+- **Origin**: Tolima, Colombia
+- **Flavor notes**: Caramel sweetness, citrus brightness, milk chocolate finish
+- **Vendor retail (Temecula collection page)**: $19.49
+- **Competitor reference price band** (FT/Organic-leaning 12oz single-origin):
+  - Low: $18.00 (Blue Bottle Three Africas — non-cert)
+  - Median: $19.75 (Equator FT-Organic; Verve)
+  - High: $24.49 (Temecula FT Sumatra direct)
+  - Sample size: 7 comps from `industry-pricing-comparison.csv`
+- **Customer-facing blurb**: Bright Colombian Fairtrade — caramel and citrus, the cup that wakes the day up clean. Sourced through verified Tolima cooperatives.
+- **Pricing TBD note**: Coastal MSRP deferred per owner directive 2026-04-29.
+
+### `coastal-guatemala-fairtrade-12oz`
+- **Name**: Coastal Guatemala Fairtrade
+- **Category**: coffee · single-origin · medium roast
+- **Size**: 12oz
+- **Vendor source SKU**: TCR-FT-GUATEMALA-12OZ
+- **Certifications**: Fairtrade ✅
+- **Origin**: San Marcos, Guatemala
+- **Flavor notes**: Clean cup, milk chocolate, soft fruit, balanced acidity
+- **Vendor retail**: $19.49
+- **Competitor reference price band**: Same as Colombia (single-origin 12oz band, N=7)
+- **Customer-facing blurb**: A clean, honest Guatemalan medium — milk chocolate and soft fruit, the kind of cup that doesn't ask for attention but rewards it.
+
+### `coastal-peru-fairtrade-12oz` ⭐ flagship
+- **Name**: Coastal Peru Fairtrade — Clean Coffee Project
+- **Category**: coffee · single-origin · medium roast
+- **Size**: 12oz
+- **Vendor source SKU**: TCR-FT-PERU-12OZ (a.k.a. TCR-CCP-CLEAN-PERU)
+- **Certifications**: Fairtrade ✅ + **Eurofins lab-tested** (glyphosate-free, heavy-metals clean, mycotoxin clean) — the SOLE Temecula product currently in the Clean Coffee Project
+- **Origin**: Amazonas, Peru (1600-1800m)
+- **Flavor notes**: Lemon, herbal, milk chocolate, medium acidity, smooth body
+- **Vendor retail**: $19.49
+- **Competitor reference price band**: Single-origin 12oz band (N=7). Note: no comparable comp carries lab-tested clean cert — this SKU has an outsized "every cup is what the label says it is" story.
+- **Customer-facing blurb**: Lab-clean Peru. Glyphosate-free, heavy-metal-tested, mycotoxin-tested — the literal proof of "every cup is what the label says it is." Lemon and herbal lift over a smooth chocolate body.
+- **Note**: This is the strongest single-SKU brand-asset on the Temecula line. Recommend front-of-store positioning + dedicated product page treatment.
+
+### `coastal-peru-decaf-fairtrade-12oz`
+- **Name**: Coastal Peru Decaf — Swiss Water Process
+- **Category**: coffee · single-origin · decaf · medium roast
+- **Size**: 12oz
+- **Vendor source SKU**: TCR-FT-PERU-DECAF-12OZ
+- **Certifications**: Fairtrade ✅ + **Swiss Water Process** (chemical-free decaffeination — pairs with Coastal "nothing chemically, ever" brand promise)
+- **Origin**: Amazonas, Peru
+- **Flavor notes**: Smooth body, mild chocolate, low acidity
+- **Vendor retail**: $19.49
+- **Competitor reference price band** (decaf 12oz):
+  - Low: $16.44 (Death Wish 16oz scaled — mass-tier)
+  - Median: $17.99 (Counter Culture Slow Motion — Organic + Swiss Water)
+  - Sample size: 2 comps (thin — surface for owner)
+- **Customer-facing blurb**: Decaf without the chemicals. Swiss Water Process, Fairtrade Peru — the cup you can drink at 4pm without thinking twice.
+
+### `coastal-honduras-fairtrade-12oz`
+- **Name**: Coastal Honduras Fairtrade
+- **Category**: coffee · single-origin · medium/dark roast
+- **Size**: 12oz
+- **Vendor source SKU**: TCR-FT-HONDURAS-12OZ
+- **Certifications**: Fairtrade ✅
+- **Origin**: Copán, Honduras
+- **Flavor notes**: Cocoa, brown sugar, walnut, smooth body
+- **Vendor retail**: $19.49
+- **Competitor reference price band** (dark-roast 12oz):
+  - Low: $16.44 (Death Wish — mass)
+  - Median: $19.75 (Equator French Roast — FT-Organic)
+  - High: $21.99 (Counter Culture Forty-Six — Organic)
+  - Sample size: 3 comps
+- **Customer-facing blurb**: Cocoa and brown sugar from the Copán hills. The dark-roast complement to the Sumatra — a porch cup with patience.
+
+### `coastal-sumatra-fairtrade-12oz` ⭐ anchor
+- **Name**: Coastal Sumatra Fairtrade
+- **Category**: coffee · single-origin · medium/dark roast
+- **Size**: 12oz
+- **Vendor source SKU**: TCR-FT-SUMATRA-12OZ
+- **Certifications**: Fairtrade ✅ (Note: Temecula's URL slug includes "organic" but customer-service confirmed organic cert is in-progress, not yet certified)
+- **Origin**: Aceh / Takengon, Indonesia (1100-1600m, KBQB cooperative, Giling Basha wet-hull, Grade 1 Triple Pick)
+- **Flavor notes**: Dark chocolate, dried fruit, earthy, syrupy body, lingering finish
+- **Vendor retail**: $19.49 (collection page) / $24.49 (detail page) — **price discrepancy flagged for owner verification with Temecula**
+- **Competitor reference price band**: Single-origin 12oz band (N=7) skewed toward the high end given dark-roast premium.
+- **Customer-facing blurb**: The slow-roast porch cup. Dark chocolate, dried fruit, syrupy body — the Sumatra that earns its place on the shelf.
+- **Open question**: Confirm with Temecula which retail price is canonical ($19.49 collection vs $24.49 detail) before any pricing decision.
+
+### `lowcountry-house-blend-12oz` (kept — private-label rebrand)
+- **Name**: Lowcountry House Blend
+- **Category**: coffee · house blend · medium roast
+- **Size**: 12oz
+- **Vendor source SKU**: TBD — Temecula private-label rebrand of one of:
+  - Temecula's existing "Breakfast Blend" or "Cowboy Blend" (their own house blends — needs verification on Fairtrade status)
+  - OR rebrand of `TCR-FT-COLOMBIA-12OZ` or `TCR-FT-GUATEMALA-12OZ` as the "house" cup (both are Fairtrade medium roasts that fit a house-blend register)
+- **Certifications**: Fairtrade ✅ (inherits Temecula's cert under private-label per the custom-blend memo)
+- **Origin**: TBD per chosen base SKU
+- **Flavor notes**: Smooth medium-roast house blend — the daily-cup default
+- **Vendor retail**: $19.49 (matches whichever Fairtrade single-origin we rebrand from)
+- **Competitor reference price band**: Single-origin 12oz band (N=7)
+- **Customer-facing blurb**: The Lowcountry House Blend — every-morning coffee, low-key, the cup you don't have to think about. A medium-roast Fairtrade, ground or whole bean.
+- **Owner decision**: Pick the base SKU. Recommend Colombia (mid-acidity, caramel, milk chocolate) as the most "house-blend appropriate" of the verified Fairtrade Temecula coffees.
+
+---
+
+## Tea SKUs
+
+### `coastal-masala-chai-3oz`
+- **Name**: Coastal Masala Chai
+- **Category**: tea · chai
+- **Size**: 3oz
+- **Vendor source SKU**: TCR-TEA-MASALACHAI-3OZ
+- **Certifications**: Organic ingredient-level (Assam black + organic cardamom, clove, ginger, cinnamon, star anise, black pepper) ✅
+- **Vendor retail**: $19.99
+- **Competitor reference price band** (loose-leaf tea 3oz / 50ct sachets):
+  - Low: $19.99 (Harney & Sons English Breakfast 50ct)
+  - Median: $19.99 (Harney & Sons across line)
+  - High: $19.99 (Harney & Sons Earl Grey Supreme 50ct)
+  - Sample size: 3 comps (Harney sets the heritage-blender band)
+- **Customer-facing blurb**: Whole-spice masala chai — Assam, cardamom, clove, ginger, cinnamon, black pepper. The cup that warms the porch in February.
+
+### `coastal-english-breakfast-3oz`
+- **Name**: Coastal English Breakfast
+- **Category**: tea · black
+- **Vendor source SKU**: TCR-TEA-ENGLISHBREAKFAST-3OZ
+- **Certifications**: Organic ingredient-level (Assam TGFOP + Ceylon OP + 2nd Flush Darjeeling) ✅
+- **Vendor retail**: $19.99
+- **Competitor reference price band**: Same as masala chai (heritage-blender band, $19.99 across Harney)
+- **Customer-facing blurb**: Whole-leaf English Breakfast — Assam, Ceylon, Darjeeling. Strong, complete, no shortcut.
+
+### `coastal-moroccan-mint-3oz`
+- **Name**: Coastal Moroccan Mint
+- **Category**: tea · green
+- **Vendor source SKU**: TCR-TEA-MOROCCANMINT-3OZ
+- **Certifications**: Organic ingredient-level (gunpowder green + spearmint + peppermint) ✅
+- **Vendor retail**: $19.99
+- **Competitor reference price band**: Heritage-blender band ($19.99) + Numi green-bagged ($8.99 / 18ct = ~$0.50/bag, low-tier sachet pricing). Loose-leaf positioning aligns with $19.99 band.
+- **Customer-facing blurb**: Green tea + mint, the way it's done from Marrakech to Charleston. Whole-leaf, organic, ready for sweet tea or hot pour.
+
+### `coastal-hibiscus-berry-rooibos-3oz` ⭐ strongest organic story
+- **Name**: Coastal Hibiscus Berry Rooibos
+- **Category**: tea · herbal · caffeine-free
+- **Vendor source SKU**: TCR-TEA-HIBISCUSBERRYROOIBOS-3OZ
+- **Certifications**: Organic ingredient-level — **7 organic ingredients** (hibiscus flowers, rosehips, orange peel, rooibos, blueberry, passionfruit, mango flavors)
+- **Vendor retail**: $19.99
+- **Competitor reference price band**: Heritage band ($19.99). Premium for the 7-organic-ingredient story.
+- **Customer-facing blurb**: Caffeine-free hibiscus and rooibos with seven organic ingredients on the label. The afternoon cup that doesn't keep you up.
+
+### `coastal-jasmine-green-loose-3oz` (Temecula doesn't qualify — Numi or Rishi)
+- **Name**: Coastal Jasmine Green
+- **Category**: tea · green · jasmine
+- **Vendor source SKU**: TBD — `SECONDARY-NUMI-FT-ORGANIC-18CT` (sachets) OR `SECONDARY-RISHI-LOOSE-LEAF-LB` (loose-leaf)
+- **Certifications**: USDA Organic + Fairtrade (Numi) OR Organic + Direct Trade (Rishi)
+- **Vendor retail**: Numi $8.99 / 18ct (small format) or Rishi $60 / lb wholesale
+- **Competitor reference price band** (jasmine green):
+  - Low: $8.99 (Numi 18ct)
+  - High: ~$30 / 3oz loose-leaf retail equivalent (Rishi at $60/lb scaled)
+  - Sample size: 2 comps (thin — owner verify)
+- **Customer-facing blurb**: Jasmine green, hand-paired with cut jasmine flowers. Tea that smells like the porch in May.
+- **Note**: Brand canon §11 makes Jasmine Tea a load-bearing motif (cut jasmine branches placed beside the Jasmine Tea tins on the storefront). This SKU exists because Temecula's Jasmine doesn't carry Organic or Fairtrade markers. Owner picks: Numi sachet (cheaper, dual-cert, smaller SKU) or Rishi loose-leaf (premium, supports the loose-leaf storyline + 5gal twine-wrapped jar visual in §11.3 warehouse).
+
+---
+
+## Matcha SKU
+
+### `coastal-ceremonial-matcha-30g` (Temecula doesn't qualify — Mizuba)
+- **Name**: Coastal Ceremonial Matcha
+- **Category**: matcha · ceremonial-grade
+- **Size**: 30g
+- **Vendor source SKU**: `SECONDARY-MIZUBA-YOROKOBI-30G`
+- **Certifications**: JAS Organic + single-estate ✅
+- **Origin**: Uji, Kyoto (single-estate)
+- **Flavor notes**: Vibrant emerald, deep umami, no bitterness
+- **Vendor retail**: $40.00
+- **Competitor reference price band** (ceremonial matcha 30g):
+  - Low: $24.99 (Temecula 1oz — non-cert)
+  - Median: $28.00 (Ippodo Kan — heritage Kyoto, no export cert)
+  - High: $40.00 (Mizuba Yorokobi — JAS-Organic single-estate, our source)
+  - Sample size: 3 comps
+- **Customer-facing blurb**: Ceremonial matcha from a single Uji estate — the way matcha is meant to be: stone-milled, vibrant, no bitter. Whisked the way it should be.
+- **Note**: Mizuba Yorokobi at $40 is the high end of the band. Coastal MSRP TBD per owner pricing-deferred directive; premium positioning is appropriate.
+
+---
+
+## Subscription SKUs
+
+### `coastal-coffee-monthly`
+- **Composition**: One 12oz Fairtrade single-origin per month, customer chooses or rotates
+- **Source SKUs available**: `coastal-colombia-fairtrade-12oz`, `coastal-guatemala-fairtrade-12oz`, `coastal-peru-fairtrade-12oz`, `coastal-honduras-fairtrade-12oz`, `coastal-sumatra-fairtrade-12oz`, `lowcountry-house-blend-12oz`
+- **Competitor reference**: Atlas Coffee Club $14/month (mass tier rotation); Trade Coffee $15-22/month (specialty curated). Sample size: 2 (thin — surface).
+- **Customer-facing blurb**: One Fairtrade single-origin a month. Pick yours, or let us rotate.
+
+### `coastal-tea-monthly`
+- **Composition**: One 3oz tea per month
+- **Source SKUs**: 4 Temecula organic teas + Coastal Jasmine Green
+- **Customer-facing blurb**: One whole-leaf tea a month. From masala chai to jasmine green.
+
+### `coastal-combo-monthly`
+- **Composition**: 1 coffee + 1 tea per month
+- **Customer-facing blurb**: Coffee and tea, monthly. One subscription, one cancellation.
+>>>>>>> Stashed changes
 
 ---
 
 ## Bundle SKUs
 
+<<<<<<< Updated upstream
 ### `coffee-tea-discovery-bundle` (UPDATE existing)
 
 - **Name**: Coastal Discovery Bundle
@@ -380,3 +618,34 @@ All SKUs above min_margin_floor at MSRP. Floor breaches only triggered at >25% p
 - Death Wish: [Walmart 16oz](https://www.walmart.com/ip/Death-Wish-Coffee-Organic-and-Fair-Trade-Dark-Roast-Ground-Coffee-16oz/120705196)
 - Harney & Sons: [English Breakfast 50ct](https://www.harney.com/products/english-breakfast-50-sachet-bag) / [Earl Grey 50ct](https://www.harney.com/products/earl-grey-bag-of-50-sachets)
 - Ippodo Tea: [Kan 30g via Kanso](https://kanso-tea.com/products/kan-by-ippodo-tea)
+=======
+### `coastal-discovery-bundle`
+- **Composition**: Sample of 1 coffee (e.g., Peru) + 1 tea (e.g., Hibiscus Rooibos) + 1 matcha trial
+- **Use case**: First-time customer "what does Coastal taste like?"
+- **Competitor reference**: Temecula sample-pack $30; Equator FT-Organic set ~$45. Sample size: 2.
+- **Customer-facing blurb**: The starter trio. Coffee, tea, matcha — three sips of the line in one box.
+
+### `coastal-pantry-refill`
+- **Composition**: 2x 12oz coffee + 2x 3oz tea — bulk-friendly
+- **Use case**: Returning customer "stock up the pantry"
+- **Customer-facing blurb**: The pantry box. Two coffees, two teas — the month's run in one ship.
+
+### `coastal-gift-bundle`
+- **Composition**: Curated gift box — 1x 12oz coffee (Lowcountry House Blend or Sumatra) + 1x 3oz tea + ceramic cup
+- **Customer-facing blurb**: A gift the recipient will actually use. Coffee, tea, and a cup made for them.
+
+---
+
+## Two highest-priority owner decisions remaining
+
+1. **Lowcountry House Blend base** — pick the Temecula SKU to private-label-rebrand. Recommendation: `TCR-FT-COLOMBIA-12OZ` (mid-acidity, caramel + milk chocolate, the most "house-cup" register of the six Fairtrade single-origins). Alternative: confirm with Temecula whether their existing house blends (Breakfast / Cowboy / Blonde / 6-Bean) are Fairtrade-eligible for private-label.
+2. **Jasmine Green source** — Numi (sachets, $8.99 / 18ct, USDA Organic + Fairtrade dual-cert, easy to display in a tin) OR Rishi (loose-leaf, premium, supports the §11.3 5-gallon twine-wrapped jar visual). Recommendation: Rishi loose-leaf for the warehouse / counter visual story; supplement with Numi sachets for at-home convenience tier.
+
+---
+
+## Open follow-ups
+
+- Confirm `TCR-FT-SUMATRA-12OZ` retail price ($19.49 vs $24.49 — Temecula collection vs detail page)
+- Confirm Temecula's Breakfast Blend / Cowboy Blend / Blonde Blend / 6-Bean status (Fairtrade-eligible? Organic ingredient-level?) — opens a possible non-rebrand path for Lowcountry House Blend
+- Confirm Temecula tea/matcha cert documentation if owner wants the full line under their cert (today: ingredient-level organic on 4 teas; whole-product cert NOT visible)
+>>>>>>> Stashed changes
