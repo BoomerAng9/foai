@@ -22,7 +22,7 @@ Cross-pollination layer:
 | cast_id | display_name | gender | accent register | role / scene |
 |---|---|---|---|---|
 | `sal_ang` | Sal_Ang | M | Lowcountry Southern, manager-proper | Head of Sales, marsh-edge pop-up |
-| `hos_ang` | Hos_Ang | F | Lowcountry Southern, manager-proper | Front-of-house counterpart |
+| `hos_ang` | Hos_Ang | M | Lowcountry Southern, manager-proper | Front-of-house counterpart |
 | `bar_ang` | Bar_Ang | M | Belter Creole leaning Gullah-Lowcountry | Pour-over barista, syllable-timed pace |
 | `con_ang` | Con_Ang | F | Belter Creole leaning Gullah-Lowcountry | Consultative cup-finder, softer register |
 | `tas_ang` | Tas_Ang | M | Country Caucasian Southern | Charleston gentleman tasting bar |
