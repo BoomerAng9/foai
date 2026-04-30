@@ -9,14 +9,31 @@ function resolveBase(): string {
   return process.env.COASTAL_RUNNER_INTERNAL || "http://coastal-runner:8080";
 }
 
+export type ProductCategory =
+  | "coffee"
+  | "flavored_coffee"
+  | "specialty_coffee"
+  | "tea"
+  | "matcha"
+  | "kcup"
+  | "instant"
+  | "functional"
+  | "sample_pack"
+  | "bundle"
+  | "subscription";
+
 export type Product = {
   sku: string;
   name: string;
-  category: "coffee" | "tea" | "matcha" | "bundle" | "subscription";
+  category: ProductCategory;
   msrp: number;
   unit: string;
   description?: string;
   image?: string;
+  certifications?: string[];
+  flavor_notes?: string;
+  roast_level?: string;
+  tags?: string[];
 };
 
 export type ChatMessage = {
@@ -31,7 +48,7 @@ export type ChatMessage = {
 interface RunnerCatalogItem {
   id?: string;
   name: string;
-  category: Product["category"];
+  category: ProductCategory;
   size?: string;
   msrp: number;
   blurb?: string;
@@ -39,6 +56,10 @@ interface RunnerCatalogItem {
   image?: string;
   unit?: string;
   sku?: string;
+  certifications?: string[];
+  flavor_notes?: string;
+  roast_level?: string;
+  tags?: string[];
 }
 
 function normalize(item: RunnerCatalogItem, fallbackId?: string): Product {
@@ -50,6 +71,10 @@ function normalize(item: RunnerCatalogItem, fallbackId?: string): Product {
     unit: item.unit || item.size || "each",
     description: item.description || item.blurb,
     image: item.image,
+    certifications: item.certifications,
+    flavor_notes: item.flavor_notes,
+    roast_level: item.roast_level,
+    tags: item.tags,
   };
 }
 
