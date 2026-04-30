@@ -38,6 +38,24 @@ from __future__ import annotations
 
 from typing import Optional
 
+# Internal-only fields that must NEVER appear in any customer-facing API
+# response. Per owner directive 2026-04-30: "we never reveal to the user what
+# our COST is. this can never be known." Public accessors (list_products,
+# get_product) strip these by default. Callers that need cost data (margin
+# calc, equation floor, NemoClaw policy gate) call the *_internal variants.
+_INTERNAL_FIELDS = frozenset({
+    "wholesale_cost",
+    "fulfillment_cost",
+    "min_margin_floor",
+    "vendor_source_sku",
+})
+
+
+def _strip_internal_fields(p: dict) -> dict:
+    """Return a copy of `p` with internal cost / vendor fields removed."""
+    return {k: v for k, v in p.items() if k not in _INTERNAL_FIELDS}
+
+
 # Each product: msrp = public retail; wholesale_cost = what we pay supplier;
 # fulfillment_cost = shipping + handling per unit; min_margin_floor = absolute
 # floor the runner won't authorize a deal below.
@@ -4299,10 +4317,42 @@ def resolve_sku(product_id: str) -> str:
 
 
 def get_product(product_id: str) -> Optional[dict]:
+    """Public-safe product lookup. Strips internal cost fields.
+
+    For server-internal callers that need cost data (margin calc, equation
+    floor, NemoClaw policy gate) use `get_product_internal()` instead.
+    """
+    p = PRODUCTS.get(resolve_sku(product_id))
+    return _strip_internal_fields(p) if p else None
+
+
+def get_product_internal(product_id: str) -> Optional[dict]:
+    """Server-internal product lookup. Returns full dict including cost fields.
+
+    NEVER serialize the result to an HTTP response without first running it
+    through `_strip_internal_fields()`. Customer-facing API routes must call
+    `get_product()` (which strips by default), not this function.
+    """
     return PRODUCTS.get(resolve_sku(product_id))
 
 
 def list_products(category: Optional[str] = None) -> list[dict]:
+    """Public-safe catalog listing. Strips internal cost fields from every entry."""
+    items = []
+    for pid, p in PRODUCTS.items():
+        if category and p.get("category") != category:
+            continue
+        items.append({**_strip_internal_fields(p), "id": pid})
+    return items
+
+
+def list_products_internal(category: Optional[str] = None) -> list[dict]:
+    """Server-internal catalog listing. Includes cost fields.
+
+    Only callers behind the `/admin/*` auth gate or running server-to-server
+    (margin calc, equation floor, audit ledger) should use this. Customer-
+    facing routes use `list_products()` which strips internal fields.
+    """
     items = []
     for pid, p in PRODUCTS.items():
         if category and p.get("category") != category:
@@ -4315,8 +4365,10 @@ def calc_line(product_id: str, qty: int, discount_pct: float = 0.0) -> dict:
     """Compute one-line margin for a product+quantity at a given discount.
 
     Returns a dict with the breakdown. Owner-internal — never exposed to customer.
+    Reads cost fields via `get_product_internal()` since the breakdown depends
+    on `wholesale_cost`, `fulfillment_cost`, and `min_margin_floor`.
     """
-    p = get_product(product_id)
+    p = get_product_internal(product_id)
     if not p:
         return {"error": "product_not_found", "product_id": product_id}
     qty = max(1, int(qty))
@@ -4447,7 +4499,10 @@ def recommend_bundle(preferences: dict) -> dict:
         picks.append("coastal-discovery-bundle")
         rationale.append("Coastal Discovery Bundle — coffee, tea, matcha trio. Best for first-timers.")
 
-    products = [{**PRODUCTS[pid], "id": pid} for pid in picks if pid in PRODUCTS]
+    # Defense-in-depth: strip internal fields from the working dict even
+    # though `picks` below only serializes id/name/size/msrp/blurb. Future
+    # edits to the response shape won't accidentally re-leak cost data.
+    products = [{**_strip_internal_fields(PRODUCTS[pid]), "id": pid} for pid in picks if pid in PRODUCTS]
     customer_total = round(sum(p["msrp"] for p in products), 2)
     return {
         "preferences": preferences,
