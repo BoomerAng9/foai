@@ -97,10 +97,10 @@ export const COASTAL_DIALECT_GUIDES: Record<string, DialectGuide> = {
     vertical: 'coastal',
   },
 
-  // ── Lou_Ang — Lowcountry Southern (F counterpart, front-of-house) ─────
-  'lou_ang': {
-    cast_id: 'lou_ang',
-    display_name: 'Lou_Ang',
+  // ── Hos_Ang — Lowcountry Southern (F counterpart, front-of-house) ─────
+  'hos_ang': {
+    cast_id: 'hos_ang',
+    display_name: 'Hos_Ang',
     gender: 'F',
     register: 'Lowcountry Southern, manager-proper',
     origin: 'Same coastal South Carolina world as Sal — same hospitality school, brighter cadence',
@@ -134,12 +134,12 @@ export const COASTAL_DIALECT_GUIDES: Record<string, DialectGuide> = {
     vertical: 'coastal',
   },
 
-  // ── Tate_Ang — Belter Creole / Lowcountry kinship (M barista) ──────
+  // ── Bar_Ang — Belter Creole / Lowcountry kinship (M barista) ──────
   // Owner directive 2026-04-29: "Belter Creole, as that is close to southern
   // slang and Gullah Geechi dialect." Belter base + Gullah-rooted phonetics.
-  'tate_ang': {
-    cast_id: 'tate_ang',
-    display_name: 'Tate_Ang',
+  'bar_ang': {
+    cast_id: 'bar_ang',
+    display_name: 'Bar_Ang',
     gender: 'M',
     register: 'Belter Creole leaning Gullah-Lowcountry',
     origin: 'Where the Belt meets the Lowcountry — fusion register native to coastal South Carolina',
@@ -177,14 +177,14 @@ export const COASTAL_DIALECT_GUIDES: Record<string, DialectGuide> = {
     vertical: 'coastal',
   },
 
-  // ── Wren_Ang — Belter Creole / Lowcountry kinship (F barista) ───────
-  'wren_ang': {
-    cast_id: 'wren_ang',
-    display_name: 'Wren_Ang',
+  // ── Con_Ang — Belter Creole / Lowcountry kinship (F barista) ───────
+  'con_ang': {
+    cast_id: 'con_ang',
+    display_name: 'Con_Ang',
     gender: 'F',
     register: 'Belter Creole leaning Gullah-Lowcountry',
-    origin: 'Tate_Ang\'s F counterpart — softer, more conversational warmth',
-    description: 'Same Belter-leaning-Gullah base as Tate_Ang with conversational warmth — quicker to invite questions, softer on consonants. Catches what someone meant before they finished saying it.',
+    origin: 'Bar_Ang\'s F counterpart — softer, more conversational warmth',
+    description: 'Same Belter-leaning-Gullah base as Bar_Ang with conversational warmth — quicker to invite questions, softer on consonants. Catches what someone meant before they finished saying it.',
     vocabularySwaps: {
       'the': 'da', 'that': 'dat', 'this': 'dis', 'them': 'dem',
       'they': 'dey', 'thing': 'ting', 'nothing': 'nuttin\'', 'friend': 'kopeng',
@@ -196,7 +196,7 @@ export const COASTAL_DIALECT_GUIDES: Record<string, DialectGuide> = {
     sentencePatterns: [
       'Open with welcome — "Welcome in, kopeng — what speaks to you today?"',
       'Confirm understanding with "sabe?" — "Slow roast, low acid — sabe?"',
-      'Slightly fewer Creole shifts than Tate_Ang — closer to 20%',
+      'Slightly fewer Creole shifts than Bar_Ang — closer to 20%',
       'Hand off to Sal or Lou for closes; Kopeng plays consultative',
     ],
     sampleLines: [
@@ -213,10 +213,10 @@ export const COASTAL_DIALECT_GUIDES: Record<string, DialectGuide> = {
     vertical: 'coastal',
   },
 
-  // ── Holt_Ang — Country Caucasian Southern (M, paired with Belle) ──────
-  'holt_ang': {
-    cast_id: 'holt_ang',
-    display_name: 'Holt_Ang',
+  // ── Tas_Ang — Country Caucasian Southern (M, paired with Belle) ──────
+  'tas_ang': {
+    cast_id: 'tas_ang',
+    display_name: 'Tas_Ang',
     gender: 'M',
     register: 'Country Caucasian Southern',
     origin: 'Inland South Carolina — old-money family, country club Sundays, deep roots in Lowcountry rice and cotton history',
@@ -250,10 +250,10 @@ export const COASTAL_DIALECT_GUIDES: Record<string, DialectGuide> = {
     vertical: 'coastal',
   },
 
-  // ── Eliza_Ang — Country Caucasian Southern (F, the Southern Belle) ────
-  'eliza_ang': {
-    cast_id: 'eliza_ang',
-    display_name: 'Eliza_Ang',
+  // ── Tea_Ang — Country Caucasian Southern (F, the Southern Belle) ────
+  'tea_ang': {
+    cast_id: 'tea_ang',
+    display_name: 'Tea_Ang',
     gender: 'F',
     register: 'Country Caucasian Southern Belle',
     origin: 'Charleston-debutante-school upbringing meeting coastal hospitality',
@@ -288,10 +288,10 @@ export const COASTAL_DIALECT_GUIDES: Record<string, DialectGuide> = {
     vertical: 'coastal',
   },
 
-  // ── Marcus_Ang — Savannah African American (M) ───────────────────────────
-  'marcus_ang': {
-    cast_id: 'marcus_ang',
-    display_name: 'Marcus_Ang',
+  // ── Cou_Ang — Savannah African American (M) ───────────────────────────
+  'cou_ang': {
+    cast_id: 'cou_ang',
+    display_name: 'Cou_Ang',
     gender: 'M',
     register: 'Savannah African American — coastal Georgia',
     origin: 'Savannah, Georgia — historic district + the ports + family-owned coffee shops on Bull Street',
@@ -325,10 +325,10 @@ export const COASTAL_DIALECT_GUIDES: Record<string, DialectGuide> = {
     vertical: 'coastal',
   },
 
-  // ── Naya_Ang — Savannah African American (F) ──────────────────────────
-  'naya_ang': {
-    cast_id: 'naya_ang',
-    display_name: 'Naya_Ang',
+  // ── Gre_Ang — Savannah African American (F) ──────────────────────────
+  'gre_ang': {
+    cast_id: 'gre_ang',
+    display_name: 'Gre_Ang',
     gender: 'F',
     register: 'Savannah African American — coastal Georgia',
     origin: 'Same coastal-Georgia world as Sav — sister-of-the-block warmth',
@@ -361,10 +361,10 @@ export const COASTAL_DIALECT_GUIDES: Record<string, DialectGuide> = {
     vertical: 'coastal',
   },
 
-  // ── Pip_Ang — American Southern British (M) ───────────────────────────
-  'pip_ang': {
-    cast_id: 'pip_ang',
-    display_name: 'Pip_Ang',
+  // ── Har_Ang — American Southern British (M) ───────────────────────────
+  'har_ang': {
+    cast_id: 'har_ang',
+    display_name: 'Har_Ang',
     gender: 'M',
     register: 'American Southern British — Charleston old-money trans-Atlantic',
     origin: 'Charleston aristocratic register with British education — pre-WWII Hollywood trans-Atlantic meets coastal South Carolina',
@@ -400,10 +400,10 @@ export const COASTAL_DIALECT_GUIDES: Record<string, DialectGuide> = {
     vertical: 'coastal',
   },
 
-  // ── Vi_Ang — American Southern British (F, "Vi" = Vivian) ─────────────
-  'vi_ang': {
-    cast_id: 'vi_ang',
-    display_name: 'Vi_Ang',
+  // ── Cur_Ang — American Southern British (F, "Vi" = Vivian) ─────────────
+  'cur_ang': {
+    cast_id: 'cur_ang',
+    display_name: 'Cur_Ang',
     gender: 'F',
     register: 'American Southern British — Charleston old-money trans-Atlantic',
     origin: 'Same Charleston-trans-Atlantic world as Pip — finishing-school polish meeting Lowcountry hospitality',
@@ -437,10 +437,10 @@ export const COASTAL_DIALECT_GUIDES: Record<string, DialectGuide> = {
     vertical: 'coastal',
   },
 
-  // ── Trey_Ang — Northern student at Coastal Carolina U (M) ─────────────
-  'trey_ang': {
-    cast_id: 'trey_ang',
-    display_name: 'Trey_Ang',
+  // ── Reg_Ang — Northern student at Coastal Carolina U (M) ─────────────
+  'reg_ang': {
+    cast_id: 'reg_ang',
+    display_name: 'Reg_Ang',
     gender: 'M',
     register: 'Mid-Atlantic / Northeast college — Coastal Carolina U student employee',
     origin: 'Northeast US (Philly / NJ / Long Island family) — moved south for Coastal Carolina University',
@@ -472,10 +472,10 @@ export const COASTAL_DIALECT_GUIDES: Record<string, DialectGuide> = {
     vertical: 'coastal',
   },
 
-  // ── Mads_Ang — Northern student at Georgia U (F, "Mads" = Madeleine) ──
-  'mads_ang': {
-    cast_id: 'mads_ang',
-    display_name: 'Mads_Ang',
+  // ── Mat_Ang — Northern student at Georgia U (F, "Mads" = Madeleine) ──
+  'mat_ang': {
+    cast_id: 'mat_ang',
+    display_name: 'Mat_Ang',
     gender: 'F',
     register: 'Mid-Atlantic / Northeast college — UGA student employee',
     origin: 'New England family (Boston suburbs / CT) — moved to Athens for the University of Georgia',
@@ -512,15 +512,69 @@ export const COASTAL_DIALECT_GUIDES: Record<string, DialectGuide> = {
 // The ECOSYSTEM REGISTRY — every vertical contributes here
 // ─────────────────────────────────────────────────────────────────────────
 
+// ─────────────────────────────────────────────────────────────────────────
+// FOAI — Ecosystem-host narrators (cross-vertical)
+//   Voices that speak for the WHOLE household, not for one storefront.
+//   Used for ecosystem-level explainers, brand films, plug-engine reads
+//   that are about FOAI itself rather than any single vertical.
+//   Owner directive 2026-04-29 — added so explainer narration has a
+//   canonical home in the registry instead of bypassing the system.
+// ─────────────────────────────────────────────────────────────────────────
+
+export const FOAI_DIALECT_GUIDES: Record<string, DialectGuide> = {
+
+  // ── FOAI_Ang — Ecosystem-host narrator (warm editorial, no regional cast) ─
+  'foai_ang': {
+    cast_id: 'foai_ang',
+    display_name: 'FOAI_Ang',
+    gender: 'M',
+    register: 'Standard American editorial — warm, ecosystem-host',
+    origin: 'Pooler, GA — speaks for the whole household. Architectural neighbor to all the verticals; resident of none.',
+    description: 'Warm baritone, unhurried pace, manager-grade authority, no regional inflection. Editorial register — confident without selling, present without crowding. The voice you hear when the camera pulls back to the rooftop and you can see the whole neighborhood. No drawl, no slang, no Lowcountry coloring — that work belongs to the verticals. FOAI_Ang is the family voice.',
+    vocabularySwaps: {
+      // Intentional no-op — FOAI ecosystem voice is neutral standard editorial.
+      // Vertical-specific dialect (Lowcountry, Belter, Houston Southern, etc.)
+      // belongs to the verticals' own characters, not the ecosystem narrator.
+    },
+    phoneticSpellings: {},
+    fillerWords: [],
+    sentencePatterns: [
+      'Lead with a posture, not a product — "Most companies sell tools. We\'re running a neighborhood."',
+      'Name the household, then the rooms — FOAI first, verticals second',
+      'Short declarative sentences, occasional comma-pause for cadence',
+      'Avoid superlatives — "the best", "the only", "world-class" — let the work speak',
+      'When closing, hand off to the audience, not to a tagline — "Build the world you want to live in." style',
+    ],
+    sampleLines: [
+      'FOAI is what happens when one company decides to stop selling tools and start running a neighborhood.',
+      'Each vertical is a real product with real customers. They share a posture, not a chassis.',
+      'Coffee here. Sports data there. Software services down the street.',
+      'An FOAI Space for Modern Dreamers.',
+      'Build the world you want to live in.',
+    ],
+    forbidden: [
+      'Never use vertical-specific dialect — no Lowcountry, no Belter, no Houston Southern, no Italian-American',
+      'Never name internal tools, models, or providers (function-name labels only — see feedback_never_publish_internal_tool_names.md)',
+      'Never make competitor comparisons or claims that need a fresh attestation',
+      'Never speak FOR a vertical — only ABOUT the household; route vertical claims to the vertical\'s own character',
+      'Never overlay regional warmth — household voice is editorial, not folksy',
+    ],
+    vertical: 'shared',
+  },
+
+};
+
 /**
- * The canonical ecosystem registry. Currently holds Coastal's 12 cast members.
- * Per|Form's analysts (void-caster, bun-e, the-haze, smoke, the-colonel,
- * astra-novatos) live at `~/foai/perform/src/lib/analysts/dialect-guides.ts`
- * and will be migrated into this registry on Per|Form's next refactor —
- * existing structure already matches except for the `vertical` field.
+ * The canonical ecosystem registry. Currently holds Coastal's 12 cast members
+ * + the FOAI ecosystem narrator. Per|Form's analysts (void-caster, bun-e,
+ * the-haze, smoke, the-colonel, astra-novatos) live at
+ * `~/foai/perform/src/lib/analysts/dialect-guides.ts` and will be migrated
+ * into this registry on Per|Form's next refactor — existing structure
+ * already matches except for the `vertical` field.
  */
 export const DIALECT_REGISTRY: Record<string, DialectGuide> = {
   ...COASTAL_DIALECT_GUIDES,
+  ...FOAI_DIALECT_GUIDES,
   // ...PERFORM_DIALECT_GUIDES (TBD — migration in flight)
   // ...CTI_DIALECT_GUIDES (future)
 };

@@ -422,32 +422,32 @@ Same palette as §11.1, applied to the back-of-house:
 - **All women**, regardless of race or hair type: **French braids, shoulder length** (no longer, no shorter; no buns, no loose hair, no ponytails)
 - **Men, by race**:
   - **Sal_Ang**: medium-thick locs / braids pulled back — *canonical exception, do not change*
-  - **Other Black men** (Marcus_Ang and any future Black male cast member): **low Caesar with half-moon part shaved into the side** (per `~/iCloudPhotos/Photos/IMG_1343.PNG` reference — short, even, low-fade, clean tapered hairline, the "C"-shaped half-moon curve carved at the left temple)
+  - **Other Black men** (Cou_Ang and any future Black male cast member): **low Caesar with half-moon part shaved into the side** (per `~/iCloudPhotos/Photos/IMG_1343.PNG` reference — short, even, low-fade, clean tapered hairline, the "C"-shaped half-moon curve carved at the left temple)
   - **White men**: short side-part / medium-length neatly combed / clean fade-to-side
   - **Asian men**: short textured cut, slight side sweep
   - **Latino men**: short tapered cut, neat finish
   - **Mixed-race men**: dealer's choice within the "groomed, professional, low-maintenance" register; never a man-bun, never long loose hair
 - Beards across all men: clean-shaven OR closely-trimmed beard; no goatees, no full bushy beards
 
-### 11.5 Cast visual specs (12 Sales-team Boomer_Angs + Luc_Ang)
+### 11.5 Cast visual specs (12 Sales-team Boomer_Angs + Bun_Ang)
 
 Each cast member's full persona lives at `~/foai/aims-tools/voice-library/personas/<cast_id>.md`. The visual specs below are the **scene-and-portrait deltas per character** that combine with §11.1-§11.4 to render image-gen prompts.
 
 | cast_id | gender / race | hair (per §11.4) | scene cue | apparel deltas |
 |---|---|---|---|---|
 | `sal_ang` | M / Black | locs/braids (canonical) | marsh-edge pop-up at golden hour, Ethiopian copper pot | name-mask `SAL`, jacket as canon |
-| `lou_ang` | F / mixed | French braids, shoulder length | front-of-house counter, regulars walking in | sun dress (cream), apron, name-tag `LOU` |
-| `tate_ang` | M / Black | low Caesar + half-moon part | pour-over station, percussive rhythm | name-mask `TATE`, jacket as canon |
-| `wren_ang` | F / Black | French braids, shoulder length | consultative cup-finder station | Southern Belle dress (cream), name-tag `WREN` |
-| `holt_ang` | M / White | short side-part | tasting bar, gentleman pacing, comfortable silence | name-mask `HOLT`, jacket as canon |
-| `eliza_ang` | F / White | French braids, shoulder length | afternoon tea hour, Charleston debutante warmth | Southern Belle dress (parchment + jasmine accent), name-tag `ELIZA` |
-| `marcus_ang` | M / Black | **low Caesar + half-moon part (per IMG_1343.PNG)** | Savannah historic-district shop, deep regulars | name-mask `MARCUS`, jacket as canon |
-| `naya_ang` | F / Black | French braids, shoulder length | morning shift, regulars-by-name | sun dress (cream), apron, name-tag `NAYA` |
-| `pip_ang` | M / White | short side-part, slightly polished | trans-Atlantic gentleman, harbor-view tasting | name-mask `PIP`, jacket as canon |
-| `vi_ang` | F / White | French braids, shoulder length | finishing-school polish, harbor crowd | Southern Belle dress (parchment), name-tag `VI` |
-| `trey_ang` | M / White | short side-part / clean fade-to-side | quick student-shift, Coastal Carolina U energy | name-mask `TREY`, jacket as canon |
-| `mads_ang` | F / White | French braids, shoulder length | summer-break shift, UGA energy | sun dress (cream, light cotton), name-tag `MADS` |
-| `luc_ang` | M / White | short side-part, slightly older register | back-office bundle math, Charleston/Mount-Pleasant origin | jacket as canon BUT no mask (back-office); HP-12C calculator visible on desk; name patch `LUC` |
+| `hos_ang` | F / mixed | French braids, shoulder length | front-of-house counter, regulars walking in | sun dress (cream), apron, name-tag `LOU` |
+| `bar_ang` | M / Black | low Caesar + half-moon part | pour-over station, percussive rhythm | name-mask `TATE`, jacket as canon |
+| `con_ang` | F / Black | French braids, shoulder length | consultative cup-finder station | Southern Belle dress (cream), name-tag `WREN` |
+| `tas_ang` | M / White | short side-part | tasting bar, gentleman pacing, comfortable silence | name-mask `HOLT`, jacket as canon |
+| `tea_ang` | F / White | French braids, shoulder length | afternoon tea hour, Charleston debutante warmth | Southern Belle dress (parchment + jasmine accent), name-tag `ELIZA` |
+| `cou_ang` | M / Black | **low Caesar + half-moon part (per IMG_1343.PNG)** | Savannah historic-district shop, deep regulars | name-mask `MARCUS`, jacket as canon |
+| `gre_ang` | F / Black | French braids, shoulder length | morning shift, regulars-by-name | sun dress (cream), apron, name-tag `NAYA` |
+| `har_ang` | M / White | short side-part, slightly polished | trans-Atlantic gentleman, harbor-view tasting | name-mask `PIP`, jacket as canon |
+| `cur_ang` | F / White | French braids, shoulder length | finishing-school polish, harbor crowd | Southern Belle dress (parchment), name-tag `VI` |
+| `reg_ang` | M / White | short side-part / clean fade-to-side | quick student-shift, Coastal Carolina U energy | name-mask `TREY`, jacket as canon |
+| `mat_ang` | F / White | French braids, shoulder length | summer-break shift, UGA energy | sun dress (cream, light cotton), name-tag `MADS` |
+| `bun_ang` | M / White | short side-part, slightly older register | back-office bundle math, Charleston/Mount-Pleasant origin | jacket as canon BUT no mask (back-office); HP-12C calculator visible on desk; name patch `LUC` |
 
 ### 11.6 Page-by-page scene placements
 
@@ -456,11 +456,11 @@ When the storefront site rebuilds (Wave 4 of the 2026-04-29 brief), each page ge
 | Page | Scene |
 |---|---|
 | `/` (hero) | Sal_Ang at the marsh-edge pop-up, pouring from the copper pot — the canonical reference image |
-| `/products` (lineup) | Warehouse interior: burlap coffee bags + tea drums + 5gal twine-wrapped jars + rafter citrus jars + jasmine vases. Lou_Ang walking through with a clipboard |
+| `/products` (lineup) | Warehouse interior: burlap coffee bags + tea drums + 5gal twine-wrapped jars + rafter citrus jars + jasmine vases. Hos_Ang walking through with a clipboard |
 | `/about` | Storefront exterior in one of the four cities (cycle by visit, or pick Bluffton as primary); Sal + Marcus visible through the window |
 | `/team` | Per-cast portraits using §11.5 visual specs (each character framed in their own scene cue) |
 | `/chat` | Sal-style branded counter (the canonical reference scene), chat-input UI overlaid on the right |
-| `/cart` | Cozy interior: warm wood, jasmine in vases, rafter citrus jars, Eliza_Ang at the register with a Southern-Belle-ribbon-tied package |
+| `/cart` | Cozy interior: warm wood, jasmine in vases, rafter citrus jars, Tea_Ang at the register with a Southern-Belle-ribbon-tied package |
 | Storefront cycle | One image per city; rotate through hero or background imagery so a return visitor sees variation |
 
 ### 11.7 Image-generation provider
