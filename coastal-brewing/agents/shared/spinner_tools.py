@@ -6,12 +6,23 @@ ADK agents register these via the `tools=[...]` param on LlmAgent.
 Tool naming convention: `<verb>_<noun>` snake_case.
 Tools that mutate state always route through `chicken_hawk.dispatch()`.
 Tools that only read state (catalog lookup, audit query) call directly.
+
+Layered authority enforcement (workstream B/C of the 2026-04-30 rework):
+Spinner is the SERVER-SIDE enforcement boundary for tier ceilings. Even if
+an LLM agent ignores its INSTRUCTION block and tries to apply a discount
+above its tier authority, `apply_discount` and `propose_deal` short-circuit
+locally via `authority_tiers.is_within_authority()` BEFORE dispatching to
+Chicken Hawk, returning an escalation envelope with an HMAC-signed Stepper
+token instead. The Chicken Hawk dispatch + NemoClaw policy gate provide a
+second line of defense. Cost data NEVER leaves the server — `equation.quote`
+returns a Quote dict that gets stripped via `equation.strip_internal_fields`
+before any HTTP serialization.
 """
 from __future__ import annotations
 
 from typing import Any, Optional
 
-from . import chicken_hawk, nemoclaw, audit_ledger
+from . import chicken_hawk, nemoclaw, audit_ledger, authority_tiers
 
 
 # ---------------------------------------------------------------------------
@@ -39,27 +50,190 @@ def add_to_cart(sku: str, qty: int, session_id: Optional[str] = None) -> dict:
     return chicken_hawk.dispatch("add_to_cart", {"sku": sku, "qty": qty, "session_id": session_id})
 
 
-def apply_discount(percent: float, session_id: str) -> dict:
-    """Apply a discount within the published margin floor.
+def apply_discount(
+    percent: float,
+    session_id: str,
+    actor: str = "sal_ang",
+    qty: int = 1,
+    is_bundle: bool = False,
+    custee_id: str = "anon",
+) -> dict:
+    """Apply a discount, enforced by the layered authority schema.
 
-    NemoClaw verdicts:
-      - allow: within `suggest_max_deal_discount()` floor
-      - escalate: below floor → Telegram approval to Jarrett
-      - deny: exceeds 30% absolute cap or violates BLOCKED_ACTIONS
+    The `actor` parameter declares which tier-authorized agent is requesting
+    the discount. Spinner first checks `authority_tiers.is_within_authority()`
+    locally; if the request exceeds the actor's tier ceiling, returns an
+    escalation envelope with an HMAC-signed Stepper token rather than
+    dispatching to Chicken Hawk.
+
+    Tier ceilings (per `agents/shared/authority_tiers.py`):
+      - T1 (acheevy): uncapped at the tier layer; bound only by the global floor
+      - T2_BULK (melli): 12u→15%, 50u→25%, 100u+→35%
+      - T2_FINANCE (luc): 0% (coupons-only, no margin discount)
+      - T3 (sal_ang): ≤10% PPU, ≤15% bundles
+
+    On the wire, the gateway envelope returned has shape:
+      `{ok, verdict, ...}` per chicken_hawk.dispatch when allowed, OR
+      `{ok=False, verdict="tier_escalation", stepper_token, ...}` when the
+      ceiling was breached locally.
     """
-    return chicken_hawk.dispatch("apply_discount", {"percent": percent, "session_id": session_id})
+    decision = authority_tiers.is_within_authority(
+        actor=actor,
+        requested_pct=percent,
+        qty=qty,
+        is_bundle=is_bundle,
+    )
+    if not decision["allowed"]:
+        token = authority_tiers.make_stepper_escalation_token(
+            actor=actor,
+            sku="",  # caller didn't pass a SKU on this surface; quote_sku has it
+            qty=qty,
+            requested_pct=percent,
+            custee_id=custee_id,
+        )
+        return {
+            "ok": False,
+            "verdict": "tier_escalation",
+            "actor_tier": decision["actor_tier"],
+            "binding_ceiling_pct": decision["binding_ceiling_pct"],
+            "reason": decision["reason"],
+            "stepper_token": token,
+            "message": (
+                "This discount exceeds the active agent's tier ceiling. "
+                "A Stepper escalation token has been issued; route the Custee "
+                "through the T1 commitment-confirmation form before ACHEEVY "
+                "can override the ceiling."
+            ),
+        }
+    return chicken_hawk.dispatch(
+        "apply_discount",
+        {
+            "percent": percent,
+            "session_id": session_id,
+            "actor": actor,
+            "actor_tier": decision["actor_tier"],
+            "qty": qty,
+            "is_bundle": is_bundle,
+        },
+    )
 
 
-def propose_deal(items: list[dict], discount_pct: float, session_id: str) -> dict:
+def propose_deal(
+    items: list[dict],
+    discount_pct: float,
+    session_id: str,
+    actor: str = "sal_ang",
+    custee_id: str = "anon",
+) -> dict:
     """Compose and propose a customer-co-authored offer.
 
-    Calls margin calculator + NemoClaw before returning the offer to the customer.
-    Floor-bound by `suggest_max_deal_discount()`.
+    Goes through `equation.quote()` for the canonical matrix Equation +
+    floor + tier-cap decision. If any line item would exceed the actor's
+    tier ceiling, returns an escalation envelope with the Stepper token.
+    Otherwise dispatches to Chicken Hawk for the receipt + side effects.
+
+    Cost data NEVER leaves this layer — only `equation.strip_internal_fields`
+    output is included in the gateway dispatch payload.
     """
+    # Lazy import to avoid runtime cycle at agent-construction time.
+    import sys as _sys
+    if "equation" not in _sys.modules:
+        import importlib as _importlib
+        _importlib.import_module("equation")
+    import equation  # type: ignore[import-not-found]
+
+    is_bundle = len(items) > 1
+    total_qty = sum(int(it.get("qty", 1)) for it in items)
+    # Quote the FIRST line for the tier-cap decision; multi-SKU bundles get
+    # treated as a single deal-shape for ceiling purposes (the BUNDLE flag
+    # plus aggregate qty captures the relevant authority semantics).
+    primary = items[0] if items else {"product_id": "", "qty": 1}
+    q = equation.quote(
+        sku_id=primary.get("product_id", ""),
+        qty=total_qty,
+        vibe=primary.get("vibe", "individual"),
+        pillars=primary.get("pillars", []),
+        frequency=primary.get("frequency", "ppu"),
+        actor=actor,
+        requested_discount_pct=discount_pct,
+        is_bundle=is_bundle,
+        custee_id=custee_id,
+    )
+    public_quote = equation.strip_internal_fields(q)
+    if q["escalation_required"]:
+        return {
+            "ok": False,
+            "verdict": "tier_escalation",
+            "actor_tier": q["actor_tier"],
+            "binding_ceiling_pct": q["tier_ceiling_pct"],
+            "stepper_token": q["stepper_token"],
+            "quote": public_quote,
+            "message": (
+                "This deal exceeds the active agent's tier ceiling. The Custee "
+                "must complete the T1 commitment-confirmation form (qty + "
+                "cadence + delivery + payment terms) before ACHEEVY can override."
+            ),
+        }
     return chicken_hawk.dispatch(
         "propose_deal",
-        {"items": items, "discount_pct": discount_pct, "session_id": session_id},
+        {
+            "items": items,
+            "discount_pct": discount_pct,
+            "session_id": session_id,
+            "actor": actor,
+            "actor_tier": q["actor_tier"],
+            "quote": public_quote,
+        },
     )
+
+
+def quote_sku(
+    sku: str,
+    qty: int = 1,
+    vibe: str = "individual",
+    pillars: Optional[list[str]] = None,
+    frequency: str = "ppu",
+    actor: str = "acheevy",
+    is_bundle: bool = False,
+    custee_id: str = "anon",
+) -> dict:
+    """Compute the canonical matrix-billing Equation price for a SKU.
+
+    Read-only. Agents call this to surface a transparent line-item quote
+    to the Custee (frequency × V.I.B.E. × pillar uplifts). NEVER returns
+    cost or floor — `equation.strip_internal_fields` is applied before
+    return so cost data never reaches the LLM context (which can leak
+    via prompt injection). Discount path is separate: `apply_discount`
+    or `propose_deal` for actual margin asks.
+    """
+    import sys as _sys
+    if "equation" not in _sys.modules:
+        import importlib as _importlib
+        _importlib.import_module("equation")
+    import equation  # type: ignore[import-not-found]
+    q = equation.quote(
+        sku_id=sku,
+        qty=qty,
+        vibe=vibe,
+        pillars=pillars or [],
+        frequency=frequency,
+        actor=actor,
+        requested_discount_pct=0.0,
+        is_bundle=is_bundle,
+        custee_id=custee_id,
+    )
+    return equation.strip_internal_fields(q)
+
+
+# NOTE: `issue_coupon` Spinner tool was REMOVED 2026-04-30 per owner
+# decision. The local authority check was real (refused unauthorized
+# actors), but the dispatch went to a Chicken Hawk action handler that
+# does not exist yet — runtime calls would have returned an error
+# envelope. Per AIMS doctrine: ship only what's real. The fixed-list
+# coupon canon (`WELCOME10`, `BREW20`, `FREESHIP`, `TRY-ME`) stays in
+# `agents/shared/authority_tiers.py:LUC_COUPON_CODES` and
+# `is_coupon_within_authority()` for the future PR that adds the
+# Chicken Hawk-side `issue_coupon` handler + Stripe coupon application.
 
 
 def start_checkout(session_id: str, customer_email: str) -> dict:
