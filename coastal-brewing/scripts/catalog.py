@@ -44,6 +44,7 @@ from typing import Optional
 PRODUCTS: dict[str, dict] = {
     # --- Coffee — Fairtrade single-origin (6) + Coastal Blend flagship (1) ---
     "coastal-blend-12oz": {
+        "image": "/products/coastal-blend-12oz.png",
         "name": "Coastal Blend",
         "category": "coffee",
         "size": "12oz",
@@ -58,6 +59,7 @@ PRODUCTS: dict[str, dict] = {
         "blurb": "Coastal Blend — whole-bean Lowcountry coffee with notes of jasmine, key lime, and cocoa. Every cup is what the label says it is.",
     },
     "coastal-colombia-fairtrade-12oz": {
+        "image": "/products/coastal-colombia-fairtrade-12oz.png",
         "name": "Coastal Colombia Fairtrade",
         "category": "coffee",
         "size": "12oz",
@@ -73,6 +75,7 @@ PRODUCTS: dict[str, dict] = {
         "blurb": "Bright Colombian Fairtrade — caramel and citrus, sourced through verified Tolima cooperatives.",
     },
     "coastal-guatemala-fairtrade-12oz": {
+        "image": "/products/coastal-guatemala-fairtrade-12oz.png",
         "name": "Coastal Guatemala Fairtrade",
         "category": "coffee",
         "size": "12oz",
@@ -88,6 +91,7 @@ PRODUCTS: dict[str, dict] = {
         "blurb": "A clean, honest Guatemalan medium — milk chocolate and soft fruit, the kind of cup that doesn't ask for attention but rewards it.",
     },
     "coastal-peru-fairtrade-12oz": {
+        "image": "/products/coastal-peru-fairtrade-12oz.png",
         "name": "Coastal Peru Fairtrade — Clean Coffee Project",
         "category": "coffee",
         "size": "12oz",
@@ -103,6 +107,7 @@ PRODUCTS: dict[str, dict] = {
         "blurb": "Lab-clean Peru. Glyphosate-free, heavy-metal-tested, mycotoxin-tested — the literal proof of every-cup-is-what-the-label-says-it-is. Lemon and herbal lift over a smooth chocolate body.",
     },
     "coastal-peru-decaf-fairtrade-12oz": {
+        "image": "/products/coastal-peru-decaf-fairtrade-12oz.png",
         "name": "Coastal Peru Decaf — Swiss Water Process",
         "category": "coffee",
         "size": "12oz",
@@ -118,6 +123,7 @@ PRODUCTS: dict[str, dict] = {
         "blurb": "Decaf without the chemicals. Swiss Water Process, Fairtrade Peru — the cup you can drink at 4pm without thinking twice.",
     },
     "coastal-honduras-fairtrade-12oz": {
+        "image": "/products/coastal-honduras-fairtrade-12oz.png",
         "name": "Coastal Honduras Fairtrade",
         "category": "coffee",
         "size": "12oz",
@@ -133,6 +139,7 @@ PRODUCTS: dict[str, dict] = {
         "blurb": "Cocoa and brown sugar from the Copán hills. The dark-roast complement to the Sumatra — a porch cup with patience.",
     },
     "coastal-sumatra-fairtrade-12oz": {
+        "image": "/products/coastal-sumatra-fairtrade-12oz.png",
         "name": "Coastal Sumatra Fairtrade",
         "category": "coffee",
         "size": "12oz",
@@ -149,6 +156,7 @@ PRODUCTS: dict[str, dict] = {
     },
     # --- Lowcountry Tea umbrella — cream cylindrical tin (5 variants) ---
     "lowcountry-tea-jasmine-green-2oz": {
+        "image": "/products/lowcountry-tea-jasmine-green-2oz.png",
         "name": "Lowcountry Tea — Jasmine Green",
         "category": "tea",
         "size": "2oz",
@@ -162,6 +170,7 @@ PRODUCTS: dict[str, dict] = {
         "blurb": "Jasmine green, hand-paired with cut jasmine flowers. Tea that smells like the porch in May.",
     },
     "lowcountry-tea-english-breakfast-2oz": {
+        "image": "/products/lowcountry-tea-english-breakfast-2oz.png",
         "name": "Lowcountry Tea — English Breakfast",
         "category": "tea",
         "size": "2oz",
@@ -176,6 +185,7 @@ PRODUCTS: dict[str, dict] = {
         "blurb": "Whole-leaf English Breakfast — Assam, Ceylon, Darjeeling. Strong, complete, no shortcut.",
     },
     "lowcountry-tea-moroccan-mint-2oz": {
+        "image": "/products/lowcountry-tea-moroccan-mint-2oz.png",
         "name": "Lowcountry Tea — Moroccan Mint",
         "category": "tea",
         "size": "2oz",
@@ -190,6 +200,7 @@ PRODUCTS: dict[str, dict] = {
         "blurb": "Green tea + mint, the way it's done from Marrakech to Charleston. Whole-leaf, organic, ready for sweet tea or hot pour.",
     },
     "lowcountry-tea-hibiscus-berry-2oz": {
+        "image": "/products/lowcountry-tea-hibiscus-berry-2oz.png",
         "name": "Lowcountry Tea — Hibiscus Berry",
         "category": "tea",
         "size": "2oz",
@@ -204,6 +215,7 @@ PRODUCTS: dict[str, dict] = {
         "blurb": "Caffeine-free hibiscus and rooibos with seven organic ingredients on the label. The afternoon cup that doesn't keep you up.",
     },
     "lowcountry-tea-masala-2oz": {
+        "image": "/products/lowcountry-tea-masala-2oz.png",
         "name": "Lowcountry Tea — Masala",
         "category": "tea",
         "size": "2oz",
@@ -219,6 +231,7 @@ PRODUCTS: dict[str, dict] = {
     },
     # --- Coastal Chai — separate dark cylindrical tin (1) ---
     "coastal-chai-2_1oz": {
+        "image": "/products/coastal-chai-2_1oz.png",
         "name": "Coastal Chai",
         "category": "tea",
         "size": "2.1oz",
@@ -237,6 +250,7 @@ PRODUCTS: dict[str, dict] = {
     # Per owner directive 2026-04-29 image-accuracy rule, the brand visual
     # does NOT have to match the literal SKU spec. Ships 30g.
     "coastal-matcha-ceremonial-30g": {
+        "image": "/products/coastal-matcha-ceremonial-30g.png",
         "name": "Coastal Brewing Co Matcha — Ceremonial Grade",
         "category": "matcha",
         "size": "30g",
@@ -253,6 +267,7 @@ PRODUCTS: dict[str, dict] = {
     },
     # --- Subscriptions (3 — recurring) ---
     "coastal-coffee-monthly": {
+        "image": "/products/coastal-coffee-monthly.png",
         "name": "Coffee Monthly Subscription",
         "category": "subscription",
         "size": "monthly",
@@ -265,6 +280,7 @@ PRODUCTS: dict[str, dict] = {
         "blurb": "One whole-bean coffee a month. Pick yours, or let us rotate.",
     },
     "coastal-tea-monthly": {
+        "image": "/products/coastal-tea-monthly.png",
         "name": "Tea Monthly Subscription",
         "category": "subscription",
         "size": "monthly",
@@ -277,6 +293,7 @@ PRODUCTS: dict[str, dict] = {
         "blurb": "One Lowcountry Tea a month. From English Breakfast to Jasmine Green.",
     },
     "coastal-combo-monthly": {
+        "image": "/products/coastal-combo-monthly.png",
         "name": "Coffee + Tea Monthly Subscription",
         "category": "subscription",
         "size": "monthly",
@@ -290,6 +307,7 @@ PRODUCTS: dict[str, dict] = {
     },
     # --- Bundles (3) ---
     "coastal-discovery-bundle": {
+        "image": "/products/coastal-discovery-bundle.png",
         "name": "Coastal Discovery Bundle",
         "category": "bundle",
         "size": "sampler",
@@ -301,6 +319,7 @@ PRODUCTS: dict[str, dict] = {
         "blurb": "The starter trio. Coffee, tea, matcha — three sips of the line in one box.",
     },
     "coastal-pantry-refill": {
+        "image": "/products/coastal-pantry-refill.png",
         "name": "Coastal Pantry Refill",
         "category": "bundle",
         "size": "pantry",
@@ -312,6 +331,7 @@ PRODUCTS: dict[str, dict] = {
         "blurb": "The pantry box. Two coffees, two teas, one chai — the month's run in one ship.",
     },
     "coastal-gift-bundle": {
+        "image": "/products/coastal-gift-bundle.png",
         "name": "Coastal Gift Bundle",
         "category": "bundle",
         "size": "gift",

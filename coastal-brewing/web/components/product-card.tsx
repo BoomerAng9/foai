@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { MessageSquare } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -12,12 +13,14 @@ export function ProductCard({ product }: { product: Product }) {
       className="group flex flex-col overflow-hidden transition-all hover:-translate-y-0.5 hover:border-accent/60"
     >
       <Link href={`/products/${product.sku}`} className="block">
-        <div className="aspect-square overflow-hidden bg-secondary">
-          <img
+        <div className="relative aspect-square overflow-hidden bg-secondary">
+          <Image
             src={product.image || "/static/mock-dark.png"}
             alt={product.name}
             itemProp="image"
-            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+            fill
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+            className="object-cover transition-transform duration-500 group-hover:scale-[1.03]"
           />
         </div>
       </Link>
