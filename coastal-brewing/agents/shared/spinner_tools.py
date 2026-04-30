@@ -245,7 +245,7 @@ def start_checkout(session_id: str, customer_email: str) -> dict:
 
 
 def escalate_to_owner(reason: str, context: dict, urgency: str = "normal") -> dict:
-    """Route a question / decision to Jarrett via Telegram.
+    """Route a question / decision to the owner via Telegram.
 
     Use this for: refunds above floor, legal/threat/fraud, unusual customer asks,
     anything outside the published policy floor.

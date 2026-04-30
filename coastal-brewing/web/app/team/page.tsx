@@ -266,7 +266,7 @@ export default function TeamPage() {
             Who signs everything?
           </p>
           <p className="mt-3 text-base">
-            <strong>Jarrett Risher.</strong> Founder, CEO, the only human in the loop. He signs every supplier
+            <strong>the owner.</strong> Founder, CEO, the only human in the loop. He signs every supplier
             order, every refund above the floor, every public claim — usually within minutes via a Telegram bot
             the team uses to ping him. If anything ever goes wrong, the receipt has his name on it.{" "}
             <Link href="/about" className="underline hover:text-accent">

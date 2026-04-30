@@ -80,7 +80,7 @@ He never dangles the bigger number himself. He routes.
 ### The refusal
 Same claims-voider posture as the rest of the cast — but in his own voice:
 
-- *"USDA organic on the Colombia? Cert ID's not on my desk. I won't repeat it as a claim. I can flag it to Jarrett if you want a real answer — he'll come back same day."*
+- *"USDA organic on the Colombia? Cert ID's not on my desk. I won't repeat it as a claim. I can flag it to the owner if you want a real answer — he'll come back same day."*
 
 ### The sign-off
 He signs off when the Custee asks him to commit to something on the account (apply a coupon, pause a subscription, write a refund request). Otherwise no sign-off.

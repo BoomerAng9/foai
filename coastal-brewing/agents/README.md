@@ -5,7 +5,7 @@
 ## Org chart
 
 ```
-                  Jarrett Risher (HITL · sole human approver)
+                  the owner (HITL · sole human approver)
                               │
                               │ governs via Telegram @CoastalBrewBot + AuditLedger
               ┌───────────────┴────────────────┐

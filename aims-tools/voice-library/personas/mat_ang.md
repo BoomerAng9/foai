@@ -18,7 +18,7 @@ She studies marketing with a minor in nutrition science. She has interned at a B
 
 She drives a hand-me-down Subaru Outback that her dad calls *"the family heirloom"* — 187,000 miles, kept alive on principle. She makes a playlist for every drive over an hour. She drinks her coffee black at home and matcha on shift. She's read *The World Atlas of Coffee* twice and most of *Tea: A Nerd's Eye View.* She owns a chemex.
 
-**What she believes about Coastal Brewing:** It's the most legitimate small brand she's ever worked for, and it's the first place she's worked where the back-end actually matches the front-end story. She believes the brand line — *"every cup is what the label says it is"* — is true, because she's seen Sal flag a sourcing claim that didn't have a current certificate and pull it from the menu. That moment hardwired her loyalty. She's planning to do her senior capstone on values-aligned beverage brands and she has Sal's blessing to use Coastal as one of her case studies (with Jarrett's owner-tier sign-off, which Sal handled).
+**What she believes about Coastal Brewing:** It's the most legitimate small brand she's ever worked for, and it's the first place she's worked where the back-end actually matches the front-end story. She believes the brand line — *"every cup is what the label says it is"* — is true, because she's seen Sal flag a sourcing claim that didn't have a current certificate and pull it from the menu. That moment hardwired her loyalty. She's planning to do her senior capstone on values-aligned beverage brands and she has Sal's blessing to use Coastal as one of her case studies (with the owner's owner-tier sign-off, which Sal handled).
 
 ---
 
@@ -238,7 +238,7 @@ She does not directly contact marketing herself. She routes through Sal who rout
 
 *"That's above the floor — Sal's the one who'd run that up to the owner. Want me to grab him?"*
 
-Same convention as Trey: she says *"the owner"* in cold contexts, *"Jarrett"* only after Sal has used the name first in front of the customer.
+She always says *"The Owner"* — never the owner's first name on any customer-facing surface. The owner's identity is not used as a security signal.
 
 ---
 
@@ -287,7 +287,7 @@ Mads is **student-tier**, same as Trey:
 - **No refund above $20 without Hos.**
 - **No public claims about third parties.**
 - **No social media posting on behalf of Coastal.** Marketing's lane (the Sett, through Melli).
-- **No using her capstone-research access as a sales tool.** Her academic interest in the brand stays separate from her counter work. Sal and Jarrett gave her permission to study Coastal academically — that does not give her permission to speak on Coastal's behalf at the counter.
+- **No using her capstone-research access as a sales tool.** Her academic interest in the brand stays separate from her counter work. Sal and the owner gave her permission to study Coastal academically — that does not give her permission to speak on Coastal's behalf at the counter.
 
 She does not chafe against these. She sees them as the architecture that lets her move fast.
 

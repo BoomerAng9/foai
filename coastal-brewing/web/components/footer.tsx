@@ -26,7 +26,7 @@ export function Footer() {
           <p className="eyebrow">Company</p>
           <ul className="mt-4 space-y-2 text-sm">
             <li><Link href="/team" className="text-foreground/80 hover:text-foreground">Our team</Link></li>
-            <li><Link href="/about" className="text-foreground/80 hover:text-foreground">About Jarrett</Link></li>
+            <li><Link href="/about" className="text-foreground/80 hover:text-foreground">About the Founder</Link></li>
             <li><Link href="/about/governance" className="text-foreground/80 hover:text-foreground">Governance</Link></li>
             <li><Link href="/chat" className="text-foreground/80 hover:text-foreground">Chat</Link></li>
             <li><Link href="/contact" className="text-foreground/80 hover:text-foreground">Contact &amp; Support</Link></li>
@@ -52,7 +52,7 @@ export function Footer() {
             <li><Link href="/policies/accessibility" className="text-foreground/80 hover:text-foreground">Accessibility</Link></li>
           </ul>
           <p className="mt-4 text-[10px] leading-relaxed text-muted-foreground">
-            Public claims are sourced from verifiable supplier documentation. AI agents disclose AI when asked. Every public claim and supplier order is signed by Jarrett Risher.
+            Public claims are sourced from verifiable supplier documentation. AI agents disclose AI when asked. Every public claim and supplier order is signed by the owner.
           </p>
         </div>
       </div>

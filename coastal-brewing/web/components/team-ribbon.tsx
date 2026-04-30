@@ -14,7 +14,7 @@ export function TeamRibbon() {
             Coastal is run by two AI teams on call around the clock. Sales finds your blend, builds bundles,
             and walks you to checkout. Marketing tells our story and runs the funnel. Both work behind a
             policy gate that catches anything they shouldn&apos;t say or do — and route every supplier order,
-            every refund, every claim straight to Jarrett, our founder and the only human in the loop. He
+            every refund, every claim straight to the owner, our founder and the only human in the loop. He
             signs everything before it leaves the building. <span className="italic">(There is no building.)</span>
           </p>
         </div>
