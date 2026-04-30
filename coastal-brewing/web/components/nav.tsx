@@ -5,6 +5,7 @@ import { Wordmark } from "@/components/wordmark";
 
 const NAV_LINKS: { href: string; label: string }[] = [
   { href: "/products", label: "Lineup" },
+  { href: "/team", label: "Team" },
   { href: "/about/governance", label: "Commitment" },
   { href: "/chat", label: "Chat" },
   { href: "/cart", label: "Cart" },
