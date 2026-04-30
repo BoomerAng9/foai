@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { Search } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -55,15 +56,27 @@ export function Hero() {
           </div>
         </div>
 
-        {/* Right column — atmospheric product photography */}
+        {/* Right column — Sal_Ang at the canonical pop-up coffee bar.
+            This IS the brand. Hard tactical visor with SAL in glowing
+            orange LED, cream linen jacket, long-spouted Ethiopian copper
+            pot, marsh and palm-frond Lowcountry register. The image
+            anchors the entire site visually — every other surface
+            (counter dressing, packaging, scene composition) traces
+            back here per design.md §11.0. */}
         <div className="relative md:col-span-5">
-          <div className="relative aspect-[4/5] overflow-hidden bg-card">
-            <img
-              src="/static/mock-dark.png"
-              alt="Coastal Brewing — coffee, tea, and matcha on a dark wooden surface with scattered beans and a bamboo whisk, warm directional light."
-              className="absolute inset-0 h-full w-full object-cover"
+          <div className="relative aspect-[3/4] overflow-hidden rounded-2xl border border-border/60 bg-card shadow-lg">
+            <Image
+              src="/team/sal_ang.png"
+              alt="Sal_Ang at the Coastal Brewing pop-up — pouring Ethiopian coffee from a long-spouted copper pot at a marsh-edge counter, cream linen uniform, hard tactical visor with SAL in glowing orange."
+              fill
+              sizes="(max-width: 768px) 100vw, 40vw"
+              className="object-cover"
+              priority
             />
           </div>
+          <p className="mt-4 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+            Sal · Sales lead at the dock
+          </p>
         </div>
       </div>
     </section>
