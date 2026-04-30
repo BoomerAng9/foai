@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 import type { Product } from "@/lib/api";
@@ -60,11 +61,13 @@ export function Lineup({ products }: { products?: Product[] }) {
               key={item.num}
               className="group flex flex-col"
             >
-              <div className="aspect-[4/5] overflow-hidden bg-card">
-                <img
+              <div className="relative aspect-[4/5] overflow-hidden bg-card">
+                <Image
                   src={item.image}
-                  alt={item.label}
-                  className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.02]"
+                  alt={`${item.label} — Coastal Brewing Co. ${item.cat.toLowerCase()} hero`}
+                  fill
+                  sizes="(max-width: 768px) 100vw, 33vw"
+                  className="object-cover transition-transform duration-700 group-hover:scale-[1.02]"
                 />
               </div>
               <div className="mt-5 flex items-baseline gap-3">

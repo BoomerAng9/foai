@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { Nav } from "@/components/nav";
 import { Footer } from "@/components/footer";
@@ -31,8 +32,15 @@ export default async function ProductDetail({ params }: { params: Promise<{ slug
           ← Back to catalog
         </Link>
         <div className="mt-6 grid gap-12 lg:grid-cols-2">
-          <div className="aspect-square overflow-hidden rounded-lg border border-border bg-secondary">
-            <img src={product.image || "/static/mock-dark.png"} alt={product.name} className="h-full w-full object-cover" />
+          <div className="relative aspect-square overflow-hidden rounded-lg border border-border bg-secondary">
+            <Image
+              src={product.image || "/static/mock-dark.png"}
+              alt={product.name}
+              fill
+              sizes="(max-width: 1024px) 100vw, 50vw"
+              priority
+              className="object-cover"
+            />
           </div>
           <div className="flex flex-col">
             <Badge variant="muted" className="w-fit uppercase tracking-widest">{product.category}</Badge>
