@@ -1655,47 +1655,120 @@ class ApiChatRequest(BaseModel):
     session_id: Optional[str] = None
 
 
+_CHAT_HISTORY: Dict[str, List[dict]] = {}
+_CHAT_HISTORY_MAX = 12  # last 6 user/assistant turn pairs per session
+
+
+def _record_history(session_id: str, role: str, content: str) -> None:
+    if not content:
+        return
+    h = _CHAT_HISTORY.setdefault(session_id, [])
+    h.append({"role": role, "content": content})
+    if len(h) > _CHAT_HISTORY_MAX:
+        del h[: len(h) - _CHAT_HISTORY_MAX]
+
+
 @app.post("/api/chat/send")
 def api_chat_send(req: ApiChatRequest) -> dict:
     """JSON contract for the Next.js front-end (lib/api.ts).
 
-    Wraps the existing _navigate_chat state machine and returns the shape the
-    React ChatPanel expects: { reply: ChatMessage, session_id }. Agent-aware
-    negotiation kit (propose_deal, counter_offer, accept_deal) lands in a
-    follow-up; for now this routes through the existing product-nav state
-    machine and tags the reply with the requesting agent lane.
+    Primary path: Supernemotron via OpenRouter (`scripts/llm_client.py`).
+    Fallback path: rule-based `_navigate_chat` state machine — runs when
+    the LLM is unconfigured, errors, or returns empty content. Either
+    way the customer always receives a non-empty reply.
     """
+    from llm_client import chat_completion, is_configured  # noqa: E402
+
     sid = req.session_id or f"sess_{secrets.token_hex(6)}"
+    agent_lane = req.agent or "sales"
+    started = _time.time()
+    reply_text = ""
+    tool_trace: List[dict] = []
+    model_used: Optional[str] = None
+    fallback_reason: Optional[str] = None
+
+    # Primary: LLM via OpenRouter
+    if is_configured():
+        history = list(_CHAT_HISTORY.get(sid, []))
+        try:
+            llm_result = chat_completion(
+                user_message=req.content,
+                history=history,
+                agent=agent_lane,
+            )
+            if llm_result.get("ok"):
+                reply_text = llm_result.get("content") or ""
+                model_used = llm_result.get("model")
+                tool_trace.append({
+                    "tool": "openrouter_chat",
+                    "status": "ok",
+                    "detail": f"{model_used} · {llm_result.get('latency_ms')}ms",
+                })
+            else:
+                fallback_reason = llm_result.get("error") or "llm_failed"
+        except Exception as e:
+            fallback_reason = f"llm_exception: {e}"
+    else:
+        fallback_reason = "openrouter_not_configured"
+
+    # Fallback: rule-based state machine. Always runs if LLM didn't produce
+    # a non-empty reply. The state-machine returns a `content` key (bug
+    # fix: prior code looked for `reply`/`message`/`response` and got "").
+    if not reply_text:
+        try:
+            result = _navigate_chat(req.content, {"agent": agent_lane})
+            reply_text = (
+                result.get("content")
+                or result.get("reply")
+                or result.get("message")
+                or "Tell me — coffee, tea, or matcha?"
+            )
+            if fallback_reason:
+                tool_trace.append({
+                    "tool": "rule_based_fallback",
+                    "status": "ok",
+                    "detail": f"reason: {fallback_reason}",
+                })
+        except Exception as e:
+            reply_text = "Sorry, I hit a snag. Try again in a moment?"
+            tool_trace.append({
+                "tool": "chat_send",
+                "status": "blocked",
+                "detail": str(e),
+            })
+
+    # Record history for future LLM context.
+    _record_history(sid, "user", req.content)
+    _record_history(sid, "assistant", reply_text)
+
+    # Audit ledger receipt — every chat call leaves a row.
     try:
-        result = _navigate_chat(req.content, {"agent": req.agent or "sales"})
-        reply_text = (
-            result.get("reply")
-            or result.get("message")
-            or result.get("response")
-            or ""
+        latency_ms = int((_time.time() - started) * 1000)
+        audit_ledger.insert_action_receipt(
+            task_id=sid,
+            executor=f"chat.{agent_lane}",
+            action_type="chat_send",
+            destination=model_used or "rule_based",
+            status="ok" if reply_text else "blocked",
+            result_summary=(
+                f"u:{req.content[:120]} | r:{reply_text[:200]} | "
+                f"latency={latency_ms}ms"
+                + (f" | fallback={fallback_reason}" if fallback_reason else "")
+            ),
         )
-        tool_trace = result.get("tool_trace") or []
-        return {
-            "reply": {
-                "role": "agent",
-                "agent": req.agent or "sales",
-                "content": reply_text,
-                "toolTrace": tool_trace,
-                "ts": int(_time.time() * 1000),
-            },
-            "session_id": sid,
-        }
-    except Exception as e:
-        return {
-            "reply": {
-                "role": "agent",
-                "agent": req.agent or "sales",
-                "content": "Sorry, I hit a snag. Try again in a moment?",
-                "toolTrace": [{"tool": "chat_send", "status": "blocked", "detail": str(e)}],
-                "ts": int(_time.time() * 1000),
-            },
-            "session_id": sid,
-        }
+    except Exception:
+        pass  # Audit failure must not break the user reply.
+
+    return {
+        "reply": {
+            "role": "agent",
+            "agent": agent_lane,
+            "content": reply_text,
+            "toolTrace": tool_trace,
+            "ts": int(_time.time() * 1000),
+        },
+        "session_id": sid,
+    }
 
 
 # ---------------------------------------------------------------------------
