@@ -19,11 +19,12 @@ Provider chain (first available wins):
        env: LIVELOOKIN_COSMOS_ENDPOINT [+ VAST_AI_API_KEY for auto-spin]
   2. NVIDIA Lyra 2.0 zoom-gs inference (Vast.ai-hosted by default)
        env: LIVELOOKIN_LYRA_ENDPOINT
-  3. HeyGen v4 action-avatar (third-party, no GPU rental needed)
-       env: HEYGEN_API_KEY + agent reference video
-  4. Seedance 360 fallback video loop (BytePlus-direct, no GPU on our side)
+  3. Kie.ai Seedance pre-rendered fallback video loop (no GPU on our side)
        env: LIVELOOKIN_FALLBACK_VIDEO_URL
-  5. Static portrait + "coming soon" copy
+  4. Static portrait + "coming soon" copy
+
+Per owner directive 2026-04-30: HeyGen is struck completely from the
+FOAI ecosystem. Do not re-add HeyGen as a provider in any form.
 
 The runtime never blocks on GPU provisioning — every session call returns
 within ~1s with either a live viewer_url or the fallback video URL. Vast.ai
@@ -57,20 +58,17 @@ LIVELOOKIN_COSMOS_ENDPOINT = os.environ.get("LIVELOOKIN_COSMOS_ENDPOINT", "")
 # Provider 2 — Lyra 2.0 (nv-tlabs/lyra; Vast.ai-hosted endpoint by default)
 LIVELOOKIN_LYRA_ENDPOINT = os.environ.get("LIVELOOKIN_LYRA_ENDPOINT", "")
 
-# Provider 3 — HeyGen v4 action-avatar
-HEYGEN_API_KEY = os.environ.get("HEYGEN_API_KEY", "")
-
-# Provider 4 — Seedance fallback video loop
+# Provider 3 — Kie.ai Seedance pre-rendered fallback video loop
 LIVELOOKIN_FALLBACK_VIDEO_URL = os.environ.get("LIVELOOKIN_FALLBACK_VIDEO_URL", "")
 
-# Provider 5 — Static portrait paths (always available)
+# Provider 4 — Static portrait paths (always available)
 STATIC_PORTRAITS = {
     "sales": "/static/team/sales-placeholder.png",
     "marketing": "/static/team/marketing-placeholder.png",
 }
 
-# Per-agent reference assets (used by HeyGen / Cosmos to maintain identity).
-# These get populated when Iller_Ang generates the canonical character pack.
+# Per-agent reference assets (used by Cosmos to maintain identity across
+# session frames). Populated when the canonical character pack is generated.
 AGENT_REFERENCE_VIDEOS = {
     "sales": os.environ.get("LIVELOOKIN_SALES_REFERENCE_VIDEO", ""),
     "marketing": os.environ.get("LIVELOOKIN_MARKETING_REFERENCE_VIDEO", ""),
@@ -86,10 +84,6 @@ def _cosmos_available() -> bool:
 
 def _lyra_available() -> bool:
     return bool(LIVELOOKIN_LYRA_ENDPOINT)
-
-
-def _heygen_available(agent: str) -> bool:
-    return bool(HEYGEN_API_KEY and AGENT_REFERENCE_VIDEOS.get(agent))
 
 
 def _fallback_video_available() -> bool:
@@ -124,8 +118,6 @@ def create_session(agent: str, requested_by: Optional[str] = None) -> dict[str, 
         return _provision_cosmos(agent, requested_by)
     if _lyra_available():
         return _provision_lyra(agent, requested_by)
-    if _heygen_available(agent):
-        return _provision_heygen(agent, requested_by)
     if _fallback_video_available():
         return _envelope(
             agent,
@@ -209,24 +201,6 @@ def _provision_lyra(agent: str, requested_by: Optional[str]) -> dict[str, Any]:
     )
 
 
-def _provision_heygen(agent: str, requested_by: Optional[str]) -> dict[str, Any]:
-    """HeyGen v4 action-avatar.
-
-    PLACEHOLDER. Real implementation:
-      1. POST /v4/action-avatars with reference_video_id + script
-      2. Receive video_id
-      3. Poll until ready, return CDN URL
-    """
-    return _envelope(
-        agent,
-        mode="fallback_video",
-        viewer_url=LIVELOOKIN_FALLBACK_VIDEO_URL or None,
-        poster=STATIC_PORTRAITS.get(agent),
-        message="HeyGen provider configured; live wiring lands when reference video uploaded.",
-        provider="heygen-v4",
-    )
-
-
 # ---------------------------------------------------------------------------
 # Envelope helper
 # ---------------------------------------------------------------------------
@@ -258,8 +232,6 @@ def configured_summary() -> dict[str, Any]:
         "providers": {
             "cosmos": _cosmos_available(),
             "lyra": _lyra_available(),
-            "heygen_sales": _heygen_available("sales"),
-            "heygen_marketing": _heygen_available("marketing"),
             "fallback_video": _fallback_video_available(),
         },
     }

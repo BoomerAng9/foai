@@ -132,7 +132,7 @@ Every BG dispatches via `hawk.foai.cloud/chat` (already wired in `scripts/adapte
 - `<Composer/>` — text input + voice input stub + product-attach affordance
 - `<AgentHandoffBanner from="sal" to="mark"/>` — visible when Sal_Ang escalates a marketing-shaped question to Mark_Ang
 - `<LiveLookInTrigger agent=.../>` — opens `<LiveLookInViewer/>` modal
-- `<LiveLookInViewer agent=.../>` — Cosmos/HeyGen-v4-driven 3D character; GPU-on-demand (feature-flagged; falls back to looping Seedance video when GPU unavailable)
+- `<LiveLookInViewer agent=.../>` — Cosmos / Lyra 2.0 driven 3D character on Vast.ai; GPU-on-demand (feature-flagged; falls back to a looping Kie.ai Seedance pre-rendered video when GPU unavailable). HeyGen is struck from the FOAI ecosystem per owner directive 2026-04-30.
 - `<RecommendBundle context="cart"|"product"/>` — calls `/api/recommend`, renders bundle card
 - `<CartDrawer/>`, `<CartLines/>`, `<CheckoutForm/>`, `<OrderSummary/>`
 - `<AuditEnvelope task_id=.../>` (preserved from current build, restyled)

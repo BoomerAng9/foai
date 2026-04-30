@@ -57,6 +57,8 @@ services:
       # Coffee Roasters until the wholesale agreement is digitally signed
       # (Documenso, Wave 2 of Coastal).
       COASTAL_SUPPLIER_EMAIL: "${COASTAL_SUPPLIER_EMAIL:-${OWNER_APPROVAL_EMAIL}}"
+      # LLM provider for chat handler — Supernemotron via OpenRouter (canon).
+      OPENROUTER_API_KEY: "${OPENROUTER_API_KEY:-}"
       TZ: "UTC"
     networks:
       - foai-internal

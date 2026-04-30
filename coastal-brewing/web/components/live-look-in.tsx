@@ -72,8 +72,8 @@ export function LiveLookInTrigger({
  * The viewer body — fetches a session, renders the best available mode.
  *
  * Modes:
- *  - "live"           → mounts viewer_url as iframe (Cosmos / Lyra / HeyGen)
- *  - "fallback_video" → loops the rendered Seedance 360° MP4
+ *  - "live"           → mounts viewer_url as iframe (Cosmos / Lyra)
+ *  - "fallback_video" → loops a Kie.ai Seedance pre-rendered MP4
  *  - "static"         → still portrait + "queued" message
  *  - "disabled"       → "not enabled in this environment" (shouldn't reach here)
  */
