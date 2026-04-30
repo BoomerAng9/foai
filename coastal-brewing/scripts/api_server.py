@@ -1611,6 +1611,9 @@ def get_catalog(category: Optional[str] = Query(default=None)) -> dict:
 
 @app.get("/api/catalog/{slug}")
 def get_catalog_item(slug: str) -> dict:
+    # `catalog.get_product` strips internal cost fields by default
+    # (wholesale_cost, fulfillment_cost, min_margin_floor, vendor_source_sku).
+    # Owner directive 2026-04-30: COST never exposed to the customer.
     p = catalog.get_product(slug)
     if not p:
         raise HTTPException(status_code=404, detail="product_not_found")
