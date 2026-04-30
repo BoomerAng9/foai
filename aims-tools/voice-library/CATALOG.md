@@ -22,17 +22,17 @@ Cross-pollination layer:
 | cast_id | display_name | gender | accent register | role / scene |
 |---|---|---|---|---|
 | `sal_ang` | Sal_Ang | M | Lowcountry Southern, manager-proper | Head of Sales, marsh-edge pop-up |
-| `lou_ang` | Lou_Ang | F | Lowcountry Southern, manager-proper | Front-of-house counterpart |
-| `tate_ang` | Tate_Ang | M | Belter Creole leaning Gullah-Lowcountry | Pour-over barista, syllable-timed pace |
-| `wren_ang` | Wren_Ang | F | Belter Creole leaning Gullah-Lowcountry | Consultative cup-finder, softer register |
-| `holt_ang` | Holt_Ang | M | Country Caucasian Southern | Charleston gentleman tasting bar |
-| `eliza_ang` | Eliza_Ang | F | Country Caucasian Southern Belle | Afternoon tea, hospitality-as-craft |
-| `marcus_ang` | Marcus_Ang | M | Savannah African American | Historic-district shop, deep regulars |
-| `naya_ang` | Naya_Ang | F | Savannah African American | Morning shift, regulars by name |
-| `pip_ang` | Pip_Ang | M | American Southern British (trans-Atlantic) | Old-money tea hour, harbor view |
-| `vi_ang` | Vi_Ang | F | American Southern British (trans-Atlantic) | Finishing-school polish, harbor crowd |
-| `trey_ang` | Trey_Ang | M | Northeast college (Coastal Carolina U student) | Student shift, fast pace |
-| `mads_ang` | Mads_Ang | F | Northeast college (UGA student) | Summer-break shift, energetic |
+| `hos_ang` | Hos_Ang | F | Lowcountry Southern, manager-proper | Front-of-house counterpart |
+| `bar_ang` | Bar_Ang | M | Belter Creole leaning Gullah-Lowcountry | Pour-over barista, syllable-timed pace |
+| `con_ang` | Con_Ang | F | Belter Creole leaning Gullah-Lowcountry | Consultative cup-finder, softer register |
+| `tas_ang` | Tas_Ang | M | Country Caucasian Southern | Charleston gentleman tasting bar |
+| `tea_ang` | Tea_Ang | F | Country Caucasian Southern Belle | Afternoon tea, hospitality-as-craft |
+| `cou_ang` | Cou_Ang | M | Savannah African American | Historic-district shop, deep regulars |
+| `gre_ang` | Gre_Ang | F | Savannah African American | Morning shift, regulars by name |
+| `har_ang` | Har_Ang | M | American Southern British (trans-Atlantic) | Old-money tea hour, harbor view |
+| `cur_ang` | Cur_Ang | F | American Southern British (trans-Atlantic) | Finishing-school polish, harbor crowd |
+| `reg_ang` | Reg_Ang | M | Northeast college (Coastal Carolina U student) | Student shift, fast pace |
+| `mat_ang` | Mat_Ang | F | Northeast college (UGA student) | Summer-break shift, energetic |
 
 Source files:
 - Dialect: `src/dialect/dialect-guides.ts` → `COASTAL_DIALECT_GUIDES`
@@ -83,7 +83,7 @@ Every speaker in the roster can plug every brand in the registry. Examples:
 | `void-caster` (Per\|Form) | Coastal Sumatra | Belter Creole — *"Da tape on this Sumatra is fee-oo, kopeng — slow-roasted, low acid, ree-oo gut"* |
 | `smoke` (Per\|Form) | Coastal Cold-Brew | Houston Southern — *"Look man, this cold-brew right here? Coastal Brewing — fixin to be your summer cup"* |
 | `sal_ang` (Coastal) | Per\|Form analysts | Lowcountry — *"The boys at Per\|Form watch the tape — they fixin' to call this kid's name"* |
-| `pip_ang` (Coastal) | ACHIEVEMOR | Trans-Atlantic — *"All of this — quite an undertaking. ACHIEVEMOR makes it possible."* |
+| `har_ang` (Coastal) | ACHIEVEMOR | Trans-Atlantic — *"All of this — quite an undertaking. ACHIEVEMOR makes it possible."* |
 
 Generate via:
 ```ts
