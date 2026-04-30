@@ -106,8 +106,8 @@ interface StorageAdapter {
 
 Already implemented:
 - `src/registry/character-voices.ts` — `VOICE_REGISTRY` + `getCharacterVoice()`
-- 12 Coastal Sales-team Boomer_Ang stubs (Sal_Ang, Lou_Ang, Tate_Ang, Wren_Ang, Holt_Ang, Eliza_Ang, Marcus_Ang, Naya_Ang, Pip_Ang, Vi_Ang, Trey_Ang, Mads_Ang)
-- 1 Coastal Bundle Specialist (Luc_Ang) stub
+- 12 Coastal Sales-team Boomer_Ang stubs (Sal_Ang, Hos_Ang, Bar_Ang, Con_Ang, Tas_Ang, Tea_Ang, Cou_Ang, Gre_Ang, Har_Ang, Cur_Ang, Reg_Ang, Mat_Ang)
+- 1 Coastal Bundle Specialist (Bun_Ang) stub
 - `directorialDefaults` for each — audio profile, scene hint, director notes
 - Voice resolution fields (`geminiVoiceName` / `derivativeId` / `cloneId`) NULL until samples generated + owner-approved
 
@@ -147,7 +147,7 @@ These ship as separate PRs:
    - Bucket name + IAM role TBD with owner
 
 4. **Sample-WAV generator** (`scripts/generate-cast-samples.ts`)
-   - For each of the 13 Coastal characters (12 carousel + Luc_Ang)
+   - For each of the 13 Coastal characters (12 carousel + Bun_Ang)
    - Generate a 30-60s sample WAV using each character's `directorialDefaults` + a sample script from their persona
    - Write to `iCloudDrive/.../Claude Code/voice-models/<cast_id>.wav`
    - Open owner-review batch
@@ -181,4 +181,4 @@ This lets each adapter ship as its own module without forcing the orchestrator t
 - `~/.claude/projects/C--Users-rishj/memory/feedback_ch_voice_gemini_live_not_inworld.md` — Gemini Live as voice substrate for CH (and by extension Coastal)
 - `~/.claude/projects/C--Users-rishj/memory/project_coastal_sales_team_voice_cast_2026_04_29.md` — Coastal cast directive
 - `aims-tools/voice-library/CATALOG.md` — character + brand index (always reflect new entries here)
-- `aims-tools/voice-library/personas/*.md` — 13 deep persona files (12 cast + Luc_Ang) the voice samples should bring to life
+- `aims-tools/voice-library/personas/*.md` — 13 deep persona files (12 cast + Bun_Ang) the voice samples should bring to life

@@ -2,7 +2,7 @@
 """Generate Coastal Sales-team character portraits via Ideogram v3 API.
 
 Uses Sal_Ang as the canonical character reference and produces brand-consistent
-portraits for the 12 other team members + Luc_Ang per design.md §11 canon.
+portraits for the 12 other team members + Bun_Ang per design.md §11 canon.
 
 Outputs to iCloud Claude Code folder for owner review.
 
