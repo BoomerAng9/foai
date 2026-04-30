@@ -50,9 +50,9 @@ KIE_GPT_IMAGE_2_MODEL = "gpt-image-2-image-to-image"
 
 # Public URL for the canonical Sal_Ang reference. Required by Kie.ai's
 # input_urls parameter (must be publicly reachable). Hosted on the foai
-# repo's `feat/ideogram-character-generator` branch at GitHub raw.
+# repo's `main` branch at GitHub raw.
 SAL_REFERENCE_URL = (
-    "https://raw.githubusercontent.com/BoomerAng9/foai/feat/ideogram-character-generator/"
+    "https://raw.githubusercontent.com/BoomerAng9/foai/main/"
     "chicken-hawk/hawk-ui/public/chicken-hawk/coffee-shop-sal-ang.png"
 )
 
