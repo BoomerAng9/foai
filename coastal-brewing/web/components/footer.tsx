@@ -6,7 +6,7 @@ export function Footer() {
   return (
     <footer className="relative overflow-hidden border-t border-border/60 bg-background">
       {/* Reference grid (kept from prior structure, restyled to match design.md) */}
-      <div className="container grid gap-12 py-16 md:grid-cols-4">
+      <div className="container grid gap-12 py-16 md:grid-cols-5">
         <div className="md:col-span-1">
           <Wordmark size="md" asLink={false} />
           <p className="mt-6 max-w-xs text-xs leading-relaxed text-muted-foreground">
@@ -29,15 +29,30 @@ export function Footer() {
             <li><Link href="/about" className="text-foreground/80 hover:text-foreground">About Jarrett</Link></li>
             <li><Link href="/about/governance" className="text-foreground/80 hover:text-foreground">Governance</Link></li>
             <li><Link href="/chat" className="text-foreground/80 hover:text-foreground">Chat</Link></li>
+            <li><Link href="/contact" className="text-foreground/80 hover:text-foreground">Contact &amp; Support</Link></li>
+          </ul>
+        </div>
+        <div>
+          <p className="eyebrow">Policies</p>
+          <ul className="mt-4 space-y-2 text-sm">
+            <li><Link href="/policies" className="text-foreground/80 hover:text-foreground">All policies</Link></li>
+            <li><Link href="/policies/shipping" className="text-foreground/80 hover:text-foreground">Shipping</Link></li>
+            <li><Link href="/policies/refund" className="text-foreground/80 hover:text-foreground">Returns &amp; refunds</Link></li>
+            <li><Link href="/policies/privacy" className="text-foreground/80 hover:text-foreground">Privacy</Link></li>
+            <li><Link href="/policies/terms" className="text-foreground/80 hover:text-foreground">Terms</Link></li>
           </ul>
         </div>
         <div>
           <p className="eyebrow">Compliance</p>
-          <p className="mt-4 text-xs leading-relaxed text-muted-foreground">
-            Public claims are sourced from verifiable supplier documentation. We do not repeat organic,
-            fair-trade, or health claims unless certificate IDs are on file. Our customer-facing AI agents
-            will not represent themselves as human if asked. Every supplier order and public claim is signed
-            by founder Jarrett Risher before execution.
+          <ul className="mt-4 space-y-2 text-sm">
+            <li><Link href="/policies/label-claims" className="text-foreground/80 hover:text-foreground">Label claims &amp; sourcing</Link></li>
+            <li><Link href="/policies/health-disclaimer" className="text-foreground/80 hover:text-foreground">FDA &amp; health disclaimer</Link></li>
+            <li><Link href="/policies/prop-65" className="text-foreground/80 hover:text-foreground">California Prop 65</Link></li>
+            <li><Link href="/policies/delivery-responsibility" className="text-foreground/80 hover:text-foreground">Delivery responsibility</Link></li>
+            <li><Link href="/policies/accessibility" className="text-foreground/80 hover:text-foreground">Accessibility</Link></li>
+          </ul>
+          <p className="mt-4 text-[10px] leading-relaxed text-muted-foreground">
+            Public claims are sourced from verifiable supplier documentation. AI agents disclose AI when asked. Every public claim and supplier order is signed by Jarrett Risher.
           </p>
         </div>
       </div>

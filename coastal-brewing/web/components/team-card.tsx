@@ -4,8 +4,6 @@ import { MessageSquare } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { LiveLookInTrigger } from "@/components/live-look-in";
-
 export type TeamMember = {
   id: string;
   name: string;
@@ -47,7 +45,6 @@ export function TeamCard({ member }: { member: TeamMember }) {
             <MessageSquare className="h-3.5 w-3.5" /> Talk to {member.name.split(" ")[0]}
           </Link>
         </Button>
-        <LiveLookInTrigger agent={member.team} />
       </CardFooter>
     </Card>
   );

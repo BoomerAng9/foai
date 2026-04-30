@@ -1,0 +1,88 @@
+import Link from "next/link";
+import { PolicyPageLayout } from "@/components/policy-page-layout";
+
+export const metadata = {
+  title: "Label Claims & Sourcing Disclosure — Coastal Brewing Co.",
+  description: "What Coastal claims, what we don't, and why. Every cup is what the label says it is.",
+};
+
+export default function LabelClaimsPage() {
+  return (
+    <PolicyPageLayout
+      eyebrow="Sourcing & claims"
+      title="Every cup is what the label says it is."
+      lastUpdated="April 30, 2026"
+    >
+      <p>The line on every Coastal bag — <em>&ldquo;Every cup is what the label says it is&rdquo;</em> — is the brand promise. This page explains what that means in practice, and what we will and will not claim.</p>
+
+      <h2 className="font-display text-2xl font-semibold text-foreground">What we claim, and how we back it</h2>
+
+      <h3 className="font-display text-lg font-semibold text-foreground">Specialty Grade</h3>
+      <p>When we say a coffee is <strong className="text-foreground">Specialty Grade</strong>, we mean the green coffee was sourced from a lot that scored 80+ on the Specialty Coffee Association (SCA) cupping protocol. The lot ID and certificate of analysis are on file for every Specialty Grade coffee we sell. They are not on the bag because most customers don&apos;t ask, but we&apos;ll provide a copy on written request.</p>
+
+      <h3 className="font-display text-lg font-semibold text-foreground">Single Origin</h3>
+      <p>When a coffee is <strong className="text-foreground">Single Origin</strong>, the green came from a single country, region, and (where possible) cooperative or estate. The country and region appear on the bag.</p>
+
+      <h3 className="font-display text-lg font-semibold text-foreground">Fairtrade®</h3>
+      <p>We label a coffee <strong className="text-foreground">Fairtrade Certified</strong> only when the green came through a Fairtrade-certified cooperative and the lot has a current Fairtrade certificate on file. The Fairtrade® mark on our packaging is provided exactly as the certifying body issues it — never modified, never paired with embellished claims.</p>
+      <p>The Fairtrade premium structure means a portion of the price you pay supports the producer cooperative directly. That premium is built into the wholesale cost we pay.</p>
+
+      <h3 className="font-display text-lg font-semibold text-foreground">Decaf — Swiss Water Process</h3>
+      <p>Our decaf coffees are decaffeinated using the <strong className="text-foreground">Swiss Water Process</strong>: chemical-free, water-only, GMO-free. We mark the bag with the SWP logo when the SWP program governs the lot.</p>
+
+      <h3 className="font-display text-lg font-semibold text-foreground">Roast level</h3>
+      <p>Light, medium, dark, espresso. These are descriptive, not regulated. We use them consistently with the SCA roast color reference scale.</p>
+
+      <h3 className="font-display text-lg font-semibold text-foreground">Brewing notes</h3>
+      <p>Tasting and brewing notes on every product page describe the cup we taste at the roastery. Coffee is a living thing — your water, your equipment, your grind, and the bag&apos;s age affect the cup. We give the notes as guidance, not promises.</p>
+
+      <h2 className="font-display text-2xl font-semibold text-foreground">What we <em>do not</em> claim</h2>
+      <p>By choice, by FDA rule, and by FTC rule. None of these will appear on a Coastal bag, the Storefront, our marketing, or our customer service:</p>
+      <ul className="ml-5 list-disc space-y-2">
+        <li><strong className="text-foreground">&ldquo;Organic&rdquo;</strong> unless the coffee carries an active USDA NOP certification on the lot. Coastal as a brand is not currently USDA Organic certified at the brand level. Individual lots may be organic; if so, the bag and Storefront product page will say so.</li>
+        <li><strong className="text-foreground">&ldquo;All natural.&rdquo;</strong> The FDA hasn&apos;t defined this term and we don&apos;t use it. Flavored coffees are labeled with the legally required <code className="font-mono text-xs">Ingredients: Coffee, Natural Flavorings</code>.</li>
+        <li><strong className="text-foreground">&ldquo;Low acid&rdquo;</strong> as a marketing claim. Some of our coffees taste lower in acidity (Sumatra, the decafs); we&apos;ll note this in cupping notes, never as a health claim.</li>
+        <li><strong className="text-foreground">Health claims of any kind.</strong> Coffee is not a supplement. Tea is not a supplement. We do not claim our products treat, cure, prevent, or mitigate any disease, support immunity, reduce stress, improve focus, support gut health, deliver clean energy, or anything similar.</li>
+        <li><strong className="text-foreground">Antioxidant claims.</strong> Coffee and tea naturally contain antioxidant compounds; quantifying or marketing this requires substantiation we don&apos;t have, so we don&apos;t claim it.</li>
+        <li><strong className="text-foreground">Sustainability claims we can&apos;t substantiate.</strong> &ldquo;Eco-friendly,&rdquo; &ldquo;carbon neutral,&rdquo; &ldquo;compostable&rdquo; without qualification — none of these appear unless we can show the work. Our coffee bags are Biotre 1.0 (industrial compostable). Our labels are not compostable.</li>
+      </ul>
+
+      <h2 className="font-display text-2xl font-semibold text-foreground">Functional / Mushroom coffees (if and when added)</h2>
+      <p>Coastal does not currently sell mushroom or functional coffees. If we add them, the labels and storefront will follow strict food (not supplement) language:</p>
+      <ul className="ml-5 list-disc space-y-1">
+        <li>The Statement of Identity will be <strong className="text-foreground">Ground Coffee with Mushrooms</strong>, exactly.</li>
+        <li>Ingredients will be listed: <code className="font-mono text-xs">Coffee, Lion&apos;s Mane Mushroom Powder, Cordyceps Mushroom Powder, Reishi Mushroom Powder</code>.</li>
+        <li>We will use <strong className="text-foreground">traditional-use language only</strong>: <em>&ldquo;long valued for,&rdquo; &ldquo;appreciated for,&rdquo; &ldquo;traditionally used.&rdquo;</em></li>
+        <li>We will <strong className="text-foreground">not</strong> claim <em>&ldquo;boosts immunity,&rdquo; &ldquo;reduces stress,&rdquo; &ldquo;improves memory,&rdquo;</em> or <em>&ldquo;clean energy.&rdquo;</em></li>
+        <li>A California Prop 65 notice will appear on the package.</li>
+      </ul>
+
+      <h2 className="font-display text-2xl font-semibold text-foreground">Freshness statements</h2>
+      <p>Our coffee is roasted small-batch on a demand-driven schedule. Most orders are roasted, packed, and shipped within the same week as your purchase.</p>
+      <p>The exact phrasing we use on the bag and on the Storefront:</p>
+      <ul className="ml-5 list-disc space-y-1">
+        <li><em>&ldquo;Small batch roasted throughout the week for peak flavor and consistency.&rdquo;</em></li>
+        <li><em>&ldquo;We roast every shipping day to ensure our coffee moves quickly from roaster to doorstep.&rdquo;</em></li>
+        <li><em>&ldquo;In many cases, your coffee is roasted, packed, and shipped all in the same day — but always with care and quality in mind.&rdquo;</em></li>
+      </ul>
+      <p>We <strong className="text-foreground">do not</strong> claim <em>&ldquo;roasted today,&rdquo;</em> <em>&ldquo;shipped same day,&rdquo;</em> or <em>&ldquo;roasted to order&rdquo;</em> on labels, because those phrases create expectations we cannot consistently meet through every season.</p>
+
+      <h2 className="font-display text-2xl font-semibold text-foreground">Spelling, consistency, and accuracy</h2>
+      <p>We hold ourselves to specific writing standards on labels and in product copy:</p>
+      <ul className="ml-5 list-disc space-y-1">
+        <li><strong className="text-foreground">Colombia</strong>, the country. Not &ldquo;Columbia.&rdquo;</li>
+        <li><strong className="text-foreground">Specialty Grade</strong>, an SCA cupping designation. Not &ldquo;Speciality.&rdquo;</li>
+        <li><strong className="text-foreground">Coarse Ground</strong>, a grind size. Not &ldquo;Course.&rdquo;</li>
+        <li><strong className="text-foreground">Fairtrade®</strong>, exactly as the mark holder writes it.</li>
+        <li><strong className="text-foreground">Swiss Water Process®</strong>, exactly.</li>
+      </ul>
+      <p>Errors get caught in our pre-print review. If you spot something on a Coastal bag or page that looks wrong, write us — we owe you the fix.</p>
+
+      <hr className="border-border" />
+      <p className="text-sm">
+        Questions? <a className="text-accent hover:underline" href="mailto:bpo@achievemor.io">bpo@achievemor.io</a>. For wholesale + sourcing transparency requests, mention &ldquo;Sourcing&rdquo; in the subject and we&apos;ll route warm.
+      </p>
+      <p className="font-display text-sm italic">Truth told: every cup is what the label says it is.</p>
+    </PolicyPageLayout>
+  );
+}
