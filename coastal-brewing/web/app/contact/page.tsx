@@ -65,9 +65,9 @@ export default function ContactPage() {
       <p>For physical mail (rare, but for the record):</p>
       <p>
         Coastal Brewing Co.<br />
-        c/o ACHIEVEMOR<br />
+        c/o A.I.M.S. — AI Managed Solutions<br />
         {/* TCR_ADDR_PATCH: confirm Oceanside ZIP on TCR Compliant Address Service enrollment */}
-        c/o Coastal Brewing Co., Oceanside, CA 92054
+        Oceanside, CA 92054
       </p>
       <p><strong className="text-foreground">Please do not return coffee by mail.</strong> See our <Link href="/policies/refund" className="text-accent hover:underline">Return &amp; Refund Policy</Link> — we replace, we don&apos;t accept returns.</p>
 

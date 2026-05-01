@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { Wordmark } from "@/components/wordmark";
-import { PalmTree } from "@/components/icons/palm-tree";
 
 export function Footer() {
   return (
@@ -62,12 +61,10 @@ export function Footer() {
         <div className="container relative grid grid-cols-1 items-center gap-2 py-8 text-center font-mono text-[10px] uppercase tracking-wordmark text-muted-foreground md:grid-cols-3">
           <span className="md:text-left">© {new Date().getFullYear()} Coastal Brewing.</span>
           <span className="text-foreground">Every cup is what the label says it is.</span>
-          <span className="md:text-right">powered by ACHIEVEMOR</span>
+          <span className="md:text-right">Powered by: A.I.M.S. (AI MANAGED SOLUTIONS) est.2025</span>
         </div>
       </div>
 
-      {/* Palm tree silhouette anchor — bottom-right corner ornament */}
-      <PalmTree className="pointer-events-none absolute bottom-4 right-4 h-20 w-16 text-foreground/10" />
     </footer>
   );
 }

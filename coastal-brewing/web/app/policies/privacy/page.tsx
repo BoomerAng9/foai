@@ -16,7 +16,7 @@ export default function PrivacyPolicy() {
       <p className="font-mono text-xs text-muted-foreground">Effective date: April 30, 2026</p>
 
       <h2 className="font-display text-2xl font-semibold text-foreground">Who we are</h2>
-      <p>Coastal Brewing Co. is a Lowcountry coffee, tea, and matcha brand operated by <strong className="text-foreground">ACHIEVEMOR</strong> at brewing.foai.cloud and at our retail and pop-up locations.</p>
+      <p>Coastal Brewing Co. is a Lowcountry coffee, tea, and matcha brand operated by <strong className="text-foreground">A.I.M.S. — AI Managed Solutions</strong> at brewing.foai.cloud and at our retail and pop-up locations.</p>
       <p>This Privacy Policy describes what personal information we collect, why we collect it, how we use it, who we share it with, and what choices you have.</p>
       <p>If you have a question about this policy, write us at <a className="text-accent hover:underline" href="mailto:bpo@achievemor.io">bpo@achievemor.io</a>.</p>
 
@@ -136,7 +136,7 @@ export default function PrivacyPolicy() {
       <p>For any privacy question or request:</p>
       <p>
         <strong className="text-foreground">Email:</strong> <a className="text-accent hover:underline" href="mailto:bpo@achievemor.io">bpo@achievemor.io</a><br />
-        <strong className="text-foreground">Mail:</strong> Coastal Brewing Co. (c/o ACHIEVEMOR), Privacy Officer{/* TCR_ADDR_PATCH: confirm Oceanside ZIP on TCR Compliant Address Service enrollment */}, c/o Coastal Brewing Co., Oceanside, CA 92054
+        <strong className="text-foreground">Mail:</strong> Coastal Brewing Co. (c/o A.I.M.S. — AI Managed Solutions), Privacy Officer{/* TCR_ADDR_PATCH: confirm Oceanside ZIP on TCR Compliant Address Service enrollment */}, Oceanside, CA 92054
       </p>
       <p>We&apos;ll respond within 30 days.</p>
 

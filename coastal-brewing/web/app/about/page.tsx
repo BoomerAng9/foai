@@ -52,7 +52,7 @@ export default function AboutPage() {
               <li>IBM-Certified Product Manager · Lean Six Sigma Black Belt</li>
               <li>Architect of the AuditLedger audit system &amp; NemoClaw policy gate</li>
               <li>Past responsibility: $2.9M government contracts under ISO 9001:2015</li>
-              <li>Founder of the broader ACHIEVEMOR / FOAI ecosystem</li>
+              <li>Founder of the broader FOAI ecosystem</li>
             </ul>
           </div>
 
