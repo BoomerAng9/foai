@@ -225,15 +225,208 @@ def quote_sku(
     return equation.strip_internal_fields(q)
 
 
-# NOTE: `issue_coupon` Spinner tool was REMOVED 2026-04-30 per owner
-# decision. The local authority check was real (refused unauthorized
-# actors), but the dispatch went to a Chicken Hawk action handler that
-# does not exist yet — runtime calls would have returned an error
-# envelope. Per AIMS doctrine: ship only what's real. The fixed-list
-# coupon canon (`WELCOME10`, `BREW20`, `FREESHIP`, `TRY-ME`) stays in
-# `agents/shared/authority_tiers.py:LUC_COUPON_CODES` and
-# `is_coupon_within_authority()` for the future PR that adds the
-# Chicken Hawk-side `issue_coupon` handler + Stripe coupon application.
+import datetime as _dt
+import hashlib as _hashlib
+
+import audit_ledger as _audit_ledger  # type: ignore[import-not-found]
+
+
+# Per-coupon discount semantics — runner-side mirror of the Stripe Coupon
+# objects Chicken Hawk creates server-side. Used to (a) compute the
+# Custee-visible price preview that the calling agent speaks during chat,
+# and (b) audit-ledger record what was issued. The actual Stripe Coupon /
+# Promotion Code lives in Chicken Hawk's response envelope.
+COUPON_DISCOUNTS: dict[str, dict] = {
+    "WELCOME10": {
+        "kind": "percent",
+        "amount": 10.0,
+        "applies_to": "first_order",
+        "single_use_per_email": True,
+    },
+    "BREW20": {
+        "kind": "percent",
+        "amount": 20.0,
+        "applies_to": "discovery_bundle_for_3plus_month_subscribers",
+        "single_use_per_email": True,
+    },
+    "FREESHIP": {
+        "kind": "free_shipping",
+        "amount": 0.0,
+        "applies_to": "any_order",
+        "single_use_per_email": False,
+    },
+    "TRY-ME": {
+        "kind": "amount_off_usd",
+        "amount": 5.19,  # $24.99 MSRP - $19.80 cost-recovery floor (catalog.py)
+        "applies_to": "sample_pack",
+        # Per `samples-program.md`: cap 1 per Custee per 30 days, cross-checked
+        # against email + shipping address hash (not just custee_id, to defeat
+        # the "multiple emails / same address" abuse pattern).
+        "rate_limit_days": 30,
+        "rate_limit_keys": ("custee_id", "email_hash", "address_hash"),
+    },
+}
+
+
+def _hash_signal(s: str) -> str:
+    """Stable, lowercased, whitespace-trimmed hash for cross-check signals.
+    Uses SHA-256 hex prefix (16 chars) — collision-resistant within a
+    plausible Custee-base size, short enough to fit in audit summaries.
+    """
+    norm = (s or "").strip().lower()
+    return _hashlib.sha256(norm.encode("utf-8")).hexdigest()[:16]
+
+
+def _check_coupon_rate_limit(
+    coupon_code: str,
+    custee_id: str,
+    email_hash: str,
+    address_hash: str,
+) -> Optional[dict]:
+    """Returns None if the coupon may be issued; returns a `rate_limited`
+    envelope dict if a recent issuance matches any of the cross-check
+    signals (custee_id, email_hash, address_hash) within the
+    coupon-specific rate-limit window.
+    """
+    spec = COUPON_DISCOUNTS.get(coupon_code, {})
+    days = spec.get("rate_limit_days")
+    keys = spec.get("rate_limit_keys") or ()
+    if not days:
+        return None  # no rate limit on this coupon
+
+    since = (_dt.datetime.now(_dt.timezone.utc) - _dt.timedelta(days=int(days))).isoformat()
+
+    signals: dict[str, str] = {
+        "custee_id": custee_id,
+        "email_hash": email_hash,
+        "address_hash": address_hash,
+    }
+    for key in keys:
+        sig = signals.get(key, "")
+        if not sig:
+            continue
+        rows = _audit_ledger.query_recent_action_receipts(
+            action_type="coupon_issuance",
+            since_iso=since,
+            summary_substr=f"{key}={sig}",
+            limit=5,
+        )
+        if rows:
+            earliest = min((r["created_at"] for r in rows), default=since)
+            retry_dt = _dt.datetime.fromisoformat(earliest) + _dt.timedelta(days=int(days))
+            return {
+                "ok": False,
+                "verdict": "rate_limited",
+                "reason": f"coupon_{coupon_code}_used_within_{days}d_match_{key}",
+                "retry_after": retry_dt.isoformat(),
+                "message": (
+                    f"Coupon `{coupon_code}` was already redeemed for this "
+                    f"{key.replace('_', ' ')} within the last {days} days. "
+                    "Hold the line in-character: offer the next-step move "
+                    "(PPU at retail, or a subscription configuration walkthrough)."
+                ),
+            }
+    return None
+
+
+def issue_coupon(
+    coupon_code: str,
+    custee_id: str,
+    actor: str = "luc",
+    custee_email: str = "",
+    shipping_address: str = "",
+) -> dict:
+    """Issue a fixed-list coupon code to a Custee. Server-side enforcement
+    chain — bypasses none of these gates regardless of LLM intent:
+
+    1. Authority gate (`authority_tiers.is_coupon_within_authority`):
+       only the canonical tier owners can issue (`T2_FINANCE` for the
+       fixed list, `T1` for any code).
+    2. Cross-check rate-limit (`_check_coupon_rate_limit`): hashes
+       email + shipping_address, queries audit ledger for prior
+       `coupon_issuance` rows within the coupon's rate-limit window,
+       refuses on any cross-check signal match.
+    3. Chicken Hawk dispatch: hawk-side `issue_coupon` handler runs
+       NemoClaw policy gate then calls Stripe SDK to create a real
+       Coupon + Promotion Code keyed to the Custee's email. Returns
+       stripe_coupon_id / promotion_code / redemption_url on success.
+    4. Audit-ledger emit: on dispatch success, records a
+       `coupon_issuance` action receipt with the cross-check signals
+       (hashed) so subsequent `_check_coupon_rate_limit` calls find
+       this row.
+
+    Routing canon (per owner directive 2026-04-30):
+       LUC is invoked by team members — Sal at checkout, Melli for
+       B2B, ACHEEVY for math-sim. He is NOT customer-facing on the
+       open chat surface; his routing is tightly wound. Other agents
+       DELEGATE to LUC (imperative); they do not request permission.
+
+    Args:
+        coupon_code: one of `LUC_COUPON_CODES` (or any code if actor=acheevy)
+        custee_id: opaque customer identifier
+        actor: agent slug — default "luc"; "acheevy" gets unrestricted
+        custee_email: required for cross-check + Stripe Promotion Code
+        shipping_address: required for cross-check (defeats multi-email abuse)
+    """
+    # 1. Authority gate
+    actor_tier = authority_tiers.get_tier(actor)
+    if actor_tier is None:
+        return {
+            "ok": False,
+            "verdict": "denied",
+            "reason": f"unknown_actor:{actor}",
+            "message": "Coupon issuance refused — actor not recognized.",
+        }
+    if not authority_tiers.is_coupon_within_authority(actor_tier, coupon_code):
+        return {
+            "ok": False,
+            "verdict": "denied",
+            "reason": f"coupon_{coupon_code}_outside_authority_for_{actor_tier}",
+            "message": (
+                f"Actor at tier {actor_tier} cannot issue coupon "
+                f"`{coupon_code}`. LUC owns the fixed-list coupon counter."
+            ),
+        }
+
+    # 2. Cross-check rate-limit
+    email_hash = _hash_signal(custee_email)
+    address_hash = _hash_signal(shipping_address)
+    blocked = _check_coupon_rate_limit(coupon_code, custee_id, email_hash, address_hash)
+    if blocked is not None:
+        return blocked
+
+    # 3. Chicken Hawk dispatch
+    envelope = chicken_hawk.dispatch(
+        "issue_coupon",
+        {
+            "coupon_code": coupon_code,
+            "custee_id": custee_id,
+            "actor": actor,
+            "actor_tier": actor_tier,
+            "custee_email": custee_email,
+        },
+    )
+    if not envelope.get("ok"):
+        return envelope  # surface the dispatch error verbatim
+
+    # 4. Audit-ledger emit on success — record cross-check signals so the
+    # next `_check_coupon_rate_limit` call finds this row. Signals are
+    # hashed (no PII in the ledger summary).
+    summary = (
+        f"coupon={coupon_code} custee_id={custee_id} email_hash={email_hash} "
+        f"address_hash={address_hash} stripe_coupon_id={envelope.get('stripe_coupon_id', '')} "
+        f"promotion_code={envelope.get('promotion_code', '')}"
+    )
+    _audit_ledger.insert_action_receipt(
+        task_id=f"coupon_{envelope.get('stripe_coupon_id', custee_id)}",
+        executor=f"{actor}:{actor_tier}",
+        action_type="coupon_issuance",
+        destination=envelope.get("stripe_coupon_id", ""),
+        status="issued",
+        result_summary=summary,
+    )
+
+    return envelope
 
 
 def start_checkout(session_id: str, customer_email: str) -> dict:
