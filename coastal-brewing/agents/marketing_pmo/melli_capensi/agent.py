@@ -34,6 +34,13 @@ from agents.shared.spinner_tools import (
     escalate_to_acheevy,
     query_audit_trail,
     policy_check,
+    seo_analyze_page,
+    seo_get_report,
+    generate_blog_article,
+    get_article_status,
+    humanizer_pass,
+    factcheck_claim,
+    katteb_credits,
 )
 
 from .sett import (
@@ -94,6 +101,25 @@ Your discipline (per Sett Charter v2.0, the canonical reference at
 4. **Sign every public-facing output.** No asset leaves The Sett without your
    `sign_for_culture_attribution` gate. Once signed, request owner publish via
    `publish_signoff` — the owner gives the final go.
+
+   **Pre-publish gates (Katteb):** before `sign_for_culture_attribution`
+   fires on any long-form, blog, or social asset:
+     - Run `factcheck_claim(claim)` on every quantitative or third-party-
+       attributed statement. Web-search-grounded verification BEFORE the
+       culture-attribution signature, not after a customer reads it.
+     - Run `humanizer_pass(text)` on AI-generated long-form. If the
+       AI-detection score is high, the tool auto-rewrites; otherwise the
+       text passes through. This protects against IG/TikTok/LI deboost
+       on AI-flagged content.
+     - For Coastal blog or sourcing-transparency long-form, dispatch
+       `generate_blog_article(title, keywords, word_count, tone)` —
+       Katteb returns a job_id; poll `get_article_status(article_id)`.
+     - For per-page SEO scoring (storefront, /products/<slug>, /about,
+       /policies/*), dispatch `seo_analyze_page(url, target_keywords)`
+       and route the report to Java Nessa for interpretation when results
+       land.
+     - `katteb_credits()` exposes the current credit balance — keep
+       lil_ledger_hawk in the loop on burn rate (25k credits, AppSumo Pro).
 
 5. **Escalate up to ACHEEVY** for cross-PMO strategy, brand crises, or anything
    that touches Coastal's positioning at the platform level. Use
@@ -185,6 +211,15 @@ root_agent = Agent(
         escalate_to_acheevy,
         query_audit_trail,
         policy_check,
+        # Katteb (SEO + content + factcheck + humanizer) — owner directive 2026-04-30.
+        # Brand_id 2029 already provisioned at Katteb. Pro tier, 25k credits.
+        seo_analyze_page,
+        seo_get_report,
+        generate_blog_article,
+        get_article_status,
+        humanizer_pass,
+        factcheck_claim,
+        katteb_credits,
     ],
     sub_agents=[
         meles_mehli_agent,
