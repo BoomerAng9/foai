@@ -56,6 +56,93 @@ def _strip_internal_fields(p: dict) -> dict:
     return {k: v for k, v in p.items() if k not in _INTERNAL_FIELDS}
 
 
+# ---------------------------------------------------------------------------
+# Brand-promise + compliance flags (E3 — owner directive 2026-04-30)
+# ---------------------------------------------------------------------------
+# `Nothing Chemically, Ever.` is the canonical brand motto, but it applies
+# PER-PRODUCT not catalog-wide. A SKU with `Ingredients: COFFEE, NATURAL
+# FLAVORINGS` cannot literally carry the motto without breaking
+# claims-voider canon. Plus TCR's mushroom-coffee strict lane requires
+# specific labelling + soft-qualifier language; violation = TCR suspends
+# our fulfillment per `mushroom_coffee.txt`.
+#
+# Derivation runs at module load. Owner can override per-SKU by setting
+# an explicit `motto_eligible` or `compliance_lane` field on the literal
+# — those take precedence over the rule.
+
+_MUSHROOM_INGREDIENT_TOKENS = ("MUSHROOM", "LION", "CORDYCEPS", "REISHI", "CHAGA", "TURKEY TAIL")
+_FLAVORING_TOKENS = ("NATURAL FLAVORINGS", "ARTIFICIAL FLAVORINGS", "FLAVORINGS")
+
+
+def _derive_motto_eligibility(p: dict) -> bool:
+    """A SKU is motto-eligible (carries 'Nothing Chemically, Ever.') only
+    when its ingredients are pure (coffee / tea / matcha) AND its category
+    is not flavored / functional / k-cup.
+    """
+    if "motto_eligible" in p:
+        return bool(p["motto_eligible"])  # explicit override wins
+
+    category = (p.get("category") or "").lower()
+    ingredients = (p.get("ingredients") or "").upper()
+    sku_id = (p.get("id") or "").lower()
+
+    # Categories that NEVER carry the motto under any circumstance.
+    if category in {"flavored_coffee", "functional", "kcup"}:
+        return False
+
+    # Sample packs split: pure-origin / best-sellers carry the motto;
+    # the flavored sample variant does not.
+    if category == "sample_pack":
+        return "flavored" not in sku_id
+
+    # Pure-category (coffee / specialty_coffee / tea / instant / matcha):
+    # motto applies UNLESS ingredients reveal additives.
+    if any(token in ingredients for token in _FLAVORING_TOKENS):
+        return False
+    if any(token in ingredients for token in _MUSHROOM_INGREDIENT_TOKENS):
+        return False
+
+    # Bundles + subscriptions: default true (constituent verification
+    # happens at the bundle-rendering layer). Owner overrides per-SKU
+    # if a bundle includes a flavored variant.
+    return True
+
+
+def _derive_compliance_lane(p: dict) -> Optional[str]:
+    """TCR strict-lane classification. `mushroom_strict` covers all
+    functional/mushroom SKUs that must follow TCR's required labelling
+    (statement of identity = "Ground Coffee with Mushrooms"; soft
+    qualifiers only; FORBIDDEN therapeutic claims). Per
+    `iCloudDrive/.../temecula-supplier-docs/mushroom_coffee.txt`.
+    """
+    if "compliance_lane" in p:
+        return p["compliance_lane"]  # explicit override wins
+
+    category = (p.get("category") or "").lower()
+    ingredients = (p.get("ingredients") or "").upper()
+
+    if category == "functional":
+        return "mushroom_strict"
+    if any(token in ingredients for token in _MUSHROOM_INGREDIENT_TOKENS):
+        return "mushroom_strict"
+
+    return None
+
+
+def _enrich_products() -> None:
+    """One-time pass at module load — annotate every SKU with the
+    derived `motto_eligible` + (optionally) `compliance_lane` flags.
+    Idempotent. Owner-overrides on individual SKUs are preserved.
+    """
+    for sku_id, p in PRODUCTS.items():
+        if "id" not in p:
+            p["id"] = sku_id  # ensure id available before derivation
+        p["motto_eligible"] = _derive_motto_eligibility(p)
+        lane = _derive_compliance_lane(p)
+        if lane is not None:
+            p["compliance_lane"] = lane
+
+
 # Each product: msrp = public retail; wholesale_cost = what we pay supplier;
 # fulfillment_cost = shipping + handling per unit; min_margin_floor = absolute
 # floor the runner won't authorize a deal below.
@@ -4510,3 +4597,8 @@ def recommend_bundle(preferences: dict) -> dict:
         "rationale": rationale,
         "customer_total": customer_total,
     }
+
+
+# Module-load enrichment: annotate every SKU with motto_eligible +
+# compliance_lane. Runs once at import time; idempotent on repeat calls.
+_enrich_products()
