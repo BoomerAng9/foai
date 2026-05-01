@@ -8,7 +8,7 @@ const NAV_LINKS: { href: string; label: string }[] = [
   { href: "/team", label: "Team" },
   { href: "/about/governance", label: "Commitment" },
   { href: "/chat", label: "Chat" },
-  { href: "/cart", label: "Cart" },
+  { href: "/chat?agent=sales", label: "Order" },
 ];
 
 export function Nav() {

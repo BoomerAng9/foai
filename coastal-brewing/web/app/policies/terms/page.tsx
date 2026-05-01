@@ -13,7 +13,7 @@ export default function TermsPage() {
       title="Terms of Service & Sale."
       lastUpdated="April 30, 2026"
     >
-      <p>These Terms govern your use of <Link href="/" className="text-accent hover:underline">brewing.foai.cloud</Link> (the &ldquo;Storefront&rdquo;) and any purchase you make from Coastal Brewing Co. (&ldquo;we,&rdquo; &ldquo;us,&rdquo; &ldquo;Coastal&rdquo;), a brand operated by <strong className="text-foreground">ACHIEVEMOR</strong>.</p>
+      <p>These Terms govern your use of <Link href="/" className="text-accent hover:underline">brewing.foai.cloud</Link> (the &ldquo;Storefront&rdquo;) and any purchase you make from Coastal Brewing Co. (&ldquo;we,&rdquo; &ldquo;us,&rdquo; &ldquo;Coastal&rdquo;), a brand operated by <strong className="text-foreground">A.I.M.S. — AI Managed Solutions</strong>.</p>
       <p>By using the Storefront or placing an order, you agree to these Terms. If you don&apos;t agree, please don&apos;t use the Storefront.</p>
 
       <h2 className="font-display text-2xl font-semibold text-foreground">1. About these Terms</h2>
@@ -96,7 +96,7 @@ export default function TermsPage() {
       </ul>
 
       <h2 className="font-display text-2xl font-semibold text-foreground">11. Intellectual property</h2>
-      <p>Coastal Brewing Co., the Coastal logo, the Lowcountry stork mark, the storefront design, the photography, the brand voice, and the cast portraits are owned by ACHIEVEMOR. You may not use them without written permission.</p>
+      <p>Coastal Brewing Co., the Coastal logo, the Lowcountry stork mark, the storefront design, the photography, the brand voice, and the cast portraits are owned by A.I.M.S. — AI Managed Solutions. You may not use them without written permission.</p>
       <p>You retain ownership of anything you submit to us (reviews, feedback, photos shared in chat). By submitting content, you grant Coastal a non-exclusive, worldwide, royalty-free license to use the content to operate, promote, and improve the brand.</p>
 
       <h2 className="font-display text-2xl font-semibold text-foreground">12. AI-assisted customer service</h2>
@@ -110,16 +110,16 @@ export default function TermsPage() {
       <p>Roasted coffee naturally contains trace levels of acrylamide, a substance listed under California&apos;s Proposition 65. See <Link href="/policies/prop-65" className="text-accent hover:underline">Proposition 65 Notice</Link> for the required disclosure and context.</p>
 
       <h2 className="font-display text-2xl font-semibold text-foreground">15. Disclaimers</h2>
-      <p className="uppercase text-xs leading-relaxed">THE STOREFRONT AND ALL PRODUCTS ARE PROVIDED &ldquo;AS IS&rdquo; AND &ldquo;AS AVAILABLE.&rdquo; TO THE FULLEST EXTENT ALLOWED BY LAW, COASTAL BREWING CO. AND ACHIEVEMOR DISCLAIM ALL WARRANTIES, EXPRESS OR IMPLIED, INCLUDING WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, NON-INFRINGEMENT, AND ACCURACY OF INFORMATION.</p>
+      <p className="uppercase text-xs leading-relaxed">THE STOREFRONT AND ALL PRODUCTS ARE PROVIDED &ldquo;AS IS&rdquo; AND &ldquo;AS AVAILABLE.&rdquo; TO THE FULLEST EXTENT ALLOWED BY LAW, COASTAL BREWING CO. AND A.I.M.S. — AI Managed Solutions DISCLAIM ALL WARRANTIES, EXPRESS OR IMPLIED, INCLUDING WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, NON-INFRINGEMENT, AND ACCURACY OF INFORMATION.</p>
       <p>We do not warrant that the Storefront will be uninterrupted, error-free, or free of viruses or other harmful code.</p>
 
       <h2 className="font-display text-2xl font-semibold text-foreground">16. Limitation of liability</h2>
-      <p className="uppercase text-xs leading-relaxed">TO THE FULLEST EXTENT ALLOWED BY LAW, IN NO EVENT WILL COASTAL BREWING CO., ACHIEVEMOR, OR ANY OF OUR AFFILIATES, OFFICERS, EMPLOYEES, OR AGENTS BE LIABLE FOR ANY INDIRECT, INCIDENTAL, CONSEQUENTIAL, SPECIAL, PUNITIVE, OR EXEMPLARY DAMAGES ARISING FROM OR RELATED TO YOUR USE OF THE STOREFRONT OR ANY PRODUCT, EVEN IF ADVISED OF THE POSSIBILITY.</p>
+      <p className="uppercase text-xs leading-relaxed">TO THE FULLEST EXTENT ALLOWED BY LAW, IN NO EVENT WILL COASTAL BREWING CO., A.I.M.S. — AI Managed Solutions, OR ANY OF OUR AFFILIATES, OFFICERS, EMPLOYEES, OR AGENTS BE LIABLE FOR ANY INDIRECT, INCIDENTAL, CONSEQUENTIAL, SPECIAL, PUNITIVE, OR EXEMPLARY DAMAGES ARISING FROM OR RELATED TO YOUR USE OF THE STOREFRONT OR ANY PRODUCT, EVEN IF ADVISED OF THE POSSIBILITY.</p>
       <p className="uppercase text-xs leading-relaxed">OUR TOTAL LIABILITY FOR ANY CLAIM ARISING FROM OR RELATED TO THESE TERMS OR ANY PRODUCT WILL NOT EXCEED THE AMOUNT YOU PAID FOR THE ORDER GIVING RISE TO THE CLAIM.</p>
       <p>Some jurisdictions don&apos;t allow these limitations; in that case, the limitations apply only to the extent permitted.</p>
 
       <h2 className="font-display text-2xl font-semibold text-foreground">17. Indemnification</h2>
-      <p>You agree to defend, indemnify, and hold harmless Coastal Brewing Co., ACHIEVEMOR, and our affiliates from any claim, loss, or expense (including reasonable attorneys&apos; fees) arising from your breach of these Terms, your violation of any law, or your misuse of the Storefront or products.</p>
+      <p>You agree to defend, indemnify, and hold harmless Coastal Brewing Co., A.I.M.S. — AI Managed Solutions, and our affiliates from any claim, loss, or expense (including reasonable attorneys&apos; fees) arising from your breach of these Terms, your violation of any law, or your misuse of the Storefront or products.</p>
 
       <h2 className="font-display text-2xl font-semibold text-foreground">18. Force majeure</h2>
       <p>We aren&apos;t responsible for delays or failures caused by events beyond our reasonable control — natural disasters, severe weather (hurricanes are a real Lowcountry concern), pandemics, carrier failures, supply-chain disruptions, government actions, or labor disputes. We&apos;ll do our best to notify you and resolve, and we&apos;ll honor orders in queue once we&apos;re operational again.</p>
@@ -134,7 +134,7 @@ export default function TermsPage() {
       <h2 className="font-display text-2xl font-semibold text-foreground">21. Contact</h2>
       <p>
         <a className="text-accent hover:underline" href="mailto:bpo@achievemor.io">bpo@achievemor.io</a><br />
-        Coastal Brewing Co. (c/o ACHIEVEMOR)<br />
+        Coastal Brewing Co. (c/o A.I.M.S. — AI Managed Solutions)<br />
         {/* TCR_ADDR_PATCH: confirm Oceanside ZIP on TCR Compliant Address Service enrollment */}
         c/o Coastal Brewing Co., Oceanside, CA 92054
       </p>
