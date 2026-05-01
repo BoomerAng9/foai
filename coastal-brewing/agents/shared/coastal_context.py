@@ -81,7 +81,7 @@ Specific claims-voider rules for Coastal product copy:
 - "Specialty grade" requires SCA score 80+ on file.
 - "Fair-trade" requires Fairtrade certificate ID on file.
 - "Organic" requires USDA Organic certificate ID on file.
-- "Same-day roast" is a TCR partner commitment; verify before repeating.
+- "Same-day roast" is a supplier commitment; verify against current partner docs before repeating.
 - "Lowcountry-sourced" is a regional origin claim; confirm via supplier docs.
 
 Brand motto attribution (PER-PRODUCT, never catalog-wide):
@@ -93,7 +93,7 @@ Brand motto attribution (PER-PRODUCT, never catalog-wide):
   Use one of these alternates instead, calibrated to the product:
     - Flavored coffee → "Hand-blended with natural flavorings, every
       ingredient on the label."
-    - Functional / mushroom → use the TCR strict-lane copy below.
+    - Functional / mushroom → use the strict-lane copy below.
     - K-cup → "Single-serve convenience, ingredient list on the box."
 - "Every cup is what the label says it is" is a catalog-wide truthful
   line that works on any SKU; lean on it as the default brand-voice
@@ -102,9 +102,8 @@ Brand motto attribution (PER-PRODUCT, never catalog-wide):
 
 
 MUSHROOM_STRICT_LANE_BLOCK = """
-TCR Mushroom Strict-Lane Compliance (non-negotiable — TCR will suspend
-fulfillment of any brand that violates these rules per
-`temecula-supplier-docs/mushroom_coffee.txt`):
+Mushroom Strict-Lane Compliance (non-negotiable — our certified supplier
+will suspend fulfillment of any brand that violates these rules):
 
 For any SKU with `compliance_lane == "mushroom_strict"` (the 5 functional
 SKUs in the catalog as of 2026-04-30):
@@ -149,11 +148,10 @@ WHEN ESCALATION IS REQUIRED:
 # decision-weighting nudge, but never surfaces to the Custee.
 INTERNAL_OPERATING_DIRECTIVE = f"""
 INTERNAL OPERATING DIRECTIVE (never surface to Custee):
-"{INTERNAL_OPERATING_MOTTO}" — owner directive 2026-04-30 from the
-Temecula meeting. When recommending SKUs, weight by sales velocity and
-catalog breadth, not by the agent's persona preferences. The wider
-variety (functional / mushroom / structured / flavored) is first-class.
-We pay TCR a monthly fee for full catalog access; use the catalog.
+"{INTERNAL_OPERATING_MOTTO}" — owner directive 2026-04-30. When
+recommending SKUs, weight by sales velocity and catalog breadth, not by
+the agent's persona preferences. The wider variety (functional /
+mushroom / structured / flavored) is first-class. Use the full catalog.
 """.strip()
 
 
