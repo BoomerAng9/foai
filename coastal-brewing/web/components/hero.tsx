@@ -31,17 +31,21 @@ export function Hero() {
             ))}
           </div>
 
-          {/* Headline */}
+          {/* Headline — owner directive 2026-04-30: motto applies per-product,
+              not catalog-wide (we carry flavored + mushroom too). The
+              catalog-wide truthful line is the homepage promise; the motto
+              appears conditionally on product detail pages where eligible. */}
           <h1 className="font-display font-semibold tracking-[-0.02em] leading-[1.05] text-[clamp(40px,7vw,88px)]">
-            Nothing chemically,
+            Every cup is what
             <br />
-            ever.
+            the label says it is.
           </h1>
 
           {/* Subhead */}
           <p className="mt-8 max-w-xl text-base leading-relaxed text-muted-foreground md:text-lg">
-            Small-batch coffee, whole-leaf tea, ceremonial matcha. Sourced through verified partners.
-            Every public claim has a paper trail. Every cup is what the label says it is.
+            Small-batch coffee, whole-leaf tea, ceremonial matcha. Flavored blends and functional brews,
+            too — every ingredient on the label, every public claim with a paper trail. Sourced through
+            verified partners.
           </p>
 
           {/* Subscription handshake chip */}

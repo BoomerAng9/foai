@@ -25,9 +25,27 @@ export function ProductCard({ product }: { product: Product }) {
         </div>
       </Link>
       <CardContent className="flex flex-1 flex-col gap-2 p-5">
-        <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground" itemProp="category">
-          {product.category}
-        </p>
+        <div className="flex items-center justify-between gap-2">
+          <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground" itemProp="category">
+            {product.category}
+          </p>
+          {product.motto_eligible && (
+            <span
+              className="rounded-full bg-accent/10 px-2 py-[2px] font-mono text-[9px] uppercase tracking-widest text-accent"
+              title="Nothing Chemically, Ever."
+            >
+              ◈ Nothing Chemically
+            </span>
+          )}
+          {product.compliance_lane === "mushroom_strict" && (
+            <span
+              className="rounded-full bg-secondary/40 px-2 py-[2px] font-mono text-[9px] uppercase tracking-widest text-foreground"
+              title="Sold as a food, not a supplement"
+            >
+              Food, not supplement
+            </span>
+          )}
+        </div>
         <Link href={`/products/${product.sku}`} className="hover:text-accent">
           <h3 className="font-display text-lg font-semibold leading-tight" itemProp="name">{product.name}</h3>
         </Link>

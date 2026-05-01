@@ -34,6 +34,20 @@ export type Product = {
   flavor_notes?: string;
   roast_level?: string;
   tags?: string[];
+  /**
+   * Per-product brand-promise flag. True ⇒ "Nothing Chemically, Ever."
+   * applies to this SKU. False ⇒ motto must NOT appear on this product
+   * surface. Derived server-side in `catalog._derive_motto_eligibility`
+   * from category + ingredients. Owner directive 2026-04-30.
+   */
+  motto_eligible?: boolean;
+  /**
+   * Strict-compliance lane (TCR labelling). Currently the only value
+   * is "mushroom_strict" — applies to the 5 functional/mushroom SKUs.
+   * Triggers per-page rendering of the locked statement-of-identity +
+   * soft-qualifier benefit copy. Per `temecula-supplier-docs/mushroom_coffee.txt`.
+   */
+  compliance_lane?: "mushroom_strict" | string;
 };
 
 export type ChatMessage = {
@@ -60,6 +74,8 @@ interface RunnerCatalogItem {
   flavor_notes?: string;
   roast_level?: string;
   tags?: string[];
+  motto_eligible?: boolean;
+  compliance_lane?: string;
 }
 
 function normalize(item: RunnerCatalogItem, fallbackId?: string): Product {
@@ -75,6 +91,8 @@ function normalize(item: RunnerCatalogItem, fallbackId?: string): Product {
     flavor_notes: item.flavor_notes,
     roast_level: item.roast_level,
     tags: item.tags,
+    motto_eligible: item.motto_eligible,
+    compliance_lane: item.compliance_lane,
   };
 }
 
