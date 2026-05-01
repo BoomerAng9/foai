@@ -20,7 +20,11 @@ import sys
 import urllib.parse
 from typing import Any, Dict, List, Optional
 
+import collections
+import threading
+
 from fastapi import FastAPI, Header, HTTPException, Query, Request
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
@@ -163,6 +167,31 @@ for _d in (RECEIPTS_DIR, RESEARCH_TICKETS_DIR, DRAFTS_DIR, OWNER_APPROVALS_DIR, 
     _d.mkdir(parents=True, exist_ok=True)
 
 app = FastAPI(title="Coastal Brewing Runner", version="3.0")
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["https://brewing.foai.cloud", "http://localhost:3000"],
+    allow_credentials=False,
+    allow_methods=["GET", "POST"],
+    allow_headers=["Content-Type", "X-Coastal-Token"],
+)
+
+# Simple in-memory rate limiter: max 15 chat requests per IP per 60s window.
+_RATE_LOCK = threading.Lock()
+_RATE_BUCKETS: Dict[str, list] = collections.defaultdict(list)
+_RATE_WINDOW_SEC = 60
+_RATE_MAX_CHAT = 15
+
+
+def _check_rate_limit(ip: str) -> None:
+    now = _time.time()
+    with _RATE_LOCK:
+        bucket = _RATE_BUCKETS[ip]
+        _RATE_BUCKETS[ip] = [t for t in bucket if now - t < _RATE_WINDOW_SEC]
+        if len(_RATE_BUCKETS[ip]) >= _RATE_MAX_CHAT:
+            raise HTTPException(status_code=429, detail="Too many requests — slow down a little.")
+        _RATE_BUCKETS[ip].append(now)
+
 
 _STATIC_DIR = ROOT / "static"
 if _STATIC_DIR.exists():
@@ -1834,7 +1863,7 @@ def livelookin_end(session_id: str) -> dict:
 
 
 class ApiChatRequest(BaseModel):
-    content: str
+    content: str = Field(..., min_length=1, max_length=2000)
     agent: Optional[str] = "sales"
     session_id: Optional[str] = None
 
@@ -1853,7 +1882,7 @@ def _record_history(session_id: str, role: str, content: str) -> None:
 
 
 @app.post("/api/chat/send")
-def api_chat_send(req: ApiChatRequest) -> dict:
+def api_chat_send(req: ApiChatRequest, request: Request) -> dict:
     """JSON contract for the Next.js front-end (lib/api.ts).
 
     Primary path: Supernemotron via OpenRouter (`scripts/llm_client.py`).
@@ -1861,6 +1890,7 @@ def api_chat_send(req: ApiChatRequest) -> dict:
     the LLM is unconfigured, errors, or returns empty content. Either
     way the customer always receives a non-empty reply.
     """
+    _check_rate_limit(request.client.host if request.client else "unknown")
     from llm_client import chat_completion, is_configured  # noqa: E402
 
     sid = req.session_id or f"sess_{secrets.token_hex(6)}"
@@ -2196,7 +2226,8 @@ color:var(--ink-soft);padding:4px 8px;border:1px solid var(--rule);display:inlin
 
 
 @app.get("/admin/margin", response_class=HTMLResponse)
-def admin_margin_ui() -> HTMLResponse:
+def admin_margin_ui(x_coastal_token: Optional[str] = Header(default=None)) -> HTMLResponse:
+    _auth(x_coastal_token)
     return HTMLResponse(content=_ADMIN_MARGIN_HTML)
 
 

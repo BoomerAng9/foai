@@ -15,7 +15,7 @@ export function ProductCard({ product }: { product: Product }) {
       <Link href={`/products/${product.sku}`} className="block">
         <div className="relative aspect-square overflow-hidden bg-secondary">
           <Image
-            src={product.image || "/static/mock-dark.png"}
+            src={product.image || "/products/coastal-blend-12oz.png"}
             alt={product.name}
             itemProp="image"
             fill

@@ -34,7 +34,7 @@ export default async function ProductDetail({ params }: { params: Promise<{ slug
         <div className="mt-6 grid gap-12 lg:grid-cols-2">
           <div className="relative aspect-square overflow-hidden rounded-lg border border-border bg-secondary">
             <Image
-              src={product.image || "/static/mock-dark.png"}
+              src={product.image || "/products/coastal-blend-12oz.png"}
               alt={product.name}
               fill
               sizes="(max-width: 1024px) 100vw, 50vw"

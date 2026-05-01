@@ -10,7 +10,7 @@ const FALLBACK_LINEUP: { num: string; cat: string; label: string; copy: string; 
     label: "Coffee",
     copy: "House blend, dark roast, decaf. Small-lot sourcing. No flavorings, no fillers.",
     sku: "lowcountry-house-blend-12oz",
-    image: "/static/mock-dark.png",
+    image: "/products/coastal-blend-12oz.png",
   },
   {
     num: "02",
@@ -18,7 +18,7 @@ const FALLBACK_LINEUP: { num: string; cat: string; label: string; copy: string; 
     label: "Tea",
     copy: "Lowcountry breakfast, herbal, green. Whole-leaf. No dust, brewed how you like it.",
     sku: "lowcountry-breakfast-tea-50ct",
-    image: "/static/mock-dark.png",
+    image: "/products/lowcountry-tea-jasmine-green-2oz.png",
   },
   {
     num: "03",
@@ -26,7 +26,7 @@ const FALLBACK_LINEUP: { num: string; cat: string; label: string; copy: string; 
     label: "Matcha",
     copy: "Ceremonial-grade matcha for the mornings that ask for it.",
     sku: "ceremonial-matcha-30ct",
-    image: "/static/mock-dark.png",
+    image: "/products/coastal-matcha-ceremonial-30g.png",
   },
 ];
 
