@@ -1673,17 +1673,141 @@ def get_quote(req: QuoteRequest) -> dict:
     return equation.strip_internal_fields(q)
 
 
-# NOTE: workstream D (Stepper escalation flow) is DEFERRED per owner
-# decision 2026-04-30. The runner-side `/api/escalation/commit` route +
-# `EscalationCommitRequest` model + the server-rendered stub form were
-# all removed; they were either real-but-unconsumable (no Paperform form
-# yet) or fake (the stub HTML bypassed the canonical Stripe-backed
-# Paperform/Stepper gate). Token issuance via `agents/shared/authority_tiers
-# .make_stepper_escalation_token` and emission via `agents/shared/spinner
-# _tools.apply_discount` / `propose_deal` stay — they're the authority-
-# enforcement layer (server-side tier-cap check + audit-ledger record).
-# When owner sets up the Paperform escalation form, the receiving
-# `/api/escalation/commit` endpoint comes back in a follow-up PR.
+# ---------------------------------------------------------------------------
+# /api/escalation/commit — Paperform webhook consumer for T1 escalation.
+#
+# Owner directive 2026-05-01: Stripe is built into Paperform + Stepper.
+# The Paperform form handles payment-method-on-file (or upfront charge)
+# natively as the canonical commitment gate. When a Custee submits the
+# T1 commitment-confirmation form, Paperform webhooks here. Runner
+# verifies the HMAC token (issued by Spinner when an agent hit its tier
+# ceiling), records the volume_commitment in the audit ledger, and fires
+# Telegram to ACHEEVY/owner.
+#
+# Form spec lives in iCloudDrive/.../coastal-business-plan/paperform-
+# escalation-form-spec.md. Set STEPPER_ESCALATION_FORM_URL env var to
+# the live Paperform URL once owner builds it.
+# ---------------------------------------------------------------------------
+
+from agents.shared import authority_tiers as _at  # noqa: E402
+
+
+class EscalationCommitRequest(BaseModel):
+    """Webhook payload from Paperform's T1 commitment-confirmation form.
+
+    The form spec (paperform-escalation-form-spec.md) defines these fields.
+    Paperform's Stripe integration handles payment authorization or
+    method-on-file before this webhook fires.
+    """
+    escalation_token: str
+    qty: int
+    cadence: str  # "ppu" | "3-month" | "6-month" | "9-month-pay9-get12" | "quarterly-bulk"
+    delivery_window: str  # "standard" | "priority" | "instant"
+    payment_terms: str  # "pay-on-order" | "net-30" | "custom"
+    notes: str = ""
+    # Paperform-side fields populated automatically (not part of the Custee form):
+    paperform_submission_id: Optional[str] = None
+    paperform_form_id: Optional[str] = None
+    stripe_customer_id: Optional[str] = None  # Paperform→Stripe ID after auth
+    stripe_payment_method_id: Optional[str] = None
+
+
+@app.post("/api/escalation/commit")
+def escalation_commit(req: EscalationCommitRequest) -> dict:
+    """Receive Paperform webhook after Custee completes the T1 commitment
+    confirmation form. Validates HMAC token + records volume_commitment +
+    fires Telegram. ACHEEVY then enters the chat with full context to
+    finalize the deal.
+    """
+    payload = _at.verify_stepper_escalation_token(req.escalation_token)
+    if payload is None:
+        raise HTTPException(
+            status_code=403,
+            detail="invalid_or_expired_escalation_token",
+        )
+
+    escalation_id = payload["escalation_id"]
+    summary = (
+        f"qty={req.qty} cadence={req.cadence} delivery={req.delivery_window} "
+        f"terms={req.payment_terms} actor={payload['actor']} "
+        f"requested_pct={payload['requested_pct']:.1f} sku={payload['sku']} "
+        f"custee={payload['custee_id']} "
+        f"paperform_sub={req.paperform_submission_id or '-'} "
+        f"stripe_customer={req.stripe_customer_id or '-'} "
+        f"notes={req.notes[:120]}"
+    )
+    audit_ledger.insert_action_receipt(
+        task_id=escalation_id,
+        executor=f"custee:{payload['custee_id']}",
+        action_type="volume_commitment",
+        destination="t1_queue",
+        status="committed",
+        result_summary=summary,
+    )
+
+    if TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID:
+        msg = (
+            f"T1 escalation committed via Paperform — Coastal Brewing\n"
+            f"escalation_id: {escalation_id}\n"
+            f"actor: {payload['actor']} ({payload['tier']})\n"
+            f"sku: {payload['sku']}\n"
+            f"requested_pct: {payload['requested_pct']:.1f}%\n"
+            f"committed: qty={req.qty} cadence={req.cadence}\n"
+            f"  delivery={req.delivery_window} terms={req.payment_terms}\n"
+            f"stripe_customer: {req.stripe_customer_id or '(not yet)'}\n"
+            f"notes: {req.notes[:200]}\n\n"
+            f"ACHEEVY: enter the chat with full context."
+        )
+        try:
+            requests.post(
+                f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage",
+                json={"chat_id": TELEGRAM_CHAT_ID, "text": msg, "disable_web_page_preview": True},
+                timeout=5,
+            )
+        except Exception:
+            pass  # best-effort; audit ledger is the canonical record
+
+    return {
+        "ok": True,
+        "escalation_id": escalation_id,
+        "state": "awaiting_T1",
+        "actor_tier_at_escalation": payload["tier"],
+        "message": (
+            "Volume commitment recorded. ACHEEVY will pick up the conversation "
+            "with full context. Custee should return to the chat surface."
+        ),
+    }
+
+
+@app.get("/api/escalation/form-url")
+def escalation_form_url(token: str = Query(default="")) -> dict:
+    """Resolve the Paperform escalation form URL, with the HMAC token
+    embedded as a hidden-field prefill. Runner caller (Spinner) uses this
+    to compose the redirect link surfaced to the Custee in chat:
+    `https://stepper.coastalbrewing.co/t1-commit?escalation_token=<token>`.
+
+    Set `STEPPER_ESCALATION_FORM_URL` env to the Paperform URL once owner
+    builds it. Until then, returns a not-configured envelope so Spinner
+    can fall back to the existing `escalate_to_owner` Telegram path.
+    """
+    base = os.environ.get("STEPPER_ESCALATION_FORM_URL", "")
+    if not base:
+        return {
+            "ok": False,
+            "verdict": "not_configured",
+            "message": (
+                "Paperform escalation form URL not yet set. "
+                "Owner: build the form per paperform-escalation-form-spec.md "
+                "and set STEPPER_ESCALATION_FORM_URL env on aims-vps."
+            ),
+        }
+    if not token:
+        raise HTTPException(status_code=400, detail="missing_token")
+    sep = "&" if "?" in base else "?"
+    return {
+        "ok": True,
+        "redirect_url": f"{base}{sep}escalation_token={token}",
+    }
 
 
 from adapters import livelookin  # noqa: E402
