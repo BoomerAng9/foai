@@ -59,6 +59,10 @@ services:
       COASTAL_SUPPLIER_EMAIL: "${COASTAL_SUPPLIER_EMAIL:-${OWNER_APPROVAL_EMAIL}}"
       # LLM provider for chat handler — Supernemotron via OpenRouter (canon).
       OPENROUTER_API_KEY: "${OPENROUTER_API_KEY:-}"
+      KATTEB_API_KEY: "${KATTEB_API_KEY:-}"
+      KATTEB_COASTAL_BRAND_ID: "${KATTEB_COASTAL_BRAND_ID:-2029}"
+      CHICKEN_HAWK_URL: "${CHICKEN_HAWK_URL:-https://hawk.foai.cloud}"
+      CHICKEN_HAWK_BEARER: "${CHICKEN_HAWK_BEARER:-}"
       TZ: "UTC"
     networks:
       - foai-internal
@@ -121,6 +125,8 @@ services:
       # LLM provider — defaults to OpenRouter. Owner can swap to direct
       # Anthropic / OpenAI / local Ollama at any time without rebuild.
       OPENROUTER_API_KEY: "${OPENROUTER_API_KEY:-}"
+      KATTEB_API_KEY: "${KATTEB_API_KEY:-}"
+      KATTEB_COASTAL_BRAND_ID: "${KATTEB_COASTAL_BRAND_ID:-2029}"
       TELEGRAM_BOT_TOKEN: "${TELEGRAM_BOT_TOKEN:-}"
       TELEGRAM_CHAT_ID: "${TELEGRAM_CHAT_ID:-}"
       TZ: "UTC"
