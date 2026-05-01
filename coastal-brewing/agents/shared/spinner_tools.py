@@ -553,3 +553,123 @@ def query_audit_trail(task_id: str) -> dict:
 def policy_check(action: str, context: dict) -> dict:
     """Ask NemoClaw to verdict an action without executing it."""
     return nemoclaw.check(action, context)
+
+
+# ---------------------------------------------------------------------------
+# Katteb tools — SEO + content + factcheck + humanizer
+# Owner directive 2026-04-30: Katteb integrated for SEO optimization +
+# marketing automation. Coastal brand_id=2029 already provisioned at Katteb.
+# Tools below surface the most-used capabilities to agents (primarily Melli's
+# marketing lane) and emit audit-ledger rows so lil_ledger_hawk can monitor
+# credit burn (25k available on AppSumo Pro tier).
+# ---------------------------------------------------------------------------
+
+def _katteb():
+    """Lazy import — keeps adapter optional at module-load if env unset."""
+    from scripts.adapters import katteb_adapter as _k  # type: ignore[import-not-found]
+    return _k
+
+
+def seo_analyze_page(url: str, target_keywords: list[str], actor: str = "melli") -> dict:
+    """Submit a Coastal URL for SEO analysis against target keywords. Returns
+    a job-ID envelope; poll `seo_get_report(report_id)` for results.
+
+    Marketing PMO tool — Melli owns dispatch; Java Nessa interprets results.
+    """
+    k = _katteb()
+    r = k.seo_analyze(url=url, target_keywords=target_keywords)
+    if r.get("ok"):
+        report_id = (r.get("data") or {}).get("id", "unknown")
+        audit_ledger.insert_action_receipt(
+            task_id=f"katteb_seo_{report_id}",
+            executor=f"{actor}:katteb",
+            action_type="katteb_seo_analyze",
+            destination=url,
+            status="submitted",
+            result_summary=f"keywords={','.join(target_keywords[:5])} latency={r.get('latency_ms')}ms",
+        )
+    return r
+
+
+def seo_get_report(report_id: str) -> dict:
+    """Poll a Katteb SEO analysis for results."""
+    return _katteb().seo_get(report_id)
+
+
+def factcheck_claim(claim: str, actor: str = "melli") -> dict:
+    """Verify a factual claim with web search BEFORE publish. Pairs with
+    claims-voider canon — any quantitative or third-party-attributed claim
+    on a public-facing surface should pass this gate before
+    `sign_for_culture_attribution` fires.
+    """
+    k = _katteb()
+    r = k.factcheck_verify(claim)
+    if r.get("ok"):
+        audit_ledger.insert_action_receipt(
+            task_id=f"katteb_factcheck_{int(_dt.datetime.now().timestamp() * 1000)}",
+            executor=f"{actor}:katteb",
+            action_type="katteb_factcheck",
+            destination="claim_verification",
+            status="verified",
+            result_summary=f"claim_excerpt={claim[:120]}",
+        )
+    return r
+
+
+def humanizer_pass(text: str, actor: str = "melli", style_id: Optional[int] = None) -> dict:
+    """Detect AI-likelihood + rewrite if score above threshold. Returns
+    combined envelope with detection + (if rewritten) cleaned text.
+
+    Used by Persona Tah / Orien Talis BG'z before social/blog publish so
+    AI-detection-shaped deboosts on IG/TikTok/LI don't surprise us.
+    """
+    k = _katteb()
+    detect = k.humanizer_detect(text)
+    score = (detect.get("data") or {}).get("ai_score") if detect.get("ok") else None
+    rewrite = None
+    if detect.get("ok") and score is not None and score > 0.7:
+        rewrite = k.humanizer_rewrite(text, style_id=style_id)
+    return {
+        "detection": detect,
+        "rewrite_applied": rewrite is not None and rewrite.get("ok", False),
+        "rewrite": rewrite,
+    }
+
+
+def generate_blog_article(
+    title: str,
+    keywords: list[str],
+    word_count: int = 1500,
+    tone: str = "professional",
+    actor: str = "melli",
+) -> dict:
+    """Submit a long-form article-generation job. Returns job-ID envelope;
+    poll `get_article_status(article_id)` for the final content.
+
+    Coastal use cases: sourcing transparency posts, brewing guides,
+    regional-feature pieces, brand-story long-form. ~2-5 min job latency.
+    """
+    k = _katteb()
+    r = k.generate_article(title=title, keywords=keywords, word_count=word_count, tone=tone)
+    if r.get("ok"):
+        article_id = (r.get("data") or {}).get("id", "unknown")
+        audit_ledger.insert_action_receipt(
+            task_id=f"katteb_article_{article_id}",
+            executor=f"{actor}:katteb",
+            action_type="katteb_generate_article",
+            destination=title[:60],
+            status="submitted",
+            result_summary=f"keywords={','.join(keywords[:5])} word_count={word_count} tone={tone}",
+        )
+    return r
+
+
+def get_article_status(article_id: str) -> dict:
+    """Poll a Katteb article-generation job for status + content."""
+    return _katteb().get_article(article_id)
+
+
+def katteb_credits() -> dict:
+    """Read current Katteb credit balance + plan tier. lil_ledger_hawk
+    consumes for burn-rate alerts."""
+    return _katteb().get_credits()

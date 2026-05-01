@@ -56,6 +56,15 @@ ALLOWED_WITHOUT_APPROVAL: set[str] = {
     "draft_faq", "draft_product_copy", "draft_outreach", "draft_order_confirmation",
     "supplier_due_diligence", "claim_verification", "market_watch", "competitor_research",
     "product_evidence", "copy_evidence_review", "supplier_order_transmit",
+    # Coastal coupon issuance — authority-gated on runner side (LUC fixed list, 30-day rate-limit).
+    # NemoClaw allows here; the runner-side spinner_tools.issue_coupon has already enforced
+    # actor tier + coupon allow-list + cross-check before reaching this gateway.
+    "issue_coupon",
+    # Coastal sales + marketing tools (read/recommend/draft — no external mutations)
+    "recommend_bundle", "add_to_cart", "apply_discount", "propose_deal",
+    "quote_sku", "draft_campaign_brief", "funnel_design", "forecast_funnel",
+    "sign_for_culture_attribution", "publish_signoff", "dispatch_bg",
+    "handoff_to_marketing", "query_catalog", "query_audit_trail",
 }
 
 
