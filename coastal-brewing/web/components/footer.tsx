@@ -19,6 +19,7 @@ export function Footer() {
             <li><Link href="/products?cat=tea" className="text-foreground/80 hover:text-foreground">Tea</Link></li>
             <li><Link href="/products?cat=matcha" className="text-foreground/80 hover:text-foreground">Matcha</Link></li>
             <li><Link href="/products?cat=subscription" className="text-foreground/80 hover:text-foreground">Subscriptions</Link></li>
+            <li><Link href="/merch" className="text-foreground/80 hover:text-foreground">Merch</Link></li>
           </ul>
         </div>
         <div>
@@ -27,6 +28,7 @@ export function Footer() {
             <li><Link href="/team" className="text-foreground/80 hover:text-foreground">Our team</Link></li>
             <li><Link href="/about" className="text-foreground/80 hover:text-foreground">About the Founder</Link></li>
             <li><Link href="/about/governance" className="text-foreground/80 hover:text-foreground">Governance</Link></li>
+            <li><Link href="/partners" className="text-foreground/80 hover:text-foreground">Partner Program</Link></li>
             <li><Link href="/chat" className="text-foreground/80 hover:text-foreground">Chat</Link></li>
             <li><Link href="/contact" className="text-foreground/80 hover:text-foreground">Contact &amp; Support</Link></li>
           </ul>
