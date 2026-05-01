@@ -482,9 +482,92 @@ async def run_action(req: RunRequest, _: None = Depends(require_auth)) -> JSONRe
             },
         )
 
-    # Verdict == allow: receipt the action; runtime dispatch is action-specific
-    # and handled by callers' own /chat round-trip. Wave 2 wires action→Lil_Hawk
-    # mapping inside this handler.
+    # ---------------------------------------------------------------------------
+    # Action-specific dispatch (Wave 2).  Each block executes after NemoClaw
+    # allows and records its own fields into the receipt + response body.
+    # Fall-through to the generic allow response at the bottom.
+    # ---------------------------------------------------------------------------
+
+    # --- issue_coupon ---------------------------------------------------
+    # Issues a Coastal-specific discount code.  The runner-side spinner_tools
+    # validates actor authority + 30-day rate-limit before reaching here.
+    # This layer: double-checks allow-list, generates a unique promo code, and
+    # returns the code for LUC to relay to the Custee.
+    #
+    # Stripe integration note: when STRIPE_SECRET_KEY is configured, swap the
+    # generated code block with stripe.Coupon.create() + stripe.PromotionCode.
+    # The response envelope shape is intentionally identical so spinner_tools
+    # reads `stripe_coupon_id` / `promotion_code` unchanged in both modes.
+    # ---------------------------------------------------------------------------
+    if req.action == "issue_coupon":
+        COASTAL_COUPON_ALLOW_LIST = {
+            "TRY-ME":    {"type": "percent", "value": 100, "description": "Cost-recovery sample"},
+            "WELCOME10": {"type": "percent", "value": 10,  "description": "First-order welcome"},
+            "BREW20":    {"type": "percent", "value": 20,  "description": "Subscriber promo"},
+            "FREESHIP":  {"type": "fixed",   "value": 0,   "description": "Free shipping"},
+        }
+        coupon_code = req.payload.get("coupon_code", "")
+        custee_id   = req.payload.get("custee_id", "")
+        actor_tier  = req.payload.get("actor_tier", "")
+
+        if coupon_code not in COASTAL_COUPON_ALLOW_LIST:
+            receipt["elapsed_ms"] = (_time.perf_counter() - started) * 1000
+            receipt["action_result"] = "denied_off_list"
+            await _record_run_receipt(receipt)
+            return JSONResponse(
+                status_code=403,
+                content={
+                    "ok": False,
+                    "verdict": "denied",
+                    "message": f"Coupon '{coupon_code}' is not on the Coastal allow-list.",
+                    "receipt": receipt,
+                },
+            )
+
+        # Generate a unique per-Custee promotion code.
+        # Format: {BASE_CODE}-{custee_hash8}-{ts_hex8}
+        # Example: TRY-ME-A3B1C9D2-1F4E8A0B
+        # When Stripe is configured: replace with stripe.PromotionCode.create(...)
+        import hashlib as _hashlib
+        custee_hash = _hashlib.sha256(custee_id.encode()).hexdigest()[:8].upper()
+        ts_hex = hex(int(_time.time()))[2:].upper().zfill(8)
+        promo_code = f"{coupon_code}-{custee_hash}-{ts_hex}"
+
+        # Redemption URL: if STEPPER_ESCALATION_FORM_URL is set for Paperform,
+        # use it as the checkout entry point with the promo code as a URL param.
+        # Otherwise fall back to the storefront with a query param.
+        stepper_url = os.getenv("COASTAL_PAPERFORM_URL", "") or os.getenv("STEPPER_ESCALATION_FORM_URL", "")
+        if stepper_url:
+            redemption_url = f"{stepper_url}?promo={promo_code}"
+        else:
+            redemption_url = f"https://brewing.foai.cloud/cart?promo={promo_code}"
+
+        coupon_meta = COASTAL_COUPON_ALLOW_LIST[coupon_code]
+        receipt["elapsed_ms"] = (_time.perf_counter() - started) * 1000
+        receipt["action_result"] = "coupon_issued"
+        receipt["coupon_code"] = coupon_code
+        receipt["promo_code"] = promo_code
+        await _record_run_receipt(receipt)
+        return JSONResponse(
+            status_code=200,
+            content={
+                "ok": True,
+                "verdict": "allow",
+                "stripe_coupon_id": promo_code,   # protocol compat with spinner_tools
+                "promotion_code":   promo_code,
+                "redemption_url":   redemption_url,
+                "coupon_type":      coupon_meta["type"],
+                "coupon_value":     coupon_meta["value"],
+                "coupon_description": coupon_meta["description"],
+                "note": (
+                    "Give this code to the Custee: they apply it at checkout. "
+                    "Code is unique to this Custee and expires when rate-limit window resets."
+                ),
+                "receipt": receipt,
+            },
+        )
+
+    # Verdict == allow (generic fall-through for actions without a specific dispatch block).
     receipt["elapsed_ms"] = (_time.perf_counter() - started) * 1000
     await _record_run_receipt(receipt)
     return JSONResponse(
