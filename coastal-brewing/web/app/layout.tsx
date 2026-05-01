@@ -21,14 +21,20 @@ const mono = JetBrains_Mono({
   display: "swap",
 });
 
+// Per owner directive 2026-04-30: "Nothing Chemically, Ever." applies
+// PER-PRODUCT, not catalog-wide (the catalog now carries 64 flavored
+// SKUs + 5 mushroom + 10 K-cups that can't honestly carry the motto).
+// Sitewide metadata uses the always-true line "Every cup is what the
+// label says it is" instead. The motto badge appears conditionally on
+// product detail pages where `motto_eligible: true`.
 export const metadata: Metadata = {
-  title: "Coastal Brewing Co. — Nothing chemically, ever.",
+  title: "Coastal Brewing Co. — Every cup is what the label says it is.",
   description:
-    "Small-batch coffee, whole-leaf tea, ceremonial matcha. Sourced through verified partners. Every public claim has a paper trail. Every cup is what the label says it is.",
+    "Small-batch coffee, whole-leaf tea, ceremonial matcha, flavored blends, and functional brews. Sourced through verified partners. Every public claim has a paper trail.",
   openGraph: {
     title: "Coastal Brewing Co.",
     description:
-      "Nothing chemically, ever. Small-batch coffee, whole-leaf tea, ceremonial matcha — AI-managed, owner-signed.",
+      "Every cup is what the label says it is. AI-managed Lowcountry coffee brand — owner-signed, claims-voider compliant.",
     type: "website",
     siteName: "Coastal Brewing Co.",
   },
@@ -53,8 +59,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               name: "Coastal Brewing Co.",
               url: "https://brewing.foai.cloud",
               description:
-                "Small-batch coffee, whole-leaf tea, and ceremonial matcha. AI-managed Lowcountry brand.",
-              slogan: "Nothing chemically, ever.",
+                "Small-batch coffee, whole-leaf tea, ceremonial matcha, flavored blends, and functional brews. AI-managed Lowcountry brand.",
+              slogan: "Every cup is what the label says it is.",
             }),
           }}
         />

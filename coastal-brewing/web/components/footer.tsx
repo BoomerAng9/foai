@@ -61,7 +61,7 @@ export function Footer() {
       <div className="border-t border-border/60">
         <div className="container relative grid grid-cols-1 items-center gap-2 py-8 text-center font-mono text-[10px] uppercase tracking-wordmark text-muted-foreground md:grid-cols-3">
           <span className="md:text-left">© {new Date().getFullYear()} Coastal Brewing.</span>
-          <span className="text-foreground">Nothing chemically, ever.</span>
+          <span className="text-foreground">Every cup is what the label says it is.</span>
           <span className="md:text-right">powered by ACHIEVEMOR</span>
         </div>
       </div>
