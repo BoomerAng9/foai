@@ -19,6 +19,9 @@ export default function AboutPage() {
           <h1 className="mt-2 font-display text-4xl font-semibold md:text-5xl">
             One human. Two AI teams. Zero rent.
           </h1>
+          <p className="mt-4 font-display text-lg italic text-muted-foreground">
+            In the age of agentic solutions and service delivery, we are building solutions the way service should be.
+          </p>
 
           <div className="mt-8 space-y-5 text-base leading-relaxed text-muted-foreground">
             <p>

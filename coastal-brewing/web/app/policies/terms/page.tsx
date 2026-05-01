@@ -135,8 +135,7 @@ export default function TermsPage() {
       <p>
         <a className="text-accent hover:underline" href="mailto:bpo@achievemor.io">bpo@achievemor.io</a><br />
         Coastal Brewing Co. (c/o A.I.M.S. — AI Managed Solutions)<br />
-        {/* TCR_ADDR_PATCH: confirm Oceanside ZIP on TCR Compliant Address Service enrollment */}
-        c/o Coastal Brewing Co., Oceanside, CA 92054
+        Bluffton, SC 29910
       </p>
     </PolicyPageLayout>
   );

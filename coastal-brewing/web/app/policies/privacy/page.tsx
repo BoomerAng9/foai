@@ -136,7 +136,7 @@ export default function PrivacyPolicy() {
       <p>For any privacy question or request:</p>
       <p>
         <strong className="text-foreground">Email:</strong> <a className="text-accent hover:underline" href="mailto:bpo@achievemor.io">bpo@achievemor.io</a><br />
-        <strong className="text-foreground">Mail:</strong> Coastal Brewing Co. (c/o A.I.M.S. — AI Managed Solutions), Privacy Officer{/* TCR_ADDR_PATCH: confirm Oceanside ZIP on TCR Compliant Address Service enrollment */}, Oceanside, CA 92054
+        <strong className="text-foreground">Mail:</strong> Coastal Brewing Co. (c/o A.I.M.S. — AI Managed Solutions), Privacy Officer, Bluffton, SC 29910
       </p>
       <p>We&apos;ll respond within 30 days.</p>
 
