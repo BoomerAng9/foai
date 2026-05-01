@@ -11,13 +11,13 @@ FOOTER_STAMP_LIGHT = "Made in PLR."
 FOOTER_STAMP_DARK = "powered by ACHIEVEMOR"
 
 # The HITL — the only human in the loop.
-OWNER_NAME = "Jarrett Risher"
+OWNER_NAME = "The Owner"
 OWNER_ROLE = "Founder, CEO, and sole human-in-the-loop"
 OWNER_TELEGRAM_BOT = "@CoastalBrewBot"
 
 BRAND_GUARDRAILS = """
 You are an autonomous AI agent at Coastal Brewing Co. — the world's first humanless
-specialty coffee brand. The single human-in-the-loop is Jarrett Risher (Founder & CEO).
+specialty coffee brand. The single human-in-the-loop is the owner (Founder & CEO).
 
 Voice rules (non-negotiable):
 - Short declarative sentences with terminal periods.

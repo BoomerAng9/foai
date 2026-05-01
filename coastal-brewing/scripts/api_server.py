@@ -1629,6 +1629,63 @@ def recommend(req: RecommendRequest) -> dict:
     return catalog.recommend_bundle(req.preferences)
 
 
+# ---------------------------------------------------------------------------
+# /api/quote — The Equation as an HTTP endpoint.
+#
+# Computes the canonical 3-6-9 Tesla Vortex × V.I.B.E. × Three Pillars
+# matrix price, applies the requesting agent's tier ceiling, and either
+# returns the quoted price or an HMAC-signed Stepper escalation token if
+# the tier ceiling was breached. Cost data NEVER serializes to the
+# response — `equation.strip_internal_fields()` is the boundary.
+# ---------------------------------------------------------------------------
+
+import equation  # noqa: E402
+
+
+class QuoteRequest(BaseModel):
+    sku: str
+    qty: int = 1
+    vibe: str = "individual"
+    pillars: List[str] = Field(default_factory=list)
+    frequency: str = "ppu"
+    actor: str = "acheevy"
+    requested_discount_pct: float = 0.0
+    is_bundle: bool = False
+    custee_id: str = "anon"
+
+
+@app.post("/api/quote")
+def get_quote(req: QuoteRequest) -> dict:
+    q = equation.quote(
+        sku_id=req.sku,
+        qty=req.qty,
+        vibe=req.vibe,
+        pillars=req.pillars,
+        frequency=req.frequency,
+        actor=req.actor,
+        requested_discount_pct=req.requested_discount_pct,
+        is_bundle=req.is_bundle,
+        custee_id=req.custee_id,
+    )
+    # Strip server-internal fields (cost, floor, margin) before serializing.
+    # `_internal_*` keys never reach the customer; only quoted price +
+    # discount + escalation_required + stepper_token reach the response.
+    return equation.strip_internal_fields(q)
+
+
+# NOTE: workstream D (Stepper escalation flow) is DEFERRED per owner
+# decision 2026-04-30. The runner-side `/api/escalation/commit` route +
+# `EscalationCommitRequest` model + the server-rendered stub form were
+# all removed; they were either real-but-unconsumable (no Paperform form
+# yet) or fake (the stub HTML bypassed the canonical Stripe-backed
+# Paperform/Stepper gate). Token issuance via `agents/shared/authority_tiers
+# .make_stepper_escalation_token` and emission via `agents/shared/spinner
+# _tools.apply_discount` / `propose_deal` stay — they're the authority-
+# enforcement layer (server-side tier-cap check + audit-ledger record).
+# When owner sets up the Paperform escalation form, the receiving
+# `/api/escalation/commit` endpoint comes back in a follow-up PR.
+
+
 from adapters import livelookin  # noqa: E402
 from adapters import email_sender  # noqa: E402
 

@@ -4,9 +4,9 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 
 export const metadata = {
-  title: "About Jarrett — Coastal Brewing Co.",
+  title: "About the owner — Coastal Brewing Co.",
   description:
-    "Jarrett Risher is the founder, CEO, and only human-in-the-loop at Coastal Brewing Co. — the world's first humanless coffee company.",
+    "the owner is the founder, CEO, and only human-in-the-loop at Coastal Brewing Co. — the world's first humanless coffee company.",
 };
 
 export default function AboutPage() {
@@ -22,7 +22,7 @@ export default function AboutPage() {
 
           <div className="mt-8 space-y-5 text-base leading-relaxed text-muted-foreground">
             <p>
-              I&apos;m Jarrett Risher. I&apos;ve spent 15+ years building AI systems for organizations that
+              I&apos;m the owner. I&apos;ve spent 15+ years building AI systems for organizations that
               mostly didn&apos;t know what they wanted from AI. Coastal is the version where I built the org
               chart first and the company second.
             </p>
@@ -42,7 +42,7 @@ export default function AboutPage() {
               If you have a problem with anything you read, hear, or buy from Coastal Brewing Co.,{" "}
               <strong>it&apos;s mine to fix.</strong> Not the bot&apos;s.
             </p>
-            <p className="font-display text-lg italic">— Jarrett Risher</p>
+            <p className="font-display text-lg italic">— the owner</p>
           </div>
 
           <div className="mt-12 rounded-lg border border-border p-6">

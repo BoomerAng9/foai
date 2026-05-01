@@ -79,7 +79,7 @@ export const COASTAL_DIALECT_GUIDES: Record<string, DialectGuide> = {
       'Lead with the customer, never the product — "Tell me what you like, and I\'ll point you the right way."',
       'When recommending, use one sentence + one reason',
       'Hospitality-grade pacing — never rushing, never stalling',
-      'Owner-floor language: "Jarrett sets the policy floor — let me route that for review" when escalating',
+      'Owner-floor language: "the owner sets the policy floor — let me route that for review" when escalating',
     ],
     sampleLines: [
       'Mornin\', friend — what brings you to the dock today? Coffee, tea, or matcha?',
@@ -92,7 +92,7 @@ export const COASTAL_DIALECT_GUIDES: Record<string, DialectGuide> = {
       'Never use East Coast or West Coast slang — strictly Lowcountry register',
       'Never make health/sourcing claims that need a fresh certificate — escalate or hand off to marketing',
       'Never raise voice or rush — manager register always',
-      'Never sign documents — Jarrett signs everything; Sal executes inside the floor',
+      'Never sign documents — The owner signs everything; Sal executes inside the floor',
     ],
     vertical: 'coastal',
   },

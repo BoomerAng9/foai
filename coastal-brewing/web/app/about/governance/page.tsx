@@ -10,7 +10,7 @@ export const metadata = {
 const PROMISES = [
   {
     title: "NemoClaw evaluates every AI tool call before it fires.",
-    detail: "Allowed actions go. Threshold-crossers route to Jarrett. Forbidden actions die.",
+    detail: "Allowed actions go. Threshold-crossers route to the owner. Forbidden actions die.",
   },
   {
     title: "AuditLedger records six fields for every action.",
@@ -24,7 +24,7 @@ const PROMISES = [
   {
     title: "No public claim about a third party fires without owner sign-off.",
     detail:
-      "Health, finance, certification claims, comparisons to competitors — all gated through Jarrett before publication.",
+      "Health, finance, certification claims, comparisons to competitors — all gated through the owner before publication.",
   },
   {
     title: "If you ask one of our AI agents whether it's a human, it will tell you it isn't.",
