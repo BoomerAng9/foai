@@ -426,5 +426,41 @@ def query_task_packets(limit: int = 50) -> list[dict]:
             conn.close()
 
 
+def query_recent_action_receipts(
+    action_type: str,
+    since_iso: str,
+    executor_substr: Optional[str] = None,
+    summary_substr: Optional[str] = None,
+    limit: int = 100,
+) -> list[dict]:
+    """Cross-check helper for tier-coupon abuse prevention.
+
+    Returns action_receipts rows matching action_type AND created_at >=
+    since_iso, optionally further filtered by executor substring (e.g.
+    a custee:<id> prefix) AND result_summary substring (used to scan
+    for an email_hash or shipping-address-hash without exact-equality on
+    a free-text field).
+    """
+    init_schema()
+    with _lock:
+        conn = _connect()
+        conn.row_factory = sqlite3.Row
+        try:
+            sql_parts = ["SELECT * FROM action_receipts WHERE action_type = ? AND created_at >= ?"]
+            args: list = [action_type, since_iso]
+            if executor_substr:
+                sql_parts.append("AND executor LIKE ?")
+                args.append(f"%{executor_substr}%")
+            if summary_substr:
+                sql_parts.append("AND result_summary LIKE ?")
+                args.append(f"%{summary_substr}%")
+            sql_parts.append("ORDER BY created_at DESC LIMIT ?")
+            args.append(limit)
+            rows = conn.execute(" ".join(sql_parts), tuple(args)).fetchall()
+            return [dict(r) for r in rows]
+        finally:
+            conn.close()
+
+
 def is_available() -> bool:
     return SCHEMA_PATH.exists()
