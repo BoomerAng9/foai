@@ -8,21 +8,20 @@ export function TeamRibbon() {
         <div className="max-w-2xl">
           <p className="eyebrow">Meet the team</p>
           <h2 className="mt-3 font-display text-2xl font-semibold tracking-[-0.02em] md:text-4xl">
-            A roastery without a roaster. A staff without staff.
+            Specialty coffee, whole-leaf tea, ceremonial matcha — handled with care at every step.
           </h2>
           <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
-            Coastal is run by two AI teams on call around the clock. Sales finds your blend, builds bundles,
-            and walks you to checkout. Marketing tells our story and runs the funnel. Both work behind a
-            policy gate that catches anything they shouldn&apos;t say or do — and route every supplier order,
-            every refund, every claim straight to the owner, our founder and the only human in the loop. He
-            signs everything before it leaves the building. <span className="italic">(There is no building.)</span>
+            Coastal is powered by an AI-managed team on call around the clock. Sales finds your cup, builds
+            bundles, and walks you to checkout. Marketing curates our story and connects us to our community.
+            Every order, every claim, every refund runs through a policy gate and lands on the owner&apos;s
+            desk for final sign-off. One human signature behind every cup.
           </p>
         </div>
         <Link
           href="/team"
           className="inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-wordmark text-foreground hover:text-muted-foreground"
         >
-          See the team <ArrowRight className="h-3 w-3" />
+          Meet the team <ArrowRight className="h-3 w-3" />
         </Link>
       </div>
     </section>

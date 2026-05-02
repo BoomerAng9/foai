@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { CheckCircle } from "lucide-react";
 
 export const metadata = {
-  title: "Partner Program — Coastal Brewing Co.",
+  title: "AIMS Partner Program — Coastal Brewing Co.",
   description:
     "Launch your own specialty beverage brand under the Coastal partner umbrella. Products, platform, and compliance — handled.",
 };
@@ -81,13 +81,13 @@ export default function PartnersPage() {
         {/* Lede */}
         <div className="mb-16 max-w-3xl">
           <p className="font-mono text-[10px] uppercase tracking-widest text-accent">
-            Partner Program
+            AIMS Partner Program
           </p>
           <h1 className="mt-2 font-display text-4xl font-semibold leading-tight md:text-5xl">
-            Your brand.<br />Our supply chain.<br />Their experience.
+            Your brand.<br />Our supply chain.<br />Your customers.
           </h1>
           <p className="mt-6 text-base leading-relaxed text-muted-foreground">
-            The Coastal Partner Program gives coffee shops, hospitality businesses, and beverage
+            The AIMS Partner Program gives coffee shops, hospitality businesses, and beverage
             entrepreneurs a complete path to launch or scale a specialty beverage brand — without
             building the supply chain, the compliance stack, or the technology from scratch.
           </p>
@@ -152,7 +152,7 @@ export default function PartnersPage() {
             The same standards we hold ourselves to.
           </h2>
           <p className="mt-4 max-w-2xl text-sm leading-relaxed text-muted-foreground">
-            Every product sold through the Coastal Partner Program is sourced, curated, and
+            Every product sold through the AIMS Partner Program is sourced, curated, and
             quality-assured through the same supply chain as our own catalog. Your customers get
             the same product integrity as Coastal&apos;s own customers.
           </p>
