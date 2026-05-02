@@ -22,20 +22,20 @@ const mono = JetBrains_Mono({
   display: "swap",
 });
 
-// Per owner directive 2026-04-30: "Nothing Chemically, Ever." applies
-// PER-PRODUCT, not catalog-wide (the catalog now carries 64 flavored
-// SKUs + 5 mushroom + 10 K-cups that can't honestly carry the motto).
-// Sitewide metadata uses the always-true line "Every cup is what the
-// label says it is" instead. The motto badge appears conditionally on
-// product detail pages where `motto_eligible: true`.
+// Sitewide tagline mixes quality (what we're brewing toward) with the
+// agentic experience (chat with ACHEEVY). "Nothing Chemically, Ever."
+// remains the per-product motto on motto-eligible SKUs only — the catalog
+// also carries flavored / functional / K-cup lines that cannot honestly
+// carry that promise. Owner directive 2026-05-02 retired the prior
+// label-promise tagline; see feedback memory of the same date.
 export const metadata: Metadata = {
-  title: "Coastal Brewing Co. — Every cup is what the label says it is.",
+  title: "Coastal Brewing Co. — Coffee, tea, matcha, served by ACHEEVY.",
   description:
-    "Small-batch coffee, whole-leaf tea, ceremonial matcha, flavored blends, and functional brews. Sourced through verified partners. Every public claim has a paper trail.",
+    "Small-batch coffee, whole-leaf tea, ceremonial matcha, flavored blends, and functional brews — brewed honest, served by ACHEEVY, our AI team. Sourced through verified partners. Every public claim has a paper trail.",
   openGraph: {
     title: "Coastal Brewing Co.",
     description:
-      "Every cup is what the label says it is. AI-managed Lowcountry coffee brand — owner-signed, claims-voider compliant.",
+      "Coffee, tea, matcha — brewed honest, served by ACHEEVY. AI-managed Lowcountry brand, owner-signed.",
     type: "website",
     siteName: "Coastal Brewing Co.",
   },
@@ -61,7 +61,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               url: "https://brewing.foai.cloud",
               description:
                 "Small-batch coffee, whole-leaf tea, ceremonial matcha, flavored blends, and functional brews. AI-managed Lowcountry brand.",
-              slogan: "Every cup is what the label says it is.",
+              slogan: "Coffee, tea, matcha — brewed honest, served by ACHEEVY.",
             }),
           }}
         />

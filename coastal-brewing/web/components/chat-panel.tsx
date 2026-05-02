@@ -10,30 +10,13 @@ import { AnimationRouter } from "@/components/animation/AnimationRouter";
 
 type Agent = "sales" | "marketing";
 
-// Employee display names
-const EMPLOYEE_LABEL: Record<string, string> = {
-  sal_ang:        "Sal_Ang",
-  luc_ang:        "LUC_Ang",
-  melli_capensi:  "Melli Capensi",
-  acheevy:        "ACHEEVY",
-};
-
-const EMPLOYEE_TIER: Record<string, string> = {
-  sal_ang:        "T3",
-  luc_ang:        "T2-Finance",
-  melli_capensi:  "T2-Bulk",
-  acheevy:        "T1",
-};
-
-const ESCALATION_DISPLAY: Record<string, string> = {
-  discount_above_t3_ceiling: "Routing to ACHEEVY...",
-  coupon_or_billing_request: "Delegating to LUC_Ang...",
-  bulk_order_inquiry:        "Routing to Melli Capensi...",
-  white_label_inquiry:       "Getting ACHEEVY...",
-  final_override:            "ACHEEVY taking over...",
-  luc_coupon_insufficient:   "Escalating to ACHEEVY...",
-  bulk_above_melli_ceiling:  "Routing to ACHEEVY...",
-};
+// Customer-surface persona — per ACHEEVY_BRAIN.md (lines 96, 138, 1656, 1802)
+// and feedback_only_acheevy_speaks_to_users_on_coastal_chat.md, ONLY ACHEEVY
+// speaks to users. Internal routing across lieutenants (Sal/LUC/Melli) still
+// happens server-side via the chain-of-command, but the customer never sees
+// any name except ACHEEVY. Do not surface employee names in this component.
+const ACHEEVY_LABEL = "ACHEEVY";
+const ACHEEVY_INITIALS = "AC";
 
 interface ChatMessage {
   role: "user" | "agent";
@@ -69,11 +52,14 @@ export function ChatPanel({
   initialAgent?: Agent;
   contextSku?: string;
 }) {
-  const [employee, setEmployee] = React.useState("sal_ang");
+  // `employee` tracks the internal routing target so the per-cup AnimationRouter
+  // can pick the right thinking animation. The value is NEVER displayed as text.
+  const [employee, setEmployee] = React.useState("acheevy");
   const [messages, setMessages] = React.useState<ChatMessage[]>([{
     role: "agent",
-    employee: "sal_ang",
-    content: "Hey. I'm Sal_Ang — Coastal's sales lead. Looking for a coffee, tea, or matcha worth drinking? Tell me what you're after and I'll find your cup.",
+    employee: "acheevy",
+    content:
+      "ACHEEVY here. Coastal Brewing — coffee, tea, matcha, brewed honest. Tell me what you're after and I'll find your cup.",
     ts: Date.now(),
   }]);
   const [input, setInput] = React.useState(contextSku ? `Tell me about ${contextSku}` : "");
@@ -172,11 +158,11 @@ export function ChatPanel({
           break;
 
         case "escalation_event":
+          // Internal routing still drives the AnimationRouter, but the customer
+          // never sees lieutenant names or routing reasons. Surface a single
+          // neutral signal so the user knows ACHEEVY is processing.
           setEmployee(msg.to_employee);
-          setEscalationMsg(
-            ESCALATION_DISPLAY[msg.reason] ||
-            `Routing to ${EMPLOYEE_LABEL[msg.to_employee] || msg.to_employee}...`
-          );
+          setEscalationMsg("ACHEEVY thinking...");
           setTimeout(() => setEscalationMsg(null), 2500);
           break;
 
@@ -221,7 +207,7 @@ export function ChatPanel({
       setMessages((m) => [...m, {
         role: "agent",
         employee: "acheevy",
-        content: reply.content || reply.reply?.content || "I hit a snag. Try again?",
+        content: reply.content || reply.reply?.content || "Hit a snag. Try again.",
         ts: Date.now(),
       }]);
     } catch {
@@ -234,8 +220,8 @@ export function ChatPanel({
     }
   }
 
-  const currentLabel = EMPLOYEE_LABEL[employee] || "ACHEEVY";
-  const currentTier = EMPLOYEE_TIER[employee] || "T1";
+  // Customer surface is single-persona. ACHEEVY only.
+  const currentLabel = ACHEEVY_LABEL;
 
   return (
     <div className="flex h-full flex-col rounded-lg border border-border bg-card">
@@ -246,7 +232,6 @@ export function ChatPanel({
             <Sparkles className="h-4 w-4 text-accent" />
           </motion.div>
           <span className="font-display text-sm font-semibold">{currentLabel}</span>
-          <Badge variant="outline" className="font-mono text-[9px] px-1.5">{currentTier}</Badge>
         </div>
         <Badge variant="outline" className="font-mono text-[10px]">
           <ShieldCheck className="mr-1 h-3 w-3" /> Policy-gated
@@ -266,11 +251,11 @@ export function ChatPanel({
             ) : (
               <div className="flex gap-3">
                 <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-accent/15 font-mono text-[10px] uppercase text-accent">
-                  {(EMPLOYEE_LABEL[m.employee || "acheevy"] || "AC").slice(0, 2)}
+                  {ACHEEVY_INITIALS}
                 </div>
                 <div className="max-w-[80%] flex-1">
                   <p className="mb-1.5 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
-                    {EMPLOYEE_LABEL[m.employee || "acheevy"] || "ACHEEVY"}
+                    {ACHEEVY_LABEL}
                   </p>
                   <div className="rounded-lg bg-secondary px-4 py-2.5 text-sm leading-relaxed">
                     {m.content}
@@ -346,7 +331,7 @@ export function ChatPanel({
         {isConnecting && (
           <div className="flex items-center gap-2 text-xs text-muted-foreground">
             <div className="h-1.5 w-1.5 animate-pulse rounded-full bg-accent" />
-            Connecting to chain of command...
+            Connecting...
           </div>
         )}
 
@@ -361,7 +346,7 @@ export function ChatPanel({
       {/* Input */}
       <form onSubmit={(e) => { e.preventDefault(); send(); }} className="flex gap-2 border-t border-border p-4">
         <Input
-          placeholder="Ask Sal_Ang — negotiate, haggle, find your cup…"
+          placeholder="Ask ACHEEVY — find your cup, ask anything…"
           value={input}
           onChange={(e) => setInput(e.target.value)}
           disabled={!!pending || isConnecting}
@@ -373,7 +358,7 @@ export function ChatPanel({
       </form>
 
       <p className="border-t border-border/60 px-5 py-2 text-center font-mono text-[9px] text-muted-foreground/60">
-        AI-managed · owner-signed · chain-of-command live
+        AI-managed · owner-signed
       </p>
     </div>
   );

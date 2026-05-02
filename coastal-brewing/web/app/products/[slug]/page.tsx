@@ -66,12 +66,14 @@ export default async function ProductDetail({ params }: { params: Promise<{ slug
             <h1 className="mt-4 font-display text-4xl font-bold leading-tight md:text-5xl">{product.name}</h1>
 
             {/* Conditional brand-promise copy per `motto_eligible` flag.
-                Owner directive 2026-04-30: the motto applies per-product,
-                never catalog-wide. SKUs without the eligible flag get an
-                alternate truthful line. */}
+                Owner directives: (a) "Nothing Chemically, Ever." applies
+                per-product on motto_eligible SKUs only — catalog also
+                carries flavored / functional / K-cup lines that can't
+                honestly carry the motto. (b) 2026-05-02 — retired the
+                "Every cup..." line entirely. */}
             {product.motto_eligible ? (
               <p className="mt-3 font-mono text-xs uppercase tracking-widest text-accent/80">
-                Every cup is what the label says it is.
+                Nothing Chemically, Ever.
               </p>
             ) : product.compliance_lane === "mushroom_strict" ? (
               <p className="mt-3 text-sm text-muted-foreground">

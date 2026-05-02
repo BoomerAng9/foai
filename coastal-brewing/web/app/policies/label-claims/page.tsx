@@ -3,17 +3,17 @@ import { PolicyPageLayout } from "@/components/policy-page-layout";
 
 export const metadata = {
   title: "Label Claims & Sourcing Disclosure — Coastal Brewing Co.",
-  description: "What Coastal claims, what we don't, and why. Every cup is what the label says it is.",
+  description: "What Coastal claims, what we don't, and why. Per-product motto, per-tier sourcing, paper trail on every public claim.",
 };
 
 export default function LabelClaimsPage() {
   return (
     <PolicyPageLayout
       eyebrow="Sourcing & claims"
-      title="Every cup is what the label says it is."
-      lastUpdated="April 30, 2026"
+      title="What we claim, what we don't, and why."
+      lastUpdated="May 2, 2026"
     >
-      <p>The line on every Coastal bag — <em>&ldquo;Every cup is what the label says it is&rdquo;</em> — is the brand promise. This page explains what that means in practice, and what we will and will not claim.</p>
+      <p>This page explains the claims you&apos;ll see on Coastal bags and on the Storefront, what they actually mean in practice, and what we deliberately will <em>not</em> claim. Our motto, <strong className="text-foreground">&ldquo;Nothing Chemically, Ever.&rdquo;</strong>, applies <em>per-product</em> — only on motto-eligible SKUs (most of our coffee, tea, and matcha lines). Flavored, functional, and K-cup lines do not carry the motto, by design.</p>
 
       <h2 className="font-display text-2xl font-semibold text-foreground">What we claim, and how we back it</h2>
 
@@ -82,7 +82,7 @@ export default function LabelClaimsPage() {
       <p className="text-sm">
         Questions? <a className="text-accent hover:underline" href="mailto:bpo@achievemor.io">bpo@achievemor.io</a>. For wholesale + sourcing transparency requests, mention &ldquo;Sourcing&rdquo; in the subject and we&apos;ll route warm.
       </p>
-      <p className="font-display text-sm italic">Truth told: every cup is what the label says it is.</p>
+      <p className="font-display text-sm italic">Brewed honest. Served by ACHEEVY. Owner-signed.</p>
     </PolicyPageLayout>
   );
 }

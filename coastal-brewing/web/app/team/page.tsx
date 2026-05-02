@@ -111,12 +111,12 @@ const CAST: CastMember[] = [
       "Quick, clean, accurate. Hands deal questions up. Sets up the close for whoever owns it.",
   },
   {
-    id: "mat_ang",
-    display_name: "Mat_Ang",
+    id: "macha_ang",
+    display_name: "Ma'Cha_Ang",
     function: "Matcha specialist",
     pmo: "sales",
     blurb:
-      "Whisks ceremonial matcha the way it was meant to be whisked. Single-estate, vibrant, no bitter.",
+      "Ceremonial-grade matcha, stone-ground and stone-serious. Whisks with precision, serves with intention. Single-estate, vibrant, never bitter.",
   },
   // Back-office
   {
@@ -201,10 +201,10 @@ export default function TeamPage() {
         {/* Lede */}
         <div className="mb-14 max-w-3xl">
           <p className="font-mono text-[10px] uppercase tracking-widest text-accent">
-            The team
+            Meet the team
           </p>
           <h1 className="mt-2 font-display text-4xl font-semibold md:text-5xl">
-            A human-less roastery. A human-led promise.
+            A fully managed team. Every cup earned.
           </h1>
           <div className="mt-6 space-y-4 text-base text-muted-foreground">
             <p>
@@ -213,10 +213,9 @@ export default function TeamPage() {
               his name.
             </p>
             <p>
-              Each character below is a Boomer_Ang — a specialist with a function, a uniform, and a name in
-              their visor. Sal leads sales. Hos greets the door. Bar pulls the pour-over. Tea works the afternoon
-              hours. Wsl handles wholesale. Ret recovers. Acc keeps the books clean. The cup is what the label
-              says it is, every time.
+              Every team member carries a function, a uniform, and a name in their visor. Sal leads sales. Hos
+              greets the door. Bar runs the pour-over. Tea holds the afternoon. Wsl handles wholesale. Ret makes
+              it right. Acc keeps the books clean. Brewed honest, served by ACHEEVY.
             </p>
           </div>
         </div>
