@@ -20,14 +20,16 @@ import sys
 import urllib.parse
 from typing import Any, Dict, List, Optional
 
+import asyncio
 import collections
 import threading
 
-from fastapi import FastAPI, Header, HTTPException, Query, Request
+from fastapi import FastAPI, Header, HTTPException, Query, Request, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
+import httpx
 import requests
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
@@ -2361,3 +2363,263 @@ def checkout_cancel() -> HTMLResponse:
             actions_html="",
         )
     )
+
+
+# =============================================================================
+# CHAIN OF COMMAND — WebSocket streaming endpoint
+# WS /api/v1/chat/stream
+# Streams: cup_metadata → thinking_token → thinking_complete → response_token
+#          → escalation_event → response_complete
+# =============================================================================
+from streaming.message_types import (  # noqa: E402
+    WsCupMetadata, WsThinkingToken, WsThinkingComplete,
+    WsResponseToken, WsEscalationEvent, WsResponseComplete, WsError,
+    WsUserMessage, EMPLOYEE_ANIMATION, EMPLOYEE_TIER, get_animation_size,
+)
+from streaming.thinking_parser import parse_openrouter_stream, THINKING, RESPONSE, DONE  # noqa: E402
+from animation.escalation_triggers import detect_escalation  # noqa: E402
+
+_OPENROUTER_API_KEY = os.environ.get("OPENROUTER_API_KEY", "")
+
+# Employee → DeepSeek model mapping
+_EMPLOYEE_MODEL = {
+    "sal_ang":       "deepseek/deepseek-v4-flash",   # fast, no deep thinking for T3
+    "luc_ang":       "deepseek/deepseek-r1",          # reasoning for coupon math
+    "melli_capensi": "deepseek/deepseek-r1",          # reasoning for bulk/strategy
+    "acheevy":       "deepseek/deepseek-r1",          # T1 full reasoning
+}
+
+# Employee → system prompt factory (injects persona + authority context)
+def _employee_system_prompt(employee: str) -> str:
+    prompts = {
+        "sal_ang": (
+            "You are Sal_Ang — Sales Lead at Coastal Brewing Co., T3 retail authority. "
+            "Lowcountry Southern register. Warm, direct, place-anchored. "
+            "Discount authority: ≤10% PPU, ≤15% bundles — hold the floor, no exceptions. "
+            "For coupons/billing: delegate to LUC_Ang. For discounts above ceiling: escalate to owner. "
+            "Never name the supplier. Every cup is what the label says it is."
+        ),
+        "luc_ang": (
+            "You are LUC_Ang — Locale Universal Calculator, T2-FINANCE at Coastal Brewing Co. "
+            "Brooklyn-fluent CPA precision. Lu-Cal calculator. CPA Gadget Man. "
+            "ZERO margin-discount authority — coupon codes only: WELCOME10, BREW20, FREESHIP, TRY-ME. "
+            "Delegate-not-ask voice. Short, precise, numerical."
+        ),
+        "melli_capensi": (
+            "You are Melli Capensi — Honey Badger, leader of The Sett, T2-BULK at Coastal Brewing Co. "
+            "Strategic, PMO-authoritative, funnel-minded. "
+            "Bulk ladder: 12u→15%, 50u→25%, 100u+→35%. Above ceiling routes to ACHEEVY. "
+            "7-stage Sett funnel owner. Never name the supplier."
+        ),
+        "acheevy": (
+            "You are ACHEEVY — T1 final authority at Coastal Brewing Co. "
+            "Belter Creole truth-speak. Direct, no pretending, short declaratives. No exclamation marks. "
+            "Uncapped discount authority bound only by cost floor. "
+            "Every public claim has a paper trail. The owner signs everything."
+        ),
+    }
+    return prompts.get(employee, prompts["acheevy"])
+
+
+async def _stream_employee_response(
+    employee: str,
+    messages: list,
+    websocket: WebSocket,
+    input_tokens: int,
+) -> tuple[str, int, int]:
+    """
+    Stream a DeepSeek response for the given employee over the WebSocket.
+    Returns (full_response_text, thinking_token_count, response_token_count).
+    """
+    anim_type = EMPLOYEE_ANIMATION.get(employee, "espresso_cup")
+    anim_size, anim_dur = get_animation_size(anim_type, input_tokens)
+
+    # Send cup metadata first so frontend pre-sizes the animation
+    await websocket.send_json(WsCupMetadata(
+        employee=employee,
+        tier=EMPLOYEE_TIER.get(employee, "T1"),
+        animation_type=anim_type,
+        animation_size=anim_size,
+        estimated_thinking_tokens=max(500, input_tokens * 3),
+        estimated_duration_sec=anim_dur,
+        input_tokens=input_tokens,
+    ).model_dump())
+
+    model = _EMPLOYEE_MODEL.get(employee, "deepseek/deepseek-r1")
+    thinking_count = 0
+    response_count = 0
+    full_response = ""
+    thinking_done = False
+    started_ms = int(_time.time() * 1000)
+
+    headers = {
+        "Authorization": f"Bearer {_OPENROUTER_API_KEY}",
+        "Content-Type": "application/json",
+        "HTTP-Referer": "https://brewing.foai.cloud",
+        "X-Title": "Coastal Brewing Co.",
+    }
+    payload = {
+        "model": model,
+        "messages": messages,
+        "stream": True,
+        "include_reasoning": True,
+        "max_tokens": 2048,
+    }
+
+    try:
+        async with httpx.AsyncClient(timeout=90) as client:
+            async with client.stream("POST", "https://openrouter.ai/api/v1/chat/completions",
+                                     headers=headers, json=payload) as resp:
+                async for token_type, content in parse_openrouter_stream(resp.aiter_lines()):
+                    if token_type == THINKING:
+                        thinking_count += 1
+                        await websocket.send_json(WsThinkingToken(
+                            content=content,
+                            token_index=thinking_count,
+                            employee=employee,
+                        ).model_dump())
+                    elif token_type == RESPONSE:
+                        if not thinking_done and thinking_count > 0:
+                            thinking_done = True
+                            elapsed = int(_time.time() * 1000) - started_ms
+                            await websocket.send_json(WsThinkingComplete(
+                                total_thinking_tokens=thinking_count,
+                                duration_ms=elapsed,
+                                employee=employee,
+                            ).model_dump())
+                        response_count += 1
+                        full_response += content
+                        await websocket.send_json(WsResponseToken(
+                            content=content,
+                            token_index=response_count,
+                        ).model_dump())
+                    elif token_type == DONE:
+                        break
+    except Exception as exc:
+        await websocket.send_json(WsError(
+            code="stream_error",
+            message=f"Stream interrupted: {exc}",
+        ).model_dump())
+
+    # If no thinking tokens came through (model doesn't support it), close cleanly
+    if thinking_count > 0 and not thinking_done:
+        elapsed = int(_time.time() * 1000) - started_ms
+        await websocket.send_json(WsThinkingComplete(
+            total_thinking_tokens=thinking_count,
+            duration_ms=elapsed,
+            employee=employee,
+        ).model_dump())
+
+    return full_response, thinking_count, response_count
+
+
+@app.websocket("/api/v1/chat/stream")
+async def chat_stream(websocket: WebSocket, token: Optional[str] = Query(default=None)):
+    """
+    Chain-of-command WebSocket endpoint.
+
+    Auth: token query param = COASTAL_GATEWAY_TOKEN (or header X-Coastal-Token).
+    Protocol: receive WsUserMessage → stream cup_metadata, thinking_token*,
+              thinking_complete, response_token* → escalation_event (if needed)
+              → response_complete.
+    """
+    # Validate auth
+    if GATEWAY_TOKEN and token != GATEWAY_TOKEN:
+        await websocket.close(code=4001, reason="Unauthorized")
+        return
+
+    await websocket.accept()
+
+    # Session state
+    employee = "sal_ang"   # Default: Sal_Ang handles first contact
+    history: list = []
+    session_id = secrets.token_hex(8)
+
+    try:
+        while True:
+            raw = await websocket.receive_json()
+            msg = WsUserMessage.model_validate(raw)
+
+            if msg.interrupt_current:
+                # Frontend requested interrupt — reset and wait for next message
+                history = history[:-2] if len(history) >= 2 else history
+                continue
+
+            user_content = msg.content.strip()
+            if not user_content:
+                continue
+
+            # Detect escalation before calling the model
+            escalation = detect_escalation(user_content, employee)
+            if escalation:
+                to_emp, reason, delegation_lang, new_anim = escalation
+                await websocket.send_json(WsEscalationEvent(
+                    from_employee=employee,
+                    from_tier=EMPLOYEE_TIER.get(employee, "T3"),
+                    to_employee=to_emp,
+                    to_tier=EMPLOYEE_TIER.get(to_emp, "T1"),
+                    reason=reason,
+                    new_animation_type=new_anim,
+                    delegation_language=delegation_lang,
+                ).model_dump())
+                employee = to_emp
+
+            # Build messages list for this employee
+            sys_prompt = _employee_system_prompt(employee)
+            messages = [{"role": "system", "content": sys_prompt}]
+            messages.extend(history)
+            messages.append({"role": "user", "content": user_content})
+
+            input_tokens = sum(len(m["content"].split()) * 1.3 for m in messages)
+
+            # Stream the response
+            full_response, think_tokens, resp_tokens = await _stream_employee_response(
+                employee=employee,
+                messages=messages,
+                websocket=websocket,
+                input_tokens=int(input_tokens),
+            )
+
+            # Append to history
+            history.append({"role": "user", "content": user_content})
+            history.append({"role": "assistant", "content": full_response})
+            # Keep last 12 messages (6 turns)
+            if len(history) > 12:
+                history = history[-12:]
+
+            # Emit turn complete
+            cost_estimate = (think_tokens * 0.0000005) + (resp_tokens * 0.0000015)
+            await websocket.send_json(WsResponseComplete(
+                total_response_tokens=resp_tokens,
+                total_thinking_tokens=think_tokens,
+                cost_usd_estimate=round(cost_estimate, 6),
+                employee=employee,
+                tier=EMPLOYEE_TIER.get(employee, "T1"),
+            ).model_dump())
+
+            # Audit log
+            try:
+                audit_ledger.insert_action_receipt(
+                    task_id=session_id,
+                    executor=f"ws_chat.{employee}",
+                    action_type="ws_chat_send",
+                    destination=_EMPLOYEE_MODEL.get(employee, "deepseek/deepseek-r1"),
+                    status="ok" if full_response else "empty",
+                    result_summary=(
+                        f"u:{user_content[:80]} | think:{think_tokens}tok "
+                        f"| resp:{resp_tokens}tok | emp:{employee}"
+                    ),
+                )
+            except Exception:
+                pass
+
+    except WebSocketDisconnect:
+        pass
+    except Exception as exc:
+        try:
+            await websocket.send_json(WsError(
+                code="session_error",
+                message=str(exc),
+            ).model_dump())
+        except Exception:
+            pass

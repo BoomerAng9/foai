@@ -1,0 +1,354 @@
+# FOAI — Inworld Character Registry
+# Classification: INTERNAL IP
+# Version: 1.0.0 — 2026-05-02
+# Owner: ACHIEVEMOR / FOAI
+#
+# This file is the single source of truth for ALL characters across ALL
+# FOAI verticals. Each vertical has its own section. Characters are
+# loaded dynamically — no code changes needed to add new characters.
+#
+# States: active | preview | inactive | retired
+# active:  voice cloned, spec complete, deployed
+# preview: spec written, voice pending — test-only
+# inactive: defined but not yet configured
+# retired: removed from rotation
+
+---
+
+vertical: coastal_brewing
+spec_dir: "aims-tools/inworld/character-specs/coastal-brewing/"
+voice_library: "aims-tools/voice-library/syntax-library/"
+
+characters:
+
+  # ─────────────────────────────────────────────────
+  # TIER 1 — Orchestrator
+  # ─────────────────────────────────────────────────
+  - employee_id: acheevy
+    display_name: ACHEEVY
+    function: "Top orchestrator · Final authority"
+    tier: T1
+    pmo: orchestrator
+    customer_facing: true
+    active: false       # → true after voice clone
+    phase: 1
+    priority: 1         # priority 1 = first to activate
+
+  # ─────────────────────────────────────────────────
+  # TIER 2 FINANCE — Back-desk
+  # ─────────────────────────────────────────────────
+  - employee_id: luc_ang
+    display_name: LUC_Ang
+    function: "Finance · Coupons · Billing"
+    tier: T2_FINANCE
+    pmo: finance
+    customer_facing: false   # team-facing only
+    active: false
+    phase: 1
+    priority: 2
+
+  # ─────────────────────────────────────────────────
+  # TIER 2 BULK — Marketing PMO Lead
+  # ─────────────────────────────────────────────────
+  - employee_id: melli_capensi
+    display_name: Melli Capensi
+    function: "Bulk · Corporate · Marketing PMO"
+    tier: T2_BULK
+    pmo: marketing
+    customer_facing: true
+    active: false
+    phase: 1
+    priority: 3
+
+  # ─────────────────────────────────────────────────
+  # TIER 3 — Sales Floor (12 members)
+  # ─────────────────────────────────────────────────
+  - employee_id: sal_ang
+    display_name: Sal_Ang
+    function: "Sales · Lead"
+    tier: T3
+    pmo: sales
+    customer_facing: true
+    active: false
+    phase: 1
+    priority: 4
+
+  - employee_id: hos_ang
+    display_name: Hos_Ang
+    function: "Host · Front-of-house"
+    tier: T3
+    pmo: sales
+    customer_facing: true
+    active: false
+    phase: 2
+    priority: 5
+
+  - employee_id: bar_ang
+    display_name: Bar_Ang
+    function: "Pour-over barista"
+    tier: T3
+    pmo: sales
+    customer_facing: true
+    active: false
+    phase: 2
+    priority: 6
+
+  - employee_id: con_ang
+    display_name: Con_Ang
+    function: "Cup-finder · Consultative"
+    tier: T3
+    pmo: sales
+    customer_facing: true
+    active: false
+    phase: 2
+    priority: 7
+
+  - employee_id: tas_ang
+    display_name: Tas_Ang
+    function: "Tasting bar"
+    tier: T3
+    pmo: sales
+    customer_facing: true
+    active: false
+    phase: 2
+    priority: 8
+
+  - employee_id: tea_ang
+    display_name: Tea_Ang
+    function: "Afternoon tea"
+    tier: T3
+    pmo: sales
+    customer_facing: true
+    active: false
+    phase: 2
+    priority: 9
+
+  - employee_id: cou_ang
+    display_name: Cou_Ang
+    function: "Counter · Savannah"
+    tier: T3
+    pmo: sales
+    customer_facing: true
+    active: false
+    phase: 2
+    priority: 10
+
+  - employee_id: gre_ang
+    display_name: Gre_Ang
+    function: "Morning greeter"
+    tier: T3
+    pmo: sales
+    customer_facing: true
+    active: false
+    phase: 2
+    priority: 11
+
+  - employee_id: har_ang
+    display_name: Har_Ang
+    function: "Harbor-view tasting"
+    tier: T3
+    pmo: sales
+    customer_facing: true
+    active: false
+    phase: 2
+    priority: 12
+
+  - employee_id: cur_ang
+    display_name: Cur_Ang
+    function: "Tea curator"
+    tier: T3
+    pmo: sales
+    customer_facing: true
+    active: false
+    phase: 2
+    priority: 13
+
+  - employee_id: reg_ang
+    display_name: Reg_Ang
+    function: "Register · Cashier"
+    tier: T3
+    pmo: sales
+    customer_facing: true
+    active: false
+    phase: 2
+    priority: 14
+
+  - employee_id: mat_ang
+    display_name: Mat_Ang
+    function: "Matcha specialist"
+    tier: T3
+    pmo: sales
+    customer_facing: true
+    active: false
+    phase: 2
+    priority: 15
+
+  # ─────────────────────────────────────────────────
+  # BACK-OFFICE
+  # ─────────────────────────────────────────────────
+  - employee_id: bun_ang
+    display_name: Bun_Ang
+    function: "Bundle · Back-office"
+    tier: internal
+    pmo: back-office
+    customer_facing: false
+    active: false
+    phase: 2
+    priority: 16
+
+  # ─────────────────────────────────────────────────
+  # OPERATIONS
+  # ─────────────────────────────────────────────────
+  - employee_id: wsl_ang
+    display_name: Wsl_Ang
+    function: "Wholesale · Bulk sales"
+    tier: T2_BULK
+    pmo: ops
+    customer_facing: true
+    active: false
+    phase: 2
+    priority: 17
+
+  - employee_id: ret_ang
+    display_name: Ret_Ang
+    function: "Returns · Customer service recovery"
+    tier: internal
+    pmo: ops
+    customer_facing: true
+    active: false
+    phase: 2
+    priority: 18
+
+  - employee_id: acc_ang
+    display_name: Acc_Ang
+    function: "Accountant"
+    tier: internal
+    pmo: ops
+    customer_facing: false
+    active: false
+    phase: 3
+    priority: 19
+
+  # ─────────────────────────────────────────────────
+  # THE SETT — Melli Capensi's Marketing PMO Badgers
+  # All internal; none customer-facing until Phase 3
+  # ─────────────────────────────────────────────────
+  - employee_id: meles_mehli
+    display_name: Meles Mehli
+    function: "Tunnel architect · Exit conversion UX"
+    tier: T2_BULK
+    pmo: marketing
+    customer_facing: false
+    active: false
+    phase: 3
+    priority: 20
+
+  - employee_id: taxi_dea
+    display_name: Taxi Dea
+    function: "Surface · Programmatic awareness"
+    tier: T2_BULK
+    pmo: marketing
+    customer_facing: false
+    active: false
+    phase: 3
+    priority: 21
+
+  - employee_id: arcto_nyx
+    display_name: Arcto Nyx
+    function: "Entrance · CRM · First-party · Lead capture"
+    tier: T2_BULK
+    pmo: marketing
+    customer_facing: false
+    active: false
+    phase: 3
+    priority: 22
+
+  - employee_id: ana_kuma
+    display_name: Ana Kuma
+    function: "Tunnel narrative · Sett-Chamber brand trust"
+    tier: T2_BULK
+    pmo: marketing
+    customer_facing: false
+    active: false
+    phase: 3
+    priority: 23
+
+  - employee_id: leu_kurus
+    display_name: Leu Kurus
+    function: "Cross-region adapt · Compliance"
+    tier: T2_BULK
+    pmo: marketing
+    customer_facing: false
+    active: false
+    phase: 3
+    priority: 24
+
+  - employee_id: moscha_tah
+    display_name: Moscha Tah
+    function: "Video stack · CTV · DOOH · Audio"
+    tier: T2_BULK
+    pmo: marketing
+    customer_facing: false
+    active: false
+    phase: 3
+    priority: 25
+
+  - employee_id: persona_tah
+    display_name: Persona Tah
+    function: "Home Chamber · Creator-led onboarding · Clan UGC"
+    tier: T2_BULK
+    pmo: marketing
+    customer_facing: false
+    active: false
+    phase: 3
+    priority: 26
+
+  - employee_id: orien_talis
+    display_name: Orien Talis
+    function: "Social · Native · All stages"
+    tier: T2_BULK
+    pmo: marketing
+    customer_facing: false
+    active: false
+    phase: 3
+    priority: 27
+
+  - employee_id: eve_retti
+    display_name: Eve Retti
+    function: "Vertical deep-dive · Sett-Chamber"
+    tier: T2_BULK
+    pmo: marketing
+    customer_facing: false
+    active: false
+    phase: 3
+    priority: 28
+
+  - employee_id: cuc_phuong
+    display_name: Cuc Phuong
+    function: "Emerging surfaces · Web3 · Agent-to-agent · AI-native"
+    tier: T2_BULK
+    pmo: marketing
+    customer_facing: false
+    active: false
+    phase: 3
+    priority: 29
+
+  - employee_id: java_nessa
+    display_name: Java Nessa
+    function: "Cross-stage forecasting · Attribution · Brand safety"
+    tier: T2_BULK
+    pmo: marketing
+    customer_facing: false
+    active: false
+    phase: 3
+    priority: 30
+
+  - employee_id: mar_che
+    display_name: Mar Che
+    function: "Surface · PR · Virality"
+    tier: T2_BULK
+    pmo: marketing
+    customer_facing: false
+    active: false
+    phase: 3
+    priority: 31
