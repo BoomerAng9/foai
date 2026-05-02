@@ -289,6 +289,9 @@ class InworldCharacterAdapter(IInworldCharacterAdapter):
     def __init__(self):
         self._registry = CharacterRegistry()
         self._persona_loader = PersonaLoader()
+        # Pre-encoded credential (Base64 key:secret) takes priority over split fields.
+        # Set INWORLD_API_CREDENTIALS when the vault stores the pre-encoded value.
+        self._api_credentials = os.environ.get("INWORLD_API_CREDENTIALS", "")
         self._api_key = os.environ.get("INWORLD_API_KEY", "")
         self._api_secret = os.environ.get("INWORLD_API_SECRET", "")
         self._workspace_id = os.environ.get("INWORLD_WORKSPACE_ID", "")
@@ -298,16 +301,18 @@ class InworldCharacterAdapter(IInworldCharacterAdapter):
 
     @property
     def _auth_header(self) -> str:
-        """Basic auth header from API key:secret. Never logged."""
-        if not self._api_key or not self._api_secret:
-            return ""
-        encoded = base64.b64encode(
-            f"{self._api_key}:{self._api_secret}".encode()
-        ).decode()
-        return f"Basic {encoded}"
+        """Basic auth header. Supports pre-encoded credential or key:secret pair. Never logged."""
+        if self._api_credentials:
+            return f"Basic {self._api_credentials}"
+        if self._api_key and self._api_secret:
+            encoded = base64.b64encode(
+                f"{self._api_key}:{self._api_secret}".encode()
+            ).decode()
+            return f"Basic {encoded}"
+        return ""
 
     def is_configured(self) -> bool:
-        return bool(self._api_key and self._api_secret)
+        return bool(self._api_credentials or (self._api_key and self._api_secret))
 
     # ── IInworldCharacterAdapter ──────────────────────────────────────────
 

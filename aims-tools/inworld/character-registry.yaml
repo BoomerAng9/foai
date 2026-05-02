@@ -61,7 +61,7 @@ characters:
     priority: 3
 
   # ─────────────────────────────────────────────────
-  # TIER 3 — Sales Floor (12 members)
+  # TIER 3 — Sales Floor (13 members)
   # ─────────────────────────────────────────────────
   - employee_id: sal_ang
     display_name: Sal_Ang
@@ -72,6 +72,17 @@ characters:
     active: false
     phase: 1
     priority: 4
+
+  - employee_id: flo_ang
+    display_name: Flo_Ang
+    function: "Floor · Retail Associate · Bluffton/Beaufort"
+    tier: T3
+    pmo: sales
+    customer_facing: true
+    active: false
+    phase: 1
+    priority: 5
+    voice_model: white_female   # Inworld character model: Deborah voice design
 
   - employee_id: hos_ang
     display_name: Hos_Ang
