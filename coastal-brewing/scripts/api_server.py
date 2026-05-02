@@ -413,7 +413,7 @@ letter-spacing:0.10em;text-transform:uppercase;flex-wrap:wrap;gap:8px}
   <div class="hero-left">
     <div class="eyebrow">[ Coffee &middot; Tea &middot; Matcha ]</div>
     <h1>Nothing<br>chemically,<br><em>ever.</em></h1>
-    <p class="lede">Small-batch coffee, whole-leaf tea, ceremonial matcha. Sourced through verified partners. Every public claim has a paper trail. Every cup is what the label says it is.</p>
+    <p class="lede">Small-batch coffee, whole-leaf tea, ceremonial matcha — brewed honest, served by ACHEEVY. Sourced through verified partners. Every public claim has a paper trail.</p>
     <div class="promise">Subscriptions opening with our supplier handshake</div>
   </div>
   <div class="hero-right">
@@ -2383,11 +2383,29 @@ _OPENROUTER_API_KEY = os.environ.get("OPENROUTER_API_KEY", "")
 
 # Employee → DeepSeek model mapping
 _EMPLOYEE_MODEL = {
-    "sal_ang":       "deepseek/deepseek-v4-flash",   # fast, no deep thinking for T3
-    "luc_ang":       "deepseek/deepseek-r1",          # reasoning for coupon math
-    "melli_capensi": "deepseek/deepseek-r1",          # reasoning for bulk/strategy
-    "acheevy":       "deepseek/deepseek-r1",          # T1 full reasoning
+    "sal_ang":       "deepseek/deepseek-v4-flash",   # T3 — fast, retail floor
+    "luc_ang":       "deepseek/deepseek-v4-flash",   # T2-FINANCE — efficient CPA math
+    "melli_capensi": "deepseek/deepseek-v4-pro",     # T2-BULK — strategic PMO reasoning
+    "acheevy":       "deepseek/deepseek-v4-pro",     # T1 — full authority reasoning
 }
+
+# Brand-grounding preamble prepended to EVERY lieutenant prompt. The model's
+# default English prior on "Coastal Brewing Co." is "craft beer brewery,"
+# which causes hallucinations like "our Lowcountry Coffee Stout." This block
+# anchors the brand to coffee/tea/matcha + Lowcountry SC and explicitly
+# excludes alcohol. Verified via WS smoke test 2026-05-02.
+_BRAND_PREAMBLE = (
+    "BRAND CONTEXT — Coastal Brewing Co. sells small-batch COFFEE, "
+    "whole-leaf TEA, and ceremonial MATCHA, plus flavored coffee blends "
+    "and functional/mushroom coffees. We are a coffee + tea + matcha brand. "
+    "We are NOT a beer brewery. We do NOT sell beer, ale, lager, stout, "
+    "porter, IPA, or any alcohol. 'Brewing' in the name refers to brewed "
+    "coffee and tea, not beer. The brand is Lowcountry South Carolina "
+    "(Bluffton / Savannah / Beaufort area). Customer surface is single-"
+    "persona ACHEEVY only — internal lieutenant names (Sal_Ang, LUC_Ang, "
+    "Melli) never appear in customer-facing copy. ===\n\n"
+)
+
 
 # Employee → system prompt factory (injects persona + authority context)
 def _employee_system_prompt(employee: str) -> str:
@@ -2397,7 +2415,7 @@ def _employee_system_prompt(employee: str) -> str:
             "Lowcountry Southern register. Warm, direct, place-anchored. "
             "Discount authority: ≤10% PPU, ≤15% bundles — hold the floor, no exceptions. "
             "For coupons/billing: delegate to LUC_Ang. For discounts above ceiling: escalate to owner. "
-            "Never name the supplier. Every cup is what the label says it is."
+            "Never name the supplier. Brewed honest — owner-signed paper trail on every public claim."
         ),
         "luc_ang": (
             "You are LUC_Ang — Locale Universal Calculator, T2-FINANCE at Coastal Brewing Co. "
@@ -2418,7 +2436,7 @@ def _employee_system_prompt(employee: str) -> str:
             "Every public claim has a paper trail. The owner signs everything."
         ),
     }
-    return prompts.get(employee, prompts["acheevy"])
+    return _BRAND_PREAMBLE + prompts.get(employee, prompts["acheevy"])
 
 
 async def _stream_employee_response(
@@ -2445,7 +2463,7 @@ async def _stream_employee_response(
         input_tokens=input_tokens,
     ).model_dump())
 
-    model = _EMPLOYEE_MODEL.get(employee, "deepseek/deepseek-r1")
+    model = _EMPLOYEE_MODEL.get(employee, "deepseek/deepseek-v4-flash")
     thinking_count = 0
     response_count = 0
     full_response = ""
@@ -2603,7 +2621,7 @@ async def chat_stream(websocket: WebSocket, token: Optional[str] = Query(default
                     task_id=session_id,
                     executor=f"ws_chat.{employee}",
                     action_type="ws_chat_send",
-                    destination=_EMPLOYEE_MODEL.get(employee, "deepseek/deepseek-r1"),
+                    destination=_EMPLOYEE_MODEL.get(employee, "deepseek/deepseek-v4-flash"),
                     status="ok" if full_response else "empty",
                     result_summary=(
                         f"u:{user_content[:80]} | think:{think_tokens}tok "

@@ -109,3 +109,23 @@ def get_animation_size(animation_type: str, input_tokens: int) -> tuple[str, flo
     last_spec = list(sizes.values())[-1] if sizes else {"duration": (5, 10)}
     d_lo, d_hi = last_spec["duration"]
     return last_name, (d_lo + d_hi) / 2
+
+
+# Internal employee → animation-type + tier maps. Imported by api_server.py
+# at the WS streaming endpoint to pick the right cup animation per lieutenant
+# routing target. NOTE: these names are INTERNAL to the chain-of-command
+# registry — they never reach the customer surface (chat-panel.tsx hardcodes
+# ACHEEVY for all display per the only-ACHEEVY-speaks-to-users canon).
+EMPLOYEE_ANIMATION: Dict[str, str] = {
+    "sal_ang":       "espresso_cup",
+    "luc_ang":       "lu_cal_ledger",
+    "melli_capensi": "sett_brief",
+    "acheevy":       "authority_seal",
+}
+
+EMPLOYEE_TIER: Dict[str, str] = {
+    "sal_ang":       "T3",
+    "luc_ang":       "T2_FINANCE",
+    "melli_capensi": "T2_BULK",
+    "acheevy":       "T1",
+}
