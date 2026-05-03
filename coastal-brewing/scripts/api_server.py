@@ -3027,3 +3027,97 @@ async def users_session_wrap(
         "summary": summary,
         "embedded": embedding is not None,
     }
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Inworld TTS — POST /api/v1/voice/synthesize
+# ─────────────────────────────────────────────────────────────────────────────
+# Customer-visible: ACHEEVY voice playback only (per the ACHEEVY-only canon
+# in feedback_only_acheevy_speaks_to_users_on_coastal_chat.md). The Sal /
+# LUC / Melli voice IDs are mapped here for internal future use (training
+# previews, voice-design comparisons, owner Tool Chest) but are not exposed
+# on the customer chat surface.
+#
+# Stock voice mapping picked 2026-05-03 from Inworld's 148-voice catalog,
+# matching each character's voice_design_prompt archetype. Custom voice
+# DESIGN endpoint is a separate scope — script-driven creation returned
+# 404 against the `/studio/v1/workspaces/.../voice-library/voices` path
+# the legacy setup expected. When that path is re-discovered or owner
+# uses the platform UI to publish custom voices, swap voiceId values
+# here. Both inworld-tts-1.5-max (flagship) and -mini (cheap/fast) are
+# valid model IDs per documented support.
+
+_INWORLD_API_KEY = os.environ.get("INWORLD_API_KEY", "").strip()
+_INWORLD_TTS_ENDPOINT = "https://api.inworld.ai/tts/v1/voice"
+_INWORLD_TTS_MODEL = os.environ.get("INWORLD_TTS_MODEL", "inworld-tts-1.5-max")
+
+# Coastal employee → Inworld stock voice + tier override.
+# Tier "max" = flagship (richer expression, ~200ms p50). "mini" = ~120ms,
+# cheaper. ACHEEVY gets max because customers hear his voice; internal
+# voices default to mini when ever surfaced (cost discipline).
+_INWORLD_VOICE_MAP: Dict[str, Dict[str, str]] = {
+    "acheevy":       {"voiceId": "Tyler",   "model": "inworld-tts-1.5-max"},
+    "sal_ang":       {"voiceId": "Hank",    "model": "inworld-tts-1.5-max"},
+    "luc_ang":       {"voiceId": "Vinny",   "model": "inworld-tts-1.5-mini"},
+    "melli_capensi": {"voiceId": "Bianca",  "model": "inworld-tts-1.5-max"},
+}
+
+
+class WsVoiceSynthRequest(BaseModel):
+    text: str
+    character_id: str = "acheevy"
+
+
+@app.post("/api/v1/voice/synthesize")
+async def voice_synthesize(body: WsVoiceSynthRequest):
+    """Inworld TTS for the 4 wired Coastal characters. Returns base64-
+    encoded WAV in `audioContent` for the frontend to decode and play
+    (no streaming yet; voice-stream endpoint can be wired later for
+    long messages). Customer surface only ever hits this with
+    character_id='acheevy' — internal voices accept calls for owner-
+    side previews."""
+    if not _INWORLD_API_KEY:
+        raise HTTPException(status_code=503, detail="INWORLD_API_KEY not configured")
+    text = (body.text or "").strip()
+    if not text:
+        raise HTTPException(status_code=400, detail="text required")
+    if len(text) > 2000:
+        # Inworld TTS-1.5 has a per-request character cap; trim to be safe.
+        text = text[:2000]
+
+    voice_cfg = _INWORLD_VOICE_MAP.get(body.character_id) or _INWORLD_VOICE_MAP["acheevy"]
+    payload = {
+        "text": text,
+        "voiceId": voice_cfg["voiceId"],
+        "modelId": voice_cfg.get("model", _INWORLD_TTS_MODEL),
+        "language": "en",
+    }
+    headers = {
+        "Authorization": f"Basic {_INWORLD_API_KEY}",
+        "Content-Type": "application/json",
+    }
+    try:
+        async with httpx.AsyncClient(timeout=30) as client:
+            resp = await client.post(_INWORLD_TTS_ENDPOINT, headers=headers, json=payload)
+        if resp.status_code != 200:
+            raise HTTPException(
+                status_code=502,
+                detail=f"Inworld TTS error {resp.status_code}: {resp.text[:300]}",
+            )
+        body_data = resp.json()
+        audio_b64 = body_data.get("audioContent", "")
+        if not audio_b64:
+            raise HTTPException(status_code=502, detail="Inworld TTS returned empty audioContent")
+        return {
+            "audioContent": audio_b64,
+            "voiceId": voice_cfg["voiceId"],
+            "model": voice_cfg.get("model", _INWORLD_TTS_MODEL),
+            "character_id": body.character_id,
+            "format": "audio/wav",
+        }
+    except httpx.TimeoutException:
+        raise HTTPException(status_code=504, detail="Inworld TTS timed out")
+    except HTTPException:
+        raise
+    except Exception as exc:
+        raise HTTPException(status_code=502, detail=f"Inworld TTS unexpected error: {exc}")

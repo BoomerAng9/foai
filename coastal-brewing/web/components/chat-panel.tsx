@@ -1,7 +1,7 @@
 "use client";
 import * as React from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Send, ChevronDown, ChevronRight, Sparkles, ShieldCheck, Zap, X } from "lucide-react";
+import { Send, ChevronDown, ChevronRight, Sparkles, ShieldCheck, Zap, X, Volume2, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -395,9 +395,12 @@ export function ChatPanel({
                   {ACHEEVY_INITIALS}
                 </div>
                 <div className="max-w-[80%] flex-1">
-                  <p className="mb-1.5 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
-                    {ACHEEVY_LABEL}
-                  </p>
+                  <div className="mb-1.5 flex items-center gap-2">
+                    <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+                      {ACHEEVY_LABEL}
+                    </p>
+                    <PlayVoiceButton text={m.content} messageKey={`msg-${i}`} />
+                  </div>
                   <div className="rounded-lg bg-secondary px-4 py-2.5 text-sm leading-relaxed">
                     {m.content}
                   </div>
@@ -559,5 +562,91 @@ export function ChatPanel({
         AI-managed · owner-signed
       </p>
     </div>
+  );
+}
+
+// ─── Inworld TTS playback for ACHEEVY responses ──────────────────────
+// Per-message opt-in. Customer clicks the speaker icon → backend calls
+// Inworld TTS (Tyler voice for ACHEEVY) → we receive base64 WAV → play
+// via an in-browser Audio element. Caches the played blob URL so a
+// second click doesn't refetch. Only ACHEEVY's voice surfaces here per
+// the only-ACHEEVY-speaks-to-users canon — internal voice IDs (Sal /
+// LUC / Melli) are mapped server-side but never exposed.
+function PlayVoiceButton({ text, messageKey: _key }: { text: string; messageKey: string }) {
+  const [state, setState] = React.useState<"idle" | "loading" | "playing" | "error">("idle");
+  const audioRef = React.useRef<HTMLAudioElement | null>(null);
+  const blobUrlRef = React.useRef<string | null>(null);
+
+  React.useEffect(() => {
+    return () => {
+      if (blobUrlRef.current) URL.revokeObjectURL(blobUrlRef.current);
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.src = "";
+      }
+    };
+  }, []);
+
+  async function play() {
+    if (state === "loading") return;
+    if (state === "playing" && audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+      setState("idle");
+      return;
+    }
+    if (blobUrlRef.current && audioRef.current) {
+      audioRef.current.currentTime = 0;
+      void audioRef.current.play();
+      setState("playing");
+      return;
+    }
+    setState("loading");
+    try {
+      const r = await fetch("/api/v1/voice/synthesize", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text, character_id: "acheevy" }),
+      });
+      if (!r.ok) throw new Error(`HTTP ${r.status}`);
+      const data = await r.json();
+      const audioB64: string = data.audioContent;
+      const binary = atob(audioB64);
+      const bytes = new Uint8Array(binary.length);
+      for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+      const blob = new Blob([bytes], { type: data.format || "audio/wav" });
+      const url = URL.createObjectURL(blob);
+      blobUrlRef.current = url;
+      const audio = new Audio(url);
+      audioRef.current = audio;
+      audio.onended = () => setState("idle");
+      audio.onerror = () => setState("error");
+      await audio.play();
+      setState("playing");
+    } catch {
+      setState("error");
+      window.setTimeout(() => setState("idle"), 2000);
+    }
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={play}
+      aria-label={state === "playing" ? "Stop ACHEEVY audio" : "Play ACHEEVY audio"}
+      className={cn(
+        "inline-flex h-5 w-5 items-center justify-center rounded-full transition-colors",
+        "text-muted-foreground/60 hover:text-accent hover:bg-accent/10",
+        state === "playing" && "text-accent bg-accent/15",
+        state === "error" && "text-destructive",
+      )}
+      title={state === "error" ? "Voice unavailable" : "Hear ACHEEVY"}
+    >
+      {state === "loading" ? (
+        <Loader2 className="h-3 w-3 animate-spin" />
+      ) : (
+        <Volume2 className="h-3 w-3" />
+      )}
+    </button>
   );
 }
