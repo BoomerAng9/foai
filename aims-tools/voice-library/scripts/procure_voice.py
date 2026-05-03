@@ -48,10 +48,29 @@ _MAX_AUDIO_BYTES = 4 * 1024 * 1024
 
 
 def _output_dir() -> pathlib.Path:
+    """Voice-model storage dir. Canonical location is the iCloud Claude
+    Code folder ("Inworld Voice Models"); falls back to the local
+    voice-library/outputs/ if iCloud isn't mounted."""
+    icloud = pathlib.Path.home() / "iCloudDrive" / "ACHIEVEMOR_" / "Projects_" / "The Deploy Platform_" / "Claude Code" / "Inworld Voice Models"
+    if icloud.exists():
+        out = icloud / "cloned-samples"
+        out.mkdir(parents=True, exist_ok=True)
+        return out
     here = pathlib.Path(__file__).resolve().parent
     out = here.parent / "outputs"
     out.mkdir(parents=True, exist_ok=True)
     return out
+
+
+def _archive_raw_dir() -> pathlib.Path:
+    """Where to drop raw + trimmed PD-source audio. Same iCloud root
+    when available, separate subfolder for clean organization."""
+    icloud = pathlib.Path.home() / "iCloudDrive" / "ACHIEVEMOR_" / "Projects_" / "The Deploy Platform_" / "Claude Code" / "Inworld Voice Models"
+    if icloud.exists():
+        out = icloud / "source-archive-public-domain"
+        out.mkdir(parents=True, exist_ok=True)
+        return out
+    return _output_dir()
 
 
 def brave_search(query: str, count: int = 5) -> list[dict]:
@@ -207,7 +226,8 @@ def inworld_tts_test(voice_id: str, text: str) -> bytes:
 
 def main() -> int:
     p = argparse.ArgumentParser()
-    p.add_argument("--archive-id", required=True, help="archive.org item identifier")
+    p.add_argument("--archive-id", help="archive.org item identifier (use this OR --source-file)")
+    p.add_argument("--source-file", help="local audio file to clone from (use this OR --archive-id) — bypasses archive.org download for owner-supplied sources (e.g. Jarrett voice training)")
     p.add_argument("--filename", help="specific filename within the archive item; auto-resolved if omitted")
     p.add_argument("--display-name", required=True, help="display name for the cloned voice in Inworld dashboard")
     p.add_argument("--description", default="", help="description text saved with the voice")
@@ -217,26 +237,45 @@ def main() -> int:
     p.add_argument("--trim-seconds", type=int, default=30, help="trim downloaded audio to at most N seconds before upload (Inworld accepts 1-180s, smaller cloning samples = faster upload)")
     args = p.parse_args()
 
-    print(f"[1/5] Resolving audio for archive item: {args.archive_id}")
-    if args.filename:
-        filename = args.filename
-        fmt = "(specified)"
-    else:
-        resolved = archive_resolve_audio(args.archive_id)
-        if not resolved:
-            print(f"  ! no audio file found in {args.archive_id}", file=sys.stderr)
-            return 1
-        filename, fmt = resolved
-        print(f"  resolved: {filename} ({fmt})")
-
-    print(f"[2/5] Downloading audio: {archive_download_url(args.archive_id, filename)}")
-    raw_bytes = download_audio(args.archive_id, filename)
-    print(f"  downloaded: {len(raw_bytes)} bytes ({len(raw_bytes) // 1024} KB)")
+    if not args.archive_id and not args.source_file:
+        print("error: provide --archive-id OR --source-file", file=sys.stderr)
+        return 1
+    if args.archive_id and args.source_file:
+        print("error: pass only one of --archive-id or --source-file", file=sys.stderr)
+        return 1
 
     out_dir = _output_dir()
-    raw_local = out_dir / f"{args.archive_id}__{filename}"
-    raw_local.write_bytes(raw_bytes)
-    print(f"  saved raw: {raw_local}")
+    archive_dir = _archive_raw_dir()
+
+    if args.source_file:
+        src = pathlib.Path(args.source_file)
+        if not src.exists():
+            print(f"  ! source file not found: {src}", file=sys.stderr)
+            return 1
+        print(f"[1/5] Loading owner-supplied audio: {src}")
+        raw_bytes = src.read_bytes()
+        filename = src.name
+        ext_for_label = "owner-supplied"
+        print(f"  loaded: {len(raw_bytes)} bytes ({len(raw_bytes) // 1024} KB)")
+    else:
+        print(f"[1/5] Resolving audio for archive item: {args.archive_id}")
+        if args.filename:
+            filename = args.filename
+            fmt = "(specified)"
+        else:
+            resolved = archive_resolve_audio(args.archive_id)
+            if not resolved:
+                print(f"  ! no audio file found in {args.archive_id}", file=sys.stderr)
+                return 1
+            filename, fmt = resolved
+            print(f"  resolved: {filename} ({fmt})")
+        print(f"[2/5] Downloading audio: {archive_download_url(args.archive_id, filename)}")
+        raw_bytes = download_audio(args.archive_id, filename)
+        print(f"  downloaded: {len(raw_bytes)} bytes ({len(raw_bytes) // 1024} KB)")
+        raw_local = archive_dir / f"{args.archive_id}__{filename}"
+        raw_local.write_bytes(raw_bytes)
+        print(f"  saved raw: {raw_local}")
+        ext_for_label = args.archive_id
 
     # Inworld clone API requires 1-180 seconds. Trim to args.trim_seconds.
     ext = (filename.rsplit(".", 1)[-1] or "mp3").lower()
@@ -248,7 +287,7 @@ def main() -> int:
             f"trimmed audio is {len(audio_bytes) // 1024} KB, exceeds Inworld 4 MB cap. "
             f"Reduce --trim-seconds."
         )
-    trimmed_local = out_dir / f"{args.archive_id}__trimmed_{args.trim_seconds}s.mp3"
+    trimmed_local = archive_dir / f"{ext_for_label}__trimmed_{args.trim_seconds}s.mp3"
     trimmed_local.write_bytes(audio_bytes)
     print(f"  saved trimmed: {trimmed_local}")
 

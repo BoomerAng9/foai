@@ -3127,19 +3127,23 @@ _INWORLD_TTS_MODEL = os.environ.get("INWORLD_TTS_MODEL", "inworld-tts-1.5-max")
 # cheaper. ACHEEVY gets max because customers hear his voice; internal
 # voices default to mini when ever surfaced (cost discipline).
 _INWORLD_VOICE_MAP: Dict[str, Dict[str, str]] = {
-    # ACHEEVY voice = custom-cloned voice via the FOAI voice-procurement
-    # pipeline (aims-tools/voice-library/scripts/procure_voice.py),
-    # 2026-05-03. Source: Marcus Garvey 1921 PD speech (US copyright
-    # lapsed for pre-1923 sound recordings 2022); 30-second trim;
-    # Inworld Instant Voice Cloning (IVC). Black-Atlantic baritone
-    # archetype matching owner's "Idris-Elba-type Black-British"
-    # spec. Belter Creole register comes from the system prompt
-    # (clipped consonants, dropped articles, vacuum-truth-speak) —
-    # the cloned voice provides the timbre.
-    # Override via env INWORLD_VOICE_ID_ACHEEVY when a higher-quality
-    # cloned voice (multi-sample, professional cloning) is published.
+    # ACHEEVY voice = the OWNER's own voice, cloned via the FOAI voice-
+    # procurement pipeline 2026-05-03. Per
+    # feedback_acheevy_is_male_digital_twin.md (2026-04-26), ACHEEVY IS
+    # Jarrett Risher in AI form — the digital twin / CEO avatar — so
+    # the canonical voice for ACHEEVY is the owner's own. Source:
+    # iCloud/.../Inworld Voice Models/jarrett-source-audio/
+    # Jarrett ACHIEVEMOR Message.mp3 (2023, owner full rights, 60s
+    # trim, Inworld Instant Voice Cloning).
+    # Belter Creole register comes from the system prompt (clipped
+    # consonants, dropped articles) — the cloned voice provides the
+    # owner's actual timbre.
+    # Garvey-1921 PD clone (acheevy-idrisarchetype-v3) is retained as
+    # a backup voice in the workspace; INWORLD_VOICE_ID_ACHEEVY env
+    # override swaps voices without code changes when higher-quality
+    # multi-sample / professional clones are published.
     "acheevy":       {
-        "voiceId": os.environ.get("INWORLD_VOICE_ID_ACHEEVY") or "default-4zhua1rhxjfl50z1dnkcba__acheevy-idrisarchetype-v3",
+        "voiceId": os.environ.get("INWORLD_VOICE_ID_ACHEEVY") or "default-4zhua1rhxjfl50z1dnkcba__acheevy-jarrett-digitaltwin-v1",
         "model": "inworld-tts-1.5-max",
     },
     "sal_ang":       {"voiceId": "Hank",    "model": "inworld-tts-1.5-max"},
