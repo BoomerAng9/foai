@@ -3127,23 +3127,23 @@ _INWORLD_TTS_MODEL = os.environ.get("INWORLD_TTS_MODEL", "inworld-tts-1.5-max")
 # cheaper. ACHEEVY gets max because customers hear his voice; internal
 # voices default to mini when ever surfaced (cost discipline).
 _INWORLD_VOICE_MAP: Dict[str, Dict[str, str]] = {
-    # ACHEEVY voice = the OWNER's own voice, cloned via the FOAI voice-
-    # procurement pipeline 2026-05-03. Per
-    # feedback_acheevy_is_male_digital_twin.md (2026-04-26), ACHEEVY IS
-    # Jarrett Risher in AI form — the digital twin / CEO avatar — so
-    # the canonical voice for ACHEEVY is the owner's own. Source:
-    # iCloud/.../Inworld Voice Models/jarrett-source-audio/
-    # Jarrett ACHIEVEMOR Message.mp3 (2023, owner full rights, 60s
-    # trim, Inworld Instant Voice Cloning).
-    # Belter Creole register comes from the system prompt (clipped
-    # consonants, dropped articles) — the cloned voice provides the
-    # owner's actual timbre.
-    # Garvey-1921 PD clone (acheevy-idrisarchetype-v3) is retained as
-    # a backup voice in the workspace; INWORLD_VOICE_ID_ACHEEVY env
-    # override swaps voices without code changes when higher-quality
-    # multi-sample / professional clones are published.
+    # ACHEEVY voice — ROLLED BACK 2026-05-03 to stock voice "Ronald"
+    # (deep British baritone, not perfect-archetype but quality-acceptable)
+    # after owner caught the Jarrett-DigitalTwin-v1 IVC clone sounding
+    # robotic. The bad clone is still in the workspace as a workspace-
+    # asset record but is NOT served. Two failure modes contributing:
+    # (1) Inworld's Instant Voice Cloning is the FAST tier — it accepts
+    # one short sample but produces noticeably-synthetic output without
+    # multiple high-quality samples; (2) the source MP3 (Jarrett
+    # ACHIEVEMOR Message 2023) had compression artifacts that the IVC
+    # carried into the clone. Path forward = Professional Voice Cloning
+    # with multiple clean samples (4 large MP4 voice-training videos
+    # available, audio extraction pipeline to be built).
+    # INWORLD_VOICE_ID_ACHEEVY env override remains in place — when a
+    # higher-quality clone is auditioned + approved, set the env var
+    # without a code change.
     "acheevy":       {
-        "voiceId": os.environ.get("INWORLD_VOICE_ID_ACHEEVY") or "default-4zhua1rhxjfl50z1dnkcba__acheevy-jarrett-digitaltwin-v1",
+        "voiceId": os.environ.get("INWORLD_VOICE_ID_ACHEEVY") or "Ronald",
         "model": "inworld-tts-1.5-max",
     },
     "sal_ang":       {"voiceId": "Hank",    "model": "inworld-tts-1.5-max"},

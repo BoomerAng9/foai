@@ -137,11 +137,13 @@ export function ChatPanel({
     return () => { aborted = true; };
   }, []);
 
-  // Voice auto-play — default ON. Customer can mute via header toggle.
-  // Persisted in sessionStorage so the choice survives navigation.
+  // Voice auto-play — default OFF until owner audits + approves a
+  // production-quality ACHEEVY voice (rolled back 2026-05-03 after a
+  // bad IVC clone shipped). Customer can opt in via header toggle;
+  // choice persists in sessionStorage.
   const [voiceAutoplay, setVoiceAutoplay] = React.useState<boolean>(() => {
-    if (typeof window === "undefined") return true;
-    return window.sessionStorage.getItem(SS_VOICE_AUTOPLAY) !== "0";
+    if (typeof window === "undefined") return false;
+    return window.sessionStorage.getItem(SS_VOICE_AUTOPLAY) === "1";
   });
   React.useEffect(() => {
     if (typeof window === "undefined") return;
