@@ -2446,6 +2446,12 @@ _EMPLOYEE_MODEL = {
 # which causes hallucinations like "our Lowcountry Coffee Stout." This block
 # anchors the brand to coffee/tea/matcha + Lowcountry SC and explicitly
 # excludes alcohol. Verified via WS smoke test 2026-05-02.
+#
+# Anti-hallucination rules added 2026-05-03 after owner caught ACHEEVY
+# inventing "Costa Rican honey process / Ethiopian washed" SKUs that don't
+# exist in our catalog. Plus anti-simulate-drinking (no "let me pour you a
+# sample / how was your drink" — ACHEEVY is an ONLINE chat agent, not a
+# physical barista; customers aren't actually drinking anything mid-chat).
 _BRAND_PREAMBLE = (
     "BRAND CONTEXT — Coastal Brewing Co. sells small-batch COFFEE, "
     "whole-leaf TEA, and ceremonial MATCHA, plus flavored coffee blends "
@@ -2455,8 +2461,51 @@ _BRAND_PREAMBLE = (
     "coffee and tea, not beer. The brand is Lowcountry South Carolina "
     "(Bluffton / Savannah / Beaufort area). Customer surface is single-"
     "persona ACHEEVY only — internal lieutenant names (Sal_Ang, LUC_Ang, "
-    "Melli) never appear in customer-facing copy. ===\n\n"
+    "Melli) never appear in customer-facing copy.\n\n"
+    "HARD RULE — NO FABRICATION: ONLY recommend SKUs that appear in the "
+    "CATALOG section below. NEVER invent product names, origins, processes, "
+    "or attributes. If a customer asks for something not in the catalog "
+    "(e.g. a specific origin we don't carry), say so plainly and offer the "
+    "closest real SKU instead. Do not say 'Costa Rican honey process' or "
+    "'Ethiopian washed' or 'Lowcountry Decaf' if those aren't in catalog. "
+    "Use the EXACT SKU NAME from the catalog when recommending.\n\n"
+    "HARD RULE — ONLINE CHAT AGENT: You are an ONLINE conversational agent, "
+    "not a physical barista standing at a counter. The customer is at a "
+    "screen. They are NOT drinking anything right now. Do NOT say 'let me "
+    "pour you a sample,' 'how was that drink,' 'come sit at the bar,' "
+    "'try a sip,' 'I'll grind it for you,' or any phrase that simulates "
+    "physical service. Recommend products through descriptions, brewing "
+    "guidance, and links — let the customer decide to order.\n\n"
+    "===\n\n"
 )
+
+
+def _coastal_catalog_context() -> str:
+    """Build a compact catalog snapshot for system-prompt injection.
+    Lists every SKU with name, category, origin, and price so the LLM has
+    real ground-truth data to reference instead of inventing."""
+    try:
+        items = catalog.list_products()
+    except Exception:
+        return ""
+    if not items:
+        return ""
+    lines = ["CATALOG (the ONLY products you may recommend):"]
+    # Group by category for readability + token efficiency
+    by_cat: Dict[str, List[dict]] = {}
+    for p in items:
+        by_cat.setdefault(p.get("category", "other"), []).append(p)
+    for cat, plist in sorted(by_cat.items()):
+        lines.append(f"\n[{cat}]")
+        for p in plist:
+            sku = p.get("id") or p.get("sku") or ""
+            name = p.get("name", "")
+            msrp = p.get("msrp")
+            origin = p.get("origin") or p.get("ingredients") or ""
+            origin_short = origin[:60] if origin else ""
+            price = f"${msrp}" if msrp else ""
+            lines.append(f"  - {sku}: {name} {price} {origin_short}".strip())
+    return "\n".join(lines) + "\n\n"
 
 
 # Employee → system prompt factory (injects persona + authority context)
@@ -2488,7 +2537,7 @@ def _employee_system_prompt(employee: str) -> str:
             "Every public claim has a paper trail. The owner signs everything."
         ),
     }
-    return _BRAND_PREAMBLE + prompts.get(employee, prompts["acheevy"])
+    return _BRAND_PREAMBLE + _coastal_catalog_context() + prompts.get(employee, prompts["acheevy"])
 
 
 async def _stream_employee_response(

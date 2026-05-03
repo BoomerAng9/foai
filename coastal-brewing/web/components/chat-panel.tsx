@@ -2,7 +2,7 @@
 import * as React from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { Send, ChevronDown, ChevronRight, Sparkles, ShieldCheck, Zap, X, Volume2, Loader2, Mic, MicOff, Square } from "lucide-react";
+import { Send, ChevronDown, ChevronRight, Sparkles, ShieldCheck, Zap, X, Volume2, VolumeX, Loader2, Mic, MicOff, Square } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -16,6 +16,7 @@ import { AnimationRouter } from "@/components/animation/AnimationRouter";
 // the user_profile layer.
 const SS_MESSAGES = "coastal_chat_messages";
 const SS_BUTTONS_DISMISSED = "coastal_chat_buttons_dismissed";
+const SS_VOICE_AUTOPLAY = "coastal_chat_voice_autoplay";   // "0" = muted, default ON
 
 type Agent = "sales" | "marketing";
 
@@ -110,6 +111,19 @@ export function ChatPanel({
   const [wsError, setWsError] = React.useState<string | null>(null);
   const [escalationMsg, setEscalationMsg] = React.useState<string | null>(null);
   const [responseBuffer, setResponseBuffer] = React.useState("");
+
+  // Voice auto-play — default ON. Customer can mute via header toggle.
+  // Persisted in sessionStorage so the choice survives navigation.
+  const [voiceAutoplay, setVoiceAutoplay] = React.useState<boolean>(() => {
+    if (typeof window === "undefined") return true;
+    return window.sessionStorage.getItem(SS_VOICE_AUTOPLAY) !== "0";
+  });
+  React.useEffect(() => {
+    if (typeof window === "undefined") return;
+    try {
+      window.sessionStorage.setItem(SS_VOICE_AUTOPLAY, voiceAutoplay ? "1" : "0");
+    } catch {}
+  }, [voiceAutoplay]);
 
   const wsRef = React.useRef<WebSocket | null>(null);
   const scrollRef = React.useRef<HTMLDivElement>(null);
@@ -449,9 +463,25 @@ export function ChatPanel({
           </motion.div>
           <span className="font-display text-sm font-semibold">{currentLabel}</span>
         </div>
-        <Badge variant="outline" className="font-mono text-[10px]">
-          <ShieldCheck className="mr-1 h-3 w-3" /> Policy-gated
-        </Badge>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setVoiceAutoplay((v) => !v)}
+            aria-label={voiceAutoplay ? "Mute ACHEEVY voice" : "Unmute ACHEEVY voice"}
+            title={voiceAutoplay ? "Voice on — click to mute" : "Voice muted — click to unmute"}
+            className={cn(
+              "inline-flex h-7 w-7 items-center justify-center rounded-full transition-colors",
+              voiceAutoplay
+                ? "text-accent hover:bg-accent/10"
+                : "text-muted-foreground/50 hover:text-foreground hover:bg-secondary",
+            )}
+          >
+            {voiceAutoplay ? <Volume2 className="h-3.5 w-3.5" /> : <VolumeX className="h-3.5 w-3.5" />}
+          </button>
+          <Badge variant="outline" className="font-mono text-[10px]">
+            <ShieldCheck className="mr-1 h-3 w-3" /> Policy-gated
+          </Badge>
+        </div>
       </div>
 
       {/* Messages */}
@@ -474,7 +504,11 @@ export function ChatPanel({
                     <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
                       {ACHEEVY_LABEL}
                     </p>
-                    <PlayVoiceButton text={m.content} messageKey={`msg-${i}`} />
+                    <PlayVoiceButton
+                      text={m.content}
+                      messageKey={`msg-${i}-${m.ts}`}
+                      autoplay={voiceAutoplay && i === messages.length - 1}
+                    />
                   </div>
                   <div className="rounded-lg bg-secondary px-4 py-2.5 text-sm leading-relaxed">
                     {m.content}
@@ -651,10 +685,19 @@ export function ChatPanel({
 // second click doesn't refetch. Only ACHEEVY's voice surfaces here per
 // the only-ACHEEVY-speaks-to-users canon — internal voice IDs (Sal /
 // LUC / Melli) are mapped server-side but never exposed.
-function PlayVoiceButton({ text, messageKey: _key }: { text: string; messageKey: string }) {
+function PlayVoiceButton({
+  text,
+  messageKey,
+  autoplay = false,
+}: {
+  text: string;
+  messageKey: string;
+  autoplay?: boolean;
+}) {
   const [state, setState] = React.useState<"idle" | "loading" | "playing" | "error">("idle");
   const audioRef = React.useRef<HTMLAudioElement | null>(null);
   const blobUrlRef = React.useRef<string | null>(null);
+  const autoplayedKeyRef = React.useRef<string | null>(null);
 
   React.useEffect(() => {
     return () => {
@@ -665,6 +708,19 @@ function PlayVoiceButton({ text, messageKey: _key }: { text: string; messageKey:
       }
     };
   }, []);
+
+  // Auto-play once per unique messageKey when the autoplay flag is on.
+  // Browser autoplay policy may block the first audio without a prior
+  // user gesture; in that case the customer can click the Hear button
+  // manually. After the first interaction, subsequent agent messages
+  // auto-play seamlessly.
+  React.useEffect(() => {
+    if (!autoplay) return;
+    if (autoplayedKeyRef.current === messageKey) return;
+    autoplayedKeyRef.current = messageKey;
+    void play();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [autoplay, messageKey]);
 
   async function play() {
     if (state === "loading") return;
