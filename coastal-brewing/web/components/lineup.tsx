@@ -10,11 +10,6 @@ import type { Product } from "@/lib/api";
 // reference image paths that haven't been generated (italian-roast,
 // jasmine-3oz, italian-roast-2lb all 404). Fix the catalog images then
 // re-enable the API override.
-//
-// FOLLOW-UP: the mushroom slot temporarily uses coastal-blend-12oz.png as a
-// stand-in (ground coffee, visually adjacent to the SKU it represents). A
-// real `coastal-functional-coffee-with-mushrooms-medium-ground-8oz.png`
-// render needs to be generated in the next image-gen pass.
 const OFFERINGS: { num: string; cat: string; label: string; copy: string; sku: string; image: string }[] = [
   {
     num: "01",
@@ -36,9 +31,9 @@ const OFFERINGS: { num: string; cat: string; label: string; copy: string; sku: s
     num: "03",
     cat: "Mushroom",
     label: "Functional with Mushrooms",
-    copy: "Coffee and matcha blended with Lion's Mane, Cordyceps, Reishi. Sold as food, never as a supplement.",
+    copy: "Coffee blended with Lion's Mane, Cordyceps, Reishi. Sold as food, never as a supplement.",
     sku: "coastal-functional-coffee-with-mushrooms-medium-ground-8oz",
-    image: "/products/coastal-blend-12oz.png",
+    image: "/products/coastal-functional-coffee-with-mushrooms-medium-ground-8oz.png",
   },
 ];
 

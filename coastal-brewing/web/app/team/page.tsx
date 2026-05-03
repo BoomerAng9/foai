@@ -3,156 +3,15 @@ import Image from "next/image";
 
 import { Nav } from "@/components/nav";
 import { Footer } from "@/components/footer";
+import { TeamCard } from "@/components/team-card";
 
 interface CastMember {
   id: string;
   display_name: string;
   function: string;
-  blurb: string;
   pmo: "sales" | "back-office" | "ops";
+  story: string;
 }
-
-// Coastal Brewing Co. — full cast.
-// Names follow the canonical Boomer_Ang `<function-prefix>_Ang` pattern.
-// Every character covers face + neck with a hard tactical visor (visor
-// across eyes shows the function-prefix in glowing orange LED).
-// Portraits live in /public/team/<id>.png — sourced from the Kie.ai
-// gpt-image-2-image-to-image generation pass (2026-04-29) with Sal_Ang
-// as the canonical character reference.
-const CAST: CastMember[] = [
-  // Sales lead — canonical
-  {
-    id: "sal_ang",
-    display_name: "Sal_Ang",
-    function: "Sales · lead",
-    pmo: "sales",
-    blurb:
-      "Hospitality first. Holds the policy floor. Walks you the right way to the right cup. Routes anything brand-shaped to Marketing and anything bulk-shaped to Wholesale.",
-  },
-  // Sales-team voice carousel
-  {
-    id: "hos_ang",
-    display_name: "Hos_Ang",
-    function: "Host · front-of-house",
-    pmo: "sales",
-    blurb:
-      "Greets you the moment you walk up. Recognizes regulars. Hands deal questions to Sal warmly without losing the thread.",
-  },
-  {
-    id: "bar_ang",
-    display_name: "Bar_Ang",
-    function: "Pour-over barista",
-    pmo: "sales",
-    blurb:
-      "Owns the pour-over station. Slow, deliberate, exact. The cup is what the label says it is — that's the bar.",
-  },
-  {
-    id: "con_ang",
-    display_name: "Con_Ang",
-    function: "Cup-finder · consultative",
-    pmo: "sales",
-    blurb:
-      "Asks the one or two questions that map you to the right cup. Hands the close back to whoever brought you in.",
-  },
-  {
-    id: "tas_ang",
-    display_name: "Tas_Ang",
-    function: "Tasting bar",
-    pmo: "sales",
-    blurb:
-      "Treats coffee like wine — varietal, region, vintage. Comfortable with silence. Lets the cup speak first.",
-  },
-  {
-    id: "tea_ang",
-    display_name: "Tea_Ang",
-    function: "Afternoon tea",
-    pmo: "sales",
-    blurb:
-      "Whole-leaf, hand-poured, no shortcut. Makes Lowcountry hospitality look easy because it never is.",
-  },
-  {
-    id: "cou_ang",
-    display_name: "Cou_Ang",
-    function: "Counter · Savannah",
-    pmo: "sales",
-    blurb:
-      "Anchors the historic-district shop. Knows everyone's order by the second visit. Savannah pace, never rushed.",
-  },
-  {
-    id: "gre_ang",
-    display_name: "Gre_Ang",
-    function: "Morning greeter",
-    pmo: "sales",
-    blurb:
-      "First face of the morning shift. Calls regulars by name. The bright that gets the day started.",
-  },
-  {
-    id: "har_ang",
-    display_name: "Har_Ang",
-    function: "Harbor-view tasting",
-    pmo: "sales",
-    blurb:
-      "Polished trans-Atlantic register. Articulates every word. Quietly insists the harbor view earns the cup.",
-  },
-  {
-    id: "cur_ang",
-    display_name: "Cur_Ang",
-    function: "Tea curator",
-    pmo: "sales",
-    blurb:
-      "Tea-first palate, sommelier-grade attention. Treats every leaf like it has a passport.",
-  },
-  {
-    id: "reg_ang",
-    display_name: "Reg_Ang",
-    function: "Register · cashier",
-    pmo: "sales",
-    blurb:
-      "Quick, clean, accurate. Hands deal questions up. Sets up the close for whoever owns it.",
-  },
-  {
-    id: "macha_ang",
-    display_name: "Ma'Cha_Ang",
-    function: "Matcha specialist",
-    pmo: "sales",
-    blurb:
-      "Ceremonial-grade matcha, stone-ground and stone-serious. Whisks with precision, serves with intention. Single-estate, vibrant, never bitter.",
-  },
-  // Back-office
-  {
-    id: "bun_ang",
-    display_name: "Bun_Ang",
-    function: "Bundle · back-office",
-    pmo: "back-office",
-    blurb:
-      "Shapes bundles, not closes them. Hands the right combination back to whoever brought you in. The math is invisible to you, sacred to him.",
-  },
-  // Ops / wholesale / accounts
-  {
-    id: "wsl_ang",
-    display_name: "Wsl_Ang",
-    function: "Wholesale · bulk sales",
-    pmo: "ops",
-    blurb:
-      "Owns the wholesale lane. Container loads, restaurant accounts, corporate gifting. Works with the Sett on anything brand-shaped.",
-  },
-  {
-    id: "ret_ang",
-    display_name: "Ret_Ang",
-    function: "Returns · customer service",
-    pmo: "ops",
-    blurb:
-      "When something misses, she makes it right. Routes the cause back to the team that owns the fix. Every return leaves a clean receipt.",
-  },
-  {
-    id: "acc_ang",
-    display_name: "Acc_Ang",
-    function: "Accountant",
-    pmo: "ops",
-    blurb:
-      "Owns the books. Reconciles every transaction against the audit chain. Quiet, precise, calm — would rather work the math twice than send a number that has to be walked back.",
-  },
-];
 
 const PMO_LABELS: Record<CastMember["pmo"], string> = {
   sales: "Sales",
@@ -160,114 +19,309 @@ const PMO_LABELS: Record<CastMember["pmo"], string> = {
   ops: "Operations",
 };
 
-function CastCard({ member }: { member: CastMember }) {
-  return (
-    <article className="group flex flex-col rounded-2xl border border-border/60 bg-card/40 overflow-hidden transition-all hover:border-foreground/30 hover:shadow-lg">
-      <div className="relative aspect-[3/4] w-full overflow-hidden bg-secondary">
-        <Image
-          src={`/team/${member.id}.png`}
-          alt={`${member.display_name} — ${member.function}`}
-          fill
-          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-          className="object-cover transition-transform duration-500 group-hover:scale-[1.02]"
-          priority={member.id === "sal_ang"}
-        />
-      </div>
-      <div className="flex flex-col gap-2 p-5">
-        <div className="font-mono text-[10px] uppercase tracking-widest text-accent">
-          {PMO_LABELS[member.pmo]}
-        </div>
-        <h2 className="font-display text-xl font-semibold tracking-tight">
-          {member.display_name}
-        </h2>
-        <p className="text-sm font-medium text-foreground/80">{member.function}</p>
-        <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
-          {member.blurb}
-        </p>
-      </div>
-    </article>
-  );
-}
+// Coastal Brewing Co. — full cast.
+// Names follow the canonical Boomer_Ang `<function-prefix>_Ang` pattern.
+// Bios excerpted from the Inworld persona logs at
+// ~/foai/aims-tools/voice-library/personas/<id>.md (Origin & Background).
+// Portraits live in /public/team/<id>.png (sourced from the Kie.ai
+// gpt-image-2 / Nano Banana 2 generation passes; canonical visor =
+// orange LED, except Ma'Cha_Ang who is mint green per owner directive).
+const CAST: CastMember[] = [
+  // Sales — lead
+  {
+    id: "sal_ang",
+    display_name: "Sal_Ang",
+    function: "Sales · lead",
+    pmo: "sales",
+    story:
+      "Bluffton, South Carolina — the working-coast side, not the gated side. His granddaddy ran a Mayriver dock before the bridge was paved; his mother taught fourth grade in Beaufort County for thirty-one years. Hospitality school by absorption — oyster roasts, shrimp boils, bait runs, waiting tables where regulars know your truck. Trident Tech for hospitality, then six years on the Charleston Battery, then his own back-shed drum roaster since 2018. A green-bean broker in Greenville knows him by first name; a Sumatran exporter's daughter sends Christmas cards. He still calls his mother every Sunday.",
+  },
+  // Sales — voice carousel (11)
+  {
+    id: "hos_ang",
+    display_name: "Hos_Ang",
+    function: "Host · front-of-house",
+    pmo: "sales",
+    story:
+      "Louis. Half an hour from Sal in Beaufort county, between Port Royal and the Spanish Moss Trail. Coast people — his grandmother ran a fabric shop, he grew up greeting customers before he could ring a register. Recognizes regulars on sight, hands deal questions back to Sal warmly without losing the thread.",
+  },
+  {
+    id: "bar_ang",
+    display_name: "Bar_Ang",
+    function: "Pour-over barista",
+    pmo: "sales",
+    story:
+      "Tate. Between two worlds that share one coast — his grandfather Eli ran on coastal merchant boats out of Charleston. Owns the pour-over station: slow, deliberate, exact. Treats the brewer like an instrument that talks back if you let the kettle steady itself.",
+  },
+  {
+    id: "con_ang",
+    display_name: "Con_Ang",
+    function: "Cup-finder · consultative",
+    pmo: "sales",
+    story:
+      "Wren. Between St. Helena Island and the Beaufort waterfront. Same coast and most of the same family tree as Tate — they're cousins in the Lowcountry sense. Asks one or two questions to map you to the right cup, then hands the close back to whoever brought you in.",
+  },
+  {
+    id: "tas_ang",
+    display_name: "Tas_Ang",
+    function: "Tasting bar",
+    pmo: "sales",
+    story:
+      "Holt. Charleston family with the name on a small plaque in three different parish records. Pivoted off the wealth-management track on Broad Street into specialty trade because the slow craft of green-coffee sourcing felt closer to honorable work than the family ledger ever did. Sewanee undergrad, half-finished post-grad in agricultural economics. Tasting bar five days a week.",
+  },
+  {
+    id: "tea_ang",
+    display_name: "Tea_Ang",
+    function: "Afternoon tea",
+    pmo: "sales",
+    story:
+      "Eliza. Same broad Charleston social register as Holt — they're cousins in the loose Lowcountry sense. Sweet Briar in Virginia, a year abroad at the British Institute in Florence, then home to do the season and immediately afterward took a job in the Charleston tea-room circuit because the work felt honest. Tea-sommelier credential from the World Tea Academy, plus a barista certification because Holt told her she'd be sorry if she didn't.",
+  },
+  {
+    id: "cou_ang",
+    display_name: "Cou_Ang",
+    function: "Counter · Savannah",
+    pmo: "sales",
+    story:
+      "Marcus. Savannahian first — the city is in his cadence the way humidity is in the air over Forsyth Park in July. West Savannah and the Pin Point side of the river. His grandmother ran a church kitchen that fed the neighborhood every Sunday after service; his uncle ran a corner store on the West side. He learned to greet a customer before he learned to ring the register.",
+  },
+  {
+    id: "gre_ang",
+    display_name: "Gre_Ang",
+    function: "Morning greeter",
+    pmo: "sales",
+    story:
+      "Naya. Same Savannah world as Marcus, same Geechee food memory, same generations-deep hospitality lineage — but where Marcus is the deep anchor of the shop, Naya is the room's brightness. Calls your name across the bar before you make it to the counter. Her grandmother ran a Saturday-morning kitchen out of the house — half neighborhood, half ministry. Knowing names by heart was the original job.",
+  },
+  {
+    id: "har_ang",
+    display_name: "Har_Ang",
+    function: "Harbor-view tasting",
+    pmo: "sales",
+    story:
+      "Pip — short for Phillip, a name carried down through three generations of the Ashby-Calhoun line. Charleston rice-and-indigo era family. Polished trans-Atlantic register from a Cambridge year and time on the British Merchant Navy under a dual passport before returning to Charleston. Quietly insists the harbor view earns the cup.",
+  },
+  {
+    id: "cur_ang",
+    display_name: "Cur_Ang",
+    function: "Tea curator",
+    pmo: "sales",
+    story:
+      "Vi — short for Vivian, the name two of her great-aunts carried before her, and the name on the brass card by her front door on Meeting Street. Pip's first cousin on the mother's side. Tea-first palate, sommelier-grade attention. Treats every leaf like it has a passport.",
+  },
+  {
+    id: "reg_ang",
+    display_name: "Reg_Ang",
+    function: "Register · cashier",
+    pmo: "sales",
+    story:
+      "Trey. Philly–Jersey Shore corridor — full vowels he dropped his first month at Coastal Carolina because he got teased once and never wanted to be teased twice. Pronounces \"water\" close to wooder when he isn't paying attention. Sophomore year, double-track in marketing and hospitality at Wall College of Business. Quiet B+ work, the kid who turns things in on time and asks one good question per class.",
+  },
+  {
+    id: "macha_ang",
+    display_name: "Ma'Cha_Ang",
+    function: "Matcha specialist",
+    pmo: "sales",
+    story:
+      "Mads — Madeleine since middle school, only her grandmother and the DMV use the full name. Boston suburbs, with summers in coastal Connecticut where her mom's side has a cottage. New England in the bones — full vowels, fast pace, dry humor. UGA Grady College for marketing with a personal interest in food-and-beverage branding. Her mint-green visor is the cast's only departure from orange — function-color tie to matcha.",
+  },
+  // Back-office (1)
+  {
+    id: "bun_ang",
+    display_name: "Bun_Ang",
+    function: "Bundle · back-office",
+    pmo: "back-office",
+    story:
+      "North of Charleston, in a town between Mount Pleasant and Awendaw where the marsh runs deep and the pluff mud sets the tempo of everything. Old highway, slow shrimp-boat money, and a family that kept its books. Shapes bundles, not closes them — the math is invisible to you, sacred to him.",
+  },
+  // Operations (3)
+  {
+    id: "wsl_ang",
+    display_name: "Wsl_Ang",
+    function: "Wholesale · bulk sales",
+    pmo: "ops",
+    story:
+      "Coastal-Georgia / Lowcountry roots. Grew up around the wholesale freight and farmer-direct ag networks that move bulk dry goods through Savannah and Port Royal. Found her way into specialty trade through a family connection that ran a small import business handling Fairtrade coffee containers and tea drums. Holds the volume math in her head; talks container-load sizes and lead times with restaurant buyers.",
+  },
+  {
+    id: "ret_ang",
+    display_name: "Ret_Ang",
+    function: "Returns · customer service",
+    pmo: "ops",
+    story:
+      "California-Irish-American. Coastal NorCal and a tight Irish-American extended family with deep roots in San Francisco's hospitality trade. Wanted out of the high-pressure SF service-recovery world and into a brand whose returns / CS lane she could fix end-to-end. Approachable, low-key, calm — recovers unhappy customers without ever sounding scripted. Treats every return as a chance to learn what the customer actually needed.",
+  },
+  {
+    id: "acc_ang",
+    display_name: "Acc_Ang",
+    function: "Accountant",
+    pmo: "ops",
+    story:
+      "Asian American. Trained as a CPA before falling into specialty trade through a family friend who roasted coffee in Oakland. Joined Coastal Brewing Co. when the books outgrew what spreadsheets could carry honestly. Treats every transaction as something the audit chain has to see clean — no shortcuts, no rounding, no commingled accounts. Quiet, precise, calm. Would rather work the math twice than send a number that has to be walked back.",
+  },
+];
+
+const SAL = CAST[0];
+const REST = CAST.slice(1);
 
 export default function TeamPage() {
-  const sales = CAST.filter((m) => m.pmo === "sales");
-  const backOffice = CAST.filter((m) => m.pmo === "back-office");
-  const ops = CAST.filter((m) => m.pmo === "ops");
+  const sales = REST.filter((m) => m.pmo === "sales");
+  const backOffice = REST.filter((m) => m.pmo === "back-office");
+  const ops = REST.filter((m) => m.pmo === "ops");
 
   return (
     <>
       <Nav />
       <main className="container py-16">
-        {/* Lede */}
-        <div className="mb-14 max-w-3xl">
+        {/* Brand top — Coastal Brewing Co. logo (the one on Sal's apron) */}
+        <div className="mb-12 flex flex-col items-start gap-4">
+          <Image
+            src="/coastal-brewing-logo-official.png"
+            alt="Coastal Brewing Co."
+            width={88}
+            height={88}
+            className="h-auto w-20 select-none"
+            priority
+          />
           <p className="font-mono text-[10px] uppercase tracking-widest text-accent">
             Meet the team
           </p>
-          <h1 className="mt-2 font-display text-4xl font-semibold md:text-5xl">
-            A fully managed team. Every cup earned.
+          <h1 className="font-display text-4xl font-semibold md:text-5xl">
+            A function-named team behind every cup.
           </h1>
-          <div className="mt-6 space-y-4 text-base text-muted-foreground">
-            <p>
-              Coastal Brewing Co. is run by an AI team — every order, every recommendation, every recovery.
-              Behind every receipt is one human signature: the founder. The team works under his floor and
-              his name.
-            </p>
-            <p>
-              Every team member carries a function, a uniform, and a name in their visor. Sal leads sales. Hos
-              greets the door. Bar runs the pour-over. Tea holds the afternoon. Wsl handles wholesale. Ret makes
-              it right. Acc keeps the books clean. Brewed honest, served by ACHEEVY.
-            </p>
-          </div>
+          <p className="max-w-3xl text-base text-muted-foreground">
+            Coastal Brewing Co. is run by an AI team — every order, every
+            recommendation, every recovery. Behind every receipt is one human
+            signature: the founder. The team works under his floor and his
+            name.
+          </p>
         </div>
 
-        {/* Sales */}
+        {/* Sal_Ang — single hero card. The face of the floor. */}
         <section className="mb-16">
-          <div className="mb-6 flex items-end justify-between">
-            <h2 className="font-display text-2xl font-semibold md:text-3xl">Sales.</h2>
-            <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
-              Twelve specialists · one floor
+          <div className="grid gap-10 md:grid-cols-12 md:gap-12">
+            <div className="md:col-span-7">
+              <div className="relative aspect-[3/4] w-full overflow-hidden rounded-2xl border border-border/60 bg-secondary">
+                <Image
+                  src={`/team/${SAL.id}.png`}
+                  alt={`${SAL.display_name} — ${SAL.function}`}
+                  fill
+                  sizes="(max-width: 768px) 100vw, 60vw"
+                  className="object-cover"
+                  priority
+                />
+              </div>
+            </div>
+            <div className="flex flex-col justify-center md:col-span-5">
+              <p className="font-mono text-[10px] uppercase tracking-widest text-accent">
+                {PMO_LABELS[SAL.pmo]} · lead
+              </p>
+              <h2 className="mt-2 font-display text-3xl font-semibold tracking-tight md:text-4xl">
+                {SAL.display_name}
+              </h2>
+              <p className="mt-2 text-base font-medium text-foreground/80">
+                {SAL.function}
+              </p>
+              <p className="mt-6 text-base leading-relaxed text-muted-foreground">
+                {SAL.story}
+              </p>
+              <Link
+                href="#rest-of-team"
+                className="mt-8 inline-flex w-fit items-center gap-2 rounded-full border border-border bg-card/30 px-4 py-2 text-xs text-foreground hover:text-foreground hover:border-foreground/40 transition-colors"
+              >
+                Meet the rest of the team →
+              </Link>
+            </div>
+          </div>
+        </section>
+
+        {/* Rest of the team — flip-card grid by department */}
+        <section id="rest-of-team" className="mb-16 scroll-mt-24">
+          <div className="mb-8">
+            <p className="font-mono text-[10px] uppercase tracking-widest text-accent">
+              The rest of the team
+            </p>
+            <h2 className="mt-2 font-display text-3xl font-semibold md:text-4xl">
+              By department.
+            </h2>
+            <p className="mt-3 max-w-2xl text-sm text-muted-foreground">
+              Tap any card to read the bio. Each story is pulled from the
+              character&apos;s working log in our Inworld system.
             </p>
           </div>
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {sales.map((m) => (
-              <CastCard key={m.id} member={m} />
-            ))}
+
+          {/* Sales */}
+          <div className="mb-12">
+            <div className="mb-5 flex items-end justify-between">
+              <h3 className="font-display text-2xl font-semibold md:text-3xl">Sales.</h3>
+              <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+                {sales.length} specialists · one floor
+              </p>
+            </div>
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {sales.map((m) => (
+                <TeamCard
+                  key={m.id}
+                  id={m.id}
+                  display_name={m.display_name}
+                  function={m.function}
+                  pmo_label={PMO_LABELS[m.pmo]}
+                  story={m.story}
+                />
+              ))}
+            </div>
+          </div>
+
+          {/* Back office */}
+          <div className="mb-12">
+            <h3 className="mb-5 font-display text-2xl font-semibold md:text-3xl">
+              Back office.
+            </h3>
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {backOffice.map((m) => (
+                <TeamCard
+                  key={m.id}
+                  id={m.id}
+                  display_name={m.display_name}
+                  function={m.function}
+                  pmo_label={PMO_LABELS[m.pmo]}
+                  story={m.story}
+                />
+              ))}
+            </div>
+          </div>
+
+          {/* Operations */}
+          <div className="mb-4">
+            <h3 className="mb-5 font-display text-2xl font-semibold md:text-3xl">
+              Operations.
+            </h3>
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {ops.map((m) => (
+                <TeamCard
+                  key={m.id}
+                  id={m.id}
+                  display_name={m.display_name}
+                  function={m.function}
+                  pmo_label={PMO_LABELS[m.pmo]}
+                  story={m.story}
+                />
+              ))}
+            </div>
           </div>
         </section>
 
-        {/* Back office */}
-        <section className="mb-16">
-          <h2 className="mb-6 font-display text-2xl font-semibold md:text-3xl">
-            Back office.
-          </h2>
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {backOffice.map((m) => (
-              <CastCard key={m.id} member={m} />
-            ))}
-          </div>
-        </section>
-
-        {/* Ops */}
-        <section className="mb-16">
-          <h2 className="mb-6 font-display text-2xl font-semibold md:text-3xl">
-            Operations.
-          </h2>
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {ops.map((m) => (
-              <CastCard key={m.id} member={m} />
-            ))}
-          </div>
-        </section>
-
-        {/* Human-in-the-loop signature */}
+        {/* Owner-signature bottom block */}
         <div className="rounded-2xl border border-accent/30 bg-accent/5 p-7">
           <p className="font-mono text-[10px] uppercase tracking-widest text-accent">
             Who signs everything?
           </p>
           <p className="mt-3 text-base">
-            <strong>the owner.</strong> Founder, CEO, the only human in the loop. He signs every supplier
-            order, every refund above the floor, every public claim — usually within minutes via a Telegram bot
-            the team uses to ping him. If anything ever goes wrong, the receipt has his name on it.{" "}
+            <strong>the owner.</strong> Founder, CEO, the only human in the
+            loop. He signs every supplier order, every refund above the floor,
+            every public claim — usually within minutes via a Telegram bot the
+            team uses to ping him. If anything ever goes wrong, the receipt has
+            his name on it.{" "}
             <Link href="/about" className="underline hover:text-accent">
               Read his profile →
             </Link>
