@@ -172,6 +172,8 @@ export function ChatPanel({
   // ── Button-click handlers (path + preference) ──
   // POST /api/v1/users/preferences with credentials so the cookie carries
   // the coastal_uid. Hides the matching button bank after a successful pick.
+  // Then drives an explicit send through the WS so ACHEEVY actually
+  // responds — no silent dead end after the customer clicks.
   async function pickPath(choice: "guide_me" | "shop_for_me" | "direct_to_marketplace") {
     setShowPathButtons(false);
     try {
@@ -188,9 +190,11 @@ export function ChatPanel({
       : choice === "shop_for_me" ? "Shop for me"
       : "I'll browse on my own";
     setMessages((m) => [...m, { role: "user", content: label, ts: Date.now() }]);
+    void send(label);
   }
 
   async function pickPreference(category: "coffee" | "tea" | "mushroom_functional") {
+    setShowPreferenceButtons(false);
     try {
       await fetch("/api/v1/users/preferences", {
         method: "POST",
@@ -205,7 +209,7 @@ export function ChatPanel({
       : category === "tea" ? "I'm into tea"
       : "Mushroom-functional, please";
     setMessages((m) => [...m, { role: "user", content: label, ts: Date.now() }]);
-    setShowPreferenceButtons(false);
+    void send(label);
   }
 
   // Token from env for WS auth
@@ -220,15 +224,21 @@ export function ChatPanel({
     });
   }
 
-  async function send() {
-    const content = input.trim();
+  async function send(explicit?: string) {
+    // `explicit` is set when a button (path/preference) drives the send;
+    // typed-input sends pass undefined and read from `input` state.
+    const fromButton = typeof explicit === "string";
+    const content = (fromButton ? explicit : input).trim();
     if (!content || pending) return;
-    setInput("");
+    if (!fromButton) setInput("");
     setWsError(null);
     setEscalationMsg(null);
 
-    // Add user message immediately
-    setMessages((m) => [...m, { role: "user", content, ts: Date.now() }]);
+    // Add user message immediately (skip if a button already appended its
+    // synthetic message — see pickPath / pickPreference).
+    if (!fromButton) {
+      setMessages((m) => [...m, { role: "user", content, ts: Date.now() }]);
+    }
 
     // Connect (or reuse)
     if (!wsRef.current || wsRef.current.readyState !== WebSocket.OPEN) {
