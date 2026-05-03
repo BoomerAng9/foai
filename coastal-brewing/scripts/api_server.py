@@ -2586,15 +2586,25 @@ async def _stream_employee_response(
 @app.websocket("/api/v1/chat/stream")
 async def chat_stream(websocket: WebSocket, token: Optional[str] = Query(default=None)):
     """
-    Chain-of-command WebSocket endpoint.
+    Chain-of-command WebSocket endpoint — PUBLIC (customer-facing).
 
-    Auth: token query param = COASTAL_GATEWAY_TOKEN (or header X-Coastal-Token).
+    Auth model: this endpoint is intentionally open to anonymous browsers
+    so the customer chat works without leaking the gateway token to the
+    JS bundle. Real protections are:
+      1. CORS allow_origins lock to brewing.foai.cloud + dev origins
+      2. IP rate limit (15 req / 60s window)
+      3. NemoClaw policy gate on every escalation
+      4. ACHEEVY-only customer surface keeps internal lieutenants hidden
+    The optional token param is preserved for backend-driven testing
+    (passes when set, ignored when missing — anonymous browsers OK).
     Protocol: receive WsUserMessage → stream cup_metadata, thinking_token*,
               thinking_complete, response_token* → escalation_event (if needed)
               → response_complete.
     """
-    # Validate auth
-    if GATEWAY_TOKEN and token != GATEWAY_TOKEN:
+    # Token is OPTIONAL — public chat endpoint. Reject only on EXPLICIT
+    # token mismatch (caller sent a token but it was wrong). Anonymous
+    # callers pass through.
+    if token and GATEWAY_TOKEN and token != GATEWAY_TOKEN:
         await websocket.close(code=4001, reason="Unauthorized")
         return
 
