@@ -3127,14 +3127,21 @@ _INWORLD_TTS_MODEL = os.environ.get("INWORLD_TTS_MODEL", "inworld-tts-1.5-max")
 # cheaper. ACHEEVY gets max because customers hear his voice; internal
 # voices default to mini when ever surfaced (cost discipline).
 _INWORLD_VOICE_MAP: Dict[str, Dict[str, str]] = {
-    # ACHEEVY voice = "Idris-Elba-type in Belter Creole" per owner
-    # directive 2026-05-03. Inworld stock voice "Ronald" is the closest
-    # archetype: "confident, british man with a deep, gravelly voice."
-    # Belter Creole comes from the SYSTEM PROMPT (clipped consonants,
-    # dropped articles, vacuum-truth-speak) — Ronald just delivers that
-    # text in the right deep-British register. Swap to a custom-cloned
-    # voice when owner publishes one.
-    "acheevy":       {"voiceId": "Ronald",  "model": "inworld-tts-1.5-max"},
+    # ACHEEVY voice = custom-cloned voice via the FOAI voice-procurement
+    # pipeline (aims-tools/voice-library/scripts/procure_voice.py),
+    # 2026-05-03. Source: Marcus Garvey 1921 PD speech (US copyright
+    # lapsed for pre-1923 sound recordings 2022); 30-second trim;
+    # Inworld Instant Voice Cloning (IVC). Black-Atlantic baritone
+    # archetype matching owner's "Idris-Elba-type Black-British"
+    # spec. Belter Creole register comes from the system prompt
+    # (clipped consonants, dropped articles, vacuum-truth-speak) —
+    # the cloned voice provides the timbre.
+    # Override via env INWORLD_VOICE_ID_ACHEEVY when a higher-quality
+    # cloned voice (multi-sample, professional cloning) is published.
+    "acheevy":       {
+        "voiceId": os.environ.get("INWORLD_VOICE_ID_ACHEEVY") or "default-4zhua1rhxjfl50z1dnkcba__acheevy-idrisarchetype-v3",
+        "model": "inworld-tts-1.5-max",
+    },
     "sal_ang":       {"voiceId": "Hank",    "model": "inworld-tts-1.5-max"},
     "luc_ang":       {"voiceId": "Vinny",   "model": "inworld-tts-1.5-mini"},
     "melli_capensi": {"voiceId": "Bianca",  "model": "inworld-tts-1.5-max"},
