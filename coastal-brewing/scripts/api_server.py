@@ -3138,3 +3138,86 @@ async def voice_synthesize(body: WsVoiceSynthRequest):
         raise
     except Exception as exc:
         raise HTTPException(status_code=502, detail=f"Inworld TTS unexpected error: {exc}")
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Inworld STT — POST /api/v1/voice/transcribe (multipart audio upload)
+# ─────────────────────────────────────────────────────────────────────────────
+# Customer-facing voice INPUT for the chat panel mic button. Browser
+# captures mic audio via MediaRecorder (webm/opus by default), uploads
+# multipart, we forward to Inworld STT (model inworld-stt-1, sync API).
+# Returns plain transcript for the frontend to drop into the input field.
+#
+# Inworld STT sync supports LINEAR16, MP3, OGG_OPUS, FLAC, AUTO_DETECT.
+# Browser webm-opus typically works under AUTO_DETECT. If accuracy
+# degrades on a given codec, we can switch to LINEAR16 PCM client-side
+# at the cost of larger payloads.
+
+from fastapi import UploadFile, File   # noqa: E402  (used here only)
+
+_INWORLD_STT_ENDPOINT = "https://api.inworld.ai/stt/v1/transcribe"
+_INWORLD_STT_MODEL = os.environ.get("INWORLD_STT_MODEL", "inworld-stt-1")
+# Fallback to Groq Whisper via Inworld's own provider (per their STT docs
+# `groq/whisper-large-v3` is supported through the same /stt/v1/transcribe
+# endpoint but with a different audio_encoding requirement). If Inworld's
+# native model rejects browser webm, retry with Groq.
+
+
+@app.post("/api/v1/voice/transcribe")
+async def voice_transcribe(audio: UploadFile = File(...)):
+    """Transcribe customer mic audio via Inworld STT. Returns plain
+    transcript for the chat panel to drop into the input field.
+    Errors return 502 — the chat panel falls back to manual typing
+    silently."""
+    if not _INWORLD_API_KEY:
+        raise HTTPException(status_code=503, detail="INWORLD_API_KEY not configured")
+    audio_bytes = await audio.read()
+    if not audio_bytes:
+        raise HTTPException(status_code=400, detail="empty audio payload")
+    if len(audio_bytes) > 10 * 1024 * 1024:    # 10 MB cap
+        raise HTTPException(status_code=413, detail="audio too large (max 10 MB)")
+
+    # Inworld STT REST sync API. Uses multipart form upload (the docs
+    # JSON shape with base64 was returning proto parse errors as of
+    # 2026-05-03 — multipart is the working path). `audio_encoding`
+    # AUTO_DETECT lets the model handle webm/opus from MediaRecorder
+    # without client-side transcoding.
+    files = {
+        "audio": (audio.filename or "audio.webm", audio_bytes, audio.content_type or "audio/webm"),
+    }
+    data = {
+        "model": _INWORLD_STT_MODEL,
+        "audio_encoding": "AUTO_DETECT",
+        "language_code": "en-US",
+    }
+    headers = {"Authorization": f"Basic {_INWORLD_API_KEY}"}
+    try:
+        async with httpx.AsyncClient(timeout=30) as client:
+            resp = await client.post(_INWORLD_STT_ENDPOINT, headers=headers, files=files, data=data)
+        if resp.status_code != 200:
+            raise HTTPException(
+                status_code=502,
+                detail=f"Inworld STT error {resp.status_code}: {resp.text[:300]}",
+            )
+        body_data = resp.json()
+        # Response can come back as either {results: [{alternatives: [...]}]} (Google-style)
+        # or {transcript: "..."} (OpenAI-style). Handle both.
+        transcript = body_data.get("transcript") or ""
+        if not transcript:
+            results = body_data.get("results") or []
+            for r in results:
+                alts = r.get("alternatives") or []
+                if alts and alts[0].get("transcript"):
+                    transcript += alts[0]["transcript"] + " "
+        transcript = transcript.strip()
+        return {
+            "transcript": transcript,
+            "model": _INWORLD_STT_MODEL,
+            "audio_bytes": len(audio_bytes),
+        }
+    except httpx.TimeoutException:
+        raise HTTPException(status_code=504, detail="Inworld STT timed out")
+    except HTTPException:
+        raise
+    except Exception as exc:
+        raise HTTPException(status_code=502, detail=f"Inworld STT unexpected error: {exc}")

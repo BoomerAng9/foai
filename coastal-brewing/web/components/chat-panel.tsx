@@ -1,12 +1,21 @@
 "use client";
 import * as React from "react";
+import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { Send, ChevronDown, ChevronRight, Sparkles, ShieldCheck, Zap, X, Volume2, Loader2 } from "lucide-react";
+import { Send, ChevronDown, ChevronRight, Sparkles, ShieldCheck, Zap, X, Volume2, Loader2, Mic, MicOff, Square } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { AnimationRouter } from "@/components/animation/AnimationRouter";
+
+// Session-scoped chat message storage so navigation between pages
+// (Guide Me → /products, Direct to Marketplace → /products?mode=browse)
+// preserves the customer's visible conversation. Server-side RAG
+// continuity (last_summary, preferences) is handled separately by
+// the user_profile layer.
+const SS_MESSAGES = "coastal_chat_messages";
+const SS_BUTTONS_DISMISSED = "coastal_chat_buttons_dismissed";
 
 type Agent = "sales" | "marketing";
 
@@ -52,23 +61,49 @@ export function ChatPanel({
   initialAgent?: Agent;
   contextSku?: string;
 }) {
+  const router = useRouter();
   // `employee` tracks the internal routing target so the per-cup AnimationRouter
   // can pick the right thinking animation. The value is NEVER displayed as text.
   const [employee, setEmployee] = React.useState("acheevy");
-  // Greeting state — populated from GET /api/v1/users/greeting on mount.
-  // Renders the canonical first-time / returning / within-24h variant from
-  // `Chain of thought research.txt` lines 846-942 + path-selection /
-  // preference-capture buttons when the variant calls for them.
-  const [messages, setMessages] = React.useState<ChatMessage[]>([{
-    role: "agent",
-    employee: "acheevy",
-    content:
-      "Welcome to Coastal Brewing Co. I'm ACHEEVY. How can I help you today?",
-    ts: Date.now(),
-  }]);
-  const [showPathButtons, setShowPathButtons] = React.useState(true);
-  const [showPreferenceButtons, setShowPreferenceButtons] = React.useState(true);
-  const [greetingResolved, setGreetingResolved] = React.useState(false);
+  // Greeting state — populated from GET /api/v1/users/greeting on mount,
+  // OR rehydrated from sessionStorage when the customer navigates between
+  // pages (Guide Me → /products etc.) so the visible conversation persists
+  // and feels seamless rather than a fresh re-introduction every page.
+  const [messages, setMessages] = React.useState<ChatMessage[]>(() => {
+    if (typeof window === "undefined") return [];
+    try {
+      const cached = window.sessionStorage.getItem(SS_MESSAGES);
+      if (cached) {
+        const parsed = JSON.parse(cached) as ChatMessage[];
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch {
+      // Fall through to default greeting
+    }
+    return [{
+      role: "agent" as const,
+      employee: "acheevy",
+      content: "Welcome to Coastal Brewing Co. I'm ACHEEVY. How can I help you today?",
+      ts: Date.now(),
+    }];
+  });
+  // Buttons follow the same rule: once dismissed in this session, stay
+  // dismissed across navigation so the customer doesn't see Guide Me /
+  // Shop For Me etc. re-appear after they've already picked a path.
+  const [showPathButtons, setShowPathButtons] = React.useState(() => {
+    if (typeof window === "undefined") return true;
+    return window.sessionStorage.getItem(SS_BUTTONS_DISMISSED + "_path") !== "1";
+  });
+  const [showPreferenceButtons, setShowPreferenceButtons] = React.useState(() => {
+    if (typeof window === "undefined") return true;
+    return window.sessionStorage.getItem(SS_BUTTONS_DISMISSED + "_pref") !== "1";
+  });
+  const [greetingResolved, setGreetingResolved] = React.useState(() => {
+    if (typeof window === "undefined") return false;
+    // If we already have cached messages, the greeting effect should
+    // skip — we're rehydrating an existing session.
+    return Boolean(window.sessionStorage.getItem(SS_MESSAGES));
+  });
   const [input, setInput] = React.useState(contextSku ? `Tell me about ${contextSku}` : "");
   const [anim, setAnim] = React.useState<AnimState | null>(null);
   const [isConnecting, setIsConnecting] = React.useState(false);
@@ -84,6 +119,19 @@ export function ChatPanel({
   React.useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
     transcriptRef.current = messages;
+    // Persist messages so navigation (Guide Me → /products) doesn't lose
+    // the visible conversation. Cap to last 30 turns so sessionStorage
+    // doesn't bloat over a long session.
+    if (typeof window !== "undefined") {
+      try {
+        window.sessionStorage.setItem(
+          SS_MESSAGES,
+          JSON.stringify(messages.slice(-30)),
+        );
+      } catch {
+        // sessionStorage may be disabled (private browsing); silent skip
+      }
+    }
   }, [messages, anim, responseBuffer]);
 
   // ── Server-driven greeting (replaces the hardcoded default above) ──
@@ -170,12 +218,19 @@ export function ChatPanel({
   }, []);
 
   // ── Button-click handlers (path + preference) ──
-  // POST /api/v1/users/preferences with credentials so the cookie carries
-  // the coastal_uid. Hides the matching button bank after a successful pick.
-  // Then drives an explicit send through the WS so ACHEEVY actually
-  // responds — no silent dead end after the customer clicks.
+  // Each click: (1) records the path/preference on the user_profile via
+  // POST /api/v1/users/preferences (cookie-bound), (2) sends a synthetic
+  // user message through the WS so ACHEEVY responds, (3) navigates to
+  // the right surface per the CoT-research spec (line 996 — "Half-screen
+  // collapsible chat panel" for Direct to Marketplace; Guide Me + Shop
+  // For Me also route to /products with the chat alongside).
+  // Button dismissal persists in sessionStorage so the customer doesn't
+  // see the same picker re-appear after navigation.
   async function pickPath(choice: "guide_me" | "shop_for_me" | "direct_to_marketplace") {
     setShowPathButtons(false);
+    if (typeof window !== "undefined") {
+      try { window.sessionStorage.setItem(SS_BUTTONS_DISMISSED + "_path", "1"); } catch {}
+    }
     try {
       await fetch("/api/v1/users/preferences", {
         method: "POST",
@@ -191,10 +246,30 @@ export function ChatPanel({
       : "I'll browse on my own";
     setMessages((m) => [...m, { role: "user", content: label, ts: Date.now() }]);
     void send(label);
+    // Navigate to the products surface so the customer SEES the products
+    // ACHEEVY is talking about. The chat-panel rehydrates from
+    // sessionStorage on the new page so the conversation continues
+    // seamlessly. Mode query param tells /products which layout to use:
+    //   guided  = right-column chat (tour-guide mode)
+    //   curated = right-column chat (shop-for-me curated picks)
+    //   browse  = mini collapsed chat (direct-to-marketplace, customer
+    //             browses freely with chat on standby)
+    const mode = choice === "guide_me" ? "guided"
+      : choice === "shop_for_me" ? "curated"
+      : "browse";
+    // Slight delay so the user sees their button-click message + ACHEEVY
+    // start to think before the page transitions. Feels like a real
+    // associate walking you over.
+    window.setTimeout(() => {
+      router.push(`/products?mode=${mode}`);
+    }, 1200);
   }
 
   async function pickPreference(category: "coffee" | "tea" | "mushroom_functional") {
     setShowPreferenceButtons(false);
+    if (typeof window !== "undefined") {
+      try { window.sessionStorage.setItem(SS_BUTTONS_DISMISSED + "_pref", "1"); } catch {}
+    }
     try {
       await fetch("/api/v1/users/preferences", {
         method: "POST",
@@ -544,10 +619,14 @@ export function ChatPanel({
         )}
       </div>
 
-      {/* Input */}
-      <form onSubmit={(e) => { e.preventDefault(); send(); }} className="flex gap-2 border-t border-border p-4">
+      {/* Input — text + voice */}
+      <form onSubmit={(e) => { e.preventDefault(); send(); }} className="flex items-center gap-2 border-t border-border p-4">
+        <MicButton
+          onTranscribed={(text) => setInput((cur) => cur ? `${cur} ${text}` : text)}
+          disabled={!!pending || isConnecting}
+        />
         <Input
-          placeholder="Ask ACHEEVY — find your cup, ask anything…"
+          placeholder="Ask ACHEEVY — type or tap the mic…"
           value={input}
           onChange={(e) => setInput(e.target.value)}
           disabled={!!pending || isConnecting}
@@ -635,18 +714,132 @@ function PlayVoiceButton({ text, messageKey: _key }: { text: string; messageKey:
       onClick={play}
       aria-label={state === "playing" ? "Stop ACHEEVY audio" : "Play ACHEEVY audio"}
       className={cn(
-        "inline-flex h-5 w-5 items-center justify-center rounded-full transition-colors",
-        "text-muted-foreground/60 hover:text-accent hover:bg-accent/10",
-        state === "playing" && "text-accent bg-accent/15",
-        state === "error" && "text-destructive",
+        "inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 text-[10px] uppercase tracking-widest transition-colors",
+        state === "idle" && "border-accent/40 bg-accent/5 text-accent hover:bg-accent/15",
+        state === "loading" && "border-accent/40 bg-accent/10 text-accent",
+        state === "playing" && "border-accent bg-accent/20 text-accent",
+        state === "error" && "border-destructive/40 bg-destructive/10 text-destructive",
       )}
-      title={state === "error" ? "Voice unavailable" : "Hear ACHEEVY"}
+      title={state === "error" ? "Voice unavailable" : "Hear ACHEEVY in his voice"}
     >
       {state === "loading" ? (
         <Loader2 className="h-3 w-3 animate-spin" />
       ) : (
         <Volume2 className="h-3 w-3" />
       )}
+      {state === "playing" ? "Playing" : state === "loading" ? "Loading" : "Hear"}
+    </button>
+  );
+}
+
+// ─── Voice INPUT (microphone → STT → input field) ─────────────────────
+// Uses browser MediaRecorder to capture mic audio (webm/opus default,
+// 16kHz mono). Sends to backend /api/v1/voice/transcribe which forwards
+// to Inworld STT (inworld-stt-1 model). Transcript drops into the input
+// field — customer can edit before sending OR press the send button.
+function MicButton({
+  onTranscribed,
+  disabled,
+}: {
+  onTranscribed: (text: string) => void;
+  disabled?: boolean;
+}) {
+  const [state, setState] = React.useState<"idle" | "recording" | "transcribing" | "error">("idle");
+  const recorderRef = React.useRef<MediaRecorder | null>(null);
+  const streamRef = React.useRef<MediaStream | null>(null);
+  const chunksRef = React.useRef<Blob[]>([]);
+
+  React.useEffect(() => {
+    return () => {
+      stopStreamOnly();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  function stopStreamOnly() {
+    streamRef.current?.getTracks().forEach((t) => t.stop());
+    streamRef.current = null;
+    recorderRef.current = null;
+  }
+
+  async function startRecording() {
+    if (typeof navigator === "undefined" || !navigator.mediaDevices) {
+      setState("error");
+      window.setTimeout(() => setState("idle"), 2000);
+      return;
+    }
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      streamRef.current = stream;
+      chunksRef.current = [];
+      const mr = new MediaRecorder(stream, { mimeType: "audio/webm;codecs=opus" });
+      recorderRef.current = mr;
+      mr.ondataavailable = (e) => {
+        if (e.data && e.data.size > 0) chunksRef.current.push(e.data);
+      };
+      mr.onstop = async () => {
+        const blob = new Blob(chunksRef.current, { type: "audio/webm" });
+        stopStreamOnly();
+        if (blob.size === 0) {
+          setState("idle");
+          return;
+        }
+        setState("transcribing");
+        try {
+          const fd = new FormData();
+          fd.append("audio", blob, "rec.webm");
+          const r = await fetch("/api/v1/voice/transcribe", { method: "POST", body: fd });
+          if (!r.ok) throw new Error(`HTTP ${r.status}`);
+          const data = await r.json();
+          const transcript: string = (data.transcript || "").trim();
+          if (transcript) onTranscribed(transcript);
+          setState("idle");
+        } catch {
+          setState("error");
+          window.setTimeout(() => setState("idle"), 2000);
+        }
+      };
+      mr.start();
+      setState("recording");
+    } catch {
+      // Permission denied or no mic
+      setState("error");
+      window.setTimeout(() => setState("idle"), 2000);
+    }
+  }
+
+  function stopRecording() {
+    if (recorderRef.current && recorderRef.current.state === "recording") {
+      recorderRef.current.stop();
+    } else {
+      stopStreamOnly();
+      setState("idle");
+    }
+  }
+
+  const isActive = state === "recording";
+  const Icon = state === "transcribing" ? Loader2
+    : state === "error" ? MicOff
+    : isActive ? Square
+    : Mic;
+
+  return (
+    <button
+      type="button"
+      onClick={isActive ? stopRecording : startRecording}
+      disabled={disabled || state === "transcribing"}
+      aria-label={isActive ? "Stop recording" : "Start voice input"}
+      className={cn(
+        "inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border transition-colors",
+        state === "idle" && "border-border bg-background text-muted-foreground hover:text-accent hover:border-accent/50",
+        state === "recording" && "border-destructive bg-destructive/10 text-destructive animate-pulse",
+        state === "transcribing" && "border-accent/40 bg-accent/10 text-accent",
+        state === "error" && "border-destructive/40 bg-destructive/5 text-destructive",
+        disabled && "opacity-40 cursor-not-allowed",
+      )}
+      title={isActive ? "Stop & transcribe" : state === "error" ? "Mic unavailable" : "Speak to ACHEEVY"}
+    >
+      <Icon className={cn("h-4 w-4", state === "transcribing" && "animate-spin")} />
     </button>
   );
 }
