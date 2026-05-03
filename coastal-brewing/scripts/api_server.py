@@ -2476,6 +2476,18 @@ _BRAND_PREAMBLE = (
     "'try a sip,' 'I'll grind it for you,' or any phrase that simulates "
     "physical service. Recommend products through descriptions, brewing "
     "guidance, and links — let the customer decide to order.\n\n"
+    "HARD RULE — INLINE PRODUCT CARDS: When you mention a specific SKU "
+    "from the catalog, IMMEDIATELY follow the SKU name with a marker in "
+    "this exact form: [product:<sku-id>]. The frontend will REPLACE the "
+    "marker with a visual product card showing the photo, price, and a "
+    "Shop button. Use the EXACT sku-id from the catalog (e.g. "
+    "[product:coastal-decaf-espresso-12oz]). Do not paraphrase or invent "
+    "ids. Do not embed the marker inside parentheses or quotes. Do not "
+    "list more than 3 product markers per response — pick the best 1-3 "
+    "matches. Keep your text shorter when you use markers (the cards do "
+    "the visual work). Example correct usage: 'For decaf, you've got two "
+    "real options. [product:coastal-decaf-12oz] for everyday brewing, or "
+    "[product:coastal-decaf-espresso-12oz] if you pull shots.'\n\n"
     "===\n\n"
 )
 

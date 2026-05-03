@@ -8,6 +8,8 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { AnimationRouter } from "@/components/animation/AnimationRouter";
+import { ChatMessageContent } from "@/components/chat-message-content";
+import type { Product } from "@/lib/api";
 
 // Session-scoped chat message storage so navigation between pages
 // (Guide Me → /products, Direct to Marketplace → /products?mode=browse)
@@ -111,6 +113,29 @@ export function ChatPanel({
   const [wsError, setWsError] = React.useState<string | null>(null);
   const [escalationMsg, setEscalationMsg] = React.useState<string | null>(null);
   const [responseBuffer, setResponseBuffer] = React.useState("");
+
+  // Catalog cache — fetched once on mount so [product:sku] markers in
+  // ACHEEVY's text can be resolved to ProductCard renders without an
+  // extra API call per message. Empty until first fetch resolves; the
+  // marker parser silently drops markers for unknown SKUs (no broken
+  // visuals during the brief fetch window).
+  const [catalog, setCatalog] = React.useState<Product[]>([]);
+  React.useEffect(() => {
+    let aborted = false;
+    (async () => {
+      try {
+        const r = await fetch("/api/catalog", { credentials: "include" });
+        if (!r.ok) return;
+        const data = await r.json();
+        if (!aborted && Array.isArray(data?.products)) {
+          setCatalog(data.products as Product[]);
+        }
+      } catch {
+        // Catalog fetch failure → markers drop silently, message text shows
+      }
+    })();
+    return () => { aborted = true; };
+  }, []);
 
   // Voice auto-play — default ON. Customer can mute via header toggle.
   // Persisted in sessionStorage so the choice survives navigation.
@@ -510,9 +535,7 @@ export function ChatPanel({
                       autoplay={voiceAutoplay && i === messages.length - 1}
                     />
                   </div>
-                  <div className="rounded-lg bg-secondary px-4 py-2.5 text-sm leading-relaxed">
-                    {m.content}
-                  </div>
+                  <ChatMessageContent text={m.content} catalog={catalog} />
                 </div>
               </div>
             )}
@@ -623,10 +646,10 @@ export function ChatPanel({
                   </div>
                 )}
                 {responseBuffer && (
-                  <div className="rounded-lg bg-secondary px-4 py-2.5 text-sm leading-relaxed">
-                    {responseBuffer}
+                  <div className="space-y-3">
+                    <ChatMessageContent text={responseBuffer} catalog={catalog} />
                     <motion.span
-                      className="ml-0.5 inline-block h-3 w-0.5 bg-accent/60"
+                      className="ml-1 inline-block h-3 w-0.5 bg-accent/60"
                       animate={{ opacity: [1, 0, 1] }}
                       transition={{ duration: 0.5, repeat: Infinity }}
                     />
