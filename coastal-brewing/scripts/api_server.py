@@ -3056,7 +3056,14 @@ _INWORLD_TTS_MODEL = os.environ.get("INWORLD_TTS_MODEL", "inworld-tts-1.5-max")
 # cheaper. ACHEEVY gets max because customers hear his voice; internal
 # voices default to mini when ever surfaced (cost discipline).
 _INWORLD_VOICE_MAP: Dict[str, Dict[str, str]] = {
-    "acheevy":       {"voiceId": "Tyler",   "model": "inworld-tts-1.5-max"},
+    # ACHEEVY voice = "Idris-Elba-type in Belter Creole" per owner
+    # directive 2026-05-03. Inworld stock voice "Ronald" is the closest
+    # archetype: "confident, british man with a deep, gravelly voice."
+    # Belter Creole comes from the SYSTEM PROMPT (clipped consonants,
+    # dropped articles, vacuum-truth-speak) — Ronald just delivers that
+    # text in the right deep-British register. Swap to a custom-cloned
+    # voice when owner publishes one.
+    "acheevy":       {"voiceId": "Ronald",  "model": "inworld-tts-1.5-max"},
     "sal_ang":       {"voiceId": "Hank",    "model": "inworld-tts-1.5-max"},
     "luc_ang":       {"voiceId": "Vinny",   "model": "inworld-tts-1.5-mini"},
     "melli_capensi": {"voiceId": "Bianca",  "model": "inworld-tts-1.5-max"},
