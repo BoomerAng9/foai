@@ -55,11 +55,10 @@ export function ChatPanel({
   // `employee` tracks the internal routing target so the per-cup AnimationRouter
   // can pick the right thinking animation. The value is NEVER displayed as text.
   const [employee, setEmployee] = React.useState("acheevy");
-  // Canonical first-time greeting (from `Chain of thought research.txt` —
-  // owner-established 2026-04). The returning-user variant ("Welcome back!
-  // How was that [last product]? Ready for more, or want to try something
-  // new?") fires after a 24-hour gap once RAG / user-profile is wired
-  // (separate work item — POST /api/users/greeting per the research).
+  // Greeting state — populated from GET /api/v1/users/greeting on mount.
+  // Renders the canonical first-time / returning / within-24h variant from
+  // `Chain of thought research.txt` lines 846-942 + path-selection /
+  // preference-capture buttons when the variant calls for them.
   const [messages, setMessages] = React.useState<ChatMessage[]>([{
     role: "agent",
     employee: "acheevy",
@@ -67,6 +66,9 @@ export function ChatPanel({
       "Welcome to Coastal Brewing Co. I'm ACHEEVY. How can I help you today?",
     ts: Date.now(),
   }]);
+  const [showPathButtons, setShowPathButtons] = React.useState(true);
+  const [showPreferenceButtons, setShowPreferenceButtons] = React.useState(true);
+  const [greetingResolved, setGreetingResolved] = React.useState(false);
   const [input, setInput] = React.useState(contextSku ? `Tell me about ${contextSku}` : "");
   const [anim, setAnim] = React.useState<AnimState | null>(null);
   const [isConnecting, setIsConnecting] = React.useState(false);
@@ -76,11 +78,135 @@ export function ChatPanel({
 
   const wsRef = React.useRef<WebSocket | null>(null);
   const scrollRef = React.useRef<HTMLDivElement>(null);
+  const transcriptRef = React.useRef<ChatMessage[]>([]);
   const pending = anim?.isThinking || (responseBuffer.length > 0);
 
   React.useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
+    transcriptRef.current = messages;
   }, [messages, anim, responseBuffer]);
+
+  // ── Server-driven greeting (replaces the hardcoded default above) ──
+  // Calls GET /api/v1/users/greeting with credentials so the coastal_uid
+  // cookie roundtrips. Renders the variant returned by the server. When
+  // the customer is mid-session (returning within 60 minutes), variant
+  // = "within_session" and we suppress the greeting message + buttons
+  // entirely so ACHEEVY picks up seamlessly.
+  React.useEffect(() => {
+    if (greetingResolved) return;
+    let aborted = false;
+    (async () => {
+      try {
+        const r = await fetch("/api/v1/users/greeting", {
+          method: "GET",
+          credentials: "include",
+        });
+        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+        const data = await r.json();
+        if (aborted) return;
+        if (data.variant === "within_session") {
+          // No re-introduction — clear the canonical first-time greeting
+          // and let the customer pick up where they left off.
+          setMessages([]);
+          setShowPathButtons(false);
+          setShowPreferenceButtons(false);
+        } else if (data.greeting) {
+          setMessages([{
+            role: "agent",
+            employee: "acheevy",
+            content: data.greeting,
+            ts: Date.now(),
+          }]);
+          setShowPathButtons(Boolean(data.show_path_buttons));
+          setShowPreferenceButtons(Boolean(data.show_preference_buttons));
+        }
+      } catch {
+        // Silent fall back to the hardcoded canonical first-time greeting
+        // already in initial state. Buttons stay shown by default.
+      } finally {
+        if (!aborted) setGreetingResolved(true);
+      }
+    })();
+    return () => { aborted = true; };
+  }, [greetingResolved]);
+
+  // ── Session wrap on unmount or 30-min idle ──
+  // Fires POST /api/v1/users/session-wrap with the conversation transcript
+  // so the server (Gemini Flash + gemini-embedding-001) can summarize +
+  // embed + persist for the next session's returning-user greeting.
+  React.useEffect(() => {
+    const wrap = () => {
+      const t = transcriptRef.current;
+      if (!t || t.length < 2) return; // greeting only — nothing useful
+      try {
+        const payload = JSON.stringify({
+          transcript: t.map((m) => ({
+            role: m.role === "user" ? "user" : "agent",
+            content: m.content,
+          })),
+        });
+        // Use sendBeacon when available so the request survives unmount.
+        if (typeof navigator !== "undefined" && navigator.sendBeacon) {
+          const blob = new Blob([payload], { type: "application/json" });
+          navigator.sendBeacon("/api/v1/users/session-wrap", blob);
+        } else {
+          fetch("/api/v1/users/session-wrap", {
+            method: "POST",
+            credentials: "include",
+            headers: { "Content-Type": "application/json" },
+            body: payload,
+            keepalive: true,
+          }).catch(() => undefined);
+        }
+      } catch {
+        // best-effort — never block unmount
+      }
+    };
+    window.addEventListener("beforeunload", wrap);
+    return () => {
+      window.removeEventListener("beforeunload", wrap);
+      wrap();
+    };
+  }, []);
+
+  // ── Button-click handlers (path + preference) ──
+  // POST /api/v1/users/preferences with credentials so the cookie carries
+  // the coastal_uid. Hides the matching button bank after a successful pick.
+  async function pickPath(choice: "guide_me" | "shop_for_me" | "direct_to_marketplace") {
+    setShowPathButtons(false);
+    try {
+      await fetch("/api/v1/users/preferences", {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ likes: [], path_choice: choice }),
+      });
+    } catch {
+      // Non-fatal — the path choice is a profile hint, not a hard gate.
+    }
+    const label = choice === "guide_me" ? "Give me a tour"
+      : choice === "shop_for_me" ? "Shop for me"
+      : "I'll browse on my own";
+    setMessages((m) => [...m, { role: "user", content: label, ts: Date.now() }]);
+  }
+
+  async function pickPreference(category: "coffee" | "tea" | "mushroom_functional") {
+    try {
+      await fetch("/api/v1/users/preferences", {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ likes: [category] }),
+      });
+    } catch {
+      // Non-fatal.
+    }
+    const label = category === "coffee" ? "I'm into coffee"
+      : category === "tea" ? "I'm into tea"
+      : "Mushroom-functional, please";
+    setMessages((m) => [...m, { role: "user", content: label, ts: Date.now() }]);
+    setShowPreferenceButtons(false);
+  }
 
   // Token from env for WS auth
   const wsToken = process.env.NEXT_PUBLIC_COASTAL_WS_TOKEN || "";
@@ -270,6 +396,63 @@ export function ChatPanel({
             )}
           </motion.div>
         ))}
+
+        {/* Path-selection buttons (Guide Me / Shop For Me / Direct to Marketplace).
+            Per `Chain of thought research.txt` lines 931-942 — three retail
+            paths owner canon (feedback_coastal_is_retail_sales_not_rfp.md). */}
+        {showPathButtons && messages.length > 0 && (
+          <div className="flex flex-wrap gap-2 pl-10">
+            <button
+              type="button"
+              onClick={() => pickPath("guide_me")}
+              className="rounded-full border border-border bg-card/50 px-3 py-1.5 text-xs text-foreground/80 transition-colors hover:bg-accent/10 hover:border-accent/40 hover:text-foreground"
+            >
+              Give me a tour
+            </button>
+            <button
+              type="button"
+              onClick={() => pickPath("shop_for_me")}
+              className="rounded-full border border-border bg-card/50 px-3 py-1.5 text-xs text-foreground/80 transition-colors hover:bg-accent/10 hover:border-accent/40 hover:text-foreground"
+            >
+              Shop for me
+            </button>
+            <button
+              type="button"
+              onClick={() => pickPath("direct_to_marketplace")}
+              className="rounded-full border border-border bg-card/50 px-3 py-1.5 text-xs text-foreground/80 transition-colors hover:bg-accent/10 hover:border-accent/40 hover:text-foreground"
+            >
+              I&apos;ll browse on my own
+            </button>
+          </div>
+        )}
+
+        {/* Preference-capture buttons (coffee / tea / mushroom-functional).
+            First-time-greeting preference funnel per CoT research line 891. */}
+        {showPreferenceButtons && messages.length > 0 && (
+          <div className="flex flex-wrap gap-2 pl-10">
+            <button
+              type="button"
+              onClick={() => pickPreference("coffee")}
+              className="rounded-full border border-accent/30 bg-accent/5 px-3 py-1.5 text-xs text-foreground transition-colors hover:bg-accent/15 hover:border-accent/60"
+            >
+              ☕ Coffee
+            </button>
+            <button
+              type="button"
+              onClick={() => pickPreference("tea")}
+              className="rounded-full border border-accent/30 bg-accent/5 px-3 py-1.5 text-xs text-foreground transition-colors hover:bg-accent/15 hover:border-accent/60"
+            >
+              🍵 Tea
+            </button>
+            <button
+              type="button"
+              onClick={() => pickPreference("mushroom_functional")}
+              className="rounded-full border border-accent/30 bg-accent/5 px-3 py-1.5 text-xs text-foreground transition-colors hover:bg-accent/15 hover:border-accent/60"
+            >
+              🍄 Mushroom-functional
+            </button>
+          </div>
+        )}
 
         {/* Escalation banner */}
         <AnimatePresence>

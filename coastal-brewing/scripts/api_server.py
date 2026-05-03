@@ -173,7 +173,10 @@ app = FastAPI(title="Coastal Brewing Runner", version="3.0")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["https://brewing.foai.cloud", "http://localhost:3000"],
-    allow_credentials=False,
+    # allow_credentials=True so the chat panel can send/receive the
+    # `coastal_uid` cookie that powers user-profile RAG (greeting variant
+    # selection + last-purchase recall + session summaries).
+    allow_credentials=True,
     allow_methods=["GET", "POST"],
     allow_headers=["Content-Type", "X-Coastal-Token"],
 )
@@ -1063,6 +1066,7 @@ async def stripe_webhook(request: Request) -> dict:
     # round trip closes without a second API call from the storefront:
     # Stripe paid → /run → NemoClaw → Telegram approval → SMTP send.
     run_report: Optional[Dict[str, Any]] = None
+    rag_report: Optional[Dict[str, Any]] = None
     if event.get("type") == "checkout.session.completed":
         try:
             session = event["data"]["object"]
@@ -1077,6 +1081,53 @@ async def stripe_webhook(request: Request) -> dict:
                     "next_action": run_resp.get("next_action"),
                     "telegram_notified": run_resp.get("telegram_notified", False),
                 }
+
+            # User-profile RAG hook — record the purchase against the
+            # customer's coastal_uid (passed through Stripe checkout
+            # metadata when the chat panel initiates the session). Without
+            # a coastal_uid we can't tie the purchase to a profile, so we
+            # silently skip rather than orphan a row.
+            try:
+                _coastal_uid = session_meta.get("coastal_uid")
+                if _coastal_uid and _profile_layer.is_configured():
+                    _sku = (
+                        session_meta.get("sku")
+                        or session_meta.get("primary_sku")
+                        or "unknown"
+                    )
+                    _label = session_meta.get("sku_label") or session_meta.get("product_name")
+                    _amount = session.get("amount_total")
+                    _currency = (session.get("currency") or "usd").lower()
+                    _purchase_id = _profile_layer.record_purchase(
+                        coastal_uid=_coastal_uid,
+                        sku=_sku,
+                        sku_label=_label,
+                        amount_cents=_amount,
+                        currency=_currency,
+                        stripe_session_id=session.get("id"),
+                        metadata={
+                            "stripe_event_id": event["id"],
+                            "customer_email": session.get("customer_email") or session.get("customer_details", {}).get("email"),
+                        },
+                    )
+                    rag_report = {
+                        "purchase_id": _purchase_id,
+                        "coastal_uid": _coastal_uid,
+                        "sku": _sku,
+                    }
+                    # If Stripe gave us a customer email, opportunistically
+                    # upgrade the anonymous profile to identity-bound.
+                    _customer_email = (
+                        session.get("customer_email")
+                        or session.get("customer_details", {}).get("email")
+                    )
+                    if _customer_email:
+                        try:
+                            _profile_layer.update_identity(_coastal_uid, _customer_email)
+                        except Exception:
+                            pass
+            except Exception as _rag_exc:
+                rag_report = {"error": str(_rag_exc)}
         except Exception as e:
             run_report = {"error": str(e)}
 
@@ -1086,6 +1137,7 @@ async def stripe_webhook(request: Request) -> dict:
         "type": event["type"],
         "path": str(out_path),
         "run_report": run_report,
+        "rag_report": rag_report,
     }
 
 
@@ -2548,6 +2600,18 @@ async def chat_stream(websocket: WebSocket, token: Optional[str] = Query(default
 
     await websocket.accept()
 
+    # Resolve coastal_uid from cookie header (cookie was set by an earlier
+    # /api/v1/users/identity or /greeting call). Used for profile-aware
+    # context injection on every chat turn. None for users who haven't hit
+    # the cookie-setting endpoints yet — graceful first-time fallback.
+    _cookie_header = websocket.headers.get("cookie", "")
+    coastal_uid: Optional[str] = None
+    for _ck in _cookie_header.split(";"):
+        _ck = _ck.strip()
+        if _ck.startswith(f"{COASTAL_UID_COOKIE}="):
+            coastal_uid = _ck.split("=", 1)[1].strip() or None
+            break
+
     # Session state
     employee = "sal_ang"   # Default: Sal_Ang handles first contact
     history: list = []
@@ -2582,8 +2646,18 @@ async def chat_stream(websocket: WebSocket, token: Optional[str] = Query(default
                 ).model_dump())
                 employee = to_emp
 
-            # Build messages list for this employee
+            # Build messages list for this employee — prepend customer
+            # profile context (last purchase, preferences, last summary)
+            # so ACHEEVY can reference history naturally without reciting.
             sys_prompt = _employee_system_prompt(employee)
+            if coastal_uid and _profile_layer.is_configured():
+                try:
+                    _profile = _profile_layer.get_profile(coastal_uid)
+                    _profile_ctx = _profile_layer.profile_context_for_prompt(_profile)
+                    if _profile_ctx:
+                        sys_prompt = _profile_ctx + sys_prompt
+                except Exception as _exc:
+                    print(f"[user_profile] context fetch failed for uid={coastal_uid}: {_exc}", flush=True)
             messages = [{"role": "system", "content": sys_prompt}]
             messages.extend(history)
             messages.append({"role": "user", "content": user_content})
@@ -2641,3 +2715,315 @@ async def chat_stream(websocket: WebSocket, token: Optional[str] = Query(default
             ).model_dump())
         except Exception:
             pass
+
+
+# =============================================================================
+# User-profile RAG layer — greeting / preferences / session continuity
+# =============================================================================
+# Reads/writes through scripts/user_profile.py against the shared FOAI Neon
+# database (`coastal` schema). Cookie-based identity (anonymous-first); the
+# `coastal_uid` cookie is set on first contact and persisted client-side for
+# 1 year. Powers the canonical first-time / returning / within-24h ACHEEVY
+# greeting variants per `Chain of thought research.txt` lines 846-942.
+
+from fastapi import Cookie, Response  # noqa: E402
+
+import user_profile as _profile_layer  # noqa: E402
+
+COASTAL_UID_COOKIE = "coastal_uid"
+COASTAL_UID_MAX_AGE_SEC = 31_536_000  # 1 year
+
+
+def _ensure_uid(coastal_uid: Optional[str], response: Response) -> str:
+    """Resolve or mint a coastal_uid for the caller. If a cookie is present,
+    return its value; otherwise mint a new one + set the cookie on the
+    response. Idempotent: subsequent calls reuse the existing cookie."""
+    if coastal_uid:
+        return coastal_uid
+    new_uid = _profile_layer.new_coastal_uid()
+    response.set_cookie(
+        key=COASTAL_UID_COOKIE,
+        value=new_uid,
+        max_age=COASTAL_UID_MAX_AGE_SEC,
+        httponly=True,
+        secure=True,
+        samesite="lax",
+        path="/",
+    )
+    return new_uid
+
+
+class WsUserPreferences(BaseModel):
+    """POST /api/v1/users/preferences body."""
+    likes: List[str] = Field(default_factory=list)         # e.g. ["coffee", "tea"]
+    path_choice: Optional[str] = None                       # 'guide_me' | 'shop_for_me' | 'direct_to_marketplace'
+
+
+class WsUserSessionSummary(BaseModel):
+    """POST /api/v1/users/session-summary body — kept for direct-summary
+    callers; the frontend calls /session-wrap instead which generates the
+    summary server-side via Gemini."""
+    summary: str
+    summary_embedding: Optional[List[float]] = None         # gemini-embedding-001 = 768 dims, optional
+    metadata: Optional[Dict[str, Any]] = None
+
+
+class WsUserSessionWrap(BaseModel):
+    """POST /api/v1/users/session-wrap body. Frontend posts the transcript
+    on unmount; server generates summary + embedding via Gemini and stores."""
+    transcript: List[Dict[str, str]]                        # [{"role": "user|agent", "content": "..."}, ...]
+    metadata: Optional[Dict[str, Any]] = None
+
+
+@app.get("/api/v1/users/identity")
+async def users_identity(
+    response: Response,
+    coastal_uid: Optional[str] = Cookie(default=None, alias=COASTAL_UID_COOKIE),
+):
+    """Resolve or mint the caller's coastal_uid cookie + return it.
+
+    Side effect: if a profile doesn't exist yet, inserts a fresh row with
+    visit_count=1. If it does, bumps last_visit_at and visit_count.
+    """
+    if not _profile_layer.is_configured():
+        return {"coastal_uid": None, "rag": "disabled"}
+    uid = _ensure_uid(coastal_uid, response)
+    profile = _profile_layer.upsert_profile_visit(uid)
+    return {
+        "coastal_uid": uid,
+        "visit_count": profile.visit_count,
+        "first_visit_at": profile.first_visit_at.isoformat(),
+        "last_visit_at": profile.last_visit_at.isoformat(),
+    }
+
+
+@app.get("/api/v1/users/profile")
+async def users_profile(
+    response: Response,
+    coastal_uid: Optional[str] = Cookie(default=None, alias=COASTAL_UID_COOKIE),
+):
+    """Return the full profile for the caller's coastal_uid. Mints a uid +
+    empty profile if none exists yet."""
+    if not _profile_layer.is_configured():
+        return {"profile": None, "rag": "disabled"}
+    uid = _ensure_uid(coastal_uid, response)
+    profile = _profile_layer.get_profile(uid)
+    if profile is None:
+        profile = _profile_layer.upsert_profile_visit(uid)
+    return {
+        "coastal_uid": profile.coastal_uid,
+        "identity": profile.identity,
+        "first_visit_at": profile.first_visit_at.isoformat(),
+        "last_visit_at": profile.last_visit_at.isoformat(),
+        "visit_count": profile.visit_count,
+        "preferences": profile.preferences,
+        "last_path_choice": profile.last_path_choice,
+        "last_summary": profile.last_summary,
+        "last_purchase_sku": profile.last_purchase_sku,
+        "last_purchase_label": profile.last_purchase_label,
+        "last_purchase_at": (
+            profile.last_purchase_at.isoformat() if profile.last_purchase_at else None
+        ),
+    }
+
+
+@app.get("/api/v1/users/greeting")
+async def users_greeting(
+    response: Response,
+    coastal_uid: Optional[str] = Cookie(default=None, alias=COASTAL_UID_COOKIE),
+):
+    """Return the appropriate greeting variant + path/preference button
+    flags for the caller's coastal_uid. Mints a uid if missing.
+
+    Variants: first_time, within_session, returning, returning_long_break.
+    Per `Chain of thought research.txt` lines 846-942.
+    """
+    if not _profile_layer.is_configured():
+        # Graceful degradation — serve the canonical first-time greeting
+        # without any profile-aware logic.
+        return {
+            "variant": "first_time",
+            "greeting": "Welcome to Coastal Brewing Co. I'm ACHEEVY. How can I help you today?",
+            "show_path_buttons": True,
+            "show_preference_buttons": True,
+            "context": {"last_purchase_label": None, "preferences": {}, "visit_count": 1},
+            "rag": "disabled",
+        }
+    uid = _ensure_uid(coastal_uid, response)
+    profile = _profile_layer.get_profile(uid)
+    if profile is None:
+        profile = _profile_layer.upsert_profile_visit(uid)
+    payload = _profile_layer.pick_greeting_variant(profile)
+    payload["coastal_uid"] = uid
+    return payload
+
+
+@app.post("/api/v1/users/preferences")
+async def users_preferences(
+    body: WsUserPreferences,
+    response: Response,
+    coastal_uid: Optional[str] = Cookie(default=None, alias=COASTAL_UID_COOKIE),
+):
+    """Update preferences + optional path-choice for the caller. Used by
+    the chat-panel button clicks (path-selection + preference-capture)."""
+    if not _profile_layer.is_configured():
+        raise HTTPException(status_code=503, detail="user-profile RAG disabled")
+    uid = _ensure_uid(coastal_uid, response)
+    # Ensure profile exists
+    _profile_layer.upsert_profile_visit(uid)
+    profile = _profile_layer.update_preferences(
+        uid,
+        preferences={"likes": body.likes} if body.likes else {},
+        path_choice=body.path_choice,
+    )
+    return {
+        "coastal_uid": uid,
+        "preferences": profile.preferences,
+        "last_path_choice": profile.last_path_choice,
+    }
+
+
+@app.post("/api/v1/users/session-summary")
+async def users_session_summary(
+    body: WsUserSessionSummary,
+    coastal_uid: Optional[str] = Cookie(default=None, alias=COASTAL_UID_COOKIE),
+):
+    """Store a pre-generated conversation summary. Kept for direct callers
+    (e.g. backend cron); the frontend uses /session-wrap which generates
+    the summary server-side via Gemini."""
+    if not _profile_layer.is_configured():
+        raise HTTPException(status_code=503, detail="user-profile RAG disabled")
+    if not coastal_uid:
+        return {"stored": False, "reason": "no coastal_uid cookie"}
+    sid = _profile_layer.record_session_summary(
+        coastal_uid=coastal_uid,
+        summary=body.summary,
+        summary_embedding=body.summary_embedding,
+        metadata=body.metadata,
+    )
+    return {"stored": True, "session_id": sid}
+
+
+# Gemini configuration for server-side summarization + embedding.
+# Per CLAUDE.md model policy: Google/Gemini/Vertex first.
+_GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "").strip()
+_GEMINI_FLASH_MODEL = os.environ.get("GEMINI_FLASH_MODEL", "gemini-2.5-flash")
+_GEMINI_EMBED_MODEL = os.environ.get("GEMINI_EMBED_MODEL", "gemini-embedding-001")
+_GEMINI_API_BASE = "https://generativelanguage.googleapis.com/v1beta"
+
+
+def _gemini_summarize_transcript(transcript: List[Dict[str, str]]) -> str:
+    """Generate a ~50-token conversation summary via Gemini Flash. Used
+    for the user_session.summary field so the next greeting can reference
+    the prior conversation topic concisely. Returns empty string on error
+    (caller stores empty summary rather than failing the session-wrap)."""
+    if not _GEMINI_API_KEY:
+        return ""
+    if not transcript:
+        return ""
+    convo = "\n".join(
+        f"{t.get('role', 'unknown').upper()}: {t.get('content', '').strip()[:500]}"
+        for t in transcript[-20:]   # last 20 turns max — keep prompt tight
+        if t.get("content", "").strip()
+    )
+    if not convo:
+        return ""
+    prompt = (
+        "Summarize this Coastal Brewing Co. customer chat in ONE compact "
+        "sentence (<= 25 words). Capture the customer's intent + any "
+        "specific product or preference they mentioned. Plain text only, "
+        "no markdown, no quotes.\n\n---TRANSCRIPT---\n"
+        + convo
+    )
+    url = f"{_GEMINI_API_BASE}/models/{_GEMINI_FLASH_MODEL}:generateContent?key={_GEMINI_API_KEY}"
+    payload = {
+        "contents": [{"role": "user", "parts": [{"text": prompt}]}],
+        "generationConfig": {"temperature": 0.2, "maxOutputTokens": 80},
+    }
+    try:
+        r = requests.post(url, json=payload, timeout=20)
+        r.raise_for_status()
+        data = r.json()
+        candidates = data.get("candidates") or []
+        if not candidates:
+            return ""
+        parts = (candidates[0].get("content") or {}).get("parts") or []
+        text = " ".join(p.get("text", "") for p in parts).strip()
+        return text[:280]   # safety cap
+    except Exception as exc:
+        print(f"[user_profile] Gemini summarize failed: {exc}", flush=True)
+        return ""
+
+
+def _gemini_embed_text(text: str, output_dim: int = 768) -> Optional[List[float]]:
+    """Generate a 768-dim embedding via gemini-embedding-001 (matryoshka
+    truncated to 768 to match the coastal.user_session schema). Returns
+    None on error so callers can store the summary without an embedding."""
+    if not _GEMINI_API_KEY or not text:
+        return None
+    url = f"{_GEMINI_API_BASE}/models/{_GEMINI_EMBED_MODEL}:embedContent?key={_GEMINI_API_KEY}"
+    payload = {
+        "model": f"models/{_GEMINI_EMBED_MODEL}",
+        "content": {"parts": [{"text": text}]},
+        "outputDimensionality": output_dim,
+        "taskType": "SEMANTIC_SIMILARITY",
+    }
+    try:
+        r = requests.post(url, json=payload, timeout=20)
+        r.raise_for_status()
+        data = r.json()
+        emb = (data.get("embedding") or {}).get("values")
+        if not emb or len(emb) != output_dim:
+            return None
+        return emb
+    except Exception as exc:
+        print(f"[user_profile] Gemini embed failed: {exc}", flush=True)
+        return None
+
+
+@app.post("/api/v1/users/session-wrap")
+async def users_session_wrap(
+    body: WsUserSessionWrap,
+    coastal_uid: Optional[str] = Cookie(default=None, alias=COASTAL_UID_COOKIE),
+):
+    """Frontend posts the conversation transcript at session-end (chat-
+    panel unmount or 30-min idle). Server generates a compact summary +
+    768-dim embedding via Gemini and stores both in coastal.user_session.
+    Frontend never touches the Gemini key."""
+    if not _profile_layer.is_configured():
+        raise HTTPException(status_code=503, detail="user-profile RAG disabled")
+    if not coastal_uid:
+        return {"stored": False, "reason": "no coastal_uid cookie"}
+    if not body.transcript:
+        return {"stored": False, "reason": "empty transcript"}
+
+    summary = _gemini_summarize_transcript(body.transcript)
+    if not summary:
+        # Fall back to a deterministic tail-of-conversation snippet so we
+        # always store SOMETHING when the customer had real interaction.
+        last_user = next(
+            (t.get("content", "") for t in reversed(body.transcript)
+             if t.get("role") == "user" and t.get("content", "").strip()),
+            "",
+        )
+        if not last_user:
+            return {"stored": False, "reason": "no useful content"}
+        summary = f"Customer asked: {last_user[:200]}"
+
+    embedding = _gemini_embed_text(summary)
+    sid = _profile_layer.record_session_summary(
+        coastal_uid=coastal_uid,
+        summary=summary,
+        summary_embedding=embedding,
+        metadata={
+            **(body.metadata or {}),
+            "transcript_turns": len(body.transcript),
+            "embedding_dim": len(embedding) if embedding else 0,
+        },
+    )
+    return {
+        "stored": True,
+        "session_id": sid,
+        "summary": summary,
+        "embedded": embedding is not None,
+    }
