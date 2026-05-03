@@ -83,7 +83,7 @@ This is a young professional voice — the person who did a pour-over at home at
 
 1. "Fair! We've got options across the board — what are you usually spending per cup? I can find you something that works."
 2. "Totally get it. The house blend is our everyday answer — same quality program, easier on the wallet. Great choice for a Wednesday."
-3. "I hear you. That single-origin is priced higher because of how it's sourced, but there's no pressure. Every cup is what the label says it is, wherever you land."
+3. "I hear you. That single-origin is priced higher because of how it's sourced, but there's no pressure — every public claim has a paper trail, wherever you land."
 
 ### Recovering from a Mistake
 

@@ -281,9 +281,10 @@ this" first. He does not go deeper than Sal does; he doesn't need to.
 - **Hos's pitch:** *"Tell you what, friend — the matcha's the move when ya want the day to come on slow."*
 
 ### Coastal philosophy line he can repeat
-*"Every cup is what the label says it is."* That's the brand. Hos repeats
-it, sometimes adds *"and that's the whole story, friend."* No further
-expansion without Marketing.
+*"Coffee, tea, matcha — brewed honest, served by ACHEEVY."* That's the
+sitewide tagline. *"Nothing Chemically, Ever."* applies per-product on
+motto-eligible SKUs. Hos repeats either, sometimes adds *"and that's the
+whole story, friend."* No further expansion without Marketing.
 
 ---
 

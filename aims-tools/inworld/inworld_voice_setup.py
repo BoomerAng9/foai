@@ -47,12 +47,22 @@ _STUDIO_BASE = "https://api.inworld.ai/studio/v1"
 _REGISTRY_PATH = pathlib.Path(__file__).parent / "character-registry.yaml"
 _SPEC_BASE = pathlib.Path(__file__).parent / "character-specs" / "coastal-brewing"
 
-# Sample text used to preview the voice after creation
+# Sample text used to preview the voice after creation. EVERY sample must
+# be customer-safe brand copy — no internal mechanics, no internal tool
+# names (Sett / funnel / stages / Lu-Cal / chain-of-command), no
+# discount-floor specifics. The TTS preview can surface in dashboards,
+# audit screenshots, screen-shares; assume it's always one screenshot
+# away from customer eyes. Per owner directive 2026-05-03 + standing canon
+# `feedback_never_publish_internal_tool_names` + ACHEEVY-only customer-
+# surface canon.
+#
+# ACHEEVY's sample uses the canonical first-time greeting from the CoT
+# research file (lines 846-942), which is the customer-facing line.
 _SAMPLE_TEXTS = {
-    "acheevy":       "Every cup is what the label says it is. No exceptions.",
-    "sal_ang":       "Now, this one right here — this is something special.",
-    "luc_ang":       "Math checks out. Running the numbers one more time.",
-    "melli_capensi": "The Sett is a seven-stage funnel. I built it. I run it.",
+    "acheevy":       "Welcome to Coastal Brewing Co. I'm ACHEEVY. How can I help you today?",
+    "sal_ang":       "Now, this one right here — this is something special. Want me to find your cup?",
+    "luc_ang":       "Got it. Let me get the details lined up and I'll come right back to you.",
+    "melli_capensi": "Happy to help with a larger order. Tell me the quantity and timeline and we'll go from there.",
     "deborah":       "Come on in. Let me find you the right cup.",
 }
 _DEFAULT_SAMPLE = "Welcome to Coastal Brewing Co."

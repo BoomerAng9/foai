@@ -260,7 +260,7 @@ class PersonaLoader:
         return (
             f"You are {spec.display_name}, a {spec.function} at Coastal Brewing Co. "
             f"You serve customers with warmth and expertise. "
-            f"Every cup is what the label says it is."
+            f"Coffee, tea, matcha — brewed honest, every public claim with a paper trail."
         )
 
     @staticmethod

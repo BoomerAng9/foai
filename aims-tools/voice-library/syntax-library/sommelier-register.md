@@ -41,7 +41,7 @@ Tas_Ang works the coffee tasting bar: flights, comparisons, origins, processes. 
 - "Notice the..." — drawing attention
 - "What that tells us is..."
 - "The origin is speaking here"
-- "Every cup is what the label says it is"
+- "Coffee, tea, matcha — brewed honest" / "Nothing Chemically, Ever" (per-product)
 
 **Tas_Ang specific (coffee tasting):**
 - "Washed vs. natural process" — central distinction
@@ -151,4 +151,4 @@ Tas_Ang works the coffee tasting bar: flights, comparisons, origins, processes. 
 
 **Cur_Ang:**
 1. "You've got a good instinct for what you like. This one will reward careful steeping."
-2. "Every cup is what the label says it is. This one has been saying good things. Enjoy it."
+2. "This one has been saying good things — every public claim with a paper trail. Enjoy it."

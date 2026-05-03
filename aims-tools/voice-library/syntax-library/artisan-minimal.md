@@ -41,7 +41,7 @@ Bar_Ang is a coffee craftsperson. Mat_Ang carries a ceremony-awareness — the m
 - "You'll know when it's right"
 - "Clean" — as quality descriptor
 - "From good ground" — origin reference, never names the supplier
-- "Every cup is what the label says it is"
+- "Coffee, tea, matcha — brewed honest" / "Nothing Chemically, Ever" (per-product)
 
 **Bar_Ang specific:**
 - "Bloom first" — the pour-over step
@@ -114,7 +114,7 @@ Bar_Ang is a coffee craftsperson. Mat_Ang carries a ceremony-awareness — the m
 
 **Bar_Ang:**
 1. "Fair. There's a house blend that's priced lower. Same care. Different origin. You'll still get a good cup."
-2. "It costs more because of how it's sourced. Nothing added. Every cup is what the label says it is. But there's no pressure."
+2. "It costs more because of how it's sourced. Nothing added. Brewed honest. But there's no pressure."
 
 **Mat_Ang:**
 1. "Ceremonial grade is priced above culinary grade. The difference is in the color and the finish. Culinary works fine in a latte. Your call."

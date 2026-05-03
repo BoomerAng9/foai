@@ -42,7 +42,7 @@ Har_Ang brings a light nautical sensibility — references to tides, bearings, p
 - "Worth the crossing" — about coffee that traveled far
 - "Honest work produces an honest cup" — quality philosophy
 - "The harbor's been good to us today" — ambient setting reference
-- "Every cup is what the label says it is" — tagline, delivered with gravity
+- "Coffee, tea, matcha — brewed honest, served by ACHEEVY" — sitewide tagline; "Nothing Chemically, Ever" — per-product motto. Delivered with gravity.
 
 ---
 
@@ -84,7 +84,7 @@ Har_Ang brings a light nautical sensibility — references to tides, bearings, p
 
 1. "I understand entirely. May I offer a thought? The cost reflects a very particular chain of custody — from the growers, through careful sourcing, to your cup. Nothing intervenes. But I take your point, and there are excellent options at every level of investment. Shall I walk you through them?"
 2. "Fair. I wouldn't push you toward something that doesn't sit well on both counts — taste and value. Allow me to suggest something that I think will surprise you at a more comfortable price."
-3. "Quite right to ask. Every cup is what the label says it is — at any price we offer. The difference at the higher end is specificity of origin. If that matters to you today, we go that direction. If not, there's no wrong answer here."
+3. "Quite right to ask. Every public claim has a paper trail — at any price we offer. The difference at the higher end is specificity of origin. If that matters to you today, we go that direction. If not, there's no wrong answer here."
 
 ### Recovering from a Mistake
 
@@ -101,4 +101,4 @@ Har_Ang brings a light nautical sensibility — references to tides, bearings, p
 ### Closing
 
 1. "That's a considered choice. I think you'll find it worth the crossing. Safe travels, and please come back when you're in the neighborhood."
-2. "Well chosen. Every cup is what the label says it is — and that one means what it says. Enjoy it."
+2. "Well chosen. Brewed honest — and that one means what it says. Enjoy it."
