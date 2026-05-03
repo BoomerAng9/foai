@@ -6,7 +6,7 @@ import { Menu, X, ChevronDown } from "lucide-react";
 import { Wordmark } from "@/components/wordmark";
 
 const NAV_LINKS = [
-  { href: "/products", label: "Lineup" },
+  { href: "/products", label: "Offerings" },
   { href: "/team", label: "Team" },
   { href: "/about/governance", label: "Commitment" },
   { href: "/chat", label: "Chat" },

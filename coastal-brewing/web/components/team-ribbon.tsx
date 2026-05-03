@@ -8,13 +8,13 @@ export function TeamRibbon() {
         <div className="max-w-2xl">
           <p className="eyebrow">Meet the team</p>
           <h2 className="mt-3 font-display text-2xl font-semibold tracking-[-0.02em] md:text-4xl">
-            Specialty coffee, whole-leaf tea, ceremonial matcha — handled with care at every step.
+            A function-named team behind every cup.
           </h2>
           <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
-            Coastal is powered by an AI-managed team on call around the clock. Sales finds your cup, builds
-            bundles, and walks you to checkout. Marketing curates our story and connects us to our community.
-            Every order, every claim, every refund runs through a policy gate and lands on the owner&apos;s
-            desk for final sign-off. One human signature behind every cup.
+            Sales finds your cup. Marketing tells our story. Wholesale handles
+            bulk. Returns makes it right. Every Coastal Brewing Co. team
+            member is named for the function they own — and every action
+            lands on the owner&apos;s desk for final sign-off.
           </p>
         </div>
         <Link

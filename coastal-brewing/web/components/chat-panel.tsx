@@ -55,11 +55,16 @@ export function ChatPanel({
   // `employee` tracks the internal routing target so the per-cup AnimationRouter
   // can pick the right thinking animation. The value is NEVER displayed as text.
   const [employee, setEmployee] = React.useState("acheevy");
+  // Canonical first-time greeting (from `Chain of thought research.txt` —
+  // owner-established 2026-04). The returning-user variant ("Welcome back!
+  // How was that [last product]? Ready for more, or want to try something
+  // new?") fires after a 24-hour gap once RAG / user-profile is wired
+  // (separate work item — POST /api/users/greeting per the research).
   const [messages, setMessages] = React.useState<ChatMessage[]>([{
     role: "agent",
     employee: "acheevy",
     content:
-      "ACHEEVY here. Coastal Brewing — coffee, tea, matcha, brewed honest. Tell me what you're after and I'll find your cup.",
+      "Welcome to Coastal Brewing Co. I'm ACHEEVY. How can I help you today?",
     ts: Date.now(),
   }]);
   const [input, setInput] = React.useState(contextSku ? `Tell me about ${contextSku}` : "");

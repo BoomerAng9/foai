@@ -3,55 +3,55 @@ import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 import type { Product } from "@/lib/api";
 
-const FALLBACK_LINEUP: { num: string; cat: string; label: string; copy: string; sku: string; image: string }[] = [
+// One-of-each-category surface so visitors see all three product lines at a
+// glance — coffee, tea, and the functional/mushroom blend (TCR strict-lane).
+// Images are hardcoded to files that exist in /public/products/. The API
+// fallback is intentionally NOT used here because catalog rows currently
+// reference image paths that haven't been generated (italian-roast,
+// jasmine-3oz, italian-roast-2lb all 404). Fix the catalog images then
+// re-enable the API override.
+//
+// FOLLOW-UP: the mushroom slot temporarily uses coastal-blend-12oz.png as a
+// stand-in (ground coffee, visually adjacent to the SKU it represents). A
+// real `coastal-functional-coffee-with-mushrooms-medium-ground-8oz.png`
+// render needs to be generated in the next image-gen pass.
+const OFFERINGS: { num: string; cat: string; label: string; copy: string; sku: string; image: string }[] = [
   {
     num: "01",
     cat: "Coffee",
     label: "Coffee",
-    copy: "House blend, dark roast, decaf. Small-lot sourcing. No flavorings, no fillers.",
-    sku: "lowcountry-house-blend-12oz",
+    copy: "Specialty coffee, traced to roaster. Single-origin and signature blends, ground or whole bean.",
+    sku: "coastal-blend-12oz",
     image: "/products/coastal-blend-12oz.png",
   },
   {
     num: "02",
     cat: "Tea",
     label: "Tea",
-    copy: "Lowcountry breakfast, herbal, green. Whole-leaf. No dust, brewed how you like it.",
-    sku: "lowcountry-breakfast-tea-50ct",
+    copy: "Whole-leaf tea — jasmine green, English breakfast, masala chai, hibiscus berry, Moroccan mint.",
+    sku: "lowcountry-tea-jasmine-green-2oz",
     image: "/products/lowcountry-tea-jasmine-green-2oz.png",
   },
   {
     num: "03",
-    cat: "Matcha",
-    label: "Matcha",
-    copy: "Ceremonial-grade matcha for the mornings that ask for it.",
-    sku: "ceremonial-matcha-30ct",
-    image: "/products/coastal-matcha-ceremonial-30g.png",
+    cat: "Mushroom",
+    label: "Functional with Mushrooms",
+    copy: "Coffee and matcha blended with Lion's Mane, Cordyceps, Reishi. Sold as food, never as a supplement.",
+    sku: "coastal-functional-coffee-with-mushrooms-medium-ground-8oz",
+    image: "/products/coastal-blend-12oz.png",
   },
 ];
 
-export function Lineup({ products }: { products?: Product[] }) {
-  // If real catalog products are provided, prefer them but keep the 01/02/03 framing.
-  const items =
-    products && products.length >= 3
-      ? FALLBACK_LINEUP.map((f, i) => {
-          const p = products.find((x) => x.category === f.cat.toLowerCase()) || products[i];
-          return {
-            ...f,
-            label: p.name,
-            copy: p.description || f.copy,
-            sku: p.sku,
-            image: p.image || f.image,
-          };
-        })
-      : FALLBACK_LINEUP;
+export function Lineup({ products: _products }: { products?: Product[] }) {
+  // API products intentionally ignored until catalog image paths are repaired.
+  const items = OFFERINGS;
 
   return (
     <section className="border-b border-border/60">
       <div className="container py-20 md:py-28">
         <div className="mb-12">
           <h2 className="font-display text-3xl font-semibold tracking-[-0.02em] md:text-5xl">
-            The lineup.
+            Our offerings.
           </h2>
         </div>
 
