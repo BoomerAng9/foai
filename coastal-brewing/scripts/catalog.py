@@ -48,6 +48,9 @@ _INTERNAL_FIELDS = frozenset({
     "fulfillment_cost",
     "min_margin_floor",
     "vendor_source_sku",
+    "image_original",  # declared image path (pre-substitution) — used by
+                       # generate_product_images.py to find SKUs needing
+                       # imagery. Never exposed to customer-facing surfaces.
 })
 
 
@@ -193,6 +196,11 @@ def _enrich_products() -> None:
         if lane is not None:
             p["compliance_lane"] = lane
         if "image" in p:
+            # Preserve the catalog's declared (intended) image path so the
+            # image-generation pipeline can identify which SKUs still need
+            # per-SKU imagery. Internal field — stripped from public catalog
+            # by _strip_internal_fields.
+            p["image_original"] = p["image"]
             p["image"] = _resolve_image_path(p["image"])
 
 
