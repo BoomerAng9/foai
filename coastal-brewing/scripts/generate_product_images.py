@@ -44,21 +44,35 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 PRODUCTS_DIR = REPO_ROOT / "web" / "public" / "products"
 ANCHORS_DIR = REPO_ROOT / "assets" / "brand-anchors"
 
-OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"
-# `openai/gpt-5.4-image-2` on OpenRouter == `gpt-image-2` on direct OpenAI API
-# (released 2026-04-21). The "5.4" is the text-reasoning backbone version,
-# not a separate older image model. Per memory feedback_image_models_strict_allowlist_2026_05_04.md.
-MODEL = "openai/gpt-5.4-image-2"
-PRICE_PER_IMAGE_USD = 0.05  # approximate; verify against OR billing post-batch
+# Provider routing (per reference_kie_ai_gpt_image_2_canon_2026_05_04.md):
+#   1. kie       — canonical FOAI image-gen provider (Kie.ai gpt-image-2)
+#   2. openrouter — fallback when Kie unavailable; supports data-URI inputs
+PROVIDER_DEFAULT = "kie"
 
-# Brand anchors passed as multimodal image inputs to ground gpt-image-2 in
-# the canonical Coastal aesthetic. Match the existing 21 originals (which are
-# the product photos already on real merchandise) — outdoor Lowcountry
-# lakefront, golden daylight, palm trees, Spanish moss. Use the canonical
-# Coastal Blend product shot as the primary aesthetic anchor.
-BRAND_ANCHORS = [
-    ANCHORS_DIR / "merchandise-anchor.jpg",  # downsampled 1024px JPEG (~150KB) — Lowcountry warm-daylight aesthetic
-    ANCHORS_DIR / "coastal-logo.jpg",        # downsampled flying-stork logo (~160KB)
+# Kie.ai
+KIE_BASE = "https://api.kie.ai/api/v1"
+KIE_CREATE_URL = f"{KIE_BASE}/jobs/createTask"
+KIE_RECORD_URL = f"{KIE_BASE}/jobs/recordInfo"
+KIE_MODEL_I2I = "gpt-image-2-image-to-image"
+
+# OpenRouter
+OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"
+OPENROUTER_MODEL = "openai/gpt-5.4-image-2"
+
+PRICE_PER_IMAGE_USD = 0.05  # approximate; verify against actual provider billing
+
+# Brand-anchor PUBLIC URLs (Kie.ai requires HTTPS URLs, not data URIs).
+# These match the canonical merchandise aesthetic per
+# reference_coastal_official_brand_canon_2026_04_30.md.
+KIE_BRAND_ANCHOR_URLS = [
+    "https://brewing.foai.cloud/products/coastal-blend-12oz.png",
+    "https://raw.githubusercontent.com/BoomerAng9/foai/main/coastal-brewing/web/public/coastal-brewing-logo-official.png",
+]
+
+# OpenRouter — multimodal anchors as inline base64 (data URI). Same aesthetic.
+OR_BRAND_ANCHORS = [
+    ANCHORS_DIR / "merchandise-anchor.jpg",
+    ANCHORS_DIR / "coastal-logo.jpg",
 ]
 
 # Brand-consistent prompt prefix. Matches the EXISTING merchandise-photo
@@ -214,34 +228,129 @@ def _file_to_data_uri(path: Path) -> str:
     return f"data:{mime};base64,{b}"
 
 
-def _build_multimodal_content(prompt: str) -> list:
-    """Build the OpenRouter content array: text prompt + brand anchor images
-    as image_url parts. Anchors GROUND the gen in the canonical Coastal
-    aesthetic — without them the model defaults to generic e-commerce style.
-    """
+def _build_or_multimodal_content(prompt: str) -> list:
+    """OpenRouter content array: text + brand anchor images as image_url
+    parts (data URIs)."""
     parts: list = [{"type": "text", "text": prompt}]
-    for anchor in BRAND_ANCHORS:
+    for anchor in OR_BRAND_ANCHORS:
         if anchor.exists():
-            parts.append({
-                "type": "image_url",
-                "image_url": {"url": _file_to_data_uri(anchor)},
-            })
+            parts.append({"type": "image_url", "image_url": {"url": _file_to_data_uri(anchor)}})
         else:
-            print(f"[anchor-missing] {anchor} — proceeding without it (output will likely drift off-brand)", file=sys.stderr)
+            print(f"[anchor-missing] {anchor} — proceeding without it", file=sys.stderr)
     return parts
 
 
-def _generate_image(prompt: str, out_path: Path) -> bool:
-    """Call OpenRouter, save image to out_path. Returns True on success.
-    Retries up to 3 times on connection-reset / timeout errors.
-    """
+def _kie_post_with_retry(url: str, headers: dict, json_body: Optional[dict] = None,
+                         method: str = "POST", timeout: int = 60) -> Optional[requests.Response]:
+    """POST/GET with the same retry policy used elsewhere — connection errors +
+    transient 429/5xx with exponential back-off."""
+    last_exc = None
+    for attempt in range(3):
+        try:
+            if method == "GET":
+                resp = requests.get(url, headers=headers, timeout=timeout)
+            else:
+                resp = requests.post(url, headers=headers, json=json_body, timeout=timeout)
+        except (requests.exceptions.ConnectionError,
+                requests.exceptions.Timeout,
+                requests.exceptions.ChunkedEncodingError) as e:
+            last_exc = e
+            time.sleep(2 ** attempt)
+            continue
+        if resp.status_code in (429, 500, 502, 503, 504):
+            last_exc = f"HTTP {resp.status_code}"
+            time.sleep(2 ** attempt)
+            continue
+        return resp
+    print(f"  ERROR: 3 retries failed: {last_exc}", file=sys.stderr)
+    return None
+
+
+def _generate_image_kie(prompt: str, out_path: Path) -> bool:
+    """Submit a Kie.ai gpt-image-2-image-to-image task, poll until the
+    task completes, download the resultUrls[0] image, save to out_path.
+    Returns True on success.
+
+    Per reference_kie_ai_gpt_image_2_canon_2026_05_04.md."""
+    api_key = os.environ.get("KIE_AI_API_KEY") or os.environ.get("KIE_API_KEY")
+    if not api_key:
+        raise RuntimeError("KIE_AI_API_KEY not set in environment")
+    headers = {"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"}
+
+    body = {
+        "model": KIE_MODEL_I2I,
+        "input": {
+            "prompt": prompt,
+            "input_urls": KIE_BRAND_ANCHOR_URLS,
+            "aspect_ratio": "1:1",
+        },
+    }
+    submit = _kie_post_with_retry(KIE_CREATE_URL, headers, body, "POST", timeout=30)
+    if submit is None or submit.status_code != 200:
+        print(f"  ERROR submit: {submit.status_code if submit else 'no-resp'} {submit.text[:300] if submit else ''}", file=sys.stderr)
+        return False
+    sj = submit.json()
+    if sj.get("code") != 200:
+        print(f"  ERROR submit-code: {sj.get('code')} {sj.get('msg')}", file=sys.stderr)
+        return False
+    task_id = sj.get("data", {}).get("taskId")
+    if not task_id:
+        print(f"  ERROR no taskId in submit: {sj}", file=sys.stderr)
+        return False
+
+    # Poll
+    poll_url = f"{KIE_RECORD_URL}?taskId={task_id}"
+    poll_headers = {"Authorization": f"Bearer {api_key}"}
+    deadline = time.time() + 240  # 4 min hard cap per task
+    while time.time() < deadline:
+        time.sleep(3)
+        rr = _kie_post_with_retry(poll_url, poll_headers, None, "GET", timeout=20)
+        if rr is None:
+            continue
+        if rr.status_code != 200:
+            print(f"  ERROR poll: {rr.status_code} {rr.text[:200]}", file=sys.stderr)
+            return False
+        rj = rr.json()
+        if rj.get("code") != 200:
+            print(f"  ERROR poll-code: {rj}", file=sys.stderr)
+            return False
+        data = rj.get("data", {})
+        state = data.get("state")
+        if state == "success":
+            result_json = data.get("resultJson") or "{}"
+            try:
+                result = json.loads(result_json) if isinstance(result_json, str) else result_json
+            except Exception:
+                print(f"  ERROR resultJson decode: {result_json[:200]}", file=sys.stderr)
+                return False
+            urls = result.get("resultUrls") or []
+            if not urls:
+                print(f"  ERROR no resultUrls: {result}", file=sys.stderr)
+                return False
+            # Download the image
+            img_resp = _kie_post_with_retry(urls[0], {}, None, "GET", timeout=60)
+            if img_resp is None or img_resp.status_code != 200:
+                print(f"  ERROR download: {img_resp.status_code if img_resp else 'no-resp'}", file=sys.stderr)
+                return False
+            out_path.write_bytes(img_resp.content)
+            return True
+        if state == "failure":
+            print(f"  ERROR task-fail: {data.get('failCode')} {data.get('failMsg')}", file=sys.stderr)
+            return False
+        # state in (waiting, running) — keep polling
+    print(f"  ERROR timeout polling task {task_id}", file=sys.stderr)
+    return False
+
+
+def _generate_image_openrouter(prompt: str, out_path: Path) -> bool:
+    """OpenRouter fallback path. Same retry policy. data-URI anchor inputs."""
     api_key = os.environ.get("OPENROUTER_API_KEY")
     if not api_key:
         raise RuntimeError("OPENROUTER_API_KEY not set in environment")
 
     body = {
-        "model": MODEL,
-        "messages": [{"role": "user", "content": _build_multimodal_content(prompt)}],
+        "model": OPENROUTER_MODEL,
+        "messages": [{"role": "user", "content": _build_or_multimodal_content(prompt)}],
         "modalities": ["image", "text"],
     }
     headers = {
@@ -250,27 +359,8 @@ def _generate_image(prompt: str, out_path: Path) -> bool:
         "HTTP-Referer": "https://brewing.foai.cloud",
         "X-Title": "Coastal Brewing Co - product imagery",
     }
-    last_exc = None
-    resp = None
-    for attempt in range(3):
-        try:
-            resp = requests.post(OPENROUTER_URL, headers=headers, json=body, timeout=180)
-        except (requests.exceptions.ConnectionError,
-                requests.exceptions.Timeout,
-                requests.exceptions.ChunkedEncodingError) as e:
-            last_exc = e
-            time.sleep(2 ** attempt)  # 1s, 2s, 4s
-            continue
-        # Retry on transient server-side errors too — rate limits and upstream
-        # faults are common during long batches and recover on backoff.
-        if resp.status_code in (429, 500, 502, 503, 504):
-            last_exc = f"HTTP {resp.status_code}"
-            resp = None
-            time.sleep(2 ** attempt)
-            continue
-        break
+    resp = _kie_post_with_retry(OPENROUTER_URL, headers, body, "POST", timeout=180)
     if resp is None:
-        print(f"  ERROR: 3 retries failed: {last_exc}", file=sys.stderr)
         return False
     if resp.status_code != 200:
         print(f"  ERROR: {resp.status_code} {resp.text[:300]}", file=sys.stderr)
@@ -307,6 +397,18 @@ def _generate_image(prompt: str, out_path: Path) -> bool:
 
     out_path.write_bytes(img_bytes)
     return True
+
+
+def _generate_image(prompt: str, out_path: Path) -> bool:
+    """Provider dispatcher. Defaults to Kie.ai (canonical FOAI image-gen
+    provider). Set `IMAGE_GEN_PROVIDER=openrouter` to use the fallback path.
+    """
+    provider = (os.environ.get("IMAGE_GEN_PROVIDER") or PROVIDER_DEFAULT).lower()
+    if provider == "kie":
+        return _generate_image_kie(prompt, out_path)
+    if provider == "openrouter":
+        return _generate_image_openrouter(prompt, out_path)
+    raise RuntimeError(f"unknown IMAGE_GEN_PROVIDER: {provider!r} (expected 'kie' or 'openrouter')")
 
 
 def cmd_dry_run(args):
