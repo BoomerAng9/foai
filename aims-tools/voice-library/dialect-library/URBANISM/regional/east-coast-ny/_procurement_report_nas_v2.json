@@ -1,0 +1,42 @@
+{
+  "results": [
+    {
+      "speaker": "Nas",
+      "register_label": "queensbridge-baritone-5pct",
+      "group": "URBANISM",
+      "region": "east-coast-ny",
+      "target_dir": "C:\\Users\\rishj\\foai\\aims-tools\\voice-library\\dialect-library\\URBANISM\\regional\\east-coast-ny\\audio",
+      "candidates_found": 1,
+      "downloads": [
+        {
+          "audio_file": "nas_nas-drink-champs-full-episode_e18ac00c.mp3",
+          "sidecar": "nas_nas-drink-champs-full-episode_e18ac00c.provenance.json",
+          "source_url": "https://www.youtube.com/watch?v=XU-EBYK3YvY",
+          "title": "NAS | Drink Champs (FULL EPISODE)"
+        }
+      ],
+      "analysis_summary": {
+        "files_analyzed": 2,
+        "ranked_top": [
+          {
+            "rank": 1,
+            "file": "nasir-jones_2001-nas-disses-hot-97-camron-nore-nelly_e4f3a630.mp3",
+            "match_percent": 26.3,
+            "f0_hz_mean": 154.571,
+            "speech_rate_sps": 1.9333,
+            "duration_sec": 60.0
+          },
+          {
+            "rank": 2,
+            "file": "nas_nas-drink-champs-full-episode_e18ac00c.mp3",
+            "match_percent": 15.1,
+            "f0_hz_mean": 259.7397,
+            "speech_rate_sps": 5.65,
+            "duration_sec": 60.0
+          }
+        ]
+      }
+    }
+  ],
+  "ingested_at": "2026-05-03T12:30:04+00:00"
+}

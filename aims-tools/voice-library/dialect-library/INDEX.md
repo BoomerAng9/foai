@@ -2,14 +2,35 @@
 
 > Canonical taxonomy for voice procurement, character casting, and TTS
 > register tuning across the FOAI ecosystem (Coastal Brewing Co.,
-> NURDSCODE, plugmein, future verticals).
+> NURDSCODE, plugmein, Choose 2 ACHIEVEMOR, Locale by ACHIEVEMOR,
+> future verticals).
+>
+> **Scope correction 2026-05-03:** This library is the **Ethnicity
+> Dashboard data layer for SmelterOS / FOAI ecosystem-wide use** — it
+> is platform-IP. It does **NOT** ship with any one vertical. Coastal
+> Brewing Co. *consumes* a few voices from this library as the cast
+> for that pilot company; every other vertical does the same.
+>
+> The dashboard is a **second moat** alongside the SmelterOS OS layer
+> (per `~/foai/SmelterOS/AGENTIC-OS-IP-LAYER.md`). It must NOT be
+> conflated with the Coastal kit, the Choose 2 ACHIEVEMOR kit, or any
+> other vertical-specific deployment. Customers who fork a Human-less
+> Company kit get a *generic visual + voice library* (per
+> `project_humanless_company_devkit_vision.md`); the URBANISM tree,
+> the cast-environments YAMLs, the dialect canon, and the persona
+> bibles stay INTERNAL.
 >
 > **Owner directive 2026-05-03:** every voice / character entry must
 > carry an ethnic label, and each ethnicity carries a *range* of
 > dialects organized by region, subculture, lifestyle, and register.
 > Black Americans are labeled **Indigenous Americans**; the canonical
 > group label is **URBANISM**. Owner is an urbanist; URBANISM is the
-> deepest tree by design.
+> deepest tree by design — but it is **one group of many**, and the
+> rest of this library now needs to be built out to comparable depth.
+> Each non-URBANISM group gets URBANISM-shape headers (group root,
+> regional sub-folders, subcultural cross-cuts, intensity / register
+> scale where applicable, anchor speakers, gatekeeping rules,
+> anti-patterns, acoustic profile target).
 
 ## Terminology — read this first
 
@@ -25,40 +46,52 @@ linguistics. It's the working language for the project:
   used interchangeably to describe the grammatical/phonetic system.
   Intensity is graded 0-5 (see URBANISM/AAVE-INTENSITY-SCALE.md).
 
-## Ethnic groups (canonical list)
+## Ethnic groups (canonical list — the 11-group dashboard)
 
-| Group label | Population | Sub-tree depth |
-|---|---|---|
-| **URBANISM** | Indigenous Americans (Black Americans) | **Deep** — regional + subcultural + AAVE intensity |
-| **Lowcountry / Coastal-South** | White Southern, Charleston/Bluffton/Savannah | Moderate (Coastal Brewing primary domain) |
-| **Anglo-American Regional** | White American, non-Southern | Moderate (NE / Midwest / West / Plains) |
-| **Latin American** | Hispanic / Latino across origins | Moderate (Mex-Am / Cuban / PR / Domn / Colombian / Argentine) |
-| **Caribbean** | Jamaican / Trinidadian / Haitian / Bahamian | Stub |
-| **African (continental)** | Nigerian / Ghanaian / Kenyan / South African | Stub |
-| **MENA** | Levantine / Gulf / North African / Iranian / Turkish | Stub |
-| **Asian American** | Korean / Viet / Chinese / Japanese / South Asian | Stub |
-| **Native Nations** | Navajo / Lakota / Cherokee / Inuit | Stub |
-| **Jewish American** | Ashkenazi NYC / LA / Modern Orthodox / Hasidic | Stub |
-| **Constructed / Conlang** | Belter Creole, brand-conlangs | Existing (`syntax-library/belter-creole.md`) |
+Each group has its own folder under `dialect-library/<GROUP>/` with a
+group-root README plus regional/ and subcultural/ subfolders. The
+build state column tracks how filled-out each tree is.
 
-Each group has a folder under `dialect-library/` with one `.md` per
-dialect / register. The folder layout intentionally mirrors the
-existing `syntax-library/` pattern so both libraries can be loaded
-the same way at runtime.
+| Group label | Population | Group root | Build state |
+|---|---|---|---|
+| **URBANISM** | Indigenous Americans (Black Americans) | `URBANISM/` | **Deep** — 6 regional files + AAVE-intensity scale + church.md subcultural; East-Coast NY has audio + transcripts. Reference shape for all other groups. |
+| **Lowcountry / Coastal-South** | White Southern, Charleston/Bluffton/Savannah | `lowcountry-coastal-south/` | Header (build out: Charleston / Bluffton-Beaufort / Savannah / Hilton Head / Port Royal sub-files) |
+| **Anglo-American Regional** | White American, non-Southern | `anglo-american-regional/` | Header (build out: NE / Midwest / West / Plains / Pacific NW / Mountain) |
+| **Latin American** | Hispanic / Latino across origins | `latin-american/` | Header (build out: Mex-Am / Cuban-Am / PR / Dominican / Colombian / Argentine / Tejano / Chicano) |
+| **Caribbean** | Jamaican / Trinidadian / Haitian / Bahamian | `caribbean/` | Header (build out: Jamaican / Trini / Haitian / Bajan / Vincentian / Bahamian / Belizean) |
+| **African (continental)** | Nigerian / Ghanaian / Kenyan / South African | `african-continental/` | Header (build out: Nigerian / Ghanaian / Kenyan / South African / Ethiopian / Eritrean / Senegalese / Cameroonian) |
+| **MENA** | Levantine / Gulf / North African / Iranian / Turkish | `mena/` | Header (build out: Levantine / Gulf / Egyptian / Maghreb / Iranian / Turkish / Kurdish) |
+| **Asian American** | Korean / Viet / Chinese / Japanese / South Asian | `asian-american/` | Header (build out: Korean / Vietnamese / Chinese / Japanese / Filipino / South Asian / SE Asian) |
+| **Native Nations** | Navajo / Lakota / Cherokee / Inuit | `native-nations/` | Header (build out: Navajo / Lakota / Cherokee / Inuit / Hopi / Pueblo / Iroquois / Pacific Coastal) |
+| **Jewish American** | Ashkenazi NYC / LA / Modern Orthodox / Hasidic | `jewish-american/` | Header (build out: Ashkenazi NYC / LA / Modern Orthodox / Hasidic / Sephardic) |
+| **Constructed / Conlang** | Belter Creole, brand-conlangs | `syntax-library/` (sibling tree) | Existing — Belter Creole is canonical; future brand-conlangs land here. |
+
+The folder layout intentionally mirrors the existing `syntax-library/`
+pattern so both libraries can be loaded the same way at runtime.
 
 ## How to use this library
 
-**For voice procurement (procure_voice.py):** when picking a source
-audio sample, check the target character's ethnic label + dialect
-in this library before selecting from archive.org / OneDrive / etc.
+**For voice procurement (procure_voice.py / research_voice_register.py):**
+when picking a source audio sample, check the target character's
+ethnic label + dialect in this library, then run the analyzer
+(`scripts/analyze_voice.py`) against the candidate target profile
+to verify the acoustic match.
 
 **For TTS / system prompt:** when generating text for a character,
 load the matching dialect file as register guidance for the LLM
-(vocabulary, density, sentence patterns, anti-patterns).
+(vocabulary, density, sentence patterns, anti-patterns) AND apply
+register modulation per the deployment surface — see
+`REGISTER-MODULATION.md` (doctrine) and `scripts/register_modulator.py`
+(applies the doctrine programmatically). Voice (acoustic profile) is
+character-invariant; lexicon density modulates by surface.
 
 **For casting:** when adding a new Boomer_Ang to the cast, assign
-**ethnic group → dialect → AAVE/density level** explicitly in the
-character spec (`character-specs/<vertical>/<id>.yaml`).
+**ethnic group → dialect → AAVE/density level → home-register-with-
+code-switch-range** explicitly in the character spec
+(`character-specs/<vertical>/<id>.yaml`), AND add an entry in the
+vertical's environment table (`cast-environments/<vertical>.yaml`)
+mapping which surfaces the character appears on and the operating
+register at each.
 
 ## Coastal Brewing Co. cast assignments (initial)
 

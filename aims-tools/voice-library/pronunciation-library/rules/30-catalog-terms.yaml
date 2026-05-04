@@ -1,0 +1,91 @@
+# 30-catalog-terms.yaml — Coffee / tea / herbal / origin / place names
+# Add entries as owner ear-flags TTS mispronunciations.
+
+metadata:
+  name: catalog-terms
+  scope: [all]
+  priority: 30
+  description: Coffee / tea / herbal / origin terms + Coastal place names.
+
+rules:
+  # Herbals
+  - id: word.chamomile
+    type: regex
+    pattern: "\\bchamomile\\b"
+    replacement: "kammomile"
+    case_sensitive: false
+    notes: "Inworld default reads 'cham-o-mile'; correct phoneme KAM-uh-mile."
+
+  - id: word.matcha
+    type: regex
+    pattern: "\\bmatcha\\b"
+    replacement: "matcha"
+    case_sensitive: false
+    no_rewrite: true
+    notes: "matcha — verify TTS pronounces MAH-cha (not MATCH-a). If wrong, add phoneme rewrite."
+
+  - id: word.kombucha
+    type: regex
+    pattern: "\\bkombucha\\b"
+    replacement: "kombucha"
+    case_sensitive: false
+    no_rewrite: true
+    notes: "kombucha — verify kom-BOO-cha. Add rewrite if TTS gets it wrong."
+
+  # Origin terms (Temecula supplier canon — country-only, never supplier name)
+  - id: word.yirgacheffe
+    type: regex
+    pattern: "\\bYirgacheffe\\b"
+    replacement: "year-guh-cheff"
+    case_sensitive: false
+    notes: "Ethiopian region; TTS often syllable-mangles. Phoneme YEAR-guh-cheff."
+
+  - id: word.sumatra
+    type: regex
+    pattern: "\\bSumatra\\b"
+    replacement: "Sumatra"
+    case_sensitive: false
+    no_rewrite: true
+    notes: "Sumatra — verify soo-MAH-trah. Likely OK."
+
+  - id: word.guatemala
+    type: regex
+    pattern: "\\bGuatemala\\b"
+    replacement: "Guatemala"
+    case_sensitive: false
+    no_rewrite: true
+    notes: "Verify gwah-tuh-MAH-luh."
+
+  # Coastal place names
+  - id: place.bluffton
+    type: regex
+    pattern: "\\bBluffton\\b"
+    replacement: "Bluffton"
+    case_sensitive: false
+    no_rewrite: true
+    notes: "Bluffton SC — BLUFF-tuhn. Verify."
+
+  - id: place.beaufort
+    type: regex
+    pattern: "\\bBeaufort\\b"
+    replacement: "Bewfert"
+    case_sensitive: false
+    notes: |
+      Beaufort SC is pronounced BEW-furt (not BO-furt like Beaufort NC).
+      Lowcountry-specific phoneme.
+
+  - id: place.savannah
+    type: regex
+    pattern: "\\bSavannah\\b"
+    replacement: "Savannah"
+    case_sensitive: false
+    no_rewrite: true
+    notes: "Verify suh-VAN-uh."
+
+  - id: place.charleston
+    type: regex
+    pattern: "\\bCharleston\\b"
+    replacement: "Charleston"
+    case_sensitive: false
+    no_rewrite: true
+    notes: "Verify CHARL-stuhn."

@@ -32,8 +32,9 @@
   but with full second syllable). Heavy nasalization.
 - **Vocabulary markers**: *bag* (money), *cap* / *no cap*, *trap*
   (anywhere you grind), *plug*, *the wave*, *foreal foreal*, *period*.
-- **Anchors**: T.I. interviews; Migos cadence; Killer Mike musical-
-  vs-spoken; Big Boi (Outkast) measured tempo.
+- **Anchors**: T.I. interviews; Killer Mike musical-vs-spoken;
+  Big Boi (Outkast) measured tempo; Jeezy long-form
+  conversational.
 
 ### 3. Atlanta megachurch / preacher cadence
 - **AAVE intensity**: 2-4 with controlled rise. Builds from low to
@@ -64,8 +65,10 @@
 - **Vocabulary markers**: *foreal* (intensifier), *bruh*, *chill*,
   *that ain't it*, *period*, *deadass* (newer, NE-influenced),
   *finna* (heavy), *we outside*.
-- **Anchors**: Lil Baby interviews; Future spoken (not rapped);
-  Quavo conversational; barbershop YouTube content.
+- **Anchors**: Lil Baby interviews; Gucci Mane recent
+  conversational (post-prison cleaner register);
+  21 Savage in long-form sit-down podcasts;
+  barbershop YouTube content.
 
 ## Cross-cuts
 

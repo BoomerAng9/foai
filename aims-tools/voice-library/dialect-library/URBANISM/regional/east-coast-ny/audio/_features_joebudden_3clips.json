@@ -1,0 +1,245 @@
+{
+  "target_profile": "acheevy_baritone",
+  "files_analyzed": 3,
+  "results": [
+    {
+      "file": "C:\\Users\\rishj\\foai\\aims-tools\\voice-library\\dialect-library\\URBANISM\\regional\\east-coast-ny\\audio\\joebudden_episode_t2400.mp3",
+      "filename": "joebudden_episode_t2400.mp3",
+      "sample_rate": 48000,
+      "samples": 2880000,
+      "loaded_duration_sec": 60.0,
+      "f0_hz_mean": 154.6152,
+      "f0_hz_median": 153.7767,
+      "f0_hz_std": 20.3714,
+      "f0_hz_min": 123.4708,
+      "f0_hz_max": 190.418,
+      "voiced_fraction": 0.6068,
+      "spectral_centroid_hz": 2594.5132,
+      "spectral_rolloff_hz": 5174.0052,
+      "spectral_bandwidth_hz": 2982.2026,
+      "zero_crossing_rate": 0.0587,
+      "rms_mean": 0.0863,
+      "rms_db": -21.2768,
+      "rms_std": 0.0769,
+      "speech_rate_syllables_per_sec": 3.9667,
+      "duration_sec": 30.0,
+      "hnr_db": 2.7425,
+      "mfcc_mean": [
+        -313.875,
+        103.912,
+        24.802,
+        26.529,
+        -24.951,
+        17.628,
+        3.906,
+        -17.255,
+        -11.245,
+        1.495,
+        -7.579,
+        -12.112,
+        -1.601
+      ],
+      "best_window_start_sec": 0.0,
+      "window_seconds": 30.0,
+      "windows_evaluated": 2,
+      "window_summaries": [
+        {
+          "start_sec": 0.0,
+          "match_percent": 41.3,
+          "f0_hz_mean": 154.6152,
+          "speech_rate_sps": 3.9667,
+          "hnr_db": 2.7425
+        },
+        {
+          "start_sec": 30.0,
+          "match_percent": 39.9,
+          "f0_hz_mean": 144.4093,
+          "speech_rate_sps": 4.9,
+          "hnr_db": 2.578
+        }
+      ],
+      "match": {
+        "overall_match_percent": 41.3,
+        "feature_scores": {
+          "f0_hz_mean": 0.14,
+          "f0_hz_median": 0.099,
+          "spectral_centroid_hz": 0.442,
+          "spectral_rolloff_hz": 0.536,
+          "speech_rate_syllables_per_sec": 0.745,
+          "hnr_db": 0.256,
+          "voiced_fraction": 0.96,
+          "rms_db": 0.996
+        },
+        "missing_features": []
+      }
+    },
+    {
+      "file": "C:\\Users\\rishj\\foai\\aims-tools\\voice-library\\dialect-library\\URBANISM\\regional\\east-coast-ny\\audio\\joebudden_episode_t300.mp3",
+      "filename": "joebudden_episode_t300.mp3",
+      "sample_rate": 48000,
+      "samples": 2880000,
+      "loaded_duration_sec": 60.0,
+      "f0_hz_mean": 94.2627,
+      "f0_hz_median": 90.3859,
+      "f0_hz_std": 21.3929,
+      "f0_hz_min": 66.1664,
+      "f0_hz_max": 134.1806,
+      "voiced_fraction": 0.4952,
+      "spectral_centroid_hz": 2166.1465,
+      "spectral_rolloff_hz": 3887.9088,
+      "spectral_bandwidth_hz": 2454.51,
+      "zero_crossing_rate": 0.0557,
+      "rms_mean": 0.0736,
+      "rms_db": -22.6669,
+      "rms_std": 0.0703,
+      "speech_rate_syllables_per_sec": 3.8333,
+      "duration_sec": 30.0,
+      "hnr_db": 2.4478,
+      "mfcc_mean": [
+        -333.226,
+        130.833,
+        15.074,
+        32.965,
+        -6.011,
+        10.654,
+        2.981,
+        -9.067,
+        -9.732,
+        -6.909,
+        -5.728,
+        -8.007,
+        -3.234
+      ],
+      "best_window_start_sec": 30.0,
+      "window_seconds": 30.0,
+      "windows_evaluated": 2,
+      "window_summaries": [
+        {
+          "start_sec": 0.0,
+          "match_percent": 72.6,
+          "f0_hz_mean": 133.3929,
+          "speech_rate_sps": 4.0,
+          "hnr_db": 4.6694
+        },
+        {
+          "start_sec": 30.0,
+          "match_percent": 81.6,
+          "f0_hz_mean": 94.2627,
+          "speech_rate_sps": 3.8333,
+          "hnr_db": 2.4478
+        }
+      ],
+      "match": {
+        "overall_match_percent": 81.6,
+        "feature_scores": {
+          "f0_hz_mean": 0.912,
+          "f0_hz_median": 0.929,
+          "spectral_centroid_hz": 0.801,
+          "spectral_rolloff_hz": 0.967,
+          "speech_rate_syllables_per_sec": 0.818,
+          "hnr_db": 0.232,
+          "voiced_fraction": 0.963,
+          "rms_db": 0.997
+        },
+        "missing_features": []
+      }
+    },
+    {
+      "file": "C:\\Users\\rishj\\foai\\aims-tools\\voice-library\\dialect-library\\URBANISM\\regional\\east-coast-ny\\audio\\joebudden_episode_t3600.mp3",
+      "filename": "joebudden_episode_t3600.mp3",
+      "sample_rate": 48000,
+      "samples": 2880000,
+      "loaded_duration_sec": 60.0,
+      "f0_hz_mean": 131.329,
+      "f0_hz_median": 136.9995,
+      "f0_hz_std": 32.8664,
+      "f0_hz_min": 68.1052,
+      "f0_hz_max": 175.0187,
+      "voiced_fraction": 0.3886,
+      "spectral_centroid_hz": 2458.6581,
+      "spectral_rolloff_hz": 5008.1263,
+      "spectral_bandwidth_hz": 2745.4784,
+      "zero_crossing_rate": 0.0611,
+      "rms_mean": 0.0549,
+      "rms_db": -25.2145,
+      "rms_std": 0.0698,
+      "speech_rate_syllables_per_sec": 3.6667,
+      "duration_sec": 30.0,
+      "hnr_db": 3.0976,
+      "mfcc_mean": [
+        -371.021,
+        86.724,
+        22.304,
+        27.398,
+        -14.482,
+        6.893,
+        3.244,
+        -6.926,
+        -5.189,
+        -0.895,
+        -3.264,
+        -5.993,
+        -1.003
+      ],
+      "best_window_start_sec": 30.0,
+      "window_seconds": 30.0,
+      "windows_evaluated": 2,
+      "window_summaries": [
+        {
+          "start_sec": 0.0,
+          "match_percent": 31.7,
+          "f0_hz_mean": 157.5253,
+          "speech_rate_sps": 5.1,
+          "hnr_db": 1.8438
+        },
+        {
+          "start_sec": 30.0,
+          "match_percent": 57.8,
+          "f0_hz_mean": 131.329,
+          "speech_rate_sps": 3.6667,
+          "hnr_db": 3.0976
+        }
+      ],
+      "match": {
+        "overall_match_percent": 57.8,
+        "feature_scores": {
+          "f0_hz_mean": 0.574,
+          "f0_hz_median": 0.334,
+          "spectral_centroid_hz": 0.556,
+          "spectral_rolloff_hz": 0.603,
+          "speech_rate_syllables_per_sec": 0.897,
+          "hnr_db": 0.287,
+          "voiced_fraction": 0.722,
+          "rms_db": 0.922
+        },
+        "missing_features": []
+      }
+    }
+  ],
+  "ranked": [
+    {
+      "rank": 1,
+      "file": "joebudden_episode_t300.mp3",
+      "match_percent": 81.6,
+      "f0_hz_mean": 94.2627,
+      "speech_rate_sps": 3.8333,
+      "duration_sec": 30.0
+    },
+    {
+      "rank": 2,
+      "file": "joebudden_episode_t3600.mp3",
+      "match_percent": 57.8,
+      "f0_hz_mean": 131.329,
+      "speech_rate_sps": 3.6667,
+      "duration_sec": 30.0
+    },
+    {
+      "rank": 3,
+      "file": "joebudden_episode_t2400.mp3",
+      "match_percent": 41.3,
+      "f0_hz_mean": 154.6152,
+      "speech_rate_sps": 3.9667,
+      "duration_sec": 30.0
+    }
+  ]
+}

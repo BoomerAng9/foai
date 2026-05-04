@@ -27,8 +27,11 @@ type Agent = "sales" | "marketing";
 // speaks to users. Internal routing across lieutenants (Sal/LUC/Melli) still
 // happens server-side via the chain-of-command, but the customer never sees
 // any name except ACHEEVY. Do not surface employee names in this component.
-const ACHEEVY_LABEL = "ACHEEVY";
-const ACHEEVY_INITIALS = "AC";
+// Customer-visible labels — per owner directive 2026-05-03 17:30 swap
+// from ACHEEVY to Sal as customer-facing lead. Internal const names kept
+// unchanged to minimize churn; only the displayed VALUES update.
+const ACHEEVY_LABEL = "Sal";
+const ACHEEVY_INITIALS = "S";
 
 interface ChatMessage {
   role: "user" | "agent";
@@ -67,7 +70,7 @@ export function ChatPanel({
   const router = useRouter();
   // `employee` tracks the internal routing target so the per-cup AnimationRouter
   // can pick the right thinking animation. The value is NEVER displayed as text.
-  const [employee, setEmployee] = React.useState("acheevy");
+  const [employee, setEmployee] = React.useState("sal_ang");
   // Greeting state — populated from GET /api/v1/users/greeting on mount,
   // OR rehydrated from sessionStorage when the customer navigates between
   // pages (Guide Me → /products etc.) so the visible conversation persists
@@ -85,8 +88,8 @@ export function ChatPanel({
     }
     return [{
       role: "agent" as const,
-      employee: "acheevy",
-      content: "Welcome to Coastal Brewing Co. I'm ACHEEVY. How can I help you today?",
+      employee: "sal_ang",
+      content: "Welcome to Coastal Brewing Co. I'm Sal — Lead Barista. What you looking for today?",
       ts: Date.now(),
     }];
   });
@@ -202,7 +205,7 @@ export function ChatPanel({
         } else if (data.greeting) {
           setMessages([{
             role: "agent",
-            employee: "acheevy",
+            employee: "sal_ang",
             content: data.greeting,
             ts: Date.now(),
           }]);
@@ -419,7 +422,7 @@ export function ChatPanel({
           // never sees lieutenant names or routing reasons. Surface a single
           // neutral signal so the user knows ACHEEVY is processing.
           setEmployee(msg.to_employee);
-          setEscalationMsg("ACHEEVY thinking...");
+          setEscalationMsg("Sal thinking...");
           setTimeout(() => setEscalationMsg(null), 2500);
           break;
 
@@ -463,14 +466,14 @@ export function ChatPanel({
       const reply = data.reply || data;
       setMessages((m) => [...m, {
         role: "agent",
-        employee: "acheevy",
+        employee: "sal_ang",
         content: reply.content || reply.reply?.content || "Hit a snag. Try again.",
         ts: Date.now(),
       }]);
     } catch {
       setMessages((m) => [...m, {
         role: "agent",
-        employee: "acheevy",
+        employee: "sal_ang",
         content: "Connection issue. Try again in a moment.",
         ts: Date.now(),
       }]);
@@ -766,7 +769,7 @@ function PlayVoiceButton({
       const r = await fetch("/api/v1/voice/synthesize", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text, character_id: "acheevy" }),
+        body: JSON.stringify({ text, character_id: "sal_ang" }),
       });
       if (!r.ok) throw new Error(`HTTP ${r.status}`);
       const data = await r.json();

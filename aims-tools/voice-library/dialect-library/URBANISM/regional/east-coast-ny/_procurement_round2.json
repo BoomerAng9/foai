@@ -1,0 +1,296 @@
+{
+  "results": [
+    {
+      "speaker": "AZ Anthony Cruz",
+      "register_label": "queensbridge-affiliated-baritone",
+      "group": "URBANISM",
+      "region": "east-coast-ny",
+      "target_dir": "C:\\Users\\rishj\\foai\\aims-tools\\voice-library\\dialect-library\\URBANISM\\regional\\east-coast-ny\\audio",
+      "candidates_found": 1,
+      "downloads": [
+        {
+          "audio_file": "az-anthony-cruz_az-on-illmatic-jay-z-the-firm-mixtape-cu_23748ac4.mp3",
+          "sidecar": "az-anthony-cruz_az-on-illmatic-jay-z-the-firm-mixtape-cu_23748ac4.provenance.json",
+          "transcript_sidecar": "az-anthony-cruz_az-on-illmatic-jay-z-the-firm-mixtape-cu_23748ac4.transcript.json",
+          "transcript_block_count": 6991,
+          "source_url": "https://www.youtube.com/watch?v=0mehvL2DLXs",
+          "title": "AZ On Illmatic, JAY-Z, The Firm, Mixtape Culture, Untold Stories, New Album & More | Drink Champs"
+        }
+      ],
+      "analysis_summary": {
+        "files_analyzed": 3,
+        "ranked_top": [
+          {
+            "rank": 1,
+            "file": "nasir-jones_2001-nas-disses-hot-97-camron-nore-nelly_e4f3a630.mp3",
+            "match_percent": 57.7,
+            "f0_hz_mean": 122.3393,
+            "speech_rate_sps": 1.8667,
+            "duration_sec": 30.0
+          },
+          {
+            "rank": 2,
+            "file": "nas_nas-drink-champs-full-episode_e18ac00c.mp3",
+            "match_percent": 33.6,
+            "f0_hz_mean": 151.0979,
+            "speech_rate_sps": 3.4333,
+            "duration_sec": 30.0
+          },
+          {
+            "rank": 3,
+            "file": "az-anthony-cruz_az-on-illmatic-jay-z-the-firm-mixtape-cu_23748ac4.mp3",
+            "match_percent": 29.3,
+            "f0_hz_mean": 187.5472,
+            "speech_rate_sps": 4.1333,
+            "duration_sec": 30.0
+          }
+        ]
+      }
+    },
+    {
+      "speaker": "Cormega",
+      "register_label": "queensbridge-baritone",
+      "group": "URBANISM",
+      "region": "east-coast-ny",
+      "target_dir": "C:\\Users\\rishj\\foai\\aims-tools\\voice-library\\dialect-library\\URBANISM\\regional\\east-coast-ny\\audio",
+      "candidates_found": 1,
+      "downloads": [
+        {
+          "audio_file": "cormega_cormega-talks-his-career-shares-stories-_925c8eaa.mp3",
+          "sidecar": "cormega_cormega-talks-his-career-shares-stories-_925c8eaa.provenance.json",
+          "transcript_sidecar": "cormega_cormega-talks-his-career-shares-stories-_925c8eaa.transcript.json",
+          "transcript_block_count": 10094,
+          "source_url": "https://www.youtube.com/watch?v=D1Uf3fOmo80",
+          "title": "Cormega Talks His Career, Shares Stories Of Big Pun, Nas, The Firm & More | Drink Champs"
+        }
+      ],
+      "analysis_summary": {
+        "files_analyzed": 4,
+        "ranked_top": [
+          {
+            "rank": 1,
+            "file": "nasir-jones_2001-nas-disses-hot-97-camron-nore-nelly_e4f3a630.mp3",
+            "match_percent": 57.7,
+            "f0_hz_mean": 122.3393,
+            "speech_rate_sps": 1.8667,
+            "duration_sec": 30.0
+          },
+          {
+            "rank": 2,
+            "file": "cormega_cormega-talks-his-career-shares-stories-_925c8eaa.mp3",
+            "match_percent": 41.4,
+            "f0_hz_mean": 153.3733,
+            "speech_rate_sps": 3.2333,
+            "duration_sec": 30.0
+          },
+          {
+            "rank": 3,
+            "file": "nas_nas-drink-champs-full-episode_e18ac00c.mp3",
+            "match_percent": 33.6,
+            "f0_hz_mean": 151.0979,
+            "speech_rate_sps": 3.4333,
+            "duration_sec": 30.0
+          },
+          {
+            "rank": 4,
+            "file": "az-anthony-cruz_az-on-illmatic-jay-z-the-firm-mixtape-cu_23748ac4.mp3",
+            "match_percent": 29.3,
+            "f0_hz_mean": 187.5472,
+            "speech_rate_sps": 4.1333,
+            "duration_sec": 30.0
+          }
+        ]
+      }
+    },
+    {
+      "speaker": "Havoc Mobb Deep",
+      "register_label": "queensbridge-baritone-thun-language",
+      "group": "URBANISM",
+      "region": "east-coast-ny",
+      "target_dir": "C:\\Users\\rishj\\foai\\aims-tools\\voice-library\\dialect-library\\URBANISM\\regional\\east-coast-ny\\audio",
+      "candidates_found": 1,
+      "downloads": [
+        {
+          "audio_file": "havoc-mobb-deep_havoc-drink-champs-full-episode_22133b83.mp3",
+          "sidecar": "havoc-mobb-deep_havoc-drink-champs-full-episode_22133b83.provenance.json",
+          "transcript_sidecar": "havoc-mobb-deep_havoc-drink-champs-full-episode_22133b83.transcript.json",
+          "transcript_block_count": 2381,
+          "source_url": "https://www.youtube.com/watch?v=hVPkGO_4MdU",
+          "title": "Havoc | Drink Champs (Full Episode)"
+        }
+      ],
+      "analysis_summary": {
+        "files_analyzed": 5,
+        "ranked_top": [
+          {
+            "rank": 1,
+            "file": "havoc-mobb-deep_havoc-drink-champs-full-episode_22133b83.mp3",
+            "match_percent": 63.4,
+            "f0_hz_mean": 122.5689,
+            "speech_rate_sps": 3.4667,
+            "duration_sec": 30.0
+          },
+          {
+            "rank": 2,
+            "file": "nasir-jones_2001-nas-disses-hot-97-camron-nore-nelly_e4f3a630.mp3",
+            "match_percent": 57.7,
+            "f0_hz_mean": 122.3393,
+            "speech_rate_sps": 1.8667,
+            "duration_sec": 30.0
+          },
+          {
+            "rank": 3,
+            "file": "cormega_cormega-talks-his-career-shares-stories-_925c8eaa.mp3",
+            "match_percent": 41.4,
+            "f0_hz_mean": 153.3733,
+            "speech_rate_sps": 3.2333,
+            "duration_sec": 30.0
+          },
+          {
+            "rank": 4,
+            "file": "nas_nas-drink-champs-full-episode_e18ac00c.mp3",
+            "match_percent": 33.6,
+            "f0_hz_mean": 151.0979,
+            "speech_rate_sps": 3.4333,
+            "duration_sec": 30.0
+          },
+          {
+            "rank": 5,
+            "file": "az-anthony-cruz_az-on-illmatic-jay-z-the-firm-mixtape-cu_23748ac4.mp3",
+            "match_percent": 29.3,
+            "f0_hz_mean": 187.5472,
+            "speech_rate_sps": 4.1333,
+            "duration_sec": 30.0
+          }
+        ]
+      }
+    },
+    {
+      "speaker": "GZA Wu-Tang",
+      "register_label": "shaolin-baritone-wu-tang-slang",
+      "group": "URBANISM",
+      "region": "east-coast-ny",
+      "target_dir": "C:\\Users\\rishj\\foai\\aims-tools\\voice-library\\dialect-library\\URBANISM\\regional\\east-coast-ny\\audio",
+      "candidates_found": 1,
+      "downloads": [
+        {
+          "audio_file": "gza-wu-tang_rza-on-wu-tang-forever-legacy-shaolin-wi_c751c1ff.mp3",
+          "sidecar": "gza-wu-tang_rza-on-wu-tang-forever-legacy-shaolin-wi_c751c1ff.provenance.json",
+          "transcript_sidecar": "gza-wu-tang_rza-on-wu-tang-forever-legacy-shaolin-wi_c751c1ff.transcript.json",
+          "transcript_block_count": 12697,
+          "source_url": "https://www.youtube.com/watch?v=UyG1tbpwSxY",
+          "title": "RZA on Wu-Tang Forever, Legacy & Shaolin Wisdom | Full Episode"
+        }
+      ],
+      "analysis_summary": {
+        "files_analyzed": 15,
+        "ranked_top": [
+          {
+            "rank": 1,
+            "file": "nas_joe-budden-djpremier-fatherhood-classics_full.mp3",
+            "match_percent": 85.5,
+            "f0_hz_mean": 110.0277,
+            "speech_rate_sps": 3.0667,
+            "duration_sec": 30.0
+          },
+          {
+            "rank": 2,
+            "file": "_acheevy_clone_source_nas_joebudden_30s.mp3",
+            "match_percent": 82.4,
+            "f0_hz_mean": 89.1438,
+            "speech_rate_sps": 3.1667,
+            "duration_sec": 30.0
+          },
+          {
+            "rank": 3,
+            "file": "joebudden_episode_t300.mp3",
+            "match_percent": 81.6,
+            "f0_hz_mean": 94.2627,
+            "speech_rate_sps": 3.8333,
+            "duration_sec": 30.0
+          },
+          {
+            "rank": 4,
+            "file": "joe-budden_provisional_questioning-host_t300+30s_F0-94hz.mp3",
+            "match_percent": 81.0,
+            "f0_hz_mean": 94.5883,
+            "speech_rate_sps": 3.9447,
+            "duration_sec": 29.9137
+          },
+          {
+            "rank": 5,
+            "file": "nas-or-premier_provisional_substantive-answer_t300+0s_F0-133hz.mp3",
+            "match_percent": 71.3,
+            "f0_hz_mean": 132.7246,
+            "speech_rate_sps": 4.1682,
+            "duration_sec": 29.989
+          }
+        ]
+      }
+    },
+    {
+      "speaker": "Raekwon Wu-Tang",
+      "register_label": "shaolin-mafia-coded-wu-tang-slang",
+      "group": "URBANISM",
+      "region": "east-coast-ny",
+      "target_dir": "C:\\Users\\rishj\\foai\\aims-tools\\voice-library\\dialect-library\\URBANISM\\regional\\east-coast-ny\\audio",
+      "candidates_found": 1,
+      "downloads": [
+        {
+          "audio_file": "raekwon-wu-tang_drink-champs-episode-20-w-raekwon-talks-_3a0768c8.mp3",
+          "sidecar": "raekwon-wu-tang_drink-champs-episode-20-w-raekwon-talks-_3a0768c8.provenance.json",
+          "transcript_sidecar": "raekwon-wu-tang_drink-champs-episode-20-w-raekwon-talks-_3a0768c8.transcript.json",
+          "transcript_block_count": 5057,
+          "source_url": "https://www.youtube.com/watch?v=kWPlN-ZL-xM",
+          "title": "DRINK CHAMPS: Episode 20 w/ Raekwon | Talks Wu-Tang, Purple Tape, ODB, Michael Jackon + more"
+        }
+      ],
+      "analysis_summary": {
+        "files_analyzed": 16,
+        "ranked_top": [
+          {
+            "rank": 1,
+            "file": "nas_joe-budden-djpremier-fatherhood-classics_full.mp3",
+            "match_percent": 85.5,
+            "f0_hz_mean": 110.0277,
+            "speech_rate_sps": 3.0667,
+            "duration_sec": 30.0
+          },
+          {
+            "rank": 2,
+            "file": "_acheevy_clone_source_nas_joebudden_30s.mp3",
+            "match_percent": 82.4,
+            "f0_hz_mean": 89.1438,
+            "speech_rate_sps": 3.1667,
+            "duration_sec": 30.0
+          },
+          {
+            "rank": 3,
+            "file": "joebudden_episode_t300.mp3",
+            "match_percent": 81.6,
+            "f0_hz_mean": 94.2627,
+            "speech_rate_sps": 3.8333,
+            "duration_sec": 30.0
+          },
+          {
+            "rank": 4,
+            "file": "joe-budden_provisional_questioning-host_t300+30s_F0-94hz.mp3",
+            "match_percent": 81.0,
+            "f0_hz_mean": 94.5883,
+            "speech_rate_sps": 3.9447,
+            "duration_sec": 29.9137
+          },
+          {
+            "rank": 5,
+            "file": "nas-or-premier_provisional_substantive-answer_t300+0s_F0-133hz.mp3",
+            "match_percent": 71.3,
+            "f0_hz_mean": 132.7246,
+            "speech_rate_sps": 4.1682,
+            "duration_sec": 29.989
+          }
+        ]
+      }
+    }
+  ],
+  "ingested_at": "2026-05-03T21:48:06+00:00"
+}

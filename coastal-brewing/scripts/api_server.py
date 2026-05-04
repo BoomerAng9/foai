@@ -49,6 +49,75 @@ try:
 except Exception:
     STRIPE_AVAILABLE = False
 
+# Surface-aware register modulation (voice-library/scripts/register_modulator.py).
+# Soft import — the runner stays functional if the voice-library tree is not present
+# (e.g., on a stripped-down deploy image). When available, the modulator emits a
+# per-(character × surface) preamble that gates dialect lexicon to the deployment
+# environment per dialect-library/REGISTER-MODULATION.md doctrine.
+_VOICE_LIBRARY_CANDIDATES = [
+    pathlib.Path(os.environ.get("VOICE_LIBRARY_SCRIPTS_DIR", "")),
+    ROOT.parent / "aims-tools" / "voice-library" / "scripts",
+    ROOT / "voice-library" / "scripts",  # VPS layout: /app/voice-library/scripts
+]
+_VOICE_LIBRARY_SCRIPTS = pathlib.Path(".")  # placeholder, overwritten below
+REGISTER_MODULATOR_AVAILABLE = False
+for _vl in _VOICE_LIBRARY_CANDIDATES:
+    if _vl and str(_vl) not in ("", ".") and (_vl / "register_modulator.py").exists():
+        sys.path.insert(0, str(_vl))
+        _VOICE_LIBRARY_SCRIPTS = _vl
+        try:
+            from register_modulator import operating_register_for, preamble_for  # noqa: E402
+            REGISTER_MODULATOR_AVAILABLE = True
+            break
+        except Exception:
+            pass
+
+# Pronunciation engine (TTS-only rewrites for brand / catalog / cadence /
+# Belter Creole / URBANISM phonetics — see voice-library/pronunciation-library/).
+# Try multiple candidate paths so this works on both local-dev (foai/aims-tools/...)
+# and the VPS deploy (/docker/coastal-brewing/pronunciation-library/).
+_PRONUNCIATION_ENGINE_CANDIDATES = [
+    pathlib.Path(os.environ.get("PRONUNCIATION_LIBRARY_ENGINE_DIR", "")),
+    ROOT.parent / "aims-tools" / "voice-library" / "pronunciation-library" / "engine",
+    ROOT / "pronunciation-library" / "engine",  # VPS layout: /docker/coastal-brewing/pronunciation-library/engine
+]
+_PRONUNCIATION_RULES_CANDIDATES = [
+    pathlib.Path(os.environ.get("PRONUNCIATION_LIBRARY_DIR", "")),
+    ROOT.parent / "aims-tools" / "voice-library" / "pronunciation-library" / "rules",
+    ROOT / "pronunciation-library" / "rules",
+]
+_PRONUNCIATION_ENGINE_AVAILABLE = False
+_PRONUNCIATION_IMPORT_ERROR: Optional[str] = None
+# Filter to candidates with a non-empty path AND that contain pronunciation_engine.py
+_valid_engine_dirs = [
+    p for p in _PRONUNCIATION_ENGINE_CANDIDATES
+    if p and str(p) not in ("", ".") and (p / "pronunciation_engine.py").exists()
+]
+for _engine_dir in _valid_engine_dirs:
+    sys.path.insert(0, str(_engine_dir))
+    # Co-locate the rules dir env var BEFORE import so the engine
+    # picks it up at first-call time.
+    for _rules_dir in _PRONUNCIATION_RULES_CANDIDATES:
+        if _rules_dir and str(_rules_dir) not in ("", ".") and _rules_dir.exists():
+            os.environ["PRONUNCIATION_LIBRARY_DIR"] = str(_rules_dir)
+            break
+    try:
+        from pronunciation_engine import rewrite_for_tts as _rewrite_for_tts  # noqa: E402
+        _PRONUNCIATION_ENGINE_AVAILABLE = True
+        break  # only break on SUCCESSFUL import — the bug fix
+    except Exception as _e:
+        _PRONUNCIATION_IMPORT_ERROR = f"{type(_e).__name__}: {_e}"
+        # try next candidate
+
+# Map the runner's lowercase employee keys to the cast-environments YAML keys.
+# Cast YAML lives at voice-library/dialect-library/cast-environments/coastal-brewing.yaml
+_EMPLOYEE_TO_CAST_KEY = {
+    "sal_ang":       "Sal_Ang",
+    "luc_ang":       "LUC_Ang",
+    "melli_capensi": "Melli_Capensi",
+    "acheevy":       "ACHEEVY",
+}
+
 GATEWAY_TOKEN = os.environ.get("COASTAL_GATEWAY_TOKEN", "")
 COASTAL_PUBLIC_URL = os.environ.get("COASTAL_PUBLIC_URL", "https://brewing.foai.cloud")
 NEMOCLAW_URL = os.environ.get("NEMOCLAW_URL", "")
@@ -2453,6 +2522,34 @@ _EMPLOYEE_MODEL = {
 # sample / how was your drink" — ACHEEVY is an ONLINE chat agent, not a
 # physical barista; customers aren't actually drinking anything mid-chat).
 _BRAND_PREAMBLE = (
+    "═══════════════════════════════════════════════════════════════\n"
+    "ZERO-FABRICATION HARD GATE — READ BEFORE EVERY RESPONSE\n"
+    "═══════════════════════════════════════════════════════════════\n"
+    "Coastal Brewing Co. sells REAL products to REAL customers paying REAL money. "
+    "EVERY claim you make about a product — origin, processing, roastery, brewing "
+    "method, flavor profile, ingredients, prior customer history — must be grounded "
+    "in the CATALOG block below or in explicit session-context provided by the system. "
+    "If the catalog block does not state an attribute the customer asks about, you "
+    "MUST say one of the following verbatim styles instead of inventing:\n"
+    "  - \"I don't have that detail in front of me — let me check with the team and "
+    "circle back.\"\n"
+    "  - \"Catalog doesn't list that one for this SKU; want me to flag it so the "
+    "owner can confirm?\"\n"
+    "  - \"That's not something I can confirm right now. The honest answer beats a "
+    "guess.\"\n"
+    "FORBIDDEN — these are firing offenses, no exceptions:\n"
+    "  • Inventing supplier names, roastery locations, processing methods (Swiss "
+    "water, washed, honey, natural, anaerobic), country-of-origin, varietals, "
+    "or altitude.\n"
+    "  • Stage-direction or roleplay narration: '[Pouring a cup]', '*grinds the "
+    "beans*', 'Here you go — give that a sip', anything written as physical action.\n"
+    "  • Fake session memory: 'welcome back', 'I remember you had your eye on', "
+    "'last time you mentioned' — UNLESS the system explicitly provides a customer-"
+    "history context block this turn.\n"
+    "  • Smoothing-over phrases like 'small batch from our partner roastery' that "
+    "imply specifics the catalog doesn't confirm.\n"
+    "Honest answer beats a confident guess. Every time.\n"
+    "═══════════════════════════════════════════════════════════════\n\n"
     "BRAND CONTEXT — Coastal Brewing Co. sells small-batch COFFEE, "
     "whole-leaf TEA, and ceremonial MATCHA, plus flavored coffee blends "
     "and functional/mushroom coffees. We are a coffee + tea + matcha brand. "
@@ -2476,6 +2573,28 @@ _BRAND_PREAMBLE = (
     "'try a sip,' 'I'll grind it for you,' or any phrase that simulates "
     "physical service. Recommend products through descriptions, brewing "
     "guidance, and links — let the customer decide to order.\n\n"
+    "HARD RULE — NO ROLEPLAY ACTION NARRATION: You do NOT narrate physical "
+    "actions in stage-directions or asterisks or brackets. Forbidden patterns: "
+    "'[Pouring a small cup, the rich aroma fills the air]', "
+    "'*pours coffee*', '(grinds the beans)', 'Here you go — give that a sip'. "
+    "You are TEXT only. The customer reads what you write; nothing pours, "
+    "nothing brews, nothing fills the air. If you want to describe a flavor "
+    "profile, describe it as a tasting note (third person), not as if you're "
+    "handing the customer a cup.\n\n"
+    "HARD RULE — NO FAKE SESSION MEMORY: Do NOT claim to remember prior "
+    "visits, prior orders, or prior conversations unless the system explicitly "
+    "provides a customer-history context block. Phrases FORBIDDEN unless "
+    "history is provided: 'welcome back,' 'I remember you had your eye on,' "
+    "'last time you mentioned,' 'as we discussed before.' First-time greeting "
+    "is the canonical default per ACHEEVY canon.\n\n"
+    "HARD RULE — NO SUPPLIER OR PROCESSING-LOCATION CLAIMS NOT IN CATALOG: "
+    "Do NOT say a coffee is 'roasted in Bluffton,' 'Swiss water processed,' "
+    "'Colombian-origin,' or claim ANY origin/processing/roastery detail unless "
+    "those exact attributes are in the catalog block below. The supplier name "
+    "is NEVER customer-facing. When a customer asks about origin, defer to "
+    "what the catalog explicitly states; if catalog doesn't say, answer "
+    "generically (e.g. 'small-batch from our partner roastery') without "
+    "inventing specifics.\n\n"
     "HARD RULE — INLINE PRODUCT CARDS: When you mention a specific SKU "
     "from the catalog, IMMEDIATELY follow the SKU name with a marker in "
     "this exact form: [product:<sku-id>]. The frontend will REPLACE the "
@@ -2521,35 +2640,61 @@ def _coastal_catalog_context() -> str:
 
 
 # Employee → system prompt factory (injects persona + authority context)
-def _employee_system_prompt(employee: str) -> str:
+def _employee_system_prompt(employee: str, surface: str = "customer_chat_panel") -> str:
     prompts = {
         "sal_ang": (
-            "You are Sal_Ang — Sales Lead at Coastal Brewing Co., T3 retail authority. "
-            "Lowcountry Southern register. Warm, direct, place-anchored. "
-            "Discount authority: ≤10% PPU, ≤15% bundles — hold the floor, no exceptions. "
+            "You are Sal_Ang — Lead Barista at Coastal Brewing Co. The customer-facing voice — first contact for every visitor. "
+            "American Black male, culturally aware, up-north background (NYC / NJ / Philly), now lives in the Coastal Georgia / Carolina region. Well-articulated and smooth — fly without trying. AAVE 1-2 conversational professional layered with soft Southern warmth from years on the coast. "
+            "Authority: deals-of-the-day at your discretion + standing discounts ≤10% PPU, ≤15% bundles. HOLD the floor. Above ceiling: route to ACHEEVY by saying \"Let me get ACHEEVY in on this — that's an above-the-ceiling call.\" DO NOT promise the discount yourself. Customer wants to haggle / run numbers? Pull LUC_Ang in to crunch — LUC does the math, ACHEEVY signs off. Bulk orders (12+ units): route to Melli_Capensi. Never invent origin / processing / roastery / varietal — if catalog doesn't say it, say so plainly. "
             "For coupons/billing: delegate to LUC_Ang. For discounts above ceiling: escalate to owner. "
             "Never name the supplier. Brewed honest — owner-signed paper trail on every public claim."
         ),
         "luc_ang": (
-            "You are LUC_Ang — Locale Universal Calculator, T2-FINANCE at Coastal Brewing Co. "
-            "Brooklyn-fluent CPA precision. Lu-Cal calculator. CPA Gadget Man. "
-            "ZERO margin-discount authority — coupon codes only: WELCOME10, BREW20, FREESHIP, TRY-ME. "
-            "Delegate-not-ask voice. Short, precise, numerical."
+            "You are LUC_Ang — Brooklyn-fluent CPA at Coastal Brewing Co. Internal voice; surfaces when Sal pulls you in for haggling / number-crunching. "
+            "Direct, precise, numerical. Short sentences. "
+            "You CRUNCH numbers when customers bargain — \"what if I take three bags?\", \"can you knock 5% off?\". Compute the math, present the options. "
+            "You DO NOT approve. Coupon codes are your only standing authority: WELCOME10, BREW20, FREESHIP, TRY-ME. "
+            "Anything beyond those coupons → state the math clearly and route to ACHEEVY for approval."
         ),
         "melli_capensi": (
-            "You are Melli Capensi — Honey Badger, leader of The Sett, T2-BULK at Coastal Brewing Co. "
-            "Strategic, PMO-authoritative, funnel-minded. "
-            "Bulk ladder: 12u→15%, 50u→25%, 100u+→35%. Above ceiling routes to ACHEEVY. "
-            "7-stage Sett funnel owner. Never name the supplier."
+            "You are Melli Capensi — strategic bulk / corporate authority at Coastal Brewing Co. Surfaces only on /wholesale or B2B chat. "
+            "Composed, decisive, dry. "
+            "Bulk-order ladder: 12u→15%, 50u→25%, 100u+→35%. Above ladder: route to ACHEEVY for approval. "
+            "Never name the supplier."
         ),
         "acheevy": (
-            "You are ACHEEVY — T1 final authority at Coastal Brewing Co. "
-            "Belter Creole truth-speak. Direct, no pretending, short declaratives. No exclamation marks. "
+            "You are ACHEEVY — internal final-authority approver at Coastal Brewing Co. NOT customer-facing in normal sales flow. "
+            "You surface only when Sal_Ang / LUC_Ang / Melli_Capensi escalates an above-ceiling request. "
+            "Direct, no pretending, short declaratives. No exclamation marks. "
             "Uncapped discount authority bound only by cost floor. "
-            "Every public claim has a paper trail. The owner signs everything."
+            "When called for an approval: confirm or deny in one to two sentences with rationale. "
+            "Never name the supplier. Never invent product attributes."
         ),
     }
-    return _BRAND_PREAMBLE + _coastal_catalog_context() + prompts.get(employee, prompts["acheevy"])
+    persona = prompts.get(employee, prompts["acheevy"])
+
+    # Surface-aware register modulation. Inserts a (character × surface)-tuned
+    # register preamble between the brand preamble and the persona prompt so
+    # the LLM knows which dialect inheritances are ACTIVE / OFF for this surface
+    # (e.g. ACHEEVY's 5%-Nation + Thun lexicon are OFF on customer_chat_panel,
+    # ACTIVE on team_internal). See dialect-library/REGISTER-MODULATION.md.
+    register_preamble = ""
+    if REGISTER_MODULATOR_AVAILABLE:
+        try:
+            cast_key = _EMPLOYEE_TO_CAST_KEY.get(employee, _EMPLOYEE_TO_CAST_KEY["acheevy"])
+            spec = operating_register_for(cast_key, surface, vertical="coastal-brewing")
+            register_preamble = preamble_for(spec) + "\n\n"
+        except Exception:
+            # Modulator failed (missing surface, missing character, malformed YAML);
+            # fall back silently to the unmodulated prompt rather than break chat.
+            register_preamble = ""
+
+    return (
+        _BRAND_PREAMBLE
+        + _coastal_catalog_context()
+        + register_preamble
+        + persona
+    )
 
 
 async def _stream_employee_response(
@@ -3126,9 +3271,24 @@ _INWORLD_TTS_MODEL = os.environ.get("INWORLD_TTS_MODEL", "inworld-tts-1.5-max")
 # Tier "max" = flagship (richer expression, ~200ms p50). "mini" = ~120ms,
 # cheaper. ACHEEVY gets max because customers hear his voice; internal
 # voices default to mini when ever surfaced (cost discipline).
+_ACHEEVY_NAS_CLONE_VOICEID = (
+    # IVC clone 2026-05-03 — Nas Power 105.1 Stillmatic best-window
+    # (0:00-0:30, F0=122 Hz / median 93 / 1.87 sps / HNR 4.7 dB,
+    # transcript-grounded as Nas first-person; analyzer 57.7% match
+    # against acheevy_baritone target). Cloned via /api/v1/voice/clone
+    # endpoint into Inworld workspace default-4zhua1rhxjfl50z1dnkcba.
+    # Belter Creole dialect comes from the LLM register-modulator
+    # preamble layer (cast-environments YAML + register_modulator.py),
+    # not from the voice signature — voice gives ACHEEVY his acoustic
+    # baritone; the modulator gives him his lexicon + register.
+    "default-4zhua1rhxjfl50z1dnkcba__acheevy-nas-queensbridge-baritone-v1"
+)
+
 _INWORLD_VOICE_MAP: Dict[str, Dict[str, str]] = {
-    # ACHEEVY voice — ROLLED BACK 2026-05-03 to stock voice "Ronald"
-    # (deep British baritone, not perfect-archetype but quality-acceptable)
+    # ACHEEVY voice — switched 2026-05-03 14:30 from stock "Ronald"
+    # to the IVC clone of Nas (Queensbridge baritone). Per owner
+    # directive 2026-05-03 14:25: "ACHEEVY voice should either be Nas
+    # or AZ with Belter Creole Dialect."
     # after owner caught the Jarrett-DigitalTwin-v1 IVC clone sounding
     # robotic. The bad clone is still in the workspace as a workspace-
     # asset record but is NOT served. Two failure modes contributing:
@@ -3142,19 +3302,65 @@ _INWORLD_VOICE_MAP: Dict[str, Dict[str, str]] = {
     # INWORLD_VOICE_ID_ACHEEVY env override remains in place — when a
     # higher-quality clone is auditioned + approved, set the env var
     # without a code change.
+    # PROSODY note: per owner directive 2026-05-03 14:45, voice +
+    # pitch are the load-bearing layer; energy/loudness/speed are
+    # alterable via Inworld TTS params. ACHEEVY ships with calmed-
+    # down prosody to fit the coffee-shop environment — Nas Power
+    # 105.1 source was attack-mode (Stillmatic / Ether response);
+    # the dial-down brings it to measured / contemplative.
+    # - temperature 0.5 (default 1.0): less expressiveness, more
+    #   predictable / measured / calm.
+    # - speakingRate 0.85 (default 1.0, range 0.5-1.5): 15% slower
+    #   for deliberate, considered pacing.
     "acheevy":       {
-        "voiceId": os.environ.get("INWORLD_VOICE_ID_ACHEEVY") or "Ronald",
+        "voiceId": os.environ.get("INWORLD_VOICE_ID_ACHEEVY") or _ACHEEVY_NAS_CLONE_VOICEID,
         "model": "inworld-tts-1.5-max",
+        # Prosody dial-down round 3 (2026-05-03 15:05) — owner found
+        # round-2 (t=0.3, rate=0.78) was over-dialed (slow / bad-sounding).
+        # Backing off to gentle dial — voice quality preserved, slight
+        # measure-down from default to fit coffee-shop without over-
+        # smoothing the speech delivery.
+        "temperature": 0.7,
+        "speakingRate": 0.95,
     },
-    "sal_ang":       {"voiceId": "Hank",    "model": "inworld-tts-1.5-max"},
-    "luc_ang":       {"voiceId": "Vinny",   "model": "inworld-tts-1.5-mini"},
-    "melli_capensi": {"voiceId": "Bianca",  "model": "inworld-tts-1.5-max"},
+    # Sal_Ang voice — switched 2026-05-03 16:35 from stock "Hank"
+    # (Lowcountry warmth) to "Brandon" per owner directive: Sal is
+    # now an American Black male lead barista, up-north migration
+    # to Coastal Georgia/Carolina, articulate + smooth + fly.
+    # Brandon = bold, strident male voice (news-style read) — gentle
+    # prosody dial keeps it conversational, not announcement-heavy.
+    "sal_ang":       {
+        "voiceId": "Brandon",
+        "model": "inworld-tts-1.5-max",
+        "temperature": 0.7,
+        "speakingRate": 0.97,
+    },
+    # LUC_Ang — Brooklyn CPA archetype. Vinny (gritty New York male)
+    # remains the right stock fit. Gentle prosody for conversational
+    # cadence (Vinny defaults a touch fast).
+    "luc_ang":       {
+        "voiceId": "Vinny",
+        "model": "inworld-tts-1.5-mini",
+        "temperature": 0.7,
+        "speakingRate": 0.95,
+    },
+    # Melli_Capensi — strategic executive archetype. Bianca (deep,
+    # controlled female voice) remains the right stock fit. Gentle
+    # prosody keeps her measured / decisive without sounding rushed.
+    "melli_capensi": {
+        "voiceId": "Bianca",
+        "model": "inworld-tts-1.5-max",
+        "temperature": 0.7,
+        "speakingRate": 0.95,
+    },
 }
 
 
 class WsVoiceSynthRequest(BaseModel):
     text: str
-    character_id: str = "acheevy"
+    # Default customer-facing agent is Sal_Ang per owner directive 2026-05-03 17:30.
+    # ACHEEVY moved to internal escalation chain — not customer-facing anymore.
+    character_id: str = "sal_ang"
 
 
 @app.post("/api/v1/voice/synthesize")
@@ -3174,13 +3380,40 @@ async def voice_synthesize(body: WsVoiceSynthRequest):
         # Inworld TTS-1.5 has a per-request character cap; trim to be safe.
         text = text[:2000]
 
-    voice_cfg = _INWORLD_VOICE_MAP.get(body.character_id) or _INWORLD_VOICE_MAP["acheevy"]
-    payload = {
+    # TTS pronunciation + cadence fixes via the pronunciation engine.
+    # All rule packs live in voice-library/pronunciation-library/rules/
+    # and are loaded YAML-side, so adding new pronunciation rules NEVER
+    # requires a code change here. Per owner directive 2026-05-03 15:35:
+    # "WE NEED A TRUE PRONUNCIATION SYNTAX AND INDEX FOR PROPER
+    # GRAMMATICAL CONVERSATION."
+    #
+    # Display text never alters — only the TTS-bound text rewrites.
+    if _PRONUNCIATION_ENGINE_AVAILABLE:
+        try:
+            text = _rewrite_for_tts(
+                text,
+                character=body.character_id,
+                surface="customer_chat_panel",
+                vertical="coastal-brewing",
+            )
+        except Exception:
+            pass  # never break TTS on rule-engine failure
+
+    voice_cfg = _INWORLD_VOICE_MAP.get(body.character_id) or _INWORLD_VOICE_MAP["sal_ang"]
+    # Build payload with optional per-character prosody (temperature
+    # is top-level; speakingRate sits under audioConfig per Inworld
+    # synthesize-speech schema verified 2026-05-03).
+    payload: Dict[str, Any] = {
         "text": text,
         "voiceId": voice_cfg["voiceId"],
         "modelId": voice_cfg.get("model", _INWORLD_TTS_MODEL),
         "language": "en",
+        "applyTextNormalization": "ON",
     }
+    if "temperature" in voice_cfg:
+        payload["temperature"] = float(voice_cfg["temperature"])
+    if "speakingRate" in voice_cfg:
+        payload.setdefault("audioConfig", {})["speakingRate"] = float(voice_cfg["speakingRate"])
     headers = {
         "Authorization": f"Basic {_INWORLD_API_KEY}",
         "Content-Type": "application/json",
@@ -3210,6 +3443,239 @@ async def voice_synthesize(body: WsVoiceSynthRequest):
         raise
     except Exception as exc:
         raise HTTPException(status_code=502, detail=f"Inworld TTS unexpected error: {exc}")
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Inworld voice catalog — GET /api/v1/voice/catalog
+# ─────────────────────────────────────────────────────────────────────────────
+# Server-side proxy for the Inworld stock voice list. The Inworld API key
+# never leaves the runner; the catalog comes back as JSON for owner / dev
+# inspection so we can map stock voices to Coastal cast registers without
+# pulling credentials into a transcript or local shell.
+#
+# Inworld endpoint: GET https://api.inworld.ai/tts/v1/voices
+# (Deprecation notice: scheduled for removal 2026-07-01 in favor of
+# Voices API List Voices; revisit before that date.)
+_INWORLD_VOICES_LIST_ENDPOINT = "https://api.inworld.ai/tts/v1/voices"
+
+
+@app.get("/api/v1/voice/catalog")
+async def voice_catalog(
+    language: Optional[str] = Query(default="en"),
+    x_coastal_token: Optional[str] = Header(default=None, alias="X-Coastal-Token"),
+):
+    """Return the Inworld stock voice catalog. Gateway-token-protected
+    so the proxy can't be hammered by external callers, and so the
+    Inworld key stays inside the runner."""
+    if GATEWAY_TOKEN and x_coastal_token != GATEWAY_TOKEN:
+        raise HTTPException(status_code=401, detail="invalid gateway token")
+    if not _INWORLD_API_KEY:
+        raise HTTPException(status_code=503, detail="INWORLD_API_KEY not configured")
+
+    params = {}
+    if language:
+        params["filter"] = f"language={language}"
+    headers = {
+        "Authorization": f"Basic {_INWORLD_API_KEY}",
+        "Accept": "application/json",
+    }
+    try:
+        async with httpx.AsyncClient(timeout=30.0) as client:
+            resp = await client.get(_INWORLD_VOICES_LIST_ENDPOINT,
+                                    params=params, headers=headers)
+        if resp.status_code != 200:
+            raise HTTPException(
+                status_code=resp.status_code,
+                detail=f"Inworld voice-list error: {resp.text[:500]}",
+            )
+        data = resp.json()
+        # Tag each voice with the locally-mapped Coastal character (if any)
+        # so the operator can see which stock voices are already wired.
+        reverse_map: Dict[str, str] = {}
+        for char_key, cfg in _INWORLD_VOICE_MAP.items():
+            vid = cfg.get("voiceId")
+            if vid:
+                reverse_map[vid] = char_key
+        for voice in data.get("voices", []):
+            mapped = reverse_map.get(voice.get("voiceId"))
+            if mapped:
+                voice["_coastal_assigned_to"] = mapped
+        return {
+            "language_filter": language,
+            "voice_count": len(data.get("voices", [])),
+            "current_coastal_mapping": _INWORLD_VOICE_MAP,
+            "voices": data.get("voices", []),
+        }
+    except HTTPException:
+        raise
+    except Exception as exc:
+        raise HTTPException(status_code=502, detail=f"Inworld voice-list unexpected error: {exc}")
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Owner dashboard — GET /api/v1/owner/dashboard
+# ─────────────────────────────────────────────────────────────────────────────
+# Read-only operator visibility into the SmelterOS-on-Coastal stack:
+# voice library state, pronunciation library state, register modulator
+# state, cast mapping, runner health. Gateway-token-protected; no
+# customer-facing surface, no write capability.
+@app.get("/api/v1/owner/dashboard")
+async def owner_dashboard(
+    x_coastal_token: Optional[str] = Header(default=None, alias="X-Coastal-Token"),
+):
+    if GATEWAY_TOKEN and x_coastal_token != GATEWAY_TOKEN:
+        raise HTTPException(status_code=401, detail="invalid gateway token")
+
+    # Pronunciation engine state
+    pron_state: Dict[str, Any] = {"available": _PRONUNCIATION_ENGINE_AVAILABLE}
+    if _PRONUNCIATION_ENGINE_AVAILABLE:
+        try:
+            from pronunciation_engine import rules_loaded_summary  # type: ignore
+            pron_state.update(rules_loaded_summary())
+        except Exception as e:
+            pron_state["error"] = str(e)
+
+    # Register modulator state — list configured characters + surfaces
+    reg_state: Dict[str, Any] = {"available": REGISTER_MODULATOR_AVAILABLE}
+    if REGISTER_MODULATOR_AVAILABLE:
+        try:
+            import yaml  # type: ignore
+            cast_yaml = (_VOICE_LIBRARY_SCRIPTS.parent
+                         / "dialect-library"
+                         / "cast-environments"
+                         / "coastal-brewing.yaml")
+            if cast_yaml.exists():
+                cfg = yaml.safe_load(cast_yaml.read_text(encoding="utf-8")) or {}
+                reg_state["surfaces"] = list((cfg.get("surfaces") or {}).keys())
+                reg_state["characters"] = list((cfg.get("cast") or {}).keys())
+        except Exception as e:
+            reg_state["error"] = str(e)
+
+    # Voice library state — current voice mapping + per-character prosody
+    voice_state = {
+        "inworld_api_key_configured": bool(_INWORLD_API_KEY),
+        "tts_endpoint": _INWORLD_TTS_ENDPOINT,
+        "voice_map": {
+            char: {
+                "voiceId": cfg.get("voiceId"),
+                "model": cfg.get("model"),
+                "temperature": cfg.get("temperature"),
+                "speakingRate": cfg.get("speakingRate"),
+            }
+            for char, cfg in _INWORLD_VOICE_MAP.items()
+        },
+    }
+
+    # Runner health proxy
+    runner_state = {
+        "gateway_token_configured": bool(GATEWAY_TOKEN),
+        "stripe_available": STRIPE_AVAILABLE,
+        "coastal_public_url": COASTAL_PUBLIC_URL,
+        "voice_library_scripts_dir": str(_VOICE_LIBRARY_SCRIPTS),
+        "pronunciation_engine_dir_candidates_seen": [
+            str(p) for p in _PRONUNCIATION_ENGINE_CANDIDATES if p and p.exists()
+        ],
+    }
+
+    return {
+        "ok": True,
+        "as_of_utc": dt.datetime.now(dt.timezone.utc).isoformat() if "dt" in dir()
+                     else __import__("datetime").datetime.utcnow().isoformat() + "Z",
+        "voice": voice_state,
+        "pronunciation": pron_state,
+        "register_modulator": reg_state,
+        "runner": runner_state,
+    }
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Inworld voice clone — POST /api/v1/voice/clone
+# ─────────────────────────────────────────────────────────────────────────────
+# Clone a 1-180 second mp3/wav into a custom Inworld voice. The audio
+# file must already be staged inside the runner's scripts/ directory
+# (mounted via docker compose) — this endpoint does NOT accept upload
+# from the public internet. Gateway-token-protected.
+#
+# Inworld endpoint: POST https://api.inworld.ai/voices/v1/voices:clone
+# Body: { displayName, langCode, voiceSamples: [{audioData<b64>, transcription}],
+#         audioProcessingConfig: { removeBackgroundNoise: true } }
+_INWORLD_VOICE_CLONE_ENDPOINT = "https://api.inworld.ai/voices/v1/voices:clone"
+_RUNNER_SCRIPTS_DIR = pathlib.Path(__file__).resolve().parent
+
+
+class CloneVoiceRequest(BaseModel):
+    audio_filename: str = Field(
+        ...,
+        description=(
+            "Filename inside the runner scripts/ directory (no path "
+            "traversal — basename only)."
+        ),
+    )
+    transcription: str = Field(..., description="Verbatim transcript of the audio sample.")
+    display_name: str = Field(..., description="Human-readable name for the cloned voice.")
+    lang_code: str = Field(default="en")
+    remove_background_noise: bool = Field(default=True)
+
+
+@app.post("/api/v1/voice/clone")
+async def voice_clone(
+    body: CloneVoiceRequest,
+    x_coastal_token: Optional[str] = Header(default=None, alias="X-Coastal-Token"),
+):
+    """Clone a staged audio file into an Inworld custom voice."""
+    if GATEWAY_TOKEN and x_coastal_token != GATEWAY_TOKEN:
+        raise HTTPException(status_code=401, detail="invalid gateway token")
+    if not _INWORLD_API_KEY:
+        raise HTTPException(status_code=503, detail="INWORLD_API_KEY not configured")
+
+    # Path-traversal guard: only basename, must exist in scripts dir.
+    safe_name = pathlib.PurePath(body.audio_filename).name
+    audio_path = _RUNNER_SCRIPTS_DIR / safe_name
+    if not audio_path.exists() or not audio_path.is_file():
+        raise HTTPException(status_code=404, detail=f"audio file not found: {safe_name}")
+
+    audio_bytes = audio_path.read_bytes()
+    import base64
+    audio_b64 = base64.b64encode(audio_bytes).decode("ascii")
+
+    payload = {
+        "displayName": body.display_name,
+        "langCode": body.lang_code,
+        "voiceSamples": [
+            {"audioData": audio_b64, "transcription": body.transcription}
+        ],
+        "audioProcessingConfig": {
+            "removeBackgroundNoise": body.remove_background_noise,
+        },
+    }
+    headers = {
+        "Authorization": f"Basic {_INWORLD_API_KEY}",
+        "Content-Type": "application/json",
+        "Accept": "application/json",
+    }
+    try:
+        async with httpx.AsyncClient(timeout=180.0) as client:
+            resp = await client.post(_INWORLD_VOICE_CLONE_ENDPOINT,
+                                     json=payload, headers=headers)
+        if resp.status_code != 200:
+            raise HTTPException(
+                status_code=resp.status_code,
+                detail=f"Inworld clone error: {resp.text[:1500]}",
+            )
+        result = resp.json()
+        voice_id = result.get("voiceId") or result.get("name") or result.get("id")
+        return {
+            "ok": True,
+            "voice_id": voice_id,
+            "display_name": body.display_name,
+            "audio_filename": safe_name,
+            "audio_bytes": len(audio_bytes),
+            "raw_inworld_response": result,
+        }
+    except HTTPException:
+        raise
+    except Exception as exc:
+        raise HTTPException(status_code=502, detail=f"Inworld clone unexpected error: {exc}")
 
 
 # ─────────────────────────────────────────────────────────────────────────────
