@@ -129,9 +129,60 @@ def _derive_compliance_lane(p: dict) -> Optional[str]:
     return None
 
 
+import os as _os
+
+# Per-SKU image paths in PRODUCTS reference filenames the coastal-web container
+# may or may not actually have on disk. Until per-SKU imagery generation lands
+# (Iller_Ang / Kie.ai pipeline — open queue item), substitute the universal
+# fallback (`coastal-blend-12oz.png`) when the referenced file is not in the
+# known-shipped set. Prevents 229 broken-image icons rendering for catalog
+# entries whose imagery hasn't been generated yet.
+#
+# Update this set when new per-SKU images are added to web/public/products/.
+_AVAILABLE_PRODUCT_IMAGES: frozenset[str] = frozenset({
+    "coastal-blend-12oz.png",
+    "coastal-chai-2_1oz.png",
+    "coastal-coffee-monthly.png",
+    "coastal-colombia-fairtrade-12oz.png",
+    "coastal-combo-monthly.png",
+    "coastal-discovery-bundle.png",
+    "coastal-functional-coffee-with-mushrooms-medium-ground-8oz.png",
+    "coastal-gift-bundle.png",
+    "coastal-guatemala-fairtrade-12oz.png",
+    "coastal-honduras-fairtrade-12oz.png",
+    "coastal-matcha-ceremonial-30g.png",
+    "coastal-pantry-refill.png",
+    "coastal-peru-decaf-fairtrade-12oz.png",
+    "coastal-peru-fairtrade-12oz.png",
+    "coastal-sumatra-fairtrade-12oz.png",
+    "coastal-tea-monthly.png",
+    "lowcountry-tea-english-breakfast-2oz.png",
+    "lowcountry-tea-hibiscus-berry-2oz.png",
+    "lowcountry-tea-jasmine-green-2oz.png",
+    "lowcountry-tea-masala-2oz.png",
+    "lowcountry-tea-moroccan-mint-2oz.png",
+})
+_FALLBACK_IMAGE_PATH = "/products/coastal-blend-12oz.png"
+
+
+def _resolve_image_path(image_path: str) -> str:
+    """Return image_path if its filename is in the known-shipped set, else
+    swap to the universal Coastal Blend fallback. Stops 404s for SKUs whose
+    per-SKU imagery hasn't been generated yet.
+    """
+    if not image_path:
+        return _FALLBACK_IMAGE_PATH
+    fname = _os.path.basename(image_path)
+    if fname in _AVAILABLE_PRODUCT_IMAGES:
+        return image_path
+    return _FALLBACK_IMAGE_PATH
+
+
 def _enrich_products() -> None:
     """One-time pass at module load — annotate every SKU with the
-    derived `motto_eligible` + (optionally) `compliance_lane` flags.
+    derived `motto_eligible` + (optionally) `compliance_lane` flags,
+    and substitute the fallback image path when the per-SKU image
+    isn't shipped yet.
     Idempotent. Owner-overrides on individual SKUs are preserved.
     """
     for sku_id, p in PRODUCTS.items():
@@ -141,6 +192,8 @@ def _enrich_products() -> None:
         lane = _derive_compliance_lane(p)
         if lane is not None:
             p["compliance_lane"] = lane
+        if "image" in p:
+            p["image"] = _resolve_image_path(p["image"])
 
 
 # Each product: msrp = public retail; wholesale_cost = what we pay supplier;
