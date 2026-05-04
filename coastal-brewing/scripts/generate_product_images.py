@@ -301,7 +301,7 @@ def _generate_image_kie(prompt: str, out_path: Path) -> bool:
     # Poll
     poll_url = f"{KIE_RECORD_URL}?taskId={task_id}"
     poll_headers = {"Authorization": f"Bearer {api_key}"}
-    deadline = time.time() + 240  # 4 min hard cap per task
+    deadline = time.time() + 600  # 10 min hard cap per task — Kie.ai under load can queue beyond 4 min
     while time.time() < deadline:
         time.sleep(3)
         rr = _kie_post_with_retry(poll_url, poll_headers, None, "GET", timeout=20)
