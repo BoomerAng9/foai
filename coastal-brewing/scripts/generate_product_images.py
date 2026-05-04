@@ -255,13 +255,20 @@ def _generate_image(prompt: str, out_path: Path) -> bool:
     for attempt in range(3):
         try:
             resp = requests.post(OPENROUTER_URL, headers=headers, json=body, timeout=180)
-            break
         except (requests.exceptions.ConnectionError,
                 requests.exceptions.Timeout,
                 requests.exceptions.ChunkedEncodingError) as e:
             last_exc = e
-            backoff = 2 ** attempt  # 1s, 2s, 4s
-            time.sleep(backoff)
+            time.sleep(2 ** attempt)  # 1s, 2s, 4s
+            continue
+        # Retry on transient server-side errors too — rate limits and upstream
+        # faults are common during long batches and recover on backoff.
+        if resp.status_code in (429, 500, 502, 503, 504):
+            last_exc = f"HTTP {resp.status_code}"
+            resp = None
+            time.sleep(2 ** attempt)
+            continue
+        break
     if resp is None:
         print(f"  ERROR: 3 retries failed: {last_exc}", file=sys.stderr)
         return False
@@ -303,7 +310,7 @@ def _generate_image(prompt: str, out_path: Path) -> bool:
 
 
 def cmd_dry_run(args):
-    skus = _missing_skus() if args.missing_only else _all_skus()
+    skus = _all_skus() if getattr(args, "all_skus", False) else _missing_skus()
     print(f"Would generate {len(skus)} images at ${PRICE_PER_IMAGE_USD}/each = ${len(skus) * PRICE_PER_IMAGE_USD:.2f}")
     print(f"Output: {PRODUCTS_DIR}")
     print(f"Brand anchors: {ANCHORS_DIR}")
@@ -348,7 +355,7 @@ def cmd_single(args):
 
 
 def cmd_batch(args):
-    skus = _missing_skus() if args.missing_only else _all_skus()
+    skus = _all_skus() if getattr(args, "all_skus", False) else _missing_skus()
     cost = len(skus) * PRICE_PER_IMAGE_USD
     print(f"BATCH: {len(skus)} images, ~${cost:.2f}")
     if not args.yes:
@@ -370,7 +377,7 @@ def cmd_batch(args):
         i, (sku_id, p) = idx_sku
         prompt = _build_prompt(sku_id, p)
         out_path = PRODUCTS_DIR / f"{sku_id}.png"
-        if out_path.exists() and args.missing_only and not force_overwrite:
+        if out_path.exists() and not getattr(args, "all_skus", False) and not force_overwrite:
             with counter_lock:
                 counters["done"] += 1
                 print(f"[{counters['done']}/{len(skus)}] SKIP {sku_id} (exists)", flush=True)
@@ -419,26 +426,26 @@ def main():
     sub = ap.add_subparsers(dest="cmd")
 
     p_dry = sub.add_parser("dry-run")
-    p_dry.add_argument("--missing-only", action="store_true", default=True)
-    p_dry.set_defaults(func=cmd_dry_run)
+    p_dry.add_argument("--all", dest="all_skus", action="store_true", help="dry-run all SKUs, not just missing")
+    p_dry.set_defaults(func=cmd_dry_run, missing_only=True)
 
     p_single = sub.add_parser("single")
     p_single.add_argument("sku")
     p_single.set_defaults(func=cmd_single)
 
     p_batch = sub.add_parser("batch")
-    p_batch.add_argument("--missing-only", action="store_true", default=True)
+    p_batch.add_argument("--all", dest="all_skus", action="store_true", help="batch all SKUs, not just missing")
     p_batch.add_argument("--yes", action="store_true", help="confirm spend")
     p_batch.add_argument("--concurrency", type=int, default=4)
     p_batch.add_argument("--force", action="store_true", help="overwrite existing files (regenerate)")
-    p_batch.set_defaults(func=cmd_batch)
+    p_batch.set_defaults(func=cmd_batch, missing_only=True)
 
     # Top-level shorthand
     ap.add_argument("--dry-run", action="store_true")
     ap.add_argument("--single", metavar="SKU")
     ap.add_argument("--batch", action="store_true")
     ap.add_argument("--yes", action="store_true")
-    ap.add_argument("--missing-only", action="store_true", default=True)
+    ap.add_argument("--all", dest="all_skus", action="store_true", help="all SKUs, not just missing")
     ap.add_argument("--concurrency", type=int, default=4)
     ap.add_argument("--force", action="store_true")
 

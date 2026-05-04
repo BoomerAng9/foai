@@ -225,8 +225,13 @@ def _enrich_products() -> None:
             # image-generation pipeline can identify which SKUs still need
             # per-SKU imagery. Internal field — stripped from public catalog
             # by _strip_internal_fields.
-            p["image_original"] = p["image"]
-            p["image"] = _resolve_image_path(p["image"])
+            #
+            # Idempotency: setdefault so a second call to _enrich_products
+            # (test reloads, gunicorn worker fork-after-import, double imports
+            # via different sys.path entries) doesn't overwrite the declared
+            # path with the post-substitution fallback.
+            p.setdefault("image_original", p["image"])
+            p["image"] = _resolve_image_path(p["image_original"])
 
 
 # Each product: msrp = public retail; wholesale_cost = what we pay supplier;
