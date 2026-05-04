@@ -2548,11 +2548,20 @@ _BRAND_PREAMBLE = (
     "history context block this turn.\n"
     "  • Smoothing-over phrases like 'small batch from our partner roastery' that "
     "imply specifics the catalog doesn't confirm.\n"
-    "  • Back-office promises with no infrastructure behind them: 'let me flag "
-    "with the team', 'I'll log this and circle back', 'I'll check internally and "
-    "get back to you', 'I'll pass this to support'. There is no ticketing system, "
-    "no shift-change handoff, no out-of-session memory. If a fact isn't in the "
-    "catalog, say so and offer the closest real SKU — do NOT promise follow-up.\n"
+    "  • ANY back-office follow-up promise — exact phrasing doesn't matter, "
+    "the PATTERN is forbidden. Pattern = 'I/we will ask/check/flag/log/note/"
+    "raise/pull/verify/look-into/follow-up/circle-back/get-back-to-you ... "
+    "with the team / with sourcing / with the roastery / internally / for "
+    "you / on this'. Includes ALL paraphrases: 'I can flag it with the "
+    "team', 'let me see if I can pull that up', 'I'll see what records show', "
+    "'happy to check on that for you', 'let me find out and circle back', "
+    "'I can ask the sourcing team', 'we can look into it and follow up'. ALL "
+    "FORBIDDEN. There is NO team behind the chat, NO ticketing system, NO "
+    "shift-change handoff, NO out-of-session memory, NO records you can pull. "
+    "If a fact isn't in the catalog block: state plainly that you don't have "
+    "it, then EITHER offer the closest real SKU you DO have data on, OR ask "
+    "what specifically would help them decide between what's already on the "
+    "menu. Never make a promise you have no infrastructure to keep.\n"
     "  • Internal pricing / economics language exposed to the customer: 'cost "
     "floor', 'cost on those SKUs', 'check the cost', 'margin', 'wholesale', "
     "'COGS', 'unit economics', 'pricing tier'. Customers see prices and offered "
@@ -2636,7 +2645,8 @@ _BRAND_PREAMBLE = (
 def _coastal_catalog_context() -> str:
     """Build a compact catalog snapshot for system-prompt injection.
     Lists every SKU with name, category, origin, and price so the LLM has
-    real ground-truth data to reference instead of inventing."""
+    real ground-truth data to reference instead of inventing.
+    Public-safe — strips internal cost / margin fields."""
     try:
         items = catalog.list_products()
     except Exception:
@@ -2658,6 +2668,82 @@ def _coastal_catalog_context() -> str:
             origin_short = origin[:60] if origin else ""
             price = f"${msrp}" if msrp else ""
             lines.append(f"  - {sku}: {name} {price} {origin_short}".strip())
+    return "\n".join(lines) + "\n\n"
+
+
+def _max_approvable_discount_pct(p: dict) -> Optional[int]:
+    """For an internal-format product (with wholesale_cost / fulfillment_cost
+    / min_margin_floor / msrp), return the highest single-unit discount %
+    (in 5% steps from 0..50) that keeps unit profit at or above the floor.
+
+    Uses the same dollar-margin semantic as catalog.calc_line:
+      unit_margin = (msrp × (1 − discount)) − (wholesale_cost + fulfillment_cost)
+      approve only if unit_margin ≥ min_margin_floor.
+
+    Returns None when any required field is missing.
+    """
+    msrp = p.get("msrp")
+    wc = p.get("wholesale_cost")
+    ff = p.get("fulfillment_cost")
+    floor = p.get("min_margin_floor")
+    if msrp is None or wc is None or ff is None or floor is None:
+        return None
+    unit_cost = wc + ff
+    for d in (50, 45, 40, 35, 30, 25, 20, 15, 10, 5, 0):
+        sale = msrp * (1.0 - d / 100.0)
+        if (sale - unit_cost) >= floor:
+            return d
+    return 0
+
+
+def _coastal_catalog_context_acheevy_internal() -> str:
+    """ACHEEVY-only catalog snapshot with PRE-COMPUTED max approvable
+    discount per SKU. Used ONLY for ACHEEVY's system prompt during
+    escalation so she can approve / deny within actual margin floor
+    without doing the math herself (LLM arithmetic is unreliable).
+
+    Customer-facing output stripping is enforced by the BRAND_PREAMBLE
+    rule against revealing 'cost floor / margin / wholesale / COGS' —
+    ACHEEVY uses these numbers to decide internally, never to quote.
+    """
+    try:
+        items = catalog.list_products_internal()
+    except Exception:
+        return ""
+    if not items:
+        return ""
+    lines = [
+        "CATALOG_INTERNAL — ACHEEVY-ONLY DISCOUNT AUTHORITY (NEVER QUOTE TO CUSTOMER):",
+        "  For each SKU below, max_disc is the largest discount % you can",
+        "  approve while keeping unit profit at or above the configured floor.",
+        "  Decision rule: if customer asks for a discount ≤ max_disc, approve",
+        "  and quote the resulting price. If they ask above max_disc, refuse",
+        "  politely and counter at max_disc with the resulting price. Never",
+        "  reveal max_disc itself, the floor, the wholesale, or the cost — only",
+        "  the customer-facing price you arrived at. Floor is in DOLLARS of",
+        "  profit per unit, not a sale-price floor.",
+    ]
+    by_cat: Dict[str, List[dict]] = {}
+    for p in items:
+        by_cat.setdefault(p.get("category", "other"), []).append(p)
+    for cat, plist in sorted(by_cat.items()):
+        lines.append(f"\n[{cat}]")
+        for p in plist:
+            sku = p.get("id") or p.get("sku") or ""
+            name = p.get("name", "")
+            msrp = p.get("msrp")
+            max_d = _max_approvable_discount_pct(p)
+            bits = [f"  - {sku}: {name}"]
+            if msrp is not None:
+                bits.append(f"msrp=${msrp}")
+            if max_d is not None:
+                # Show the resulting customer price at max-approval too
+                if msrp is not None:
+                    max_price = round(msrp * (1.0 - max_d / 100.0), 2)
+                    bits.append(f"max_disc={max_d}% (-> ${max_price})")
+                else:
+                    bits.append(f"max_disc={max_d}%")
+            lines.append(" ".join(bits))
     return "\n".join(lines) + "\n\n"
 
 
@@ -2688,8 +2774,10 @@ def _employee_system_prompt(employee: str, surface: str = "customer_chat_panel")
             "You are ACHEEVY — internal final-authority approver at Coastal Brewing Co. NOT customer-facing in normal sales flow. "
             "You surface only when Sal_Ang / LUC_Ang / Melli_Capensi escalates an above-ceiling request. "
             "Direct, no pretending, short declaratives. No exclamation marks. "
-            "Uncapped discount authority bound only by cost floor. "
-            "When called for an approval: confirm or deny in one to two sentences with rationale. "
+            "Discount authority bound only by max_disc. The CATALOG_INTERNAL block above gives you per-SKU msrp + max_disc (the largest % discount we can approve while staying above the profit floor). DO NOT do margin math yourself — max_disc is pre-computed for you. "
+            "DECISION RULE: if customer's requested discount ≤ max_disc for the SKU, APPROVE and quote the resulting price. If their ask > max_disc, REFUSE politely and counter at max_disc with the resulting price. "
+            "OUTPUT RULE: customer hears yes/no + the resulting price only. NEVER quote max_disc itself, the floor, wholesale, fulfill, or any internal economics — those are for YOUR decision, not the customer's ears. If you refuse the original ask, counter with the viable offer; do not reveal why the original was over the line. "
+            "When called for an approval: confirm or counter in one to two sentences with the resulting customer-facing price + the SKU bracket reference. "
             "Never name the supplier. Never invent product attributes."
         ),
     }
@@ -2711,9 +2799,19 @@ def _employee_system_prompt(employee: str, surface: str = "customer_chat_panel")
             # fall back silently to the unmodulated prompt rather than break chat.
             register_preamble = ""
 
+    # ACHEEVY (final-approver) needs cost/margin visibility to decide
+    # discount approvals against the floor. Customer-facing output safety is
+    # enforced by the BRAND_PREAMBLE rule against quoting internal economics
+    # AND by the persona's explicit "decide internally, never quote" rule.
+    catalog_block = (
+        _coastal_catalog_context_acheevy_internal()
+        if employee == "acheevy"
+        else _coastal_catalog_context()
+    )
+
     return (
         _BRAND_PREAMBLE
-        + _coastal_catalog_context()
+        + catalog_block
         + register_preamble
         + persona
     )
