@@ -51,16 +51,39 @@ OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"
 MODEL = "openai/gpt-5.4-image-2"
 PRICE_PER_IMAGE_USD = 0.05  # approximate; verify against OR billing post-batch
 
-# Brand-consistent prompt prefix. References the Coastal aesthetic without
-# inventing supplier-specific details (per zero-fab canon).
+# Brand anchors passed as multimodal image inputs to ground gpt-image-2 in
+# the canonical Coastal aesthetic. Match the existing 21 originals (which are
+# the product photos already on real merchandise) — outdoor Lowcountry
+# lakefront, golden daylight, palm trees, Spanish moss. Use the canonical
+# Coastal Blend product shot as the primary aesthetic anchor.
+BRAND_ANCHORS = [
+    ANCHORS_DIR / "merchandise-anchor.jpg",  # downsampled 1024px JPEG (~150KB) — Lowcountry warm-daylight aesthetic
+    ANCHORS_DIR / "coastal-logo.jpg",        # downsampled flying-stork logo (~160KB)
+]
+
+# Brand-consistent prompt prefix. Matches the EXISTING merchandise-photo
+# aesthetic of the 21 originals (the product shots customers already see):
+# outdoor Lowcountry coastal scene, warm golden daylight, palm trees, Spanish
+# moss, lakefront/marsh background, kraft bag with cream parchment label,
+# flying stork mark, COFFEE. TEA. MATCHA. PURPOSE. wooden frame visible.
 BRAND_PREFIX = (
-    "Studio product photograph for Coastal Brewing Co., a Lowcountry "
-    "South Carolina coffee, tea, and matcha brand. Clean white seamless "
-    "background, soft natural lighting from the upper left, slight shadow "
-    "below the product. Square 1:1 framing, product centered with ~10% "
-    "negative space margin. Editorial e-commerce style. No text overlays "
-    "beyond what appears on the product label itself. No props, no "
-    "lifestyle scene, no people, no pour shots — pure product on white. "
+    "Outdoor product photograph for Coastal Brewing Co., a Lowcountry South "
+    "Carolina coffee + tea + matcha brand. MATCH THE REFERENCE IMAGE EXACTLY "
+    "— same outdoor Lowcountry coastal setting (lakefront or marsh visible in "
+    "background), same warm golden daylight (late-afternoon, soft, airy), "
+    "same kraft-paper bag form with wide cream-parchment label, same dark "
+    "wood bar or shelf the product sits on, same atmospheric props (palm "
+    "tree fronds, Spanish moss draping, copper pot, ceramic cup with diamond "
+    "pattern, scattered coffee beans, wooden bowl). The brand mark is a "
+    "FLYING STORK (wings up, vintage engraving style) in dark sepia ink — "
+    "NEVER a palm tree, NEVER any other icon. The product label uses "
+    "heavy-serif COASTAL / BREWING / CO. wordmark beneath the stork. Wooden "
+    "frame visible behind product reads 'COFFEE. TEA. MATCHA. PURPOSE.' with "
+    "a small carved stork. Background: Lowcountry lakefront or marsh, palm "
+    "trees, Spanish moss, soft warm sky. Tagline 'Nothing chemically, ever.' "
+    "may appear on the product label. Square 1:1 framing. Hero product "
+    "center-frame. Style is warm + premium + Lowcountry editorial — the "
+    "polar opposite of bright clinical white-bg e-commerce. Exact product:\n\n"
 )
 
 
@@ -78,44 +101,75 @@ def _build_prompt(sku_id: str, p: dict) -> str:
     size = p.get("size", "")
     roast = p.get("roast_level", "")
 
-    if category == "coffee" or category in ("flavored_coffee", "specialty_coffee"):
+    if category in ("coffee", "flavored_coffee", "specialty_coffee", "functional"):
         bag_form = (
-            f"craft kraft-paper coffee bag with a tin tie at the top, "
-            f"product label reading '{name}'"
-            f"{f', {size}' if size else ''}"
-            f"{f', {roast} roast' if roast else ''}"
+            f"a kraft-paper coffee bag with tin-tie top, sitting on a dark "
+            f"polished-wood bar. The bag's cream-parchment label is centered "
+            f"and shows the flying-stork mark above heavy-serif COASTAL / "
+            f"BREWING / CO. wordmark. Below the wordmark, the product name "
+            f"reads '{name}'"
+            f"{f', net wt {size}' if size else ''}"
+            f"{f' — {roast} roast' if roast else ''}"
+            f". Behind the bag, more kraft bags and cream metal tins are "
+            f"softly visible on dark wood shelves under amber Edison light."
         )
     elif category == "tea":
         bag_form = (
-            f"small loose-leaf tea pouch with a label reading '{name}'"
-            f"{f', {size}' if size else ''}"
+            f"a cream cylindrical metal tin sitting on a dark polished-wood "
+            f"bar. The tin's label shows the flying-stork mark above "
+            f"COASTAL / BREWING / CO. with the product name '{name}'"
+            f"{f', net wt {size}' if size else ''} below. Loose tea leaves "
+            f"are scattered at the base of the tin. Background: more cream "
+            f"tins in a row, dark wood shelves, warm amber light."
         )
     elif category == "matcha":
         bag_form = (
-            f"small ceramic-look matcha tin or pouch labeled '{name}'"
-            f"{f', {size}' if size else ''}"
+            f"a cream cylindrical metal tin (slightly stubbier than the tea "
+            f"tins) on a dark wood bar, with a small wooden chasen whisk and "
+            f"a shallow ceramic bowl of bright vivid-green matcha powder "
+            f"alongside. The tin's label shows the flying-stork mark above "
+            f"COASTAL / BREWING / CO. with '{name}'"
+            f"{f', net wt {size}' if size else ''} below. Warm amber light, "
+            f"deep shadows."
         )
     elif category == "kcup":
-        bag_form = f"recyclable K-cup pod box labeled '{name}'{f', {size}' if size else ''}"
+        bag_form = (
+            f"a recyclable K-cup pod box on a dark wood bar, with the "
+            f"flying-stork mark and COASTAL / BREWING / CO. wordmark on the "
+            f"front panel. Product name '{name}'"
+            f"{f', {size}' if size else ''} reads below. A few loose K-cup "
+            f"pods sit alongside. Warm Edison amber light."
+        )
     elif category == "bundle":
         bag_form = (
-            f"curated bundle: 2-3 craft coffee bags arranged in a clean "
-            f"flat-lay composition labeled '{name}'"
+            f"a curated bundle arrangement on a dark wood bar — 2 to 3 kraft "
+            f"coffee bags and/or cream tea tins together with a small kraft "
+            f"box, all bearing the flying-stork mark over COASTAL / BREWING "
+            f"/ CO. wordmark. The bundle name '{name}' is visible on a small "
+            f"hangtag or card."
         )
     elif category == "subscription":
         bag_form = (
-            f"single craft coffee bag with a small subscription card tag "
-            f"reading '{name}'"
-        )
-    elif category == "functional" or "mushroom" in name.lower():
-        bag_form = (
-            f"functional coffee bag with subtle medicinal-mushroom iconography, "
-            f"label reads '{name}'{f', {size}' if size else ''}"
+            f"a kraft coffee bag on a dark wood bar with a small parchment "
+            f"card-stock subscription insert tucked alongside, the card "
+            f"reading '{name}' below the flying-stork mark over COASTAL / "
+            f"BREWING / CO. wordmark."
         )
     else:
-        bag_form = f"product packaging for '{name}'{f', {size}' if size else ''}"
+        bag_form = (
+            f"product packaging for '{name}'"
+            f"{f', {size}' if size else ''} on a dark wood bar with the "
+            f"flying-stork mark and COASTAL / BREWING / CO. wordmark "
+            f"prominent on the label."
+        )
 
-    return BRAND_PREFIX + bag_form + ". Photographed at eye level, slight 5-degree tilt, sharp focus on the label."
+    return BRAND_PREFIX + bag_form + (
+        " Photographed at eye level, sharp focus on the product label, "
+        "shallow depth of field on the background. Vintage-engraving label "
+        "art style. No text in the scene other than what appears on the "
+        "product label itself. NO palm-tree icon — the brand mark is "
+        "exclusively the flying stork."
+    )
 
 
 def _missing_skus() -> list[tuple[str, dict]]:
@@ -153,28 +207,64 @@ def _all_skus() -> list[tuple[str, dict]]:
     return list(_load_catalog().items())
 
 
+def _file_to_data_uri(path: Path) -> str:
+    suffix = path.suffix.lower().lstrip(".")
+    mime = "image/jpeg" if suffix in ("jpg", "jpeg") else "image/png"
+    b = base64.b64encode(path.read_bytes()).decode("ascii")
+    return f"data:{mime};base64,{b}"
+
+
+def _build_multimodal_content(prompt: str) -> list:
+    """Build the OpenRouter content array: text prompt + brand anchor images
+    as image_url parts. Anchors GROUND the gen in the canonical Coastal
+    aesthetic — without them the model defaults to generic e-commerce style.
+    """
+    parts: list = [{"type": "text", "text": prompt}]
+    for anchor in BRAND_ANCHORS:
+        if anchor.exists():
+            parts.append({
+                "type": "image_url",
+                "image_url": {"url": _file_to_data_uri(anchor)},
+            })
+        else:
+            print(f"[anchor-missing] {anchor} — proceeding without it (output will likely drift off-brand)", file=sys.stderr)
+    return parts
+
+
 def _generate_image(prompt: str, out_path: Path) -> bool:
-    """Call OpenRouter, save image to out_path. Returns True on success."""
+    """Call OpenRouter, save image to out_path. Returns True on success.
+    Retries up to 3 times on connection-reset / timeout errors.
+    """
     api_key = os.environ.get("OPENROUTER_API_KEY")
     if not api_key:
         raise RuntimeError("OPENROUTER_API_KEY not set in environment")
 
     body = {
         "model": MODEL,
-        "messages": [{"role": "user", "content": prompt}],
+        "messages": [{"role": "user", "content": _build_multimodal_content(prompt)}],
         "modalities": ["image", "text"],
     }
-    resp = requests.post(
-        OPENROUTER_URL,
-        headers={
-            "Authorization": f"Bearer {api_key}",
-            "Content-Type": "application/json",
-            "HTTP-Referer": "https://brewing.foai.cloud",
-            "X-Title": "Coastal Brewing Co - product imagery",
-        },
-        json=body,
-        timeout=120,
-    )
+    headers = {
+        "Authorization": f"Bearer {api_key}",
+        "Content-Type": "application/json",
+        "HTTP-Referer": "https://brewing.foai.cloud",
+        "X-Title": "Coastal Brewing Co - product imagery",
+    }
+    last_exc = None
+    resp = None
+    for attempt in range(3):
+        try:
+            resp = requests.post(OPENROUTER_URL, headers=headers, json=body, timeout=180)
+            break
+        except (requests.exceptions.ConnectionError,
+                requests.exceptions.Timeout,
+                requests.exceptions.ChunkedEncodingError) as e:
+            last_exc = e
+            backoff = 2 ** attempt  # 1s, 2s, 4s
+            time.sleep(backoff)
+    if resp is None:
+        print(f"  ERROR: 3 retries failed: {last_exc}", file=sys.stderr)
+        return False
     if resp.status_code != 200:
         print(f"  ERROR: {resp.status_code} {resp.text[:300]}", file=sys.stderr)
         return False
@@ -226,6 +316,19 @@ def cmd_dry_run(args):
         print(f"... + {len(skus) - 5} more")
 
 
+def _regenerate_manifest_quiet():
+    """Best-effort manifest regen so catalog._AVAILABLE_PRODUCT_IMAGES picks
+    up new images on next runner restart. Never raises — script failure must
+    not depend on manifest write."""
+    try:
+        sys.path.insert(0, str(REPO_ROOT / "scripts"))
+        import regenerate_products_manifest as _r  # noqa: E402
+        p = _r.regenerate()
+        print(f"[manifest] {p['count']} images written to {_r.MANIFEST_PATH.name}")
+    except Exception as e:
+        print(f"[manifest] regen failed: {e}")
+
+
 def cmd_single(args):
     products = _load_catalog()
     if args.sku not in products:
@@ -240,6 +343,8 @@ def cmd_single(args):
     print(f"Generating -> {out_path}")
     ok = _generate_image(prompt, out_path)
     print("OK" if ok else "FAILED")
+    if ok:
+        _regenerate_manifest_quiet()
 
 
 def cmd_batch(args):
@@ -259,11 +364,13 @@ def cmd_batch(args):
     succeeded: list[str] = []
     failed: list[str] = []
 
+    force_overwrite = bool(getattr(args, "force", False))
+
     def _worker(idx_sku):
         i, (sku_id, p) = idx_sku
         prompt = _build_prompt(sku_id, p)
         out_path = PRODUCTS_DIR / f"{sku_id}.png"
-        if out_path.exists() and args.missing_only:
+        if out_path.exists() and args.missing_only and not force_overwrite:
             with counter_lock:
                 counters["done"] += 1
                 print(f"[{counters['done']}/{len(skus)}] SKIP {sku_id} (exists)", flush=True)
@@ -304,6 +411,7 @@ def cmd_batch(args):
         print("FAILED SKUs:")
         for s in failed:
             print(f"  {s}")
+    _regenerate_manifest_quiet()
 
 
 def main():
@@ -322,6 +430,7 @@ def main():
     p_batch.add_argument("--missing-only", action="store_true", default=True)
     p_batch.add_argument("--yes", action="store_true", help="confirm spend")
     p_batch.add_argument("--concurrency", type=int, default=4)
+    p_batch.add_argument("--force", action="store_true", help="overwrite existing files (regenerate)")
     p_batch.set_defaults(func=cmd_batch)
 
     # Top-level shorthand
@@ -331,6 +440,7 @@ def main():
     ap.add_argument("--yes", action="store_true")
     ap.add_argument("--missing-only", action="store_true", default=True)
     ap.add_argument("--concurrency", type=int, default=4)
+    ap.add_argument("--force", action="store_true")
 
     args = ap.parse_args()
 
