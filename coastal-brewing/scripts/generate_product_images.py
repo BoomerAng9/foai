@@ -30,6 +30,14 @@ import sys
 import time
 from pathlib import Path
 
+# Force UTF-8 on stdout/stderr so unicode in prompts/logs doesn't crash
+# the script under Windows cp1252.
+try:
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+    sys.stderr.reconfigure(encoding="utf-8", errors="replace")
+except Exception:
+    pass
+
 import requests
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
@@ -37,8 +45,11 @@ PRODUCTS_DIR = REPO_ROOT / "web" / "public" / "products"
 ANCHORS_DIR = REPO_ROOT / "assets" / "brand-anchors"
 
 OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"
-MODEL = "openai/gpt-image"
-PRICE_PER_IMAGE_USD = 0.05
+# `openai/gpt-5.4-image-2` on OpenRouter == `gpt-image-2` on direct OpenAI API
+# (released 2026-04-21). The "5.4" is the text-reasoning backbone version,
+# not a separate older image model. Per memory feedback_image_models_strict_allowlist_2026_05_04.md.
+MODEL = "openai/gpt-5.4-image-2"
+PRICE_PER_IMAGE_USD = 0.05  # approximate; verify against OR billing post-batch
 
 # Brand-consistent prompt prefix. References the Coastal aesthetic without
 # inventing supplier-specific details (per zero-fab canon).
@@ -226,7 +237,7 @@ def cmd_single(args):
     print()
     out_path = PRODUCTS_DIR / f"{args.sku}.png"
     PRODUCTS_DIR.mkdir(parents=True, exist_ok=True)
-    print(f"Generating → {out_path}")
+    print(f"Generating -> {out_path}")
     ok = _generate_image(prompt, out_path)
     print("OK" if ok else "FAILED")
 
@@ -240,27 +251,52 @@ def cmd_batch(args):
         sys.exit(0)
 
     PRODUCTS_DIR.mkdir(parents=True, exist_ok=True)
-    succeeded = []
-    failed = []
-    for i, (sku_id, p) in enumerate(skus, 1):
+
+    from concurrent.futures import ThreadPoolExecutor, as_completed
+    import threading
+    counter_lock = threading.Lock()
+    counters = {"done": 0, "ok": 0, "fail": 0}
+    succeeded: list[str] = []
+    failed: list[str] = []
+
+    def _worker(idx_sku):
+        i, (sku_id, p) = idx_sku
         prompt = _build_prompt(sku_id, p)
         out_path = PRODUCTS_DIR / f"{sku_id}.png"
         if out_path.exists() and args.missing_only:
-            print(f"[{i}/{len(skus)}] SKIP {sku_id} (exists)")
-            continue
-        print(f"[{i}/{len(skus)}] {sku_id} ... ", end="", flush=True)
+            with counter_lock:
+                counters["done"] += 1
+                print(f"[{counters['done']}/{len(skus)}] SKIP {sku_id} (exists)", flush=True)
+            return ("skip", sku_id)
         try:
             ok = _generate_image(prompt, out_path)
         except Exception as e:
-            print(f"EXC {e}")
-            failed.append(sku_id)
-            continue
-        if ok:
-            print("OK")
-            succeeded.append(sku_id)
-        else:
-            failed.append(sku_id)
-        time.sleep(1.0)  # gentle rate limit
+            with counter_lock:
+                counters["done"] += 1
+                counters["fail"] += 1
+                print(f"[{counters['done']}/{len(skus)}] EXC {sku_id}: {e}", flush=True)
+            return ("fail", sku_id)
+        with counter_lock:
+            counters["done"] += 1
+            if ok:
+                counters["ok"] += 1
+                print(f"[{counters['done']}/{len(skus)}] OK {sku_id}", flush=True)
+                return ("ok", sku_id)
+            else:
+                counters["fail"] += 1
+                print(f"[{counters['done']}/{len(skus)}] FAIL {sku_id}", flush=True)
+                return ("fail", sku_id)
+
+    workers = max(1, int(getattr(args, "concurrency", 4) or 4))
+    print(f"Concurrency: {workers}")
+    with ThreadPoolExecutor(max_workers=workers) as ex:
+        futures = [ex.submit(_worker, (i, x)) for i, x in enumerate(skus, 1)]
+        for f in as_completed(futures):
+            status, sku = f.result()
+            if status == "ok":
+                succeeded.append(sku)
+            elif status == "fail":
+                failed.append(sku)
 
     print()
     print(f"DONE. Succeeded: {len(succeeded)}, Failed: {len(failed)}")
@@ -285,6 +321,7 @@ def main():
     p_batch = sub.add_parser("batch")
     p_batch.add_argument("--missing-only", action="store_true", default=True)
     p_batch.add_argument("--yes", action="store_true", help="confirm spend")
+    p_batch.add_argument("--concurrency", type=int, default=4)
     p_batch.set_defaults(func=cmd_batch)
 
     # Top-level shorthand
@@ -293,6 +330,7 @@ def main():
     ap.add_argument("--batch", action="store_true")
     ap.add_argument("--yes", action="store_true")
     ap.add_argument("--missing-only", action="store_true", default=True)
+    ap.add_argument("--concurrency", type=int, default=4)
 
     args = ap.parse_args()
 
