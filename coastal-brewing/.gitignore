@@ -22,3 +22,4 @@ owner_approvals/
 Thumbs.db
 .idea/
 .vscode/
+catalog.runtime.json
