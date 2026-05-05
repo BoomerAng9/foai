@@ -15,6 +15,7 @@ from __future__ import annotations
 import json
 import os
 import pathlib
+import re
 import secrets
 import sys
 import urllib.parse
@@ -3404,14 +3405,6 @@ _ACHEEVY_NAS_CLONE_VOICEID = (
     "default-4zhua1rhxjfl50z1dnkcba__acheevy-nas-queensbridge-baritone-v1"
 )
 
-_SAL_NAS_REFLECTIVE_VOICEID = (
-    # Owner directive 2026-05-05: Sal needs a different throat from
-    # ACHEEVY — baritone-v1 doesn't fit lead-barista warmth. Try the
-    # reflective-v2 IVC clone (lighter, conversational variant of the
-    # Nas baseline) for Sal while ACHEEVY keeps the baritone-v1 canon.
-    "default-4zhua1rhxjfl50z1dnkcba__acheevy-nas-or-premier-reflective-v2"
-)
-
 _INWORLD_VOICE_MAP: Dict[str, Dict[str, str]] = {
     # ACHEEVY voice — switched 2026-05-03 14:30 from stock "Ronald"
     # to the IVC clone of Nas (Queensbridge baritone). Per owner
@@ -3451,27 +3444,22 @@ _INWORLD_VOICE_MAP: Dict[str, Dict[str, str]] = {
         "temperature": 0.7,
         "speakingRate": 0.95,
     },
-    # Sal_Ang voice — switched 2026-05-05 from stock "Brandon" (sounded
-    # like newscaster — wrong vibe for lead barista). Initial swap was
-    # to ACHEEVY's baritone-v1 clone for brand-voice consistency, but
-    # owner caught that the heavy baritone didn't fit lead-barista
-    # warmth either. Now on the reflective-v2 IVC clone (lighter,
-    # conversational variant of the Nas baseline) — Sal + ACHEEVY now
-    # diverge: Sal carries the front-counter, ACHEEVY carries the
-    # back-room final-approver weight. Belter Creole register-modulator
-    # at LLM layer + pronunciation engine + gentle prosody preserved.
+    # Sal_Ang voice — third update 2026-05-05: dedicated `sal-rpozo`
+    # IVC clone on the new inworld-tts-2 model. Owner's explicit
+    # config: deliveryMode=EXPRESSIVE, speakingRate=1.05. Replaces
+    # the reflective-v2 clone Sal was on for ~30 minutes (which itself
+    # replaced the brand-voice-consistency baritone-v1 share). Sal +
+    # ACHEEVY remain intentionally divergent voices.
     "sal_ang":       {
-        # INWORLD_VOICE_ID_SAL allows per-character override; falls back
-        # to the reflective-v2 clone for Sal's lead-barista timbre. No
-        # longer falls back to ACHEEVY's override — the two voices are
-        # intentionally different now.
+        # INWORLD_VOICE_ID_SAL env override takes precedence for ops
+        # auditioning a different clone without a code change.
         "voiceId": (
             os.environ.get("INWORLD_VOICE_ID_SAL")
-            or _SAL_NAS_REFLECTIVE_VOICEID
+            or "default-4zhua1rhxjfl50z1dnkcba__sal-rpozo"
         ),
-        "model": "inworld-tts-1.5-max",
-        "temperature": 0.7,
-        "speakingRate": 0.95,
+        "model": "inworld-tts-2",
+        "deliveryMode": os.environ.get("INWORLD_DELIVERY_MODE_SAL") or "EXPRESSIVE",
+        "speakingRate": 1.05,
     },
     # LUC_Ang — Brooklyn CPA archetype. Vinny (gritty New York male)
     # remains the right stock fit. Gentle prosody for conversational
@@ -3504,6 +3492,74 @@ _INWORLD_VOICE_MAP: Dict[str, Dict[str, str]] = {
 }
 
 
+_MD_BOLD = re.compile(r"\*\*([^*\n]+?)\*\*")
+_MD_BOLD_UNDER = re.compile(r"__([^_\n]+?)__")
+_MD_ITALIC = re.compile(r"(?<![*\w])\*([^*\n]+?)\*(?!\w)")
+_MD_ITALIC_UNDER = re.compile(r"(?<![_\w])_([^_\n]+?)_(?!\w)")
+_MD_CODE_INLINE = re.compile(r"`+([^`\n]+?)`+")
+_MD_LINK = re.compile(r"\[([^\]]+)\]\([^)\s]+\)")
+_MD_HEADER = re.compile(r"^\s{0,3}#{1,6}\s+", re.MULTILINE)
+_MD_BULLET = re.compile(r"^\s*[-*+•]\s+", re.MULTILINE)
+_MD_ORDERED = re.compile(r"^\s*\d+[.)]\s+", re.MULTILINE)
+_MD_BLOCKQUOTE = re.compile(r"^\s*>\s?", re.MULTILINE)
+_MD_HRULE = re.compile(r"^\s{0,3}([-*_])\s*\1\s*\1[\s\1]*$", re.MULTILINE)
+_PARENS_ASIDE = re.compile(r"\s*\(([^)]{1,80})\)")
+_SLASH_BETWEEN_WORDS = re.compile(r"(\w)\s*/\s*(\w)")
+_DASH_SEPARATOR = re.compile(r"\s*[—–]\s*|(?<!-)\s+-\s+(?!-)")
+_DOUBLE_COMMA = re.compile(r",\s*,+")
+_COMMA_BEFORE_PUNCT = re.compile(r",\s*(?=[.!?;:])")
+_MULTI_SPACE = re.compile(r"[ \t]{2,}")
+_MULTI_NEWLINE = re.compile(r"\n{3,}")
+
+
+def _strip_markdown_for_tts(text: str) -> str:
+    """Convert LLM-emitted markdown into a clean conversational read.
+
+    Inworld TTS reads `**`, `*`, `_`, backticks, and bullet markers
+    literally or stutters on them. Display layer keeps the formatting;
+    this rewrites only the TTS-bound copy. Inworld audio markup tags
+    like `[laugh]`, `[whispering]`, `<break time="500ms" />` are
+    preserved (the regexes target paired markdown emphasis only).
+    """
+    if not text:
+        return text
+    # Headers / bullets / blockquotes / horizontal rules — strip the
+    # marker; keep the line content. Order matters: hrule before bullet
+    # so "---" alone on a line doesn't get caught as a bullet.
+    text = _MD_HRULE.sub("", text)
+    text = _MD_HEADER.sub("", text)
+    text = _MD_BULLET.sub("", text)
+    text = _MD_ORDERED.sub("", text)
+    text = _MD_BLOCKQUOTE.sub("", text)
+    # Links: [label](url) → label
+    text = _MD_LINK.sub(r"\1", text)
+    # Inline code spans: `foo` → foo
+    text = _MD_CODE_INLINE.sub(r"\1", text)
+    # Bold/italic — both asterisk and underscore variants
+    text = _MD_BOLD.sub(r"\1", text)
+    text = _MD_BOLD_UNDER.sub(r"\1", text)
+    text = _MD_ITALIC.sub(r"\1", text)
+    text = _MD_ITALIC_UNDER.sub(r"\1", text)
+    # Parenthetical asides → comma-bounded clauses (more natural read).
+    # Keeps the content; just trades brackets for prosodic pauses.
+    text = _PARENS_ASIDE.sub(r", \1,", text)
+    # Slash between words (e.g. "Dark/ground" / "and/or") → "or".
+    # Only triggers between word chars so it doesn't touch URLs that
+    # already survived the link strip (none should — but defense-in-depth).
+    text = _SLASH_BETWEEN_WORDS.sub(r"\1 or \2", text)
+    # Em / en dashes and " - " separators → comma + pause.
+    text = _DASH_SEPARATOR.sub(", ", text)
+    # Collapse runs of commas (parenthetical → comma + dash → comma can
+    # leave ",, " sequences) and trim commas that drifted in front of
+    # sentence-ending punctuation.
+    text = _DOUBLE_COMMA.sub(",", text)
+    text = _COMMA_BEFORE_PUNCT.sub("", text)
+    # Cleanup whitespace
+    text = _MULTI_SPACE.sub(" ", text)
+    text = _MULTI_NEWLINE.sub("\n\n", text)
+    return text.strip()
+
+
 class WsVoiceSynthRequest(BaseModel):
     text: str
     # Default customer-facing agent is Sal_Ang per owner directive 2026-05-03 17:30.
@@ -3527,6 +3583,15 @@ async def voice_synthesize(body: WsVoiceSynthRequest):
     if len(text) > 2000:
         # Inworld TTS-1.5 has a per-request character cap; trim to be safe.
         text = text[:2000]
+
+    # Strip markdown formatting BEFORE the pronunciation engine runs.
+    # The LLM emits Markdown (** for bold, lists with - / *, parentheses
+    # around asides, [link](url), forward-slash separators like
+    # "Dark/ground"). Inworld TTS reads those literal characters or
+    # stutters on them — owner caught Sal stuttering on bullet markers
+    # and reading "asterisk asterisk Coastal Functional...". Display
+    # canon stays untouched; only the TTS-bound text gets cleaned.
+    text = _strip_markdown_for_tts(text)
 
     # TTS pronunciation + cadence fixes via the pronunciation engine.
     # All rule packs live in voice-library/pronunciation-library/rules/
