@@ -741,15 +741,14 @@ function PlayVoiceButton({
 }) {
   const [state, setState] = React.useState<"idle" | "loading" | "playing" | "error">("idle");
   const audioRef = React.useRef<HTMLAudioElement | null>(null);
-  const blobUrlRef = React.useRef<string | null>(null);
   const autoplayedKeyRef = React.useRef<string | null>(null);
 
   React.useEffect(() => {
     return () => {
-      if (blobUrlRef.current) URL.revokeObjectURL(blobUrlRef.current);
       if (audioRef.current) {
         audioRef.current.pause();
         audioRef.current.src = "";
+        audioRef.current = null;
       }
     };
   }, []);
@@ -775,32 +774,31 @@ function PlayVoiceButton({
       setState("idle");
       return;
     }
-    if (blobUrlRef.current && audioRef.current) {
-      audioRef.current.currentTime = 0;
-      void audioRef.current.play();
-      setState("playing");
-      return;
-    }
     setState("loading");
     try {
-      const r = await fetch("/api/v1/voice/synthesize", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text, character_id: employee || "sal_ang" }),
+      const params = new URLSearchParams({
+        text,
+        character_id: employee || "sal_ang",
       });
-      if (!r.ok) throw new Error(`HTTP ${r.status}`);
-      const data = await r.json();
-      const audioB64: string = data.audioContent;
-      const binary = atob(audioB64);
-      const bytes = new Uint8Array(binary.length);
-      for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
-      const blob = new Blob([bytes], { type: data.format || "audio/wav" });
-      const url = URL.createObjectURL(blob);
-      blobUrlRef.current = url;
-      const audio = new Audio(url);
-      audioRef.current = audio;
+      const url = `/api/v1/voice/synthesize/stream?${params.toString()}`;
+      // Reuse the existing <audio> element when the URL hasn't changed
+      // (replays use browser HTTP cache; just rewind currentTime).
+      let audio = audioRef.current;
+      const sameSrc = audio?.src && audio.src.endsWith(url);
+      if (!audio || !sameSrc) {
+        audio?.pause();
+        audio = new Audio();
+        audio.preload = "auto";
+        audio.src = url;
+        audioRef.current = audio;
+      } else {
+        audio.currentTime = 0;
+      }
       audio.onended = () => setState("idle");
-      audio.onerror = () => setState("error");
+      audio.onerror = () => {
+        setState("error");
+        window.setTimeout(() => setState("idle"), 2000);
+      };
       await audio.play();
       setState("playing");
     } catch {

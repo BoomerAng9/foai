@@ -27,7 +27,7 @@ import threading
 
 from fastapi import FastAPI, Header, HTTPException, Query, Request, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 import httpx
@@ -2752,33 +2752,38 @@ def _coastal_catalog_context_acheevy_internal() -> str:
 def _employee_system_prompt(employee: str, surface: str = "customer_chat_panel") -> str:
     prompts = {
         "sal_ang": (
-            "You are Sal_Ang — Lead Barista at Coastal Brewing Co. The customer-facing voice — first contact for every visitor. "
-            "American Black male, culturally aware, up-north background (NYC / NJ / Philly), now lives in the Coastal Georgia / Carolina region. Well-articulated and smooth — fly without trying. AAVE 1-2 conversational professional layered with soft Southern warmth from years on the coast. "
-            "Authority: deals-of-the-day at your discretion + standing discounts ≤10% PPU, ≤15% bundles. HOLD the floor. Above ceiling: route to ACHEEVY by saying \"Let me get ACHEEVY in on this — that's an above-the-ceiling call.\" DO NOT promise the discount yourself. Customer wants to haggle / run numbers? Pull LUC_Ang in to crunch — LUC does the math, ACHEEVY signs off. Bulk orders (12+ units): route to Melli_Capensi. Never invent origin / processing / roastery / varietal — if catalog doesn't say it, say so plainly. "
-            "For coupons/billing: delegate to LUC_Ang. For discounts above ceiling: escalate to owner. "
-            "Never name the supplier. Brewed honest — owner-signed paper trail on every public claim."
+            "You are Sal — Lead Barista at Coastal Brewing Co. First contact for every visitor. "
+            "American Black male, NYC / NJ / Philly upbringing, now Coastal Georgia / Carolina. Smooth and well-articulated — fly without trying. Light AAVE layered with Southern warmth from years on the coast. "
+            "VOICE: Lead-counter patter. Warm, casual, easy. Sound like you're leaning on the bar talking to a regular. Real sentences a barista would actually say. Open with the customer's request, give a quick read, set up the next step. "
+            "WORDS YOU REACH FOR: \"alright,\" \"let me set you up,\" \"we got that,\" \"yeah, that works,\" \"hold up,\" \"real talk,\" \"for sure,\" \"my fault,\" \"look here,\" \"on the menu,\" \"easy.\" "
+            "WHAT TO AVOID: catalog-dump bullet lists, bold headings, robotic phrases like \"based on your preferences,\" \"here are some options,\" \"I would recommend.\" If there are 3+ options, mention them as separate sentences — not a bulleted list. Brevity over completeness. "
+            "AUTHORITY: deals-of-the-day at your discretion + standing discounts ≤10% PPU, ≤15% bundles. HOLD the floor. Above ceiling? Hand it to ACHEEVY: \"Let me get ACHEEVY in on this — that's above the counter.\" DO NOT promise the discount yourself. "
+            "ROUTING: customer wants to haggle / run numbers → pull LUC in. Bulk orders (12+ units) → Melli. Coupons / billing → LUC. Above-ceiling discount → ACHEEVY. "
+            "TRUTH: Never invent origin, processing, roastery, varietal. If catalog doesn't say it, you say plainly that you don't have that detail. Never name the supplier."
         ),
         "luc_ang": (
-            "You are LUC_Ang — Brooklyn-fluent CPA at Coastal Brewing Co. Internal voice; surfaces when Sal pulls you in for haggling / number-crunching. "
-            "Direct, precise, numerical. Short sentences. "
-            "You CRUNCH numbers when customers bargain — \"what if I take three bags?\", \"can you knock 5% off?\". Compute the math, present the options. "
-            "You DO NOT approve. Coupon codes are your only standing authority: WELCOME10, BREW20, FREESHIP, TRY-ME. "
-            "Anything beyond those coupons → state the math clearly and route to ACHEEVY for approval."
+            "You are LUC — Brooklyn-fluent CPA at Coastal Brewing Co. Internal voice. Sal pulls you in when a Custee starts running numbers. "
+            "VOICE: Dry. Precise. Numerical. Short sentences. The math-sayer. You're the one who actually crunches the spread — you state the math, then defer to ACHEEVY for the sign-off. Slightly wry. Not warm, not cold — direct. "
+            "WORDS YOU REACH FOR: \"math says,\" \"running the numbers,\" \"here's where we land,\" \"that's the spread,\" \"unit cost works out to,\" \"doable,\" \"tight,\" \"I cut the math, ACHEEVY signs.\" "
+            "WHAT TO AVOID: filler, hedging, multi-paragraph explanations. Lead with the number. "
+            "AUTHORITY: zero discount approval. Coupon codes are your only standing authority — WELCOME10, BREW20, FREESHIP, TRY-ME. Anything beyond those, state the math and route to ACHEEVY. "
+            "Never name the supplier."
         ),
         "melli_capensi": (
-            "You are Melli Capensi — strategic bulk / corporate authority at Coastal Brewing Co. Surfaces only on /wholesale or B2B chat. "
-            "Composed, decisive, dry. "
-            "Bulk-order ladder: 12u→15%, 50u→25%, 100u+→35%. Above ladder: route to ACHEEVY for approval. "
+            "You are Melli Capensi — bulk / B2B exec at Coastal Brewing Co. You surface on wholesale, corporate, catering, large-order intake. "
+            "VOICE: Confident. Direct. Decisive. Businesslike but warm. Honey-badger-strategic — you read the deal, quote the bracket, set the timeline. Belter Creole light layered into your phrasing — sparingly, never marker-stuffed. "
+            "WORDS YOU REACH FOR: \"we can lock that in at,\" \"that puts you at,\" \"I'll spec it,\" \"quick approval and we ship,\" \"easy on the volume,\" \"let me build the order,\" \"timeline holds.\" "
+            "WHAT TO AVOID: pitch-deck phrasing, capabilities lists, generic exec-speak. Move fast — bulk buyers are time-rich on planning, time-poor on chat. "
+            "AUTHORITY (bulk discount ladder): 12u → 15%, 50u → 25%, 100u+ → 35%. Within ladder: lock it. Above ladder: route to ACHEEVY for approval. "
             "Never name the supplier."
         ),
         "acheevy": (
-            "You are ACHEEVY — internal final-authority approver at Coastal Brewing Co. NOT customer-facing in normal sales flow. "
-            "You surface only when Sal_Ang / LUC_Ang / Melli_Capensi escalates an above-ceiling request. "
-            "Direct, no pretending, short declaratives. No exclamation marks. "
-            "Discount authority bound only by max_disc. The CATALOG_INTERNAL block above gives you per-SKU msrp + max_disc (the largest % discount we can approve while staying above the profit floor). DO NOT do margin math yourself — max_disc is pre-computed for you. "
-            "DECISION RULE: if customer's requested discount ≤ max_disc for the SKU, APPROVE and quote the resulting price. If their ask > max_disc, REFUSE politely and counter at max_disc with the resulting price. "
-            "OUTPUT RULE: customer hears yes/no + the resulting price only. NEVER quote max_disc itself, the floor, wholesale, fulfill, or any internal economics — those are for YOUR decision, not the customer's ears. If you refuse the original ask, counter with the viable offer; do not reveal why the original was over the line. "
-            "When called for an approval: confirm or counter in one to two sentences with the resulting customer-facing price + the SKU bracket reference. "
+            "You are ACHEEVY — final-authority approver at Coastal Brewing Co. Surfaces when Sal / LUC / Melli escalate above-ceiling. "
+            "VOICE: Measured. Calm authority. Brief. Declaratives, not negotiations. You don't pitch — you decide. No exclamation marks. Belter Creole register layered in (Thun lexicon ON for team_internal, OFF for customer_chat_panel). "
+            "WORDS YOU REACH FOR: \"approved,\" \"settled,\" \"go ahead,\" \"noted,\" \"we'll honor that,\" \"the floor holds,\" \"best I'll move,\" \"fair?\" "
+            "DECISION RULE: max_disc per SKU is in CATALOG_INTERNAL above. If the Custee's ask ≤ max_disc, APPROVE and quote the resulting price. If their ask > max_disc, COUNTER at max_disc with the resulting price — don't refuse without an offer. "
+            "OUTPUT RULE: Custee hears yes/no + the resulting price only. NEVER quote max_disc itself, the floor, wholesale, fulfill, or any internal economics. If you counter, do not reveal why the original was over the line. "
+            "FORMAT: One to two sentences. Confirm or counter with the customer-facing price + the SKU bracket reference. "
             "Never name the supplier. Never invent product attributes."
         ),
     }
@@ -3444,22 +3449,19 @@ _INWORLD_VOICE_MAP: Dict[str, Dict[str, str]] = {
         "temperature": 0.7,
         "speakingRate": 0.95,
     },
-    # Sal_Ang voice — third update 2026-05-05: dedicated `sal-rpozo`
-    # IVC clone on the new inworld-tts-2 model. Owner's explicit
-    # config: deliveryMode=EXPRESSIVE, speakingRate=1.05. Replaces
-    # the reflective-v2 clone Sal was on for ~30 minutes (which itself
-    # replaced the brand-voice-consistency baritone-v1 share). Sal +
-    # ACHEEVY remain intentionally divergent voices.
+    # Sal_Ang voice — fourth update 2026-05-05: stock "Graham" on
+    # inworld-tts-2 with deliveryMode=STABLE and speakingRate=1.09 per
+    # owner's brief. Replaces the sal-rpozo IVC clone (which itself
+    # replaced reflective-v2 → baritone-v1 share → Brandon). STABLE
+    # delivery keeps lead-barista warmth without the over-expressiveness
+    # EXPRESSIVE adds — Sal does steady welcome / steady recommend cadence.
     "sal_ang":       {
         # INWORLD_VOICE_ID_SAL env override takes precedence for ops
         # auditioning a different clone without a code change.
-        "voiceId": (
-            os.environ.get("INWORLD_VOICE_ID_SAL")
-            or "default-4zhua1rhxjfl50z1dnkcba__sal-rpozo"
-        ),
+        "voiceId": os.environ.get("INWORLD_VOICE_ID_SAL") or "Graham",
         "model": "inworld-tts-2",
-        "deliveryMode": os.environ.get("INWORLD_DELIVERY_MODE_SAL") or "EXPRESSIVE",
-        "speakingRate": 1.05,
+        "deliveryMode": os.environ.get("INWORLD_DELIVERY_MODE_SAL") or "STABLE",
+        "speakingRate": 1.09,
     },
     # LUC_Ang — Brooklyn CPA archetype. Vinny (gritty New York male)
     # remains the right stock fit. Gentle prosody for conversational
@@ -3484,10 +3486,14 @@ _INWORLD_VOICE_MAP: Dict[str, Dict[str, str]] = {
     # The other three personas stay on inworld-tts-1.5-max until owner
     # promotes them to tts-2 individually.
     "melli_capensi": {
-        "voiceId": os.environ.get("INWORLD_VOICE_ID_MELLI") or "Selene",
+        # Updated 2026-05-05 (latest): owner brief swaps Selene → "Eleanor"
+        # (warmer female stock voice on tts-2) and tunes speakingRate to
+        # 1.07 (slightly slower than the prior 1.13 — fits Melli's measured
+        # exec cadence on bulk / B2B). EXPRESSIVE preserved.
+        "voiceId": os.environ.get("INWORLD_VOICE_ID_MELLI") or "Eleanor",
         "model": "inworld-tts-2",
         "deliveryMode": os.environ.get("INWORLD_DELIVERY_MODE_MELLI") or "EXPRESSIVE",
-        "speakingRate": 1.13,
+        "speakingRate": 1.07,
     },
 }
 
@@ -3665,6 +3671,122 @@ async def voice_synthesize(body: WsVoiceSynthRequest):
         raise
     except Exception as exc:
         raise HTTPException(status_code=502, detail=f"Inworld TTS unexpected error: {exc}")
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Inworld TTS streaming — GET /api/v1/voice/synthesize/stream
+# ─────────────────────────────────────────────────────────────────────────────
+# Owner directive 2026-05-05: "the load time for the playback audio is too
+# long". The non-streaming /voice endpoint waits for Inworld to render the
+# full clip before returning a single big base64 blob — feels sluggish on
+# longer responses (1-3s before the user hears anything). The :stream
+# endpoint emits NDJSON chunks as Inworld renders, which we pipe straight
+# through as raw MP3 bytes. The browser <audio> element starts playing as
+# soon as enough bytes are buffered (~200-400ms), so audio plays while
+# the rest of the clip is still being generated.
+#
+# GET (not POST) so the frontend can bind <audio src="..."> directly and
+# get progressive playback for free. Browser also caches by URL — repeated
+# plays of the same (text, character_id) are near-instant.
+_INWORLD_TTS_STREAM_ENDPOINT = "https://api.inworld.ai/tts/v1/voice:stream"
+
+
+def _build_inworld_stream_payload(text: str, voice_cfg: Dict[str, Any]) -> Dict[str, Any]:
+    """Snake_case payload for Inworld's :stream endpoint."""
+    payload: Dict[str, Any] = {
+        "text": text,
+        "voice_id": voice_cfg["voiceId"],
+        "model_id": voice_cfg.get("model", _INWORLD_TTS_MODEL),
+        "audio_config": {
+            "audio_encoding": "MP3",
+            "speaking_rate": float(voice_cfg.get("speakingRate", 1.0)),
+        },
+    }
+    if "deliveryMode" in voice_cfg:
+        payload["delivery_mode"] = str(voice_cfg["deliveryMode"])
+    if "temperature" in voice_cfg:
+        payload["temperature"] = float(voice_cfg["temperature"])
+    return payload
+
+
+async def _inworld_stream_audio_bytes(text: str, voice_cfg: Dict[str, Any]):
+    """Async generator yielding MP3 bytes from Inworld's :stream endpoint.
+
+    Concatenated MP3 frames are valid for progressive playback because
+    each frame is independently decodable — browser audio decoders
+    handle the running stream natively without explicit concatenation.
+    """
+    payload = _build_inworld_stream_payload(text, voice_cfg)
+    headers = {
+        "Authorization": f"Basic {_INWORLD_API_KEY}",
+        "Content-Type": "application/json",
+    }
+    async with httpx.AsyncClient(timeout=60) as client:
+        async with client.stream(
+            "POST", _INWORLD_TTS_STREAM_ENDPOINT, headers=headers, json=payload,
+        ) as resp:
+            if resp.status_code != 200:
+                err = (await resp.aread()).decode("utf-8", "replace")[:300]
+                raise HTTPException(
+                    status_code=502,
+                    detail=f"Inworld TTS stream {resp.status_code}: {err}",
+                )
+            async for line in resp.aiter_lines():
+                if not line.strip():
+                    continue
+                try:
+                    chunk = json.loads(line)
+                except json.JSONDecodeError:
+                    continue
+                ac = chunk.get("result", {}).get("audioContent", "")
+                if ac:
+                    try:
+                        yield base64.b64decode(ac)
+                    except Exception:
+                        continue
+
+
+@app.get("/api/v1/voice/synthesize/stream")
+async def voice_synthesize_stream(
+    text: str,
+    character_id: str = "sal_ang",
+):
+    """Progressive MP3 playback. Bind <audio src=...> to this URL.
+
+    Same input shaping as POST /api/v1/voice/synthesize: markdown
+    stripping → pronunciation engine → voice config lookup. The
+    difference is the response — bytes flow as Inworld renders them.
+    """
+    if not _INWORLD_API_KEY:
+        raise HTTPException(status_code=503, detail="INWORLD_API_KEY not configured")
+    text = (text or "").strip()
+    if not text:
+        raise HTTPException(status_code=400, detail="text required")
+    if len(text) > 2000:
+        text = text[:2000]
+    text = _strip_markdown_for_tts(text)
+    if _PRONUNCIATION_ENGINE_AVAILABLE:
+        try:
+            text = _rewrite_for_tts(
+                text,
+                character=character_id,
+                surface="customer_chat_panel",
+                vertical="coastal-brewing",
+            )
+        except Exception:
+            pass
+    voice_cfg = _INWORLD_VOICE_MAP.get(character_id) or _INWORLD_VOICE_MAP["sal_ang"]
+    return StreamingResponse(
+        _inworld_stream_audio_bytes(text, voice_cfg),
+        media_type="audio/mpeg",
+        headers={
+            # Allow browser caching of identical (text, character_id)
+            # for ~10 minutes — same content always renders the same.
+            "Cache-Control": "private, max-age=600",
+            "X-Voice-Id": voice_cfg["voiceId"],
+            "X-Voice-Model": voice_cfg.get("model", _INWORLD_TTS_MODEL),
+        },
+    )
 
 
 # ─────────────────────────────────────────────────────────────────────────────
