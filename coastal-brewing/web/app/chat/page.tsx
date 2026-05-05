@@ -14,12 +14,12 @@ export default async function ChatPage({
       <Nav />
       <main className="container py-10">
         <div className="mb-6">
-          <p className="font-mono text-[10px] uppercase tracking-widest text-accent">Live · ACHEEVY is online</p>
+          <p className="font-mono text-[10px] uppercase tracking-widest text-accent">Live · Sal is online</p>
           <h1 className="mt-1 font-display text-3xl font-semibold md:text-4xl">
-            Find your cup with ACHEEVY.
+            Find your cup with Sal.
           </h1>
           <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
-            Coffee, tea, matcha. Tell ACHEEVY what you&apos;re after and
+            Coffee, tea, matcha. Tell Sal what you&apos;re after and
             you&apos;ll be on a recommendation in two questions, on a
             checkout in five.
           </p>

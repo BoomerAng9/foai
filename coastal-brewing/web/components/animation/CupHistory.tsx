@@ -54,7 +54,7 @@ export function CupHistory({ cups }: Props) {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             transition={{ delay: 0.1 }}
             className="flex flex-col items-center gap-0.5 shrink-0"
-            title={`Turn ${cup.turnIndex + 1} · ${EMPLOYEE_LABEL[cup.employee] || cup.employee}`}
+            title={`Turn ${cup.turnIndex + 1}`}
           >
             <span className="text-lg">{ANIM_ICON[cup.animationType] || "☕"}</span>
             <span className="font-mono text-[7px] text-muted-foreground/50">

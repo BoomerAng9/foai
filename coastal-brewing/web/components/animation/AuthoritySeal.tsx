@@ -76,7 +76,7 @@ export function AuthoritySeal({ progress, size, isThinking, isComplete }: Props)
       )}
 
       <p className="font-mono text-center text-[9px] uppercase tracking-widest text-muted-foreground">
-        ACHEEVY · T1 · Final Authority
+        Final approval in progress
       </p>
     </div>
   );

@@ -3443,17 +3443,29 @@ _INWORLD_VOICE_MAP: Dict[str, Dict[str, str]] = {
         "temperature": 0.7,
         "speakingRate": 0.95,
     },
-    # Sal_Ang voice — switched 2026-05-03 16:35 from stock "Hank"
-    # (Lowcountry warmth) to "Brandon" per owner directive: Sal is
-    # now an American Black male lead barista, up-north migration
-    # to Coastal Georgia/Carolina, articulate + smooth + fly.
-    # Brandon = bold, strident male voice (news-style read) — gentle
-    # prosody dial keeps it conversational, not announcement-heavy.
+    # Sal_Ang voice — switched 2026-05-05 from stock "Brandon" (sounded
+    # like newscaster — wrong vibe for lead barista) to the same Nas
+    # Queensbridge baritone IVC clone ACHEEVY uses. Per owner directive
+    # 2026-05-05: brand voice consistency — Sal + ACHEEVY share the
+    # same throat (Nas clone), persona NAMES differentiate role
+    # (lead barista vs final approver), not voice timbre. Belter Creole
+    # register-modulator at LLM layer + pronunciation engine + gentle
+    # prosody (t=0.7, rate=0.95) preserved.
     "sal_ang":       {
-        "voiceId": "Brandon",
+        # Brand-voice consistency per owner directive 2026-05-05: Sal +
+        # ACHEEVY share the same throat. INWORLD_VOICE_ID_SAL allows
+        # per-character override; falls back to ACHEEVY's override (if
+        # set, e.g. ops auditioning a higher-quality clone) and finally
+        # to the canonical Nas-clone voiceId. Keeps Sal in lockstep with
+        # ACHEEVY voice changes by default.
+        "voiceId": (
+            os.environ.get("INWORLD_VOICE_ID_SAL")
+            or os.environ.get("INWORLD_VOICE_ID_ACHEEVY")
+            or _ACHEEVY_NAS_CLONE_VOICEID
+        ),
         "model": "inworld-tts-1.5-max",
         "temperature": 0.7,
-        "speakingRate": 0.97,
+        "speakingRate": 0.95,
     },
     # LUC_Ang — Brooklyn CPA archetype. Vinny (gritty New York male)
     # remains the right stock fit. Gentle prosody for conversational
@@ -3489,7 +3501,7 @@ async def voice_synthesize(body: WsVoiceSynthRequest):
     encoded WAV in `audioContent` for the frontend to decode and play
     (no streaming yet; voice-stream endpoint can be wired later for
     long messages). Customer surface only ever hits this with
-    character_id='acheevy' — internal voices accept calls for owner-
+    character_id='sal_ang' — internal voices accept calls for owner-
     side previews."""
     if not _INWORLD_API_KEY:
         raise HTTPException(status_code=503, detail="INWORLD_API_KEY not configured")

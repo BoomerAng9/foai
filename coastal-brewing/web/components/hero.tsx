@@ -80,7 +80,7 @@ export function Hero() {
             <ChatPanel initialAgent="sales" />
           </div>
           <p className="mt-3 text-center font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
-            Live · ACHEEVY is online
+            Live · Sal is online
           </p>
         </div>
       </div>

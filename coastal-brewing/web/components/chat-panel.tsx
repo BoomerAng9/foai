@@ -497,7 +497,7 @@ export function ChatPanel({
           <button
             type="button"
             onClick={() => setVoiceAutoplay((v) => !v)}
-            aria-label={voiceAutoplay ? "Mute ACHEEVY voice" : "Unmute ACHEEVY voice"}
+            aria-label={voiceAutoplay ? "Mute Sal voice" : "Unmute Sal voice"}
             title={voiceAutoplay ? "Voice on — click to mute" : "Voice muted — click to unmute"}
             className={cn(
               "inline-flex h-7 w-7 items-center justify-center rounded-full transition-colors",
@@ -688,7 +688,7 @@ export function ChatPanel({
           disabled={!!pending || isConnecting}
         />
         <Input
-          placeholder="Ask ACHEEVY — type or tap the mic…"
+          placeholder="Ask Sal — type or tap the mic…"
           value={input}
           onChange={(e) => setInput(e.target.value)}
           disabled={!!pending || isConnecting}
@@ -796,7 +796,7 @@ function PlayVoiceButton({
     <button
       type="button"
       onClick={play}
-      aria-label={state === "playing" ? "Stop ACHEEVY audio" : "Play ACHEEVY audio"}
+      aria-label={state === "playing" ? "Stop Sal audio" : "Play Sal audio"}
       className={cn(
         "inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 text-[10px] uppercase tracking-widest transition-colors",
         state === "idle" && "border-accent/40 bg-accent/5 text-accent hover:bg-accent/15",
@@ -804,7 +804,7 @@ function PlayVoiceButton({
         state === "playing" && "border-accent bg-accent/20 text-accent",
         state === "error" && "border-destructive/40 bg-destructive/10 text-destructive",
       )}
-      title={state === "error" ? "Voice unavailable" : "Hear ACHEEVY in his voice"}
+      title={state === "error" ? "Voice unavailable" : "Hear Sal in his voice"}
     >
       {state === "loading" ? (
         <Loader2 className="h-3 w-3 animate-spin" />
@@ -921,7 +921,7 @@ function MicButton({
         state === "error" && "border-destructive/40 bg-destructive/5 text-destructive",
         disabled && "opacity-40 cursor-not-allowed",
       )}
-      title={isActive ? "Stop & transcribe" : state === "error" ? "Mic unavailable" : "Speak to ACHEEVY"}
+      title={isActive ? "Stop & transcribe" : state === "error" ? "Mic unavailable" : "Speak to Sal"}
     >
       <Icon className={cn("h-4 w-4", state === "transcribing" && "animate-spin")} />
     </button>
