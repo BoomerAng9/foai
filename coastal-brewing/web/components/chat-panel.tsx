@@ -22,16 +22,26 @@ const SS_VOICE_AUTOPLAY = "coastal_chat_voice_autoplay";   // "0" = muted, defau
 
 type Agent = "sales" | "marketing";
 
-// Customer-surface persona — per ACHEEVY_BRAIN.md (lines 96, 138, 1656, 1802)
-// and feedback_only_acheevy_speaks_to_users_on_coastal_chat.md, ONLY ACHEEVY
-// speaks to users. Internal routing across lieutenants (Sal/LUC/Melli) still
-// happens server-side via the chain-of-command, but the customer never sees
-// any name except ACHEEVY. Do not surface employee names in this component.
-// Customer-visible labels — per owner directive 2026-05-03 17:30 swap
-// from ACHEEVY to Sal as customer-facing lead. Internal const names kept
-// unchanged to minimize churn; only the displayed VALUES update.
-const ACHEEVY_LABEL = "Sal";
-const ACHEEVY_INITIALS = "S";
+// Customer-visible persona labels — per owner directive 2026-05-03 17:30
+// (Sal as customer-facing lead) + 2026-05-05 (Melli surfaces by name on
+// bulk / B2B intake; LUC + ACHEEVY surface by name when escalation
+// triggers route to them). The escalation chain itself stays server-
+// side; only the responding agent's label is shown.
+const EMPLOYEE_LABEL: Record<string, string> = {
+  sal_ang:       "Sal",
+  luc_ang:       "LUC",
+  melli_capensi: "Melli",
+  acheevy:       "ACHEEVY",
+};
+const EMPLOYEE_INITIALS: Record<string, string> = {
+  sal_ang:       "S",
+  luc_ang:       "L",
+  melli_capensi: "M",
+  acheevy:       "A",
+};
+const DEFAULT_EMPLOYEE_KEY = "sal_ang";
+const labelFor = (e?: string) => EMPLOYEE_LABEL[e || DEFAULT_EMPLOYEE_KEY] || EMPLOYEE_LABEL[DEFAULT_EMPLOYEE_KEY];
+const initialsFor = (e?: string) => EMPLOYEE_INITIALS[e || DEFAULT_EMPLOYEE_KEY] || EMPLOYEE_INITIALS[DEFAULT_EMPLOYEE_KEY];
 
 interface ChatMessage {
   role: "user" | "agent";
@@ -480,8 +490,11 @@ export function ChatPanel({
     }
   }
 
-  // Customer surface is single-persona. ACHEEVY only.
-  const currentLabel = ACHEEVY_LABEL;
+  // Header label tracks the currently-routed responding agent so the
+  // customer always sees who they're talking to as escalation moves
+  // through the chain (Sal → Melli for bulk, Sal → LUC for billing,
+  // any → ACHEEVY on final approval).
+  const currentLabel = labelFor(employee);
 
   return (
     <div className="flex h-full flex-col rounded-lg border border-border bg-card">
@@ -497,7 +510,7 @@ export function ChatPanel({
           <button
             type="button"
             onClick={() => setVoiceAutoplay((v) => !v)}
-            aria-label={voiceAutoplay ? "Mute Sal voice" : "Unmute Sal voice"}
+            aria-label={voiceAutoplay ? `Mute ${currentLabel} voice` : `Unmute ${currentLabel} voice`}
             title={voiceAutoplay ? "Voice on — click to mute" : "Voice muted — click to unmute"}
             className={cn(
               "inline-flex h-7 w-7 items-center justify-center rounded-full transition-colors",
@@ -527,17 +540,18 @@ export function ChatPanel({
             ) : (
               <div className="flex gap-3">
                 <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-accent/15 font-mono text-[10px] uppercase text-accent">
-                  {ACHEEVY_INITIALS}
+                  {initialsFor(m.employee)}
                 </div>
                 <div className="max-w-[80%] flex-1">
                   <div className="mb-1.5 flex items-center gap-2">
                     <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
-                      {ACHEEVY_LABEL}
+                      {labelFor(m.employee)}
                     </p>
                     <PlayVoiceButton
                       text={m.content}
                       messageKey={`msg-${i}-${m.ts}`}
                       autoplay={voiceAutoplay && i === messages.length - 1}
+                      employee={m.employee}
                     />
                   </div>
                   <ChatMessageContent text={m.content} catalog={catalog} />
@@ -706,21 +720,24 @@ export function ChatPanel({
   );
 }
 
-// ─── Inworld TTS playback for ACHEEVY responses ──────────────────────
+// ─── Inworld TTS playback per agent response ─────────────────────────
 // Per-message opt-in. Customer clicks the speaker icon → backend calls
-// Inworld TTS (Tyler voice for ACHEEVY) → we receive base64 WAV → play
-// via an in-browser Audio element. Caches the played blob URL so a
-// second click doesn't refetch. Only ACHEEVY's voice surfaces here per
-// the only-ACHEEVY-speaks-to-users canon — internal voice IDs (Sal /
-// LUC / Melli) are mapped server-side but never exposed.
+// Inworld TTS with the responding agent's character_id → we receive
+// base64 WAV → play via an in-browser Audio element. Caches the played
+// blob URL so a second click doesn't refetch. The character_id comes
+// from the message's `employee` field (set when the WS routes to
+// sal_ang / melli_capensi / luc_ang / acheevy); without it the call
+// falls back to sal_ang since Sal is the customer-facing default.
 function PlayVoiceButton({
   text,
   messageKey,
   autoplay = false,
+  employee,
 }: {
   text: string;
   messageKey: string;
   autoplay?: boolean;
+  employee?: string;
 }) {
   const [state, setState] = React.useState<"idle" | "loading" | "playing" | "error">("idle");
   const audioRef = React.useRef<HTMLAudioElement | null>(null);
@@ -769,7 +786,7 @@ function PlayVoiceButton({
       const r = await fetch("/api/v1/voice/synthesize", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text, character_id: "sal_ang" }),
+        body: JSON.stringify({ text, character_id: employee || "sal_ang" }),
       });
       if (!r.ok) throw new Error(`HTTP ${r.status}`);
       const data = await r.json();
@@ -796,7 +813,7 @@ function PlayVoiceButton({
     <button
       type="button"
       onClick={play}
-      aria-label={state === "playing" ? "Stop Sal audio" : "Play Sal audio"}
+      aria-label={state === "playing" ? `Stop ${labelFor(employee)} audio` : `Play ${labelFor(employee)} audio`}
       className={cn(
         "inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 text-[10px] uppercase tracking-widest transition-colors",
         state === "idle" && "border-accent/40 bg-accent/5 text-accent hover:bg-accent/15",
@@ -804,7 +821,7 @@ function PlayVoiceButton({
         state === "playing" && "border-accent bg-accent/20 text-accent",
         state === "error" && "border-destructive/40 bg-destructive/10 text-destructive",
       )}
-      title={state === "error" ? "Voice unavailable" : "Hear Sal in his voice"}
+      title={state === "error" ? "Voice unavailable" : `Hear ${labelFor(employee)}`}
     >
       {state === "loading" ? (
         <Loader2 className="h-3 w-3 animate-spin" />

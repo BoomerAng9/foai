@@ -2,6 +2,7 @@
 import { EspressoCup } from "./EspressoCup";
 import { LuCalLedger } from "./LuCalLedger";
 import { SettBrief } from "./SettBrief";
+import { CoffeePot } from "./CoffeePot";
 import { AuthoritySeal } from "./AuthoritySeal";
 
 interface Props {
@@ -19,6 +20,7 @@ export function AnimationRouter({ employee, animationType, animationSize, progre
   switch (animationType) {
     case "espresso_cup":   return <EspressoCup {...shared} />;
     case "lu_cal_ledger":  return <LuCalLedger {...shared} />;
+    case "coffee_pot":     return <CoffeePot {...shared} />;
     case "sett_brief":     return <SettBrief {...shared} />;
     case "authority_seal": return <AuthoritySeal {...shared} />;
     default:               return <EspressoCup {...shared} />;

@@ -14,7 +14,7 @@ from typing import Optional, Tuple
 EMPLOYEE_ANIMATION = {
     "sal_ang":        "espresso_cup",
     "luc_ang":        "lu_cal_ledger",
-    "melli_capensi":  "sett_brief",
+    "melli_capensi":  "coffee_pot",
     "acheevy":        "authority_seal",
 }
 
@@ -72,7 +72,7 @@ def detect_escalation(
 
     # Bulk / corporate / catering → Melli Capensi (if not already there)
     if _BULK_PATTERNS.search(text) and current_employee not in ("melli_capensi", "acheevy"):
-        return ("melli_capensi", "bulk_order_inquiry", None, "sett_brief")
+        return ("melli_capensi", "bulk_order_inquiry", None, "coffee_pot")
 
     # Coupon / billing request from Sal_Ang → delegate to LUC_Ang
     if current_employee == "sal_ang" and _COUPON_PATTERNS.search(text):

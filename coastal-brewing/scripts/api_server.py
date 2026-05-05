@@ -3404,6 +3404,14 @@ _ACHEEVY_NAS_CLONE_VOICEID = (
     "default-4zhua1rhxjfl50z1dnkcba__acheevy-nas-queensbridge-baritone-v1"
 )
 
+_SAL_NAS_REFLECTIVE_VOICEID = (
+    # Owner directive 2026-05-05: Sal needs a different throat from
+    # ACHEEVY — baritone-v1 doesn't fit lead-barista warmth. Try the
+    # reflective-v2 IVC clone (lighter, conversational variant of the
+    # Nas baseline) for Sal while ACHEEVY keeps the baritone-v1 canon.
+    "default-4zhua1rhxjfl50z1dnkcba__acheevy-nas-or-premier-reflective-v2"
+)
+
 _INWORLD_VOICE_MAP: Dict[str, Dict[str, str]] = {
     # ACHEEVY voice — switched 2026-05-03 14:30 from stock "Ronald"
     # to the IVC clone of Nas (Queensbridge baritone). Per owner
@@ -3444,24 +3452,22 @@ _INWORLD_VOICE_MAP: Dict[str, Dict[str, str]] = {
         "speakingRate": 0.95,
     },
     # Sal_Ang voice — switched 2026-05-05 from stock "Brandon" (sounded
-    # like newscaster — wrong vibe for lead barista) to the same Nas
-    # Queensbridge baritone IVC clone ACHEEVY uses. Per owner directive
-    # 2026-05-05: brand voice consistency — Sal + ACHEEVY share the
-    # same throat (Nas clone), persona NAMES differentiate role
-    # (lead barista vs final approver), not voice timbre. Belter Creole
-    # register-modulator at LLM layer + pronunciation engine + gentle
-    # prosody (t=0.7, rate=0.95) preserved.
+    # like newscaster — wrong vibe for lead barista). Initial swap was
+    # to ACHEEVY's baritone-v1 clone for brand-voice consistency, but
+    # owner caught that the heavy baritone didn't fit lead-barista
+    # warmth either. Now on the reflective-v2 IVC clone (lighter,
+    # conversational variant of the Nas baseline) — Sal + ACHEEVY now
+    # diverge: Sal carries the front-counter, ACHEEVY carries the
+    # back-room final-approver weight. Belter Creole register-modulator
+    # at LLM layer + pronunciation engine + gentle prosody preserved.
     "sal_ang":       {
-        # Brand-voice consistency per owner directive 2026-05-05: Sal +
-        # ACHEEVY share the same throat. INWORLD_VOICE_ID_SAL allows
-        # per-character override; falls back to ACHEEVY's override (if
-        # set, e.g. ops auditioning a higher-quality clone) and finally
-        # to the canonical Nas-clone voiceId. Keeps Sal in lockstep with
-        # ACHEEVY voice changes by default.
+        # INWORLD_VOICE_ID_SAL allows per-character override; falls back
+        # to the reflective-v2 clone for Sal's lead-barista timbre. No
+        # longer falls back to ACHEEVY's override — the two voices are
+        # intentionally different now.
         "voiceId": (
             os.environ.get("INWORLD_VOICE_ID_SAL")
-            or os.environ.get("INWORLD_VOICE_ID_ACHEEVY")
-            or _ACHEEVY_NAS_CLONE_VOICEID
+            or _SAL_NAS_REFLECTIVE_VOICEID
         ),
         "model": "inworld-tts-1.5-max",
         "temperature": 0.7,
@@ -3476,11 +3482,14 @@ _INWORLD_VOICE_MAP: Dict[str, Dict[str, str]] = {
         "temperature": 0.7,
         "speakingRate": 0.95,
     },
-    # Melli_Capensi — strategic executive archetype. Bianca (deep,
-    # controlled female voice) remains the right stock fit. Gentle
-    # prosody keeps her measured / decisive without sounding rushed.
+    # Melli_Capensi — strategic executive archetype. Owner directive
+    # 2026-05-05: Selene (warm but assertive female voice) replaces
+    # Bianca; Belter Creole register layered in via the LLM
+    # register-modulator (cast-environments YAML adds
+    # belter_creole_layer_light to her customer_chat_panel surface).
+    # Gentle prosody preserved.
     "melli_capensi": {
-        "voiceId": "Bianca",
+        "voiceId": os.environ.get("INWORLD_VOICE_ID_MELLI") or "Selene",
         "model": "inworld-tts-1.5-max",
         "temperature": 0.7,
         "speakingRate": 0.95,

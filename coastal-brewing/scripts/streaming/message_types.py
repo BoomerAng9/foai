@@ -8,7 +8,7 @@ class WsCupMetadata(BaseModel):
     type: str = "cup_metadata"
     employee: str          # sal_ang | luc_ang | melli_capensi | acheevy
     tier: str              # T3 | T2_FINANCE | T2_BULK | T1
-    animation_type: str    # espresso_cup | lu_cal_ledger | sett_brief | authority_seal
+    animation_type: str    # espresso_cup | lu_cal_ledger | coffee_pot | authority_seal
     animation_size: str    # espresso_1_shot | americano_2 | etc.
     estimated_thinking_tokens: int
     estimated_duration_sec: float
@@ -83,10 +83,14 @@ ANIMATION_SIZING: Dict[str, Dict[str, Any]] = {
         "bundle_calculation":   {"range": (300, 800),  "duration": (5, 10)},
         "deep_coupon":          {"range": (800, 99999),"duration": (10, 20)},
     },
-    "sett_brief": {
-        "surface_brief":    {"range": (100, 500),    "duration": (5, 8)},
-        "funnel_staging":   {"range": (500, 1500),   "duration": (8, 15)},
-        "full_sett":        {"range": (1500, 99999), "duration": (15, 30)},
+    "coffee_pot": {
+        # Bulk / B2B carafe — same drip/pour mechanic as the espresso cup,
+        # bigger vessel. Token bands roughly 2x the cup so the animation
+        # stays visually proportional to the larger contract / bulk-order
+        # reasoning Melli does.
+        "carafe_4u":     {"range": (100, 500),     "duration": (4, 7)},
+        "carafe_12u":    {"range": (500, 1500),    "duration": (7, 14)},
+        "carafe_50u":    {"range": (1500, 99999),  "duration": (14, 28)},
     },
     "authority_seal": {
         "standard_approval":{"range": (100, 500),   "duration": (3, 6)},
@@ -113,13 +117,13 @@ def get_animation_size(animation_type: str, input_tokens: int) -> tuple[str, flo
 
 # Internal employee → animation-type + tier maps. Imported by api_server.py
 # at the WS streaming endpoint to pick the right cup animation per lieutenant
-# routing target. NOTE: these names are INTERNAL to the chain-of-command
-# registry — they never reach the customer surface (chat-panel.tsx hardcodes
-# ACHEEVY for all display per the only-ACHEEVY-speaks-to-users canon).
+# routing target. Customer-visible label = Sal per owner directive
+# 2026-05-03 17:30 (sal_ang_customer_facing canon); ACHEEVY = internal
+# escalation only. Animation type still drives the per-cup visual.
 EMPLOYEE_ANIMATION: Dict[str, str] = {
     "sal_ang":       "espresso_cup",
     "luc_ang":       "lu_cal_ledger",
-    "melli_capensi": "sett_brief",
+    "melli_capensi": "coffee_pot",
     "acheevy":       "authority_seal",
 }
 
