@@ -3487,12 +3487,19 @@ _INWORLD_VOICE_MAP: Dict[str, Dict[str, str]] = {
     # Bianca; Belter Creole register layered in via the LLM
     # register-modulator (cast-environments YAML adds
     # belter_creole_layer_light to her customer_chat_panel surface).
-    # Gentle prosody preserved.
+    # Second update 2026-05-05: upgraded to inworld-tts-2 (Inworld's
+    # newest model, MP3 output). The new family swaps `temperature`
+    # for `deliveryMode` — EXPRESSIVE keeps the warmth of Belter Creole
+    # phrasing on bulk / B2B intake without flattening into monotone.
+    # speakingRate 1.13 per the Inworld integration brief default for
+    # tts-2 (slightly faster than 1.5-max, fits Melli's decisive cadence).
+    # The other three personas stay on inworld-tts-1.5-max until owner
+    # promotes them to tts-2 individually.
     "melli_capensi": {
         "voiceId": os.environ.get("INWORLD_VOICE_ID_MELLI") or "Selene",
-        "model": "inworld-tts-1.5-max",
-        "temperature": 0.7,
-        "speakingRate": 0.95,
+        "model": "inworld-tts-2",
+        "deliveryMode": os.environ.get("INWORLD_DELIVERY_MODE_MELLI") or "EXPRESSIVE",
+        "speakingRate": 1.13,
     },
 }
 
@@ -3541,18 +3548,23 @@ async def voice_synthesize(body: WsVoiceSynthRequest):
             pass  # never break TTS on rule-engine failure
 
     voice_cfg = _INWORLD_VOICE_MAP.get(body.character_id) or _INWORLD_VOICE_MAP["sal_ang"]
-    # Build payload with optional per-character prosody (temperature
-    # is top-level; speakingRate sits under audioConfig per Inworld
-    # synthesize-speech schema verified 2026-05-03).
+    # Build payload with optional per-character prosody. inworld-tts-1.5-*
+    # uses top-level `temperature`; inworld-tts-2 swaps that for
+    # `deliveryMode` (STABLE / BALANCED / EXPRESSIVE) per Inworld's
+    # 2026-05-05 tts-2 release. speakingRate sits under audioConfig on
+    # both model families.
+    model_id = voice_cfg.get("model", _INWORLD_TTS_MODEL)
     payload: Dict[str, Any] = {
         "text": text,
         "voiceId": voice_cfg["voiceId"],
-        "modelId": voice_cfg.get("model", _INWORLD_TTS_MODEL),
+        "modelId": model_id,
         "language": "en",
         "applyTextNormalization": "ON",
     }
     if "temperature" in voice_cfg:
         payload["temperature"] = float(voice_cfg["temperature"])
+    if "deliveryMode" in voice_cfg:
+        payload["deliveryMode"] = str(voice_cfg["deliveryMode"])
     if "speakingRate" in voice_cfg:
         payload.setdefault("audioConfig", {})["speakingRate"] = float(voice_cfg["speakingRate"])
     headers = {
@@ -3571,12 +3583,16 @@ async def voice_synthesize(body: WsVoiceSynthRequest):
         audio_b64 = body_data.get("audioContent", "")
         if not audio_b64:
             raise HTTPException(status_code=502, detail="Inworld TTS returned empty audioContent")
+        # tts-2 returns MP3, tts-1.5-* returns WAV. Frontend Audio()
+        # element handles either MIME, but we tell it the truth so it
+        # can pass the right `type` to Blob().
+        audio_format = "audio/mpeg" if "tts-2" in model_id else "audio/wav"
         return {
             "audioContent": audio_b64,
             "voiceId": voice_cfg["voiceId"],
-            "model": voice_cfg.get("model", _INWORLD_TTS_MODEL),
+            "model": model_id,
             "character_id": body.character_id,
-            "format": "audio/wav",
+            "format": audio_format,
         }
     except httpx.TimeoutException:
         raise HTTPException(status_code=504, detail="Inworld TTS timed out")
