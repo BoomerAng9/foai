@@ -4038,19 +4038,34 @@ async def voice_clone(
 from fastapi import UploadFile, File   # noqa: E402  (used here only)
 
 _INWORLD_STT_ENDPOINT = "https://api.inworld.ai/stt/v1/transcribe"
-_INWORLD_STT_MODEL = os.environ.get("INWORLD_STT_MODEL", "inworld-stt-1")
-# Fallback to Groq Whisper via Inworld's own provider (per their STT docs
-# `groq/whisper-large-v3` is supported through the same /stt/v1/transcribe
-# endpoint but with a different audio_encoding requirement). If Inworld's
-# native model rejects browser webm, retry with Groq.
+# `groq/whisper-large-v3` is the canonical Whisper model exposed through
+# Inworld's STT gateway and the default the docs example uses (per the
+# 2026-05-05 STT API reference fetched from docs.inworld.ai). The legacy
+# `inworld-stt-1` model is no longer the recommended path. Owner can
+# override via env var if Inworld ships a native English-tuned model
+# we want to A/B against.
+_INWORLD_STT_MODEL = os.environ.get("INWORLD_STT_MODEL", "groq/whisper-large-v3")
 
 
 @app.post("/api/v1/voice/transcribe")
 async def voice_transcribe(audio: UploadFile = File(...)):
-    """Transcribe customer mic audio via Inworld STT. Returns plain
-    transcript for the chat panel to drop into the input field.
-    Errors return 502 — the chat panel falls back to manual typing
-    silently."""
+    """Transcribe customer mic audio via Inworld STT.
+
+    Returns plain transcript for the chat panel to drop into the input
+    field. Errors return 502 — the chat panel falls back to manual
+    typing silently.
+
+    Implementation notes (corrected 2026-05-05 after owner reported STT
+    silently broken — endpoint had been returning 502 for every request):
+    Inworld's REST shape is JSON with `transcribeConfig` + `audioData`
+    (NOT multipart, NOT flat `model`/`audio_encoding` fields). The prior
+    multipart implementation was hitting Inworld's JSON parser which
+    choked on the boundary string with "invalid character '-' in
+    numeric literal".
+
+    Uses `AUTO_DETECT` for audioEncoding so MediaRecorder's webm/opus
+    output works without a client-side transcode step.
+    """
     if not _INWORLD_API_KEY:
         raise HTTPException(status_code=503, detail="INWORLD_API_KEY not configured")
     audio_bytes = await audio.read()
@@ -4059,43 +4074,44 @@ async def voice_transcribe(audio: UploadFile = File(...)):
     if len(audio_bytes) > 10 * 1024 * 1024:    # 10 MB cap
         raise HTTPException(status_code=413, detail="audio too large (max 10 MB)")
 
-    # Inworld STT REST sync API. Uses multipart form upload (the docs
-    # JSON shape with base64 was returning proto parse errors as of
-    # 2026-05-03 — multipart is the working path). `audio_encoding`
-    # AUTO_DETECT lets the model handle webm/opus from MediaRecorder
-    # without client-side transcoding.
-    files = {
-        "audio": (audio.filename or "audio.webm", audio_bytes, audio.content_type or "audio/webm"),
+    audio_b64 = base64.b64encode(audio_bytes).decode("ascii")
+    payload = {
+        "transcribeConfig": {
+            "modelId": _INWORLD_STT_MODEL,
+            "audioEncoding": "AUTO_DETECT",
+            "language": "en-US",
+            # MediaRecorder defaults to mono and 48 kHz on most browsers.
+            # AUTO_DETECT inspects the container and overrides these
+            # when needed; we send sensible defaults so non-AUTO_DETECT
+            # paths (if owner switches to a fixed encoding) still work.
+            "sampleRateHertz": 48000,
+            "numberOfChannels": 1,
+        },
+        "audioData": {"content": audio_b64},
     }
-    data = {
-        "model": _INWORLD_STT_MODEL,
-        "audio_encoding": "AUTO_DETECT",
-        "language_code": "en-US",
+    headers = {
+        "Authorization": f"Basic {_INWORLD_API_KEY}",
+        "Content-Type": "application/json",
     }
-    headers = {"Authorization": f"Basic {_INWORLD_API_KEY}"}
     try:
         async with httpx.AsyncClient(timeout=30) as client:
-            resp = await client.post(_INWORLD_STT_ENDPOINT, headers=headers, files=files, data=data)
+            resp = await client.post(_INWORLD_STT_ENDPOINT, headers=headers, json=payload)
         if resp.status_code != 200:
             raise HTTPException(
                 status_code=502,
                 detail=f"Inworld STT error {resp.status_code}: {resp.text[:300]}",
             )
         body_data = resp.json()
-        # Response can come back as either {results: [{alternatives: [...]}]} (Google-style)
-        # or {transcript: "..."} (OpenAI-style). Handle both.
-        transcript = body_data.get("transcript") or ""
-        if not transcript:
-            results = body_data.get("results") or []
-            for r in results:
-                alts = r.get("alternatives") or []
-                if alts and alts[0].get("transcript"):
-                    transcript += alts[0]["transcript"] + " "
-        transcript = transcript.strip()
+        # Real shape (verified 2026-05-05):
+        #   {"transcription": {"transcript": "...", "isFinal": true, ...},
+        #    "usage": {"transcribedAudioMs": ..., "modelId": "..."}}
+        transcription = body_data.get("transcription") or {}
+        transcript = (transcription.get("transcript") or "").strip()
         return {
             "transcript": transcript,
             "model": _INWORLD_STT_MODEL,
             "audio_bytes": len(audio_bytes),
+            "is_final": transcription.get("isFinal", True),
         }
     except httpx.TimeoutException:
         raise HTTPException(status_code=504, detail="Inworld STT timed out")

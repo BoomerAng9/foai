@@ -88,8 +88,29 @@ function parseMarkers(text: string, catalog: Product[]): Segment[] {
   return segments;
 }
 
+// Category-aware fallback so a missing tea/matcha/functional image
+// doesn't render as a coffee bag. Owner caught chat showing tea
+// SKUs with the coffee-blend fallback even though the tea PNGs on
+// disk are correct tin renders. Map each category to a representative
+// in-category image; brand-neutral category PNG would be cleaner if
+// we add one later.
+const CATEGORY_FALLBACK: Record<string, string> = {
+  coffee:           "/products/coastal-blend-12oz.png",
+  specialty_coffee: "/products/coastal-blend-12oz.png",
+  flavored_coffee:  "/products/coastal-blend-12oz.png",
+  functional:       "/products/coastal-functional-coffee-with-mushrooms-medium-ground-8oz.png",
+  tea:              "/products/coastal-lowcountry-tea-jasmine-3oz.png",
+  matcha:           "/products/coastal-matcha-ceremonial-30g.png",
+  kcup:             "/products/coastal-blend-12oz.png",
+  bundle:           "/products/coastal-blend-12oz.png",
+  sample_pack:      "/products/coastal-blend-12oz.png",
+  instant:          "/products/coastal-functional-instant-coffee-with-mushrooms-3oz.png",
+  subscription:     "/products/coastal-blend-12oz.png",
+};
+
 function InlineProductCard({ product }: { product: Product }) {
   const productId = product.sku || (product as Product & { id?: string }).id || "";
+  const fallback = CATEGORY_FALLBACK[product.category] || "/products/coastal-blend-12oz.png";
   return (
     <Link
       href={`/products/${productId}`}
@@ -97,7 +118,7 @@ function InlineProductCard({ product }: { product: Product }) {
     >
       <div className="relative aspect-square w-20 shrink-0 overflow-hidden rounded-lg bg-secondary">
         <Image
-          src={product.image || "/products/coastal-blend-12oz.png"}
+          src={product.image || fallback}
           alt={product.name}
           fill
           sizes="80px"
