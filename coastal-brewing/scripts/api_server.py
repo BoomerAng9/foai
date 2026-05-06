@@ -4508,6 +4508,53 @@ except NameError:
 
 
 # ─────────────────────────────────────────────────────────────────────────────
+# HR-PMO team-handoff audit. Owner directive 2026-05-06 — Betty Ann_Ang
+# (HR PMO supervisor) needs an audit trail of every agent transition so
+# she can assess team-member effectiveness and efficiency. Each chat
+# escalation (Sal→LUC, Sal→Melli, any→ACHEEVY, any→Marcus, etc.) writes
+# a "team_handoff" event keyed to the customer's coastal_uid.
+# ─────────────────────────────────────────────────────────────────────────────
+
+
+class TeamHandoffRequest(BaseModel):
+    from_employee: str
+    to_employee: str
+    reason: Optional[str] = None
+    client_ts: Optional[str] = None
+
+
+@app.post("/api/v1/team-handoff")
+async def team_handoff(body: TeamHandoffRequest, coastal_uid: Optional[str] = Cookie(default=None)):
+    """Record an agent transition for the HR-PMO audit trail. Severity
+    stays low — handoffs are routine. Visible to operator dashboard at
+    hawk.foai.cloud/tools/risk-events under category=team_handoff.
+    Future Betty Ann_Ang dashboard reads this stream to compute
+    per-team-member effectiveness/efficiency."""
+    fr = (body.from_employee or "").strip()
+    to = (body.to_employee or "").strip()
+    if not fr or not to or fr == to:
+        raise HTTPException(status_code=400, detail="from_employee and to_employee required and must differ")
+    description = f"handoff {fr} → {to} · reason={body.reason or 'unspecified'}"
+    try:
+        event_id = audit_ledger.insert_risk_event(
+            severity="low",
+            category="team_handoff",
+            description=description[:600],
+            actor=coastal_uid or "anonymous",
+            metadata={
+                "from_employee": fr,
+                "to_employee": to,
+                "reason": body.reason,
+                "client_ts": body.client_ts,
+                "coastal_uid": coastal_uid,
+            },
+        )
+    except Exception as exc:
+        raise HTTPException(status_code=502, detail=f"audit-ledger insert failed: {exc}")
+    return {"ok": True, "event_id": event_id}
+
+
+# ─────────────────────────────────────────────────────────────────────────────
 # Loss prevention — chat conversations that aren't on a path to purchase.
 # Owner directive 2026-05-06: treat tokens as the store's shrink budget.
 # Frontend evaluates each user message client-side, fires a soft- or hard-

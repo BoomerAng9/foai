@@ -84,6 +84,27 @@ interface LPAuditEntry {
   hardClose: boolean;
 }
 
+async function recordTeamHandoff(fromEmployee: string, toEmployee: string, reason: string): Promise<void> {
+  // HR-PMO audit trail. Every agent transition writes a "team_handoff"
+  // event so Betty Ann_Ang's effectiveness/efficiency dashboard can
+  // assess each team member. Owner directive 2026-05-06.
+  try {
+    await fetch("/api/v1/team-handoff", {
+      method: "POST",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        from_employee: fromEmployee,
+        to_employee: toEmployee,
+        reason,
+        client_ts: new Date().toISOString(),
+      }),
+    });
+  } catch {
+    // Non-fatal — the visible transition already happened.
+  }
+}
+
 async function recordLossPreventionEvent(ev: LPAuditEntry): Promise<void> {
   try {
     await fetch("/api/v1/loss-prevention/event", {
@@ -652,8 +673,22 @@ export function ChatPanel({
   // Header label tracks the currently-routed responding agent so the
   // customer always sees who they're talking to as escalation moves
   // through the chain (Sal → Melli for bulk, Sal → LUC for billing,
-  // any → ACHEEVY on final approval).
+  // any → ACHEEVY on final approval, any → Marcus for LP). Each
+  // transition is recorded for HR-PMO assessment (Betty Ann_Ang).
   const currentLabel = labelFor(employee);
+  const prevEmployeeRef = React.useRef<string>(employee);
+  const [handoffBanner, setHandoffBanner] = React.useState<{ from: string; to: string } | null>(null);
+  React.useEffect(() => {
+    const prev = prevEmployeeRef.current;
+    if (prev && prev !== employee) {
+      setHandoffBanner({ from: prev, to: employee });
+      void recordTeamHandoff(prev, employee, "ws_routing_change");
+      const timeout = window.setTimeout(() => setHandoffBanner(null), 4500);
+      prevEmployeeRef.current = employee;
+      return () => window.clearTimeout(timeout);
+    }
+    prevEmployeeRef.current = employee;
+  }, [employee]);
 
   return (
     <div className="flex h-full flex-col rounded-lg border border-border bg-card">
@@ -675,14 +710,45 @@ export function ChatPanel({
           }]);
         }}
       />
-      {/* Header */}
-      <div className="flex items-center justify-between border-b border-border px-5 py-3">
+      {/* Header — agent label animates on handoff so the customer always
+          sees who's at the counter; transition is logged for HR-PMO. */}
+      <div className="relative flex items-center justify-between border-b border-border px-5 py-3">
         <div className="flex items-center gap-2.5">
           <motion.div animate={{ rotate: [0, 10, -10, 0] }} transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}>
             <Sparkles className="h-4 w-4 text-accent" />
           </motion.div>
-          <span className="font-display text-sm font-semibold">{currentLabel}</span>
+          <div className="relative flex items-center gap-2 overflow-hidden">
+            <span className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">Chat w/</span>
+            <AnimatePresence mode="wait">
+              <motion.span
+                key={employee}
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -8 }}
+                transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+                className="font-display text-sm font-semibold"
+              >
+                {currentLabel}
+              </motion.span>
+            </AnimatePresence>
+          </div>
         </div>
+
+        {/* Handoff banner — shows briefly when an escalation moves the
+            conversation from one team member to another. */}
+        <AnimatePresence>
+          {handoffBanner && (
+            <motion.div
+              initial={{ opacity: 0, y: -8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.35 }}
+              className="absolute left-1/2 top-full z-10 -translate-x-1/2 translate-y-1 rounded-full border border-accent/40 bg-accent/15 px-3 py-1 font-mono text-[10px] uppercase tracking-widest text-accent shadow-sm"
+            >
+              {labelFor(handoffBanner.from)} → {labelFor(handoffBanner.to)} took over
+            </motion.div>
+          )}
+        </AnimatePresence>
         <div className="flex items-center gap-2">
           <button
             type="button"
