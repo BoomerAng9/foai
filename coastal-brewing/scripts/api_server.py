@@ -3463,10 +3463,20 @@ class AuthLoginRequest(BaseModel):
 
 
 # ─── Welcome-card render helpers ────────────────────────────────────────
-# Anthropic Claude generates the per-user welcome message; Inworld TTS
-# (Sal v2 IVC clone) renders it to MP3; the runner saves the MP3 locally
-# and serves via /api/v1/account/welcome-card.mp3. /account reads the
-# message text + audio URL from /api/v1/auth/me on first load.
+# Per-signup welcome message generated via DeepSeek-v4-pro through the
+# OpenRouter integration that's already wired for ACHEEVY's chat
+# reasoning. Inworld TTS (Sal v2 IVC clone) renders the message to MP3,
+# the runner saves it locally + serves via
+# /api/v1/account/welcome-card.mp3. /account reads message text + audio
+# URL from /api/v1/auth/me on first load.
+#
+# Why DeepSeek-v4-pro and not Claude Opus 4.7: a 35-50 word brand-voice
+# welcome line is not a frontier-reasoning task. DeepSeek-v4-pro is
+# already in the stack, costs ~20× less per call ($0.0007 vs $0.014
+# per message — ~$0.70/mo vs ~$14/mo at 1k signups), and follows the
+# Sal persona prompt with the same dialect-marker discipline that
+# already drives the live chat. Use Opus 4.7 only for tasks where
+# frontier reasoning genuinely changes the output.
 
 WELCOME_CARDS_DIR = pathlib.Path(__file__).resolve().parent.parent / "welcome-cards"
 WELCOME_FALLBACK_MESSAGE = (
@@ -3474,19 +3484,20 @@ WELCOME_FALLBACK_MESSAGE = (
     "We don't just sell coffee. We sell the part of the day that "
     "starts with a cup. Pull up a stool any time."
 )
+# DeepSeek-v4-flash (NOT -pro). Pro is a reasoning model — it spends
+# the token budget on chain-of-thought in `message.reasoning` and
+# returns `message.content: null`. Brand-voice 35-word output doesn't
+# need reasoning, and flash is ~2× cheaper anyway. Same model already
+# powering Sal + LUC retail chat.
+WELCOME_LLM_MODEL = os.environ.get("WELCOME_LLM_MODEL", "deepseek/deepseek-v4-flash")
 
 
-def _anthropic_welcome_message(name: Optional[str], email: str) -> str:
-    """Generate a 30-50 word Sal-voiced welcome message via Claude
-    Opus 4.7. Falls back to WELCOME_FALLBACK_MESSAGE on any failure
-    (Anthropic outage, missing key, etc) — signup must never block on
-    this best-effort enrichment."""
-    api_key = os.environ.get("ANTHROPIC_API_KEY", "").strip()
-    if not api_key:
-        return WELCOME_FALLBACK_MESSAGE
-    try:
-        import anthropic   # noqa: E402 — only imported when configured
-    except ImportError:
+def _generate_welcome_message(name: Optional[str], email: str) -> str:
+    """Generate a 35-50 word Sal-voiced welcome message via the
+    OpenRouter chat-completion path. Falls back to
+    WELCOME_FALLBACK_MESSAGE on any failure — signup must never block
+    on this best-effort enrichment."""
+    if not _OPENROUTER_API_KEY:
         return WELCOME_FALLBACK_MESSAGE
     display_name = (name or email.split("@")[0]).strip() or "friend"
     system_prompt = (
@@ -3505,28 +3516,48 @@ def _anthropic_welcome_message(name: Optional[str], email: str) -> str:
         "but not pushy. Output ONLY the welcome note, nothing else."
     )
     try:
-        client = anthropic.Anthropic(api_key=api_key)
-        msg = client.messages.create(
-            model=os.environ.get("ANTHROPIC_WELCOME_MODEL", "claude-opus-4-7"),
-            max_tokens=200,
-            system=system_prompt,
-            messages=[{
-                "role": "user",
-                "content": (
-                    f"Customer first name: {display_name}\n"
-                    f"Customer email: {email}\n\n"
-                    f"Write the 35-50 word welcome note now."
-                ),
-            }],
+        resp = requests.post(
+            "https://openrouter.ai/api/v1/chat/completions",
+            headers={
+                "Authorization": f"Bearer {_OPENROUTER_API_KEY}",
+                "Content-Type": "application/json",
+            },
+            json={
+                "model": WELCOME_LLM_MODEL,
+                "messages": [
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": (
+                        f"Customer first name: {display_name}\n"
+                        f"Customer email: {email}\n\n"
+                        f"Write the 35-50 word welcome note now."
+                    )},
+                ],
+                "max_tokens": 200,
+                "temperature": 0.7,
+            },
+            timeout=30,
         )
-        # SDK returns content blocks — concatenate text blocks.
-        text = "".join(
-            getattr(block, "text", "") for block in msg.content
-        ).strip()
+        if resp.status_code != 200:
+            log = __import__("logging").getLogger("coastal.welcome")
+            log.warning(
+                "openrouter welcome gen %s: %s",
+                resp.status_code, resp.text[:200],
+            )
+            return WELCOME_FALLBACK_MESSAGE
+        data = resp.json()
+        choices = data.get("choices") or []
+        if not choices:
+            return WELCOME_FALLBACK_MESSAGE
+        message = choices[0].get("message") or {}
+        content = message.get("content")
+        # Content can be None (not just missing) when the upstream provider
+        # returns a malformed response. .get(..., "") doesn't catch None,
+        # so coalesce explicitly.
+        text = (content or "").strip()
         return text or WELCOME_FALLBACK_MESSAGE
     except Exception as exc:
         log = __import__("logging").getLogger("coastal.welcome")
-        log.warning("anthropic welcome message gen failed: %s", exc)
+        log.warning("welcome message gen failed: %s", exc)
         return WELCOME_FALLBACK_MESSAGE
 
 
@@ -3636,7 +3667,7 @@ async def auth_signup(
     # reads `welcome_card_message` + `welcome_card_url` from /me to
     # play the card. If either step fails, signup still succeeds and
     # the welcome card falls back gracefully (static text + no audio).
-    welcome_text = _anthropic_welcome_message(body.name, email)
+    welcome_text = _generate_welcome_message(body.name, email)
     meta["welcome_card_message"] = welcome_text
     meta["welcome_card_seen"] = False
     try:
