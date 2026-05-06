@@ -10,6 +10,13 @@ import { cn } from "@/lib/utils";
 import { AnimationRouter } from "@/components/animation/AnimationRouter";
 import { ChatMessageContent } from "@/components/chat-message-content";
 import { SpinnerActivityOverlay } from "@/components/spinner-activity-overlay";
+import {
+  evaluateMessage,
+  SOFT_CLOSE_LINE,
+  HARD_CLOSE_LINE,
+  type SessionSnapshot,
+  type LossEval,
+} from "@/lib/loss-prevention";
 import type { Product } from "@/lib/api";
 
 // Session-scoped chat message storage so navigation between pages
@@ -64,6 +71,27 @@ interface AnimState {
 }
 
 // Detect WebSocket URL from environment
+async function recordLossPreventionEvent(ev: LossEval, userText: string): Promise<void> {
+  try {
+    await fetch("/api/v1/loss-prevention/event", {
+      method: "POST",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        signal: ev.signal,
+        reason: ev.reason,
+        matched_pattern: ev.matchedPattern || null,
+        user_text_excerpt: (userText || "").slice(0, 240),
+        soft_close: ev.shouldSoftClose,
+        hard_close: ev.shouldHardClose,
+        client_ts: new Date().toISOString(),
+      }),
+    });
+  } catch {
+    // Non-fatal — the close already happened on the client.
+  }
+}
+
 function getWsUrl(): string {
   const base = typeof window !== "undefined"
     ? window.location.origin.replace(/^http/, "ws")
@@ -170,6 +198,51 @@ export function ChatPanel({
     if (typeof window === "undefined") return true;
     return window.sessionStorage.getItem(SS_VOICE_AUTOPLAY) !== "0";
   });
+
+  // Loss-prevention session state. Tracks message counts + intent
+  // history so we can soft-close conversations that aren't going
+  // anywhere (and hard-close attempted nerfs). Owner directive
+  // 2026-05-06 — treat tokens as the store's shrink budget.
+  const sessionStartRef = React.useRef<number>(Date.now());
+  const userMessageCountRef = React.useRef<number>(0);
+  const agentReplyCountRef = React.useRef<number>(0);
+  const intentEverDetectedRef = React.useRef<boolean>(false);
+  const [conversationClosed, setConversationClosed] = React.useState<null | "soft" | "hard">(null);
+  const [closeCooldownEnds, setCloseCooldownEnds] = React.useState<number>(0);
+  const [, forceTick] = React.useReducer((x: number) => x + 1, 0);
+
+  // Tick once a second while a cooldown is active so the UI re-evaluates
+  // whether the input should re-enable.
+  React.useEffect(() => {
+    if (!conversationClosed) return;
+    const t = window.setInterval(() => {
+      if (Date.now() >= closeCooldownEnds) {
+        setConversationClosed(null);
+        sessionStartRef.current = Date.now();
+        userMessageCountRef.current = 0;
+        agentReplyCountRef.current = 0;
+        intentEverDetectedRef.current = false;
+      } else {
+        forceTick();
+      }
+    }, 1000);
+    return () => window.clearInterval(t);
+  }, [conversationClosed, closeCooldownEnds]);
+
+  // Count agent replies as they arrive so the loss-prevention
+  // session-too-chatty cap can fire. Last-message inspection only —
+  // doesn't double-count if the array re-renders.
+  const lastMessageKeyRef = React.useRef<string>("");
+  React.useEffect(() => {
+    const last = messages[messages.length - 1];
+    if (!last) return;
+    const key = `${last.role}__${last.ts}__${(last.content || "").slice(0, 24)}`;
+    if (key === lastMessageKeyRef.current) return;
+    lastMessageKeyRef.current = key;
+    if (last.role === "agent") {
+      agentReplyCountRef.current += 1;
+    }
+  }, [messages]);
   React.useEffect(() => {
     if (typeof window === "undefined") return;
     try {
@@ -393,9 +466,51 @@ export function ChatPanel({
     const fromButton = typeof explicit === "string";
     const content = (fromButton ? explicit : input).trim();
     if (!content || pending) return;
+    if (conversationClosed) return; // input should already be disabled but belt-and-suspenders
     if (!fromButton) setInput("");
     setWsError(null);
     setEscalationMsg(null);
+
+    // Loss-prevention check on the inbound user message BEFORE it goes
+    // upstream to the model. Button-driven sends (path/preference picks)
+    // are exempt — those are intent signals by definition.
+    if (!fromButton) {
+      const snapshot: SessionSnapshot = {
+        startedAt: sessionStartRef.current,
+        agentRepliesSoFar: agentReplyCountRef.current,
+        userMessagesSoFar: userMessageCountRef.current,
+        intentEverDetected: intentEverDetectedRef.current,
+      };
+      const ev = evaluateMessage(content, snapshot);
+      if (ev.signal === "intent_present") {
+        intentEverDetectedRef.current = true;
+      }
+      userMessageCountRef.current += 1;
+
+      if (ev.shouldHardClose || ev.shouldSoftClose) {
+        // Append the user's last message so the close reads in context,
+        // then drop the closing line in Sal's voice + lock the input.
+        setMessages((m) => [
+          ...m,
+          { role: "user", content, ts: Date.now() },
+          {
+            role: "agent",
+            employee: "sal_ang",
+            content: ev.shouldHardClose ? HARD_CLOSE_LINE : SOFT_CLOSE_LINE,
+            ts: Date.now(),
+          },
+        ]);
+        const cooldownMs = ev.shouldHardClose ? 5 * 60 * 1000 : 90 * 1000;
+        setConversationClosed(ev.shouldHardClose ? "hard" : "soft");
+        setCloseCooldownEnds(Date.now() + cooldownMs);
+        // Fire-and-forget audit-log entry. Failure is non-fatal.
+        void recordLossPreventionEvent(ev, content);
+        return;
+      }
+    } else {
+      // Button presses count as strong intent.
+      intentEverDetectedRef.current = true;
+    }
 
     // Add user message immediately (skip if a button already appended its
     // synthetic message — see pickPath / pickPreference).
@@ -747,7 +862,19 @@ export function ChatPanel({
         )}
       </div>
 
-      {/* Input — text + voice */}
+      {/* Input — text + voice. Disabled while a loss-prevention close
+          is active; secondsLeft message tells the visitor when Sal will
+          be back at the counter. */}
+      {conversationClosed ? (
+        <div className="border-t border-border bg-card/40 px-5 py-4 text-center">
+          <p className="text-xs text-muted-foreground">
+            Sal stepped to another customer.
+            <span className="ml-1 font-mono text-foreground/80">
+              Back in {Math.max(0, Math.ceil((closeCooldownEnds - Date.now()) / 1000))}s
+            </span>
+          </p>
+        </div>
+      ) : (
       <form onSubmit={(e) => { e.preventDefault(); send(); }} className="flex items-center gap-2 border-t border-border p-4">
         <MicButton
           onTranscribed={(text) => setInput((cur) => cur ? `${cur} ${text}` : text)}
@@ -764,6 +891,7 @@ export function ChatPanel({
           <Send className="h-4 w-4" />
         </Button>
       </form>
+      )}
 
       <p className="border-t border-border/60 px-5 py-2 text-center font-mono text-[9px] text-muted-foreground/60">
         AI-managed · owner-signed

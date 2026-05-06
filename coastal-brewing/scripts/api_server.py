@@ -4413,6 +4413,69 @@ async def agent_spinner_events(task_id: str):
     })
 
 
+# ─────────────────────────────────────────────────────────────────────────────
+# Loss prevention — chat conversations that aren't on a path to purchase.
+# Owner directive 2026-05-06: treat tokens as the store's shrink budget.
+# Frontend evaluates each user message client-side, fires a soft- or hard-
+# close, then POSTs the event here so the audit ledger has a record.
+# Future: LP_Ang reviews these in batch.
+# ─────────────────────────────────────────────────────────────────────────────
+
+class LossPreventionEventRequest(BaseModel):
+    signal: str
+    reason: str
+    matched_pattern: Optional[str] = None
+    user_text_excerpt: Optional[str] = None
+    soft_close: bool = False
+    hard_close: bool = False
+    client_ts: Optional[str] = None
+
+
+@app.post("/api/v1/loss-prevention/event")
+async def loss_prevention_event(body: LossPreventionEventRequest, coastal_uid: Optional[str] = Cookie(default=None)):
+    """Record a loss-prevention close event in the audit ledger so the
+    operator can review patterns over time. Severity ladder:
+       nerf_attempt        → high     (sacred-separation probe / jailbreak)
+       session_too_long    → medium   (no purchase intent past time cap)
+       session_too_chatty  → medium   (reply-count cap reached)
+       small_talk          → low      (off-topic turn)
+       low_intent_warning  → low      (watch flag, not a close)
+       other               → low
+    """
+    severity_map = {
+        "nerf_attempt":        "high",
+        "session_too_long":    "medium",
+        "session_too_chatty":  "medium",
+        "small_talk":          "low",
+        "low_intent_warning":  "low",
+    }
+    severity = severity_map.get(body.signal or "", "low")
+    category = "loss_prevention"
+    description_parts = [
+        f"signal={body.signal}",
+        f"close={'hard' if body.hard_close else 'soft' if body.soft_close else 'flag'}",
+        body.reason or "",
+    ]
+    description = " · ".join(p for p in description_parts if p)[:600]
+    metadata: Dict[str, Any] = {
+        "matched_pattern": body.matched_pattern,
+        "user_text_excerpt": body.user_text_excerpt,
+        "client_ts": body.client_ts,
+        "coastal_uid": coastal_uid,
+    }
+    try:
+        event_id = audit_ledger.insert_risk_event(
+            severity=severity,
+            category=category,
+            description=description,
+            actor=coastal_uid or "anonymous",
+            metadata=metadata,
+        )
+    except Exception as exc:
+        raise HTTPException(status_code=502, detail=f"audit-ledger insert failed: {exc}")
+    return {"ok": True, "event_id": event_id, "severity": severity}
+
+
 @app.get("/api/v1/aims/gateway/status")
 async def aims_gateway_status():
     """A.I.M.S. Model Gateway diagnostics — surface registry + available
