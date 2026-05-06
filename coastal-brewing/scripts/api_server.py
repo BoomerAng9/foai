@@ -4508,6 +4508,77 @@ except NameError:
 
 
 # ─────────────────────────────────────────────────────────────────────────────
+# Prompt enhancer — magic-wand button in chat-panel. Owner directive
+# 2026-05-06 (II-Agent gap-analysis Phase 1). Takes a customer's draft
+# message and rewrites it to be clearer for Sal — keeps the customer's
+# voice, drops ambiguity, no preamble. Routes through the AIMS gateway
+# `transactional_short` surface (Gemma 4 26B — fast + brand-voice
+# compatible).
+# ─────────────────────────────────────────────────────────────────────────────
+
+
+class PromptEnhanceRequest(BaseModel):
+    text: str
+
+
+_PROMPT_ENHANCE_SYSTEM = (
+    "You are a prompt clarifier for Coastal Brewing Co. customers chatting with "
+    "Sal — Lead Barista. The customer typed a draft message; rewrite it so Sal "
+    "can answer in fewer turns. Rules:\n"
+    "1. Keep the customer's voice and intent. Don't add information they didn't "
+    "imply.\n"
+    "2. Strip filler, fix grammar, clarify any pronouns or vague references.\n"
+    "3. If they're asking about a product but didn't name it specifically, "
+    "leave that ambiguity in — don't guess at SKUs.\n"
+    "4. Keep it short — one or two sentences. No preamble. No 'here is your "
+    "rewritten message'. Output ONLY the rewritten text.\n"
+    "5. If the input is already clear and short, return it unchanged."
+)
+
+
+@app.post("/api/v1/prompt-enhance")
+async def prompt_enhance(body: PromptEnhanceRequest):
+    """Rewrite a customer's draft chat message to be clearer.
+    Single-shot completion through the AIMS gateway. ~150 tokens out
+    cap so we don't pay for a long answer when the customer just
+    needed a tighter sentence."""
+    text = (body.text or "").strip()
+    if not text:
+        raise HTTPException(status_code=400, detail="text required")
+    if len(text) > 1500:
+        raise HTTPException(status_code=400, detail="text too long (max 1500 chars)")
+    try:
+        from aims_gateway import (   # noqa: E402
+            chat_completion as _gw_chat_completion,
+            extract_text as _gw_extract_text,
+            is_configured as _gw_is_configured,
+        )
+        if not _gw_is_configured():
+            return {"ok": True, "enhanced": text, "unchanged": True, "reason": "gateway not configured"}
+        resp = _gw_chat_completion(
+            surface="transactional_short",
+            messages=[
+                {"role": "system", "content": _PROMPT_ENHANCE_SYSTEM},
+                {"role": "user", "content": text},
+            ],
+            max_tokens=180,
+            temperature=0.2,
+            timeout=10,
+        )
+        enhanced = (_gw_extract_text(resp) or "").strip()
+        if not enhanced:
+            return {"ok": True, "enhanced": text, "unchanged": True, "reason": "empty response"}
+        # Strip stray quotation wrappers some models add despite the prompt.
+        if (enhanced.startswith('"') and enhanced.endswith('"')) or (
+            enhanced.startswith("'") and enhanced.endswith("'")
+        ):
+            enhanced = enhanced[1:-1].strip()
+        return {"ok": True, "enhanced": enhanced, "unchanged": enhanced == text}
+    except Exception as exc:
+        return {"ok": True, "enhanced": text, "unchanged": True, "reason": f"gateway failed: {exc}"}
+
+
+# ─────────────────────────────────────────────────────────────────────────────
 # HR-PMO team-handoff audit. Owner directive 2026-05-06 — Betty Ann_Ang
 # (HR PMO supervisor) needs an audit trail of every agent transition so
 # she can assess team-member effectiveness and efficiency. Each chat

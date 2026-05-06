@@ -2,7 +2,7 @@
 import * as React from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { Send, ChevronDown, ChevronRight, Sparkles, ShieldCheck, Zap, X, Volume2, VolumeX, Loader2, Mic, MicOff, Square } from "lucide-react";
+import { Send, ChevronDown, ChevronRight, Sparkles, ShieldCheck, Zap, X, Volume2, VolumeX, Loader2, Mic, MicOff, Square, Wand2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -228,6 +228,10 @@ export function ChatPanel({
   // them to pick a preference category. Set in pickPath, consumed in
   // pickPreference to commission Spinner with the chosen category.
   const armedForShopForMeRef = React.useRef<boolean>(false);
+
+  // Magic-wand prompt enhancer is enhancing right now? Locks the input
+  // + send button briefly so the user doesn't fire mid-rewrite.
+  const [enhancing, setEnhancing] = React.useState(false);
 
   const [voiceAutoplay, setVoiceAutoplay] = React.useState<boolean>(() => {
     // Default-ON per owner directive 2026-05-06. Only respect an explicit
@@ -1025,10 +1029,16 @@ export function ChatPanel({
           }
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          disabled={!!pending || isConnecting}
+          disabled={!!pending || isConnecting || enhancing}
           className="font-sans text-sm"
         />
-        <Button type="submit" variant="accent" disabled={!!pending || !input.trim() || isConnecting}>
+        <PromptEnhanceButton
+          text={input}
+          disabled={!!pending || isConnecting}
+          onEnhanced={(t) => setInput(t)}
+          onBusyChange={setEnhancing}
+        />
+        <Button type="submit" variant="accent" disabled={!!pending || !input.trim() || isConnecting || enhancing}>
           <Send className="h-4 w-4" />
         </Button>
       </form>
@@ -1044,6 +1054,73 @@ export function ChatPanel({
 // ─── Inworld TTS playback per agent response ─────────────────────────
 // Per-message opt-in. Customer clicks the speaker icon → backend calls
 // Inworld TTS with the responding agent's character_id → we receive
+// Magic-wand prompt enhancer button. Owner directive 2026-05-06 (Phase
+// 1 of the II-Agent gap analysis). Click runs the customer's draft
+// through /api/v1/prompt-enhance — gateway clarifies the message
+// without changing intent, replaces the input. Saves token round-trips
+// by reducing follow-up clarification turns from Sal.
+function PromptEnhanceButton({
+  text,
+  disabled,
+  onEnhanced,
+  onBusyChange,
+}: {
+  text: string;
+  disabled?: boolean;
+  onEnhanced: (next: string) => void;
+  onBusyChange: (busy: boolean) => void;
+}) {
+  const [busy, setBusy] = React.useState(false);
+  const trimmed = (text || "").trim();
+  const canEnhance = !disabled && !busy && trimmed.length >= 4;
+
+  async function enhance() {
+    if (!canEnhance) return;
+    setBusy(true);
+    onBusyChange(true);
+    try {
+      const r = await fetch("/api/v1/prompt-enhance", {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text: trimmed }),
+      });
+      if (!r.ok) return;
+      const data = await r.json() as { enhanced?: string; unchanged?: boolean };
+      const next = (data.enhanced || "").trim();
+      if (next && next !== trimmed) onEnhanced(next);
+    } catch {
+      // Silent — original text stays in input.
+    } finally {
+      setBusy(false);
+      onBusyChange(false);
+    }
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={enhance}
+      disabled={!canEnhance}
+      aria-label="Tighten this for Sal"
+      title="Tighten this for Sal"
+      className={cn(
+        "inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-md transition-all",
+        canEnhance
+          ? "text-accent hover:bg-accent/10 hover:scale-105 active:scale-95"
+          : "text-muted-foreground/40 cursor-not-allowed",
+      )}
+    >
+      {busy ? (
+        <Loader2 className="h-4 w-4 animate-spin" />
+      ) : (
+        <Wand2 className="h-4 w-4" />
+      )}
+    </button>
+  );
+}
+
+
 // base64 WAV → play via an in-browser Audio element. Caches the played
 // blob URL so a second click doesn't refetch. The character_id comes
 // from the message's `employee` field (set when the WS routes to
