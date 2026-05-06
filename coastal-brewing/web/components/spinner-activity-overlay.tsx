@@ -113,12 +113,20 @@ export function SpinnerActivityOverlay({ open, taskId, initialCommission, onClos
   const [errored, setErrored] = useState<string | null>(null);
   const esRef = useRef<EventSource | null>(null);
   const scrollRef = useRef<HTMLDivElement | null>(null);
+  // Stash onFinished + onClose in refs so the SSE useEffect doesn't tear
+  // down + re-open on every parent render. Inline arrow callbacks from
+  // chat-panel were forcing the EventSource to recycle mid-stream, which
+  // fired spinner.finished N times → Sal message duplicated N times.
+  const onFinishedRef = useRef(onFinished);
+  const firedFinishedRef = useRef(false);
+  useEffect(() => { onFinishedRef.current = onFinished; }, [onFinished]);
 
   useEffect(() => {
     if (!open || !taskId) return;
     setLines([]);
     setDone(false);
     setErrored(null);
+    firedFinishedRef.current = false;
 
     const es = new EventSource(`/api/v1/agent/spinner/${encodeURIComponent(taskId)}/events`);
     esRef.current = es;
@@ -128,10 +136,11 @@ export function SpinnerActivityOverlay({ open, taskId, initialCommission, onClos
         const data: SpinnerEventPayload = JSON.parse(ev.data);
         const line = humanize(data);
         setLines((cur) => (cur.some((l) => l.id === line.id) ? cur : [...cur, line]));
-        if (data.type === "spinner.finished") {
+        if (data.type === "spinner.finished" && !firedFinishedRef.current) {
+          firedFinishedRef.current = true;
           setDone(true);
           if (data.payload?.error) setErrored(String(data.payload.error));
-          onFinished?.(data.payload?.summary || "");
+          onFinishedRef.current?.(data.payload?.summary || "");
         }
       } catch {}
     };
@@ -151,7 +160,7 @@ export function SpinnerActivityOverlay({ open, taskId, initialCommission, onClos
     es.onerror = () => { /* SSE retries automatically; ignore transient drops */ };
 
     return () => { es.close(); esRef.current = null; };
-  }, [open, taskId, onFinished]);
+  }, [open, taskId]);
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -166,15 +175,15 @@ export function SpinnerActivityOverlay({ open, taskId, initialCommission, onClos
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 z-50 flex items-stretch justify-end bg-black/40 backdrop-blur-sm"
+          className="fixed inset-0 z-50 flex items-stretch justify-start bg-black/40 backdrop-blur-sm"
           onClick={onClose}
         >
           <motion.div
-            initial={{ x: "100%" }}
+            initial={{ x: "-100%" }}
             animate={{ x: 0 }}
-            exit={{ x: "100%" }}
+            exit={{ x: "-100%" }}
             transition={{ type: "spring", damping: 28, stiffness: 280 }}
-            className="relative flex h-full w-full max-w-md flex-col border-l border-border bg-background shadow-2xl"
+            className="relative flex h-full w-full max-w-md flex-col border-r border-border bg-background shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
             <header className="flex items-center justify-between border-b border-border px-5 py-4">

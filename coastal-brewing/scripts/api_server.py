@@ -4571,6 +4571,51 @@ _COMMA_BEFORE_PUNCT = re.compile(r",\s*(?=[.!?;:])")
 _MULTI_SPACE = re.compile(r"[ \t]{2,}")
 _MULTI_NEWLINE = re.compile(r"\n{3,}")
 
+# Conversational rewrites — TTS reads abbreviations literally ("oh-zee",
+# "ell-bee", "one-ex"), which makes Sal sound like a robot reading a SKU
+# tag. These rules convert quantity + size shorthand into the words a
+# barista would actually say at the counter.
+_NUM_WORDS = {
+    "0": "zero", "1": "one", "2": "two", "3": "three", "4": "four",
+    "5": "five", "6": "six", "7": "seven", "8": "eight", "9": "nine",
+    "10": "ten", "11": "eleven", "12": "twelve",
+}
+
+
+def _num_to_words(n: str) -> str:
+    return _NUM_WORDS.get(n, n)
+
+
+# "1x", "2x", "12x" → "one", "two", "twelve"  (drop the "x" multiplier marker;
+# spoken form already conveys "one of" with the article that follows)
+_QTY_X = re.compile(r"\b(\d{1,3})x\b", re.IGNORECASE)
+# "12oz" / "12 oz" → "twelve ounce" — singular reads cleaner per barista pattern
+_SIZE_OZ = re.compile(r"\b(\d{1,3})\s*oz\b", re.IGNORECASE)
+# "1lb" / "1 lb" / "1lbs" → "one pound" / "five pound" (singular form)
+_SIZE_LB = re.compile(r"\b(\d{1,3})\s*lbs?\b", re.IGNORECASE)
+# "12K6BEAN" / "K-cup" → "K cup" (read the K as the letter, not "kay-cup")
+_KCUP_HYPHEN = re.compile(r"\bK-?cups?\b", re.IGNORECASE)
+# Semicolons in conversational copy → commas (Inworld renders ; as a hard
+# pause that breaks the flow when a list is naturally comma-separable).
+_SEMI_TO_COMMA = re.compile(r"\s*;\s*")
+# "Coastal 6Bean Blend / 6Bean Espresso" — handled by _SLASH_BETWEEN_WORDS,
+# but the digit prefix "6Bean" is read as "six-bean" which is fine.
+# Standalone "PUMP" / "DBAI" / etc. SKU-ish ALL-CAPS short tokens — leave
+# untouched; they only show in display names that the LLM wraps in normal
+# words anyway.
+
+
+def _qty_x_to_word(m: "re.Match[str]") -> str:
+    return _num_to_words(m.group(1))
+
+
+def _size_oz_to_word(m: "re.Match[str]") -> str:
+    return f"{_num_to_words(m.group(1))} ounce"
+
+
+def _size_lb_to_word(m: "re.Match[str]") -> str:
+    return f"{_num_to_words(m.group(1))} pound"
+
 
 def _strip_markdown_for_tts(text: str) -> str:
     """Convert LLM-emitted markdown into a clean conversational read.
@@ -4614,6 +4659,13 @@ def _strip_markdown_for_tts(text: str) -> str:
     # sentence-ending punctuation.
     text = _DOUBLE_COMMA.sub(",", text)
     text = _COMMA_BEFORE_PUNCT.sub("", text)
+    # Conversational rewrites — abbreviations + units → spoken phrases.
+    # Run AFTER markdown strip so we operate on clean text.
+    text = _QTY_X.sub(_qty_x_to_word, text)
+    text = _SIZE_OZ.sub(_size_oz_to_word, text)
+    text = _SIZE_LB.sub(_size_lb_to_word, text)
+    text = _KCUP_HYPHEN.sub("K cup", text)
+    text = _SEMI_TO_COMMA.sub(", ", text)
     # Cleanup whitespace
     text = _MULTI_SPACE.sub(" ", text)
     text = _MULTI_NEWLINE.sub("\n\n", text)
