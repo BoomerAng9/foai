@@ -3212,10 +3212,12 @@ async def users_greeting(
     """
     if not _profile_layer.is_configured():
         # Graceful degradation — serve the canonical first-time greeting
-        # without any profile-aware logic.
+        # without any profile-aware logic. Sal is the customer-facing
+        # lead per `feedback_sal_ang_customer_facing_acheevy_escalation_2026_05_03.md`;
+        # ACHEEVY is internal escalation only.
         return {
             "variant": "first_time",
-            "greeting": "Welcome to Coastal Brewing Co. I'm ACHEEVY. How can I help you today?",
+            "greeting": "Welcome to Coastal Brewing Co. I'm Sal — Lead Barista. What you looking for today?",
             "show_path_buttons": True,
             "show_preference_buttons": True,
             "context": {"last_purchase_label": None, "preferences": {}, "visit_count": 1},

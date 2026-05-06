@@ -407,9 +407,12 @@ def pick_greeting_variant(profile: Optional[Profile]) -> dict:
       returning_long_break — ≥ RETURNING_LONG_BREAK_HOURS since last_visit
     """
     if profile is None or profile.visit_count <= 1:
+        # Sal is the customer-facing lead per
+        # feedback_sal_ang_customer_facing_acheevy_escalation_2026_05_03.md;
+        # ACHEEVY surfaces only on internal escalation.
         return {
             "variant": "first_time",
-            "greeting": "Welcome to Coastal Brewing Co. I'm ACHEEVY. How can I help you today?",
+            "greeting": "Welcome to Coastal Brewing Co. I'm Sal — Lead Barista. What you looking for today?",
             "show_path_buttons": True,
             "show_preference_buttons": True,
             "context": {

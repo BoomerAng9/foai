@@ -32,12 +32,32 @@ export const metadata: Metadata = {
   title: "Coastal Brewing Co. — Coffee, tea, matcha, served by ACHEEVY.",
   description:
     "Small-batch coffee, whole-leaf tea, ceremonial matcha, flavored blends, and functional brews — brewed honest, served by ACHEEVY, our AI team. Sourced through verified partners. Every public claim has a paper trail.",
+  // Animated brand mark — owner directive 2026-05-06. Used as both
+  // favicon (browsers that support animated GIF favicons) and OG
+  // thumbnail (Twitter / LinkedIn / iMessage previews).
+  icons: {
+    icon: [
+      { url: "/brand/coastal-favicon.gif", type: "image/gif" },
+      { url: "/coastal-logo.png", type: "image/png" },
+    ],
+    shortcut: "/brand/coastal-favicon.gif",
+    apple: "/brand/coastal-favicon.gif",
+  },
   openGraph: {
     title: "Coastal Brewing Co.",
     description:
       "Coffee, tea, matcha — brewed honest, served by ACHEEVY. AI-managed Lowcountry brand, owner-signed.",
     type: "website",
     siteName: "Coastal Brewing Co.",
+    images: [
+      { url: "/brand/coastal-favicon.gif", width: 800, height: 800, alt: "Coastal Brewing Co." },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Coastal Brewing Co.",
+    description: "Coffee, tea, matcha — brewed honest, served by ACHEEVY.",
+    images: ["/brand/coastal-favicon.gif"],
   },
   other: {
     "ai-content-policy": "agent-readable",

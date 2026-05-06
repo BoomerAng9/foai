@@ -122,7 +122,7 @@ function InlineProductCard({ product }: { product: Product }) {
           alt={product.name}
           fill
           sizes="80px"
-          className="object-cover transition-transform duration-300 group-hover:scale-[1.04]"
+          className="object-cover object-top transition-transform duration-300 group-hover:scale-[1.04]"
         />
       </div>
       <div className="flex flex-1 flex-col justify-between gap-1">
