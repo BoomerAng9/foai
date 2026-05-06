@@ -31,7 +31,7 @@ import requests
 
 log = logging.getLogger("coastal.shopify_adapter")
 
-SHOPIFY_API_VERSION = "2024-10"
+SHOPIFY_API_VERSION = os.environ.get("SHOPIFY_API_VERSION", "2026-04")
 SHOPIFY_SHOP_DOMAIN = os.environ.get("SHOPIFY_SHOP_DOMAIN", "").strip().lower()
 SHOPIFY_ADMIN_TOKEN = os.environ.get("SHOPIFY_ADMIN_TOKEN", "").strip()
 SHOPIFY_WEBHOOK_SECRET = os.environ.get("SHOPIFY_WEBHOOK_SECRET", "").strip()
