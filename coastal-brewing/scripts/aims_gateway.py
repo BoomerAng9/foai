@@ -58,7 +58,7 @@ GATEWAY_API_KEY = os.environ.get("INWORLD_API_KEY", "").strip()
 SURFACE_MODELS: Dict[str, str] = {
     # Coastal customer chat
     "coastal_chat_retail":     "google-vertex/gemma-4-26b-a4b",      # Sal, LUC
-    "coastal_chat_reasoning":  "deepinfra/deepseek-v3",                # Melli, ACHEEVY
+    "coastal_chat_reasoning":  "deepinfra/deepseek-v4-pro",            # Melli, ACHEEVY — bumped from v3 to v4-pro 2026-05-06 per "always-newest" canon
     # Brand-voice + transactional
     "welcome_message":         "google-vertex/gemma-4-26b-a4b",
     "transactional_short":     "google-vertex/gemma-4-26b-a4b",
