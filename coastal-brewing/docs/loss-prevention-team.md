@@ -27,14 +27,20 @@ established Inworld TTS pipeline.
 Future LP team additions follow the same uniform spec — Marcus is the
 first member of the floor team, not the only one.
 
-## Uniform spec (for Iller_Ang generation)
+## Uniform spec (for Higgsfield / Iller_Ang generation)
 
-When Iller_Ang generates the LP team character art:
+When the team character art is generated:
 - High-resolution button-down top (charcoal / slate / muted-navy palette)
 - Form-fitting cut — modern tailoring, not loose hospitality
 - NOT tight, NOT aggressive — measured, professional silhouette
 - Coastal Brewing wordmark or wood-stork pin on the left chest
-- Dark slacks or chino, neutral footwear
+- Dark slacks or chino
+- **Footwear (owner directive 2026-05-06): Gore-Tex Vasque field
+  boots in the "beef and broccoli" colorway — camel + dark brown +
+  olive green**, Timberland field-boot silhouette (NOT construction
+  boot, NOT hiker), in Vasque's Gore-Tex line. This is shared across
+  the team uniform, not LP-only — it's the canonical Coastal floor
+  footwear.
 - Same "ACHIEVEMOR helmet visor" form factor as the Boomer_Angs +
   ACHEEVY (per Iller_Ang skill canon), but in matte charcoal with a
   thin gold rim (vs Sal's gold-on-black, ACHEEVY's full gold-glow)
