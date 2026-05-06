@@ -71,6 +71,14 @@ SURFACE_MODELS: Dict[str, str] = {
     "linkedin_maps_agent":     "anthropic/claude-sonnet-4-6",
     "code_generation":         "anthropic/claude-sonnet-4-6",
     "structured_evaluation":   "anthropic/claude-sonnet-4-6",
+    # Spinner — agent-commissioned site-action runtime (Kodee-shaped).
+    # Sonnet 4-6 for tool-use accuracy; Spinner runs multi-step cart/nav
+    # loops and a wrong call touches real cart state.
+    "spinner_execution":       "anthropic/claude-sonnet-4-6",
+    # Iller_Ang prompt composition — strong visual reasoning for the
+    # 4-step pipeline. Image gen itself stays direct-to-Kie.ai; this
+    # surface is only the LLM that *composes* the prompt.
+    "iller_ang_visual":        "anthropic/claude-sonnet-4-6",
     # Candidate-model surfaces — added 2026-05-06 to keep optionality
     # accessible by canonical surface key. Use these when a caller
     # explicitly wants to route through a specific candidate model

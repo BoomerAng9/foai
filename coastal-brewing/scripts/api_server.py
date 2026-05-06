@@ -4210,6 +4210,209 @@ async def agent_lilhawk_dispatch_status():
     }
 
 
+# ─────────────────────────────────────────────────────────────────────────────
+# Cart — multi-item session-cart for "Shop for me" / Spinner / future cart UI
+# ─────────────────────────────────────────────────────────────────────────────
+# Coastal's customer flow was single-SKU until v1 of Spinner. cart_store.py
+# materializes a Neon-backed cart keyed by coastal_uid. Endpoints below are
+# the public REST surface for reading/writing it. Spinner writes here with
+# added_by="spinner"; the customer can review/edit before checkout.
+
+import cart_store  # noqa: E402
+
+
+class CartAddItemRequest(BaseModel):
+    sku: str
+    quantity: int = 1
+    variant: Optional[str] = None
+
+
+class CartSetQuantityRequest(BaseModel):
+    quantity: int
+    variant: Optional[str] = None
+
+
+@app.get("/api/v1/cart")
+async def cart_get(coastal_uid: Optional[str] = Cookie(default=None)):
+    if not coastal_uid:
+        return {"ok": True, "items": [], "line_items": 0, "total_quantity": 0, "anonymous": True}
+    if not cart_store.is_configured():
+        raise HTTPException(status_code=503, detail="cart store not configured (NEON_DATABASE_URL missing)")
+    return {"ok": True, **cart_store.cart_summary(coastal_uid)}
+
+
+@app.post("/api/v1/cart/items")
+async def cart_add_item(body: CartAddItemRequest, response: Response, coastal_uid: Optional[str] = Cookie(default=None)):
+    uid = _ensure_uid(coastal_uid, response)
+    if not cart_store.is_configured():
+        raise HTTPException(status_code=503, detail="cart store not configured")
+    sku = (body.sku or "").strip()
+    if not sku:
+        raise HTTPException(status_code=400, detail="sku required")
+    qty = max(1, min(int(body.quantity or 1), 12))
+    try:
+        items = cart_store.add_item(coastal_uid=uid, sku=sku, quantity=qty, variant=body.variant, added_by="user")
+    except Exception as exc:
+        raise HTTPException(status_code=502, detail=f"cart add failed: {exc}")
+    return {"ok": True, "items": items, "line_items": len(items)}
+
+
+@app.patch("/api/v1/cart/items/{sku}")
+async def cart_patch_item(sku: str, body: CartSetQuantityRequest, coastal_uid: Optional[str] = Cookie(default=None)):
+    if not coastal_uid:
+        raise HTTPException(status_code=400, detail="coastal_uid cookie required")
+    if not cart_store.is_configured():
+        raise HTTPException(status_code=503, detail="cart store not configured")
+    qty = max(0, int(body.quantity or 0))
+    try:
+        items = cart_store.set_quantity(coastal_uid, sku, qty, body.variant)
+    except Exception as exc:
+        raise HTTPException(status_code=502, detail=f"cart patch failed: {exc}")
+    return {"ok": True, "items": items, "line_items": len(items)}
+
+
+@app.delete("/api/v1/cart/items/{sku}")
+async def cart_delete_item(sku: str, variant: Optional[str] = None, coastal_uid: Optional[str] = Cookie(default=None)):
+    if not coastal_uid:
+        raise HTTPException(status_code=400, detail="coastal_uid cookie required")
+    if not cart_store.is_configured():
+        raise HTTPException(status_code=503, detail="cart store not configured")
+    try:
+        items = cart_store.remove_item(coastal_uid, sku, variant)
+    except Exception as exc:
+        raise HTTPException(status_code=502, detail=f"cart delete failed: {exc}")
+    return {"ok": True, "items": items, "line_items": len(items)}
+
+
+@app.post("/api/v1/cart/clear")
+async def cart_clear(coastal_uid: Optional[str] = Cookie(default=None)):
+    if not coastal_uid:
+        return {"ok": True, "cleared": False}
+    if not cart_store.is_configured():
+        raise HTTPException(status_code=503, detail="cart store not configured")
+    cart_store.clear(coastal_uid)
+    return {"ok": True, "cleared": True}
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Spinner — agent-commissioned site-action runtime
+# POST /api/v1/agent/spinner          — commission a Spinner run
+# GET  /api/v1/agent/spinner/status   — activation diagnostics
+# GET  /api/v1/agent/spinner/{task_id}/events  — SSE live event stream
+# ─────────────────────────────────────────────────────────────────────────────
+
+class SpinnerCommissionRequest(BaseModel):
+    commission: str
+    commissioned_by: str = "agent"
+    metadata: Optional[Dict[str, Any]] = None
+    max_iterations: int = 8
+    system_prompt: Optional[str] = None
+
+
+@app.post("/api/v1/agent/spinner")
+async def agent_spinner(body: SpinnerCommissionRequest, response: Response, coastal_uid: Optional[str] = Cookie(default=None)):
+    """Commission a Spinner run — fire-and-stream. Mints a task_id,
+    returns it immediately, runs the agent loop in the background. The
+    frontend subscribes to /events/{task_id} via SSE in parallel to see
+    live tool-call activity."""
+    from aims_agents.spinner_runtime import (   # noqa: E402
+        is_configured as _agent_configured,
+        missing_keys as _agent_missing,
+        mint_task_id as _mint_task_id,
+        run_agent as _run_agent,
+    )
+    if not _agent_configured():
+        raise HTTPException(status_code=503, detail={
+            "error": "agent_not_configured",
+            "missing_keys": _agent_missing(),
+            "message": "Spinner inactive — gateway key required.",
+        })
+    uid = _ensure_uid(coastal_uid, response)
+    commission = (body.commission or "").strip()
+    if not commission:
+        raise HTTPException(status_code=400, detail="commission required")
+    if len(commission) > 4000:
+        raise HTTPException(status_code=400, detail="commission too long (max 4000 chars)")
+
+    task_id = _mint_task_id()
+
+    import asyncio as _asyncio
+    loop = _asyncio.get_event_loop()
+    # Fire-and-forget — caller gets task_id back instantly, the agent
+    # loop runs in a thread and writes events to the in-memory ring
+    # buffer that the SSE endpoint streams from.
+    loop.run_in_executor(
+        None,
+        lambda: _run_agent(
+            commission_text=commission,
+            coastal_uid=uid,
+            commissioned_by=body.commissioned_by or "agent",
+            max_iterations=max(1, min(int(body.max_iterations or 8), 14)),
+            system_prompt=body.system_prompt,
+            metadata=body.metadata,
+            task_id=task_id,
+        ),
+    )
+    return {
+        "ok": True,
+        "task_id": task_id,
+        "events_url": f"/api/v1/agent/spinner/{task_id}/events",
+    }
+
+
+@app.get("/api/v1/agent/spinner/status")
+async def agent_spinner_status():
+    from aims_agents.spinner_runtime import (   # noqa: E402
+        is_configured as _agent_configured,
+        missing_keys as _agent_missing,
+        SPINNER_DB_PATH as _db,
+    )
+    return {
+        "ok": True,
+        "configured": _agent_configured(),
+        "missing_keys": _agent_missing(),
+        "audit_db": str(_db),
+        "framework": "Anthropic Sonnet 4-6 via A.I.M.S. Model Gateway spinner_execution surface, 5 v1 tools (search_catalog/get_user_history/get_cart/cart_add/summarize_selection)",
+    }
+
+
+@app.get("/api/v1/agent/spinner/{task_id}/events")
+async def agent_spinner_events(task_id: str):
+    """SSE stream of Spinner activity events for the overlay UI. Polls
+    the in-memory ring buffer every 250ms and emits new events; closes
+    when the task is marked final."""
+    from aims_agents.spinner_runtime import (   # noqa: E402
+        get_live_events as _get_live,
+        is_task_final as _is_final,
+    )
+    from fastapi.responses import StreamingResponse  # noqa: E402
+    import asyncio as _asyncio  # noqa: E402
+
+    async def gen():
+        cursor = 0
+        idle_loops = 0
+        while True:
+            evs = _get_live(task_id)
+            while cursor < len(evs):
+                ev = evs[cursor]
+                yield f"event: {ev['type']}\ndata: {json.dumps(ev)}\n\n"
+                cursor += 1
+                idle_loops = 0
+            if _is_final(task_id) and cursor >= len(evs):
+                yield "event: end\ndata: {}\n\n"
+                return
+            idle_loops += 1
+            if idle_loops > 240:  # ~60s of idle → bail
+                yield "event: timeout\ndata: {}\n\n"
+                return
+            await _asyncio.sleep(0.25)
+
+    return StreamingResponse(gen(), media_type="text/event-stream", headers={
+        "Cache-Control": "no-cache, no-transform",
+        "X-Accel-Buffering": "no",
+    })
+
+
 @app.get("/api/v1/aims/gateway/status")
 async def aims_gateway_status():
     """A.I.M.S. Model Gateway diagnostics — surface registry + available

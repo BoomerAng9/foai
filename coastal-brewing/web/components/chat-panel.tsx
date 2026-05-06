@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { AnimationRouter } from "@/components/animation/AnimationRouter";
 import { ChatMessageContent } from "@/components/chat-message-content";
+import { SpinnerActivityOverlay } from "@/components/spinner-activity-overlay";
 import type { Product } from "@/lib/api";
 
 // Session-scoped chat message storage so navigation between pages
@@ -154,6 +155,14 @@ export function ChatPanel({
   // production-quality ACHEEVY voice (rolled back 2026-05-03 after a
   // bad IVC clone shipped). Customer can opt in via header toggle;
   // choice persists in sessionStorage.
+  // Spinner activity overlay — opens when "Shop for me" is clicked or
+  // when an agent commissions Spinner for the user. Holds the task_id
+  // returned by /api/v1/agent/spinner so the overlay can subscribe to
+  // /events/{task_id} via SSE.
+  const [spinnerOpen, setSpinnerOpen] = React.useState(false);
+  const [spinnerTaskId, setSpinnerTaskId] = React.useState<string | null>(null);
+  const [spinnerCommission, setSpinnerCommission] = React.useState<string>("");
+
   const [voiceAutoplay, setVoiceAutoplay] = React.useState<boolean>(() => {
     if (typeof window === "undefined") return false;
     return window.sessionStorage.getItem(SS_VOICE_AUTOPLAY) === "1";
@@ -300,20 +309,42 @@ export function ChatPanel({
       : "I'll browse on my own";
     setMessages((m) => [...m, { role: "user", content: label, ts: Date.now() }]);
     void send(label);
-    // Navigate to the products surface so the customer SEES the products
-    // ACHEEVY is talking about. The chat-panel rehydrates from
-    // sessionStorage on the new page so the conversation continues
-    // seamlessly. Mode query param tells /products which layout to use:
-    //   guided  = right-column chat (tour-guide mode)
-    //   curated = right-column chat (shop-for-me curated picks)
-    //   browse  = mini collapsed chat (direct-to-marketplace, customer
-    //             browses freely with chat on standby)
-    const mode = choice === "guide_me" ? "guided"
-      : choice === "shop_for_me" ? "curated"
-      : "browse";
-    // Slight delay so the user sees their button-click message + ACHEEVY
-    // start to think before the page transitions. Feels like a real
-    // associate walking you over.
+
+    // "Shop for me" → commission Spinner, render the activity overlay.
+    // Spinner runs server-side (Sonnet 4-6 tool loop, hits the Coastal
+    // catalog + cart_store), the overlay subscribes to the SSE stream
+    // for live progress. The user stays on the chat page during the run.
+    if (choice === "shop_for_me") {
+      const commission = "Shop for me. Pick 2-4 items I'd like based on my history and stated preferences. Default to flagship blends if history is empty.";
+      setSpinnerCommission(commission);
+      try {
+        const r = await fetch("/api/v1/agent/spinner", {
+          method: "POST",
+          credentials: "include",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            commission,
+            commissioned_by: "user",
+            metadata: { trigger: "shop_for_me_button" },
+          }),
+        });
+        if (r.ok) {
+          const data = await r.json() as { task_id?: string };
+          if (data.task_id) {
+            setSpinnerTaskId(data.task_id);
+            setSpinnerOpen(true);
+          }
+        }
+      } catch {
+        // Non-fatal — fall through to the curated /products view.
+      }
+      return;
+    }
+
+    // Other paths still navigate to /products — Spinner only handles
+    // shop_for_me for now. Guide Me + Direct to Marketplace use the
+    // existing curated/browse layouts.
+    const mode = choice === "guide_me" ? "guided" : "browse";
     window.setTimeout(() => {
       router.push(`/products?mode=${mode}`);
     }, 1200);
@@ -498,6 +529,17 @@ export function ChatPanel({
 
   return (
     <div className="flex h-full flex-col rounded-lg border border-border bg-card">
+      <SpinnerActivityOverlay
+        open={spinnerOpen}
+        taskId={spinnerTaskId}
+        initialCommission={spinnerCommission}
+        onClose={() => { setSpinnerOpen(false); setSpinnerTaskId(null); }}
+        onFinished={(summary) => {
+          if (summary) {
+            setMessages((m) => [...m, { role: "agent", content: summary, employee: "sal_ang", ts: Date.now() }]);
+          }
+        }}
+      />
       {/* Header */}
       <div className="flex items-center justify-between border-b border-border px-5 py-3">
         <div className="flex items-center gap-2.5">
