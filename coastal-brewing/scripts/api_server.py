@@ -3891,6 +3891,28 @@ async def research_query(body: ResearchQueryRequest):
     return result.to_dict()
 
 
+@app.get("/api/v1/aims/gateway/status")
+async def aims_gateway_status():
+    """A.I.M.S. Model Gateway diagnostics — surface registry + available
+    models registry + base URL. Useful for verifying the gateway is
+    wired correctly + which models are reachable per surface."""
+    from aims_gateway import (   # noqa: E402
+        SURFACE_MODELS as _surfaces,
+        AVAILABLE_MODELS as _available,
+        is_configured as _gw_ok,
+        GATEWAY_BASE_URL as _url,
+        list_available_models as _list,
+    )
+    return {
+        "ok": _gw_ok(),
+        "base_url": _url,
+        "surface_count": len(_surfaces),
+        "surfaces": _surfaces,
+        "available_model_count": len(_list()),
+        "available_by_provider": {p: list(m.keys()) for p, m in _available.items()},
+    }
+
+
 @app.get("/api/v1/research/status")
 async def research_status():
     """Surface which search backend is live + key presence (booleans only)."""

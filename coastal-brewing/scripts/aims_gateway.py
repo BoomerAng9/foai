@@ -71,6 +71,20 @@ SURFACE_MODELS: Dict[str, str] = {
     "linkedin_maps_agent":     "anthropic/claude-sonnet-4-6",
     "code_generation":         "anthropic/claude-sonnet-4-6",
     "structured_evaluation":   "anthropic/claude-sonnet-4-6",
+    # Candidate-model surfaces — added 2026-05-06 to keep optionality
+    # accessible by canonical surface key. Use these when a caller
+    # explicitly wants to route through a specific candidate model
+    # without going through model_id() lookup.
+    "code_generation_kimi":    "deepinfra/kimi-k2-6",                # agentic coding A/B vs Sonnet
+    "research_kimi_long_ctx":  "deepinfra/kimi-k2-6",                # 256k ctx for long-source research
+    "auto_cheap":              "fireworks/minimax-m2-7",             # explicit cost-floor pick
+    "bilingual_chat":          "deepinfra/glm-4.6",                  # future international Coastal
+    "realtime_data_agent":     "xai/grok-4",                         # future social/news monitoring
+    "structured_evaluation_mistral":  "mistral/mistral-large-3",     # cost-cheaper Sonnet alternative
+    "frontier_reasoning":      "anthropic/claude-opus-4-7",          # only for tasks Sonnet can't handle
+    "vision_chat":             "google-ai-studio/gemini-3.1-flash-image-preview",  # multimodal Flash
+    "long_context_pro":        "google-ai-studio/gemini-3.1-pro",    # long-context Pro reasoning
+    "openai_default":          "openai/gpt-5.5",                     # GPT 5.5 access
     # Auto-routing — Inworld picks cost-optimized
     "auto":                    "auto",
 }
@@ -86,6 +100,141 @@ def model_for(surface: str) -> str:
             f"add to SURFACE_MODELS in aims_gateway.py first"
         )
     return SURFACE_MODELS[surface]
+
+
+# ─── Available-models registry ──────────────────────────────────────────
+# Every model confirmed reachable on the Inworld Realtime Router as of
+# 2026-05-06 (probed via /v1/chat/completions returning 200 + valid
+# choices[]). Surfaces above pin specific models to specific use cases;
+# this registry is the broader catalog of what's accessible if a caller
+# wants to A/B test or ad-hoc pick a specific model not on the surface
+# map.
+#
+# Owner directive 2026-05-06: register every available model even if
+# we don't use them today — keeps optionality with no per-call cost.
+# Add new entries when Inworld onboards a model OR when a probe of a
+# new variant returns OK.
+#
+# Always-newest discipline (per
+# `feedback_always_newest_model_version_2026_05_06.md`): when a vendor
+# ships vN+1 and Inworld exposes it, bump the registry — don't keep
+# vN as the active default.
+AVAILABLE_MODELS: Dict[str, Dict[str, str]] = {
+    # ─── Anthropic ──────────────────────────────────────────────────
+    "anthropic": {
+        # Frontier reasoning + structured output. Use only when task
+        # genuinely earns the premium (per cost-discipline canon).
+        "opus-4-7":        "anthropic/claude-opus-4-7",        # latest Opus, frontier
+        "opus-4-6":        "anthropic/claude-opus-4-6",        # prior Opus
+        # Tool-use accuracy + structured output sweet spot. Default for
+        # agent orchestration.
+        "sonnet-4-6":      "anthropic/claude-sonnet-4-6",      # latest Sonnet
+        # Fast cheap tier — when DeepSeek/Gemma quality isn't enough but
+        # Sonnet would be overkill.
+        "haiku-4-5":       "anthropic/claude-haiku-4-5",
+    },
+    # ─── Google Gemini ──────────────────────────────────────────────
+    "gemini": {
+        "3.1-pro":              "google-ai-studio/gemini-3.1-pro",                # GA reasoning + long ctx
+        "3.1-pro-preview":      "google-ai-studio/gemini-3.1-pro-preview",        # preview tier
+        "3.1-flash-lite":       "google-ai-studio/gemini-3.1-flash-lite-preview", # current session_summary default
+        "3.1-flash-image":      "google-ai-studio/gemini-3.1-flash-image-preview",# multimodal Flash
+        "3-flash":              "google-vertex/gemini-3-flash-preview",           # older Flash
+    },
+    # ─── Google Gemma (open weights) ────────────────────────────────
+    "gemma": {
+        "4-26b-a4b":       "google-vertex/gemma-4-26b-a4b",     # MoE — retail brand-voice default
+        "4-26b-a4b-deepinfra": "deepinfra/gemma-4-26b-a4b",     # alt provider for same model
+        "4-31b":           "deepinfra/gemma-4-31b",              # dense, bigger variant
+    },
+    # ─── DeepSeek ───────────────────────────────────────────────────
+    "deepseek": {
+        "v4-pro":          "deepinfra/deepseek-v4-pro",         # reasoning, current default for melli/acheevy
+        "v4-flash":        "deepinfra/deepseek-v4-flash",       # faster v4 (non-reasoning)
+        "v3":              "deepinfra/deepseek-v3",             # legacy — kept for fallback only
+    },
+    # ─── OpenAI ─────────────────────────────────────────────────────
+    "openai": {
+        "gpt-5.5":         "openai/gpt-5.5",                     # latest GPT
+        "gpt-5":           "openai/gpt-5",                        # GA tier
+        "gpt-5-mini":      "openai/gpt-5-mini",                   # smaller, cheaper
+    },
+    # ─── Moonshot Kimi ──────────────────────────────────────────────
+    "kimi": {
+        # K2.6 — agentic coding, 256k context, very strong instruction-
+        # following. Candidate alternative to Sonnet for code_generation
+        # surfaces; A/B-test when Code_Ang ships.
+        "k2-6-deepinfra":  "deepinfra/kimi-k2-6",
+        "k2-6-fireworks":  "fireworks/kimi-k2-6",
+    },
+    # ─── Zhipu GLM ──────────────────────────────────────────────────
+    "glm": {
+        # 4.6 — bilingual (EN/CN), strong reasoning, agentic. Reserved
+        # for future international Coastal surface or any vertical
+        # serving non-English customers.
+        "4.6":             "deepinfra/glm-4.6",
+    },
+    # ─── MiniMax ────────────────────────────────────────────────────
+    "minimax": {
+        # M2-7 — Inworld Router's auto-mode default pick. Cost-floor
+        # reasoning; effectively free via `auto` surface when caller
+        # opts into auto-routing.
+        "m2-7":            "fireworks/minimax-m2-7",
+    },
+    # ─── xAI Grok ───────────────────────────────────────────────────
+    "grok": {
+        # Grok 4 — real-time data via X integration, large context.
+        # Reserved for future social-monitoring agent or news-scanning
+        # surface.
+        "4":               "xai/grok-4",
+        "3":               "xai/grok-3",                          # older — keep for reference
+    },
+    # ─── Mistral ────────────────────────────────────────────────────
+    "mistral": {
+        "large-3":         "mistral/mistral-large-3",              # cheap reasoning + code
+        "medium":          "mistral/mistral-medium",
+    },
+    # ─── Auto ──────────────────────────────────────────────────────
+    # Special "model" — Inworld picks per request based on optimization
+    # criteria passed via extra_body.sort. Use for cost-sensitive
+    # high-volume paths where any-cheap-fast model is acceptable.
+    "auto": {
+        "auto":            "auto",
+    },
+}
+
+
+def model_id(provider: str, alias: str) -> str:
+    """Look up a specific Inworld model id by provider + alias.
+
+    Example:
+        model_id("anthropic", "sonnet-4-6") -> "anthropic/claude-sonnet-4-6"
+        model_id("kimi", "k2-6-deepinfra")  -> "deepinfra/kimi-k2-6"
+
+    Raises KeyError on unknown provider/alias — same fail-loud posture
+    as model_for().
+    """
+    provider_models = AVAILABLE_MODELS.get(provider)
+    if provider_models is None:
+        raise KeyError(
+            f"provider '{provider}' not in AVAILABLE_MODELS — "
+            f"available: {sorted(AVAILABLE_MODELS.keys())}"
+        )
+    if alias not in provider_models:
+        raise KeyError(
+            f"alias '{alias}' not under provider '{provider}' — "
+            f"available aliases: {sorted(provider_models.keys())}"
+        )
+    return provider_models[alias]
+
+
+def list_available_models() -> List[str]:
+    """Flat list of every Inworld model id confirmed reachable. Use
+    for diagnostics, model-picker UIs, or sanity-check probes."""
+    out: List[str] = []
+    for provider_models in AVAILABLE_MODELS.values():
+        out.extend(provider_models.values())
+    return sorted(set(out))
 
 
 def is_configured() -> bool:
