@@ -2432,7 +2432,7 @@ PRODUCTS: dict[str, dict] = {
         "roast_level": "MED-DARK",
         "ingredients": "COFFEE",
         "statement_of_identity": "COFFEE",
-        "blurb": "https://temeculacoffeeroasters.com/pages/our-farms",
+        "blurb": "Single-origin specialty coffee, roasted to order in small batches.",
     },
     "coastal-bali-1lb": {
         "image": "/products/coastal-bali-1lb.png",
@@ -2448,7 +2448,7 @@ PRODUCTS: dict[str, dict] = {
         "roast_level": "MED-DARK",
         "ingredients": "COFFEE",
         "statement_of_identity": "COFFEE",
-        "blurb": "https://temeculacoffeeroasters.com/pages/our-farms",
+        "blurb": "Single-origin specialty coffee, roasted to order in small batches.",
     },
     "coastal-bali-2lb": {
         "image": "/products/coastal-bali-2lb.png",
@@ -2464,7 +2464,7 @@ PRODUCTS: dict[str, dict] = {
         "roast_level": "MED-DARK",
         "ingredients": "COFFEE",
         "statement_of_identity": "COFFEE",
-        "blurb": "https://temeculacoffeeroasters.com/pages/our-farms",
+        "blurb": "Single-origin specialty coffee, roasted to order in small batches.",
     },
     "coastal-bali-5lb": {
         "image": "/products/coastal-bali-5lb.png",
@@ -2480,7 +2480,7 @@ PRODUCTS: dict[str, dict] = {
         "roast_level": "MED-DARK",
         "ingredients": "COFFEE",
         "statement_of_identity": "COFFEE",
-        "blurb": "https://temeculacoffeeroasters.com/pages/our-farms",
+        "blurb": "Single-origin specialty coffee, roasted to order in small batches.",
     },
     "coastal-brazil-12oz": {
         "image": "/products/coastal-brazil-12oz.png",
@@ -2496,7 +2496,7 @@ PRODUCTS: dict[str, dict] = {
         "roast_level": "MED",
         "ingredients": "COFFEE",
         "statement_of_identity": "COFFEE",
-        "blurb": "https://temeculacoffeeroasters.com/pages/our-farms",
+        "blurb": "Single-origin specialty coffee, roasted to order in small batches.",
     },
     "coastal-brazil-1lb": {
         "image": "/products/coastal-brazil-1lb.png",
@@ -2512,7 +2512,7 @@ PRODUCTS: dict[str, dict] = {
         "roast_level": "MED",
         "ingredients": "COFFEE",
         "statement_of_identity": "COFFEE",
-        "blurb": "https://temeculacoffeeroasters.com/pages/our-farms",
+        "blurb": "Single-origin specialty coffee, roasted to order in small batches.",
     },
     "coastal-brazil-2lb": {
         "image": "/products/coastal-brazil-2lb.png",
@@ -2528,7 +2528,7 @@ PRODUCTS: dict[str, dict] = {
         "roast_level": "MED",
         "ingredients": "COFFEE",
         "statement_of_identity": "COFFEE",
-        "blurb": "https://temeculacoffeeroasters.com/pages/our-farms",
+        "blurb": "Single-origin specialty coffee, roasted to order in small batches.",
     },
     "coastal-brazil-5lb": {
         "image": "/products/coastal-brazil-5lb.png",
@@ -2544,7 +2544,7 @@ PRODUCTS: dict[str, dict] = {
         "roast_level": "MED",
         "ingredients": "COFFEE",
         "statement_of_identity": "COFFEE",
-        "blurb": "https://temeculacoffeeroasters.com/pages/our-farms",
+        "blurb": "Single-origin specialty coffee, roasted to order in small batches.",
     },
     "coastal-colombia-12oz": {
         "image": "/products/coastal-colombia-12oz.png",
@@ -2560,7 +2560,7 @@ PRODUCTS: dict[str, dict] = {
         "roast_level": "MED",
         "ingredients": "COFFEE",
         "statement_of_identity": "COFFEE",
-        "blurb": "https://temeculacoffeeroasters.com/pages/our-farms",
+        "blurb": "Single-origin specialty coffee, roasted to order in small batches.",
     },
     "coastal-colombia-1lb": {
         "image": "/products/coastal-colombia-1lb.png",
@@ -2576,7 +2576,7 @@ PRODUCTS: dict[str, dict] = {
         "roast_level": "MED",
         "ingredients": "COFFEE",
         "statement_of_identity": "COFFEE",
-        "blurb": "https://temeculacoffeeroasters.com/pages/our-farms",
+        "blurb": "Single-origin specialty coffee, roasted to order in small batches.",
     },
     "coastal-colombia-2lb": {
         "image": "/products/coastal-colombia-2lb.png",
@@ -2592,7 +2592,7 @@ PRODUCTS: dict[str, dict] = {
         "roast_level": "MED",
         "ingredients": "COFFEE",
         "statement_of_identity": "COFFEE",
-        "blurb": "https://temeculacoffeeroasters.com/pages/our-farms",
+        "blurb": "Single-origin specialty coffee, roasted to order in small batches.",
     },
     "coastal-colombia-5lb": {
         "image": "/products/coastal-colombia-5lb.png",
@@ -2608,7 +2608,7 @@ PRODUCTS: dict[str, dict] = {
         "roast_level": "MED",
         "ingredients": "COFFEE",
         "statement_of_identity": "COFFEE",
-        "blurb": "https://temeculacoffeeroasters.com/pages/our-farms",
+        "blurb": "Single-origin specialty coffee, roasted to order in small batches.",
     },
     "coastal-costa-rica-12oz": {
         "image": "/products/coastal-costa-rica-12oz.png",
@@ -2624,7 +2624,7 @@ PRODUCTS: dict[str, dict] = {
         "roast_level": "MED-LIGHT",
         "ingredients": "COFFEE",
         "statement_of_identity": "COFFEE",
-        "blurb": "https://temeculacoffeeroasters.com/pages/our-farms",
+        "blurb": "Single-origin specialty coffee, roasted to order in small batches.",
     },
     "coastal-costa-rica-1lb": {
         "image": "/products/coastal-costa-rica-1lb.png",
@@ -2640,7 +2640,7 @@ PRODUCTS: dict[str, dict] = {
         "roast_level": "MED-LIGHT",
         "ingredients": "COFFEE",
         "statement_of_identity": "COFFEE",
-        "blurb": "https://temeculacoffeeroasters.com/pages/our-farms",
+        "blurb": "Single-origin specialty coffee, roasted to order in small batches.",
     },
     "coastal-costa-rica-2lb": {
         "image": "/products/coastal-costa-rica-2lb.png",
@@ -2656,7 +2656,7 @@ PRODUCTS: dict[str, dict] = {
         "roast_level": "MED-LIGHT",
         "ingredients": "COFFEE",
         "statement_of_identity": "COFFEE",
-        "blurb": "https://temeculacoffeeroasters.com/pages/our-farms",
+        "blurb": "Single-origin specialty coffee, roasted to order in small batches.",
     },
     "coastal-costa-rica-5lb": {
         "image": "/products/coastal-costa-rica-5lb.png",
@@ -2672,7 +2672,7 @@ PRODUCTS: dict[str, dict] = {
         "roast_level": "MED-LIGHT",
         "ingredients": "COFFEE",
         "statement_of_identity": "COFFEE",
-        "blurb": "https://temeculacoffeeroasters.com/pages/our-farms",
+        "blurb": "Single-origin specialty coffee, roasted to order in small batches.",
     },
     "coastal-ethiopia-natural-12oz": {
         "image": "/products/coastal-ethiopia-natural-12oz.png",
@@ -2688,7 +2688,7 @@ PRODUCTS: dict[str, dict] = {
         "roast_level": "MED-LIGHT",
         "ingredients": "COFFEE",
         "statement_of_identity": "COFFEE",
-        "blurb": "https://temeculacoffeeroasters.com/pages/our-farms",
+        "blurb": "Single-origin specialty coffee, roasted to order in small batches.",
     },
     "coastal-ethiopia-natural-1lb": {
         "image": "/products/coastal-ethiopia-natural-1lb.png",
@@ -2704,7 +2704,7 @@ PRODUCTS: dict[str, dict] = {
         "roast_level": "MED-LIGHT",
         "ingredients": "COFFEE",
         "statement_of_identity": "COFFEE",
-        "blurb": "https://temeculacoffeeroasters.com/pages/our-farms",
+        "blurb": "Single-origin specialty coffee, roasted to order in small batches.",
     },
     "coastal-ethiopia-natural-2lb": {
         "image": "/products/coastal-ethiopia-natural-2lb.png",
@@ -2720,7 +2720,7 @@ PRODUCTS: dict[str, dict] = {
         "roast_level": "MED-LIGHT",
         "ingredients": "COFFEE",
         "statement_of_identity": "COFFEE",
-        "blurb": "https://temeculacoffeeroasters.com/pages/our-farms",
+        "blurb": "Single-origin specialty coffee, roasted to order in small batches.",
     },
     "coastal-ethiopia-natural-5lb": {
         "image": "/products/coastal-ethiopia-natural-5lb.png",
@@ -2736,7 +2736,7 @@ PRODUCTS: dict[str, dict] = {
         "roast_level": "MED-LIGHT",
         "ingredients": "COFFEE",
         "statement_of_identity": "COFFEE",
-        "blurb": "https://temeculacoffeeroasters.com/pages/our-farms",
+        "blurb": "Single-origin specialty coffee, roasted to order in small batches.",
     },
     "coastal-guatemala-12oz": {
         "image": "/products/coastal-guatemala-12oz.png",
@@ -2752,7 +2752,7 @@ PRODUCTS: dict[str, dict] = {
         "roast_level": "MED",
         "ingredients": "COFFEE",
         "statement_of_identity": "COFFEE",
-        "blurb": "https://temeculacoffeeroasters.com/pages/our-farms",
+        "blurb": "Single-origin specialty coffee, roasted to order in small batches.",
     },
     "coastal-guatemala-1lb": {
         "image": "/products/coastal-guatemala-1lb.png",
@@ -2768,7 +2768,7 @@ PRODUCTS: dict[str, dict] = {
         "roast_level": "MED",
         "ingredients": "COFFEE",
         "statement_of_identity": "COFFEE",
-        "blurb": "https://temeculacoffeeroasters.com/pages/our-farms",
+        "blurb": "Single-origin specialty coffee, roasted to order in small batches.",
     },
     "coastal-guatemala-2lb": {
         "image": "/products/coastal-guatemala-2lb.png",
@@ -2784,7 +2784,7 @@ PRODUCTS: dict[str, dict] = {
         "roast_level": "MED",
         "ingredients": "COFFEE",
         "statement_of_identity": "COFFEE",
-        "blurb": "https://temeculacoffeeroasters.com/pages/our-farms",
+        "blurb": "Single-origin specialty coffee, roasted to order in small batches.",
     },
     "coastal-guatemala-5lb": {
         "image": "/products/coastal-guatemala-5lb.png",
@@ -2800,7 +2800,7 @@ PRODUCTS: dict[str, dict] = {
         "roast_level": "MED",
         "ingredients": "COFFEE",
         "statement_of_identity": "COFFEE",
-        "blurb": "https://temeculacoffeeroasters.com/pages/our-farms",
+        "blurb": "Single-origin specialty coffee, roasted to order in small batches.",
     },
     "coastal-honduras-12oz": {
         "image": "/products/coastal-honduras-12oz.png",
@@ -2816,7 +2816,7 @@ PRODUCTS: dict[str, dict] = {
         "roast_level": "MED-DARK",
         "ingredients": "COFFEE",
         "statement_of_identity": "COFFEE",
-        "blurb": "https://temeculacoffeeroasters.com/pages/our-farms",
+        "blurb": "Single-origin specialty coffee, roasted to order in small batches.",
     },
     "coastal-honduras-1lb": {
         "image": "/products/coastal-honduras-1lb.png",
@@ -2832,7 +2832,7 @@ PRODUCTS: dict[str, dict] = {
         "roast_level": "MED-DARK",
         "ingredients": "COFFEE",
         "statement_of_identity": "COFFEE",
-        "blurb": "https://temeculacoffeeroasters.com/pages/our-farms",
+        "blurb": "Single-origin specialty coffee, roasted to order in small batches.",
     },
     "coastal-honduras-2lb": {
         "image": "/products/coastal-honduras-2lb.png",
@@ -2848,7 +2848,7 @@ PRODUCTS: dict[str, dict] = {
         "roast_level": "MED-DARK",
         "ingredients": "COFFEE",
         "statement_of_identity": "COFFEE",
-        "blurb": "https://temeculacoffeeroasters.com/pages/our-farms",
+        "blurb": "Single-origin specialty coffee, roasted to order in small batches.",
     },
     "coastal-honduras-5lb": {
         "image": "/products/coastal-honduras-5lb.png",
@@ -2864,7 +2864,7 @@ PRODUCTS: dict[str, dict] = {
         "roast_level": "MED-DARK",
         "ingredients": "COFFEE",
         "statement_of_identity": "COFFEE",
-        "blurb": "https://temeculacoffeeroasters.com/pages/our-farms",
+        "blurb": "Single-origin specialty coffee, roasted to order in small batches.",
     },
     "coastal-robusta-12oz": {
         "image": "/products/coastal-robusta-12oz.png",
@@ -2880,7 +2880,7 @@ PRODUCTS: dict[str, dict] = {
         "roast_level": "MED",
         "ingredients": "COFFEE",
         "statement_of_identity": "COFFEE",
-        "blurb": "https://temeculacoffeeroasters.com/pages/our-farms",
+        "blurb": "Single-origin specialty coffee, roasted to order in small batches.",
     },
     "coastal-robusta-1lb": {
         "image": "/products/coastal-robusta-1lb.png",
@@ -2896,7 +2896,7 @@ PRODUCTS: dict[str, dict] = {
         "roast_level": "MED",
         "ingredients": "COFFEE",
         "statement_of_identity": "COFFEE",
-        "blurb": "https://temeculacoffeeroasters.com/pages/our-farms",
+        "blurb": "Single-origin specialty coffee, roasted to order in small batches.",
     },
     "coastal-robusta-2lb": {
         "image": "/products/coastal-robusta-2lb.png",
@@ -2912,7 +2912,7 @@ PRODUCTS: dict[str, dict] = {
         "roast_level": "MED",
         "ingredients": "COFFEE",
         "statement_of_identity": "COFFEE",
-        "blurb": "https://temeculacoffeeroasters.com/pages/our-farms",
+        "blurb": "Single-origin specialty coffee, roasted to order in small batches.",
     },
     "coastal-robusta-5lb": {
         "image": "/products/coastal-robusta-5lb.png",
@@ -2928,7 +2928,7 @@ PRODUCTS: dict[str, dict] = {
         "roast_level": "MED",
         "ingredients": "COFFEE",
         "statement_of_identity": "COFFEE",
-        "blurb": "https://temeculacoffeeroasters.com/pages/our-farms",
+        "blurb": "Single-origin specialty coffee, roasted to order in small batches.",
     },
     "coastal-kenya-12oz": {
         "image": "/products/coastal-kenya-12oz.png",
@@ -2944,7 +2944,7 @@ PRODUCTS: dict[str, dict] = {
         "roast_level": "MED-LIGHT",
         "ingredients": "COFFEE",
         "statement_of_identity": "COFFEE",
-        "blurb": "https://temeculacoffeeroasters.com/pages/our-farms",
+        "blurb": "Single-origin specialty coffee, roasted to order in small batches.",
     },
     "coastal-kenya-1lb": {
         "image": "/products/coastal-kenya-1lb.png",
@@ -2960,7 +2960,7 @@ PRODUCTS: dict[str, dict] = {
         "roast_level": "MED-LIGHT",
         "ingredients": "COFFEE",
         "statement_of_identity": "COFFEE",
-        "blurb": "https://temeculacoffeeroasters.com/pages/our-farms",
+        "blurb": "Single-origin specialty coffee, roasted to order in small batches.",
     },
     "coastal-kenya-2lb": {
         "image": "/products/coastal-kenya-2lb.png",
@@ -2976,7 +2976,7 @@ PRODUCTS: dict[str, dict] = {
         "roast_level": "MED-LIGHT",
         "ingredients": "COFFEE",
         "statement_of_identity": "COFFEE",
-        "blurb": "https://temeculacoffeeroasters.com/pages/our-farms",
+        "blurb": "Single-origin specialty coffee, roasted to order in small batches.",
     },
     "coastal-kenya-5lb": {
         "image": "/products/coastal-kenya-5lb.png",
@@ -2992,7 +2992,7 @@ PRODUCTS: dict[str, dict] = {
         "roast_level": "MED-LIGHT",
         "ingredients": "COFFEE",
         "statement_of_identity": "COFFEE",
-        "blurb": "https://temeculacoffeeroasters.com/pages/our-farms",
+        "blurb": "Single-origin specialty coffee, roasted to order in small batches.",
     },
     "coastal-mexico-12oz": {
         "image": "/products/coastal-mexico-12oz.png",
@@ -3008,7 +3008,7 @@ PRODUCTS: dict[str, dict] = {
         "roast_level": "MED",
         "ingredients": "COFFEE",
         "statement_of_identity": "COFFEE",
-        "blurb": "https://temeculacoffeeroasters.com/pages/our-farms",
+        "blurb": "Single-origin specialty coffee, roasted to order in small batches.",
     },
     "coastal-mexico-1lb": {
         "image": "/products/coastal-mexico-1lb.png",
@@ -3024,7 +3024,7 @@ PRODUCTS: dict[str, dict] = {
         "roast_level": "MED",
         "ingredients": "COFFEE",
         "statement_of_identity": "COFFEE",
-        "blurb": "https://temeculacoffeeroasters.com/pages/our-farms",
+        "blurb": "Single-origin specialty coffee, roasted to order in small batches.",
     },
     "coastal-mexico-2lb": {
         "image": "/products/coastal-mexico-2lb.png",
@@ -3040,7 +3040,7 @@ PRODUCTS: dict[str, dict] = {
         "roast_level": "MED",
         "ingredients": "COFFEE",
         "statement_of_identity": "COFFEE",
-        "blurb": "https://temeculacoffeeroasters.com/pages/our-farms",
+        "blurb": "Single-origin specialty coffee, roasted to order in small batches.",
     },
     "coastal-mexico-5lb": {
         "image": "/products/coastal-mexico-5lb.png",
@@ -3056,7 +3056,7 @@ PRODUCTS: dict[str, dict] = {
         "roast_level": "MED",
         "ingredients": "COFFEE",
         "statement_of_identity": "COFFEE",
-        "blurb": "https://temeculacoffeeroasters.com/pages/our-farms",
+        "blurb": "Single-origin specialty coffee, roasted to order in small batches.",
     },
     "coastal-nicaragua-12oz": {
         "image": "/products/coastal-nicaragua-12oz.png",
@@ -3072,7 +3072,7 @@ PRODUCTS: dict[str, dict] = {
         "roast_level": "MED",
         "ingredients": "COFFEE",
         "statement_of_identity": "COFFEE",
-        "blurb": "https://temeculacoffeeroasters.com/pages/our-farms",
+        "blurb": "Single-origin specialty coffee, roasted to order in small batches.",
     },
     "coastal-nicaragua-1lb": {
         "image": "/products/coastal-nicaragua-1lb.png",
@@ -3088,7 +3088,7 @@ PRODUCTS: dict[str, dict] = {
         "roast_level": "MED",
         "ingredients": "COFFEE",
         "statement_of_identity": "COFFEE",
-        "blurb": "https://temeculacoffeeroasters.com/pages/our-farms",
+        "blurb": "Single-origin specialty coffee, roasted to order in small batches.",
     },
     "coastal-nicaragua-2lb": {
         "image": "/products/coastal-nicaragua-2lb.png",
@@ -3104,7 +3104,7 @@ PRODUCTS: dict[str, dict] = {
         "roast_level": "MED",
         "ingredients": "COFFEE",
         "statement_of_identity": "COFFEE",
-        "blurb": "https://temeculacoffeeroasters.com/pages/our-farms",
+        "blurb": "Single-origin specialty coffee, roasted to order in small batches.",
     },
     "coastal-nicaragua-5lb": {
         "image": "/products/coastal-nicaragua-5lb.png",
@@ -3120,7 +3120,7 @@ PRODUCTS: dict[str, dict] = {
         "roast_level": "MED",
         "ingredients": "COFFEE",
         "statement_of_identity": "COFFEE",
-        "blurb": "https://temeculacoffeeroasters.com/pages/our-farms",
+        "blurb": "Single-origin specialty coffee, roasted to order in small batches.",
     },
     "coastal-papua-new-guinea-12oz": {
         "image": "/products/coastal-papua-new-guinea-12oz.png",
@@ -3136,7 +3136,7 @@ PRODUCTS: dict[str, dict] = {
         "roast_level": "MED",
         "ingredients": "COFFEE",
         "statement_of_identity": "COFFEE",
-        "blurb": "https://temeculacoffeeroasters.com/pages/our-farms",
+        "blurb": "Single-origin specialty coffee, roasted to order in small batches.",
     },
     "coastal-papua-new-guinea-1lb": {
         "image": "/products/coastal-papua-new-guinea-1lb.png",
@@ -3152,7 +3152,7 @@ PRODUCTS: dict[str, dict] = {
         "roast_level": "MED",
         "ingredients": "COFFEE",
         "statement_of_identity": "COFFEE",
-        "blurb": "https://temeculacoffeeroasters.com/pages/our-farms",
+        "blurb": "Single-origin specialty coffee, roasted to order in small batches.",
     },
     "coastal-papua-new-guinea-2lb": {
         "image": "/products/coastal-papua-new-guinea-2lb.png",
@@ -3168,7 +3168,7 @@ PRODUCTS: dict[str, dict] = {
         "roast_level": "MED",
         "ingredients": "COFFEE",
         "statement_of_identity": "COFFEE",
-        "blurb": "https://temeculacoffeeroasters.com/pages/our-farms",
+        "blurb": "Single-origin specialty coffee, roasted to order in small batches.",
     },
     "coastal-papua-new-guinea-5lb": {
         "image": "/products/coastal-papua-new-guinea-5lb.png",
@@ -3184,7 +3184,7 @@ PRODUCTS: dict[str, dict] = {
         "roast_level": "MED",
         "ingredients": "COFFEE",
         "statement_of_identity": "COFFEE",
-        "blurb": "https://temeculacoffeeroasters.com/pages/our-farms",
+        "blurb": "Single-origin specialty coffee, roasted to order in small batches.",
     },
     "coastal-peru-12oz": {
         "image": "/products/coastal-peru-12oz.png",
@@ -3200,7 +3200,7 @@ PRODUCTS: dict[str, dict] = {
         "roast_level": "MED",
         "ingredients": "COFFEE",
         "statement_of_identity": "COFFEE",
-        "blurb": "https://temeculacoffeeroasters.com/pages/our-farms",
+        "blurb": "Single-origin specialty coffee, roasted to order in small batches.",
     },
     "coastal-peru-1lb": {
         "image": "/products/coastal-peru-1lb.png",
@@ -3216,7 +3216,7 @@ PRODUCTS: dict[str, dict] = {
         "roast_level": "MED",
         "ingredients": "COFFEE",
         "statement_of_identity": "COFFEE",
-        "blurb": "https://temeculacoffeeroasters.com/pages/our-farms",
+        "blurb": "Single-origin specialty coffee, roasted to order in small batches.",
     },
     "coastal-peru-2lb": {
         "image": "/products/coastal-peru-2lb.png",
@@ -3232,7 +3232,7 @@ PRODUCTS: dict[str, dict] = {
         "roast_level": "MED",
         "ingredients": "COFFEE",
         "statement_of_identity": "COFFEE",
-        "blurb": "https://temeculacoffeeroasters.com/pages/our-farms",
+        "blurb": "Single-origin specialty coffee, roasted to order in small batches.",
     },
     "coastal-peru-5lb": {
         "image": "/products/coastal-peru-5lb.png",
@@ -3248,7 +3248,7 @@ PRODUCTS: dict[str, dict] = {
         "roast_level": "MED",
         "ingredients": "COFFEE",
         "statement_of_identity": "COFFEE",
-        "blurb": "https://temeculacoffeeroasters.com/pages/our-farms",
+        "blurb": "Single-origin specialty coffee, roasted to order in small batches.",
     },
     "coastal-sumatra-12oz": {
         "image": "/products/coastal-sumatra-12oz.png",
@@ -3264,7 +3264,7 @@ PRODUCTS: dict[str, dict] = {
         "roast_level": "MED-DARK",
         "ingredients": "COFFEE",
         "statement_of_identity": "COFFEE",
-        "blurb": "https://temeculacoffeeroasters.com/pages/our-farms",
+        "blurb": "Single-origin specialty coffee, roasted to order in small batches.",
     },
     "coastal-sumatra-1lb": {
         "image": "/products/coastal-sumatra-1lb.png",
@@ -3280,7 +3280,7 @@ PRODUCTS: dict[str, dict] = {
         "roast_level": "MED-DARK",
         "ingredients": "COFFEE",
         "statement_of_identity": "COFFEE",
-        "blurb": "https://temeculacoffeeroasters.com/pages/our-farms",
+        "blurb": "Single-origin specialty coffee, roasted to order in small batches.",
     },
     "coastal-sumatra-2lb": {
         "image": "/products/coastal-sumatra-2lb.png",
@@ -3296,7 +3296,7 @@ PRODUCTS: dict[str, dict] = {
         "roast_level": "MED-DARK",
         "ingredients": "COFFEE",
         "statement_of_identity": "COFFEE",
-        "blurb": "https://temeculacoffeeroasters.com/pages/our-farms",
+        "blurb": "Single-origin specialty coffee, roasted to order in small batches.",
     },
     "coastal-sumatra-5lb": {
         "image": "/products/coastal-sumatra-5lb.png",
@@ -3312,7 +3312,7 @@ PRODUCTS: dict[str, dict] = {
         "roast_level": "MED-DARK",
         "ingredients": "COFFEE",
         "statement_of_identity": "COFFEE",
-        "blurb": "https://temeculacoffeeroasters.com/pages/our-farms",
+        "blurb": "Single-origin specialty coffee, roasted to order in small batches.",
     },
     "coastal-tanzania-12oz": {
         "image": "/products/coastal-tanzania-12oz.png",
@@ -3328,7 +3328,7 @@ PRODUCTS: dict[str, dict] = {
         "roast_level": "MED-LIGHT",
         "ingredients": "COFFEE",
         "statement_of_identity": "COFFEE",
-        "blurb": "https://temeculacoffeeroasters.com/pages/our-farms",
+        "blurb": "Single-origin specialty coffee, roasted to order in small batches.",
     },
     "coastal-tanzania-1lb": {
         "image": "/products/coastal-tanzania-1lb.png",
@@ -3344,7 +3344,7 @@ PRODUCTS: dict[str, dict] = {
         "roast_level": "MED-LIGHT",
         "ingredients": "COFFEE",
         "statement_of_identity": "COFFEE",
-        "blurb": "https://temeculacoffeeroasters.com/pages/our-farms",
+        "blurb": "Single-origin specialty coffee, roasted to order in small batches.",
     },
     "coastal-tanzania-2lb": {
         "image": "/products/coastal-tanzania-2lb.png",
@@ -3360,7 +3360,7 @@ PRODUCTS: dict[str, dict] = {
         "roast_level": "MED-LIGHT",
         "ingredients": "COFFEE",
         "statement_of_identity": "COFFEE",
-        "blurb": "https://temeculacoffeeroasters.com/pages/our-farms",
+        "blurb": "Single-origin specialty coffee, roasted to order in small batches.",
     },
     "coastal-tanzania-5lb": {
         "image": "/products/coastal-tanzania-5lb.png",
@@ -3376,7 +3376,7 @@ PRODUCTS: dict[str, dict] = {
         "roast_level": "MED-LIGHT",
         "ingredients": "COFFEE",
         "statement_of_identity": "COFFEE",
-        "blurb": "https://temeculacoffeeroasters.com/pages/our-farms",
+        "blurb": "Single-origin specialty coffee, roasted to order in small batches.",
     },
     "coastal-uganda-12oz": {
         "image": "/products/coastal-uganda-12oz.png",
@@ -3392,7 +3392,7 @@ PRODUCTS: dict[str, dict] = {
         "roast_level": "MED-DARK",
         "ingredients": "COFFEE",
         "statement_of_identity": "COFFEE",
-        "blurb": "https://temeculacoffeeroasters.com/pages/our-farms",
+        "blurb": "Single-origin specialty coffee, roasted to order in small batches.",
     },
     "coastal-uganda-1lb": {
         "image": "/products/coastal-uganda-1lb.png",
@@ -3408,7 +3408,7 @@ PRODUCTS: dict[str, dict] = {
         "roast_level": "MED-DARK",
         "ingredients": "COFFEE",
         "statement_of_identity": "COFFEE",
-        "blurb": "https://temeculacoffeeroasters.com/pages/our-farms",
+        "blurb": "Single-origin specialty coffee, roasted to order in small batches.",
     },
     "coastal-uganda-2lb": {
         "image": "/products/coastal-uganda-2lb.png",
@@ -3424,7 +3424,7 @@ PRODUCTS: dict[str, dict] = {
         "roast_level": "MED-DARK",
         "ingredients": "COFFEE",
         "statement_of_identity": "COFFEE",
-        "blurb": "https://temeculacoffeeroasters.com/pages/our-farms",
+        "blurb": "Single-origin specialty coffee, roasted to order in small batches.",
     },
     "coastal-uganda-5lb": {
         "image": "/products/coastal-uganda-5lb.png",
@@ -3440,7 +3440,7 @@ PRODUCTS: dict[str, dict] = {
         "roast_level": "MED-DARK",
         "ingredients": "COFFEE",
         "statement_of_identity": "COFFEE",
-        "blurb": "https://temeculacoffeeroasters.com/pages/our-farms",
+        "blurb": "Single-origin specialty coffee, roasted to order in small batches.",
     },
     "coastal-sumatra-12oz": {
         "image": "/products/coastal-sumatra-12oz.png",
@@ -3457,7 +3457,7 @@ PRODUCTS: dict[str, dict] = {
         "roast_level": "MED-DARK",
         "ingredients": "COFFEE",
         "statement_of_identity": "COFFEE",
-        "blurb": "https://temeculacoffeeroasters.com/pages/our-farms",
+        "blurb": "Single-origin specialty coffee, roasted to order in small batches.",
     },
     "coastal-sumatra-1lb": {
         "image": "/products/coastal-sumatra-1lb.png",
@@ -3474,7 +3474,7 @@ PRODUCTS: dict[str, dict] = {
         "roast_level": "MED-DARK",
         "ingredients": "COFFEE",
         "statement_of_identity": "COFFEE",
-        "blurb": "https://temeculacoffeeroasters.com/pages/our-farms",
+        "blurb": "Single-origin specialty coffee, roasted to order in small batches.",
     },
     "coastal-sumatra-2lb": {
         "image": "/products/coastal-sumatra-2lb.png",
@@ -3491,7 +3491,7 @@ PRODUCTS: dict[str, dict] = {
         "roast_level": "MED-DARK",
         "ingredients": "COFFEE",
         "statement_of_identity": "COFFEE",
-        "blurb": "https://temeculacoffeeroasters.com/pages/our-farms",
+        "blurb": "Single-origin specialty coffee, roasted to order in small batches.",
     },
     "coastal-sumatra-5lb": {
         "image": "/products/coastal-sumatra-5lb.png",
@@ -3508,7 +3508,7 @@ PRODUCTS: dict[str, dict] = {
         "roast_level": "MED-DARK",
         "ingredients": "COFFEE",
         "statement_of_identity": "COFFEE",
-        "blurb": "https://temeculacoffeeroasters.com/pages/our-farms",
+        "blurb": "Single-origin specialty coffee, roasted to order in small batches.",
     },
     "coastal-peru-12oz": {
         "image": "/products/coastal-peru-12oz.png",
@@ -3525,7 +3525,7 @@ PRODUCTS: dict[str, dict] = {
         "roast_level": "MED-DARK",
         "ingredients": "COFFEE",
         "statement_of_identity": "COFFEE",
-        "blurb": "https://temeculacoffeeroasters.com/pages/our-farms",
+        "blurb": "Single-origin specialty coffee, roasted to order in small batches.",
     },
     "coastal-peru-1lb": {
         "image": "/products/coastal-peru-1lb.png",
@@ -3542,7 +3542,7 @@ PRODUCTS: dict[str, dict] = {
         "roast_level": "MED-DARK",
         "ingredients": "COFFEE",
         "statement_of_identity": "COFFEE",
-        "blurb": "https://temeculacoffeeroasters.com/pages/our-farms",
+        "blurb": "Single-origin specialty coffee, roasted to order in small batches.",
     },
     "coastal-peru-2lb": {
         "image": "/products/coastal-peru-2lb.png",
@@ -3559,7 +3559,7 @@ PRODUCTS: dict[str, dict] = {
         "roast_level": "MED-DARK",
         "ingredients": "COFFEE",
         "statement_of_identity": "COFFEE",
-        "blurb": "https://temeculacoffeeroasters.com/pages/our-farms",
+        "blurb": "Single-origin specialty coffee, roasted to order in small batches.",
     },
     "coastal-peru-5lb": {
         "image": "/products/coastal-peru-5lb.png",
@@ -3576,7 +3576,7 @@ PRODUCTS: dict[str, dict] = {
         "roast_level": "MED-DARK",
         "ingredients": "COFFEE",
         "statement_of_identity": "COFFEE",
-        "blurb": "https://temeculacoffeeroasters.com/pages/our-farms",
+        "blurb": "Single-origin specialty coffee, roasted to order in small batches.",
     },
     "coastal-decaf-12oz": {
         "image": "/products/coastal-decaf-12oz.png",
@@ -3593,7 +3593,7 @@ PRODUCTS: dict[str, dict] = {
         "roast_level": "MED",
         "ingredients": "COFFEE",
         "statement_of_identity": "DECAFFEINATED COFFEE",
-        "blurb": "https://temeculacoffeeroasters.com/pages/our-farms",
+        "blurb": "Single-origin specialty coffee, roasted to order in small batches.",
     },
     "coastal-decaf-1lb": {
         "image": "/products/coastal-decaf-1lb.png",
@@ -3610,7 +3610,7 @@ PRODUCTS: dict[str, dict] = {
         "roast_level": "MED",
         "ingredients": "COFFEE",
         "statement_of_identity": "DECAFFEINATED COFFEE",
-        "blurb": "https://temeculacoffeeroasters.com/pages/our-farms",
+        "blurb": "Single-origin specialty coffee, roasted to order in small batches.",
     },
     "coastal-decaf-2lb": {
         "image": "/products/coastal-decaf-2lb.png",
@@ -3627,7 +3627,7 @@ PRODUCTS: dict[str, dict] = {
         "roast_level": "MED",
         "ingredients": "COFFEE",
         "statement_of_identity": "DECAFFEINATED COFFEE",
-        "blurb": "https://temeculacoffeeroasters.com/pages/our-farms",
+        "blurb": "Single-origin specialty coffee, roasted to order in small batches.",
     },
     "coastal-decaf-5lb": {
         "image": "/products/coastal-decaf-5lb.png",
@@ -3644,7 +3644,7 @@ PRODUCTS: dict[str, dict] = {
         "roast_level": "MED",
         "ingredients": "COFFEE",
         "statement_of_identity": "DECAFFEINATED COFFEE",
-        "blurb": "https://temeculacoffeeroasters.com/pages/our-farms",
+        "blurb": "Single-origin specialty coffee, roasted to order in small batches.",
     },
     "coastal-decaf-espresso-12oz": {
         "image": "/products/coastal-decaf-espresso-12oz.png",
@@ -3661,7 +3661,7 @@ PRODUCTS: dict[str, dict] = {
         "roast_level": "DARK",
         "ingredients": "COFFEE",
         "statement_of_identity": "DECAFFEINATED COFFEE",
-        "blurb": "https://temeculacoffeeroasters.com/pages/our-farms",
+        "blurb": "Single-origin specialty coffee, roasted to order in small batches.",
     },
     "coastal-decaf-espresso-1lb": {
         "image": "/products/coastal-decaf-espresso-1lb.png",
@@ -3678,7 +3678,7 @@ PRODUCTS: dict[str, dict] = {
         "roast_level": "DARK",
         "ingredients": "COFFEE",
         "statement_of_identity": "DECAFFEINATED COFFEE",
-        "blurb": "https://temeculacoffeeroasters.com/pages/our-farms",
+        "blurb": "Single-origin specialty coffee, roasted to order in small batches.",
     },
     "coastal-decaf-espresso-2lb": {
         "image": "/products/coastal-decaf-espresso-2lb.png",
@@ -3695,7 +3695,7 @@ PRODUCTS: dict[str, dict] = {
         "roast_level": "DARK",
         "ingredients": "COFFEE",
         "statement_of_identity": "DECAFFEINATED COFFEE",
-        "blurb": "https://temeculacoffeeroasters.com/pages/our-farms",
+        "blurb": "Single-origin specialty coffee, roasted to order in small batches.",
     },
     "coastal-decaf-espresso-5lb": {
         "image": "/products/coastal-decaf-espresso-5lb.png",
@@ -3712,7 +3712,7 @@ PRODUCTS: dict[str, dict] = {
         "roast_level": "DARK",
         "ingredients": "COFFEE",
         "statement_of_identity": "DECAFFEINATED COFFEE",
-        "blurb": "https://temeculacoffeeroasters.com/pages/our-farms",
+        "blurb": "Single-origin specialty coffee, roasted to order in small batches.",
     },
     "coastal-guatemala-12oz": {
         "image": "/products/coastal-guatemala-12oz.png",
@@ -3729,7 +3729,7 @@ PRODUCTS: dict[str, dict] = {
         "roast_level": "MED",
         "ingredients": "COFFEE",
         "statement_of_identity": "COFFEE",
-        "blurb": "https://temeculacoffeeroasters.com/pages/our-farms",
+        "blurb": "Single-origin specialty coffee, roasted to order in small batches.",
     },
     "coastal-guatemala-1lb": {
         "image": "/products/coastal-guatemala-1lb.png",
@@ -3746,7 +3746,7 @@ PRODUCTS: dict[str, dict] = {
         "roast_level": "MED",
         "ingredients": "COFFEE",
         "statement_of_identity": "COFFEE",
-        "blurb": "https://temeculacoffeeroasters.com/pages/our-farms",
+        "blurb": "Single-origin specialty coffee, roasted to order in small batches.",
     },
     "coastal-guatemala-2lb": {
         "image": "/products/coastal-guatemala-2lb.png",
@@ -3763,7 +3763,7 @@ PRODUCTS: dict[str, dict] = {
         "roast_level": "MED",
         "ingredients": "COFFEE",
         "statement_of_identity": "COFFEE",
-        "blurb": "https://temeculacoffeeroasters.com/pages/our-farms",
+        "blurb": "Single-origin specialty coffee, roasted to order in small batches.",
     },
     "coastal-guatemala-5lb": {
         "image": "/products/coastal-guatemala-5lb.png",
@@ -3780,7 +3780,7 @@ PRODUCTS: dict[str, dict] = {
         "roast_level": "MED",
         "ingredients": "COFFEE",
         "statement_of_identity": "COFFEE",
-        "blurb": "https://temeculacoffeeroasters.com/pages/our-farms",
+        "blurb": "Single-origin specialty coffee, roasted to order in small batches.",
     },
     "coastal-honduras-12oz": {
         "image": "/products/coastal-honduras-12oz.png",
@@ -3797,7 +3797,7 @@ PRODUCTS: dict[str, dict] = {
         "roast_level": "MED-DARK",
         "ingredients": "COFFEE",
         "statement_of_identity": "COFFEE",
-        "blurb": "https://temeculacoffeeroasters.com/pages/our-farms",
+        "blurb": "Single-origin specialty coffee, roasted to order in small batches.",
     },
     "coastal-honduras-1lb": {
         "image": "/products/coastal-honduras-1lb.png",
@@ -3814,7 +3814,7 @@ PRODUCTS: dict[str, dict] = {
         "roast_level": "MED-DARK",
         "ingredients": "COFFEE",
         "statement_of_identity": "COFFEE",
-        "blurb": "https://temeculacoffeeroasters.com/pages/our-farms",
+        "blurb": "Single-origin specialty coffee, roasted to order in small batches.",
     },
     "coastal-honduras-2lb": {
         "image": "/products/coastal-honduras-2lb.png",
@@ -3831,7 +3831,7 @@ PRODUCTS: dict[str, dict] = {
         "roast_level": "MED-DARK",
         "ingredients": "COFFEE",
         "statement_of_identity": "COFFEE",
-        "blurb": "https://temeculacoffeeroasters.com/pages/our-farms",
+        "blurb": "Single-origin specialty coffee, roasted to order in small batches.",
     },
     "coastal-honduras-5lb": {
         "image": "/products/coastal-honduras-5lb.png",
@@ -3848,7 +3848,7 @@ PRODUCTS: dict[str, dict] = {
         "roast_level": "MED-DARK",
         "ingredients": "COFFEE",
         "statement_of_identity": "COFFEE",
-        "blurb": "https://temeculacoffeeroasters.com/pages/our-farms",
+        "blurb": "Single-origin specialty coffee, roasted to order in small batches.",
     },
     "coastal-colombia-12oz": {
         "image": "/products/coastal-colombia-12oz.png",
@@ -3865,7 +3865,7 @@ PRODUCTS: dict[str, dict] = {
         "roast_level": "MED",
         "ingredients": "COFFEE",
         "statement_of_identity": "COFFEE",
-        "blurb": "https://temeculacoffeeroasters.com/pages/our-farms",
+        "blurb": "Single-origin specialty coffee, roasted to order in small batches.",
     },
     "coastal-colombia-1lb": {
         "image": "/products/coastal-colombia-1lb.png",
@@ -3882,7 +3882,7 @@ PRODUCTS: dict[str, dict] = {
         "roast_level": "MED",
         "ingredients": "COFFEE",
         "statement_of_identity": "COFFEE",
-        "blurb": "https://temeculacoffeeroasters.com/pages/our-farms",
+        "blurb": "Single-origin specialty coffee, roasted to order in small batches.",
     },
     "coastal-colombia-2lb": {
         "image": "/products/coastal-colombia-2lb.png",
@@ -3899,7 +3899,7 @@ PRODUCTS: dict[str, dict] = {
         "roast_level": "MED",
         "ingredients": "COFFEE",
         "statement_of_identity": "COFFEE",
-        "blurb": "https://temeculacoffeeroasters.com/pages/our-farms",
+        "blurb": "Single-origin specialty coffee, roasted to order in small batches.",
     },
     "coastal-colombia-5lb": {
         "image": "/products/coastal-colombia-5lb.png",
@@ -3916,7 +3916,7 @@ PRODUCTS: dict[str, dict] = {
         "roast_level": "MED",
         "ingredients": "COFFEE",
         "statement_of_identity": "COFFEE",
-        "blurb": "https://temeculacoffeeroasters.com/pages/our-farms",
+        "blurb": "Single-origin specialty coffee, roasted to order in small batches.",
     },
     # --- Sample packs ---
     "coastal-best-sellers-sampler": {
@@ -3932,7 +3932,7 @@ PRODUCTS: dict[str, dict] = {
         "vendor_source_sku": "TCR-TPROBSPACK",
         "ingredients": "COFFEE",
         "statement_of_identity": "COFFEE",
-        "blurb": "Bali, Mexico, Peru, Breakfast, Cowboy, 6Bean",
+        "blurb": "Six 2oz drip-grind bags inside a 16oz black stand-up pouch. Bali, Mexico, Peru, Breakfast, Cowboy, 6Bean.",
     },
     "coastal-single-origin-sampler": {
         "image": "/products/coastal-single-origin-sampler.png",
@@ -3947,7 +3947,7 @@ PRODUCTS: dict[str, dict] = {
         "vendor_source_sku": "TCR-TPROSOPACK",
         "ingredients": "COFFEE",
         "statement_of_identity": "COFFEE",
-        "blurb": "Brazil, Colombia, Costa Rica, Honduras, Tanzania, Ethiopia",
+        "blurb": "Six 2oz drip-grind bags inside a 16oz black stand-up pouch. Brazil, Colombia, Costa Rica, Honduras, Tanzania, Ethiopia.",
     },
     "coastal-flavored-sampler": {
         "image": "/products/coastal-flavored-sampler.png",
@@ -3962,7 +3962,7 @@ PRODUCTS: dict[str, dict] = {
         "vendor_source_sku": "TCR-TPROFCPACK",
         "ingredients": "COFFEE, NATURAL FLAVORINGS",
         "statement_of_identity": "FLAVORED COFFEE",
-        "blurb": "Caramel, Cinnamon Hazelnut, Cinnamon, French Vanilla, Hazelnut, Mocha",
+        "blurb": "Six 2oz drip-grind bags inside a 16oz black stand-up pouch. Caramel, Cinnamon Hazelnut, Cinnamon, French Vanilla, Hazelnut, Mocha.",
     },
     # --- K-Cup compatible single-use cups ---
     "coastal-6bean-kcups-12pk": {
@@ -3979,7 +3979,7 @@ PRODUCTS: dict[str, dict] = {
         "roast_level": "DARK",
         "ingredients": "COFFEE",
         "statement_of_identity": "COFFEE",
-        "blurb": "See Blend Description",
+        "blurb": "Single-use cups for the brand's coffee fans. Recyclable foil lid, recyclable cup, fresh-roasted convenience — not a nitro-purged grocery K-cup.",
     },
     "coastal-6bean-kcups-48pk": {
         "image": "/products/coastal-6bean-kcups-48pk.png",
@@ -3995,7 +3995,7 @@ PRODUCTS: dict[str, dict] = {
         "roast_level": "DARK",
         "ingredients": "COFFEE",
         "statement_of_identity": "COFFEE",
-        "blurb": "See Blend Description",
+        "blurb": "Single-use cups for the brand's coffee fans. Recyclable foil lid, recyclable cup, fresh-roasted convenience — not a nitro-purged grocery K-cup.",
     },
     "coastal-cowboy-kcups-12pk": {
         "image": "/products/coastal-cowboy-kcups-12pk.png",
@@ -4011,7 +4011,7 @@ PRODUCTS: dict[str, dict] = {
         "roast_level": "MED + DARK",
         "ingredients": "COFFEE",
         "statement_of_identity": "COFFEE",
-        "blurb": "See Blend Description",
+        "blurb": "Single-use cups for the brand's coffee fans. Recyclable foil lid, recyclable cup, fresh-roasted convenience — not a nitro-purged grocery K-cup.",
     },
     "coastal-cowboy-kcups-48pk": {
         "image": "/products/coastal-cowboy-kcups-48pk.png",
@@ -4027,7 +4027,7 @@ PRODUCTS: dict[str, dict] = {
         "roast_level": "MED + DARK",
         "ingredients": "COFFEE",
         "statement_of_identity": "COFFEE",
-        "blurb": "See Blend Description",
+        "blurb": "Single-use cups for the brand's coffee fans. Recyclable foil lid, recyclable cup, fresh-roasted convenience — not a nitro-purged grocery K-cup.",
     },
     "coastal-breakfast-blend-kcups-12pk": {
         "image": "/products/coastal-breakfast-blend-kcups-12pk.png",
@@ -4043,7 +4043,7 @@ PRODUCTS: dict[str, dict] = {
         "roast_level": "MED",
         "ingredients": "COFFEE",
         "statement_of_identity": "COFFEE",
-        "blurb": "See Blend Description",
+        "blurb": "Single-use cups for the brand's coffee fans. Recyclable foil lid, recyclable cup, fresh-roasted convenience — not a nitro-purged grocery K-cup.",
     },
     "coastal-breakfast-blend-kcups-48pk": {
         "image": "/products/coastal-breakfast-blend-kcups-48pk.png",
@@ -4059,7 +4059,7 @@ PRODUCTS: dict[str, dict] = {
         "roast_level": "MED",
         "ingredients": "COFFEE",
         "statement_of_identity": "COFFEE",
-        "blurb": "See Blend Description",
+        "blurb": "Single-use cups for the brand's coffee fans. Recyclable foil lid, recyclable cup, fresh-roasted convenience — not a nitro-purged grocery K-cup.",
     },
     "coastal-peru-kcups-12pk": {
         "image": "/products/coastal-peru-kcups-12pk.png",
@@ -4139,7 +4139,7 @@ PRODUCTS: dict[str, dict] = {
         "vendor_source_sku": "TCR-TJAS-3OZ",
         "ingredients": "",
         "statement_of_identity": "LOOSE LEAF TEA",
-        "blurb": "https://temeculacoffeeroasters.com/pages/tea-dropship",
+        "blurb": "Loose-leaf tea, packed in a cream cylindrical tin. See brewing notes on the product page.",
     },
     "coastal-lowcountry-tea-english-breakfast-3oz": {
         "image": "/products/coastal-lowcountry-tea-english-breakfast-3oz.png",
@@ -4154,7 +4154,7 @@ PRODUCTS: dict[str, dict] = {
         "vendor_source_sku": "TCR-TENG-3OZ",
         "ingredients": "",
         "statement_of_identity": "LOOSE LEAF TEA",
-        "blurb": "https://temeculacoffeeroasters.com/pages/tea-dropship",
+        "blurb": "Loose-leaf tea, packed in a cream cylindrical tin. See brewing notes on the product page.",
     },
     "coastal-lowcountry-tea-masala-chai-3oz": {
         "image": "/products/coastal-lowcountry-tea-masala-chai-3oz.png",
@@ -4169,7 +4169,7 @@ PRODUCTS: dict[str, dict] = {
         "vendor_source_sku": "TCR-TCHAI-3OZ",
         "ingredients": "",
         "statement_of_identity": "LOOSE LEAF FLAVORED TEA",
-        "blurb": "https://temeculacoffeeroasters.com/pages/tea-dropship",
+        "blurb": "Loose-leaf tea, packed in a cream cylindrical tin. See brewing notes on the product page.",
     },
     "coastal-lowcountry-tea-earl-gray-3oz": {
         "image": "/products/coastal-lowcountry-tea-earl-gray-3oz.png",
@@ -4184,7 +4184,7 @@ PRODUCTS: dict[str, dict] = {
         "vendor_source_sku": "TCR-TEARL-3OZ",
         "ingredients": "",
         "statement_of_identity": "LOOSE LEAF FLAVORED TEA",
-        "blurb": "https://temeculacoffeeroasters.com/pages/tea-dropship",
+        "blurb": "Loose-leaf tea, packed in a cream cylindrical tin. See brewing notes on the product page.",
     },
     "coastal-lowcountry-tea-peach-paradise-3oz": {
         "image": "/products/coastal-lowcountry-tea-peach-paradise-3oz.png",
@@ -4199,7 +4199,7 @@ PRODUCTS: dict[str, dict] = {
         "vendor_source_sku": "TCR-TPEACH-3OZ",
         "ingredients": "",
         "statement_of_identity": "LOOSE LEAF FLAVORED TEA",
-        "blurb": "https://temeculacoffeeroasters.com/pages/tea-dropship",
+        "blurb": "Loose-leaf tea, packed in a cream cylindrical tin. See brewing notes on the product page.",
     },
     "coastal-lowcountry-tea-mango-treat-3oz": {
         "image": "/products/coastal-lowcountry-tea-mango-treat-3oz.png",
@@ -4214,7 +4214,7 @@ PRODUCTS: dict[str, dict] = {
         "vendor_source_sku": "TCR-TMANG-3OZ",
         "ingredients": "",
         "statement_of_identity": "LOOSE LEAF FLAVORED TEA",
-        "blurb": "https://temeculacoffeeroasters.com/pages/tea-dropship",
+        "blurb": "Loose-leaf tea, packed in a cream cylindrical tin. See brewing notes on the product page.",
     },
     "coastal-lowcountry-tea-moroccan-mint-3oz": {
         "image": "/products/coastal-lowcountry-tea-moroccan-mint-3oz.png",
@@ -4229,7 +4229,7 @@ PRODUCTS: dict[str, dict] = {
         "vendor_source_sku": "TCR-TMINT-3OZ",
         "ingredients": "",
         "statement_of_identity": "MINT GREEN TEA",
-        "blurb": "https://temeculacoffeeroasters.com/pages/tea-dropship",
+        "blurb": "Loose-leaf tea, packed in a cream cylindrical tin. See brewing notes on the product page.",
     },
     "coastal-lowcountry-tea-apple-cider-rooibos-3oz": {
         "image": "/products/coastal-lowcountry-tea-apple-cider-rooibos-3oz.png",
@@ -4244,7 +4244,7 @@ PRODUCTS: dict[str, dict] = {
         "vendor_source_sku": "TCR-TROO-3OZ",
         "ingredients": "",
         "statement_of_identity": "FLAVORED HERBAL TEA",
-        "blurb": "https://temeculacoffeeroasters.com/pages/tea-dropship",
+        "blurb": "Loose-leaf tea, packed in a cream cylindrical tin. See brewing notes on the product page.",
     },
     "coastal-lowcountry-tea-hibiscus-berry-tea-3oz": {
         "image": "/products/coastal-lowcountry-tea-hibiscus-berry-tea-3oz.png",
@@ -4259,7 +4259,7 @@ PRODUCTS: dict[str, dict] = {
         "vendor_source_sku": "TCR-THIB-3OZ",
         "ingredients": "",
         "statement_of_identity": "FLAVORED HERBAL TEA",
-        "blurb": "https://temeculacoffeeroasters.com/pages/tea-dropship",
+        "blurb": "Loose-leaf tea, packed in a cream cylindrical tin. See brewing notes on the product page.",
     },
     "coastal-lowcountry-tea-hojicha-3oz": {
         "image": "/products/coastal-lowcountry-tea-hojicha-3oz.png",
@@ -4274,7 +4274,7 @@ PRODUCTS: dict[str, dict] = {
         "vendor_source_sku": "TCR-THOJ-3OZ",
         "ingredients": "",
         "statement_of_identity": "HOJICHA ROASTED GREEN TEA",
-        "blurb": "https://temeculacoffeeroasters.com/pages/tea-dropship",
+        "blurb": "Loose-leaf tea, packed in a cream cylindrical tin. See brewing notes on the product page.",
     },
     "coastal-lowcountry-tea-matcha-1oz": {
         "image": "/products/coastal-lowcountry-tea-matcha-1oz.png",
@@ -4289,7 +4289,7 @@ PRODUCTS: dict[str, dict] = {
         "vendor_source_sku": "TCR-TMATCH-1OZ",
         "ingredients": "",
         "statement_of_identity": "MATCHA GREEN TEA POWDER",
-        "blurb": "https://temeculacoffeeroasters.com/pages/tea-dropship",
+        "blurb": "Loose-leaf tea, packed in a cream cylindrical tin. See brewing notes on the product page.",
     },
     # --- Instant coffee ---
     "coastal-instant-coffee-med-roast-3oz": {
@@ -4323,7 +4323,7 @@ PRODUCTS: dict[str, dict] = {
         "roast_level": "Dark",
         "ingredients": "See product detail page",
         "statement_of_identity": "Ground Coffee With Mushrooms",
-        "blurb": "See Functional Products Page",
+        "blurb": "Ground specialty coffee blended with traditional medicinal mushrooms long valued in herbal practice. Dark roast. Sold as food, not a supplement.",
     },
     "coastal-functional-coffee-with-mushrooms-medium-ground-8oz": {
         "image": "/products/coastal-functional-coffee-with-mushrooms-medium-ground-8oz.png",
@@ -4339,7 +4339,7 @@ PRODUCTS: dict[str, dict] = {
         "roast_level": "Medium",
         "ingredients": "See product detail page",
         "statement_of_identity": "Ground Coffee With Mushrooms",
-        "blurb": "See Functional Products Page",
+        "blurb": "Ground specialty coffee blended with traditional medicinal mushrooms long valued in herbal practice. Medium roast. Sold as food, not a supplement.",
     },
     "coastal-functional-instant-coffee-with-mushrooms-3oz": {
         "image": "/products/coastal-functional-instant-coffee-with-mushrooms-3oz.png",
@@ -4355,7 +4355,7 @@ PRODUCTS: dict[str, dict] = {
         "roast_level": "Cowboy",
         "ingredients": "See product detail page",
         "statement_of_identity": "Instant Coffee With Mushrooms",
-        "blurb": "See Functional Products Page",
+        "blurb": "Instant specialty coffee blended with traditional medicinal mushrooms long valued in herbal practice. Sold as food, not a supplement.",
     },
     "coastal-functional-matcha-with-mushrooms-1oz": {
         "image": "/products/coastal-functional-matcha-with-mushrooms-1oz.png",
@@ -4371,7 +4371,7 @@ PRODUCTS: dict[str, dict] = {
         "roast_level": "",
         "ingredients": "See product detail page",
         "statement_of_identity": "Matcha Green Tea With Mushrooms",
-        "blurb": "See Functional Products Page",
+        "blurb": "Matcha green tea powder blended with traditional medicinal mushrooms long appreciated in herbal practice. Sold as food, not a supplement.",
     },
     "coastal-functional-hojicha-with-mushrooms-3oz": {
         "image": "/products/coastal-functional-hojicha-with-mushrooms-3oz.png",
@@ -4387,7 +4387,7 @@ PRODUCTS: dict[str, dict] = {
         "roast_level": "",
         "ingredients": "See product detail page",
         "statement_of_identity": "Roasted Green Tea With Mushrooms",
-        "blurb": "See Functional Products Page",
+        "blurb": "Roasted hojicha green tea blended with traditional medicinal mushrooms long appreciated in herbal practice. Sold as food, not a supplement.",
     },
     # --- Monthly subscriptions ---
     "coastal-coffee-monthly": {

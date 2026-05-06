@@ -11,7 +11,7 @@ export default function TermsPage() {
     <PolicyPageLayout
       eyebrow="Terms"
       title="Terms of Service & Sale."
-      lastUpdated="April 30, 2026"
+      lastUpdated="May 6, 2026"
     >
       <p>These Terms govern your use of <Link href="/" className="text-accent hover:underline">brewing.foai.cloud</Link> (the &ldquo;Storefront&rdquo;) and any purchase you make from Coastal Brewing Co. (&ldquo;we,&rdquo; &ldquo;us,&rdquo; &ldquo;Coastal&rdquo;), a brand operated by <strong className="text-foreground">A.I.M.S. — AI Managed Solutions</strong>.</p>
       <p>By using the Storefront or placing an order, you agree to these Terms. If you don&apos;t agree, please don&apos;t use the Storefront.</p>
@@ -76,11 +76,11 @@ export default function TermsPage() {
       </ul>
 
       <h2 className="font-display text-2xl font-semibold text-foreground">9. Returns, refunds, and damaged orders</h2>
-      <p>We don&apos;t accept physical returns of coffee or tea — see <Link href="/policies/refund" className="text-accent hover:underline">Return &amp; Refund Policy</Link>. Briefly:</p>
+      <p>We don&apos;t accept physical returns of coffee or tea — every bag is roasted to order, and returned product is discarded. See <Link href="/policies/refund" className="text-accent hover:underline">Return &amp; Refund Policy</Link> for the full three-rule structure. Briefly:</p>
       <ul className="ml-5 list-disc space-y-1">
-        <li>Our error → we replace at our cost.</li>
-        <li>Customer error → new order at your cost.</li>
-        <li>Carrier issue or theft → we replace coffee, you cover shipping (one-time).</li>
+        <li><strong className="text-foreground">Our error</strong> → we replace coffee + cover shipping, expedited.</li>
+        <li><strong className="text-foreground">Customer error</strong> → new order at your cost.</li>
+        <li><strong className="text-foreground">Carrier issue or theft</strong> → we cover the coffee, you cover shipping on the replacement (one time per affected order).</li>
       </ul>
       <p>For confirmed damaged-in-transit, photograph the package and email us within 7 days. See <Link href="/policies/delivery-responsibility" className="text-accent hover:underline">Package Theft &amp; Delivery Responsibility</Link> for theft details.</p>
 
