@@ -3279,12 +3279,16 @@ _GEMINI_API_BASE = "https://generativelanguage.googleapis.com/v1beta"
 
 
 def _gemini_summarize_transcript(transcript: List[Dict[str, str]]) -> str:
-    """Generate a ~50-token conversation summary via Gemini Flash. Used
-    for the user_session.summary field so the next greeting can reference
-    the prior conversation topic concisely. Returns empty string on error
-    (caller stores empty summary rather than failing the session-wrap)."""
-    if not _GEMINI_API_KEY:
-        return ""
+    """Generate a ~25-word conversation summary via the A.I.M.S. Model
+    Gateway (`session_summary` surface → Gemini 3.1 Flash Lite). Used
+    for the user_session.summary field so the next greeting can
+    reference the prior conversation topic concisely. Returns empty
+    string on error — caller stores empty summary rather than failing
+    the session-wrap.
+
+    Function name retained for backward compatibility with callers; the
+    call now routes through the gateway instead of direct Gemini API.
+    """
     if not transcript:
         return ""
     convo = "\n".join(
@@ -3294,28 +3298,26 @@ def _gemini_summarize_transcript(transcript: List[Dict[str, str]]) -> str:
     )
     if not convo:
         return ""
-    prompt = (
-        "Summarize this Coastal Brewing Co. customer chat in ONE compact "
-        "sentence (<= 25 words). Capture the customer's intent + any "
-        "specific product or preference they mentioned. Plain text only, "
-        "no markdown, no quotes.\n\n---TRANSCRIPT---\n"
-        + convo
+    system_prompt = (
+        "You summarize Coastal Brewing Co. customer chats. Output ONE "
+        "compact sentence, no more than 25 words. Capture the customer's "
+        "intent + any specific product or preference they mentioned. "
+        "Plain text only, no markdown, no quotes, no preamble."
     )
-    url = f"{_GEMINI_API_BASE}/models/{_GEMINI_FLASH_MODEL}:generateContent?key={_GEMINI_API_KEY}"
-    payload = {
-        "contents": [{"role": "user", "parts": [{"text": prompt}]}],
-        "generationConfig": {"temperature": 0.2, "maxOutputTokens": 80},
-    }
+    user_prompt = "Transcript:\n\n" + convo
     try:
-        r = requests.post(url, json=payload, timeout=20)
-        r.raise_for_status()
-        data = r.json()
-        candidates = data.get("candidates") or []
-        if not candidates:
-            return ""
-        parts = (candidates[0].get("content") or {}).get("parts") or []
-        text = " ".join(p.get("text", "") for p in parts).strip()
-        return text[:280]   # safety cap
+        resp = _gw_chat_completion(
+            surface="session_summary",
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_prompt},
+            ],
+            max_tokens=80,
+            temperature=0.2,
+            timeout=20,
+        )
+        text = _gw_extract_text(resp)
+        return text[:280]   # safety cap (matches prior behavior)
     except Exception as exc:
         print(f"[user_profile] Gemini summarize failed: {exc}", flush=True)
         return ""
@@ -3889,6 +3891,89 @@ async def research_query(body: ResearchQueryRequest):
     except Exception as exc:
         raise HTTPException(status_code=502, detail=f"research failed: {exc}")
     return result.to_dict()
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# LinkedIn + Maps prospecting agent — POST /api/v1/agent/linkedin-maps
+# ─────────────────────────────────────────────────────────────────────────────
+# A.I.M.S. ecosystem agent (currently serving Coastal Brewing Co. as
+# the first vertical). Routes through the gateway's `linkedin_maps_agent`
+# surface (Claude Sonnet 4-6) — multi-tool orchestration where errors
+# compound. Returns 503 with a `missing_keys` list when activation env
+# vars aren't set, so owner can wire keys without redeploying code.
+
+class LinkedInMapsAgentRequest(BaseModel):
+    goal: str
+    max_iterations: int = 6
+    system_prompt: Optional[str] = None
+
+
+@app.post("/api/v1/agent/linkedin-maps")
+async def agent_linkedin_maps(body: LinkedInMapsAgentRequest):
+    """Run the LinkedIn + Maps prospecting agent loop. Endpoint stays
+    live regardless of key state — returns 503 with a clean
+    `missing_keys` list until LINKEDIN_API_TOKEN + GOOGLE_MAPS_API_KEY
+    land in the runner env."""
+    from aims_agents.linkedin_maps_agent import (   # noqa: E402
+        is_configured as _agent_configured,
+        missing_keys as _agent_missing,
+        run_agent as _run_agent,
+    )
+    if not _agent_configured():
+        raise HTTPException(
+            status_code=503,
+            detail={
+                "error": "agent_not_configured",
+                "missing_keys": _agent_missing(),
+                "message": (
+                    "LinkedIn + Maps agent inactive. Push the listed "
+                    "env vars to /docker/coastal-brewing/.env and "
+                    "recreate the runner."
+                ),
+            },
+        )
+    goal = (body.goal or "").strip()
+    if not goal:
+        raise HTTPException(status_code=400, detail="goal required")
+    if len(goal) > 4000:
+        raise HTTPException(status_code=400, detail="goal too long (max 4000 chars)")
+
+    import asyncio as _asyncio
+    loop = _asyncio.get_event_loop()
+    result = await loop.run_in_executor(
+        None,
+        lambda: _run_agent(
+            goal=goal,
+            max_iterations=max(1, min(int(body.max_iterations or 6), 12)),
+            system_prompt=body.system_prompt,
+        ),
+    )
+    return {
+        "ok": result.error is None,
+        "goal": goal,
+        "final_answer": result.final_answer,
+        "iterations": result.iterations,
+        "tool_calls": result.tool_calls,
+        "duration_ms": round(result.duration_ms, 1),
+        "error": result.error,
+    }
+
+
+@app.get("/api/v1/agent/linkedin-maps/status")
+async def agent_linkedin_maps_status():
+    """Surface activation state of the LinkedIn + Maps agent without
+    invoking it. Returns is_configured + missing_keys list so owner can
+    verify env wiring after deploy."""
+    from aims_agents.linkedin_maps_agent import (   # noqa: E402
+        is_configured as _agent_configured,
+        missing_keys as _agent_missing,
+    )
+    return {
+        "ok": True,
+        "configured": _agent_configured(),
+        "missing_keys": _agent_missing(),
+        "framework": "Anthropic Sonnet 4-6 via A.I.M.S. Model Gateway, OpenAI-compatible tool-calling, 5 tools (LinkedIn search/profile, Maps places/geocode/distance-matrix)",
+    }
 
 
 @app.get("/api/v1/aims/gateway/status")

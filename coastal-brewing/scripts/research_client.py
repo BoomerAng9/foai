@@ -224,7 +224,7 @@ def research(query: str, depth: int = 1) -> ResearchResult:
             seen_urls.add(s.url)
             unique_sources.append(s)
 
-    summary = summarize_sources(unique_sources)
+    summary = summarize_sources(unique_sources, query=query)
     duration = (time.time() - start) * 1000
 
     return ResearchResult(
@@ -255,23 +255,89 @@ def search_and_extract(query: str, num_sources: int = 5) -> List[Source]:
     return sources
 
 
-def summarize_sources(sources: List[Source]) -> str:
-    """Synthesize multiple sources into a summary.
+def summarize_sources(sources: List[Source], query: str = "") -> str:
+    """Synthesize multiple sources into a summary via the A.I.M.S. Model
+    Gateway (`research_synthesis` surface → Gemma 4 26B). Falls back to
+    a regex-based first-sentence extract on gateway failure so the
+    research endpoint never returns empty content.
 
     Args:
         sources: List of Source objects to summarize.
+        query: Original research query (gives the LLM grounding context
+            when stitching sources together).
 
     Returns:
-        A plain-text summary synthesized from the sources.
+        A plain-text 100-200 word summary synthesized from the sources.
     """
     if not sources:
         return "No sources found."
 
-    # Extract key sentences from each source
+    # Try the gateway first — Gemma 4 26B handles multi-source synthesis
+    # cleanly with brand-neutral copy. Soft import keeps the module
+    # standalone if aims_gateway isn't on the path (legacy testing).
+    try:
+        from aims_gateway import (   # noqa: E402 — local import
+            chat_completion as _gw_chat_completion,
+            extract_text as _gw_extract_text,
+            is_configured as _gw_is_configured,
+        )
+        _gw_available = _gw_is_configured()
+    except ImportError:
+        _gw_available = False
+
+    if _gw_available:
+        # Build a compact source dossier — title + URL + content snippet
+        # per source. Cap each snippet so we don't blow the prompt budget
+        # on long extracts; the LLM can reason fine off ~500 chars/source.
+        dossier_parts: List[str] = []
+        for i, src in enumerate(sources[:8], start=1):
+            snippet = (src.content or "").strip()[:600]
+            if not snippet and src.title:
+                snippet = src.title
+            dossier_parts.append(
+                f"[{i}] {src.title or 'Untitled'} ({src.url})\n{snippet}"
+            )
+        dossier = "\n\n".join(dossier_parts)
+
+        system_prompt = (
+            "You are a research synthesizer. Read the source dossier and "
+            "produce a tight 100-180 word answer to the query. Lead with the "
+            "answer, then key supporting facts. Cite sources inline using "
+            "the bracket numbers from the dossier (e.g., [1], [3]). Plain "
+            "prose only — no markdown, no bullets, no headings, no preamble "
+            "like 'Based on the sources'. If sources contradict, say so "
+            "plainly. If sources don't answer the query, say that plainly "
+            "instead of fabricating."
+        )
+        user_prompt = (
+            f"Query: {query or '(no query provided — summarize the sources)'}\n\n"
+            f"Source dossier:\n\n{dossier}\n\n"
+            f"Synthesize."
+        )
+        try:
+            resp = _gw_chat_completion(
+                surface="research_synthesis",
+                messages=[
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": user_prompt},
+                ],
+                max_tokens=400,
+                temperature=0.3,
+                timeout=45,
+            )
+            text = _gw_extract_text(resp)
+            if text:
+                return text
+        except Exception as exc:
+            __import__("logging").getLogger("aims.research").warning(
+                "gateway synth failed, falling back: %s", exc,
+            )
+
+    # Fallback — regex first-sentence extract (the prior implementation).
+    # Reachable when gateway is down, key missing, or LLM returns empty.
     key_points: List[str] = []
     for src in sources[:10]:
         if src.content:
-            # Take first meaningful sentence
             sentences = [s.strip() for s in src.content.split(".") if len(s.strip()) > 30]
             if sentences:
                 key_points.append(f"- {sentences[0]}. (source: {src.title})")
