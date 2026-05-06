@@ -1,5 +1,6 @@
 import { Nav } from "@/components/nav";
 import { Hero } from "@/components/hero";
+import { BrandPillars } from "@/components/brand-pillars";
 import { Lineup } from "@/components/lineup";
 import { Commitment } from "@/components/commitment";
 import { TeamRibbon } from "@/components/team-ribbon";
@@ -24,6 +25,7 @@ export default async function Home() {
       <Nav />
       <main>
         <Hero />
+        <BrandPillars />
         <Lineup products={products} />
         <Commitment />
         <TeamRibbon />
