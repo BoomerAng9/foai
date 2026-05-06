@@ -125,6 +125,10 @@ EMPLOYEE_ANIMATION: Dict[str, str] = {
     "luc_ang":       "lu_cal_ledger",
     "melli_capensi": "coffee_pot",
     "acheevy":       "authority_seal",
+    # Loss Prevention floor team — Marcus. Reuses the espresso_cup
+    # animation for now; dedicated LP-team motion (button-down silhouette)
+    # ships with the cinematic-explainer Iller_Ang batch.
+    "lp_ang":        "espresso_cup",
 }
 
 EMPLOYEE_TIER: Dict[str, str] = {
@@ -132,4 +136,5 @@ EMPLOYEE_TIER: Dict[str, str] = {
     "luc_ang":       "T2_FINANCE",
     "melli_capensi": "T2_BULK",
     "acheevy":       "T1",
+    "lp_ang":        "T2_LP",
 }

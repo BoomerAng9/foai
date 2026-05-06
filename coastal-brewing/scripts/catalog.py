@@ -206,11 +206,73 @@ def _resolve_image_path(image_path: str) -> str:
     return _FALLBACK_IMAGE_PATH
 
 
+# Pricing policy — owner directive 2026-05-06.
+# Catalog stores cost-basis truth (wholesale_cost + fulfillment_cost
+# from the supplier pricing JSON). MSRPs are COMPUTED at module load
+# from cost + a single target-margin knob, then rounded to a "$X.99"
+# anchor. One policy lever instead of 236 hand-edited prices.
+#
+# Default 60% gross margin — splits the difference between unworkable
+# (the prior placeholder ~12% was below Stripe fees + fulfillment) and
+# Sey/Onyx-tier (65%+). Tier overrides keep premium SKUs at higher
+# margin without dragging house-blend prices into specialty territory.
+#
+# Override env: COASTAL_MARGIN_FLOOR_PCT (e.g. 0.55 to drop sitewide).
+
+import os as _os_pricing
+
+_MARGIN_FLOOR_PCT = float(_os_pricing.environ.get("COASTAL_MARGIN_FLOOR_PCT", "0.60"))
+
+# Tier-level overrides take precedence when set. Categories not listed
+# fall back to the global floor. Owner can flip these without touching
+# any SKU row — single source of truth for pricing policy.
+_MARGIN_FLOOR_BY_CATEGORY: dict[str, float] = {
+    "coffee":             0.60,
+    "specialty_coffee":   0.62,  # Whiskey Barrel / Cold Brew / Coffee of the Month
+    "flavored_coffee":    0.58,
+    "tea":                0.62,
+    "kcup":               0.55,
+    "instant":            0.62,
+    "functional":         0.65,  # mushroom blends — premium tier
+    "sample_pack":        0.55,
+    "subscription":       0.55,
+    "bundle":             0.50,
+    "merch":              0.65,
+}
+
+
+def _round_to_anchor(price: float) -> float:
+    """Round up to the next $X.99 (or $X.49 if that lands cleaner). Keeps
+    psychological-pricing anchors without producing weird .03 endings."""
+    floor = int(price)
+    fraction = price - floor
+    if fraction <= 0.50:
+        return float(floor) + 0.49
+    if fraction <= 0.99:
+        return float(floor) + 0.99
+    # price had > 0.99 fraction — bump to next dollar with .99 anchor
+    return float(floor + 1) + 0.99
+
+
+def _compute_msrp(p: dict) -> float | None:
+    """Compute MSRP from cost + margin policy. Returns None if cost data
+    isn't available (e.g., bundles that price separately)."""
+    cost = p.get("wholesale_cost")
+    if cost is None:
+        return None
+    fulfillment = p.get("fulfillment_cost", 0.0) or 0.0
+    landed = float(cost) + float(fulfillment)
+    category = p.get("category", "") or ""
+    target = _MARGIN_FLOOR_BY_CATEGORY.get(category, _MARGIN_FLOOR_PCT)
+    raw_msrp = landed / max(0.05, 1.0 - target)
+    return round(_round_to_anchor(raw_msrp), 2)
+
+
 def _enrich_products() -> None:
     """One-time pass at module load — annotate every SKU with the
     derived `motto_eligible` + (optionally) `compliance_lane` flags,
-    and substitute the fallback image path when the per-SKU image
-    isn't shipped yet.
+    substitute the fallback image path when the per-SKU image isn't
+    shipped yet, AND compute the MSRP from the pricing policy.
     Idempotent. Owner-overrides on individual SKUs are preserved.
     """
     for sku_id, p in PRODUCTS.items():
@@ -220,6 +282,19 @@ def _enrich_products() -> None:
         lane = _derive_compliance_lane(p)
         if lane is not None:
             p["compliance_lane"] = lane
+        # Pricing policy: compute MSRP from cost + target margin unless
+        # the SKU has an explicit `msrp_locked: True` flag (manual override).
+        if not p.get("msrp_locked"):
+            computed = _compute_msrp(p)
+            if computed is not None:
+                p.setdefault("msrp_placeholder", p.get("msrp"))
+                p["msrp"] = computed
+                # Effective margin recorded for audit visibility.
+                cost = float(p.get("wholesale_cost") or 0.0)
+                fulfill = float(p.get("fulfillment_cost") or 0.0)
+                landed = cost + fulfill
+                if landed > 0 and computed > landed:
+                    p["effective_margin_pct"] = round((computed - landed) / computed * 100, 1)
         if "image" in p:
             # Preserve the catalog's declared (intended) image path so the
             # image-generation pipeline can identify which SKUs still need

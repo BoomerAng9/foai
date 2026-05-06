@@ -11,11 +11,12 @@ import { AnimationRouter } from "@/components/animation/AnimationRouter";
 import { ChatMessageContent } from "@/components/chat-message-content";
 import { SpinnerActivityOverlay } from "@/components/spinner-activity-overlay";
 import {
-  evaluateMessage,
-  SOFT_CLOSE_LINE,
-  HARD_CLOSE_LINE,
-  type SessionSnapshot,
-  type LossEval,
+  evaluateUserMessage,
+  applyDecision,
+  freshSession,
+  hasIntent,
+  type LPSession,
+  type LPDecision,
 } from "@/lib/loss-prevention";
 import type { Product } from "@/lib/api";
 
@@ -40,12 +41,14 @@ const EMPLOYEE_LABEL: Record<string, string> = {
   luc_ang:       "LUC",
   melli_capensi: "Melli",
   acheevy:       "ACHEEVY",
+  lp_ang:        "Marcus",
 };
 const EMPLOYEE_INITIALS: Record<string, string> = {
   sal_ang:       "S",
   luc_ang:       "L",
   melli_capensi: "M",
   acheevy:       "A",
+  lp_ang:        "M",
 };
 const DEFAULT_EMPLOYEE_KEY = "sal_ang";
 const labelFor = (e?: string) => EMPLOYEE_LABEL[e || DEFAULT_EMPLOYEE_KEY] || EMPLOYEE_LABEL[DEFAULT_EMPLOYEE_KEY];
@@ -71,7 +74,16 @@ interface AnimState {
 }
 
 // Detect WebSocket URL from environment
-async function recordLossPreventionEvent(ev: LossEval, userText: string): Promise<void> {
+interface LPAuditEntry {
+  signal: string;
+  reason: string;
+  matchedPattern: string | null;
+  userTextExcerpt: string;
+  softClose: boolean;
+  hardClose: boolean;
+}
+
+async function recordLossPreventionEvent(ev: LPAuditEntry): Promise<void> {
   try {
     await fetch("/api/v1/loss-prevention/event", {
       method: "POST",
@@ -80,15 +92,15 @@ async function recordLossPreventionEvent(ev: LossEval, userText: string): Promis
       body: JSON.stringify({
         signal: ev.signal,
         reason: ev.reason,
-        matched_pattern: ev.matchedPattern || null,
-        user_text_excerpt: (userText || "").slice(0, 240),
-        soft_close: ev.shouldSoftClose,
-        hard_close: ev.shouldHardClose,
+        matched_pattern: ev.matchedPattern,
+        user_text_excerpt: ev.userTextExcerpt,
+        soft_close: ev.softClose,
+        hard_close: ev.hardClose,
         client_ts: new Date().toISOString(),
       }),
     });
   } catch {
-    // Non-fatal — the close already happened on the client.
+    // Non-fatal — the state transition already happened on the client.
   }
 }
 
@@ -199,39 +211,31 @@ export function ChatPanel({
     return window.sessionStorage.getItem(SS_VOICE_AUTOPLAY) !== "0";
   });
 
-  // Loss-prevention session state. Tracks message counts + intent
-  // history so we can soft-close conversations that aren't going
-  // anywhere (and hard-close attempted nerfs). Owner directive
-  // 2026-05-06 — treat tokens as the store's shrink budget.
-  const sessionStartRef = React.useRef<number>(Date.now());
-  const userMessageCountRef = React.useRef<number>(0);
-  const agentReplyCountRef = React.useRef<number>(0);
-  const intentEverDetectedRef = React.useRef<boolean>(false);
-  const [conversationClosed, setConversationClosed] = React.useState<null | "soft" | "hard">(null);
-  const [closeCooldownEnds, setCloseCooldownEnds] = React.useState<number>(0);
+  // Loss-prevention state machine. Owner directive 2026-05-06 —
+  // scripted interceptor (no LLM tokens during LP states): normal →
+  // negotiating → looking → terse → lp_active (Marcus) →
+  // acheevy_warning → exit. Each transition emits a scripted line
+  // from the appropriate team member.
+  const [lpSession, setLpSession] = React.useState<LPSession>(() => freshSession());
+  const lpSessionRef = React.useRef<LPSession>(lpSession);
+  React.useEffect(() => { lpSessionRef.current = lpSession; }, [lpSession]);
   const [, forceTick] = React.useReducer((x: number) => x + 1, 0);
 
-  // Tick once a second while a cooldown is active so the UI re-evaluates
-  // whether the input should re-enable.
+  // Tick once a second when a cooldown is active so the UI re-evaluates.
   React.useEffect(() => {
-    if (!conversationClosed) return;
+    if (lpSession.state !== "acheevy_warning" && lpSession.state !== "exit") return;
     const t = window.setInterval(() => {
-      if (Date.now() >= closeCooldownEnds) {
-        setConversationClosed(null);
-        sessionStartRef.current = Date.now();
-        userMessageCountRef.current = 0;
-        agentReplyCountRef.current = 0;
-        intentEverDetectedRef.current = false;
+      if (lpSession.state === "exit") return;
+      if (Date.now() >= lpSession.cooldownUntil) {
+        setLpSession((s) => (s.state === "acheevy_warning" ? { ...s, state: "exit" } : s));
       } else {
         forceTick();
       }
     }, 1000);
     return () => window.clearInterval(t);
-  }, [conversationClosed, closeCooldownEnds]);
+  }, [lpSession.state, lpSession.cooldownUntil]);
 
-  // Count agent replies as they arrive so the loss-prevention
-  // session-too-chatty cap can fire. Last-message inspection only —
-  // doesn't double-count if the array re-renders.
+  // Count agent replies as they arrive so the chatty-cap can fire.
   const lastMessageKeyRef = React.useRef<string>("");
   React.useEffect(() => {
     const last = messages[messages.length - 1];
@@ -240,7 +244,7 @@ export function ChatPanel({
     if (key === lastMessageKeyRef.current) return;
     lastMessageKeyRef.current = key;
     if (last.role === "agent") {
-      agentReplyCountRef.current += 1;
+      setLpSession((s) => ({ ...s, agentRepliesSoFar: s.agentRepliesSoFar + 1 }));
     }
   }, [messages]);
   React.useEffect(() => {
@@ -466,50 +470,55 @@ export function ChatPanel({
     const fromButton = typeof explicit === "string";
     const content = (fromButton ? explicit : input).trim();
     if (!content || pending) return;
-    if (conversationClosed) return; // input should already be disabled but belt-and-suspenders
+    if (lpSessionRef.current.state === "exit") return;
     if (!fromButton) setInput("");
     setWsError(null);
     setEscalationMsg(null);
 
-    // Loss-prevention check on the inbound user message BEFORE it goes
-    // upstream to the model. Button-driven sends (path/preference picks)
-    // are exempt — those are intent signals by definition.
+    // Loss-prevention state machine. Button-driven sends are exempt —
+    // path/preference picks are intent signals by definition.
     if (!fromButton) {
-      const snapshot: SessionSnapshot = {
-        startedAt: sessionStartRef.current,
-        agentRepliesSoFar: agentReplyCountRef.current,
-        userMessagesSoFar: userMessageCountRef.current,
-        intentEverDetected: intentEverDetectedRef.current,
-      };
-      const ev = evaluateMessage(content, snapshot);
-      if (ev.signal === "intent_present") {
-        intentEverDetectedRef.current = true;
-      }
-      userMessageCountRef.current += 1;
+      const decision = evaluateUserMessage(content, lpSessionRef.current);
+      const next = applyDecision(lpSessionRef.current, decision);
+      // Mark intent-detected when the message has it (used by future cycles).
+      if (hasIntent(content)) next.intentEverDetected = true;
+      setLpSession(next);
 
-      if (ev.shouldHardClose || ev.shouldSoftClose) {
-        // Append the user's last message so the close reads in context,
-        // then drop the closing line in Sal's voice + lock the input.
-        setMessages((m) => [
-          ...m,
-          { role: "user", content, ts: Date.now() },
-          {
-            role: "agent",
-            employee: "sal_ang",
-            content: ev.shouldHardClose ? HARD_CLOSE_LINE : SOFT_CLOSE_LINE,
-            ts: Date.now(),
-          },
-        ]);
-        const cooldownMs = ev.shouldHardClose ? 5 * 60 * 1000 : 90 * 1000;
-        setConversationClosed(ev.shouldHardClose ? "hard" : "soft");
-        setCloseCooldownEnds(Date.now() + cooldownMs);
-        // Fire-and-forget audit-log entry. Failure is non-fatal.
-        void recordLossPreventionEvent(ev, content);
+      if (decision.blockUpstream) {
+        // Append the user's message + the scripted reply (if any) and
+        // STOP — no LLM call this turn. Saves tokens during LP states.
+        setMessages((m) => {
+          const out = [...m, { role: "user" as const, content, ts: Date.now() }];
+          if (decision.emit) {
+            out.push({
+              role: "agent" as const,
+              employee: decision.emit.employee,
+              content: decision.emit.content,
+              ts: Date.now() + 1,
+            });
+          }
+          return out;
+        });
+        if (decision.recordAuditSignal) {
+          void recordLossPreventionEvent({
+            signal: decision.recordAuditSignal,
+            reason: `state ${lpSessionRef.current.state} → ${decision.nextState}`,
+            matchedPattern: null,
+            userTextExcerpt: content.slice(0, 240),
+            softClose: decision.nextState === "negotiating" || decision.nextState === "looking" || decision.nextState === "terse",
+            hardClose: decision.nextState === "lp_active" || decision.nextState === "acheevy_warning" || decision.nextState === "exit",
+          });
+        }
         return;
       }
     } else {
-      // Button presses count as strong intent.
-      intentEverDetectedRef.current = true;
+      // Button presses count as strong intent → reset state if we
+      // were in any non-normal LP phase.
+      setLpSession((s) =>
+        s.state === "normal"
+          ? { ...s, intentEverDetected: true }
+          : { ...freshSession(), intentEverDetected: true },
+      );
     }
 
     // Add user message immediately (skip if a button already appended its
@@ -862,17 +871,34 @@ export function ChatPanel({
         )}
       </div>
 
-      {/* Input — text + voice. Disabled while a loss-prevention close
-          is active; secondsLeft message tells the visitor when Sal will
-          be back at the counter. */}
-      {conversationClosed ? (
-        <div className="border-t border-border bg-card/40 px-5 py-4 text-center">
-          <p className="text-xs text-muted-foreground">
-            Sal stepped to another customer.
+      {/* Input footer — varies by LP state. Most states keep the
+          input enabled; only acheevy_warning and exit lock it. */}
+      {lpSession.state === "exit" ? (
+        <div className="border-t border-border bg-card/40 px-5 py-5 text-center">
+          <p className="text-xs text-muted-foreground mb-2.5">
+            Conversation closed.
+          </p>
+          <a
+            href="/auth/signup?next=/account"
+            className="inline-flex items-center justify-center rounded-full bg-foreground px-4 py-2 text-xs font-medium text-background hover:bg-foreground/90 transition-colors"
+          >
+            Create an account to return
+          </a>
+        </div>
+      ) : lpSession.state === "acheevy_warning" ? (
+        <div className="border-t border-border bg-destructive/5 px-5 py-4 text-center">
+          <p className="text-xs text-destructive/90">
+            ACHEEVY paused this session.
             <span className="ml-1 font-mono text-foreground/80">
-              Back in {Math.max(0, Math.ceil((closeCooldownEnds - Date.now()) / 1000))}s
+              {Math.max(0, Math.ceil((lpSession.cooldownUntil - Date.now()) / 1000))}s
             </span>
           </p>
+          <a
+            href="/auth/signup?next=/account"
+            className="mt-2 inline-flex items-center justify-center rounded-full bg-foreground px-4 py-1.5 text-[11px] font-medium text-background hover:bg-foreground/90 transition-colors"
+          >
+            Create an account
+          </a>
         </div>
       ) : (
       <form onSubmit={(e) => { e.preventDefault(); send(); }} className="flex items-center gap-2 border-t border-border p-4">
@@ -881,7 +907,12 @@ export function ChatPanel({
           disabled={!!pending || isConnecting}
         />
         <Input
-          placeholder="Ask Sal — type or tap the mic…"
+          placeholder={
+            lpSession.state === "lp_active" ? "Talk to Marcus — quick, on the menu…"
+            : lpSession.state === "terse" ? "Make it specific — what are you after?"
+            : lpSession.state === "looking" ? "Ping Sal when you're ready…"
+            : "Ask Sal — type or tap the mic…"
+          }
           value={input}
           onChange={(e) => setInput(e.target.value)}
           disabled={!!pending || isConnecting}

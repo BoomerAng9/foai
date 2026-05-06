@@ -2524,6 +2524,7 @@ _EMPLOYEE_SURFACE = {
     "luc_ang":       "coastal_chat_retail",     # T2-FINANCE — Gemma 4 26B
     "melli_capensi": "coastal_chat_reasoning",  # T2-BULK — DeepSeek v3 reasoning
     "acheevy":       "coastal_chat_reasoning",  # T1 — DeepSeek v3 reasoning
+    "lp_ang":        "coastal_chat_retail",     # T2-LP — Gemma 4 26B (Marcus, loss prevention)
 }
 
 # Brand-grounding preamble prepended to EVERY lieutenant prompt. The model's
@@ -2800,6 +2801,14 @@ def _employee_system_prompt(employee: str, surface: str = "customer_chat_panel")
             "OUTPUT RULE: Custee hears yes/no + the resulting price only. NEVER quote max_disc itself, the floor, wholesale, fulfill, or any internal economics. If you counter, do not reveal why the original was over the line. "
             "FORMAT: One to two sentences. Confirm or counter with the customer-facing price + the SKU bracket reference. "
             "Never name the supplier. Never invent product attributes."
+        ),
+        "lp_ang": (
+            "You are Marcus — floor-team Loss Prevention at Coastal Brewing Co. Surfaces when a customer conversation has stalled out of negotiation and Sal has stepped off. "
+            "VOICE: Calm, professional, structured. Less warm than Sal, less authoritative than ACHEEVY. The associate in the high-res button-down who walks up because something needs untangling. "
+            "WORDS YOU REACH FOR: \"let's keep this on the menu,\" \"what are we landing on,\" \"got it,\" \"that's a fit,\" \"want me to set you up,\" \"I'll close this loop,\" \"happy to get you to checkout.\" "
+            "WHAT TO AVOID: small talk, jokes, flirtation, philosophical detours, anything off the menu. Three-step assist max — family / specifics / close. "
+            "AUTHORITY: zero discount approval. You can route to checkout, recommend bundles, or hand back to Sal. Above-ceiling routes to ACHEEVY. "
+            "Never accuse the visitor of waste or game-playing — your only job is to convert or step off. Never name the supplier. Never invent product attributes."
         ),
     }
     persona = prompts.get(employee, prompts["acheevy"])
@@ -4568,6 +4577,10 @@ _COASTAL_V2_VOICEID = {
     "luc_ang":       "default-4zhua1rhxjfl50z1dnkcba__coastal-luc-ang-v2",
     "melli_capensi": "default-4zhua1rhxjfl50z1dnkcba__coastal-melli-capensi-v2",
     "acheevy":       "default-4zhua1rhxjfl50z1dnkcba__coastal-acheevy-v2",
+    # Marcus / Loss Prevention — defaults to ACHEEVY's clone until owner
+    # records the dedicated LP team voice. Override via INWORLD_VOICE_ID_LP
+    # to swap in a custom IVC clone without touching code.
+    "lp_ang":        "default-4zhua1rhxjfl50z1dnkcba__coastal-acheevy-v2",
 }
 
 _INWORLD_VOICE_MAP: Dict[str, Dict[str, str]] = {
@@ -4611,6 +4624,16 @@ _INWORLD_VOICE_MAP: Dict[str, Dict[str, str]] = {
         "model": "inworld-tts-2",
         "deliveryMode": os.environ.get("INWORLD_DELIVERY_MODE_ACHEEVY") or "EXPRESSIVE",
         "speakingRate": 0.95,
+    },
+    # Marcus — Loss Prevention floor team. Register: calm, professional,
+    # structured. Less warm than Sal, less authoritative than ACHEEVY.
+    # STABLE delivery mode (no over-acted prosody) reflects the uniform
+    # discipline (high-res button-down, form-fitting but not aggressive).
+    "lp_ang": {
+        "voiceId": os.environ.get("INWORLD_VOICE_ID_LP") or _COASTAL_V2_VOICEID["lp_ang"],
+        "model": "inworld-tts-2",
+        "deliveryMode": os.environ.get("INWORLD_DELIVERY_MODE_LP") or "STABLE",
+        "speakingRate": 1.0,
     },
 }
 
