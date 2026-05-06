@@ -3397,103 +3397,61 @@ _INWORLD_TTS_MODEL = os.environ.get("INWORLD_TTS_MODEL", "inworld-tts-1.5-max")
 # Tier "max" = flagship (richer expression, ~200ms p50). "mini" = ~120ms,
 # cheaper. ACHEEVY gets max because customers hear his voice; internal
 # voices default to mini when ever surfaced (cost discipline).
-_ACHEEVY_NAS_CLONE_VOICEID = (
-    # IVC clone 2026-05-03 — Nas Power 105.1 Stillmatic best-window
-    # (0:00-0:30, F0=122 Hz / median 93 / 1.87 sps / HNR 4.7 dB,
-    # transcript-grounded as Nas first-person; analyzer 57.7% match
-    # against acheevy_baritone target). Cloned via /api/v1/voice/clone
-    # endpoint into Inworld workspace default-4zhua1rhxjfl50z1dnkcba.
-    # Belter Creole dialect comes from the LLM register-modulator
-    # preamble layer (cast-environments YAML + register_modulator.py),
-    # not from the voice signature — voice gives ACHEEVY his acoustic
-    # baritone; the modulator gives him his lexicon + register.
-    "default-4zhua1rhxjfl50z1dnkcba__acheevy-nas-queensbridge-baritone-v1"
-)
+# All four personas re-seeded 2026-05-05 via Gemini 3.1 Flash TTS NL-
+# accent prompts → uploaded to Inworld for IVC cloning. Owner approved
+# all four samples. The Gemini pipeline gives us cleaner-sounding clones
+# than the prior YouTube-rip Nas baseline because the source audio is
+# studio-quality 24 kHz mono PCM with no compression artifacts. Dialect
+# expression in production comes from the LLM register-modulator + the
+# script wording at chat time — voice carries timbre + cadence.
+_COASTAL_V2_VOICEID = {
+    "sal_ang":       "default-4zhua1rhxjfl50z1dnkcba__coastal-sal-ang-v2",
+    "luc_ang":       "default-4zhua1rhxjfl50z1dnkcba__coastal-luc-ang-v2",
+    "melli_capensi": "default-4zhua1rhxjfl50z1dnkcba__coastal-melli-capensi-v2",
+    "acheevy":       "default-4zhua1rhxjfl50z1dnkcba__coastal-acheevy-v2",
+}
 
 _INWORLD_VOICE_MAP: Dict[str, Dict[str, str]] = {
-    # ACHEEVY voice — switched 2026-05-03 14:30 from stock "Ronald"
-    # to the IVC clone of Nas (Queensbridge baritone). Per owner
-    # directive 2026-05-03 14:25: "ACHEEVY voice should either be Nas
-    # or AZ with Belter Creole Dialect."
-    # after owner caught the Jarrett-DigitalTwin-v1 IVC clone sounding
-    # robotic. The bad clone is still in the workspace as a workspace-
-    # asset record but is NOT served. Two failure modes contributing:
-    # (1) Inworld's Instant Voice Cloning is the FAST tier — it accepts
-    # one short sample but produces noticeably-synthetic output without
-    # multiple high-quality samples; (2) the source MP3 (Jarrett
-    # ACHIEVEMOR Message 2023) had compression artifacts that the IVC
-    # carried into the clone. Path forward = Professional Voice Cloning
-    # with multiple clean samples (4 large MP4 voice-training videos
-    # available, audio extraction pipeline to be built).
-    # INWORLD_VOICE_ID_ACHEEVY env override remains in place — when a
-    # higher-quality clone is auditioned + approved, set the env var
-    # without a code change.
-    # PROSODY note: per owner directive 2026-05-03 14:45, voice +
-    # pitch are the load-bearing layer; energy/loudness/speed are
-    # alterable via Inworld TTS params. ACHEEVY ships with calmed-
-    # down prosody to fit the coffee-shop environment — Nas Power
-    # 105.1 source was attack-mode (Stillmatic / Ether response);
-    # the dial-down brings it to measured / contemplative.
-    # - temperature 0.5 (default 1.0): less expressiveness, more
-    #   predictable / measured / calm.
-    # - speakingRate 0.85 (default 1.0, range 0.5-1.5): 15% slower
-    #   for deliberate, considered pacing.
-    "acheevy":       {
-        "voiceId": os.environ.get("INWORLD_VOICE_ID_ACHEEVY") or _ACHEEVY_NAS_CLONE_VOICEID,
-        "model": "inworld-tts-1.5-max",
-        # Prosody dial-down round 3 (2026-05-03 15:05) — owner found
-        # round-2 (t=0.3, rate=0.78) was over-dialed (slow / bad-sounding).
-        # Backing off to gentle dial — voice quality preserved, slight
-        # measure-down from default to fit coffee-shop without over-
-        # smoothing the speech delivery.
-        "temperature": 0.7,
-        "speakingRate": 0.95,
-    },
-    # Sal_Ang voice — fourth update 2026-05-05: stock "Graham" on
-    # inworld-tts-2 with deliveryMode=STABLE and speakingRate=1.09 per
-    # owner's brief. Replaces the sal-rpozo IVC clone (which itself
-    # replaced reflective-v2 → baritone-v1 share → Brandon). STABLE
-    # delivery keeps lead-barista warmth without the over-expressiveness
-    # EXPRESSIVE adds — Sal does steady welcome / steady recommend cadence.
-    "sal_ang":       {
-        # INWORLD_VOICE_ID_SAL env override takes precedence for ops
-        # auditioning a different clone without a code change.
-        "voiceId": os.environ.get("INWORLD_VOICE_ID_SAL") or "Graham",
+    # All four personas now ride the v2 IVC clones generated 2026-05-05
+    # from Gemini 3.1 Flash TTS NL-accent-prompted seed samples. Source
+    # WAVs at iCloud/.../Coastal Brew Voices/<persona>.wav, cloned via
+    # POST /api/v1/voice/clone, voiceIds locked in _COASTAL_V2_VOICEID
+    # above. Per-character env overrides remain in place for ops to
+    # audition future iterations without touching code.
+    #
+    # Model = inworld-tts-2 across the board (MP3 streaming output,
+    # uniform deliveryMode prosody control, browser-native progressive
+    # playback via the streaming endpoint). The 1.5-max/-mini fallbacks
+    # are gone — tts-2 supports MP3 streaming for both stock and IVC
+    # voices, verified live 2026-05-05.
+    #
+    # deliveryMode picked per persona register:
+    #   - EXPRESSIVE: warmth + slight emotional range (Sal welcome,
+    #     Melli decisive, ACHEEVY measured-but-engaged)
+    #   - STABLE: steady, predictable, not over-acted (LUC math-first)
+    "sal_ang": {
+        "voiceId": os.environ.get("INWORLD_VOICE_ID_SAL") or _COASTAL_V2_VOICEID["sal_ang"],
         "model": "inworld-tts-2",
-        "deliveryMode": os.environ.get("INWORLD_DELIVERY_MODE_SAL") or "STABLE",
-        "speakingRate": 1.09,
+        "deliveryMode": os.environ.get("INWORLD_DELIVERY_MODE_SAL") or "EXPRESSIVE",
+        "speakingRate": 1.05,
     },
-    # LUC_Ang — Brooklyn CPA archetype. Vinny (gritty New York male)
-    # remains the right stock fit. Gentle prosody for conversational
-    # cadence (Vinny defaults a touch fast).
-    "luc_ang":       {
-        "voiceId": "Vinny",
-        "model": "inworld-tts-1.5-mini",
-        "temperature": 0.7,
-        "speakingRate": 0.95,
+    "luc_ang": {
+        "voiceId": os.environ.get("INWORLD_VOICE_ID_LUC") or _COASTAL_V2_VOICEID["luc_ang"],
+        "model": "inworld-tts-2",
+        "deliveryMode": os.environ.get("INWORLD_DELIVERY_MODE_LUC") or "STABLE",
+        "speakingRate": 1.0,
     },
-    # Melli_Capensi — strategic executive archetype. Owner directive
-    # 2026-05-05: Selene (warm but assertive female voice) replaces
-    # Bianca; Belter Creole register layered in via the LLM
-    # register-modulator (cast-environments YAML adds
-    # belter_creole_layer_light to her customer_chat_panel surface).
-    # Second update 2026-05-05: upgraded to inworld-tts-2 (Inworld's
-    # newest model, MP3 output). The new family swaps `temperature`
-    # for `deliveryMode` — EXPRESSIVE keeps the warmth of Belter Creole
-    # phrasing on bulk / B2B intake without flattening into monotone.
-    # speakingRate 1.13 per the Inworld integration brief default for
-    # tts-2 (slightly faster than 1.5-max, fits Melli's decisive cadence).
-    # The other three personas stay on inworld-tts-1.5-max until owner
-    # promotes them to tts-2 individually.
     "melli_capensi": {
-        # Updated 2026-05-05 (latest): owner brief swaps Selene → "Eleanor"
-        # (warmer female stock voice on tts-2) and tunes speakingRate to
-        # 1.07 (slightly slower than the prior 1.13 — fits Melli's measured
-        # exec cadence on bulk / B2B). EXPRESSIVE preserved.
-        "voiceId": os.environ.get("INWORLD_VOICE_ID_MELLI") or "Eleanor",
+        "voiceId": os.environ.get("INWORLD_VOICE_ID_MELLI") or _COASTAL_V2_VOICEID["melli_capensi"],
         "model": "inworld-tts-2",
         "deliveryMode": os.environ.get("INWORLD_DELIVERY_MODE_MELLI") or "EXPRESSIVE",
-        "speakingRate": 1.07,
+        "speakingRate": 1.05,
+    },
+    "acheevy": {
+        "voiceId": os.environ.get("INWORLD_VOICE_ID_ACHEEVY") or _COASTAL_V2_VOICEID["acheevy"],
+        "model": "inworld-tts-2",
+        "deliveryMode": os.environ.get("INWORLD_DELIVERY_MODE_ACHEEVY") or "EXPRESSIVE",
+        "speakingRate": 0.95,
     },
 }
 
@@ -4007,7 +3965,16 @@ async def voice_clone(
                 detail=f"Inworld clone error: {resp.text[:1500]}",
             )
         result = resp.json()
-        voice_id = result.get("voiceId") or result.get("name") or result.get("id")
+        # Inworld returns the cloned voice under `voice.voiceId` per the
+        # 2026-05-05 response shape: {voice: {voiceId, displayName, ...},
+        # audioSamplesValidated: [...]}. Older fallbacks kept for safety.
+        voice_obj = result.get("voice") or {}
+        voice_id = (
+            voice_obj.get("voiceId")
+            or result.get("voiceId")
+            or result.get("name")
+            or result.get("id")
+        )
         return {
             "ok": True,
             "voice_id": voice_id,
