@@ -3687,18 +3687,54 @@ async def auth_login(body: AuthLoginRequest):
     })
     link = f"{AUTH_PUBLIC_URL}/auth/verify?token={token}"
 
-    # Email delivery: TODO — owner directive 2026-05-06 says use GCP
-    # (Cloud Functions / Pub/Sub / SES) or Firebase (Firebase Functions
-    # + SendGrid / Mailgun) instead of Resend. The Resend adapter
-    # shipped earlier this session was the wrong path; backed out here.
-    # Until the GCP/Firebase email path lands, stay in dev-mode (return
-    # the magic link inline so the cross-device flow stays testable).
+    # Email delivery via the Firebase Cloud Function gateway (per the
+    # 2026-05-06 GCP/Firebase-not-Resend canon). The function lives in
+    # the foai-aims Firebase project at
+    # `coastal-brewing/firebase-functions/send-email/`. When
+    # COASTAL_EMAIL_FUNCTION_URL + COASTAL_EMAIL_FUNCTION_SECRET are
+    # set, the adapter signs + POSTs and the magic link goes by email.
+    # When unset (dev mode), we return the link inline so cross-device
+    # login stays testable without the function deployed.
     response_payload: Dict[str, Any] = {
         "ok": True,
         "sent": True,
         "expires_in_sec": AUTH_TOKEN_TTL_SEC,
-        "magic_link": link,                # dev-mode — replace with email send via GCP/Firebase
     }
+    try:
+        from adapters.email_adapter import (   # noqa: E402 — local import
+            is_configured as _email_is_configured,
+            send_email as _email_send,
+            magic_link_email_body as _magic_link_body,
+        )
+    except Exception:
+        _email_is_configured = lambda: False  # type: ignore
+        _email_send = None                     # type: ignore
+        _magic_link_body = None                # type: ignore
+
+    if _email_is_configured() and _email_send and _magic_link_body:
+        html, text = _magic_link_body(
+            recipient_email=email,
+            magic_link=link,
+            ttl_minutes=AUTH_TOKEN_TTL_SEC // 60,
+        )
+        try:
+            _email_send(
+                to=email,
+                subject="Pull up to the counter — your Coastal sign-in link",
+                html=html,
+                text=text,
+                template_id="auth_magic_link",
+            )
+        except Exception as exc:
+            log = __import__("logging").getLogger("coastal.auth")
+            log.warning("email function send raised for %s: %s", email, exc)
+        # Don't leak send-status to the caller. Generic body either way
+        # to prevent email-enumeration attacks.
+    else:
+        # Dev mode — surface the magic link until the Firebase Function
+        # is deployed + COASTAL_EMAIL_FUNCTION_URL lands in the runner env.
+        response_payload["magic_link"] = link
+
     return response_payload
 
 

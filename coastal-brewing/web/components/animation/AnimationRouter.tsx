@@ -1,7 +1,6 @@
 "use client";
 import { EspressoCup } from "./EspressoCup";
 import { LuCalLedger } from "./LuCalLedger";
-import { SettBrief } from "./SettBrief";
 import { CoffeePot } from "./CoffeePot";
 import { AuthoritySeal } from "./AuthoritySeal";
 
@@ -21,7 +20,6 @@ export function AnimationRouter({ employee, animationType, animationSize, progre
     case "espresso_cup":   return <EspressoCup {...shared} />;
     case "lu_cal_ledger":  return <LuCalLedger {...shared} />;
     case "coffee_pot":     return <CoffeePot {...shared} />;
-    case "sett_brief":     return <SettBrief {...shared} />;
     case "authority_seal": return <AuthoritySeal {...shared} />;
     default:               return <EspressoCup {...shared} />;
   }

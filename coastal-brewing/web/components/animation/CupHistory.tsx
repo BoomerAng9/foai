@@ -23,7 +23,6 @@ const ANIM_ICON: Record<string, string> = {
   espresso_cup:  "☕",
   lu_cal_ledger: "🔢",
   coffee_pot:    "🫖",
-  sett_brief:    "📋",
   authority_seal:"🔏",
 };
 
