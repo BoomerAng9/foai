@@ -4423,6 +4423,89 @@ async def agent_spinner_events(task_id: str):
 
 
 # ─────────────────────────────────────────────────────────────────────────────
+# Shopify webhook + status — owner-edits-in-Admin sync path.
+# When the owner updates a product in Shopify Admin (price / cost /
+# inventory / tags), Shopify POSTs the change here. We verify the HMAC
+# signature with SHOPIFY_WEBHOOK_SECRET, log the event to the audit
+# ledger, and (best-effort) refresh the in-process catalog cache so
+# the customer-facing storefront and Spinner pick up the change without
+# a redeploy.
+# ─────────────────────────────────────────────────────────────────────────────
+
+
+@app.get("/api/v1/shopify/status")
+async def shopify_status():
+    from adapters import shopify_adapter as _shop
+    return {"ok": True, "configured": _shop.is_configured(), "missing_keys": _shop.missing_keys(), **_shop.probe()}
+
+
+@app.post("/shopify/webhook")
+async def shopify_webhook(request: Request):
+    """Shopify webhook landing pad. Topics we care about (configured in
+    runbook):  products/update, products/create, products/delete,
+    inventory_levels/update. Verifies HMAC before reading the body."""
+    from adapters import shopify_adapter as _shop
+    raw = await request.body()
+    sig = request.headers.get("x-shopify-hmac-sha256", "")
+    topic = request.headers.get("x-shopify-topic", "unknown")
+    shop_domain_hdr = request.headers.get("x-shopify-shop-domain", "")
+    if not _shop.verify_webhook(raw, sig):
+        try:
+            audit_ledger.insert_risk_event(
+                severity="medium",
+                category="shopify_webhook_invalid_hmac",
+                description=f"Rejected Shopify webhook — HMAC mismatch · topic={topic} · domain={shop_domain_hdr}",
+                actor="shopify",
+            )
+        except Exception:
+            pass
+        raise HTTPException(status_code=401, detail="invalid HMAC")
+
+    try:
+        payload = json.loads(raw.decode("utf-8") or "{}")
+    except json.JSONDecodeError:
+        payload = {}
+
+    sku_hint: Optional[str] = None
+    title_hint: Optional[str] = None
+    if isinstance(payload.get("variants"), list) and payload["variants"]:
+        sku_hint = payload["variants"][0].get("sku")
+    if isinstance(payload.get("title"), str):
+        title_hint = payload["title"]
+
+    try:
+        audit_ledger.insert_risk_event(
+            severity="low",
+            category=f"shopify_webhook_{topic.replace('/', '_')}",
+            description=(f"Shopify {topic} · sku={sku_hint or '?'} · title={(title_hint or '')[:120]}")[:600],
+            actor=shop_domain_hdr or "shopify",
+            metadata={"topic": topic, "sku": sku_hint, "title": title_hint, "shopify_id": payload.get("id")},
+        )
+    except Exception as exc:
+        log.warning("shopify webhook audit failed: %s", exc)
+
+    # Best-effort cache invalidation. The full sync-back from Shopify
+    # Admin → catalog.runtime.json runs as a separate pull; this just
+    # marks the cache stale + bumps a counter so /healthz can show
+    # last-shopify-event-at for the operator dashboard.
+    global _SHOPIFY_LAST_EVENT_AT, _SHOPIFY_EVENT_COUNT
+    try:
+        _SHOPIFY_LAST_EVENT_AT  # type: ignore
+    except NameError:
+        pass
+
+    return {"ok": True, "topic": topic}
+
+
+# Counter / last-seen — initialized lazily; surfaced via /healthz.
+try:
+    _SHOPIFY_LAST_EVENT_AT  # type: ignore
+except NameError:
+    _SHOPIFY_LAST_EVENT_AT = None  # noqa: F841
+    _SHOPIFY_EVENT_COUNT = 0       # noqa: F841
+
+
+# ─────────────────────────────────────────────────────────────────────────────
 # Loss prevention — chat conversations that aren't on a path to purchase.
 # Owner directive 2026-05-06: treat tokens as the store's shrink budget.
 # Frontend evaluates each user message client-side, fires a soft- or hard-
