@@ -224,6 +224,10 @@ export function ChatPanel({
   const [spinnerOpen, setSpinnerOpen] = React.useState(false);
   const [spinnerTaskId, setSpinnerTaskId] = React.useState<string | null>(null);
   const [spinnerCommission, setSpinnerCommission] = React.useState<string>("");
+  // True when the user clicked "Shop for me" and we're now waiting on
+  // them to pick a preference category. Set in pickPath, consumed in
+  // pickPreference to commission Spinner with the chosen category.
+  const armedForShopForMeRef = React.useRef<boolean>(false);
 
   const [voiceAutoplay, setVoiceAutoplay] = React.useState<boolean>(() => {
     // Default-ON per owner directive 2026-05-06. Only respect an explicit
@@ -412,34 +416,27 @@ export function ChatPanel({
     setMessages((m) => [...m, { role: "user", content: label, ts: Date.now() }]);
     void send(label);
 
-    // "Shop for me" → commission Spinner, render the activity overlay.
-    // Spinner runs server-side (Sonnet 4-6 tool loop, hits the Coastal
-    // catalog + cart_store), the overlay subscribes to the SSE stream
-    // for live progress. The user stays on the chat page during the run.
+    // "Shop for me" — DON'T fire Spinner yet. Sal asks the preference
+    // question first; the user picks coffee / tea / mushroom from the
+    // existing preference chips, and THAT click commissions Spinner
+    // with the chosen category baked into the brief. Owner directive
+    // 2026-05-06 — never run Spinner without an answered preference.
     if (choice === "shop_for_me") {
-      const commission = "Shop for me. Pick 2-4 items I'd like based on my history and stated preferences. Default to flagship blends if history is empty.";
-      setSpinnerCommission(commission);
-      try {
-        const r = await fetch("/api/v1/agent/spinner", {
-          method: "POST",
-          credentials: "include",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            commission,
-            commissioned_by: "user",
-            metadata: { trigger: "shop_for_me_button" },
-          }),
-        });
-        if (r.ok) {
-          const data = await r.json() as { task_id?: string };
-          if (data.task_id) {
-            setSpinnerTaskId(data.task_id);
-            setSpinnerOpen(true);
-          }
-        }
-      } catch {
-        // Non-fatal — fall through to the curated /products view.
-      }
+      armedForShopForMeRef.current = true;
+      setShowPreferenceButtons(true);
+      // Sal's bridge line lands as a chat message (with brief delay so
+      // it doesn't race the synthetic user message above).
+      window.setTimeout(() => {
+        setMessages((m) => [
+          ...m,
+          {
+            role: "agent",
+            employee: "sal_ang",
+            content: "Real fine — what're we leaning toward, coffee, tea, or one of the mushroom blends? Pick one and I'll send Spinner to fill the basket.",
+            ts: Date.now(),
+          },
+        ]);
+      }, 700);
       return;
     }
 
@@ -471,6 +468,45 @@ export function ChatPanel({
       : category === "tea" ? "I'm into tea"
       : "Mushroom-functional, please";
     setMessages((m) => [...m, { role: "user", content: label, ts: Date.now() }]);
+
+    // If the user came from a "Shop for me" path-button, the
+    // armedForShopForMeRef is set; consume it now and commission
+    // Spinner with the chosen category baked into the brief.
+    const armedForShopping = armedForShopForMeRef.current;
+    armedForShopForMeRef.current = false;
+
+    if (armedForShopping) {
+      const human = category === "coffee" ? "coffee"
+        : category === "tea" ? "tea or matcha"
+        : "functional / mushroom blends";
+      const commission = `Shop for me. The customer is into ${human}. Pick 2-4 items in that lane based on their history if any; default to flagship picks if history is empty. Avoid duplicates of items already in their cart.`;
+      setSpinnerCommission(commission);
+      try {
+        const r = await fetch("/api/v1/agent/spinner", {
+          method: "POST",
+          credentials: "include",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            commission,
+            commissioned_by: "user",
+            metadata: { trigger: "shop_for_me_button", category },
+          }),
+        });
+        if (r.ok) {
+          const data = await r.json() as { task_id?: string };
+          if (data.task_id) {
+            setSpinnerTaskId(data.task_id);
+            setSpinnerOpen(true);
+          }
+        }
+      } catch {
+        // Non-fatal — fall through to chat.
+      }
+      return;
+    }
+
+    // Default path — user is just declaring a preference outside of
+    // shop-for-me, send the message to Sal for conversation.
     void send(label);
   }
 
