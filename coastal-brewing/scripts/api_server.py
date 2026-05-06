@@ -3462,6 +3462,138 @@ class AuthLoginRequest(BaseModel):
     email: str
 
 
+# ─── Welcome-card render helpers ────────────────────────────────────────
+# Anthropic Claude generates the per-user welcome message; Inworld TTS
+# (Sal v2 IVC clone) renders it to MP3; the runner saves the MP3 locally
+# and serves via /api/v1/account/welcome-card.mp3. /account reads the
+# message text + audio URL from /api/v1/auth/me on first load.
+
+WELCOME_CARDS_DIR = pathlib.Path(__file__).resolve().parent.parent / "welcome-cards"
+WELCOME_FALLBACK_MESSAGE = (
+    "Welcome to Coastal Brewing Co. I'm Sal — first pour's on us. "
+    "We don't just sell coffee. We sell the part of the day that "
+    "starts with a cup. Pull up a stool any time."
+)
+
+
+def _anthropic_welcome_message(name: Optional[str], email: str) -> str:
+    """Generate a 30-50 word Sal-voiced welcome message via Claude
+    Opus 4.7. Falls back to WELCOME_FALLBACK_MESSAGE on any failure
+    (Anthropic outage, missing key, etc) — signup must never block on
+    this best-effort enrichment."""
+    api_key = os.environ.get("ANTHROPIC_API_KEY", "").strip()
+    if not api_key:
+        return WELCOME_FALLBACK_MESSAGE
+    try:
+        import anthropic   # noqa: E402 — only imported when configured
+    except ImportError:
+        return WELCOME_FALLBACK_MESSAGE
+    display_name = (name or email.split("@")[0]).strip() or "friend"
+    system_prompt = (
+        "You are Sal_Ang, lead barista at Coastal Brewing Co. American "
+        "Black male, NYC/NJ/Philly upbringing, now Coastal Georgia. "
+        "Smooth and well-articulated — fly without trying. Light AAVE "
+        "layered with Southern warmth. Your voice is conversational, "
+        "lead-counter patter — sound like you're leaning on the bar "
+        "talking to a regular. Words you reach for: 'alright,' 'pull "
+        "up a stool,' 'real talk,' 'on the menu,' 'easy,' 'no pressure.' "
+        "You write a 35-50 word welcome note for a customer who just "
+        "opened a Coastal account. Address them by their first name. "
+        "Anchor to the brand thesis: 'Coffee changes your day. We're "
+        "here for the change.' No bullets, no markdown, no headings — "
+        "prose only. No exclamation points. End on something inviting "
+        "but not pushy. Output ONLY the welcome note, nothing else."
+    )
+    try:
+        client = anthropic.Anthropic(api_key=api_key)
+        msg = client.messages.create(
+            model=os.environ.get("ANTHROPIC_WELCOME_MODEL", "claude-opus-4-7"),
+            max_tokens=200,
+            system=system_prompt,
+            messages=[{
+                "role": "user",
+                "content": (
+                    f"Customer first name: {display_name}\n"
+                    f"Customer email: {email}\n\n"
+                    f"Write the 35-50 word welcome note now."
+                ),
+            }],
+        )
+        # SDK returns content blocks — concatenate text blocks.
+        text = "".join(
+            getattr(block, "text", "") for block in msg.content
+        ).strip()
+        return text or WELCOME_FALLBACK_MESSAGE
+    except Exception as exc:
+        log = __import__("logging").getLogger("coastal.welcome")
+        log.warning("anthropic welcome message gen failed: %s", exc)
+        return WELCOME_FALLBACK_MESSAGE
+
+
+async def _render_welcome_narration(
+    text: str, character_id: str, coastal_uid: str,
+) -> bool:
+    """Render the welcome message to MP3 via Inworld TTS streaming +
+    save to WELCOME_CARDS_DIR / {coastal_uid}.mp3. Returns True on
+    success. Best-effort — caller should not block on failure."""
+    if not _INWORLD_API_KEY:
+        return False
+    try:
+        WELCOME_CARDS_DIR.mkdir(parents=True, exist_ok=True)
+    except Exception:
+        return False
+    # Apply same TTS pre-processing the live streaming endpoint uses
+    text = _strip_markdown_for_tts((text or "").strip())[:2000]
+    if not text:
+        return False
+    if _PRONUNCIATION_ENGINE_AVAILABLE:
+        try:
+            text = _rewrite_for_tts(
+                text,
+                character=character_id,
+                surface="customer_chat_panel",
+                vertical="coastal-brewing",
+            )
+        except Exception:
+            pass
+    voice_cfg = _INWORLD_VOICE_MAP.get(character_id) or _INWORLD_VOICE_MAP["sal_ang"]
+    out_path = WELCOME_CARDS_DIR / f"{coastal_uid}.mp3"
+    try:
+        chunks: list = []
+        async for chunk in _inworld_stream_audio_bytes(text, voice_cfg):
+            chunks.append(chunk)
+        if not chunks:
+            return False
+        out_path.write_bytes(b"".join(chunks))
+        return True
+    except Exception as exc:
+        log = __import__("logging").getLogger("coastal.welcome")
+        log.warning("welcome narration render failed for %s: %s", coastal_uid, exc)
+        return False
+
+
+@app.get("/api/v1/account/welcome-card.mp3")
+async def account_welcome_card_audio(
+    coastal_uid: Optional[str] = Cookie(default=None, alias=COASTAL_UID_COOKIE),
+):
+    """Serve the caller's saved welcome-narration MP3. Auth-gated by the
+    cookie + identity presence. Returns 404 if the user has no narration
+    on file (caller falls back to silent mode)."""
+    if not coastal_uid or not _profile_layer.is_configured():
+        raise HTTPException(status_code=401, detail="not authenticated")
+    profile = _profile_layer.get_profile(coastal_uid)
+    if profile is None or not profile.identity:
+        raise HTTPException(status_code=401, detail="not authenticated")
+    audio_path = WELCOME_CARDS_DIR / f"{coastal_uid}.mp3"
+    if not audio_path.exists():
+        raise HTTPException(status_code=404, detail="welcome card not rendered")
+    return StreamingResponse(
+        iter([audio_path.read_bytes()]),
+        media_type="audio/mpeg",
+        headers={"Cache-Control": "private, max-age=3600"},
+    )
+
+
 @app.post("/api/v1/auth/signup")
 async def auth_signup(
     body: AuthSignupRequest,
@@ -3497,6 +3629,25 @@ async def auth_signup(
         meta["display_name"] = body.name
     if stripe_customer_id:
         meta["stripe_customer_id"] = stripe_customer_id
+
+    # Welcome-card render (best-effort, non-fatal): generate the
+    # personalized message via Claude → render Sal narration via
+    # Inworld TTS → save MP3. The frontend on /account first-load
+    # reads `welcome_card_message` + `welcome_card_url` from /me to
+    # play the card. If either step fails, signup still succeeds and
+    # the welcome card falls back gracefully (static text + no audio).
+    welcome_text = _anthropic_welcome_message(body.name, email)
+    meta["welcome_card_message"] = welcome_text
+    meta["welcome_card_seen"] = False
+    try:
+        narration_ok = await _render_welcome_narration(
+            welcome_text, "sal_ang", uid,
+        )
+    except Exception:
+        narration_ok = False
+    if narration_ok:
+        meta["welcome_card_url"] = "/api/v1/account/welcome-card.mp3"
+
     if meta != (profile.metadata or {}):
         _profile_layer.update_metadata(uid, meta)
     return {
@@ -3505,6 +3656,7 @@ async def auth_signup(
         "email": email,
         "display_name": body.name,
         "stripe_customer_id": stripe_customer_id,
+        "welcome_card_ready": narration_ok,
     }
 
 
@@ -3534,15 +3686,54 @@ async def auth_login(body: AuthLoginRequest):
         "exp": int(_auth_time.time()) + AUTH_TOKEN_TTL_SEC,
     })
     link = f"{AUTH_PUBLIC_URL}/auth/verify?token={token}"
-    # Email delivery is wired separately (see TODO: resend / SES adapter).
-    # For now we return the link so the owner can test end-to-end. In
-    # prod this returns only {ok, sent} and the link goes by email.
-    return {
+
+    # Resend delivery (when RESEND_API_KEY is configured). Falls back to
+    # inline magic_link return when not configured — supports dev work
+    # without provisioning email infra.
+    response_payload: Dict[str, Any] = {
         "ok": True,
         "sent": True,
-        "magic_link": link,                # dev only — strip when email lands
         "expires_in_sec": AUTH_TOKEN_TTL_SEC,
     }
+    try:
+        from adapters.resend_adapter import (   # noqa: E402 — local import
+            is_configured as _resend_is_configured,
+            send_email as _resend_send,
+            magic_link_email_body as _resend_magic_link_body,
+        )
+    except Exception:
+        _resend_is_configured = lambda: False  # type: ignore
+        _resend_send = None                      # type: ignore
+        _resend_magic_link_body = None           # type: ignore
+
+    if _resend_is_configured() and _resend_send and _resend_magic_link_body:
+        html, text = _resend_magic_link_body(
+            recipient_email=email,
+            magic_link=link,
+            ttl_minutes=AUTH_TOKEN_TTL_SEC // 60,
+        )
+        try:
+            email_id = _resend_send(
+                to=email,
+                subject="Pull up to the counter — your Coastal sign-in link",
+                html=html,
+                text=text,
+            )
+        except Exception as exc:
+            log = __import__("logging").getLogger("coastal.auth")
+            log.warning("resend send raised for %s: %s", email, exc)
+            email_id = None
+        # Don't leak email_id or send-status to the caller — same
+        # generic body whether delivery succeeded or failed (no user
+        # enumeration). Ops monitor delivery via Resend dashboard +
+        # the runner log line above on failure.
+    else:
+        # Dev mode — surface the magic link so the owner can test the
+        # cross-device login flow without email infra. Strip this once
+        # RESEND_API_KEY lands in the vault.
+        response_payload["magic_link"] = link
+
+    return response_payload
 
 
 @app.get("/api/v1/auth/verify")
@@ -3605,6 +3796,11 @@ async def auth_me(
         "last_purchase_at": (
             profile.last_purchase_at.isoformat() if profile.last_purchase_at else None
         ),
+        # Welcome-card state — drives the post-signup motion+narration
+        # modal on /account first visit.
+        "welcome_card_seen": bool((profile.metadata or {}).get("welcome_card_seen")),
+        "welcome_card_url": (profile.metadata or {}).get("welcome_card_url"),
+        "welcome_card_message": (profile.metadata or {}).get("welcome_card_message"),
     }
 
 
@@ -3613,6 +3809,26 @@ async def auth_logout(response: Response):
     """Clear the session cookie. Profile data stays in Neon — logout is
     just a cookie reset; the next anonymous visit gets a fresh uid."""
     response.delete_cookie(key=COASTAL_UID_COOKIE, path="/")
+    return {"ok": True}
+
+
+@app.post("/api/v1/account/welcome-dismiss")
+async def account_welcome_dismiss(
+    coastal_uid: Optional[str] = Cookie(default=None, alias=COASTAL_UID_COOKIE),
+):
+    """Mark the post-signup welcome card as seen so it doesn't replay on
+    subsequent /account loads. Auth-gated by the cookie + profile.identity
+    presence — anonymous callers are quietly no-op'd."""
+    if not coastal_uid or not _profile_layer.is_configured():
+        return {"ok": False, "reason": "not authenticated"}
+    profile = _profile_layer.get_profile(coastal_uid)
+    if profile is None or not profile.identity:
+        return {"ok": False, "reason": "not authenticated"}
+    meta = dict(profile.metadata or {})
+    if meta.get("welcome_card_seen"):
+        return {"ok": True, "already_seen": True}
+    meta["welcome_card_seen"] = True
+    _profile_layer.update_metadata(coastal_uid, meta)
     return {"ok": True}
 
 

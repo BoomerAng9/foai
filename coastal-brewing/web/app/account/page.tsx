@@ -8,6 +8,7 @@ import { Coffee, Leaf, Sparkles, Calendar, ArrowUpRight, LogOut } from "lucide-r
 
 import { Nav } from "@/components/nav";
 import { Footer } from "@/components/footer";
+import { AccountWelcomeCard } from "@/components/account-welcome-card";
 import { cn } from "@/lib/utils";
 
 interface AccountState {
@@ -23,6 +24,9 @@ interface AccountState {
   last_purchase_sku?: string | null;
   last_purchase_label?: string | null;
   last_purchase_at?: string | null;
+  welcome_card_seen?: boolean;
+  welcome_card_url?: string | null;
+  welcome_card_message?: string | null;
 }
 
 const PREFERENCE_LABELS: Record<string, { label: string; icon: React.ComponentType<{ className?: string }> }> = {
@@ -36,6 +40,7 @@ export default function AccountPage() {
   const router = useRouter();
   const [state, setState] = React.useState<AccountState | null>(null);
   const [loading, setLoading] = React.useState(true);
+  const [welcomeOpen, setWelcomeOpen] = React.useState(false);
 
   React.useEffect(() => {
     let cancelled = false;
@@ -51,6 +56,14 @@ export default function AccountPage() {
           // routing — avoids a flash for legit signed-in users with slow
           // /me responses.
           window.setTimeout(() => router.push("/auth/login"), 1200);
+          return;
+        }
+        // Welcome-card gate: render the post-signup motion+narration
+        // modal exactly once per account. Driven by profile metadata
+        // flags returned from /me — `welcome_card_seen` is set true
+        // when the user dismisses (or auto-dismiss fires).
+        if (data.welcome_card_message && !data.welcome_card_seen) {
+          setWelcomeOpen(true);
         }
       } catch {
         if (!cancelled) setLoading(false);
@@ -64,6 +77,19 @@ export default function AccountPage() {
   async function onLogout() {
     await fetch("/api/v1/auth/logout", { method: "POST", credentials: "include" });
     router.push("/");
+  }
+
+  async function dismissWelcome() {
+    setWelcomeOpen(false);
+    // Persist the seen flag — fire-and-forget; UI already closed.
+    try {
+      await fetch("/api/v1/account/welcome-dismiss", {
+        method: "POST",
+        credentials: "include",
+      });
+    } catch {
+      // non-fatal; flag will eventually persist on next dismiss
+    }
   }
 
   if (loading || !state) {
@@ -127,6 +153,14 @@ export default function AccountPage() {
 
   return (
     <>
+      {welcomeOpen && state.welcome_card_message && (
+        <AccountWelcomeCard
+          displayName={displayName}
+          message={state.welcome_card_message}
+          audioUrl={state.welcome_card_url || null}
+          onDismiss={dismissWelcome}
+        />
+      )}
       <Nav />
       <main className="container py-12 md:py-16">
         {/* Hero header — editorial welcome */}
