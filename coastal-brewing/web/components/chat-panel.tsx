@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { AnimationRouter } from "@/components/animation/AnimationRouter";
+import { detectTopic, topicToAnimationType } from "@/lib/topic-detect";
 import { ChatMessageContent } from "@/components/chat-message-content";
 import { SpinnerActivityOverlay } from "@/components/spinner-activity-overlay";
 import {
@@ -830,14 +831,21 @@ export function ChatPanel({
                 </p>
                 {anim && (
                   <div className="rounded-lg border border-accent/15 bg-accent/[0.04] px-3 py-2 mb-2">
-                    <AnimationRouter
-                      employee={anim.employee}
-                      animationType={anim.type}
-                      animationSize={anim.size}
-                      progress={anim.progress}
-                      isThinking={anim.isThinking}
-                      isComplete={anim.isComplete}
-                    />
+                    {(() => {
+                      const topicSnap = detectTopic(messages.map((m) => ({ role: m.role, content: m.content })));
+                      const topicAnim = topicToAnimationType(topicSnap.topic, anim.type);
+                      return (
+                        <AnimationRouter
+                          employee={anim.employee}
+                          animationType={anim.type}
+                          animationSize={anim.size}
+                          progress={anim.progress}
+                          isThinking={anim.isThinking}
+                          isComplete={anim.isComplete}
+                          topicAnimationType={topicAnim}
+                        />
+                      );
+                    })()}
                   </div>
                 )}
                 {responseBuffer && (
