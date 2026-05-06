@@ -3687,52 +3687,18 @@ async def auth_login(body: AuthLoginRequest):
     })
     link = f"{AUTH_PUBLIC_URL}/auth/verify?token={token}"
 
-    # Resend delivery (when RESEND_API_KEY is configured). Falls back to
-    # inline magic_link return when not configured — supports dev work
-    # without provisioning email infra.
+    # Email delivery: TODO — owner directive 2026-05-06 says use GCP
+    # (Cloud Functions / Pub/Sub / SES) or Firebase (Firebase Functions
+    # + SendGrid / Mailgun) instead of Resend. The Resend adapter
+    # shipped earlier this session was the wrong path; backed out here.
+    # Until the GCP/Firebase email path lands, stay in dev-mode (return
+    # the magic link inline so the cross-device flow stays testable).
     response_payload: Dict[str, Any] = {
         "ok": True,
         "sent": True,
         "expires_in_sec": AUTH_TOKEN_TTL_SEC,
+        "magic_link": link,                # dev-mode — replace with email send via GCP/Firebase
     }
-    try:
-        from adapters.resend_adapter import (   # noqa: E402 — local import
-            is_configured as _resend_is_configured,
-            send_email as _resend_send,
-            magic_link_email_body as _resend_magic_link_body,
-        )
-    except Exception:
-        _resend_is_configured = lambda: False  # type: ignore
-        _resend_send = None                      # type: ignore
-        _resend_magic_link_body = None           # type: ignore
-
-    if _resend_is_configured() and _resend_send and _resend_magic_link_body:
-        html, text = _resend_magic_link_body(
-            recipient_email=email,
-            magic_link=link,
-            ttl_minutes=AUTH_TOKEN_TTL_SEC // 60,
-        )
-        try:
-            email_id = _resend_send(
-                to=email,
-                subject="Pull up to the counter — your Coastal sign-in link",
-                html=html,
-                text=text,
-            )
-        except Exception as exc:
-            log = __import__("logging").getLogger("coastal.auth")
-            log.warning("resend send raised for %s: %s", email, exc)
-            email_id = None
-        # Don't leak email_id or send-status to the caller — same
-        # generic body whether delivery succeeded or failed (no user
-        # enumeration). Ops monitor delivery via Resend dashboard +
-        # the runner log line above on failure.
-    else:
-        # Dev mode — surface the magic link so the owner can test the
-        # cross-device login flow without email infra. Strip this once
-        # RESEND_API_KEY lands in the vault.
-        response_payload["magic_link"] = link
-
     return response_payload
 
 
@@ -3810,6 +3776,78 @@ async def auth_logout(response: Response):
     just a cookie reset; the next anonymous visit gets a fresh uid."""
     response.delete_cookie(key=COASTAL_UID_COOKIE, path="/")
     return {"ok": True}
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Research — POST /api/v1/research/query
+# ─────────────────────────────────────────────────────────────────────────────
+# First live mount of the ii-researcher framework that's been vendored
+# at `runtime/ii_researcher/` since Apr 2026 but never wired into a
+# production endpoint (test-only). Owner directive 2026-05-06: cold
+# vendored repos are unacceptable — ship live or remove.
+#
+# Backend: research_client.py is a self-contained Python module.
+# Brave Search API for primary search (BRAVE_API_KEY in vault), falls
+# back to DuckDuckGo HTML parsing when key absent. Jina Reader for
+# content extraction (free tier, no key). Returns a structured
+# ResearchResult with summary + ranked sources + duration.
+#
+# This is the seed for Scout_Ang's persistent research surface and the
+# foundation for the Account Assistant's "research my market" capability
+# per `account-assistant-spec.md`. When the dedicated FOAI runtime
+# stands up, this should re-import from the canonical
+# `runtime/ii_researcher/research_client.py` instead of the local copy.
+
+class ResearchQueryRequest(BaseModel):
+    query: str
+    depth: int = 1
+
+
+@app.post("/api/v1/research/query")
+async def research_query(body: ResearchQueryRequest):
+    """Run a research task — search + extract + synthesized summary.
+
+    Brave-first search, Jina-Reader content extraction. Depth 1 = quick
+    search-and-summarize (~5s); depth 2+ adds content extraction from
+    top sources (~15-30s per round). Cap at depth=3 to bound cost +
+    latency.
+    """
+    query = (body.query or "").strip()
+    if not query:
+        raise HTTPException(status_code=400, detail="query required")
+    if len(query) > 500:
+        raise HTTPException(status_code=400, detail="query too long (max 500 chars)")
+    depth = max(1, min(int(body.depth or 1), 3))
+
+    try:
+        import research_client as _rc   # noqa: E402 — local vendor
+    except ImportError as exc:
+        raise HTTPException(
+            status_code=503,
+            detail=f"research_client not available: {exc}",
+        )
+
+    # research() is sync (uses requests). Run in a thread to avoid
+    # blocking the asyncio event loop on multi-second searches.
+    import asyncio as _asyncio
+    loop = _asyncio.get_event_loop()
+    try:
+        result = await loop.run_in_executor(None, _rc.research, query, depth)
+    except Exception as exc:
+        raise HTTPException(status_code=502, detail=f"research failed: {exc}")
+    return result.to_dict()
+
+
+@app.get("/api/v1/research/status")
+async def research_status():
+    """Surface which search backend is live + key presence (booleans only)."""
+    return {
+        "ok": True,
+        "backend_primary": "brave" if os.environ.get("BRAVE_API_KEY") else "duckduckgo",
+        "extractor": "jina-reader",
+        "max_depth": 3,
+        "framework": "ii-researcher (vendored from Intelligent-Internet/ii-researcher, Apache 2.0)",
+    }
 
 
 @app.post("/api/v1/account/welcome-dismiss")
