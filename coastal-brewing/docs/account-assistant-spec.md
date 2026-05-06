@@ -50,6 +50,36 @@ The four production personas (Sal / LUC / Melli / ACHEEVY) keep their roles. The
 
 The Melli expansion (catering room arrangement from photos, event design, campaign generation) is the most novel piece — this is where the Iller_Ang skill plus the Multimodal Companion template plug into the account assistant. Per Iller_Ang canon, the visual outputs follow the 4-step pipeline (no Seedance→Veo swap, no HeyGen).
 
+## Graph composition patterns
+
+The Inworld Runtime SDK uses a `GraphBuilder` model where `CustomNode` subclasses are wired together by `addEdge(upstream, downstream)`. Two patterns matter for the assistant:
+
+### Sequential pipeline (Sal-only chat path)
+
+```
+PromptBuilder → LLM (Sal persona) → TextChunking → TTS → audio out
+```
+
+This is the seed shape from `inworld init --template llm-to-tts-node`. Used for the default Sal interaction loop.
+
+### Multi-input fan-in (escalation chain rendered as one response)
+
+When an interaction needs **more than one persona's output combined into a final message**, the multi-input `CustomNode.process(context, ...inputs)` pattern fits:
+
+```
+PromptBuilder ─┬─→ Sal LLM ────────────┐
+               └─→ LUC LLM (math) ─────┤
+                                       ├─→ ACHEEVY review node → TTS → audio out
+```
+
+`process(context, salResponse, lucMath): LLMChatRequest` reads both upstream outputs and composes them into ACHEEVY's final-approval prompt. Reference: [Inworld multi-input docs](https://docs.inworld.ai/node/templates/multi-input). The example in the docs uses the same shape — two LLMs write poems in parallel, a third reviews. Direct fit for our escalation flow:
+
+- Single-step interactions skip the fan-in (Sal's LLM goes straight to TTS).
+- Discount escalation does the fan-in: Sal drafts the conversational frame, LUC computes the bracket math, ACHEEVY's review node combines them into the customer-facing approval line.
+- Catering with visuals does a multi-modal fan-in: Melli drafts the prose, Iller_Ang generates an image asset, a wrap-up node composes the message + asset URL into one response.
+
+Decision is per-interaction-type at routing time, not global. Most chat turns stay sequential (cheaper / faster). Escalation turns fan-in.
+
 ## Cost-to-deploy worksheet (estimate, refine when real)
 
 **Per-session marginal** (one customer, one assistant interaction — say a recipe ask):
