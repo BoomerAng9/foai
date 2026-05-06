@@ -27,6 +27,14 @@ const DRAWER_GROUPS = [
     ],
   },
   {
+    label: "Account",
+    links: [
+      { href: "/account", label: "My Account" },
+      { href: "/auth/login", label: "Sign In" },
+      { href: "/auth/signup", label: "Open an Account" },
+    ],
+  },
+  {
     label: "Company",
     links: [
       { href: "/team", label: "Meet the Team" },

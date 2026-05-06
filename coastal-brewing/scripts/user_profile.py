@@ -221,6 +221,53 @@ def update_preferences(
             return Profile.from_row(row)
 
 
+def find_by_identity(identity: str) -> Optional[Profile]:
+    """Look up a profile by identity (email). Returns the most-recently-active
+    row for that identity, or None. Used by the login flow to find the
+    canonical `coastal_uid` to bind a returning user's session to so a
+    customer signing in on a new device picks up their existing history."""
+    p = _get_pool()
+    if p is None:
+        return None
+    with _conn() as c:
+        c.autocommit = True
+        with c.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
+            cur.execute(
+                """
+                SELECT *
+                FROM coastal.user_profile
+                WHERE identity = %s
+                ORDER BY last_visit_at DESC
+                LIMIT 1
+                """,
+                (identity,),
+            )
+            row = cur.fetchone()
+            return Profile.from_row(row) if row else None
+
+
+def update_metadata(coastal_uid: str, metadata: dict) -> Profile:
+    """Replace the metadata JSON for a profile (e.g. to record stripe
+    customer_id + display_name on signup). Caller is responsible for
+    merging with existing metadata if they want partial-update semantics."""
+    with _conn() as c:
+        c.autocommit = True
+        with c.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
+            cur.execute(
+                """
+                UPDATE coastal.user_profile
+                SET metadata = %s::jsonb
+                WHERE coastal_uid = %s
+                RETURNING *
+                """,
+                (json.dumps(metadata), coastal_uid),
+            )
+            row = cur.fetchone()
+            if row is None:
+                raise LookupError(f"no profile for coastal_uid={coastal_uid}")
+            return Profile.from_row(row)
+
+
 def update_identity(coastal_uid: str, identity: str) -> Profile:
     """Upgrade an anonymous profile to identity-bound (e.g. Stripe email).
     If two anonymous profiles point at the same identity, the most recent

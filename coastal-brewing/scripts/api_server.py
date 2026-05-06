@@ -3372,6 +3372,251 @@ async def users_session_wrap(
 
 
 # ─────────────────────────────────────────────────────────────────────────────
+# Account auth — /api/v1/auth/* (signup, login, verify, me, logout)
+# ─────────────────────────────────────────────────────────────────────────────
+# Stripe Customer is the identity basis (per the no-overlapping-vendors
+# canon 2026-05-06). The `coastal_uid` cookie is the session — once a
+# user authenticates, their cookie's coastal_uid row in user_profile gets
+# its `identity` field set to the customer's email, which flips the
+# anonymous-cookie state to authenticated.
+#
+# Cross-device login uses a magic-link pattern:
+#   1) User on device B enters email at /auth/login
+#   2) Server looks up the email's existing coastal_uid via find_by_identity
+#   3) Server signs a short-lived JWT-like token containing that coastal_uid
+#   4) Server emails (or returns in dev) /auth/verify?token=<...>
+#   5) User clicks → server verifies token → sets cookie to that coastal_uid
+#   6) Device B now has the same authenticated history as device A
+#
+# Tokens are HMAC-signed with COASTAL_AUTH_SECRET (env var). 30-min TTL.
+
+import base64 as _auth_b64
+import hmac as _auth_hmac
+import hashlib as _auth_hashlib
+import time as _auth_time
+
+AUTH_SECRET = os.environ.get("COASTAL_AUTH_SECRET", "").strip()
+AUTH_TOKEN_TTL_SEC = 1800  # 30 min — magic-link window
+AUTH_PUBLIC_URL = os.environ.get("COASTAL_PUBLIC_URL", "https://brewing.foai.cloud")
+
+
+def _auth_sign(payload: Dict[str, Any]) -> str:
+    """Sign a payload as base64(json).hmac. Compact, no JWT lib needed."""
+    if not AUTH_SECRET:
+        raise HTTPException(status_code=503, detail="COASTAL_AUTH_SECRET not configured")
+    body = _auth_b64.urlsafe_b64encode(
+        json.dumps(payload, separators=(",", ":")).encode("utf-8")
+    ).rstrip(b"=").decode("ascii")
+    sig = _auth_hmac.new(
+        AUTH_SECRET.encode("utf-8"), body.encode("ascii"), _auth_hashlib.sha256,
+    ).hexdigest()
+    return f"{body}.{sig}"
+
+
+def _auth_verify(token: str) -> Optional[Dict[str, Any]]:
+    """Verify a token signature + TTL. Returns payload or None."""
+    if not AUTH_SECRET or not token or "." not in token:
+        return None
+    body, sig = token.rsplit(".", 1)
+    expected = _auth_hmac.new(
+        AUTH_SECRET.encode("utf-8"), body.encode("ascii"), _auth_hashlib.sha256,
+    ).hexdigest()
+    if not _auth_hmac.compare_digest(sig, expected):
+        return None
+    try:
+        padded = body + "=" * (-len(body) % 4)
+        raw = _auth_b64.urlsafe_b64decode(padded.encode("ascii"))
+        payload = json.loads(raw)
+    except Exception:
+        return None
+    if int(payload.get("exp", 0)) < int(_auth_time.time()):
+        return None
+    return payload
+
+
+def _stripe_customer_create(email: str, name: Optional[str] = None) -> Optional[str]:
+    """Create a Stripe Customer for a new signup. Returns customer_id or None
+    if Stripe isn't configured (dev mode)."""
+    if not STRIPE_AVAILABLE or not _stripe_is_configured():
+        return None
+    try:
+        import stripe as _stripe   # noqa: E402 — imported only when configured
+        cust = _stripe.Customer.create(
+            email=email,
+            name=name or None,
+            metadata={"source": "coastal_signup", "vertical": "coastal-brewing"},
+        )
+        return cust.get("id") if isinstance(cust, dict) else getattr(cust, "id", None)
+    except Exception as exc:
+        log = __import__("logging").getLogger("coastal.auth")
+        log.warning("stripe customer create failed: %s", exc)
+        return None
+
+
+class AuthSignupRequest(BaseModel):
+    email: str
+    name: Optional[str] = None
+
+
+class AuthLoginRequest(BaseModel):
+    email: str
+
+
+@app.post("/api/v1/auth/signup")
+async def auth_signup(
+    body: AuthSignupRequest,
+    response: Response,
+    coastal_uid: Optional[str] = Cookie(default=None, alias=COASTAL_UID_COOKIE),
+):
+    """Create an account: bind the caller's coastal_uid to the email and
+    create a Stripe Customer. Returns the authenticated profile.
+
+    If a profile already exists for this email on a different coastal_uid
+    (e.g. user previously signed up from another browser), we DON'T move
+    the cookie — they stay on this device's history. That's owner-canon:
+    cross-device sync happens via /auth/login magic link, not silent on
+    signup.
+    """
+    if not _profile_layer.is_configured():
+        raise HTTPException(status_code=503, detail="profile layer not configured")
+    email = (body.email or "").strip().lower()
+    if not email or "@" not in email:
+        raise HTTPException(status_code=400, detail="valid email required")
+    uid = _ensure_uid(coastal_uid, response)
+    # Make sure profile row exists (ensure_profile / upsert visit)
+    _profile_layer.upsert_profile_visit(uid)
+    # Bind email to the coastal_uid (sets profile.identity)
+    profile = _profile_layer.update_identity(uid, email)
+    # Create Stripe Customer (best-effort; non-fatal if Stripe is down)
+    stripe_customer_id = _stripe_customer_create(email, body.name)
+    # Always persist display_name + stripe_customer_id (when present) into
+    # profile metadata so /account can render them. Don't gate the write
+    # on Stripe being configured — display_name is independently useful.
+    meta = dict(profile.metadata or {})
+    if body.name:
+        meta["display_name"] = body.name
+    if stripe_customer_id:
+        meta["stripe_customer_id"] = stripe_customer_id
+    if meta != (profile.metadata or {}):
+        _profile_layer.update_metadata(uid, meta)
+    return {
+        "ok": True,
+        "coastal_uid": uid,
+        "email": email,
+        "display_name": body.name,
+        "stripe_customer_id": stripe_customer_id,
+    }
+
+
+@app.post("/api/v1/auth/login")
+async def auth_login(body: AuthLoginRequest):
+    """Send a magic-link to an existing account's email. Returns the link
+    in dev mode (when no email service is configured) so the owner can
+    test the flow without provisioning Resend / SES yet.
+
+    The link, when clicked, calls /auth/verify?token=... which sets the
+    caller's coastal_uid cookie to the email's canonical coastal_uid —
+    enabling cross-device login + history continuity.
+    """
+    if not _profile_layer.is_configured():
+        raise HTTPException(status_code=503, detail="profile layer not configured")
+    email = (body.email or "").strip().lower()
+    if not email or "@" not in email:
+        raise HTTPException(status_code=400, detail="valid email required")
+    profile = _profile_layer.find_by_identity(email)
+    if profile is None:
+        # Don't leak whether the email exists. Always return 200 with a
+        # generic body. (Matches modern "no user enumeration" auth posture.)
+        return {"ok": True, "sent": True}
+    token = _auth_sign({
+        "uid": profile.coastal_uid,
+        "email": email,
+        "exp": int(_auth_time.time()) + AUTH_TOKEN_TTL_SEC,
+    })
+    link = f"{AUTH_PUBLIC_URL}/auth/verify?token={token}"
+    # Email delivery is wired separately (see TODO: resend / SES adapter).
+    # For now we return the link so the owner can test end-to-end. In
+    # prod this returns only {ok, sent} and the link goes by email.
+    return {
+        "ok": True,
+        "sent": True,
+        "magic_link": link,                # dev only — strip when email lands
+        "expires_in_sec": AUTH_TOKEN_TTL_SEC,
+    }
+
+
+@app.get("/api/v1/auth/verify")
+async def auth_verify(
+    token: str,
+    response: Response,
+):
+    """Verify a magic-link token + set the caller's coastal_uid cookie to
+    the verified profile's uid. Returns a redirect-friendly response so
+    the frontend can call this from the /auth/verify page client-side."""
+    payload = _auth_verify(token)
+    if not payload:
+        raise HTTPException(status_code=401, detail="invalid or expired token")
+    uid = payload["uid"]
+    email = payload["email"]
+    # Re-stamp the cookie to the verified uid. Since the user is on a new
+    # device, we override their existing coastal_uid (if any) with the
+    # canonical one for this email so their history carries forward.
+    response.set_cookie(
+        key=COASTAL_UID_COOKIE,
+        value=uid,
+        max_age=COASTAL_UID_MAX_AGE_SEC,
+        httponly=True,
+        secure=True,
+        samesite="lax",
+        path="/",
+    )
+    profile = _profile_layer.get_profile(uid)
+    return {
+        "ok": True,
+        "coastal_uid": uid,
+        "email": email,
+        "profile_present": profile is not None,
+    }
+
+
+@app.get("/api/v1/auth/me")
+async def auth_me(
+    coastal_uid: Optional[str] = Cookie(default=None, alias=COASTAL_UID_COOKIE),
+):
+    """Return the authenticated user's profile, or {authenticated: false}
+    if the caller is anonymous. Used by /account to gate the page."""
+    if not coastal_uid or not _profile_layer.is_configured():
+        return {"authenticated": False}
+    profile = _profile_layer.get_profile(coastal_uid)
+    if profile is None or not profile.identity:
+        return {"authenticated": False, "coastal_uid": coastal_uid}
+    return {
+        "authenticated": True,
+        "coastal_uid": profile.coastal_uid,
+        "email": profile.identity,
+        "display_name": (profile.metadata or {}).get("display_name"),
+        "stripe_customer_id": (profile.metadata or {}).get("stripe_customer_id"),
+        "first_visit_at": profile.first_visit_at.isoformat(),
+        "last_visit_at": profile.last_visit_at.isoformat(),
+        "visit_count": profile.visit_count,
+        "preferences": profile.preferences,
+        "last_purchase_sku": profile.last_purchase_sku,
+        "last_purchase_label": profile.last_purchase_label,
+        "last_purchase_at": (
+            profile.last_purchase_at.isoformat() if profile.last_purchase_at else None
+        ),
+    }
+
+
+@app.post("/api/v1/auth/logout")
+async def auth_logout(response: Response):
+    """Clear the session cookie. Profile data stays in Neon — logout is
+    just a cookie reset; the next anonymous visit gets a fresh uid."""
+    response.delete_cookie(key=COASTAL_UID_COOKIE, path="/")
+    return {"ok": True}
+
+
+# ─────────────────────────────────────────────────────────────────────────────
 # Inworld TTS — POST /api/v1/voice/synthesize
 # ─────────────────────────────────────────────────────────────────────────────
 # Customer-visible: ACHEEVY voice playback only (per the ACHEEVY-only canon

@@ -6,7 +6,7 @@ Owner directive 2026-05-05. Captured before the account-layer build to prevent d
 
 Coastal is **not just a beverage retailer** — the brand sells a relationship to the cup. The account layer is the surface where that relationship becomes ongoing. It has three layers:
 
-1. **Auth + identity** (the gap the owner flagged) — sign-up / login / `/account` page wired through **Stepper + Paperform** (Stripe under the hood) per the Coastal payments canon. *Not* NextAuth / Clerk / Supabase — those proposals were wrong.
+1. **Auth + identity** (the gap the owner flagged) — Stripe Customer is the identity basis (email + payment method + subscription state already live there, since Stepper + Paperform run Stripe under the hood). Sign-up / login / `/account` pages plug into Stripe Customer, not a third-party auth overlay. **No NextAuth / Clerk / Supabase / Insforge** — same logic that rejected Insforge as redundant with Neon rejects Clerk as redundant with Stripe Customer. One identity vendor, no overlapping providers.
 2. **Introduction layer** — the first experience after account creation. A *thank-you card* welcoming the customer to the experience: "Coffee can change your day. Some people love the vibe of drinking coffee with friends, alone, with family. We are more than a hot-beverage company." Owner-canon hero framing.
 3. **Account Assistant** (paid opt-in service) — a persistent agent the customer opts into for ordering supplies, gift planning, recipe suggestions, and (for catering / B2B) event design + campaign planning routed through Melli + Iller_Ang.
 
