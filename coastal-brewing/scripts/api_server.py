@@ -2501,14 +2501,29 @@ from streaming.message_types import (  # noqa: E402
 from streaming.thinking_parser import parse_openrouter_stream, THINKING, RESPONSE, DONE  # noqa: E402
 from animation.escalation_triggers import detect_escalation  # noqa: E402
 
+# A.I.M.S. Model Gateway — vertical-agnostic LLM access through Inworld
+# Realtime Router. Single ingress for chat completions across the FOAI
+# ecosystem; resolves per-surface model assignments from the matrix
+# locked 2026-05-06.
+from aims_gateway import (  # noqa: E402
+    GATEWAY_BASE_URL as _GW_URL,
+    GATEWAY_API_KEY as _GW_KEY,
+    chat_completion as _gw_chat_completion,
+    extract_text as _gw_extract_text,
+    model_for as _gw_model_for,
+)
+
 _OPENROUTER_API_KEY = os.environ.get("OPENROUTER_API_KEY", "")
 
-# Employee → DeepSeek model mapping
-_EMPLOYEE_MODEL = {
-    "sal_ang":       "deepseek/deepseek-v4-flash",   # T3 — fast, retail floor
-    "luc_ang":       "deepseek/deepseek-v4-flash",   # T2-FINANCE — efficient CPA math
-    "melli_capensi": "deepseek/deepseek-v4-pro",     # T2-BULK — strategic PMO reasoning
-    "acheevy":       "deepseek/deepseek-v4-pro",     # T1 — full authority reasoning
+# Employee → A.I.M.S. Model Gateway surface mapping. Resolves to
+# Inworld-Router-routable models per the alignment matrix locked
+# 2026-05-06. Source-of-truth model names live in aims_gateway.py
+# SURFACE_MODELS so the matrix is one place to edit when it changes.
+_EMPLOYEE_SURFACE = {
+    "sal_ang":       "coastal_chat_retail",     # T3 — Gemma 4 26B
+    "luc_ang":       "coastal_chat_retail",     # T2-FINANCE — Gemma 4 26B
+    "melli_capensi": "coastal_chat_reasoning",  # T2-BULK — DeepSeek v3 reasoning
+    "acheevy":       "coastal_chat_reasoning",  # T1 — DeepSeek v3 reasoning
 }
 
 # Brand-grounding preamble prepended to EVERY lieutenant prompt. The model's
@@ -2847,7 +2862,10 @@ async def _stream_employee_response(
         input_tokens=input_tokens,
     ).model_dump())
 
-    model = _EMPLOYEE_MODEL.get(employee, "deepseek/deepseek-v4-flash")
+    # Route through A.I.M.S. Model Gateway (Inworld Realtime Router).
+    # Gateway resolves the employee surface to a routable Inworld model.
+    surface = _EMPLOYEE_SURFACE.get(employee, "coastal_chat_retail")
+    model = _gw_model_for(surface)
     thinking_count = 0
     response_count = 0
     full_response = ""
@@ -2855,22 +2873,25 @@ async def _stream_employee_response(
     started_ms = int(_time.time() * 1000)
 
     headers = {
-        "Authorization": f"Bearer {_OPENROUTER_API_KEY}",
+        "Authorization": f"Bearer {_GW_KEY}",
         "Content-Type": "application/json",
-        "HTTP-Referer": "https://brewing.foai.cloud",
-        "X-Title": "Coastal Brewing Co.",
+        "Accept": "text/event-stream",
     }
     payload = {
         "model": model,
         "messages": messages,
         "stream": True,
-        "include_reasoning": True,
         "max_tokens": 2048,
     }
+    # Reasoning models (DeepSeek v3 via deepinfra) emit reasoning tokens
+    # via the standard OpenAI-compatible delta.reasoning field, which our
+    # parse_openrouter_stream already handles. include_reasoning is
+    # OpenRouter-specific — Inworld Router emits the reasoning tokens
+    # natively without that flag.
 
     try:
         async with httpx.AsyncClient(timeout=90) as client:
-            async with client.stream("POST", "https://openrouter.ai/api/v1/chat/completions",
+            async with client.stream("POST", f"{_GW_URL}/chat/completions",
                                      headers=headers, json=payload) as resp:
                 async for token_type, content in parse_openrouter_stream(resp.aiter_lines()):
                     if token_type == THINKING:
@@ -3037,7 +3058,7 @@ async def chat_stream(websocket: WebSocket, token: Optional[str] = Query(default
                     task_id=session_id,
                     executor=f"ws_chat.{employee}",
                     action_type="ws_chat_send",
-                    destination=_EMPLOYEE_MODEL.get(employee, "deepseek/deepseek-v4-flash"),
+                    destination=_gw_model_for(_EMPLOYEE_SURFACE.get(employee, "coastal_chat_retail")),
                     status="ok" if full_response else "empty",
                     result_summary=(
                         f"u:{user_content[:80]} | think:{think_tokens}tok "
@@ -3250,7 +3271,10 @@ async def users_session_summary(
 # Per CLAUDE.md model policy: Google/Gemini/Vertex first.
 _GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "").strip()
 _GEMINI_FLASH_MODEL = os.environ.get("GEMINI_FLASH_MODEL", "gemini-2.5-flash")
-_GEMINI_EMBED_MODEL = os.environ.get("GEMINI_EMBED_MODEL", "gemini-embedding-001")
+# Gemini Embedding v2 — multimodal-capable (text + image), GA, 768 dims via
+# matryoshka truncation (schema-compatible with v1). v1 is text-only and
+# being retired. Same price.
+_GEMINI_EMBED_MODEL = os.environ.get("GEMINI_EMBED_MODEL", "gemini-embedding-2")
 _GEMINI_API_BASE = "https://generativelanguage.googleapis.com/v1beta"
 
 
@@ -3484,21 +3508,12 @@ WELCOME_FALLBACK_MESSAGE = (
     "We don't just sell coffee. We sell the part of the day that "
     "starts with a cup. Pull up a stool any time."
 )
-# DeepSeek-v4-flash (NOT -pro). Pro is a reasoning model — it spends
-# the token budget on chain-of-thought in `message.reasoning` and
-# returns `message.content: null`. Brand-voice 35-word output doesn't
-# need reasoning, and flash is ~2× cheaper anyway. Same model already
-# powering Sal + LUC retail chat.
-WELCOME_LLM_MODEL = os.environ.get("WELCOME_LLM_MODEL", "deepseek/deepseek-v4-flash")
-
-
 def _generate_welcome_message(name: Optional[str], email: str) -> str:
-    """Generate a 35-50 word Sal-voiced welcome message via the
-    OpenRouter chat-completion path. Falls back to
-    WELCOME_FALLBACK_MESSAGE on any failure — signup must never block
-    on this best-effort enrichment."""
-    if not _OPENROUTER_API_KEY:
-        return WELCOME_FALLBACK_MESSAGE
+    """Generate a 35-50 word Sal-voiced welcome message via the A.I.M.S.
+    Model Gateway (Inworld Router → google-vertex/gemma-4-26b-a4b for
+    the welcome_message surface). Falls back to WELCOME_FALLBACK_MESSAGE
+    on any failure — signup must never block on this best-effort
+    enrichment."""
     display_name = (name or email.split("@")[0]).strip() or "friend"
     system_prompt = (
         "You are Sal_Ang, lead barista at Coastal Brewing Co. American "
@@ -3515,50 +3530,21 @@ def _generate_welcome_message(name: Optional[str], email: str) -> str:
         "prose only. No exclamation points. End on something inviting "
         "but not pushy. Output ONLY the welcome note, nothing else."
     )
-    try:
-        resp = requests.post(
-            "https://openrouter.ai/api/v1/chat/completions",
-            headers={
-                "Authorization": f"Bearer {_OPENROUTER_API_KEY}",
-                "Content-Type": "application/json",
-            },
-            json={
-                "model": WELCOME_LLM_MODEL,
-                "messages": [
-                    {"role": "system", "content": system_prompt},
-                    {"role": "user", "content": (
-                        f"Customer first name: {display_name}\n"
-                        f"Customer email: {email}\n\n"
-                        f"Write the 35-50 word welcome note now."
-                    )},
-                ],
-                "max_tokens": 200,
-                "temperature": 0.7,
-            },
-            timeout=30,
-        )
-        if resp.status_code != 200:
-            log = __import__("logging").getLogger("coastal.welcome")
-            log.warning(
-                "openrouter welcome gen %s: %s",
-                resp.status_code, resp.text[:200],
-            )
-            return WELCOME_FALLBACK_MESSAGE
-        data = resp.json()
-        choices = data.get("choices") or []
-        if not choices:
-            return WELCOME_FALLBACK_MESSAGE
-        message = choices[0].get("message") or {}
-        content = message.get("content")
-        # Content can be None (not just missing) when the upstream provider
-        # returns a malformed response. .get(..., "") doesn't catch None,
-        # so coalesce explicitly.
-        text = (content or "").strip()
-        return text or WELCOME_FALLBACK_MESSAGE
-    except Exception as exc:
-        log = __import__("logging").getLogger("coastal.welcome")
-        log.warning("welcome message gen failed: %s", exc)
-        return WELCOME_FALLBACK_MESSAGE
+    resp = _gw_chat_completion(
+        surface="welcome_message",
+        messages=[
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": (
+                f"Customer first name: {display_name}\n"
+                f"Customer email: {email}\n\n"
+                f"Write the 35-50 word welcome note now."
+            )},
+        ],
+        max_tokens=200,
+        temperature=0.7,
+    )
+    text = _gw_extract_text(resp)
+    return text or WELCOME_FALLBACK_MESSAGE
 
 
 async def _render_welcome_narration(
