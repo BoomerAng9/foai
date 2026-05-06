@@ -3976,6 +3976,240 @@ async def agent_linkedin_maps_status():
     }
 
 
+# ─────────────────────────────────────────────────────────────────────────────
+# Code_Ang — repo-grounded code reasoning agent
+# POST /api/v1/agent/code  +  GET /api/v1/agent/code/status
+# ─────────────────────────────────────────────────────────────────────────────
+
+class CodeAngRequest(BaseModel):
+    task: str
+    max_iterations: int = 8
+    system_prompt: Optional[str] = None
+
+
+@app.post("/api/v1/agent/code")
+async def agent_code(body: CodeAngRequest):
+    """Run Code_Ang against the repo. Read-only by default; checked
+    commands (pytest/npm/ruff/mypy/tsc/eslint/git) only run when
+    CODE_ANG_EXEC_ENABLED is truthy in env."""
+    from aims_agents.code_ang import (   # noqa: E402
+        is_configured as _agent_configured,
+        missing_keys as _agent_missing,
+        run_agent as _run_agent,
+    )
+    if not _agent_configured():
+        raise HTTPException(
+            status_code=503,
+            detail={
+                "error": "agent_not_configured",
+                "missing_keys": _agent_missing(),
+                "message": "Code_Ang inactive — gateway key + REPO_ROOT must be set.",
+            },
+        )
+    task = (body.task or "").strip()
+    if not task:
+        raise HTTPException(status_code=400, detail="task required")
+    if len(task) > 8000:
+        raise HTTPException(status_code=400, detail="task too long (max 8000 chars)")
+
+    import asyncio as _asyncio
+    loop = _asyncio.get_event_loop()
+    result = await loop.run_in_executor(
+        None,
+        lambda: _run_agent(
+            task=task,
+            max_iterations=max(1, min(int(body.max_iterations or 8), 16)),
+            system_prompt=body.system_prompt,
+        ),
+    )
+    return {
+        "ok": result.error is None,
+        "task": task,
+        "final_answer": result.final_answer,
+        "iterations": result.iterations,
+        "tool_calls": result.tool_calls,
+        "duration_ms": round(result.duration_ms, 1),
+        "error": result.error,
+    }
+
+
+@app.get("/api/v1/agent/code/status")
+async def agent_code_status():
+    from aims_agents.code_ang import (   # noqa: E402
+        is_configured as _agent_configured,
+        missing_keys as _agent_missing,
+        EXEC_ENABLED as _exec,
+        REPO_ROOT as _root,
+    )
+    return {
+        "ok": True,
+        "configured": _agent_configured(),
+        "missing_keys": _agent_missing(),
+        "exec_enabled": _exec,
+        "repo_root": str(_root),
+        "framework": "Anthropic Sonnet 4-6 via A.I.M.S. Model Gateway code_generation surface, repo-read tools (read/list/grep/git_diff/git_log) + gated code_run_check",
+    }
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Crucible Judge_Hawk — contract-graded structured evaluation
+# POST /api/v1/agent/judge-hawk  +  GET /api/v1/agent/judge-hawk/status
+# ─────────────────────────────────────────────────────────────────────────────
+
+class JudgeHawkRequest(BaseModel):
+    contract_id: str
+    output_under_eval: str
+    max_iterations: int = 6
+    system_prompt: Optional[str] = None
+
+
+@app.post("/api/v1/agent/judge-hawk")
+async def agent_judge_hawk(body: JudgeHawkRequest):
+    """Grade an output against a Crucible contract. Returns pass/fail
+    verdict + reasoning + audit-ledger record."""
+    from aims_agents.crucible_judge import (   # noqa: E402
+        is_configured as _agent_configured,
+        missing_keys as _agent_missing,
+        run_agent as _run_agent,
+    )
+    if not _agent_configured():
+        raise HTTPException(
+            status_code=503,
+            detail={
+                "error": "agent_not_configured",
+                "missing_keys": _agent_missing(),
+                "message": "Judge_Hawk inactive — gateway key required.",
+            },
+        )
+    contract_id = (body.contract_id or "").strip()
+    output_under_eval = (body.output_under_eval or "").strip()
+    if not contract_id:
+        raise HTTPException(status_code=400, detail="contract_id required")
+    if not output_under_eval:
+        raise HTTPException(status_code=400, detail="output_under_eval required")
+    if len(output_under_eval) > 16000:
+        raise HTTPException(status_code=400, detail="output_under_eval too long (max 16000 chars)")
+
+    import asyncio as _asyncio
+    loop = _asyncio.get_event_loop()
+    result = await loop.run_in_executor(
+        None,
+        lambda: _run_agent(
+            contract_id=contract_id,
+            output_under_eval=output_under_eval,
+            max_iterations=max(1, min(int(body.max_iterations or 6), 10)),
+            system_prompt=body.system_prompt,
+        ),
+    )
+    return {
+        "ok": result.error is None,
+        "contract_id": contract_id,
+        "verdict": result.verdict,
+        "final_answer": result.final_answer,
+        "iterations": result.iterations,
+        "tool_calls": result.tool_calls,
+        "duration_ms": round(result.duration_ms, 1),
+        "error": result.error,
+    }
+
+
+@app.get("/api/v1/agent/judge-hawk/status")
+async def agent_judge_hawk_status():
+    from aims_agents.crucible_judge import (   # noqa: E402
+        is_configured as _agent_configured,
+        missing_keys as _agent_missing,
+        BUILTIN_CONTRACTS as _builtin,
+        CONTRACTS_DB_PATH as _db,
+    )
+    return {
+        "ok": True,
+        "configured": _agent_configured(),
+        "missing_keys": _agent_missing(),
+        "builtin_contracts": list(_builtin.keys()),
+        "contracts_db": str(_db),
+        "framework": "Anthropic Sonnet 4-6 via A.I.M.S. Model Gateway structured_evaluation surface, SQLite contract registry, 4 tools (load/list/register/record_verdict)",
+    }
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Lil_Hawk Dispatch — task-to-worker routing
+# POST /api/v1/agent/lilhawk-dispatch  +  GET /api/v1/agent/lilhawk-dispatch/status
+# ─────────────────────────────────────────────────────────────────────────────
+
+class LilHawkDispatchRequest(BaseModel):
+    task: str
+    max_iterations: int = 4
+    system_prompt: Optional[str] = None
+
+
+@app.post("/api/v1/agent/lilhawk-dispatch")
+async def agent_lilhawk_dispatch(body: LilHawkDispatchRequest):
+    """Route a task to the right Lil_Hawk worker class. Records
+    dispatch in audit DB; forwards to Chicken Hawk fleet endpoint when
+    LILHAWK_FLEET_URL is set."""
+    from aims_agents.lilhawk_dispatch import (   # noqa: E402
+        is_configured as _agent_configured,
+        missing_keys as _agent_missing,
+        run_agent as _run_agent,
+    )
+    if not _agent_configured():
+        raise HTTPException(
+            status_code=503,
+            detail={
+                "error": "agent_not_configured",
+                "missing_keys": _agent_missing(),
+                "message": "Lil_Hawk Dispatch inactive — gateway key required.",
+            },
+        )
+    task = (body.task or "").strip()
+    if not task:
+        raise HTTPException(status_code=400, detail="task required")
+    if len(task) > 4000:
+        raise HTTPException(status_code=400, detail="task too long (max 4000 chars)")
+
+    import asyncio as _asyncio
+    loop = _asyncio.get_event_loop()
+    result = await loop.run_in_executor(
+        None,
+        lambda: _run_agent(
+            task=task,
+            max_iterations=max(1, min(int(body.max_iterations or 4), 8)),
+            system_prompt=body.system_prompt,
+        ),
+    )
+    return {
+        "ok": result.error is None,
+        "task": task,
+        "task_id": result.task_id,
+        "lilhawk_class": result.lilhawk_class,
+        "final_answer": result.final_answer,
+        "iterations": result.iterations,
+        "tool_calls": result.tool_calls,
+        "duration_ms": round(result.duration_ms, 1),
+        "error": result.error,
+    }
+
+
+@app.get("/api/v1/agent/lilhawk-dispatch/status")
+async def agent_lilhawk_dispatch_status():
+    from aims_agents.lilhawk_dispatch import (   # noqa: E402
+        is_configured as _agent_configured,
+        missing_keys as _agent_missing,
+        fleet_url_configured as _fleet_ok,
+        LILHAWK_FLEET as _fleet,
+        DISPATCH_DB_PATH as _db,
+    )
+    return {
+        "ok": True,
+        "configured": _agent_configured(),
+        "missing_keys": _agent_missing(),
+        "fleet_url_configured": _fleet_ok(),
+        "fleet_classes": list(_fleet.keys()),
+        "dispatch_db": str(_db),
+        "framework": "Anthropic Sonnet 4-6 via A.I.M.S. Model Gateway agent_orchestration surface, 7-class fleet registry, 4 tools (list/assess/dispatch/check_status)",
+    }
+
+
 @app.get("/api/v1/aims/gateway/status")
 async def aims_gateway_status():
     """A.I.M.S. Model Gateway diagnostics — surface registry + available
