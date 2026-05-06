@@ -534,10 +534,17 @@ export function ChatPanel({
         taskId={spinnerTaskId}
         initialCommission={spinnerCommission}
         onClose={() => { setSpinnerOpen(false); setSpinnerTaskId(null); }}
-        onFinished={(summary) => {
-          if (summary) {
-            setMessages((m) => [...m, { role: "agent", content: summary, employee: "sal_ang", ts: Date.now() }]);
-          }
+        onFinished={() => {
+          // Brief conversational acknowledgment in Sal's voice. Product
+          // detail lives in the overlay cards — chat copy stays clean
+          // for both the eye and the TTS read. Don't echo Spinner's raw
+          // "Picked: 1x ... 1lb" summary into chat.
+          setMessages((m) => [...m, {
+            role: "agent",
+            content: "Pulled a starter basket together for you — take a peek on the side panel and let me know what stays.",
+            employee: "sal_ang",
+            ts: Date.now(),
+          }]);
         }}
       />
       {/* Header */}

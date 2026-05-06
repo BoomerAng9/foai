@@ -231,7 +231,32 @@ def _cart_add(coastal_uid: str, sku: str, quantity: int, variant: Optional[str],
             added_by="spinner",
             spinner_task_id=task_id,
         )
-        return {"ok": True, "items": items, "added": {"sku": sku, "quantity": quantity, "variant": variant}}
+        # Enrich with catalog data so the SSE consumer can render a real
+        # product card (image + name + msrp) instead of a bare SKU string.
+        product: Dict[str, Any] = {}
+        try:
+            import catalog as _cat
+            prod = _cat.get_product(sku) or {}
+            product = {
+                "name":     prod.get("name") or prod.get("title") or sku,
+                "category": prod.get("category"),
+                "image":    prod.get("image"),
+                "msrp":     prod.get("msrp"),
+                "size":     prod.get("size"),
+                "blurb":    (prod.get("blurb") or "")[:160],
+            }
+        except Exception:
+            pass
+        return {
+            "ok": True,
+            "items": items,
+            "added": {
+                "sku": sku,
+                "quantity": quantity,
+                "variant": variant,
+                **product,
+            },
+        }
     except Exception as exc:
         return {"error": f"cart add failed: {exc}"}
 

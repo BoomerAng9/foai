@@ -1,11 +1,11 @@
 "use client";
 
-// Spinner activity overlay — live "Sal is shopping for you" surface.
-// Subscribes to /api/v1/agent/spinner/{task_id}/events (SSE) and renders
-// each tool call as a human-readable line. Closes when task ends.
+// Spinner activity overlay — live "shopping for you" surface.
+// Subscribes to /api/v1/agent/spinner/{task_id}/events (SSE) and
+// renders product cards as items get picked. Closes when task ends.
 
 import { useEffect, useRef, useState } from "react";
-import { Loader2, ShoppingCart, X, CheckCircle2, AlertCircle, Search, History, Sparkles } from "lucide-react";
+import { Loader2, ShoppingCart, X, CheckCircle2, AlertCircle, UserPlus, ArrowRight } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 interface SpinnerEventPayload {
@@ -16,12 +16,15 @@ interface SpinnerEventPayload {
   payload?: any;
 }
 
-interface ActivityLine {
-  id: number;
-  icon: "search" | "history" | "cart" | "summary" | "done" | "error" | "info";
-  text: string;
-  detail?: string;
-  ts: string;
+interface PickedItem {
+  sku: string;
+  quantity: number;
+  variant?: string | null;
+  name?: string;
+  category?: string;
+  image?: string;
+  msrp?: number;
+  size?: string;
 }
 
 interface Props {
@@ -32,98 +35,26 @@ interface Props {
   onFinished?: (summary: string) => void;
 }
 
-const TOOL_ICONS: Record<string, ActivityLine["icon"]> = {
-  "tool.search_catalog": "search",
-  "tool.get_user_history": "history",
-  "tool.get_cart": "cart",
-  "tool.cart_add": "cart",
-  "tool.summarize_selection": "summary",
-  "spinner.started": "info",
-  "spinner.finished": "done",
-};
-
-function humanize(ev: SpinnerEventPayload): ActivityLine {
-  const baseId = ev.seq;
-  const ts = ev.ts;
-  const icon = TOOL_ICONS[ev.type] ?? "info";
-  const args = ev.payload?.args || {};
-  const result = ev.payload?.result || {};
-
-  if (ev.type === "spinner.started") {
-    return { id: baseId, icon: "info", text: "Spinner started — figuring out what to grab.", ts };
-  }
-  if (ev.type === "tool.get_user_history") {
-    const purchases = (result?.purchases || []).length;
-    return {
-      id: baseId,
-      icon: "history",
-      text: purchases ? `Pulled history — ${purchases} prior purchase${purchases === 1 ? "" : "s"} to factor in.` : "No prior history yet — picking from the canon.",
-      ts,
-    };
-  }
-  if (ev.type === "tool.search_catalog") {
-    const q = args.query || "the catalog";
-    const count = result?.count ?? 0;
-    return { id: baseId, icon: "search", text: `Searched for "${q}" — ${count} match${count === 1 ? "" : "es"}.`, ts };
-  }
-  if (ev.type === "tool.cart_add") {
-    const sku = args.sku || "(unknown)";
-    const qty = args.quantity || 1;
-    const variant = args.variant ? ` · ${args.variant}` : "";
-    return {
-      id: baseId,
-      icon: "cart",
-      text: `Added ${qty}x ${sku}${variant}`,
-      detail: result?.error,
-      ts,
-    };
-  }
-  if (ev.type === "tool.get_cart") {
-    const lc = result?.line_items ?? 0;
-    return { id: baseId, icon: "cart", text: `Checked the cart — ${lc} line${lc === 1 ? "" : "s"} in.`, ts };
-  }
-  if (ev.type === "tool.summarize_selection") {
-    return { id: baseId, icon: "summary", text: result?.summary || "Wrapped up the selection.", ts };
-  }
-  if (ev.type === "spinner.finished") {
-    return {
-      id: baseId,
-      icon: ev.payload?.error ? "error" : "done",
-      text: ev.payload?.error ? `Spinner stopped: ${ev.payload.error}` : "Done.",
-      ts,
-    };
-  }
-  return { id: baseId, icon: "info", text: ev.type, ts };
-}
-
-function IconFor({ kind, spinning }: { kind: ActivityLine["icon"]; spinning?: boolean }) {
-  const cls = "size-4";
-  if (kind === "search") return <Search className={cls} />;
-  if (kind === "history") return <History className={cls} />;
-  if (kind === "cart") return <ShoppingCart className={cls} />;
-  if (kind === "summary") return <Sparkles className={cls} />;
-  if (kind === "done") return <CheckCircle2 className={cls} />;
-  if (kind === "error") return <AlertCircle className={cls} />;
-  return spinning ? <Loader2 className={`${cls} animate-spin`} /> : <Sparkles className={cls} />;
+function formatMoney(n?: number): string {
+  if (typeof n !== "number" || !Number.isFinite(n)) return "";
+  return `$${n.toFixed(2)}`;
 }
 
 export function SpinnerActivityOverlay({ open, taskId, initialCommission, onClose, onFinished }: Props) {
-  const [lines, setLines] = useState<ActivityLine[]>([]);
+  const [picked, setPicked] = useState<PickedItem[]>([]);
+  const [statusLine, setStatusLine] = useState<string>("Spinner is warming up…");
   const [done, setDone] = useState(false);
   const [errored, setErrored] = useState<string | null>(null);
+  const [authed, setAuthed] = useState<boolean | null>(null);
   const esRef = useRef<EventSource | null>(null);
-  const scrollRef = useRef<HTMLDivElement | null>(null);
-  // Stash onFinished + onClose in refs so the SSE useEffect doesn't tear
-  // down + re-open on every parent render. Inline arrow callbacks from
-  // chat-panel were forcing the EventSource to recycle mid-stream, which
-  // fired spinner.finished N times → Sal message duplicated N times.
   const onFinishedRef = useRef(onFinished);
   const firedFinishedRef = useRef(false);
   useEffect(() => { onFinishedRef.current = onFinished; }, [onFinished]);
 
   useEffect(() => {
     if (!open || !taskId) return;
-    setLines([]);
+    setPicked([]);
+    setStatusLine("Spinner is warming up…");
     setDone(false);
     setErrored(null);
     firedFinishedRef.current = false;
@@ -134,12 +65,51 @@ export function SpinnerActivityOverlay({ open, taskId, initialCommission, onClos
     const onAny = (ev: MessageEvent) => {
       try {
         const data: SpinnerEventPayload = JSON.parse(ev.data);
-        const line = humanize(data);
-        setLines((cur) => (cur.some((l) => l.id === line.id) ? cur : [...cur, line]));
-        if (data.type === "spinner.finished" && !firedFinishedRef.current) {
+        const args = data.payload?.args || {};
+        const result = data.payload?.result || {};
+
+        if (data.type === "spinner.started") {
+          setStatusLine("Reading your preferences and history…");
+        } else if (data.type === "tool.get_user_history") {
+          const purchases = (result?.purchases || []).length;
+          setStatusLine(purchases ? `Pulled ${purchases} prior purchase${purchases === 1 ? "" : "s"}.` : "No prior history — picking from the canon.");
+        } else if (data.type === "tool.search_catalog") {
+          const q = args.query || "the catalog";
+          const c = result?.count ?? 0;
+          setStatusLine(`Searching for "${q}" — ${c} match${c === 1 ? "" : "es"}.`);
+        } else if (data.type === "tool.cart_add" && result?.ok) {
+          const added = result.added || {};
+          const item: PickedItem = {
+            sku: added.sku || args.sku || "",
+            quantity: Number(added.quantity ?? args.quantity ?? 1),
+            variant: added.variant ?? args.variant ?? null,
+            name: added.name,
+            category: added.category,
+            image: added.image,
+            msrp: typeof added.msrp === "number" ? added.msrp : undefined,
+            size: added.size,
+          };
+          setPicked((cur) => {
+            const idx = cur.findIndex((p) => p.sku === item.sku && (p.variant || null) === (item.variant || null));
+            if (idx >= 0) {
+              const next = [...cur];
+              next[idx] = { ...next[idx], quantity: next[idx].quantity + item.quantity };
+              return next;
+            }
+            return [...cur, item];
+          });
+          setStatusLine(`Added ${item.name || item.sku}.`);
+        } else if (data.type === "tool.summarize_selection") {
+          setStatusLine("Wrapping up the basket…");
+        } else if (data.type === "spinner.finished" && !firedFinishedRef.current) {
           firedFinishedRef.current = true;
           setDone(true);
-          if (data.payload?.error) setErrored(String(data.payload.error));
+          if (data.payload?.error) {
+            setErrored(String(data.payload.error));
+            setStatusLine("Something went wrong.");
+          } else {
+            setStatusLine("Done.");
+          }
           onFinishedRef.current?.(data.payload?.summary || "");
         }
       } catch {}
@@ -156,17 +126,23 @@ export function SpinnerActivityOverlay({ open, taskId, initialCommission, onClos
     ].forEach((t) => es.addEventListener(t, onAny as any));
 
     es.addEventListener("end", () => { setDone(true); es.close(); });
-    es.addEventListener("timeout", () => { setDone(true); setErrored("Timed out waiting for activity."); es.close(); });
-    es.onerror = () => { /* SSE retries automatically; ignore transient drops */ };
+    es.addEventListener("timeout", () => { setDone(true); setErrored("Timed out."); es.close(); });
 
     return () => { es.close(); esRef.current = null; };
   }, [open, taskId]);
 
+  // Pull auth state once on done so the CTA can branch (sign up vs view cart).
   useEffect(() => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-    }
-  }, [lines.length]);
+    if (!done || authed !== null) return;
+    fetch("/api/v1/auth/me", { credentials: "include" })
+      .then((r) => r.json())
+      .then((d) => setAuthed(Boolean(d?.authenticated)))
+      .catch(() => setAuthed(false));
+  }, [done, authed]);
+
+  const lineCount = picked.length;
+  const totalQty = picked.reduce((n, p) => n + p.quantity, 0);
+  const subtotal = picked.reduce((n, p) => n + (p.msrp || 0) * p.quantity, 0);
 
   return (
     <AnimatePresence>
@@ -188,14 +164,14 @@ export function SpinnerActivityOverlay({ open, taskId, initialCommission, onClos
           >
             <header className="flex items-center justify-between border-b border-border px-5 py-4">
               <div className="flex items-center gap-3">
-                <div className="flex size-8 items-center justify-center rounded-full bg-accent/15 text-accent">
+                <div className="flex size-9 items-center justify-center rounded-full bg-accent/15 text-accent">
                   {done ? <CheckCircle2 className="size-4" /> : <Loader2 className="size-4 animate-spin" />}
                 </div>
                 <div>
-                  <h2 className="text-sm font-semibold tracking-tight">{done ? "Picked your basket" : "Shopping for you"}</h2>
-                  {initialCommission && !done && (
-                    <p className="text-xs text-muted-foreground line-clamp-1">{initialCommission}</p>
-                  )}
+                  <h2 className="text-sm font-semibold tracking-tight">
+                    {done ? "Picked your basket" : "Shopping for you"}
+                  </h2>
+                  <p className="text-xs text-muted-foreground line-clamp-1">{statusLine}</p>
                 </div>
               </div>
               <button
@@ -208,62 +184,120 @@ export function SpinnerActivityOverlay({ open, taskId, initialCommission, onClos
               </button>
             </header>
 
-            <div ref={scrollRef} className="flex-1 overflow-y-auto px-5 py-4">
-              <ol className="space-y-3">
-                {lines.map((l) => (
-                  <motion.li
-                    key={l.id}
-                    initial={{ opacity: 0, y: 8 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.25 }}
-                    className="flex items-start gap-3 text-sm"
-                  >
-                    <span
-                      className={`mt-0.5 flex size-6 shrink-0 items-center justify-center rounded-full ${
-                        l.icon === "error" ? "bg-destructive/15 text-destructive" :
-                        l.icon === "done" ? "bg-accent/20 text-accent" :
-                        "bg-card text-muted-foreground"
-                      }`}
+            <div className="flex-1 overflow-y-auto px-5 py-5">
+              {picked.length === 0 && !errored && (
+                <div className="flex flex-col items-center justify-center py-12 text-center text-sm text-muted-foreground">
+                  <ShoppingCart className="size-6 opacity-40 mb-3" />
+                  <p>The basket fills up here as picks land.</p>
+                </div>
+              )}
+
+              {errored && (
+                <div className="flex items-start gap-3 rounded-lg border border-destructive/30 bg-destructive/5 px-3 py-2.5 text-sm text-destructive">
+                  <AlertCircle className="size-4 mt-0.5 shrink-0" />
+                  <span>{errored}</span>
+                </div>
+              )}
+
+              <ul className="space-y-3">
+                <AnimatePresence initial={false}>
+                  {picked.map((p) => (
+                    <motion.li
+                      key={`${p.sku}__${p.variant || "default"}`}
+                      layout
+                      initial={{ opacity: 0, y: 16, scale: 0.98 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, x: -20 }}
+                      transition={{ type: "spring", damping: 24, stiffness: 320 }}
+                      className="flex items-stretch gap-3 rounded-xl border border-border bg-card/50 p-3 hover:border-accent/40 transition-colors"
                     >
-                      <IconFor kind={l.icon} />
-                    </span>
-                    <span className="flex-1 leading-snug">
-                      <span className="text-foreground">{l.text}</span>
-                      {l.detail && <span className="block text-xs text-destructive/80">{l.detail}</span>}
-                    </span>
-                  </motion.li>
-                ))}
-                {!done && lines.length === 0 && (
-                  <li className="flex items-center gap-3 text-sm text-muted-foreground">
-                    <Loader2 className="size-4 animate-spin" /> Spinner is warming up…
-                  </li>
-                )}
-              </ol>
+                      <div className="relative size-20 shrink-0 overflow-hidden rounded-lg bg-card">
+                        {p.image ? (
+                          <img
+                            src={p.image}
+                            alt={p.name || p.sku}
+                            className="size-full object-cover"
+                            loading="lazy"
+                          />
+                        ) : (
+                          <div className="flex size-full items-center justify-center text-muted-foreground">
+                            <ShoppingCart className="size-5 opacity-40" />
+                          </div>
+                        )}
+                      </div>
+                      <div className="flex flex-1 flex-col justify-between min-w-0">
+                        <div>
+                          <p className="text-sm font-medium leading-snug line-clamp-2">{p.name || p.sku}</p>
+                          {(p.size || p.variant) && (
+                            <p className="mt-0.5 text-[11px] text-muted-foreground">
+                              {[p.size, p.variant].filter(Boolean).join(" · ")}
+                            </p>
+                          )}
+                        </div>
+                        <div className="flex items-center justify-between text-xs">
+                          <span className="rounded-full bg-accent/10 px-2 py-0.5 text-accent font-medium">
+                            ×{p.quantity}
+                          </span>
+                          {typeof p.msrp === "number" && (
+                            <span className="font-mono text-muted-foreground">
+                              {formatMoney(p.msrp)}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </motion.li>
+                  ))}
+                </AnimatePresence>
+              </ul>
             </div>
 
-            <footer className="border-t border-border px-5 py-3">
-              {errored ? (
-                <p className="text-xs text-destructive">{errored}</p>
-              ) : done ? (
-                <div className="flex items-center justify-between gap-2">
-                  <a
-                    href="/cart"
-                    className="rounded-full bg-foreground px-4 py-2 text-xs font-medium text-background transition-colors hover:bg-foreground/90"
-                  >
-                    View cart
-                  </a>
-                  <button
-                    type="button"
-                    onClick={onClose}
-                    className="rounded-full border border-border px-4 py-2 text-xs text-foreground/80 transition-colors hover:bg-accent/10"
-                  >
-                    Keep chatting
-                  </button>
-                </div>
-              ) : (
-                <p className="text-xs text-muted-foreground">Spinner is the site-action runtime — it browses the catalog and stocks the cart.</p>
-              )}
-            </footer>
+            {(picked.length > 0 || done) && (
+              <div className="border-t border-border bg-card/30 px-5 py-4">
+                {picked.length > 0 && (
+                  <div className="mb-3 flex items-baseline justify-between text-xs">
+                    <span className="text-muted-foreground">
+                      {lineCount} line{lineCount === 1 ? "" : "s"} · {totalQty} item{totalQty === 1 ? "" : "s"}
+                    </span>
+                    {subtotal > 0 && (
+                      <span className="font-mono font-medium text-foreground">{formatMoney(subtotal)}</span>
+                    )}
+                  </div>
+                )}
+                {done && !errored && (
+                  <div className="flex flex-col gap-2">
+                    {authed === false && (
+                      <a
+                        href="/auth/signup?next=/account"
+                        className="flex items-center justify-center gap-2 rounded-full bg-foreground px-4 py-2.5 text-xs font-medium text-background hover:bg-foreground/90 transition-colors"
+                      >
+                        <UserPlus className="size-3.5" />
+                        Save this basket — create an account
+                      </a>
+                    )}
+                    {authed === true && (
+                      <a
+                        href="/cart"
+                        className="flex items-center justify-center gap-2 rounded-full bg-foreground px-4 py-2.5 text-xs font-medium text-background hover:bg-foreground/90 transition-colors"
+                      >
+                        View cart <ArrowRight className="size-3.5" />
+                      </a>
+                    )}
+                    <button
+                      type="button"
+                      onClick={onClose}
+                      className="rounded-full border border-border px-4 py-2 text-xs text-foreground/80 hover:bg-accent/10 transition-colors"
+                    >
+                      Keep chatting
+                    </button>
+                  </div>
+                )}
+                {!done && (
+                  <p className="text-[11px] text-muted-foreground text-center">
+                    Picks stream in as they happen.
+                  </p>
+                )}
+              </div>
+            )}
           </motion.div>
         </motion.div>
       )}
