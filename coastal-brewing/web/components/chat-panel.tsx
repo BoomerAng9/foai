@@ -164,8 +164,11 @@ export function ChatPanel({
   const [spinnerCommission, setSpinnerCommission] = React.useState<string>("");
 
   const [voiceAutoplay, setVoiceAutoplay] = React.useState<boolean>(() => {
-    if (typeof window === "undefined") return false;
-    return window.sessionStorage.getItem(SS_VOICE_AUTOPLAY) === "1";
+    // Default-ON per owner directive 2026-05-06. Only respect an explicit
+    // "0" (user clicked the volume button to mute). Empty / "1" → autoplay.
+    // SS_VOICE_AUTOPLAY canon comment matched this; code path was inverted.
+    if (typeof window === "undefined") return true;
+    return window.sessionStorage.getItem(SS_VOICE_AUTOPLAY) !== "0";
   });
   React.useEffect(() => {
     if (typeof window === "undefined") return;
