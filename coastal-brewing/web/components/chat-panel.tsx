@@ -2,7 +2,7 @@
 import * as React from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { Send, ChevronDown, ChevronRight, Sparkles, ShieldCheck, Zap, X, Volume2, VolumeX, Loader2, Mic, MicOff, Square, Wand2 } from "lucide-react";
+import { Send, ChevronDown, ChevronRight, Sparkles, ShieldCheck, Zap, X, Volume2, VolumeX, Loader2, Mic, MicOff, Square } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -1054,11 +1054,24 @@ export function ChatPanel({
 // ─── Inworld TTS playback per agent response ─────────────────────────
 // Per-message opt-in. Customer clicks the speaker icon → backend calls
 // Inworld TTS with the responding agent's character_id → we receive
-// Magic-wand prompt enhancer button. Owner directive 2026-05-06 (Phase
-// 1 of the II-Agent gap analysis). Click runs the customer's draft
-// through /api/v1/prompt-enhance — gateway clarifies the message
-// without changing intent, replaces the input. Saves token round-trips
-// by reducing follow-up clarification turns from Sal.
+// GRAMMAR enhancer button. Owner correction 2026-05-06: this IS
+// GRAMMAR (the prompt-clarification engine that's already in the
+// FOAI ecosystem and migrated to the AIMS gateway). Not a "magic
+// wand" — Grammar IS the tool. Icon is a boomerang to mirror
+// Grammar's "send your thought out, get it back clarified" logic.
+// Click runs the customer's draft through /api/v1/prompt-enhance →
+// AIMS gateway → returns clarified text. Saves Sal a follow-up turn.
+function GrammarBoomerang(props: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className={props.className}>
+      <path d="M4 18 C 8 14, 14 14, 18 18" />
+      <path d="M4 18 C 6 12, 10 6, 18 6" />
+      <path d="M18 6 L 18 11" />
+      <path d="M18 6 L 13 6" />
+    </svg>
+  );
+}
+
 function PromptEnhanceButton({
   text,
   disabled,
@@ -1102,8 +1115,8 @@ function PromptEnhanceButton({
       type="button"
       onClick={enhance}
       disabled={!canEnhance}
-      aria-label="Tighten this for Sal"
-      title="Tighten this for Sal"
+      aria-label="Run through Grammar"
+      title="Run through Grammar — clarifies your message before Sal sees it"
       className={cn(
         "inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-md transition-all",
         canEnhance
@@ -1114,7 +1127,7 @@ function PromptEnhanceButton({
       {busy ? (
         <Loader2 className="h-4 w-4 animate-spin" />
       ) : (
-        <Wand2 className="h-4 w-4" />
+        <GrammarBoomerang className="h-4 w-4" />
       )}
     </button>
   );

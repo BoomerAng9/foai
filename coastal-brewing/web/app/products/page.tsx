@@ -79,21 +79,21 @@ export default async function ProductsPage({
         <p className="mt-3 max-w-2xl text-base text-muted-foreground">
           {mode === "guided" ? (
             <>
-              ACHEEVY is alongside — keep the conversation going while you
+              Sal is at the counter — keep the conversation going while you
               browse. He&apos;ll point at the right shelves as you go.
             </>
           ) : mode === "curated" ? (
             <>
-              These are picks shaped by what you&apos;ve told ACHEEVY.
-              Anything looks off, just say so in the chat.
+              Picks shaped by what you told Sal at the counter. Anything
+              looks off, ping him in the chat and he&apos;ll re-shape the
+              basket.
             </>
           ) : (
             <>
-              Coastal carries every coffee, tea, K-Cup, and curated bundle
-              we offer — branded, retailed, and roasted-to-order under
-              our flying-stork mark.{" "}
-              <strong className="text-foreground">{totalCount} items</strong>.
-              Hover any card for tasting notes and certifications.
+              Roasted-to-order coffee, whole-leaf tea, ceremonial matcha,
+              flavored blends, K-Cups, and curated bundles — all under
+              the flying-stork mark, all by policy specialty-grade. Pick
+              the lane that fits, or ask Sal to find the cup with you.
             </>
           )}
         </p>

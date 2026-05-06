@@ -9,11 +9,13 @@ interface CastMember {
   id: string;
   display_name: string;
   function: string;
-  pmo: "sales" | "back-office" | "ops";
+  pmo: "leadership" | "loss-prevention" | "sales" | "back-office" | "ops";
   story: string;
 }
 
 const PMO_LABELS: Record<CastMember["pmo"], string> = {
+  leadership: "Leadership",
+  "loss-prevention": "Loss Prevention",
   sales: "Sales",
   "back-office": "Back office",
   ops: "Operations",
@@ -159,12 +161,49 @@ const CAST: CastMember[] = [
     story:
       "Asian American. Trained as a CPA before falling into specialty trade through a family friend who roasted coffee in Oakland. Joined Coastal Brewing Co. when the books outgrew what spreadsheets could carry honestly. Treats every transaction as something the audit chain has to see clean — no shortcuts, no rounding, no commingled accounts. Quiet, precise, calm. Would rather work the math twice than send a number that has to be walked back.",
   },
+  // ── Leadership ────────────────────────────────────────────────────────
+  {
+    id: "acheevy",
+    display_name: "ACHEEVY",
+    function: "Digital executive · final approver",
+    pmo: "leadership",
+    story:
+      "Surfaces only when an associate hits an authority ceiling. Never does the selling itself. Speaks in declaratives, not negotiations — \"approved,\" \"settled,\" \"go ahead.\" Voiced in Nas's Power 105.1 register, Belter Creole at the LLM-prompt layer (off for customer-chat-panel surface). Does not work the floor; signs the floor.",
+  },
+  // ── Back office ───────────────────────────────────────────────────────
+  {
+    id: "melli_capensi",
+    display_name: "Melli",
+    function: "Bulk · B2B executive",
+    pmo: "back-office",
+    story:
+      "Honey-badger-strategic — reads the deal, quotes the bracket, sets the timeline. Different lane from the retail counter: wholesale + corporate + catering + large-order intake. Within the discount ladder (12u → 15%, 50u → 25%, 100u+ → 35%) she locks the deal; above the ladder she routes to ACHEEVY. Selene voice, Belter Creole light layered into her phrasing.",
+  },
+  {
+    id: "luc_ang",
+    display_name: "LUC",
+    function: "Floor accountant",
+    pmo: "back-office",
+    story:
+      "Brooklyn-fluent CPA. Sal pulls him in when a customer starts running numbers. Dry, precise, numerical — \"math says,\" \"running the numbers,\" \"here's where we land.\" Zero discount approval; coupon codes are his only standing authority (WELCOME10 / BREW20 / FREESHIP / TRY-ME). Anything beyond that, he states the math and routes to ACHEEVY. \"I cut the math, ACHEEVY signs.\"",
+  },
+  // ── Loss Prevention ───────────────────────────────────────────────────
+  {
+    id: "lp_ang",
+    display_name: "Marcus",
+    function: "Loss prevention · floor team",
+    pmo: "loss-prevention",
+    story:
+      "Calm, professional, structured. Less warm than Sal, less authoritative than ACHEEVY — the associate in the high-res button-down who walks up because something needs untangling. Steps in when a conversation has stalled and the lead barista has stepped off. Three-step structured assist: family → specifics → close. Zero discount authority. Above ceiling routes to ACHEEVY.",
+  },
 ];
 
 const SAL = CAST[0];
 const REST = CAST.slice(1);
 
 export default function TeamPage() {
+  const leadership = REST.filter((m) => m.pmo === "leadership");
+  const lossPrevention = REST.filter((m) => m.pmo === "loss-prevention");
   const sales = REST.filter((m) => m.pmo === "sales");
   const backOffice = REST.filter((m) => m.pmo === "back-office");
   const ops = REST.filter((m) => m.pmo === "ops");
@@ -250,6 +289,30 @@ export default function TeamPage() {
             </p>
           </div>
 
+          {/* Leadership — ACHEEVY (digital executive) */}
+          {leadership.length > 0 && (
+            <div className="mb-12">
+              <div className="mb-5 flex items-end justify-between">
+                <h3 className="font-display text-2xl font-semibold md:text-3xl">Leadership.</h3>
+                <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+                  signs the floor · doesn&apos;t serve the floor
+                </p>
+              </div>
+              <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                {leadership.map((m) => (
+                  <TeamCard
+                    key={m.id}
+                    id={m.id}
+                    display_name={m.display_name}
+                    function={m.function}
+                    pmo_label={PMO_LABELS[m.pmo]}
+                    story={m.story}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* Sales */}
           <div className="mb-12">
             <div className="mb-5 flex items-end justify-between">
@@ -271,6 +334,30 @@ export default function TeamPage() {
               ))}
             </div>
           </div>
+
+          {/* Loss Prevention — Marcus and team */}
+          {lossPrevention.length > 0 && (
+            <div className="mb-12">
+              <div className="mb-5 flex items-end justify-between">
+                <h3 className="font-display text-2xl font-semibold md:text-3xl">Loss Prevention.</h3>
+                <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+                  steps in when the conversation stalls
+                </p>
+              </div>
+              <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                {lossPrevention.map((m) => (
+                  <TeamCard
+                    key={m.id}
+                    id={m.id}
+                    display_name={m.display_name}
+                    function={m.function}
+                    pmo_label={PMO_LABELS[m.pmo]}
+                    story={m.story}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Back office */}
           <div className="mb-12">

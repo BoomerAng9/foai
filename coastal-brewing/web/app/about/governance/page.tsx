@@ -63,12 +63,36 @@ const HIERARCHY: AgentRow[] = [
       "Surfaces only when an associate hits an authority ceiling. Never does the selling itself. Speaks in declaratives, not negotiations.",
   },
   {
-    name: "Sal · LUC · Melli (the front counter)",
-    tier: "Customer-facing associates",
+    name: "Melli",
+    tier: "Bulk · B2B executive",
     owns:
-      "Sal — first contact, deals-of-the-day, ≤10% PPU / ≤15% bundle discounts. LUC — math, coupon codes, no discount authority. Melli — bulk/B2B intake (12u/50u/100u tiers).",
+      "Wholesale + B2B intake. Volume math, container-load timelines, restaurant + cafe accounts. Discount ladder: 12u → 15%, 50u → 25%, 100u+ → 35%.",
     notes:
-      "Each associate has a fixed authority ceiling. The ceiling is in code, not in policy memos. Above the ceiling, the call lands on ACHEEVY's desk.",
+      "Within the discount ladder she locks the deal. Above the ladder, she routes to ACHEEVY. Does not work the retail counter — different lane, different authority.",
+  },
+  {
+    name: "LUC",
+    tier: "Floor accountant",
+    owns:
+      "Math, unit-cost spreads, coupon codes (WELCOME10 / BREW20 / FREESHIP / TRY-ME). Zero discount authority — runs the numbers, hands the sign-off to ACHEEVY.",
+    notes:
+      "Surfaces when a retail customer starts running numbers with Sal. Cuts the math, defers approval. \"I cut the math, ACHEEVY signs.\"",
+  },
+  {
+    name: "Sal",
+    tier: "Lead barista · retail counter",
+    owns:
+      "First customer contact. Deals-of-the-day at his discretion. Standing discount authority: ≤10% per-unit, ≤15% bundle. Above ceiling routes through LUC for the math + ACHEEVY for the sign-off.",
+    notes:
+      "Customer-facing default. Different lane from Melli (bulk) and different authority from LUC (zero discount). Handoffs to ACHEEVY only on above-ceiling pricing or brand-voice escalation.",
+  },
+  {
+    name: "Loss Prevention floor team",
+    tier: "Counter-adjacent",
+    owns:
+      "Steps in when a conversation has stalled out of negotiation and the lead barista has stepped off. Three-step structured assist: family → specifics → close.",
+    notes:
+      "Marcus is the named lead. Zero discount authority — can route to checkout, recommend bundles, or hand back to the counter. Above ceiling routes to ACHEEVY for formal exit warning.",
   },
   {
     name: "Chicken Hawk",

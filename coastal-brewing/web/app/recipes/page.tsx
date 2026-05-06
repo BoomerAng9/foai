@@ -91,9 +91,20 @@ export default function RecipesPage() {
             </li>
             <li>
               <span className="font-mono text-xs text-accent">#</span>
-              ServedByACHEEVY
+              PouredBySal
+            </li>
+            <li>
+              <span className="font-mono text-xs text-accent">#</span>
+              SteepedByEliza
+            </li>
+            <li>
+              <span className="font-mono text-xs text-accent">#</span>
+              WhiskedByMads
             </li>
           </ul>
+          <p className="mt-3 text-xs text-muted-foreground">
+            Counter-team hashtags only — leadership doesn&apos;t serve.
+          </p>
           <p className="mt-6 text-sm text-muted-foreground">
             When the upload wall opens, your tagged posts will be the first
             we feature.{" "}
