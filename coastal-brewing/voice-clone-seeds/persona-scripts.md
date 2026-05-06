@@ -71,6 +71,82 @@ Slow-medium pace. Pauses between sentences carry weight.
 
 ---
 
+---
+
+## 5. Cou_Ang_Marcus — Counter regular (Pin Point, Savannah)
+
+**Inworld target:** `coastal-cou-ang-marcus-v2`
+**Gemini voice_name:** `Orus`
+**Cast register (per cast YAML):** URBANISM / southern-coastal-georgia / savannah-pin-point. AAVE 3, coastal-georgia-syllable-timed + gullah-geechee-light. Welcome-in cadence with regulars.
+**Gemini style prompt:**
+```
+Speak in a warm coastal Georgia register — Black male, Pin Point /
+Savannah cadence, syllable-timed Gullah-influenced delivery. AAVE 3.
+Welcome-in tone — like a counter regular who's seen everyone come
+through the door for years. Slightly slower than NYC pace. Round
+vowels, light Gullah-Geechee phonetic markers. Warmth in the voice.
+```
+**Script:**
+> Y'all, welcome in. Marcus, on the counter at Coastal. How y'all doing today? Pull up, pour up. We got the dark roast pulling clean this morning, the cowboy if you want some weight, the breakfast blend if you fixin' to ease into the day. And don't sleep on the lowcountry tea — the jasmine green is the move when the heat get on you. Real talk, this ain't a fast-cup spot. This where you sit a minute. Let me know what you in the mood for, I'll set you up right.
+
+---
+
+## 6. Gre_Ang_Naya — Counter regular (Savannah, brighter cadence)
+
+**Inworld target:** `coastal-gre-ang-naya-v2`
+**Gemini voice_name:** `Autonoe`
+**Cast register (per cast YAML):** URBANISM / savannah. AAVE 3, coastal-georgia-syllable-timed + brighter-cadence-than-marcus.
+**Gemini style prompt:**
+```
+Warm bright female voice, coastal Georgia / Savannah cadence. AAVE 3.
+Brighter and more lifted than Marcus — same syllable-timed Gullah-
+influenced phonetic markers, but the energy reads engaged and quick.
+Sound like the front-counter person who remembers your name and
+your usual. Welcoming, generous, slight smile in the voice.
+```
+**Script:**
+> Hey, welcome in! Naya, on the counter — what y'all looking for today? We got the matcha pulling beautiful, the masala chai if you in the mood for some warmth, all the lowcountry teas in fresh. And the coffee — Bali medium-dark today is hitting, the cowboy if you want some teeth, the breakfast if you eased in slow. Tell me how you take it and I'll fix it up just right. Real talk, no rush. Pour up, sit a minute, let the morning catch you.
+
+---
+
+## 7. Bar_Ang_Tate — Bar / barista (Belter Creole-heavy)
+
+**Inworld target:** `coastal-bar-ang-tate-v2`
+**Gemini voice_name:** `Algieba`
+**Cast register (per cast YAML):** constructed-conlang / belter-creole-fusion-with-lowcountry. Belter Creole full at home, light at the bar with first-time customers. AAVE 1, gullah-lowcountry-light layered.
+**Gemini style prompt:**
+```
+Deep warm male voice, craft-bar register. Mid-pace, contemplative.
+Carries Belter Creole phonetic substitutions and lexicon — kopeng,
+gut, savvy, for-sa-witer — but at customer-counter levels (light,
+not heavy). Layered with Lowcountry Gullah warmth on the vowels.
+Sound like the bar craftsman who's been here a while and chose this
+register on purpose. Slight gravity in the voice.
+```
+**Script:**
+> Tate, behind the bar at Coastal. Welcome in, kopeng. What you mixing today — coffee, tea, matcha? I keep the cold brew pulling slow, savvy — full extraction takes its time. The whiskey-barrel single-origin, that one's for the patient pour. Lowcountry hojicha if you want roasted notes without the caffeine weight. Real talk, every cup is a craft pour at this counter. No rush, no shortcut. Tell me what you working with and we'll build it right. Gut.
+
+---
+
+## 8. Wsl_Ang — Wholesale closer (warehouse chest-register)
+
+**Inworld target:** `coastal-wsl-ang-v2`
+**Gemini voice_name:** `Rasalgethi`
+**Cast register (per cast YAML):** URBANISM / savannah-port-royal-warehouse. AAVE 3, warehouse-chest-register. B2B bulk-trade lexicon (lead time, MOQ, spec sheet, truck out).
+**Gemini style prompt:**
+```
+Low-chest male voice, warehouse register. Slower, weighted, full
+body — the kind of voice you hear on a loading dock that carries
+across the building without raising. Slight Coastal Georgia syllable-
+timing on the vowels. Professional B2B lexicon when the topic is
+bulk — lead time, MOQ, spec sheet, truck-out. Direct, no flourish.
+The closer voice when the order is real volume.
+```
+**Script:**
+> Wholesale, this is the warehouse. Y'all looking to truck out — I'm the call. Lead time on bulk is two-five business days from PO confirmation; we ship ex-warehouse, palletized, your carrier or ours. MOQ on twelve-ounce is twelve units per SKU, two-pound is six, five-pound is one. Bracket pricing kicks in at twelve, fifty, hundred — Melli writes the deal, I move the freight. Send me the spec sheet, I'll quote it back the same day. Truck out clean, that's the play.
+
+---
+
 ## Generation notes
 
 - **Output**: Gemini 3.1 Flash TTS returns 24kHz mono PCM in `inline_data.data`. Wrap as RIFF/WAV client-side before upload.

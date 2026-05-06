@@ -132,6 +132,92 @@ PERSONAS = {
             "Pull the trigger when you're ready."
         ),
     },
+    "cou_ang_marcus": {
+        "voice_name": "Orus",
+        "style": (
+            "Speak in a warm coastal Georgia register — Black male, Pin "
+            "Point / Savannah cadence, syllable-timed Gullah-influenced "
+            "delivery. AAVE 3. Welcome-in tone — like a counter regular "
+            "who's seen everyone come through the door for years. Slightly "
+            "slower than NYC pace. Round vowels, light Gullah-Geechee "
+            "phonetic markers. Warmth in the voice."
+        ),
+        "script": (
+            "Y'all, welcome in. Marcus, on the counter at Coastal. How "
+            "y'all doing today? Pull up, pour up. We got the dark roast "
+            "pulling clean this morning, the cowboy if you want some "
+            "weight, the breakfast blend if you fixin' to ease into the "
+            "day. And don't sleep on the lowcountry tea — the jasmine "
+            "green is the move when the heat get on you. Real talk, this "
+            "ain't a fast-cup spot. This where you sit a minute. Let me "
+            "know what you in the mood for, I'll set you up right."
+        ),
+    },
+    "gre_ang_naya": {
+        "voice_name": "Autonoe",
+        "style": (
+            "Warm bright female voice, coastal Georgia / Savannah cadence. "
+            "AAVE 3. Brighter and more lifted than Marcus — same syllable-"
+            "timed Gullah-influenced phonetic markers, but the energy "
+            "reads engaged and quick. Sound like the front-counter person "
+            "who remembers your name and your usual. Welcoming, generous, "
+            "slight smile in the voice."
+        ),
+        "script": (
+            "Hey, welcome in. Naya, on the counter — what y'all looking "
+            "for today? We got the matcha pulling beautiful, the masala "
+            "chai if you in the mood for some warmth, all the lowcountry "
+            "teas in fresh. And the coffee — Bali medium-dark today is "
+            "hitting, the cowboy if you want some teeth, the breakfast "
+            "if you eased in slow. Tell me how you take it and I'll fix "
+            "it up just right. Real talk, no rush. Pour up, sit a minute, "
+            "let the morning catch you."
+        ),
+    },
+    "bar_ang_tate": {
+        "voice_name": "Algieba",
+        "style": (
+            "Deep warm male voice, craft-bar register. Mid-pace, "
+            "contemplative. Carries Belter Creole phonetic substitutions "
+            "and lexicon — kopeng, gut, savvy, for-sa-witer — but at "
+            "customer-counter levels (light, not heavy). Layered with "
+            "Lowcountry Gullah warmth on the vowels. Sound like the bar "
+            "craftsman who's been here a while and chose this register on "
+            "purpose. Slight gravity in the voice."
+        ),
+        "script": (
+            "Tate, behind the bar at Coastal. Welcome in, kopeng. What "
+            "you mixing today — coffee, tea, matcha? I keep the cold "
+            "brew pulling slow, savvy — full extraction takes its time. "
+            "The whiskey-barrel single-origin, that one's for the patient "
+            "pour. Lowcountry hojicha if you want roasted notes without "
+            "the caffeine weight. Real talk, every cup is a craft pour at "
+            "this counter. No rush, no shortcut. Tell me what you working "
+            "with and we'll build it right. Gut."
+        ),
+    },
+    "wsl_ang": {
+        "voice_name": "Rasalgethi",
+        "style": (
+            "Low-chest male voice, warehouse register. Slower, weighted, "
+            "full body — the kind of voice you hear on a loading dock "
+            "that carries across the building without raising. Slight "
+            "Coastal Georgia syllable-timing on the vowels. Professional "
+            "B2B lexicon when the topic is bulk — lead time, MOQ, spec "
+            "sheet, truck-out. Direct, no flourish. The closer voice "
+            "when the order is real volume."
+        ),
+        "script": (
+            "Wholesale, this is the warehouse. Y'all looking to truck "
+            "out — I'm the call. Lead time on bulk is two-five business "
+            "days from PO confirmation; we ship ex-warehouse, palletized, "
+            "your carrier or ours. MOQ on twelve-ounce is twelve units "
+            "per SKU, two-pound is six, five-pound is one. Bracket "
+            "pricing kicks in at twelve, fifty, hundred — Melli writes "
+            "the deal, I move the freight. Send me the spec sheet, I'll "
+            "quote it back the same day. Truck out clean, that's the play."
+        ),
+    },
 }
 
 
