@@ -3,16 +3,18 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
-import { LayoutDashboard, FlaskConical, Shield, Cpu, Bird, Calendar, FileSearch, ArrowLeft } from 'lucide-react';
+import { LayoutDashboard, FlaskConical, Shield, Cpu, Bird, Calendar, FileSearch, ArrowLeft, Activity, AlertTriangle } from 'lucide-react';
 
 const items = [
   { href: '/tools', label: 'Overview', icon: LayoutDashboard },
-  { href: '/tools/tuning-loop', label: 'Tuning Loop', icon: FlaskConical },
+  { href: '/tools/live-plan', label: 'Live Plan', icon: Activity },
+  { href: '/tools/lil-hawks', label: 'Lil_Hawks', icon: Bird },
+  { href: '/tools/risk-events', label: 'Risk Events', icon: AlertTriangle },
   { href: '/tools/nemoclaw', label: 'Policy Gate', icon: Shield },
   { href: '/tools/hermes', label: 'Agent Runtime', icon: Cpu },
-  { href: '/tools/lil-hawks', label: 'Lil_Hawks', icon: Bird },
-  { href: '/tools/cron', label: 'Scheduled Jobs', icon: Calendar },
   { href: '/tools/audit', label: 'Audit Chain', icon: FileSearch },
+  { href: '/tools/cron', label: 'Scheduled Jobs', icon: Calendar },
+  { href: '/tools/tuning-loop', label: 'Tuning Loop', icon: FlaskConical },
 ];
 
 export function ToolsNav() {
