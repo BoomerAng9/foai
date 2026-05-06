@@ -11,7 +11,7 @@ export default function RefundPolicy() {
     <PolicyPageLayout
       eyebrow="Returns & refunds"
       title="The three-bucket rule."
-      lastUpdated="April 30, 2026"
+      lastUpdated="May 5, 2026"
     >
       <h2 className="font-display text-2xl font-semibold text-foreground">The short version</h2>
       <p>Coffee and tea are roasted, blended, and packed to order. Once your bag leaves our facility, we don&apos;t accept it back — returned coffee gets discarded, and that helps nobody.</p>
@@ -19,7 +19,7 @@ export default function RefundPolicy() {
 
       <h2 className="font-display text-2xl font-semibold text-foreground">Rule 1 — Our error, we pay.</h2>
       <p>If we sent the wrong grind, the wrong roast, the wrong size, or the wrong SKU, the fix is on us — coffee and shipping both. Just write us within <strong className="text-foreground">7 days of delivery</strong> with your order number and a quick note explaining what happened. We&apos;ll send the right bag right out, expedited where possible. No coffee back, no friction.</p>
-      <p>Our internal error rate runs about <strong className="text-foreground">0.3%</strong>, which means it happens occasionally. When it does, we own it.</p>
+      <p>Our internal tracked error rate runs about <strong className="text-foreground">0.04%</strong> — well under one in two thousand orders. It still happens occasionally. When it does, we own it.</p>
 
       <h2 className="font-display text-2xl font-semibold text-foreground">Rule 2 — Your error, you pay.</h2>
       <p>If the order was placed for the wrong SKU, the wrong address, or the wrong customer — or you changed your mind after the bag has roasted — we ask that you place a new order at the corrected detail. We&apos;ll do everything we can to expedite the new one if you let us know quickly.</p>

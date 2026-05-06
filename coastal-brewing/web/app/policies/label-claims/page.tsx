@@ -11,7 +11,7 @@ export default function LabelClaimsPage() {
     <PolicyPageLayout
       eyebrow="Sourcing & claims"
       title="What we claim, what we don't, and why."
-      lastUpdated="May 2, 2026"
+      lastUpdated="May 5, 2026"
     >
       <p>This page explains the claims you&apos;ll see on Coastal bags and on the Storefront, what they actually mean in practice, and what we deliberately will <em>not</em> claim. Our motto, <strong className="text-foreground">&ldquo;Nothing Chemically, Ever.&rdquo;</strong>, applies <em>per-product</em> — only on motto-eligible SKUs (most of our coffee, tea, and matcha lines). Flavored, functional, and K-cup lines do not carry the motto, by design.</p>
 
@@ -47,25 +47,33 @@ export default function LabelClaimsPage() {
         <li><strong className="text-foreground">Sustainability claims we can&apos;t substantiate.</strong> &ldquo;Eco-friendly,&rdquo; &ldquo;carbon neutral,&rdquo; &ldquo;compostable&rdquo; without qualification — none of these appear unless we can show the work. Our coffee bags are Biotre 1.0 (industrial compostable). Our labels are not compostable.</li>
       </ul>
 
-      <h2 className="font-display text-2xl font-semibold text-foreground">Functional / Mushroom coffees (if and when added)</h2>
-      <p>Coastal does not currently sell mushroom or functional coffees. If we add them, the labels and storefront will follow strict food (not supplement) language:</p>
+      <h2 className="font-display text-2xl font-semibold text-foreground">Functional / Mushroom coffees and teas</h2>
+      <p>Coastal carries a small line of functional blends — coffee and tea blended with traditional medicinal mushrooms. They&apos;re classified and labeled as <strong className="text-foreground">food, not supplements</strong>, and our copy follows the strict-lane discipline that posture requires:</p>
       <ul className="ml-5 list-disc space-y-1">
-        <li>The Statement of Identity will be <strong className="text-foreground">Ground Coffee with Mushrooms</strong>, exactly.</li>
-        <li>Ingredients will be listed: <code className="font-mono text-xs">Coffee, Lion&apos;s Mane Mushroom Powder, Cordyceps Mushroom Powder, Reishi Mushroom Powder</code>.</li>
-        <li>We will use <strong className="text-foreground">traditional-use language only</strong>: <em>&ldquo;long valued for,&rdquo; &ldquo;appreciated for,&rdquo; &ldquo;traditionally used.&rdquo;</em></li>
-        <li>We will <strong className="text-foreground">not</strong> claim <em>&ldquo;boosts immunity,&rdquo; &ldquo;reduces stress,&rdquo; &ldquo;improves memory,&rdquo;</em> or <em>&ldquo;clean energy.&rdquo;</em></li>
-        <li>A California Prop 65 notice will appear on the package.</li>
+        <li>Statement of Identity, locked, per SKU:
+          <ul className="ml-5 mt-1 list-disc space-y-1">
+            <li><strong className="text-foreground">Ground Coffee With Mushrooms</strong> — Dark and Medium roasts.</li>
+            <li><strong className="text-foreground">Instant Coffee With Mushrooms</strong>.</li>
+            <li><strong className="text-foreground">Roasted Green Tea With Mushrooms</strong> — our hojicha blend.</li>
+            <li><strong className="text-foreground">Matcha Green Tea With Mushrooms</strong>.</li>
+          </ul>
+        </li>
+        <li>We use <strong className="text-foreground">traditional-use language only</strong>: <em>&ldquo;long valued for,&rdquo; &ldquo;appreciated for,&rdquo; &ldquo;traditionally used.&rdquo;</em></li>
+        <li>We do <strong className="text-foreground">not</strong> claim <em>&ldquo;boosts immunity,&rdquo; &ldquo;reduces stress,&rdquo; &ldquo;improves memory,&rdquo;</em> or <em>&ldquo;clean energy.&rdquo;</em></li>
+        <li>A California Prop 65 notice appears on every functional package.</li>
+        <li>The functional line does <strong className="text-foreground">not</strong> carry the &ldquo;Nothing Chemically, Ever.&rdquo; motto — by design, the mushroom inputs sit outside the per-product motto-eligibility rule.</li>
       </ul>
 
       <h2 className="font-display text-2xl font-semibold text-foreground">Freshness statements</h2>
-      <p>Our coffee is roasted small-batch on a demand-driven schedule. Most orders are roasted, packed, and shipped within the same week as your purchase.</p>
-      <p>The exact phrasing we use on the bag and on the Storefront:</p>
+      <p>Every Coastal bag is <strong className="text-foreground">roasted to order</strong> — that&apos;s the actual model, not marketing language. Each retail order triggers a custom production run: labels print on demand, coffee batches are roasted every business day, and your bag ships in the 2 to 5 business days after your payment clears.</p>
+      <p>Phrasing we use on the bag and on the Storefront, all of which we can substantiate:</p>
       <ul className="ml-5 list-disc space-y-1">
+        <li><em>&ldquo;Roasted to order. Small-batch.&rdquo;</em></li>
         <li><em>&ldquo;Small batch roasted throughout the week for peak flavor and consistency.&rdquo;</em></li>
-        <li><em>&ldquo;We roast every shipping day to ensure our coffee moves quickly from roaster to doorstep.&rdquo;</em></li>
-        <li><em>&ldquo;In many cases, your coffee is roasted, packed, and shipped all in the same day — but always with care and quality in mind.&rdquo;</em></li>
+        <li><em>&ldquo;We roast every shipping day to move your coffee quickly from roaster to doorstep.&rdquo;</em></li>
+        <li><em>&ldquo;In many cases, your coffee is roasted, packed, and shipped all in the same day.&rdquo;</em></li>
       </ul>
-      <p>We <strong className="text-foreground">do not</strong> claim <em>&ldquo;roasted today,&rdquo;</em> <em>&ldquo;shipped same day,&rdquo;</em> or <em>&ldquo;roasted to order&rdquo;</em> on labels, because those phrases create expectations we cannot consistently meet through every season.</p>
+      <p>What we <strong className="text-foreground">don&apos;t</strong> claim: <em>&ldquo;roasted today&rdquo;</em> on a specific calendar day (we run a 2–5 day production window) or <em>&ldquo;shipped same day&rdquo;</em> as a guarantee (most orders ship in 1–3 days, but holidays and peak seasons can stretch).</p>
 
       <h2 className="font-display text-2xl font-semibold text-foreground">Spelling, consistency, and accuracy</h2>
       <p>We hold ourselves to specific writing standards on labels and in product copy:</p>
