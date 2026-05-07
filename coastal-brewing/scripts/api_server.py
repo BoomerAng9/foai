@@ -3044,9 +3044,14 @@ async def chat_stream(websocket: WebSocket, token: Optional[str] = Query(default
                 input_tokens=int(input_tokens),
             )
 
-            # Append to history
+            # Append to history — only include assistant turn if there was
+            # a real response. An empty full_response means the stream
+            # failed; adding an empty assistant turn causes the LLM to
+            # generate recovery/re-greeting text on the next turn instead
+            # of answering the user's original question.
             history.append({"role": "user", "content": user_content})
-            history.append({"role": "assistant", "content": full_response})
+            if full_response:
+                history.append({"role": "assistant", "content": full_response})
             # Keep last 12 messages (6 turns)
             if len(history) > 12:
                 history = history[-12:]

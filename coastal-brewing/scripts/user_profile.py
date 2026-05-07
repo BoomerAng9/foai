@@ -85,6 +85,18 @@ def _conn() -> Iterator[Any]:
             "Set the env var on coastal-runner to enable."
         )
     c = p.getconn()
+    # Test the connection before handing it to the caller. Neon serverless
+    # drops idle SSL connections; a stale connection from the pool returns
+    # psycopg2.OperationalError on the first cursor execute. Detect it here
+    # and swap in a fresh connection so callers never see a stale-conn error.
+    try:
+        c.cursor().execute("SELECT 1")
+    except Exception:
+        try:
+            p.putconn(c, close=True)
+        except Exception:
+            pass
+        c = p.getconn()
     try:
         yield c
     finally:

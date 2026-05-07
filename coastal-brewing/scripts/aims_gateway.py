@@ -56,46 +56,35 @@ GATEWAY_API_KEY = (
 ).strip()
 
 # Per-surface model registry. Surface key → OpenRouter model ID.
-# Reverted 2026-05-07: Sal back on Nemotron-Super (fast, free tier).
+# Updated 2026-05-07: full multi-model routing, no Anthropic.
 SURFACE_MODELS: Dict[str, str] = {
-    # Coastal customer chat — original fast path via OpenRouter
-    "coastal_chat_retail":     "deepseek/deepseek-v4-flash",                # Sal, LUC, Marcus — multimodal
-    "coastal_chat_reasoning":  "deepseek/deepseek-v4-pro",                  # Melli, ACHEEVY — reasoning
-    # Brand-voice + transactional
-    "welcome_message":         "deepseek/deepseek-v4-flash",
-    "transactional_short":     "deepseek/deepseek-v4-flash",
-    "json_chat_fallback":      "deepseek/deepseek-v4-flash",
+    # Coastal customer chat
+    "coastal_chat_retail":     "deepseek/deepseek-v4-flash",                # Sal, LUC, Marcus — multimodal, 1M ctx
+    "coastal_chat_reasoning":  "x-ai/grok-4.20",                            # Melli, ACHEEVY — newest Grok, multimodal reasoning
+    # Brand-voice + transactional (short, cheap)
+    "welcome_message":         "z-ai/glm-4.7-flash",                        # $0.06/$0.40 — brand voice copy
+    "transactional_short":     "z-ai/glm-4.7-flash",
+    "json_chat_fallback":      "z-ai/glm-4.7-flash",
     # Summarization + research
-    "session_summary":         "deepseek/deepseek-v4-flash",
-    "research_synthesis":      "deepseek/deepseek-v4-pro",
-    # Frontier — agent orchestration earns its cost
-    "agent_orchestration":     "anthropic/claude-sonnet-4-6",
-    "linkedin_maps_agent":     "anthropic/claude-sonnet-4-6",
-    "code_generation":         "anthropic/claude-sonnet-4-6",
-    "structured_evaluation":   "anthropic/claude-sonnet-4-6",
-    # Spinner — agent-commissioned site-action runtime (Kodee-shaped).
-    # Sonnet 4-6 for tool-use accuracy; Spinner runs multi-step cart/nav
-    # loops and a wrong call touches real cart state.
-    "spinner_execution":       "anthropic/claude-sonnet-4-6",
-    # Iller_Ang prompt composition — strong visual reasoning for the
-    # 4-step pipeline. Image gen itself stays direct-to-Kie.ai; this
-    # surface is only the LLM that *composes* the prompt.
-    "iller_ang_visual":        "anthropic/claude-sonnet-4-6",
-    # Candidate-model surfaces — added 2026-05-06 to keep optionality
-    # accessible by canonical surface key. Use these when a caller
-    # explicitly wants to route through a specific candidate model
-    # without going through model_id() lookup.
-    "code_generation_kimi":    "deepinfra/kimi-k2-6",                # agentic coding A/B vs Sonnet
-    "research_kimi_long_ctx":  "deepinfra/kimi-k2-6",                # 256k ctx for long-source research
-    "auto_cheap":              "fireworks/minimax-m2-7",             # explicit cost-floor pick
-    "bilingual_chat":          "deepinfra/glm-4.6",                  # future international Coastal
-    "realtime_data_agent":     "xai/grok-4",                         # future social/news monitoring
-    "structured_evaluation_mistral":  "mistral/mistral-large-3",     # cost-cheaper Sonnet alternative
-    "frontier_reasoning":      "anthropic/claude-opus-4-7",          # only for tasks Sonnet can't handle
-    "vision_chat":             "google-ai-studio/gemini-3.1-flash-image-preview",  # multimodal Flash
-    "long_context_pro":        "google-ai-studio/gemini-3.1-pro",    # long-context Pro reasoning
-    "openai_default":          "openai/gpt-5.5",                     # GPT 5.5 access
-    # Auto-routing — Inworld picks cost-optimized
+    "session_summary":         "google/gemma-4-31b-it:free",                 # free tier, background task
+    "research_synthesis":      "moonshotai/kimi-k2.6",                       # 262K ctx, strong research
+    # Agent orchestration + code — fast, large ctx, no Anthropic
+    "agent_orchestration":     "x-ai/grok-4-fast",                          # 2M ctx, fast orchestration
+    "linkedin_maps_agent":     "x-ai/grok-4-fast",
+    "code_generation":         "x-ai/grok-code-fast-1",                     # code-specific Grok
+    "structured_evaluation":   "nvidia/nemotron-3-super-120b-a12b",          # $0.09/$0.45, 262K ctx
+    # Spinner — Gemini 3.1 Flash Lite: function calling first-class, low ctx, fast, accurate
+    "spinner_execution":       "google/gemini-3.1-flash-lite-preview",
+    # Visual reasoning for Iller_Ang prompt composition
+    "iller_ang_visual":        "google/gemini-3.1-flash-lite-preview",       # multimodal vision
+    # Candidate surfaces
+    "research_kimi_long_ctx":  "moonshotai/kimi-k2.6",
+    "bilingual_chat":          "z-ai/glm-4.7",
+    "realtime_data_agent":     "x-ai/grok-4-fast",
+    "vision_chat":             "google/gemini-3.1-flash-lite-preview",
+    "long_context_pro":        "google/gemini-3.1-pro-preview",
+    "openai_default":          "openai/gpt-5.5",
+    "frontier_reasoning":      "x-ai/grok-4.20",                            # replaces Anthropic Opus
     "auto":                    "auto",
 }
 
