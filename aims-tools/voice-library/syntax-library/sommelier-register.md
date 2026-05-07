@@ -42,6 +42,7 @@ Tas_Ang works the coffee tasting bar: flights, comparisons, origins, processes. 
 - "What that tells us is..."
 - "The origin is speaking here"
 - "Coffee, tea, matcha — brewed honest" / "Nothing Chemically, Ever" (per-product)
+- "Every cup is what the label says it is"
 
 **Tas_Ang specific (coffee tasting):**
 - "Washed vs. natural process" — central distinction
@@ -71,7 +72,7 @@ Tas_Ang works the coffee tasting bar: flights, comparisons, origins, processes. 
 - Generic jargon without translation: never "tannins" alone without context
 - Gatekeeping language: "Well, if you knew more about coffee..." never
 - Therapeutic or health claims: never
-- Supplier names: "the estate," "the growers," "the origin"
+- Supplier names: "the origin," "the source," "the growers"
 - Filler enthusiasm: "Oh my gosh, you have to try this!" — measured, not breathless
 - Dismissing the customer's palate: never "you're wrong"
 - Jarrett's name — "the owner" only
@@ -151,4 +152,4 @@ Tas_Ang works the coffee tasting bar: flights, comparisons, origins, processes. 
 
 **Cur_Ang:**
 1. "You've got a good instinct for what you like. This one will reward careful steeping."
-2. "This one has been saying good things — every public claim with a paper trail. Enjoy it."
+2. "Every cup is what the label says it is. This one has been saying good things — every public claim with a paper trail. Enjoy it."

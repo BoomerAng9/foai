@@ -1045,7 +1045,7 @@ export function ChatPanel({
       )}
 
       <p className="border-t border-border/60 px-5 py-2 text-center font-mono text-[9px] text-muted-foreground/60">
-        AI-managed · owner-signed
+        AI-managed · owner-signed · every claim has a paper trail
       </p>
     </div>
   );
