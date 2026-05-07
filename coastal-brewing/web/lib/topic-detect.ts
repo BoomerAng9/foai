@@ -25,7 +25,11 @@ const MUSHROOM_PATTERNS: RegExp[] = [
 const COFFEE_PATTERNS: RegExp[] = [
   /\bcoffee\b/i, /\bespresso\b/i, /\broast\w*\b/i, /\bblend\b/i, /\bdecaf\b/i,
   /\bk[\s-]?cup\b/i, /\barabica\b/i, /\bsingle[\s-]?origin\b/i, /\bcold[\s-]?brew\b/i,
-  /\bbarista\b/i, /\bbrewing\b/i, /\bdrip\b/i,
+  /\bbarista\b/i, /\bbrew\w*\b/i, /\bdrip\b/i,
+  /\bbean\w*\b/i, /\bground\b/i, /\bgrind\w*\b/i,
+  /\bturkish\b/i, /\bsaudi\b/i, /\barabic\b/i, /\bcardamom\b/i,
+  /\bpour[\s-]?over\b/i, /\bfrench[\s-]?press\b/i, /\bmoka\b/i, /\baeropress\b/i,
+  /\bportafilter\b/i,
 ];
 
 function score(text: string, patterns: RegExp[]): number {
@@ -53,8 +57,31 @@ export function detectTopic(
   recentMessages: { role: string; content: string }[],
   windowSize = 6,
 ): TopicSnapshot {
+  // First pass: score the LATEST user message on its own. If it has an
+  // unambiguous winner, use it. This prevents stale prior context (e.g.
+  // a long tea-heavy thread) from drowning out a clear topic switch in
+  // the user's newest turn.
+  const latestUser = [...recentMessages].reverse().find((m) => m.role === "user");
+  if (latestUser) {
+    const luText = latestUser.content || "";
+    const luScores: Record<ChatTopic, number> = {
+      coffee: score(luText, COFFEE_PATTERNS),
+      tea: score(luText, TEA_PATTERNS),
+      matcha: score(luText, MATCHA_PATTERNS),
+      mushroom: score(luText, MUSHROOM_PATTERNS),
+      unknown: 0,
+    };
+    const luRanked = (Object.entries(luScores) as [ChatTopic, number][])
+      .sort((a, b) => b[1] - a[1]);
+    const [luWinner, luScore] = luRanked[0];
+    const [, luSecond] = luRanked[1];
+    // Unambiguous = new message has at least one match AND a clear leader.
+    if (luScore > 0 && luScore > luSecond) {
+      return { topic: luWinner, scores: luScores };
+    }
+  }
+  // Fallback: weighted window across the last N messages.
   const window = recentMessages.slice(-windowSize);
-  // Recency weighting — newest message counts the most.
   const scores: Record<ChatTopic, number> = {
     coffee: 0, tea: 0, matcha: 0, mushroom: 0, unknown: 0,
   };
@@ -66,7 +93,6 @@ export function detectTopic(
     scores.matcha   += score(text, MATCHA_PATTERNS) * weight;
     scores.mushroom += score(text, MUSHROOM_PATTERNS) * weight;
   });
-  // Pick the leader.
   const ranked = (Object.entries(scores) as [ChatTopic, number][])
     .sort((a, b) => b[1] - a[1]);
   const [winner, winnerScore] = ranked[0];
