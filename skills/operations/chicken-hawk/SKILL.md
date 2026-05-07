@@ -38,8 +38,3 @@ compatibility:
 - **Dispatches:** Lil_Hawks (all classes), Cyber Hawks (all classes).
 - **Does NOT dispatch:** Boomer_Angs, Coastal cast, Roo's directly (Roo's are Coastal-vertical and dispatched by Sal / LP_Ang for retail-floor LP; transfer to Cyber Hawks happens via skill load, not Chicken Hawk).
 
-## References
-
-- `references/dispatch-protocol.md`
-- `references/parallelism-budgeting.md`
-- `references/cyber-hawk-policy.md`

@@ -47,9 +47,3 @@ compatibility:
 - **Shoes:** Mauri sneakers (luxury exotic leather).
 - **Wrist:** Apple Watch or CMF (Nothing).
 
-## References
-
-- `references/lu-cal-calculator.md`
-- `references/coupon-policy.md`
-- `references/visual-canon.md`
-- `references/voice-canon.md` (Brooklyn-fluent CPA precision, swagger-laced)

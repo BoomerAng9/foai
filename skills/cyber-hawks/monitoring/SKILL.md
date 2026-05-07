@@ -42,7 +42,3 @@ A Roo loaded with `cyber-hawks/monitoring` watches Coastal-vertical
 surfaces during retail peak hours; on session close, returns to LP
 context.
 
-## References
-
-- `references/alert-thresholds.md`
-- `references/runbooks.md`

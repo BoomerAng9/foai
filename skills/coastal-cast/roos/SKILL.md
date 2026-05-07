@@ -48,8 +48,3 @@ FOAI-RUNTIME-001.
 - **Reports to:** Sal (during LP escalation) → Marcus / LP_Ang (during lp_active state) → ACHEEVY (final exit).
 - **Spawned by:** Sal's escalation trigger via `/api/v1/loss-prevention/event`.
 
-## References
-
-- `references/three-step-assist.md`
-- `references/transferability-protocol.md`
-- `references/refuse-list.md`

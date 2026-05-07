@@ -45,8 +45,3 @@ If two BG `SKILL.md` descriptions both match the same trigger pattern,
 Melli's dispatcher routes to ACHEEVY for tiebreak instead of guessing.
 Validator flags overlapping descriptions at PR time (Gate 1 sub-check).
 
-## References
-
-- `references/sett-roster.md` — current BG specializations
-- `references/equation.md` — discount brackets
-- `references/influencer-engagement-canon.md` (Persona Tah)

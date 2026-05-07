@@ -43,6 +43,48 @@ HTTPS / Pub/Sub interfaces).
 | **Commonground core** | Tier 3 | Shared substrate for cross-vertical state, identity, and policy primitives. |
 | **ii-commons** | Tier 3 | Shared utilities + helpers used across ii-agent / ii-researcher and any FOAI vertical that needs them. |
 
+## Runtime vendor-diversity amendment (CANON)
+
+001 wrote each tier as Anthropic-only by default — Claude Code on the
+Web, Claude Managed Agents, Claude Agent SDK on GCP. That choice was
+made because Anthropic shipped the Skills pattern + the managed runtime
+first, not because the architecture requires Anthropic.
+
+**The Skills bundle is vendor-neutral.** SKILL.md is plain markdown with
+strict frontmatter; tools are Python / shell / JS. Any model with
+tool-use semantics (Anthropic, Google Gemini, xAI Grok, DeepSeek, Kimi,
+GLM, Nemotron, Mistral, OpenAI) reads the same bundle.
+
+**Therefore:** the runtime tiers may be vendor-diverse. The bundle is
+the contract; the tier picks the runtime that fits the workload AND the
+cost envelope AND the regulatory posture.
+
+| Tier | Anthropic option | Vendor-diverse alternatives |
+|---|---|---|
+| **Tier 1** (mobile console) | Claude Code on the Web (`claude.com/code`) | Browser-accessible orchestrator on `hawk.foai.cloud` driven by AIMS gateway (any OpenRouter model — Grok 4.20, Opus 4.7, Gemini 3.1 Pro, etc.); Telegram bot routing to ACHEEVY through AIMS gateway |
+| **Tier 2** (headless fleet) | Claude Managed Agents (beta) | Self-hosted Agent SDK runtime on `aims-vps` or `foai-aims` GCP, model selection per surface via AIMS gateway (DeepSeek V4 Flash for Sal/LUC/Marcus, Grok 4.20 for Melli/ACHEEVY reasoning, Grok 4 Fast for orchestration, Gemini 3.1 Flash Lite for tool-loop, Nemotron Super 120B for evals) |
+| **Tier 3** (self-hosted) | Claude Agent SDK on GCP | Already vendor-neutral — Cloud Run / GKE Autopilot supports any SDK; ii-agent / ii-researcher run on whichever model the workload calls for |
+| **AVVA NOON** intelligence layer | Sonnet / Opus / Haiku routing | Cross-vendor model selection via AIMS gateway routing matrix |
+
+**What stays Anthropic-only:** Tier 1 ACHEEVY console MAY use
+`claude.com/code` for the operator's convenience (it's a hosted
+Claude Code surface) — but that's a UI choice, not an architectural
+lock. The same skills bundle drives any equivalent UI.
+
+**What stays vendor-neutral:** the bundle, the sync pipeline, the
+audit ledger, NemoClaw policy, every Tier 3 engine, AVVA NOON's model
+selection, every cost-meter envelope.
+
+**Cost-discipline rule (canon):** when multiple vendors expose
+equivalent capability, pick the one that fits the per-task economic
+case. Default to AIMS gateway routing matrix unless a workload's
+regulatory posture or capability ceiling demands a specific vendor.
+
+**Voice canon stays untouched:** Inworld TTS-2 + Inworld STT
+(`groq/whisper-large-v3`) only. ElevenLabs forbidden. HeyGen forbidden.
+Web Speech API forbidden. Per
+`feedback_voice_canon_inworld_only_no_elevenlabs_2026_05_07.md`.
+
 ## Cross-tier accessibility rule (canonical)
 
 Every Tier 3 engine in the roster (the existing six plus the four added

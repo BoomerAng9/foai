@@ -43,7 +43,3 @@ Audit Hawk for that session. Roo's Coastal-vertical memory mounts
 read-only; Cyber Audit Hawk memory mounts read-write. Returns to Roo
 context on session close.
 
-## References
-
-- `references/audit-checklist.md`
-- `references/cve-policy.md`

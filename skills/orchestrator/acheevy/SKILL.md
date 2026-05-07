@@ -42,8 +42,3 @@ compatibility:
 - **Dispatches:** Boomer_Angs (Tier 2), Chicken Hawk (Tier 2), LUC (Tier 2 vertical), Melli (Tier 2 vertical), Sal (Tier 2 vertical).
 - **Cross-tier reach:** every Tier 3 engine through NemoClaw policy gate.
 
-## References
-
-- `references/voice-canon.md`
-- `references/escalation-protocol.md`
-- `references/sacred-separation.md`

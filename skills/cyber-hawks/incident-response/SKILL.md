@@ -35,8 +35,3 @@ compatibility:
 - **Receives transfers from:** Roo's loaded with this skill (for Coastal-vertical incidents — supplier breach, payment-flow compromise, etc.).
 - **Reports to:** Chicken Hawk dispatch queue + ACHEEVY (postmortem co-sign).
 
-## References
-
-- `references/triage-runbook.md`
-- `references/evidence-policy.md`
-- `references/dispatch-token-spec.md`
