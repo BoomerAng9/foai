@@ -85,19 +85,24 @@ BRAND_PREFIX = (
     "Carolina coffee + tea + matcha brand. MATCH THE REFERENCE IMAGE EXACTLY "
     "— same outdoor Lowcountry coastal setting (lakefront or marsh visible in "
     "background), same warm golden daylight (late-afternoon, soft, airy), "
-    "same kraft-paper bag form with wide cream-parchment label, same dark "
-    "wood bar or shelf the product sits on, same atmospheric props (palm "
-    "tree fronds, Spanish moss draping, copper pot, ceramic cup with diamond "
-    "pattern, scattered coffee beans, wooden bowl). The brand mark is a "
-    "FLYING STORK (wings up, vintage engraving style) in dark sepia ink — "
-    "NEVER a palm tree, NEVER any other icon. The product label uses "
-    "heavy-serif COASTAL / BREWING / CO. wordmark beneath the stork. Wooden "
-    "frame visible behind product reads 'COFFEE. TEA. MATCHA. PURPOSE.' with "
-    "a small carved stork. Background: Lowcountry lakefront or marsh, palm "
-    "trees, Spanish moss, soft warm sky. Tagline 'Nothing chemically, ever.' "
-    "may appear on the product label. Square 1:1 framing. Hero product "
-    "center-frame. Style is warm + premium + Lowcountry editorial — the "
-    "polar opposite of bright clinical white-bg e-commerce. Exact product:\n\n"
+    "same dark wood bar or shelf the product sits on, same atmospheric props "
+    "(palm tree fronds, Spanish moss draping, copper pot, ceramic cup with "
+    "diamond pattern, wooden bowl). The brand mark is a FLYING STORK (wings "
+    "up, vintage engraving style) in dark sepia ink — NEVER a palm tree, "
+    "NEVER any other icon. The product label uses heavy-serif COASTAL / "
+    "BREWING / CO. wordmark beneath the stork. Wooden frame visible behind "
+    "product reads 'COFFEE. TEA. MATCHA. PURPOSE.' with a small carved "
+    "stork. Background: Lowcountry lakefront or marsh, palm trees, Spanish "
+    "moss, soft warm sky. Tagline 'Nothing chemically, ever.' may appear on "
+    "the product label. Square 1:1 framing. Hero product center-frame. "
+    "Style is warm + premium + Lowcountry editorial — the polar opposite of "
+    "bright clinical white-bg e-commerce. The PACKAGING FORM and the "
+    "SCATTERED CONTENT on the table must match the actual product type "
+    "specified below — coffee bag with coffee beans for coffee, cylindrical "
+    "tin with loose tea leaves for tea, vivid bright-green matcha powder + "
+    "bamboo whisk for matcha, mushroom slices alongside the appropriate "
+    "scatter for functional blends. Never put coffee beans next to a tea "
+    "tin and vice versa. Exact product:\n\n"
 )
 
 
@@ -115,7 +120,50 @@ def _build_prompt(sku_id: str, p: dict) -> str:
     size = p.get("size", "")
     roast = p.get("roast_level", "")
 
-    if category in ("coffee", "flavored_coffee", "specialty_coffee", "functional"):
+    # Functional blends are coffee/tea/matcha + medicinal mushrooms in a
+    # kraft bag (owner directive 2026-05-05: all functional SKUs are bags,
+    # not tins). Detect the underlying base from the SKU id so the
+    # SCATTERED content on the table matches what's INSIDE the bag — coffee
+    # beans for coffee+mushroom, tea leaves for hojicha/tea+mushroom, vivid
+    # green matcha powder for matcha+mushroom — paired with a sliced
+    # lion's-mane / cordyceps / reishi mushroom cap on the table.
+    sku_lower = sku_id.lower()
+
+    if category == "functional":
+        if "matcha" in sku_lower:
+            scatter = (
+                "A small heap of vivid bright-green matcha powder spilled "
+                "from a wooden scoop next to the bag, plus a sliced "
+                "lion's-mane mushroom cap (white, shaggy, vintage-engraved "
+                "look) on the table. NO coffee beans visible."
+            )
+        elif "hojicha" in sku_lower or "tea" in sku_lower:
+            scatter = (
+                "Loose roasted hojicha-style brown tea leaves scattered "
+                "prominently on the dark wood at the base of the bag, "
+                "alongside a sliced cordyceps or reishi mushroom cap. NO "
+                "coffee beans visible — this is a tea-base blend."
+            )
+        else:
+            scatter = (
+                "A handful of glossy dark coffee beans scattered at the "
+                "base of the bag, alongside a sliced lion's-mane mushroom "
+                "cap (white, shaggy). The mushroom is the visual cue that "
+                "this is a functional / adaptogenic blend, not a regular "
+                "coffee bag."
+            )
+        bag_form = (
+            f"a kraft-paper coffee bag with tin-tie top sitting on a dark "
+            f"polished-wood bar. The bag's cream-parchment label is "
+            f"centered and shows the flying-stork mark above heavy-serif "
+            f"COASTAL / BREWING / CO. wordmark. Below the wordmark, the "
+            f"product name reads '{name}'"
+            f"{f', net wt {size}' if size else ''}"
+            f"{f' — {roast} roast' if roast else ''}"
+            f". {scatter} Behind the bag, more kraft bags are softly "
+            f"visible on dark wood shelves under amber Edison light."
+        )
+    elif category in ("coffee", "flavored_coffee", "specialty_coffee"):
         bag_form = (
             f"a kraft-paper coffee bag with tin-tie top, sitting on a dark "
             f"polished-wood bar. The bag's cream-parchment label is centered "
@@ -124,25 +172,36 @@ def _build_prompt(sku_id: str, p: dict) -> str:
             f"reads '{name}'"
             f"{f', net wt {size}' if size else ''}"
             f"{f' — {roast} roast' if roast else ''}"
-            f". Behind the bag, more kraft bags and cream metal tins are "
-            f"softly visible on dark wood shelves under amber Edison light."
+            f". A handful of glossy dark coffee beans is scattered "
+            f"prominently on the dark wood at the base of the bag — clearly "
+            f"COFFEE BEANS, not tea or other content. Behind the bag, more "
+            f"kraft coffee bags are softly visible on dark wood shelves "
+            f"under amber Edison light."
         )
     elif category == "tea":
         bag_form = (
             f"a cream cylindrical metal tin sitting on a dark polished-wood "
             f"bar. The tin's label shows the flying-stork mark above "
             f"COASTAL / BREWING / CO. with the product name '{name}'"
-            f"{f', net wt {size}' if size else ''} below. Loose tea leaves "
-            f"are scattered at the base of the tin. Background: more cream "
-            f"tins in a row, dark wood shelves, warm amber light."
+            f"{f', net wt {size}' if size else ''} below. Loose dry tea "
+            f"leaves — NOT coffee beans — are scattered prominently in the "
+            f"foreground on the dark wood at the base of the tin. The tea "
+            f"leaves should match the variety in the name: green tea leaves "
+            f"for jasmine / green / matcha-leaf, dark twisted leaves for "
+            f"black tea / English breakfast / earl grey, fluffy red rooibos "
+            f"strands for rooibos, dried hibiscus petals for hibiscus, "
+            f"dried mint leaves for moroccan mint, etc. Background: more "
+            f"cream tins in a row, dark wood shelves, warm amber light."
         )
     elif category == "matcha":
         bag_form = (
             f"a cream cylindrical metal tin (slightly stubbier than the tea "
-            f"tins) on a dark wood bar, with a small wooden chasen whisk and "
-            f"a shallow ceramic bowl of bright vivid-green matcha powder "
-            f"alongside. The tin's label shows the flying-stork mark above "
-            f"COASTAL / BREWING / CO. with '{name}'"
+            f"tins) on a dark wood bar, with a small wooden chasen bamboo "
+            f"whisk and a shallow ceramic matcha bowl beside it. A small "
+            f"heap of vivid bright-green matcha powder is mounded on the "
+            f"dark wood next to the tin — clearly MATCHA POWDER, not coffee "
+            f"beans, not tea leaves. The tin's label shows the flying-stork "
+            f"mark above COASTAL / BREWING / CO. with '{name}'"
             f"{f', net wt {size}' if size else ''} below. Warm amber light, "
             f"deep shadows."
         )
@@ -458,6 +517,12 @@ def cmd_single(args):
 
 def cmd_batch(args):
     skus = _all_skus() if getattr(args, "all_skus", False) else _missing_skus()
+    # Optional category filter — comma-separated, e.g. "tea,functional,matcha"
+    cats = getattr(args, "categories", "") or ""
+    if cats:
+        wanted = {c.strip().lower() for c in cats.split(",") if c.strip()}
+        skus = [(sku_id, p) for (sku_id, p) in skus if (p.get("category") or "").lower() in wanted]
+        print(f"[filter] keeping categories {sorted(wanted)} -> {len(skus)} SKUs")
     cost = len(skus) * PRICE_PER_IMAGE_USD
     print(f"BATCH: {len(skus)} images, ~${cost:.2f}")
     if not args.yes:
@@ -540,6 +605,7 @@ def main():
     p_batch.add_argument("--yes", action="store_true", help="confirm spend")
     p_batch.add_argument("--concurrency", type=int, default=4)
     p_batch.add_argument("--force", action="store_true", help="overwrite existing files (regenerate)")
+    p_batch.add_argument("--categories", default="", help="comma-separated category filter (e.g. tea,matcha,functional)")
     p_batch.set_defaults(func=cmd_batch, missing_only=True)
 
     # Top-level shorthand
@@ -550,6 +616,7 @@ def main():
     ap.add_argument("--all", dest="all_skus", action="store_true", help="all SKUs, not just missing")
     ap.add_argument("--concurrency", type=int, default=4)
     ap.add_argument("--force", action="store_true")
+    ap.add_argument("--categories", default="", help="comma-separated category filter (e.g. tea,matcha,functional)")
 
     args = ap.parse_args()
 

@@ -46,26 +46,28 @@ log = logging.getLogger("aims.gateway")
 # ─── Configuration ──────────────────────────────────────────────────────
 
 GATEWAY_BASE_URL = os.environ.get(
-    "AIMS_GATEWAY_URL", "https://api.inworld.ai/v1"
+    "AIMS_GATEWAY_URL", "https://openrouter.ai/api/v1"
 ).rstrip("/")
-# Reuses the existing Inworld API key — same vendor, same auth path.
-GATEWAY_API_KEY = os.environ.get("INWORLD_API_KEY", "").strip()
+# OpenRouter is the primary gateway (original pre-2026-05-06 path).
+# Falls back to INWORLD_API_KEY for Inworld-specific surfaces if needed.
+GATEWAY_API_KEY = (
+    os.environ.get("OPENROUTER_API_KEY", "")
+    or os.environ.get("INWORLD_API_KEY", "")
+).strip()
 
-# Per-surface model registry. Caller passes a `surface` key, gateway
-# resolves to the locked Inworld model name. Keeps model selection
-# centralized — when the matrix changes, edit this dict, not every
-# call site. Owner-greenlit 2026-05-06.
+# Per-surface model registry. Surface key → OpenRouter model ID.
+# Reverted 2026-05-07: Sal back on Nemotron-Super (fast, free tier).
 SURFACE_MODELS: Dict[str, str] = {
-    # Coastal customer chat
-    "coastal_chat_retail":     "google-vertex/gemma-4-26b-a4b",      # Sal, LUC
-    "coastal_chat_reasoning":  "deepinfra/deepseek-v4-pro",            # Melli, ACHEEVY — bumped from v3 to v4-pro 2026-05-06 per "always-newest" canon
+    # Coastal customer chat — original fast path via OpenRouter
+    "coastal_chat_retail":     "deepseek/deepseek-v4-flash",                # Sal, LUC, Marcus — multimodal
+    "coastal_chat_reasoning":  "deepseek/deepseek-v4-pro",                  # Melli, ACHEEVY — reasoning
     # Brand-voice + transactional
-    "welcome_message":         "google-vertex/gemma-4-26b-a4b",
-    "transactional_short":     "google-vertex/gemma-4-26b-a4b",
-    "json_chat_fallback":      "google-vertex/gemma-4-26b-a4b",
+    "welcome_message":         "deepseek/deepseek-v4-flash",
+    "transactional_short":     "deepseek/deepseek-v4-flash",
+    "json_chat_fallback":      "deepseek/deepseek-v4-flash",
     # Summarization + research
-    "session_summary":         "google-ai-studio/gemini-3.1-flash-lite-preview",
-    "research_synthesis":      "google-vertex/gemma-4-26b-a4b",
+    "session_summary":         "deepseek/deepseek-v4-flash",
+    "research_synthesis":      "deepseek/deepseek-v4-pro",
     # Frontier — agent orchestration earns its cost
     "agent_orchestration":     "anthropic/claude-sonnet-4-6",
     "linkedin_maps_agent":     "anthropic/claude-sonnet-4-6",
