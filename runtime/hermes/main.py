@@ -44,6 +44,22 @@ app.include_router(memory_routes.router)
 app.include_router(hr_pmo.router)
 
 
+@app.get("/")
+async def landing():
+    return {
+        "service": "hermes-learnang",
+        "engine": "LearnAng Deep Think V0.5",
+        "version": VERSION,
+        "description": (
+            "Multi-model consensus evaluation engine for FOAI-AIMS. "
+            "All evaluation, memory, history, and trends endpoints require "
+            "a Bearer API key. See /health for service liveness."
+        ),
+        "health": "/health",
+        "support": "acheevy@aimanagedsolutions.cloud",
+    }
+
+
 @app.get("/health")
 async def health():
     return {
