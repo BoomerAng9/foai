@@ -9,8 +9,8 @@
   "scripts": {
     "build": "tsc",
     "build:watch": "tsc --watch",
-    "deploy": "firebase deploy --only functions:sendEmail --project foai-aims",
-    "logs": "firebase functions:log --project foai-aims",
+    "deploy": "firebase deploy --only functions:sendEmail --project ai-managed-services",
+    "logs": "firebase functions:log --project ai-managed-services",
     "lint": "eslint --ext .ts .",
     "serve": "npm run build && firebase emulators:start --only functions"
   },

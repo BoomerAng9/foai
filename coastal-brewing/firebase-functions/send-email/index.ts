@@ -3,7 +3,7 @@
  *
  * Owner directive 2026-05-06: email automation routes through GCP /
  * Firebase, NOT direct third-party APIs from coastal-runner. This
- * function lives in the foai-aims Firebase project, owns the SendGrid
+ * function lives in the ai-managed-services Firebase project, owns the SendGrid
  * integration, and is called by coastal-runner via HTTPS.
  *
  * Auth: HMAC-SHA256(body) using COASTAL_EMAIL_FUNCTION_SECRET, sent in
@@ -22,10 +22,10 @@
  * Deploy:
  *  cd coastal-brewing/firebase-functions/send-email
  *  npm install
- *  firebase deploy --only functions:sendEmail --project foai-aims
+ *  firebase deploy --only functions:sendEmail --project ai-managed-services
  *
  * After deploy, set env on coastal-runner:
- *  COASTAL_EMAIL_FUNCTION_URL=https://<region>-foai-aims.cloudfunctions.net/sendEmail
+ *  COASTAL_EMAIL_FUNCTION_URL=https://<region>-ai-managed-services.cloudfunctions.net/sendEmail
  *  COASTAL_EMAIL_FUNCTION_SECRET=<random hex 64>
  *  (function secret env via `firebase functions:secrets:set ...`)
  */

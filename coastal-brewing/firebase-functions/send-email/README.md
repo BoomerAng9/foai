@@ -13,7 +13,7 @@ the body to SendGrid's v3 mail-send API. Returns `{ok, message_id}` on
 
 ## Deploy (one-time)
 
-Prereqs: Firebase CLI authenticated, on the `foai-aims` Firebase project.
+Prereqs: Firebase CLI authenticated, on the `ai-managed-services` Firebase project.
 
 ```bash
 cd coastal-brewing/firebase-functions/send-email
@@ -21,23 +21,23 @@ npm install
 npm run build
 
 # Set the SendGrid API key as a Firebase secret
-firebase functions:secrets:set SENDGRID_API_KEY --project foai-aims
+firebase functions:secrets:set SENDGRID_API_KEY --project ai-managed-services
 
 # Set the HMAC secret (must match COASTAL_EMAIL_FUNCTION_SECRET in coastal-runner)
-firebase functions:secrets:set COASTAL_EMAIL_FUNCTION_SECRET --project foai-aims
+firebase functions:secrets:set COASTAL_EMAIL_FUNCTION_SECRET --project ai-managed-services
 
 npm run deploy
 ```
 
 After deploy, Firebase prints the function URL (e.g.
-`https://us-central1-foai-aims.cloudfunctions.net/sendEmail`).
+`https://us-central1-ai-managed-services.cloudfunctions.net/sendEmail`).
 
 ## Wire to coastal-runner
 
 Add to `/docker/coastal-brewing/.env`:
 
 ```
-COASTAL_EMAIL_FUNCTION_URL=https://us-central1-foai-aims.cloudfunctions.net/sendEmail
+COASTAL_EMAIL_FUNCTION_URL=https://us-central1-ai-managed-services.cloudfunctions.net/sendEmail
 COASTAL_EMAIL_FUNCTION_SECRET=<same hex value set as Firebase secret>
 COASTAL_EMAIL_FROM=Coastal Brewing Co. <coastal@brewing.foai.cloud>
 ```
