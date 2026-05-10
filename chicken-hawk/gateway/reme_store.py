@@ -37,17 +37,24 @@ _store: Optional[Any] = None
 _unavailable: bool = False
 
 
-def get_store() -> Optional[Any]:
-    """Return a ReMe app instance (canonical top-level class is ReMeApp).
+def get_app_class() -> Optional[Any]:
+    """Return the ReMeApp *class* (NOT an instance — instantiation deferred to Wave 2).
 
     Wave 1 minimal-init: verify reme_ai is importable and the canonical
     ReMeApp class is available. Actual store configuration (file vs vector
     backend, workspace dir) lands in Wave 2 when the routing flow wires
     `before_route` / `after_route` to call recall + store.
 
-    First call lazily initializes; subsequent calls reuse. On import
+    First call lazily resolves; subsequent calls reuse. On import
     failure, returns None. Callers treat None as "memory unavailable;
     proceed without recall."
+
+    Note: returns the CLASS reference, not an instance. Wave 2 callers
+    must instantiate (e.g. `app = ReMeApp(workspace=REME_LIGHT_DIR)`) once
+    backend config is finalized. `os.makedirs(REME_LIGHT_DIR)` is also
+    deferred to Wave 2 — running it here on import spammed
+    `reme_init_failed` warnings on dev shells where /data/reme isn't
+    writable.
     """
     global _store, _unavailable
     if _unavailable:
@@ -55,12 +62,8 @@ def get_store() -> Optional[Any]:
     if _store is not None:
         return _store
     try:
-        from reme_ai import ReMeApp  # type: ignore  # noqa: F401
-        os.makedirs(REME_LIGHT_DIR, exist_ok=True)
-        # Wave 1: just record that the class is reachable; defer instantiation
-        # until Wave 2 wires actual recall/store calls (instantiation requires
-        # backend-specific config that we'll drive from env in the next pass).
-        _store = ReMeApp  # store the class reference; instantiation happens lazily on first call
+        from reme_ai import ReMeApp  # type: ignore
+        _store = ReMeApp  # store the class reference; Wave 2 instantiates
         logger.info(
             "reme_available",
             backend=REME_BACKEND,
@@ -78,6 +81,11 @@ def get_store() -> Optional[Any]:
         return None
 
 
+# Backwards-compat shim — `get_store` was the original (misleading) name.
+# Existing call sites still work; new code should use `get_app_class()`.
+get_store = get_app_class
+
+
 def is_available() -> bool:
     """Cheap check: True if ReMe is installed and ReMeApp class is reachable."""
-    return get_store() is not None
+    return get_app_class() is not None
