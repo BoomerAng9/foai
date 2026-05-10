@@ -172,11 +172,13 @@ export function evaluateUserMessage(
   }
 
   // ── Strong intent — back to normal flow regardless of where we were.
+  // blockUpstream MUST be false here so the caller forwards the message
+  // to the LLM. Setting it to true silently dropped intent-bearing
+  // messages like "what coffees do you have?" with no reply.
   if (hasIntent(t)) {
     return {
       nextState: "normal",
-      blockUpstream: true /* will replay through normal LLM routing */,
-      // no emit — caller forwards user message upstream after state flip
+      blockUpstream: false,
       resetCounters: true,
     };
   }
@@ -190,7 +192,11 @@ export function evaluateUserMessage(
       const lowIntent =
         session.userMessagesSoFar >= thresholds.lowIntentMessageThreshold &&
         !session.intentEverDetected;
-      if (overTime || overReplies || lowIntent || isSmallTalk(t)) {
+      // Only fall to negotiation on hard signals (over-time, over-replies,
+      // accumulated low-intent). Small-talk on a fresh session goes to Sal —
+      // gate-keeping every "hi" with a scripted reply was killing first-turn
+      // engagement.
+      if (overTime || overReplies || lowIntent) {
         return {
           nextState: "negotiating",
           blockUpstream: true,

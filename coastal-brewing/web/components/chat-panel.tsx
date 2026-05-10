@@ -285,6 +285,8 @@ export function ChatPanel({
   }, [voiceAutoplay]);
 
   const wsRef = React.useRef<WebSocket | null>(null);
+  const wsMsgHandler = React.useRef<((evt: MessageEvent) => void) | null>(null);
+  const sendTimeoutRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
   const scrollRef = React.useRef<HTMLDivElement>(null);
   const transcriptRef = React.useRef<ChatMessage[]>([]);
   const pending = anim?.isThinking || (responseBuffer.length > 0);
@@ -306,6 +308,77 @@ export function ChatPanel({
       }
     }
   }, [messages, anim, responseBuffer]);
+
+  // ── Persistent WebSocket — connect on mount, auto-reconnect on close ──
+  // Owning the connection in a useEffect (not inside send()) eliminates
+  // race conditions: the WS is always ready; send() just uses wsRef.current.
+  React.useEffect(() => {
+    if (typeof window === "undefined") return;
+    let dead = false;
+    let pingInterval: ReturnType<typeof setInterval> | null = null;
+    let reconnectTimer: ReturnType<typeof setTimeout> | null = null;
+
+    function openWs() {
+      if (dead) return;
+      const wsToken = process.env.NEXT_PUBLIC_COASTAL_WS_TOKEN || "";
+      const url = `${getWsUrl()}${wsToken ? `?token=${wsToken}` : ""}`;
+      const ws = new WebSocket(url);
+      // Only adopt this socket as the active ref AFTER it opens, so a
+      // late onclose from a previously-closed socket can't clobber a
+      // newly-opened one (React Strict Mode double-invoke + tab-focus
+      // races both produce this pattern).
+      let myPing: ReturnType<typeof setInterval> | null = null;
+
+      ws.onopen = () => {
+        if (dead) { ws.close(); return; }
+        wsRef.current = ws;
+        myPing = setInterval(() => {
+          if (ws.readyState === WebSocket.OPEN) {
+            try { ws.send(JSON.stringify({ type: "ping" })); } catch { /* ignore */ }
+          }
+        }, 25000);
+        pingInterval = myPing;
+      };
+
+      ws.onmessage = (evt) => {
+        wsMsgHandler.current?.(evt);
+      };
+
+      ws.onclose = () => {
+        if (myPing) { clearInterval(myPing); myPing = null; }
+        // Only clear the ref if it's still pointing at THIS ws — otherwise
+        // a stale onclose from an earlier socket would null out the live one.
+        if (wsRef.current === ws) {
+          wsRef.current = null;
+          // Null the per-turn handler so a stale closure can't fire on the
+          // newly-opened socket (its `responseText` belongs to a dead turn).
+          wsMsgHandler.current = null;
+          setAnim(null);
+          setResponseBuffer("");
+          if (sendTimeoutRef.current) { clearTimeout(sendTimeoutRef.current); sendTimeoutRef.current = null; }
+          if (!dead) reconnectTimer = setTimeout(openWs, 1500);
+        }
+      };
+
+      ws.onerror = () => {
+        try { ws.close(); } catch { /* ignore */ }
+      };
+    }
+
+    openWs();
+
+    return () => {
+      dead = true;
+      if (pingInterval) clearInterval(pingInterval);
+      if (reconnectTimer) clearTimeout(reconnectTimer);
+      if (sendTimeoutRef.current) clearTimeout(sendTimeoutRef.current);
+      // Close the live ws if any. Don't null wsRef here — the ws.onclose
+      // handler does that conditionally so a late onclose can't clobber
+      // a freshly-mounted instance's ref (React Strict Mode pattern).
+      try { wsRef.current?.close(); } catch { /* ignore */ }
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // ── Server-driven greeting (replaces the hardcoded default above) ──
   // Calls GET /api/v1/users/greeting with credentials so the coastal_uid
@@ -514,25 +587,15 @@ export function ChatPanel({
     void send(label);
   }
 
-  // Token from env for WS auth
-  const wsToken = process.env.NEXT_PUBLIC_COASTAL_WS_TOKEN || "";
-
-  function connect(): Promise<WebSocket> {
-    return new Promise((resolve, reject) => {
-      const url = `${getWsUrl()}${wsToken ? `?token=${wsToken}` : ""}`;
-      const ws = new WebSocket(url);
-      ws.onopen = () => resolve(ws);
-      ws.onerror = () => reject(new Error("WebSocket connection failed"));
-    });
-  }
-
   async function send(explicit?: string) {
     // `explicit` is set when a button (path/preference) drives the send;
     // typed-input sends pass undefined and read from `input` state.
     const fromButton = typeof explicit === "string";
     const content = (fromButton ? explicit : input).trim();
-    if (!content || pending) return;
+    if (!content) return;
     if (lpSessionRef.current.state === "exit") return;
+    // Only block on pending when the WS is actively streaming a response.
+    if (pending && wsRef.current?.readyState === WebSocket.OPEN) return;
     if (!fromButton) setInput("");
     setWsError(null);
     setEscalationMsg(null);
@@ -589,47 +652,56 @@ export function ChatPanel({
       setMessages((m) => [...m, { role: "user", content, ts: Date.now() }]);
     }
 
-    // Connect (or reuse)
-    if (!wsRef.current || wsRef.current.readyState !== WebSocket.OPEN) {
-      setIsConnecting(true);
-      try {
-        wsRef.current = await connect();
-        setIsConnecting(false);
-      } catch (e) {
-        setIsConnecting(false);
-        setWsError("Could not connect. Falling back to standard chat.");
-        // Fallback to HTTP chat
-        await sendHttp(content);
-        return;
-      }
-
-      wsRef.current.onclose = () => { wsRef.current = null; };
+    // Explicit agent-request pre-route — detect direct asks to speak with
+    // a specific agent and pass desired_employee in the WS payload so the
+    // backend routes the LLM call correctly for THIS turn (setEmployee is
+    // async and would arrive too late). Frontend-side setEmployee is still
+    // useful to update the header label, but the backend-side routing is
+    // what actually picks the right system prompt.
+    let desiredEmployee: string | null = null;
+    const _bulkSignal = /\b(bulk|wholesale|b2b|corporate|catering|large order|50\s*unit|100\s*unit|12\+\s*unit|\bcase\b)/i.test(content);
+    const _melliSignal = /\b(melli|speak with melli|talk to melli|get melli)\b/i.test(content);
+    const _lucSignal = /\b(luc|lu-cal|run the numbers|billing|invoice|coupon code)\b/i.test(content);
+    const _whoSignal = /\bwho\b.{0,30}\b(speak|talk|handle|deal|help).{0,20}\b(bulk|wholesale|large|big order)\b/i.test(content);
+    if ((_bulkSignal || _melliSignal || _whoSignal) && employee === "sal_ang") {
+      desiredEmployee = "melli_capensi";
+    } else if (_lucSignal && employee === "sal_ang") {
+      desiredEmployee = "luc_ang";
     }
 
-    const ws = wsRef.current;
-    let thinkingBuffer = "";
+    // WS is managed by the persistent useEffect above — just use it.
+    if (!wsRef.current || wsRef.current.readyState !== WebSocket.OPEN) {
+      // Not ready yet (still connecting after auto-reconnect). Fall back to HTTP.
+      await sendHttp(content);
+      return;
+    }
+
     let responseText = "";
 
-    ws.onmessage = (evt) => {
-      const msg = JSON.parse(evt.data);
+    // Register per-turn message handler on the shared ref so the persistent
+    // WS can route incoming events to this turn's closure.
+    wsMsgHandler.current = (evt: MessageEvent) => {
+      let msg: Record<string, unknown>;
+      try { msg = JSON.parse(evt.data as string); } catch { return; }
 
       switch (msg.type) {
+        case "ping": case "pong": return; // keep-alive, ignore
+
         case "cup_metadata":
-          setEmployee(msg.employee);
+          setEmployee(msg.employee as string);
           setAnim({
-            type: msg.animation_type,
-            size: msg.animation_size,
-            employee: msg.employee,
+            type: msg.animation_type as string,
+            size: msg.animation_size as string,
+            employee: msg.employee as string,
             progress: 0,
             isThinking: true,
             isComplete: false,
-            estimatedTokens: msg.estimated_thinking_tokens,
+            estimatedTokens: msg.estimated_thinking_tokens as number,
             thinkingTokensReceived: 0,
           });
           break;
 
         case "thinking_token":
-          thinkingBuffer += msg.content;
           setAnim((prev) => {
             if (!prev) return prev;
             const received = (prev.thinkingTokensReceived || 0) + 1;
@@ -643,45 +715,57 @@ export function ChatPanel({
           break;
 
         case "response_token":
-          responseText += msg.content;
+          responseText += msg.content as string;
           setResponseBuffer(responseText);
           break;
 
         case "escalation_event":
-          // Internal routing still drives the AnimationRouter, but the customer
-          // never sees lieutenant names or routing reasons. Surface a single
-          // neutral signal so the user knows ACHEEVY is processing.
-          setEmployee(msg.to_employee);
+          setEmployee(msg.to_employee as string);
           setEscalationMsg("Sal thinking...");
           setTimeout(() => setEscalationMsg(null), 2500);
           break;
 
         case "response_complete":
-          // Commit the buffered response as a real message
-          setMessages((m) => [
-            ...m,
-            {
-              role: "agent",
-              employee: msg.employee,
-              content: responseText,
-              ts: Date.now(),
-            },
-          ]);
+          if (sendTimeoutRef.current) { clearTimeout(sendTimeoutRef.current); sendTimeoutRef.current = null; }
+          wsMsgHandler.current = null;
+          setMessages((m) => [...m, {
+            role: "agent" as const,
+            employee: msg.employee as string,
+            content: responseText,
+            ts: Date.now(),
+          }]);
           setResponseBuffer("");
           setAnim((prev) => prev ? { ...prev, isComplete: true } : prev);
           setTimeout(() => setAnim(null), 1500);
+          if (msg.next_employee) setEmployee(msg.next_employee as string);
           break;
 
         case "error":
-          setWsError(msg.message);
+          if (sendTimeoutRef.current) { clearTimeout(sendTimeoutRef.current); sendTimeoutRef.current = null; }
+          wsMsgHandler.current = null;
+          setWsError(msg.message as string);
           setAnim(null);
           setResponseBuffer("");
           break;
       }
     };
 
-    // Send the message
-    ws.send(JSON.stringify({ type: "user_message", content }));
+    // 45s safety timeout — if response_complete never arrives (model hung,
+    // network issue), unlock the input so the user can retry.
+    sendTimeoutRef.current = setTimeout(() => {
+      wsMsgHandler.current = null;
+      setAnim(null);
+      setResponseBuffer("");
+      setWsError("No response — tap to retry.");
+      sendTimeoutRef.current = null;
+    }, 45000);
+
+    // coastal-ws-v3 — persistent WS + clean error semantics + backend-side routing.
+    wsRef.current.send(JSON.stringify({
+      type: "user_message",
+      content,
+      desired_employee: desiredEmployee,
+    }));
   }
 
   // HTTP fallback when WS unavailable

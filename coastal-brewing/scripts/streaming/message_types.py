@@ -53,6 +53,7 @@ class WsResponseComplete(BaseModel):
     cost_usd_estimate: float
     employee: str
     tier: str
+    next_employee: Optional[str] = None  # set when Sal's reply signals a handoff
 
 
 class WsError(BaseModel):
@@ -67,6 +68,10 @@ class WsUserMessage(BaseModel):
     content: str
     conversation_id: Optional[str] = None
     interrupt_current: bool = False
+    # Frontend can hint a specific agent for this turn (e.g. user typed
+    # "let me talk to Melli" → desired_employee="melli_capensi"). Backend
+    # respects it when valid. Falls back to current handler-state employee.
+    desired_employee: Optional[str] = None
 
 
 # Animation size → token range table (mirrors litellm_config_CORRECTED.yaml)

@@ -89,8 +89,11 @@ def _conn() -> Iterator[Any]:
     # drops idle SSL connections; a stale connection from the pool returns
     # psycopg2.OperationalError on the first cursor execute. Detect it here
     # and swap in a fresh connection so callers never see a stale-conn error.
+    # rollback() clears the implicit transaction started by SELECT 1 so
+    # callers that set c.autocommit = True don't hit set_session-in-transaction.
     try:
         c.cursor().execute("SELECT 1")
+        c.rollback()
     except Exception:
         try:
             p.putconn(c, close=True)

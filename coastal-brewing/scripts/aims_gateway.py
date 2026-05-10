@@ -58,33 +58,34 @@ GATEWAY_API_KEY = (
 # Per-surface model registry. Surface key → OpenRouter model ID.
 # Updated 2026-05-07: full multi-model routing, no Anthropic.
 SURFACE_MODELS: Dict[str, str] = {
-    # Coastal customer chat
-    "coastal_chat_retail":     "deepseek/deepseek-v4-flash",                # Sal, LUC, Marcus — multimodal, 1M ctx
-    "coastal_chat_reasoning":  "x-ai/grok-4.20",                            # Melli, ACHEEVY — newest Grok, multimodal reasoning
+    # Coastal customer chat — OpenRouter naming
+    "coastal_chat_retail":     "deepseek/deepseek-v4-flash",                 # Sal, LUC, Marcus — multimodal, 1M ctx
+    "coastal_chat_reasoning":  "x-ai/grok-4.20",                             # Melli, ACHEEVY — newest Grok, multimodal reasoning
     # Brand-voice + transactional (short, cheap)
-    "welcome_message":         "z-ai/glm-4.7-flash",                        # $0.06/$0.40 — brand voice copy
+    "welcome_message":         "z-ai/glm-4.7-flash",                         # $0.06/$0.40 — brand voice copy
     "transactional_short":     "z-ai/glm-4.7-flash",
     "json_chat_fallback":      "z-ai/glm-4.7-flash",
     # Summarization + research
-    "session_summary":         "google/gemma-4-31b-it:free",                 # free tier, background task
+    "session_summary":         "z-ai/glm-4.7-flash",                         # cheap, no rate limit
     "research_synthesis":      "moonshotai/kimi-k2.6",                       # 262K ctx, strong research
     # Agent orchestration + code — fast, large ctx, no Anthropic
-    "agent_orchestration":     "x-ai/grok-4-fast",                          # 2M ctx, fast orchestration
+    "agent_orchestration":     "x-ai/grok-4-fast",                           # 2M ctx, fast orchestration
     "linkedin_maps_agent":     "x-ai/grok-4-fast",
-    "code_generation":         "x-ai/grok-code-fast-1",                     # code-specific Grok
+    "code_generation":         "x-ai/grok-code-fast-1",                      # code-specific Grok
     "structured_evaluation":   "nvidia/nemotron-3-super-120b-a12b",          # $0.09/$0.45, 262K ctx
-    # Spinner — Gemini 3.1 Flash Lite: function calling first-class, low ctx, fast, accurate
-    "spinner_execution":       "google/gemini-3.1-flash-lite-preview",
+    # Spinner — Grok 4 Fast: OpenAI-compatible tool_calls (Gemini's tool format
+    # would require translation; Grok slots in cleanly). Fast, 2M ctx, accurate.
+    "spinner_execution":       "x-ai/grok-4-fast",
     # Visual reasoning for Iller_Ang prompt composition
     "iller_ang_visual":        "google/gemini-3.1-flash-lite-preview",       # multimodal vision
     # Candidate surfaces
     "research_kimi_long_ctx":  "moonshotai/kimi-k2.6",
-    "bilingual_chat":          "z-ai/glm-4.7",
+    "bilingual_chat":          "z-ai/glm-4.6",
     "realtime_data_agent":     "x-ai/grok-4-fast",
     "vision_chat":             "google/gemini-3.1-flash-lite-preview",
     "long_context_pro":        "google/gemini-3.1-pro-preview",
     "openai_default":          "openai/gpt-5.5",
-    "frontier_reasoning":      "x-ai/grok-4.20",                            # replaces Anthropic Opus
+    "frontier_reasoning":      "x-ai/grok-4.20",                           # replaces Anthropic Opus
     "auto":                    "auto",
 }
 

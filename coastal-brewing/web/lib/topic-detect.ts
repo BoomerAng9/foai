@@ -6,14 +6,15 @@
 export type ChatTopic = "coffee" | "tea" | "matcha" | "mushroom" | "unknown";
 
 const TEA_PATTERNS: RegExp[] = [
-  /\btea\b/i, /\bjasmine\b/i, /\bearl[\s-]?gr[ae]y\b/i, /\bchai\b/i,
-  /\bhojicha\b/i, /\boolong\b/i, /\bherbal\b/i, /\brooibos\b/i,
-  /\bhibiscus\b/i, /\bsteep(?:ing)?\b/i, /\binfuser?\b/i, /\bloose[\s-]?leaf\b/i,
-  /\bmint tea\b/i, /\bblack tea\b/i, /\bgreen tea\b/i,
+  /\bteas?\b/i, /\bjasmine\b/i, /\bearl[\s-]?gr[ae]y\b/i, /\bchais?\b/i,
+  /\bhojichas?\b/i, /\boolongs?\b/i, /\bherbals?\b/i, /\brooibos\b/i,
+  /\bhibiscus\b/i, /\bsteep(?:ing|ed|s)?\b/i, /\binfusers?\b/i, /\bloose[\s-]?leaf\b/i,
+  /\bblack tea\b/i, /\bgreen tea\b/i, /\bwhite tea\b/i, /\bmint tea\b/i,
+  /\bbergamot\b/i, /\bcamomile|chamomile\b/i, /\btisane\b/i,
 ];
 
 const MATCHA_PATTERNS: RegExp[] = [
-  /\bmatcha\b/i, /\bceremonial\b/i, /\bwhisk\b/i,
+  /\bmatchas?\b/i, /\bceremonial\b/i, /\bwhisk\b/i,
 ];
 
 const MUSHROOM_PATTERNS: RegExp[] = [
@@ -23,13 +24,13 @@ const MUSHROOM_PATTERNS: RegExp[] = [
 ];
 
 const COFFEE_PATTERNS: RegExp[] = [
-  /\bcoffee\b/i, /\bespresso\b/i, /\broast\w*\b/i, /\bblend\b/i, /\bdecaf\b/i,
-  /\bk[\s-]?cup\b/i, /\barabica\b/i, /\bsingle[\s-]?origin\b/i, /\bcold[\s-]?brew\b/i,
-  /\bbarista\b/i, /\bbrew\w*\b/i, /\bdrip\b/i,
-  /\bbean\w*\b/i, /\bground\b/i, /\bgrind\w*\b/i,
+  /\bcoffees?\b/i, /\bespressos?\b/i, /\broast\w*\b/i, /\bblends?\b/i, /\bdecafs?\b/i,
+  /\bk[\s-]?cups?\b/i, /\barabica\b/i, /\bsingle[\s-]?origin\b/i, /\bcold[\s-]?brew\w*\b/i,
+  /\bbaristas?\b/i, /\bbrew\w*\b/i, /\bdrip\b/i, /\blattes?\b/i, /\bcappuccinos?\b/i,
+  /\bbean\w*\b/i, /\bground\b/i, /\bgrind\w*\b/i, /\bmilk[\s-]?steam\w*\b/i,
   /\bturkish\b/i, /\bsaudi\b/i, /\barabic\b/i, /\bcardamom\b/i,
   /\bpour[\s-]?over\b/i, /\bfrench[\s-]?press\b/i, /\bmoka\b/i, /\baeropress\b/i,
-  /\bportafilter\b/i,
+  /\bportafilter\b/i, /\bbreve\b/i, /\bmacchiatos?\b/i, /\bamericanos?\b/i,
 ];
 
 function score(text: string, patterns: RegExp[]): number {
@@ -78,6 +79,14 @@ export function detectTopic(
     // Unambiguous = new message has at least one match AND a clear leader.
     if (luScore > 0 && luScore > luSecond) {
       return { topic: luWinner, scores: luScores };
+    }
+    // Ambiguous user message (zero topic words like "fair-trade" /
+    // "your best products" / "tell me more"). Default to COFFEE — brand
+    // primary product. Don't drift to agent-reply history weights, which
+    // would lock the animation into whatever was just discussed.
+    const luTotal = luScores.coffee + luScores.tea + luScores.matcha + luScores.mushroom;
+    if (luTotal === 0) {
+      return { topic: "coffee", scores: luScores };
     }
   }
   // Fallback: weighted window across the last N messages.
