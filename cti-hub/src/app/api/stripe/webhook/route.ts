@@ -56,6 +56,32 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: message }, { status: 400 });
   }
 
+  // ── Idempotency guard ──────────────────────────────────────────────────
+  // Stripe retries are normal. Without this guard, a retry would re-enter
+  // issueSqwaadrunKey() which revokes the just-issued key and drops the
+  // new one (handoff INSERT...ON CONFLICT DO NOTHING) — customer left
+  // keyless. Per migration 006_processed_stripe_events.sql.
+  const subscriptionIdForLedger =
+    event.type === 'checkout.session.completed'
+      ? (() => {
+          const s = event.data.object as Stripe.Checkout.Session;
+          return typeof s.subscription === 'string' ? s.subscription : s.subscription?.id;
+        })()
+      : event.type === 'customer.subscription.updated' ||
+        event.type === 'customer.subscription.deleted'
+      ? (event.data.object as Stripe.Subscription).id
+      : null;
+  const inserted = await sql<{ event_id: string }[]>`
+    INSERT INTO processed_stripe_events (event_id, event_type, subscription_id)
+    VALUES (${event.id}, ${event.type}, ${subscriptionIdForLedger ?? null})
+    ON CONFLICT (event_id) DO NOTHING
+    RETURNING event_id
+  `;
+  if (inserted.length === 0) {
+    // Already processed — ack with 200 to stop Stripe retrying, skip side-effects.
+    return NextResponse.json({ received: true, idempotent: true });
+  }
+
   try {
     switch (event.type) {
       case 'checkout.session.completed': {
