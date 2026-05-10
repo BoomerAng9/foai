@@ -136,9 +136,21 @@ function getWsUrl(): string {
 export function ChatPanel({
   initialAgent = "sales",
   contextSku,
+  contextIntent,
 }: {
   initialAgent?: Agent;
   contextSku?: string;
+  /**
+   * Intent the customer arrived with from a CTA elsewhere on the site
+   * (e.g. /pricing → "Start Tea Monthly" sets intent="subscribe" + sku=
+   * "coastal-tea-monthly"). When set, the chat auto-sends a contextual
+   * starter message after the first WS open + catalog load so Sal opens
+   * IN the topic the customer clicked on. Closes the gap where Sal's
+   * generic greeting felt disconnected from the button the user pressed.
+   * Once-per-session-per-(intent,sku) — re-clicking the same CTA in the
+   * same tab won't double-send.
+   */
+  contextIntent?: string;
 }) {
   const router = useRouter();
   // `employee` tracks the internal routing target so the per-cup AnimationRouter
@@ -183,7 +195,7 @@ export function ChatPanel({
     // skip — we're rehydrating an existing session.
     return Boolean(window.sessionStorage.getItem(SS_MESSAGES));
   });
-  const [input, setInput] = React.useState(contextSku ? `Tell me about ${contextSku}` : "");
+  const [input, setInput] = React.useState("");
   const [anim, setAnim] = React.useState<AnimState | null>(null);
   const [isConnecting, setIsConnecting] = React.useState(false);
   const [wsError, setWsError] = React.useState<string | null>(null);
@@ -196,6 +208,11 @@ export function ChatPanel({
   // marker parser silently drops markers for unknown SKUs (no broken
   // visuals during the brief fetch window).
   const [catalog, setCatalog] = React.useState<Product[]>([]);
+  // Once-per-session guard for the contextIntent auto-starter — prevents
+  // the same intent message from re-firing on remounts/reconnects within
+  // the same browser tab. Re-using the same CTA in a different tab still
+  // works because sessionStorage is per-tab.
+  const intentStarterSentRef = React.useRef(false);
   React.useEffect(() => {
     let aborted = false;
     (async () => {
@@ -813,6 +830,85 @@ export function ChatPanel({
     }
     prevEmployeeRef.current = employee;
   }, [employee]);
+
+  // ── Intent-routed contextual starter (CTAs from /pricing, etc.) ──
+  // When the customer arrives via a CTA that carries an intent + sku
+  // (e.g. /chat?sku=coastal-tea-monthly&intent=subscribe), auto-send a
+  // natural-sounding starter message so Sal opens IN the topic the
+  // customer clicked. Closes the disconnect where Sal's generic greeting
+  // felt unrelated to the button the user pressed.
+  //
+  // Fires once per (intent, sku) per session — re-clicking the same CTA
+  // in the same tab won't double-send. Waits for greeting + catalog
+  // resolution so the starter can use the friendly product name.
+  React.useEffect(() => {
+    if (intentStarterSentRef.current) return;
+    if (!contextIntent) return;
+    if (!greetingResolved) return;
+    // If a SKU is in play, wait for catalog so we can name the product.
+    // Without a SKU, intents like "help-me-pick" can fire immediately.
+    if (contextSku && catalog.length === 0) return;
+
+    // Per-tab guard so reloads don't re-fire the same intent.
+    const guardKey = `coastal:intent_sent:${contextIntent}:${contextSku || ""}`;
+    if (typeof window !== "undefined") {
+      try {
+        if (window.sessionStorage.getItem(guardKey) === "1") {
+          intentStarterSentRef.current = true;
+          return;
+        }
+      } catch {
+        // sessionStorage disabled — degrade to in-mem ref guard only
+      }
+    }
+
+    const product = contextSku
+      ? catalog.find((p) => p.sku === contextSku)
+      : undefined;
+    const productName = product?.name || (contextSku ? contextSku.replace(/^coastal-/, "").replace(/-/g, " ") : undefined);
+
+    let starter: string | null = null;
+    switch (contextIntent) {
+      case "subscribe":
+        starter = productName
+          ? `Hey Sal — I want to start the ${productName} subscription. Can you walk me through it?`
+          : "Hey Sal — I'm interested in subscriptions. What do you have?";
+        break;
+      case "order":
+        starter = productName
+          ? `Hey Sal — I'd like to order the ${productName}.`
+          : "Hey Sal — I'd like to place an order.";
+        break;
+      case "negotiate":
+        starter = productName
+          ? `Hey Sal — what's your best price on the ${productName}?`
+          : "Hey Sal — let's talk pricing.";
+        break;
+      case "help-me-pick":
+      case "pricing-help":
+        starter = "Hey Sal — I'm not sure where to start. Can you help me pick something?";
+        break;
+      case "concierge":
+        starter = "Hey Sal — tell me about the concierge tier.";
+        break;
+      default:
+        starter = null;
+    }
+    if (!starter) return;
+
+    intentStarterSentRef.current = true;
+    if (typeof window !== "undefined") {
+      try { window.sessionStorage.setItem(guardKey, "1"); } catch { /* ignore */ }
+    }
+    // Defer to next tick so the welcome / handoff visuals settle first.
+    const t = window.setTimeout(() => { void send(starter); }, 350);
+    return () => window.clearTimeout(t);
+    // send is a stable function declaration in this component's scope —
+    // safe to omit from deps. catalog.length keeps the effect from
+    // re-firing on every catalog mutation while still waiting for first
+    // resolution.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [contextIntent, contextSku, catalog.length, greetingResolved]);
 
   return (
     <div className="flex h-full flex-col rounded-lg border border-border bg-card">

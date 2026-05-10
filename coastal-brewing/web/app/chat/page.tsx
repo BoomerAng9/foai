@@ -7,9 +7,13 @@ import { ChatPanel } from "@/components/chat-panel";
 export default async function ChatPage({
   searchParams,
 }: {
-  searchParams: Promise<{ agent?: "sales" | "marketing"; sku?: string }>;
+  searchParams: Promise<{
+    agent?: "sales" | "marketing";
+    sku?: string;
+    intent?: string;
+  }>;
 }) {
-  const { agent = "sales", sku } = await searchParams;
+  const { agent = "sales", sku, intent } = await searchParams;
   return (
     <>
       <Nav />
@@ -35,7 +39,7 @@ export default async function ChatPage({
         </div>
         <div className="h-[70vh] min-h-[560px]">
           <Suspense fallback={<div className="h-full animate-pulse rounded-lg border border-border bg-card" />}>
-            <ChatPanel initialAgent={agent} contextSku={sku} />
+            <ChatPanel initialAgent={agent} contextSku={sku} contextIntent={intent} />
           </Suspense>
         </div>
       </main>
