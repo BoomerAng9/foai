@@ -190,6 +190,33 @@ const CAST: CastMember[] = [
     story:
       "Honey-badger-strategic — reads the deal, quotes the bracket, sets the timeline. Different lane from the retail counter: wholesale + corporate + catering + large-order intake. Within the discount ladder (12u → 15%, 50u → 25%, 100u+ → 35%) she locks the deal; above the ladder she routes to ACHEEVY. Selene voice, Belter Creole light layered into her phrasing.",
   },
+  // The Sett — Melli's marketing BG'z. Each carries one differentiator on
+  // top of the Marketing-tier uniform (dark navy collared coat + palm-and-
+  // storks Coastal mark + chevron one tier below Melli's + headset).
+  {
+    id: "persona_tah",
+    display_name: "Persona Tah",
+    function: "Marketing · influencer engagement",
+    pmo: "marketing",
+    story:
+      "Persona is the influencer-engagement Sett BG. Tablet always in paw, social-feed grid never more than a glance away. Smaller frame than Melli, brighter curiosity in the eyes — she sees the brand through the audience first, then the product. Knows which creator picks up a Coastal bag and turns it into a 3-second story.",
+  },
+  {
+    id: "eve_retti",
+    display_name: "Eve Retti",
+    function: "Marketing · vertical campaigns",
+    pmo: "marketing",
+    story:
+      "Eve owns the vertical-campaign lane — the longer arc that ties one product launch to the next quarter's launch. Reading glasses on a thin black cord, leather portfolio under the arm. Quietly precise. Every campaign she ships is half the fuel for the next one.",
+  },
+  {
+    id: "leu_kurus",
+    display_name: "Leu Kurus",
+    function: "Marketing · cross-region",
+    pmo: "marketing",
+    story:
+      "Leu is the cross-region BG — the one who's almost always at a regional pop-up, an airport lounge, or a partner event. Dark travel duster over the Marketing coat, messenger bag across the chest, stainless travel-tumbler in paw. Brings the regions back into the room.",
+  },
   // ── Accounting ────────────────────────────────────────────────────────
   // LUC is NOT a Boomer_Ang — his own department: Accounting.
   // Floor-level finance lead; the math man of the team.
