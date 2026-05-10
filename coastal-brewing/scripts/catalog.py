@@ -4737,8 +4737,13 @@ PRODUCTS: dict[str, dict] = {
         "name": "Coffee Monthly Subscription",
         "category": "subscription",
         "size": "/mo",
-        "msrp": 17.99,
-        "wholesale_cost": 9.5,
+        # msrp auto-computed by _enrich_products() from cost basis + 55%
+        # subscription margin policy. Cost basis below reflects ONE 12oz
+        # Tier-A blend per delivery (TCR drop-ship $15.78). Sal-curated
+        # rotation may select Tier-B/C/D within the bag, but cost basis
+        # uses Tier-A as the floor anchor (most-shipped tier).
+        "msrp": 17.99,  # placeholder; overwritten by enrichment
+        "wholesale_cost": 15.78,
         "fulfillment_cost": 1.8,
         "min_margin_floor": 3.0,
         "tags": ['coffee', 'subscription', 'recurring'],
@@ -4750,8 +4755,11 @@ PRODUCTS: dict[str, dict] = {
         "name": "Tea Monthly Subscription",
         "category": "subscription",
         "size": "/mo",
-        "msrp": 13.99,
-        "wholesale_cost": 7.0,
+        # Cost basis: ONE 3oz standard Lowcountry Tea per delivery
+        # (TCR drop-ship $12.00). Premium teas (matcha/hojicha) ship
+        # under separate SKU at higher price tier.
+        "msrp": 13.99,  # placeholder; overwritten by enrichment
+        "wholesale_cost": 12.0,
         "fulfillment_cost": 1.8,
         "min_margin_floor": 3.0,
         "tags": ['tea', 'subscription', 'recurring'],
@@ -4763,9 +4771,14 @@ PRODUCTS: dict[str, dict] = {
         "name": "Combo Monthly Subscription",
         "category": "subscription",
         "size": "/mo",
-        "msrp": 24.99,
-        "wholesale_cost": 13.5,
-        "fulfillment_cost": 1.8,
+        # Cost basis: ONE Tier-A coffee ($15.78) + ONE standard tea
+        # ($12.00) bundled in same monthly delivery. Combined fulfill
+        # ~$2.50 (one shipment, two items). Owner-flagged 2026-05-10:
+        # prior cost basis $13.50 was ~50% under true sum — produced
+        # $34.49 MSRP that essentially eliminated all combo margin.
+        "msrp": 24.99,  # placeholder; overwritten by enrichment
+        "wholesale_cost": 27.78,
+        "fulfillment_cost": 2.5,
         "min_margin_floor": 3.0,
         "tags": ['coffee', 'tea', 'subscription', 'recurring'],
         "vendor_source_sku": "COASTAL-SUB-COMBO",

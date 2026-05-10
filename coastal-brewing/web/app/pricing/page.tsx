@@ -33,7 +33,7 @@ const SUBSCRIPTIONS: Subscription[] = [
     sku: "coastal-tea-monthly",
     name: "Tea Monthly",
     tagline: "A new Lowcountry Tea every month.",
-    price: "$19.99",
+    price: "$30.99",
     priceNote: "/ month, ships free over $50",
     image: "/products/coastal-tea-monthly.png",
     whatYouGet: [
@@ -48,7 +48,7 @@ const SUBSCRIPTIONS: Subscription[] = [
     sku: "coastal-coffee-monthly",
     name: "Coffee Monthly",
     tagline: "One bag a month, picked for your palate.",
-    price: "$25.49",
+    price: "$39.49",
     priceNote: "/ month, ships free over $50",
     image: "/products/coastal-coffee-monthly.png",
     whatYouGet: [
@@ -64,7 +64,7 @@ const SUBSCRIPTIONS: Subscription[] = [
     sku: "coastal-combo-monthly",
     name: "Combo Monthly",
     tagline: "One coffee + one tea — the household pack.",
-    price: "$34.49",
+    price: "$67.49",
     priceNote: "/ month, ships free over $50",
     image: "/products/coastal-combo-monthly.png",
     whatYouGet: [

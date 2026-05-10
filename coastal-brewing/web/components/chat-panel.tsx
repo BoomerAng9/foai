@@ -862,8 +862,15 @@ export function ChatPanel({
       }
     }
 
+    // /api/catalog returns products with `.id` (the runner's catalog
+    // SKU key), but the Product TS type uses `.sku`. The chat panel's
+    // catalog state is the raw API payload (no normalization), so the
+    // lookup must check both fields. Without this, every intent-routed
+    // CTA falls back to the raw kebab-case SKU as the product name —
+    // "coastal-combo-monthly subscription" instead of "Combo Monthly
+    // Subscription". Caught 2026-05-10 by owner test.
     const product = contextSku
-      ? catalog.find((p) => p.sku === contextSku)
+      ? catalog.find((p) => p.sku === contextSku || (p as { id?: string }).id === contextSku)
       : undefined;
     const productName = product?.name || (contextSku ? contextSku.replace(/^coastal-/, "").replace(/-/g, " ") : undefined);
 
@@ -899,6 +906,21 @@ export function ChatPanel({
     intentStarterSentRef.current = true;
     if (typeof window !== "undefined") {
       try { window.sessionStorage.setItem(guardKey, "1"); } catch { /* ignore */ }
+    }
+    // Customer arrived via a CTA — they've ALREADY declared their path
+    // (subscribe / order / negotiate / help-me-pick) and preference (the
+    // SKU they clicked). Dismiss the generic onboarding buttons (Give me
+    // a tour / Shop for me / Coffee / Tea / Mushroom-functional) so they
+    // don't appear under Sal's contextual reply and feel unrelated to
+    // the topic the customer is in. Persist dismissal so reloads/swaps
+    // don't bring them back mid-flow.
+    setShowPathButtons(false);
+    setShowPreferenceButtons(false);
+    if (typeof window !== "undefined") {
+      try {
+        window.sessionStorage.setItem(SS_BUTTONS_DISMISSED + "_path", "1");
+        window.sessionStorage.setItem(SS_BUTTONS_DISMISSED + "_pref", "1");
+      } catch { /* ignore */ }
     }
     // Defer to next tick so the welcome / handoff visuals settle first.
     const t = window.setTimeout(() => { void send(starter); }, 350);
