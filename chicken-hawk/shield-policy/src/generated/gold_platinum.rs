@@ -18,9 +18,6 @@ pub const GOLD_PLATINUM_PROHIBITED_REASONING: &[ReasoningPath] = &[
 pub const GOLD_PLATINUM_PROHIBITED_TARGETS: &[&str] = &[
 ];
 
-pub const GOLD_PLATINUM_PROHIBITED_TARGET_PREFIXES: &[&str] = &[
-];
-
 pub const GOLD_PLATINUM_PROHIBITED_DATA_CLASSES: &[DataClass] = &[
 ];
 
