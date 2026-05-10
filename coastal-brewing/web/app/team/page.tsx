@@ -9,7 +9,14 @@ interface CastMember {
   id: string;
   display_name: string;
   function: string;
-  pmo: "leadership" | "loss-prevention" | "sales" | "back-office" | "ops";
+  pmo:
+    | "leadership"
+    | "loss-prevention"
+    | "sales"
+    | "marketing"
+    | "accounting"
+    | "back-office"
+    | "ops";
   story: string;
 }
 
@@ -17,6 +24,8 @@ const PMO_LABELS: Record<CastMember["pmo"], string> = {
   leadership: "Leadership",
   "loss-prevention": "Loss Prevention",
   sales: "Sales",
+  marketing: "Marketing",
+  accounting: "Accounting",
   "back-office": "Back office",
   ops: "Operations",
 };
@@ -36,7 +45,7 @@ const CAST: CastMember[] = [
     function: "Sales · lead",
     pmo: "sales",
     story:
-      "Bluffton, South Carolina — the working-coast side, not the gated side. His granddaddy ran a Mayriver dock before the bridge was paved; his mother taught fourth grade in Beaufort County for thirty-one years. Hospitality school by absorption — oyster roasts, shrimp boils, bait runs, waiting tables where regulars know your truck. Trident Tech for hospitality, then six years on the Charleston Battery, then his own back-shed drum roaster since 2018. A green-bean broker in Greenville knows him by first name; a Sumatran exporter's daughter sends Christmas cards. He still calls his mother every Sunday.",
+      "Pooler, Georgia — the working-coast side, just outside Savannah. His granddaddy ran an Ogeechee dock before the bridge was paved; his mother taught fourth grade in Chatham County for thirty-one years. Hospitality school by absorption — oyster roasts, shrimp boils, bait runs, waiting tables where regulars know your truck. Savannah Technical College for hospitality, then six years on the Savannah riverfront, then his own back-shed drum roaster since 2018. A green-bean broker in Atlanta knows him by first name; a Sumatran exporter's daughter sends Christmas cards. He still calls his mother every Sunday.",
   },
   // Sales — voice carousel (11)
   {
@@ -85,7 +94,7 @@ const CAST: CastMember[] = [
     function: "Counter · Savannah",
     pmo: "sales",
     story:
-      "Marcus. Savannahian first — the city is in his cadence the way humidity is in the air over Forsyth Park in July. West Savannah and the Pin Point side of the river. His grandmother ran a church kitchen that fed the neighborhood every Sunday after service; his uncle ran a corner store on the West side. He learned to greet a customer before he learned to ring the register.",
+      "Marquis. Savannahian first — the city is in his cadence the way humidity is in the air over Forsyth Park in July. West Savannah and the Pin Point side of the river. His grandmother ran a church kitchen that fed the neighborhood every Sunday after service; his uncle ran a corner store on the West side. He learned to greet a customer before he learned to ring the register. (Renamed from Marcus to differentiate from the LP team lead.)",
   },
   {
     id: "gre_ang",
@@ -170,31 +179,70 @@ const CAST: CastMember[] = [
     story:
       "Surfaces only when an associate hits an authority ceiling. Never does the selling itself. Speaks in declaratives, not negotiations — \"approved,\" \"settled,\" \"go ahead.\" Voiced in Nas's Power 105.1 register, Belter Creole at the LLM-prompt layer (off for customer-chat-panel surface). Does not work the floor; signs the floor.",
   },
-  // ── Back office ───────────────────────────────────────────────────────
+  // ── Marketing ─────────────────────────────────────────────────────────
+  // Melli is NOT a Boomer_Ang — her own department: Marketing.
+  // Owns wholesale, B2B, corporate, catering, and large-order intake.
   {
     id: "melli_capensi",
     display_name: "Melli",
-    function: "Bulk · B2B executive",
-    pmo: "back-office",
+    function: "Marketing executive · bulk + B2B",
+    pmo: "marketing",
     story:
       "Honey-badger-strategic — reads the deal, quotes the bracket, sets the timeline. Different lane from the retail counter: wholesale + corporate + catering + large-order intake. Within the discount ladder (12u → 15%, 50u → 25%, 100u+ → 35%) she locks the deal; above the ladder she routes to ACHEEVY. Selene voice, Belter Creole light layered into her phrasing.",
   },
+  // ── Accounting ────────────────────────────────────────────────────────
+  // LUC is NOT a Boomer_Ang — his own department: Accounting.
+  // Floor-level finance lead; the math man of the team.
   {
     id: "luc_ang",
     display_name: "LUC",
-    function: "Floor accountant",
-    pmo: "back-office",
+    function: "Floor accountant · finance lead",
+    pmo: "accounting",
     story:
       "Brooklyn-fluent CPA. Sal pulls him in when a customer starts running numbers. Dry, precise, numerical — \"math says,\" \"running the numbers,\" \"here's where we land.\" Zero discount approval; coupon codes are his only standing authority (WELCOME10 / BREW20 / FREESHIP / TRY-ME). Anything beyond that, he states the math and routes to ACHEEVY. \"I cut the math, ACHEEVY signs.\"",
   },
   // ── Loss Prevention ───────────────────────────────────────────────────
+  // LP team: Marcus (human lead) + 4 anthropomorphic Kangaroo Roo's.
+  // Each Roo carries a single visual differentiator on top of the LP-tier canon.
   {
     id: "lp_ang",
     display_name: "Marcus",
-    function: "Loss prevention · floor team",
+    function: "Loss prevention · floor team lead",
     pmo: "loss-prevention",
     story:
       "Calm, professional, structured. Less warm than Sal, less authoritative than ACHEEVY — the associate in the high-res button-down who walks up because something needs untangling. Steps in when a conversation has stalled and the lead barista has stepped off. Three-step structured assist: family → specifics → close. Zero discount authority. Above ceiling routes to ACHEEVY.",
+  },
+  {
+    id: "mac_roo",
+    display_name: "Mac",
+    function: "Loss prevention · lead Roo",
+    pmo: "loss-prevention",
+    story:
+      "Mac is the lead Roo — calm, structured, paired closest with Marcus. Sleeve rolled up on the right side, the working-shift signal. Reads the room the way a kangaroo reads a paddock at dusk: quietly, completely, twice. Steps in only when the floor needs a second voice — never to escalate, always to defuse.",
+  },
+  {
+    id: "joey_roo",
+    display_name: "Joey",
+    function: "Loss prevention · customer-warmth specialist",
+    pmo: "loss-prevention",
+    story:
+      "Joey is the bright-energy Roo — younger, lighter on his feet, the one a customer notices first. Wears a deep coastal amber kerchief at the neck, his identifier. Specializes in the soft-defuse: a stalled conversation gets a smile, then a question, then a return to the lead barista. Never the one who closes the deal — always the one who keeps the room warm.",
+  },
+  {
+    id: "sky_roo",
+    display_name: "Sky",
+    function: "Loss prevention · observer",
+    pmo: "loss-prevention",
+    story:
+      "Sky is the observer Roo — the one watching the room while everyone else is talking. Reading glasses on a thin black cord around his neck, the signal that he's reading more than the menu. Catches the small things: the unlooked-for hesitation, the third return to the same shelf, the quiet customer who hasn't been greeted. Hands the signal to Mac without ever needing to raise his voice.",
+  },
+  {
+    id: "boomer_roo",
+    display_name: "Boomer",
+    function: "Loss prevention · senior Roo",
+    pmo: "loss-prevention",
+    story:
+      "Boomer is the senior of the Roo's — the floor veteran, broader through the chest, fur slightly grizzled at the edges. Wears a small leather wrist tooling pouch on his right wrist, the senior's mark. Boots scuffed from miles on the brick floor. Speaks rarely. When he does, the room slows down and listens. Pairs with Marcus on the harder calls.",
   },
 ];
 
@@ -205,6 +253,8 @@ export default function TeamPage() {
   const leadership = REST.filter((m) => m.pmo === "leadership");
   const lossPrevention = REST.filter((m) => m.pmo === "loss-prevention");
   const sales = REST.filter((m) => m.pmo === "sales");
+  const marketing = REST.filter((m) => m.pmo === "marketing");
+  const accounting = REST.filter((m) => m.pmo === "accounting");
   const backOffice = REST.filter((m) => m.pmo === "back-office");
   const ops = REST.filter((m) => m.pmo === "ops");
 
@@ -335,6 +385,54 @@ export default function TeamPage() {
             </div>
           </div>
 
+          {/* Marketing — Melli (and the Sett BG'z when generated) */}
+          {marketing.length > 0 && (
+            <div className="mb-12">
+              <div className="mb-5 flex items-end justify-between">
+                <h3 className="font-display text-2xl font-semibold md:text-3xl">Marketing.</h3>
+                <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+                  bulk · B2B · catering · corporate
+                </p>
+              </div>
+              <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                {marketing.map((m) => (
+                  <TeamCard
+                    key={m.id}
+                    id={m.id}
+                    display_name={m.display_name}
+                    function={m.function}
+                    pmo_label={PMO_LABELS[m.pmo]}
+                    story={m.story}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Accounting — LUC (Pretty Lu) */}
+          {accounting.length > 0 && (
+            <div className="mb-12">
+              <div className="mb-5 flex items-end justify-between">
+                <h3 className="font-display text-2xl font-semibold md:text-3xl">Accounting.</h3>
+                <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+                  cuts the math · ACHEEVY signs
+                </p>
+              </div>
+              <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                {accounting.map((m) => (
+                  <TeamCard
+                    key={m.id}
+                    id={m.id}
+                    display_name={m.display_name}
+                    function={m.function}
+                    pmo_label={PMO_LABELS[m.pmo]}
+                    story={m.story}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* Loss Prevention — Marcus and team */}
           {lossPrevention.length > 0 && (
             <div className="mb-12">
@@ -360,23 +458,25 @@ export default function TeamPage() {
           )}
 
           {/* Back office */}
-          <div className="mb-12">
-            <h3 className="mb-5 font-display text-2xl font-semibold md:text-3xl">
-              Back office.
-            </h3>
-            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {backOffice.map((m) => (
-                <TeamCard
-                  key={m.id}
-                  id={m.id}
-                  display_name={m.display_name}
-                  function={m.function}
-                  pmo_label={PMO_LABELS[m.pmo]}
-                  story={m.story}
-                />
-              ))}
+          {backOffice.length > 0 && (
+            <div className="mb-12">
+              <h3 className="mb-5 font-display text-2xl font-semibold md:text-3xl">
+                Back office.
+              </h3>
+              <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                {backOffice.map((m) => (
+                  <TeamCard
+                    key={m.id}
+                    id={m.id}
+                    display_name={m.display_name}
+                    function={m.function}
+                    pmo_label={PMO_LABELS[m.pmo]}
+                    story={m.story}
+                  />
+                ))}
+              </div>
             </div>
-          </div>
+          )}
 
           {/* Operations */}
           <div className="mb-4">
