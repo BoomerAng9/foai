@@ -170,6 +170,17 @@ export const AGENTS: AgentProfile[] = [
     subscriptionTier: 'growth', hireable: true, individualPrice: 197,
   },
   {
+    id: 'port_ang',
+    name: 'Port_Ang',
+    role: 'Operations PMO Dispatcher',
+    department: 'OPS',
+    tier: 'tactical',
+    persona: 'Port manifest in hand. Routes the right work to the right surface, every time. Internal dispatch, never customer-facing.',
+    avatar: '/agents/port-ang.png',
+    capabilities: ['Container routing', 'Work dispatch', 'Manifest tracking', 'Surface coordination'],
+    subscriptionTier: 'enterprise', hireable: false,
+  },
+  {
     id: 'iller_ang',
     name: 'Iller_Ang',
     role: 'Creative Director',
@@ -293,6 +304,17 @@ export const AGENTS: AgentProfile[] = [
     capabilities: ['Budget tracking', 'Cost analysis', 'Revenue optimization', 'Receivables', 'Bookkeeping', 'Pricing strategy'],
     mcpToolName: 'cfo_ang_finance',
     subscriptionTier: 'growth', hireable: true, individualPrice: 147,
+  },
+  {
+    id: 'luc',
+    name: 'LUC',
+    role: 'Calculation Engine',
+    department: 'FIN',
+    tier: 'specialist',
+    persona: 'Locale Universal Calculator personified. The platform calculation engine made visible — VAT, K1, ledger coefficients, fee math. Quiet, precise, always-on.',
+    avatar: '/agents/luc.png',
+    capabilities: ['Financial calculations', 'Ledger math', 'Fee + cost computation', 'Tax math (VAT/K1)', 'Currency conversion'],
+    subscriptionTier: 'enterprise', hireable: false,
   },
 ];
 
