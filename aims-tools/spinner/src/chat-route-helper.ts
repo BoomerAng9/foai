@@ -65,12 +65,21 @@ export async function handleChatRequest(
     ? [{ role: 'system', content: opts.system }, ...body.messages]
     : body.messages;
 
+  const callerScopes = opts.scopes ?? ['public'];
+  // Sacred Separation: a public-scope caller never sees internal tool
+  // names, arg shapes, or tool result previews. The trace contains all
+  // three. Strip it for any caller whose scope set is exactly ['public']
+  // (or includes nothing more privileged); keep it for ops/debug/owner
+  // scopes so internal surfaces can still see the trace.
+  const isPublicOnly =
+    callerScopes.length === 1 && callerScopes[0] === 'public';
+
   try {
     const response = await runFunctionCalling({
       messages,
       model: opts.model ?? 'auto',
       registry: opts.registry ?? defaultToolRegistry,
-      callerScopes: opts.scopes ?? ['public'],
+      callerScopes,
       ctx: {
         userId: body.userId,
         tenantId: body.tenantId,
@@ -81,13 +90,17 @@ export async function handleChatRequest(
     return json({
       message: response.message,
       iterations: response.iterations,
-      trace: response.trace,
+      trace: isPublicOnly ? undefined : response.trace,
       usage: response.usage,
     });
   } catch (e) {
     if (e instanceof FunctionCallingError) {
       return json(
-        { error: e.message, iterations: e.iterations, trace: e.trace },
+        {
+          error: e.message,
+          iterations: e.iterations,
+          trace: isPublicOnly ? undefined : e.trace,
+        },
         500,
       );
     }
