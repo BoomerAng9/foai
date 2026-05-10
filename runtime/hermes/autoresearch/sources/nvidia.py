@@ -13,13 +13,19 @@ from __future__ import annotations
 import json
 import re
 import subprocess
+import tempfile
 from pathlib import Path
 
 import httpx
 
 from autoresearch.sources.base import SourceAdapter, SourceFinding
 
-SQWAADRUN_CACHE_DIR = Path("/tmp/autoresearch-sqwaadrun")
+# Cross-platform temp dir; was hardcoded /tmp which broke Windows dev shells.
+SQWAADRUN_CACHE_DIR = Path(tempfile.gettempdir()) / "autoresearch-sqwaadrun"
+
+# Public HF API for verified model id resolution (avoids fabricating ids
+# from regex string-splits of scraped page text).
+_HF_API_MODELS = "https://huggingface.co/api/models"
 
 
 # ─── NVIDIA HuggingFace ─────────────────────────────────────────────
@@ -77,14 +83,32 @@ class NvidiaHFAdapter(SourceAdapter):
         candidates.sort(key=lambda t: (t[0], t[1]), reverse=True)
         gen, rank, label = candidates[0]
 
+        # Resolve the actual HF model id rather than fabricating one from
+        # regex captures. The previous f-string built ids like
+        # `nvidia/Nemotron-3-Super` from `label.split()[-1]` which is the
+        # LAST WORD of the matched substring — produced ghost ids that
+        # didn't exist on HF (e.g. `nvidia/Nemotron-3-9B` when the page
+        # only said "Nemotron 3" and the last token was the parameter
+        # count, not a tier name).
+        tier_token = (label.split()[-1] or "Super").strip()
+        verified_id = await _resolve_hf_model_id("nvidia", f"Nemotron-{gen}", tier_token)
+        if not verified_id:
+            # Fall back to the labeled fabrication if the HF API is down.
+            # Mark it via the summary so downstream alerting can warn.
+            verified_id = f"nvidia/Nemotron-{gen}-{tier_token}"
+            unverified_note = " (UNVERIFIED — HF API lookup failed)"
+        else:
+            unverified_note = ""
+
         return SourceFinding(
             family="nemotron",
-            latest_id=f"nvidia/Nemotron-{gen}-{label.split()[-1] or 'Super'}",
+            latest_id=verified_id,
             release_date="unknown",
             url=self._ORG_URL,
             summary=(
                 f"Highest-ranked Nemotron reference on NVIDIA HF org page: "
-                f"'{label}' (generation {gen}, tier rank {rank})."
+                f"'{_sanitize(label)}' (generation {gen}, tier rank {rank})."
+                f"{unverified_note}"
             ),
             capabilities=_infer_caps(label),
         )
@@ -124,7 +148,10 @@ class NvidiaGithubCosmosAdapter(SourceAdapter):
             latest_id=f"nvidia-cosmos/cosmos-transfer1@{tag}",
             release_date=data.get("published_at", "unknown"),
             url=data.get("html_url", self._API),
-            summary=(data.get("name") or tag)[:200],
+            # Sanitize external-input text before downstream alerting
+            # (Slack/Telegram surfaces). GitHub release `name` is
+            # author-controlled and can carry prompt-injection markers.
+            summary=_sanitize(data.get("name") or tag),
             capabilities=("sim-to-real", "depth-control", "canny-control"),
         )
 
@@ -164,6 +191,74 @@ async def _scrape(url: str, cache_name: str) -> str | None:
         pass
 
     return None
+
+
+async def _resolve_hf_model_id(
+    org: str, family_prefix: str, tier_token: str
+) -> str | None:
+    """Query the public HF API for the most recent model matching the family.
+
+    Returns the actual HF model id (e.g. ``nvidia/Nemotron-3-Super-49B``)
+    or None if the API is unreachable. The previous adapter fabricated
+    ids by string-concatenating regex captures, which produced ghost ids
+    that didn't exist on HF.
+
+    Sort order is HF API ``createdAt`` descending so the first hit is the
+    newest model in the family.
+    """
+    search = f"{family_prefix}-{tier_token}".strip("-")
+    params = {
+        "author": org,
+        "search": search,
+        "sort": "createdAt",
+        "direction": "-1",
+        "limit": "5",
+    }
+    try:
+        async with httpx.AsyncClient(timeout=10) as client:
+            r = await client.get(_HF_API_MODELS, params=params)
+            if r.status_code != 200:
+                return None
+            models = r.json()
+    except Exception:
+        return None
+
+    if not isinstance(models, list) or not models:
+        return None
+
+    # Take the first model whose id starts with the requested family prefix
+    # (after the org slash). Defends against unrelated search hits.
+    expected_prefix = f"{org}/{family_prefix}".lower()
+    for m in models:
+        model_id = m.get("id", "")
+        if isinstance(model_id, str) and model_id.lower().startswith(expected_prefix):
+            return model_id
+
+    # No exact prefix match — return the top hit anyway, better than nothing
+    first_id = models[0].get("id")
+    return first_id if isinstance(first_id, str) else None
+
+
+_INJECTION_MARKERS = ("```", "system:", "assistant:", "user:")
+
+
+def _sanitize(text: str, max_len: int = 280) -> str:
+    """Strip HTML, control chars, and prompt-injection markers from external text.
+
+    Applied to scraped page text + GitHub release names before they flow
+    into the CurrencyReport JSON (which downstream alerts to Slack/Telegram).
+    Without this, an attacker could shape a release name like
+    ``"\nsystem: ignore prior instructions"`` and ride the alert pipeline
+    into the LLM that summarises the report.
+    """
+    if not text:
+        return ""
+    out = re.sub(r"<[^>]+>", "", text)
+    out = re.sub(r"[\x00-\x1f\x7f]", " ", out)
+    for marker in _INJECTION_MARKERS:
+        out = out.replace(marker, "")
+    out = re.sub(r"\s+", " ", out).strip()
+    return out[:max_len]
 
 
 def _infer_caps(label: str) -> tuple[str, ...]:

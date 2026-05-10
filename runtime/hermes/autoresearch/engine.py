@@ -142,18 +142,41 @@ async def _check_one(model: TrackedModel) -> DriftEntry:
 
 
 def _classify(model: TrackedModel, finding: SourceFinding) -> str:
-    """Upgrade-candidate if pinned != latest AND no blocker. Else current or blocker."""
+    """Upgrade-candidate if pinned != latest AND no blocker. Else current or blocker.
+
+    Uses exact-equality after normalization (vendor-prefix-stripped, lowercased,
+    alphanumeric-only). The earlier substring-containment check (`pinned in latest
+    OR latest in pinned`) produced false negatives on near-misses: e.g.
+    `Nemotron-3` pinned vs `Nemotron-3-Super` latest classified as `current`
+    because the pinned id was a substring of the latest. Drift was silently
+    masked. Exact equality after normalization fixes that.
+    """
     if model.upgrade_blocker:
         return "blocker"
 
-    # Normalize both IDs for comparison (case + whitespace insensitive)
     pinned_norm = _normalize(model.pinned_id)
     latest_norm = _normalize(finding.latest_id)
 
-    if latest_norm and latest_norm not in pinned_norm and pinned_norm not in latest_norm:
-        return "upgrade-candidate"
-    return "current"
+    if not latest_norm:
+        return "unknown"
+
+    if pinned_norm == latest_norm:
+        return "current"
+
+    return "upgrade-candidate"
 
 
 def _normalize(s: str) -> str:
-    return "".join(ch for ch in s.lower() if ch.isalnum())
+    """Normalize a model id for cross-vendor comparison.
+
+    Strips vendor prefix (e.g. ``nvidia/``), lowercases, and keeps only
+    alphanumeric characters. The vendor-prefix strip is critical because
+    vendors often publish the same model under both bare and prefixed
+    forms (``Nemotron-3-Super`` vs ``nvidia/Nemotron-3-Super``); without
+    it, those two would normalize differently and trigger a false drift.
+    """
+    if not s:
+        return ""
+    # Drop vendor prefix if present, then lowercase + strip non-alphanumeric.
+    bare = s.split("/", 1)[-1]
+    return "".join(ch for ch in bare.lower() if ch.isalnum())
