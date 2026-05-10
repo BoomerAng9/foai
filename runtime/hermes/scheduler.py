@@ -67,11 +67,44 @@ def start_scheduler():
         replace_existing=True,
     )
 
+    # Weekly AutoResearch model-currency scan — Monday 06:00 UTC
+    _scheduler.add_job(
+        _run_autoresearch,
+        trigger=CronTrigger(day_of_week="mon", hour=6, minute=0),
+        id="weekly_autoresearch",
+        name="Weekly AutoResearch — Model Currency Scan",
+        replace_existing=True,
+    )
+
     _scheduler.start()
     logger.info(
         "scheduler_started",
-        jobs=["weekly_deep_think (Sun 02:00 UTC)", "daily_deep_think (06:00 UTC)"],
+        jobs=[
+            "weekly_deep_think (Sun 02:00 UTC)",
+            "daily_deep_think (06:00 UTC)",
+            "weekly_autoresearch (Mon 06:00 UTC)",
+        ],
     )
+
+
+def _run_autoresearch():
+    """Sync wrapper for the async AutoResearch scan."""
+    logger.info("scheduled_autoresearch_starting")
+    loop = asyncio.new_event_loop()
+    try:
+        from autoresearch.engine import scan_all
+
+        report = loop.run_until_complete(scan_all())
+        logger.info(
+            "scheduled_autoresearch_complete",
+            total_tracked=report.total_tracked,
+            total_checked=report.total_checked,
+            upgrade_candidates=[e.family for e in report.upgrade_candidates],
+        )
+    except Exception:
+        logger.exception("scheduled_autoresearch_failed")
+    finally:
+        loop.close()
 
 
 def stop_scheduler():
