@@ -52,23 +52,31 @@ export function ProductCard({ product }: { product: Product }) {
         {product.description && (
           <p className="line-clamp-2 text-sm text-muted-foreground" itemProp="description">{product.description}</p>
         )}
-        <p
-          className="mt-auto pt-2 font-mono text-base font-semibold"
-          itemProp="offers"
-          itemScope
-          itemType="https://schema.org/Offer"
-        >
-          <span itemProp="priceCurrency" content="USD">$</span>
-          <span itemProp="price">{product.msrp.toFixed(2)}</span>
-          <span className="ml-1 text-xs font-normal text-muted-foreground">/ {product.unit}</span>
-        </p>
+        <div className="mt-auto pt-2 space-y-1">
+          <p
+            className="font-mono text-base font-semibold"
+            itemProp="offers"
+            itemScope
+            itemType="https://schema.org/Offer"
+          >
+            <span className="text-[10px] font-normal uppercase tracking-widest text-muted-foreground mr-1.5">From</span>
+            <span itemProp="priceCurrency" content="USD">$</span>
+            <span itemProp="price">{product.msrp.toFixed(2)}</span>
+            <span className="ml-1 text-xs font-normal text-muted-foreground">/ {product.unit}</span>
+          </p>
+          <p className="font-mono text-[10px] uppercase tracking-widest text-accent/80">
+            Open price — Sal will work with you
+          </p>
+        </div>
       </CardContent>
       <CardFooter className="gap-2 p-5 pt-0">
         <Button asChild variant="accent" size="sm" className="flex-1">
-          <Link href={`/products/${product.sku}`}>View</Link>
+          <Link href={`/chat?sku=${product.sku}&intent=negotiate`}>
+            <MessageSquare className="h-3.5 w-3.5" /> Ask Sal for a price
+          </Link>
         </Button>
         <Button asChild variant="ghost" size="sm">
-          <Link href={`/chat?sku=${product.sku}`}><MessageSquare className="h-3.5 w-3.5" /> Ask</Link>
+          <Link href={`/products/${product.sku}`}>Details</Link>
         </Button>
       </CardFooter>
     </Card>
