@@ -5,6 +5,8 @@
  * wss://api.inworld.ai/api/v1/realtime/session.
  */
 
+import { randomUUID } from 'node:crypto';
+
 import type { InworldTool } from './inworld-client.js';
 import { readInworldKey } from './inworld-client.js';
 import type { ToolRegistry, ToolHandlerContext } from './tool-registry.js';
@@ -61,7 +63,11 @@ export async function openRealtimeSession(
   }
 
   const WS = await resolveWebSocketCtor();
-  const url = `${INWORLD_REALTIME_URL}?key=voice-${Date.now()}&protocol=realtime`;
+  // Use a UUID for the session key — wall-clock time was collision-prone
+  // under load (two sessions opened in the same millisecond would share
+  // a key) and not opaque (leaked the launch timestamp).
+  const sessionKey = `voice-${randomUUID()}`;
+  const url = `${INWORLD_REALTIME_URL}?key=${sessionKey}&protocol=realtime`;
 
   const headers = { Authorization: `Basic ${apiKey}` };
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
