@@ -51,6 +51,17 @@ _INTERNAL_FIELDS = frozenset({
     "image_original",  # declared image path (pre-substitution) — used by
                        # generate_product_images.py to find SKUs needing
                        # imagery. Never exposed to customer-facing surfaces.
+    "effective_margin_pct",  # owner directive 2026-04-30: "we never reveal
+                             # to the user what our COST is." margin × msrp =
+                             # exact cost — leaking margin leaks cost.
+                             # Internal-only audit field.
+    "msrp_placeholder",      # vestigial — pre-policy MSRP from original
+                             # SKU literal, kept for audit but never
+                             # public-facing.
+    "landing_zone",          # haggle-target zone {min, mid, max, floor} —
+                             # used by equation.py for Sal/LUC/ACHEEVY/Melli
+                             # counter-offers. NEVER public — would let
+                             # Custees know the floor + low-ball Sal.
 })
 
 
@@ -130,6 +141,245 @@ def _derive_compliance_lane(p: dict) -> Optional[str]:
         return "mushroom_strict"
 
     return None
+
+
+# ---------------------------------------------------------------------------
+# 8-category storefront taxonomy (owner directive 2026-05-09)
+# ---------------------------------------------------------------------------
+# Owner-named 8 customer-facing categories per `docs/product-categories-spec-2026-05-09.md`:
+#   coffee_blends / special_offerings / flavored_coffees / single_origin /
+#   single_origin_ft / tea / instant / functional
+# Plus 2 format-extension categories (sample_pack, kcup, bundle, subscription)
+# that don't get their own storefront landing page but inherit visual identity
+# from their underlying coffee/tea category.
+#
+# This is ADDITIVE — the existing `category` field stays untouched (existing
+# margin-floor policy + tests depend on it). New `category_slug` field provides
+# the storefront / billing-matrix taxonomy.
+#
+# Derivation runs in _enrich_products() at module load. Owner can override
+# per-SKU by setting an explicit `category_slug` field.
+
+# Single-origin TCR SKU stems (uppercased, vendor_source_sku tail):
+_SINGLE_ORIGIN_TCR_STEMS = frozenset({
+    # standard single origin (Tier E, $16.47 dropship)
+    "COLO", "COSTA", "ETHN", "GUAT", "HOND", "INDOR",
+    "MEX", "NIC", "PNG", "PERU", "TANZ", "UGAN",
+    # premium single origin (Tier F, $16.78 dropship)
+    "BALI", "BRAZ", "KENYA", "SUM",
+})
+
+# Fair Trade single-origin TCR stems — all start with FT:
+_FT_TCR_STEMS = frozenset({
+    "FTSUM", "FTPERU", "FTDECPERU", "FTDECAES",
+    "FTGUAT", "FTHOND", "FTCOLO",
+})
+
+# Special offerings TCR stems (Tier C special):
+_SPECIAL_OFFERING_TCR_STEMS = frozenset({"WBAR", "COLD", "MONTH"})
+
+# Premium tea TCR stems (matcha is the only true ceremonial-tier per market
+# research 2026-05-09 — hojicha re-tiered to standard tea per owner spec).
+_PREMIUM_TEA_TCR_STEMS = frozenset({"TMATCH"})
+
+
+def _vendor_stem(p: dict) -> str:
+    """Extract the TCR SKU stem from vendor_source_sku — the part between
+    'TCR-' or 'TCR-FT-' prefix and any -<size> suffix.
+
+    Examples:
+      'TCR-ITALY-12OZ'      -> 'ITALY'
+      'TCR-FT-COLOMBIA-12OZ' -> 'FTCOLOMBIA'  (matched via FT_TCR_STEMS prefix logic)
+      'TCR-FTCOLO-1LB'      -> 'FTCOLO'
+      'TCR-MATCHA-PWDR-3OZ' -> 'MATCHA'
+    """
+    src = (p.get("vendor_source_sku") or "").upper()
+    if not src.startswith("TCR-"):
+        return ""
+    parts = src.split("-")
+    # Strip 'TCR' prefix + final size segment if it looks like a size
+    body = parts[1:]
+    if body and body[-1] in {"12OZ", "1LB", "2LB", "5LB", "2OZ", "3OZ", "8OZ",
+                              "30G", "100G", "250G", "PWDR", "PACK", "12PACK", "48PACK"}:
+        body = body[:-1]
+    # If second segment is "FT" then re-join (TCR-FT-COLOMBIA-12OZ -> FT-COLOMBIA)
+    return "-".join(body)
+
+
+def _derive_category_slug(p: dict) -> str:
+    """Derive the 8-category storefront slug per owner directive 2026-05-09.
+
+    Returns one of:
+      coffee_blends / special_offerings / flavored_coffees / single_origin /
+      single_origin_ft / tea / instant / functional / sample_pack / kcup /
+      bundle / subscription / merch
+    """
+    if "category_slug" in p:
+        return str(p["category_slug"])
+
+    existing = (p.get("category") or "").lower()
+    stem = _vendor_stem(p)
+
+    # FT detection: TCR-FT-* OR vendor_source_sku stem starts with FT
+    if stem.startswith("FT") or "TCR-FT-" in (p.get("vendor_source_sku") or "").upper():
+        return "single_origin_ft"
+
+    # Tea — split standard vs premium (matcha)
+    if existing == "tea":
+        return "tea_premium" if stem in _PREMIUM_TEA_TCR_STEMS or "MATCH" in stem else "tea"
+
+    # Coffee — split blends / single_origin / special / flavored
+    if existing == "specialty_coffee" or stem in _SPECIAL_OFFERING_TCR_STEMS:
+        return "special_offerings"
+    if existing == "flavored_coffee":
+        return "flavored_coffees"
+    if existing == "coffee":
+        if stem in _SINGLE_ORIGIN_TCR_STEMS:
+            return "single_origin"
+        return "coffee_blends"  # default for coffee category — blends + decafs
+
+    # Direct passthroughs for the remaining categories
+    if existing in {"instant", "functional", "kcup", "sample_pack", "bundle",
+                     "subscription", "merch"}:
+        return existing
+
+    return existing or "coffee_blends"
+
+
+# Subscription overhead requirement per category (TCR partner program rules).
+# Owner-facing: "to access these SKUs, your TCR partner account must hold the
+# matching subscription." Coastal absorbs this overhead OR amortizes into SKU
+# pricing per market research (`market-pricing-research-2026-05-09.md`).
+_SUBSCRIPTION_REQUIRED_BY_SLUG = {
+    "single_origin_ft": "fairtrade_program",     # $39/mo
+    "instant":          "premium_product",        # $39/mo
+    "functional":       "functional_coffee",      # $39/mo
+}
+
+
+def _derive_subscription_required(p: dict) -> Optional[str]:
+    """Return the TCR subscription tier required to sell this SKU, or None
+    if no subscription is required."""
+    if "subscription_required" in p:
+        return p["subscription_required"]
+    slug = p.get("category_slug") or _derive_category_slug(p)
+    return _SUBSCRIPTION_REQUIRED_BY_SLUG.get(slug)
+
+
+# Visual identity token per category — used by storefront PDP / category landing
+# pages to apply the right photo treatment + palette + typography per
+# `docs/product-categories-spec-2026-05-09.md`.
+_VISUAL_TOKEN_BY_SLUG = {
+    "coffee_blends":       "counter_standard",
+    "special_offerings":   "limited_considered",
+    "flavored_coffees":    "cafe_counter",
+    "single_origin":       "from_the_farm",
+    "single_origin_ft":    "certified_at_root",
+    "tea":                 "quiet_hours",
+    "tea_premium":         "quiet_hours_premium",
+    "instant":             "moment_wont_wait",
+    "functional":          "cup_with_intent",
+    "sample_pack":         "tasting_flight",
+    "kcup":                "single_serve",
+    "bundle":              "experience_box",
+    "subscription":        "rolling_counter",
+}
+
+
+def _derive_category_visual_token(p: dict) -> str:
+    """Return the visual identity token per the 8-category framework."""
+    if "category_visual_token" in p:
+        return str(p["category_visual_token"])
+    slug = p.get("category_slug") or _derive_category_slug(p)
+    return _VISUAL_TOKEN_BY_SLUG.get(slug, "counter_standard")
+
+
+# ---------------------------------------------------------------------------
+# Landing-zone targets (owner clarification 2026-05-09 PM)
+# ---------------------------------------------------------------------------
+# Catalog MSRP is the OPENING ANCHOR (60% margin). The Sal/LUC/ACHEEVY/Melli
+# negotiation works the price DOWN to the LANDING ZONE — where Custee feels
+# they negotiated a great deal AND Coastal earns healthy margin AND the
+# experience justifies the spend.
+#
+# Three points define the landing zone per SKU:
+#   - haggle_min  (heaviest discount, B2B/Melli stack): anchor × 0.55
+#   - haggle_mid  (typical retail haggle landing):       anchor × 0.65
+#   - haggle_max  (light-haggle, Sal-only):              anchor × 0.78
+#
+# These percentages can be tuned per category if owner wants premium
+# categories to land tighter (less discount room) or commodity categories
+# to land wider. Defaults below sit at universal 55/65/78 unless a category
+# overrides.
+#
+# CRITICAL: haggle_min must always be >= floor (cost + $1.50). The
+# enrichment function clamps haggle_min up to floor + $1.00 if the
+# computed value would breach the floor.
+
+# Per-category landing-zone discount factors. Values = retail × factor.
+# Tighter ranges = less haggle room (premium tiers); wider ranges = more
+# haggle room (commodity tiers).
+_LANDING_ZONE_BY_SLUG: dict[str, dict[str, float]] = {
+    # commodity-tier categories — wide haggle room (Custees expect to negotiate)
+    "coffee_blends":      {"min": 0.55, "mid": 0.65, "max": 0.78},
+    "flavored_coffees":   {"min": 0.50, "mid": 0.62, "max": 0.75},  # widest — flavored is mass-market
+    # specialty-tier — moderate haggle room
+    "single_origin":      {"min": 0.58, "mid": 0.68, "max": 0.80},
+    "single_origin_ft":   {"min": 0.55, "mid": 0.65, "max": 0.78},
+    "special_offerings":  {"min": 0.62, "mid": 0.72, "max": 0.85},  # tighter — limited-availability premium
+    # tea — moderate haggle, tighter on premium
+    "tea":                {"min": 0.55, "mid": 0.65, "max": 0.78},
+    "tea_premium":        {"min": 0.65, "mid": 0.75, "max": 0.88},  # ceremonial matcha holds price
+    # functional + instant — moderate (subscription-amortized)
+    "instant":            {"min": 0.58, "mid": 0.68, "max": 0.80},
+    "functional":         {"min": 0.62, "mid": 0.72, "max": 0.85},  # premium-tier
+    # format-extensions — inherit from underlying
+    "kcup":               {"min": 0.55, "mid": 0.65, "max": 0.78},
+    "sample_pack":        {"min": 0.65, "mid": 0.75, "max": 0.88},  # tight — already loss-leader pricing
+    "bundle":             {"min": 0.60, "mid": 0.70, "max": 0.82},
+    "subscription":       {"min": 0.55, "mid": 0.65, "max": 0.78},
+    "merch":              {"min": 0.58, "mid": 0.68, "max": 0.80},
+}
+
+
+def _derive_landing_zone(p: dict) -> Optional[dict]:
+    """Compute the haggle-landing target zone per SKU. Returns
+    {min, mid, max, floor} dict in dollars, OR None if MSRP not yet set
+    (e.g. bundles priced separately).
+
+    `min` = heaviest haggle (B2B/Melli stack), clamped to floor + $1
+    `mid` = typical retail haggle landing (Sal/LUC tier)
+    `max` = light-haggle (Sal-only)
+    `floor` = cost + $1.50 (hard guard, never crossable)
+
+    Used by `equation.py` to compute Sal/LUC/ACHEEVY/Melli target
+    counter-offers per Custee request. Internal — never serialized to
+    customer-facing API responses (would reveal ideal-deal-floor +
+    enable adversarial low-balling).
+    """
+    msrp = p.get("msrp")
+    if msrp is None or msrp <= 0:
+        return None
+    slug = p.get("category_slug") or _derive_category_slug(p)
+    factors = _LANDING_ZONE_BY_SLUG.get(slug, {"min": 0.55, "mid": 0.65, "max": 0.78})
+
+    # Floor protection: cost + $1.50
+    cost = float(p.get("wholesale_cost") or 0)
+    fulfill = float(p.get("fulfillment_cost") or 0)
+    landed = cost + fulfill
+    floor = round(landed + 1.50, 2) if landed > 0 else 0
+
+    raw_min = round(msrp * factors["min"], 2)
+    raw_mid = round(msrp * factors["mid"], 2)
+    raw_max = round(msrp * factors["max"], 2)
+
+    # Clamp min to floor + $1 — protects against floor-breach via heavy haggle
+    if floor > 0:
+        raw_min = max(raw_min, round(floor + 1.00, 2))
+        raw_mid = max(raw_mid, raw_min)  # mid always >= min
+        raw_max = max(raw_max, raw_mid)  # max always >= mid
+
+    return {"min": raw_min, "mid": raw_mid, "max": raw_max, "floor": floor}
 
 
 import json as _json
@@ -282,8 +532,18 @@ def _enrich_products() -> None:
         lane = _derive_compliance_lane(p)
         if lane is not None:
             p["compliance_lane"] = lane
+        # 8-category storefront taxonomy (owner directive 2026-05-09).
+        # Additive — existing `category` field stays untouched for
+        # backward-compat with the margin-floor policy + tests.
+        p["category_slug"] = _derive_category_slug(p)
+        sub_req = _derive_subscription_required(p)
+        if sub_req is not None:
+            p["subscription_required"] = sub_req
+        p["category_visual_token"] = _derive_category_visual_token(p)
         # Pricing policy: compute MSRP from cost + target margin unless
         # the SKU has an explicit `msrp_locked: True` flag (manual override).
+        # MUST run BEFORE _derive_landing_zone — landing zone factors apply
+        # to the policy-computed MSRP, not the original SKU literal placeholder.
         if not p.get("msrp_locked"):
             computed = _compute_msrp(p)
             if computed is not None:
@@ -295,6 +555,13 @@ def _enrich_products() -> None:
                 landed = cost + fulfill
                 if landed > 0 and computed > landed:
                     p["effective_margin_pct"] = round((computed - landed) / computed * 100, 1)
+        # Landing-zone target — internal, used by equation.py for
+        # Sal/LUC/ACHEEVY/Melli counter-offer computation. MUST run
+        # AFTER MSRP computation above so zone factors apply to the
+        # policy-anchor MSRP, not the SKU literal placeholder.
+        zone = _derive_landing_zone(p)
+        if zone is not None:
+            p["landing_zone"] = zone
         if "image" in p:
             # Preserve the catalog's declared (intended) image path so the
             # image-generation pipeline can identify which SKUs still need
