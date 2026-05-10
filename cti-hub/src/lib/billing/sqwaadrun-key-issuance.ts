@@ -63,6 +63,14 @@ export function generateSqwaadrunKey(): string {
  * If an active (revoked_at IS NULL) key already exists for this
  * subscription, it is revoked first so each subscription has at
  * most one live key at a time.
+ *
+ * The revoke + insert pair runs in a single transaction. Without the
+ * transaction, two interleaved customer.subscription.updated events
+ * for the same subscription could each pass the revoke step and each
+ * succeed at insert, producing two live keys for one subscription
+ * (breaking the at-most-one-live-key invariant). The Stripe webhook
+ * idempotency guard in route.ts is the primary defense; this is the
+ * secondary defense for any non-Stripe caller.
  */
 export async function issueSqwaadrunKey(
   input: IssueKeyInput,
@@ -76,28 +84,30 @@ export async function issueSqwaadrunKey(
   const keyHash = hashSqwaadrunKey(plaintext);
   const keyPrefix = plaintext.slice(0, 12);
 
-  // Revoke any existing live keys for this subscription
-  if (input.stripeSubscriptionId) {
-    await sql`
-      UPDATE sqwaadrun_api_keys
-      SET revoked_at = NOW()
-      WHERE stripe_subscription_id = ${input.stripeSubscriptionId}
-        AND revoked_at IS NULL
-    `;
-  }
+  const rows = await sql.begin(async (tx) => {
+    // Revoke any existing live keys for this subscription.
+    if (input.stripeSubscriptionId) {
+      await tx`
+        UPDATE sqwaadrun_api_keys
+        SET revoked_at = NOW()
+        WHERE stripe_subscription_id = ${input.stripeSubscriptionId}
+          AND revoked_at IS NULL
+      `;
+    }
 
-  const rows = await sql<{ id: string }[]>`
-    INSERT INTO sqwaadrun_api_keys (
-      user_id, key_hash, key_prefix, tier,
-      stripe_customer_id, stripe_subscription_id,
-      monthly_quota, period_start, period_end
-    ) VALUES (
-      ${input.userId}, ${keyHash}, ${keyPrefix}, ${input.tierId},
-      ${input.stripeCustomerId}, ${input.stripeSubscriptionId},
-      ${tier.monthly_missions}, ${input.periodStart}, ${input.periodEnd}
-    )
-    RETURNING id
-  `;
+    return tx<{ id: string }[]>`
+      INSERT INTO sqwaadrun_api_keys (
+        user_id, key_hash, key_prefix, tier,
+        stripe_customer_id, stripe_subscription_id,
+        monthly_quota, period_start, period_end
+      ) VALUES (
+        ${input.userId}, ${keyHash}, ${keyPrefix}, ${input.tierId},
+        ${input.stripeCustomerId}, ${input.stripeSubscriptionId},
+        ${tier.monthly_missions}, ${input.periodStart}, ${input.periodEnd}
+      )
+      RETURNING id
+    `;
+  });
 
   return {
     plaintextKey: plaintext,
