@@ -1,0 +1,100 @@
+# =============================================================================
+# Chicken Hawk — myclaw-vps PRODUCTION runner (Wave 1, hawk.foai.cloud)
+# =============================================================================
+# Captures the live state of /docker/chicken-hawk/docker-compose.yml on
+# myclaw-vps. Differs from docker-compose.gateway.yml (which builds from
+# the Dockerfile in ./gateway): this file uses python:3.12-slim with a
+# hardcoded pip-install command line — operator-tier deploy pattern,
+# tar-pushed onto the VPS rather than git-pulled.
+#
+# Why this file exists in the repo:
+#   1. Captures the agentscope==1.0.19 + reme-ai+flowllm + extra_hosts
+#      drift that would otherwise be lost on a fresh redeploy
+#   2. Anyone needing to recreate the myclaw-vps gateway from scratch
+#      uses THIS file, not docker-compose.gateway.yml
+#   3. Documents the live Traefik label set (hawk.foai.cloud routing)
+#
+# To redeploy myclaw-vps gateway from this file:
+#   tar zcf gateway.tar.gz gateway/ && \
+#   scp gateway.tar.gz docker-compose.myclaw-prod.yml myclaw-vps:/tmp/ && \
+#   ssh myclaw-vps 'mkdir -p /docker/chicken-hawk && \
+#     tar xzf /tmp/gateway.tar.gz -C /docker/chicken-hawk/ && \
+#     cp /tmp/docker-compose.myclaw-prod.yml /docker/chicken-hawk/docker-compose.yml && \
+#     cd /docker/chicken-hawk && docker compose up -d --force-recreate hawk-gateway'
+#
+# (The /docker/chicken-hawk/.env on myclaw-vps holds NEMOCLAW_API_KEY,
+# JWT_SECRET, OWNER_EMAIL, TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID, plus
+# the Wave 1 Step D-wired LITELLM_BASE_URL/LITELLM_API_KEY.)
+# =============================================================================
+
+services:
+  hawk-gateway:
+    image: python:3.12-slim
+    restart: unless-stopped
+    mem_limit: 1g
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    working_dir: /app
+    # The pip install line bundles every gateway dependency. Adding new
+    # packages = edit this string + force-recreate the container. Wave 2
+    # tech-debt cleanup is to switch to gateway/requirements.txt + a real
+    # Dockerfile build.
+    command: >
+      bash -c "
+        apt-get update && apt-get install -y --no-install-recommends curl &&
+        pip install --no-cache-dir --upgrade pip && pip install --no-cache-dir
+        fastapi uvicorn[standard] httpx pydantic pydantic-settings python-dotenv
+        structlog tenacity pyjwt python-multipart reme-ai flowllm
+        agentscope==1.0.19 &&
+        uvicorn main:app --host 0.0.0.0 --port 8000 --log-level info
+      "
+    env_file:
+      - .env
+    volumes:
+      - ./gateway:/app
+      - ./data:/data
+    environment:
+      GATEWAY_HOST: "0.0.0.0"
+      GATEWAY_PORT: "8000"
+      GATEWAY_SECRET: hawk-internal-secret
+      LLM_PROVIDER: ollama
+      OLLAMA_BASE_URL: http://localhost:11434
+      TRAE_HAWK_URL: http://localhost:7001
+      CODING_HAWK_URL: http://localhost:7002
+      AGENT_HAWK_URL: http://localhost:7003
+      FLOW_HAWK_URL: http://localhost:7004
+      SAND_HAWK_URL: http://localhost:7005
+      MEMORY_HAWK_URL: http://localhost:7006
+      GRAPH_HAWK_URL: http://localhost:7007
+      BACK_HAWK_URL: http://localhost:7008
+      VIZ_HAWK_URL: http://localhost:7009
+      DEEP_HAWK_URL: http://localhost:7010
+      BLEND_HAWK_URL: http://localhost:7011
+      LOG_LEVEL: INFO
+      NEMOCLAW_DATA_DIR: /data/nemoclaw
+    # extra_hosts maps litellm.foai.cloud → AIMS Core public IP since
+    # foai.cloud DNS is at Hostinger and the public A-record is owner-
+    # action gated. Once DNS lands, this entry can be removed.
+    extra_hosts:
+      - "litellm.foai.cloud:76.13.96.107"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.hawk-prod.rule=Host(`hawk.foai.cloud`) || Host(`app.myclaw.foai.cloud`)"
+      - "traefik.http.routers.hawk-prod.entrypoints=websecure"
+      - "traefik.http.routers.hawk-prod.tls.certresolver=letsencrypt"
+      - "traefik.http.services.hawk-prod.loadbalancer.server.port=8000"
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://127.0.0.1:8000/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 60s
+    networks:
+      - traefik-public
+
+networks:
+  traefik-public:
+    external: true

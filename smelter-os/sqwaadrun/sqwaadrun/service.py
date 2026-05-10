@@ -139,7 +139,7 @@ async def health(request: web.Request) -> web.Response:
     return web.json_response({
         "status": "ok",
         "service": "sqwaadrun-gateway",
-        "version": "2.0.0",
+        "version": "3.3.0",
         "hawks_online": online,
         "hawks_total": len(squad._hawks),
     })
@@ -385,6 +385,9 @@ async def on_startup(app: web.Application) -> None:
 
     squad = FullScrappHawkSquadrun(
         output_dir=str(data_dir / "output"),
+        screenshots_dir=str(data_dir / "screenshots"),
+        db_path=str(data_dir / "scrape_cache.db"),
+        diff_history_dir=str(data_dir / "diff_history"),
         schedule_file=str(data_dir / "schedule.json"),
         enable_screenshots=os.environ.get("ENABLE_SCREENSHOTS", "").lower() in ("1", "true", "yes"),
     )
@@ -451,7 +454,7 @@ async def _heartbeat_loop(
             report = {
                 "timestamp": datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ"),
                 "gateway": "sqwaadrun",
-                "version": "2.0.0",
+                "version": "3.3.0",
                 "hawks_online": active_hawks,
                 "hawks_total": len(squad._hawks),
                 "mission_log_size": len(squad.chicken_hawk._mission_log),  # type: ignore[attr-defined]

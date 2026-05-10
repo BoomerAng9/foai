@@ -2,7 +2,7 @@
 
 > **Status:** Example doc-generation guide flagged by Rish 2026-04-08. ACHEEVY/Boomer_CTO reads this as the canonical example of "what good looks like" when generating developer integration guides for whitelabel customers or aiPLUG buyers.
 
-> **Source:** Notion `Complete Developer Package` (renamed from Notion AI's "DEPLOY Plug Factory" output). HIDT → A.I.M.S. and Supabase → Neon swaps applied per ingestion rules.
+> **Source:** Notion `Complete Developer Package` (renamed from Notion AI's "DEPLOY Plug Factory" output). A.I.M.S. and Supabase → Neon swaps applied per ingestion rules.
 
 > **Important:** When generating a real developer guide, swap the placeholder names with the actual aiPLUG name + customer details. Keep the section structure.
 

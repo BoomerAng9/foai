@@ -1,5 +1,5 @@
 /**
- * Hermes STT Router — Multi-Provider Speech-to-Text Dispatch
+ * STT Router — Multi-Provider Speech-to-Text Dispatch
  * ============================================================
  * Routes STT requests across three providers based on use case.
  *
@@ -166,7 +166,7 @@ async function geminiSTT(audio: Buffer, language?: string): Promise<{ text: stri
   const base64Audio = audio.toString('base64');
 
   const res = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_KEY}`,
+    `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${GEMINI_KEY}`,
     {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },

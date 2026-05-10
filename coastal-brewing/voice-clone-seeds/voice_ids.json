@@ -1,0 +1,26 @@
+[
+  {
+    "persona": "sal_ang",
+    "voice_id": null,
+    "display_name": "Coastal-Sal-Ang-v2",
+    "audio_bytes": 1935404
+  },
+  {
+    "persona": "melli_capensi",
+    "voice_id": null,
+    "display_name": "Coastal-Melli-Capensi-v2",
+    "audio_bytes": 2014124
+  },
+  {
+    "persona": "luc_ang",
+    "voice_id": null,
+    "display_name": "Coastal-LUC-Ang-v2",
+    "audio_bytes": 1849004
+  },
+  {
+    "persona": "acheevy",
+    "voice_id": null,
+    "display_name": "Coastal-ACHEEVY-v2",
+    "audio_bytes": 2098604
+  }
+]

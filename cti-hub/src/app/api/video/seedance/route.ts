@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth-guard';
-import { generateVideo, getTaskStatus, getCredits } from '@/lib/video/kie-ai';
+import { generateVideo, getTaskStatus, getCredits } from '@/lib/video/openrouter-video';
 import { isOwner } from '@/lib/allowlist';
 
 export async function POST(req: NextRequest) {

@@ -1,6 +1,6 @@
 # A.I.M.S. — 90-Day Onboarding Checklist
 
-Source: Notion `Onboarding Checklist` doc, ingested 2026-04-08, HIDT → A.I.M.S. rename applied.
+Source: Notion `Onboarding Checklist` doc, ingested 2026-04-08, A.I.M.S. rename applied.
 Use: A.I.M.S. uses this for **both** customer onboarding (new aiPLUG buyers) **and** agent onboarding (new agents joining the fleet).
 
 ---

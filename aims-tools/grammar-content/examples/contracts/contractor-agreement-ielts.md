@@ -2,7 +2,7 @@
 
 > **Status:** Reference example for the contract-tier escalation that follows a successful MOU. Use after a relationship has been validated via MOU.
 
-> **Source:** Original A.I.M.S. (formerly HIDT) Agreement form.
+> **Source:** Original A.I.M.S. Agreement form.
 
 ---
 

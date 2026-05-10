@@ -26,6 +26,9 @@ const PUBLIC_PATHS = [
   '/huddle',
   '/grading',
   '/login',
+  '/signup',
+  '/forgot',
+  '/help',
   '/teams',
   '/podcasters',
   '/franchise',
@@ -36,6 +39,7 @@ const PUBLIC_PREFIXES = [
   '/tie/',
   '/draft/',
   '/players/',
+  '/legal/',            // ToS + Privacy — must be reachable pre-auth (MIM §45)
   '/rankings/',
   '/analysts/',
   '/studio/',
@@ -45,6 +49,11 @@ const PUBLIC_PREFIXES = [
   '/api/sports/',
   '/api/auth/',
   '/api/players',
+  '/api/teams',         // Player Index Drawer — browse-first, public
+  '/api/rankings',      // SSE stream + snapshot — browse-first, public
+  '/api/draft/center/', // Draft Center commentary endpoint (Class C Managed Agents)
+  '/nba/',              // NBA Playoffs tracker — public Class B surface
+  '/api/nba/',          // ESPN scoreboard proxy for /nba/playoffs
   '/api/tie/',
   '/api/feed',
   '/api/news',
@@ -56,12 +65,14 @@ const PUBLIC_PREFIXES = [
   '/huddle/',
   '/podcasters/',
   '/api/health',
+  '/api/pricing',
   '/api/podcasters/upgrade-plan',
   '/api/webhooks/',
   '/api/draft/tokens/webhook',
   '/generated/',
   '/franchise/',
   '/api/franchise/',
+  '/landing/',  // multi-league landing prototype (static /public drop)
 ];
 
 /** API paths that allow unauthenticated GET but protect POST/PUT/DELETE. */

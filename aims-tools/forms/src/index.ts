@@ -23,3 +23,21 @@
  */
 
 export * from './types.js';
+
+// NIL pipeline — Gate 5 (2026-04-18).
+// Pure reviewer + clause-rule catalog + deterministic market-rate stub.
+// No DB, no LLM, no network — callers pass a MarketRateLookup if they
+// want market comparison.
+export {
+  reviewNilContract,
+  NIL_RULES,
+  findApplicableRules,
+  STUB_MARKET_RATE_LOOKUP,
+} from './nil/index.js';
+export type {
+  NilRule,
+  NilReviewOptions,
+  MarketRateQuery,
+  MarketRateResult,
+  MarketRateLookup,
+} from './nil/index.js';

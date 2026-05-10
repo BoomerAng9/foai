@@ -2,7 +2,7 @@
 
 > **Status:** Example doc-generation guide flagged by Rish 2026-04-08. Reference example for any contractor-relationship MOU.
 
-> **Source:** Original A.I.M.S. (formerly HIDT) MOU template.
+> **Source:** Original A.I.M.S. MOU template.
 
 ---
 

@@ -18,6 +18,8 @@ const config: Config = {
         },
       },
       fontFamily: {
+        barlow: ['Barlow Condensed', 'sans-serif'],
+        jetbrains: ['JetBrains Mono', 'monospace'],
         outfit: ['Outfit', 'sans-serif'],
         sans: ['Inter', 'system-ui', 'sans-serif'],
         mono: ['IBM Plex Mono', 'monospace'],

@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Chicken Hawk</title>
+<link rel="icon" href="/static/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/static/css/main.css">
+</head>
+<body class="theme-dark">
+  <header class="ch-header">
+    <div class="ch-brand">
+      <span class="ch-logo">⌬</span>
+      <h1>Chicken Hawk</h1>
+    </div>
+    <div class="ch-tagline">FOAI assistant — direct, capable, good-humored.</div>
+  </header>
+
+  <main class="ch-chat">
+    <div id="ch-messages" class="ch-messages" role="log" aria-live="polite"></div>
+
+    <form id="ch-form" class="ch-form" autocomplete="off">
+      <textarea
+        id="ch-input"
+        class="ch-input"
+        rows="2"
+        placeholder="Ask Chicken Hawk anything…"
+        required
+        maxlength="4096"
+      ></textarea>
+      <button type="submit" id="ch-send" class="ch-send">Send</button>
+    </form>
+    <div class="ch-hint">Enter to send · Shift+Enter for newline</div>
+  </main>
+
+  <script src="/static/js/customer_chat.js" defer></script>
+</body>
+</html>

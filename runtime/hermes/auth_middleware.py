@@ -6,18 +6,23 @@ from starlette.middleware.base import BaseHTTPMiddleware
 
 HERMES_API_KEY = os.getenv("HERMES_API_KEY", "")
 
+# Public routes — reachable without an API key. The landing route at "/"
+# exists so Cloud Run doesn't surface a raw "Forbidden" to first-time
+# visitors; it returns a JSON service manifest instead.
+EXEMPT_PATHS: frozenset[str] = frozenset({"/", "/health"})
+
+
 class ApiKeyMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
-        # Health check is always public
-        if request.url.path == "/health":
+        path = request.url.path
+
+        if path in EXEMPT_PATHS:
             return await call_next(request)
 
-        # Docs disabled in production
-        if request.url.path in ("/docs", "/redoc", "/openapi.json"):
+        if path in ("/docs", "/redoc", "/openapi.json"):
             if os.getenv("ENV", "production") == "production":
                 return JSONResponse({"error": "Not found"}, status_code=404)
 
-        # Require API key for all other routes
         if not HERMES_API_KEY:
             return JSONResponse({"error": "Service not configured"}, status_code=503)
 

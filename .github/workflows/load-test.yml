@@ -1,0 +1,64 @@
+name: Per|Form Load Test (k6)
+
+# Gate 7 · Item 41 — load test.
+#
+# Manual trigger ONLY. Never auto-runs — load-testing prod during
+# draft week would affect real users. Owner triggers this from
+# GitHub Actions → Run workflow when needed (post-deploy verification,
+# weekly soak test, pre-launch validation).
+#
+# Pass criteria from Ship Checklist Item 41:
+#   - p95 latency < 2000ms
+#   - 5xx rate < 0.1%
+#   - request failure rate < 1%
+#
+# Thresholds encoded in tests/load/perform-load.js — k6 exits non-zero
+# if any threshold fails, blocking the workflow.
+
+on:
+  workflow_dispatch:
+    inputs:
+      base_url:
+        description: 'Target URL (leave blank for production)'
+        required: false
+        default: 'https://perform.foai.cloud'
+      duration_override:
+        description: 'Override total duration (e.g. 5m for soak; default 2min)'
+        required: false
+
+jobs:
+  load:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install k6
+        run: |
+          sudo gpg -k
+          sudo gpg --no-default-keyring --keyring /usr/share/keyrings/k6-archive-keyring.gpg \
+            --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys C5AD17C747E3415A3642D57D77C6C491D6AC1D69
+          echo "deb [signed-by=/usr/share/keyrings/k6-archive-keyring.gpg] https://dl.k6.io/deb stable main" \
+            | sudo tee /etc/apt/sources.list.d/k6.list
+          sudo apt-get update
+          sudo apt-get install -y k6
+
+      - name: Pre-flight health probe
+        run: |
+          curl -sS --max-time 15 "${{ github.event.inputs.base_url }}/api/health" \
+            | jq -e '.status == "ok"' || (echo "::error::Target unhealthy, aborting load test" && exit 1)
+
+      - name: Run k6 load test
+        env:
+          BASE_URL: ${{ github.event.inputs.base_url }}
+        run: |
+          cd perform
+          k6 run tests/load/perform-load.js
+
+      - name: Upload load-test report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: load-report-${{ github.run_id }}
+          path: perform/load-report.json
+          retention-days: 30

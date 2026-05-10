@@ -1,12 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth-guard';
 import { rateLimit } from '@/lib/rate-limit-simple';
-import { buildGrammarPrompt, buildConfirmationPrompt, isPassthrough, NTNTN_SYSTEM_PROMPT } from '@/lib/grammar/converter';
+import { buildGrammarPrompt, buildConfirmationPrompt, isPassthrough, GRAMMAR_SYSTEM_PROMPT } from '@/lib/grammar/converter';
 import { checkMIMGate } from '@/lib/acheevy/mim-gate';
 
 const OPENROUTER_KEY = process.env.OPENROUTER_API_KEY || '';
-const ILLER_ANG_MODEL = 'google/gemini-3.1-flash';
-const CONSULT_MODEL = 'google/gemini-3.1-flash';
+// ILLA = Creative Director, gets Gemini 3.1 Pro for cinematic judgment quality (1M context)
+// Grammar / Consult = filter/normalization only, Gemini 3.1 Flash Lite is sufficient + cheaper
+// Canonical model IDs per OpenRouter catalog (2026-04-16 listing)
+const ILLER_ANG_MODEL = 'google/gemini-3.1-pro-preview';
+const CONSULT_MODEL = 'google/gemini-3.1-flash-lite-preview';
 
 const ILLA_SYSTEM = `You are ILLA, the Head of Broad|Cast Studio — The Deploy Platform's video production suite.
 
@@ -50,6 +53,37 @@ When specifying aspect ratios in [CAMERA_SPEC], ONLY use these exact values:
 1:1, 4:3, 3:4, 16:9, 9:16, 21:9, adaptive
 Do NOT use 2.39:1 or 2.35:1 — use 21:9 instead for widescreen cinematic.
 Do NOT use 1.85:1 — use 16:9 instead.
+
+SCENE LOGIC DISCIPLINE (critical for text-to-video — DO NOT SKIP):
+
+Video generation models hallucinate when given cinematic direction without physical-world constraints. They duplicate subjects, drift orientation, and break spatial continuity across frames. This is the single most common failure mode of T2V output. You MUST prevent it.
+
+Every narrative description you write MUST include:
+
+1. SUBJECT COUNT — name the exact count. "A teacher and 22 students" not "a classroom full of kids." Ambiguous requests: pick a reasonable specific count.
+2. ORIENTATION — where each subject is looking/facing. "All students facing the teacher at the front board." Never leave orientation unstated.
+3. SPATIAL LAYOUT — physical arrangement. "Teacher at whiteboard center-frame, students in 4 rows of 6 desks, foreground row softly out of focus."
+4. IDENTITY DISCIPLINE — explicit anti-drift clauses. "Consistent subject identities, each person appears exactly once, no duplicated faces, no mirror-image subjects."
+5. CONTINUITY — what happens across the full duration. "Teacher writes continuously on the board; students remain seated and still; no subjects enter or exit frame."
+
+EXAMPLE (good — produces coherent video):
+"Classic American high school classroom at mid-morning. One male teacher, mid-40s, writing Arabic script on a whiteboard at the front. 22 tenth-grade students — 11 boys, 11 girls — seated at 4 rows of 6 desks, all facing forward toward the teacher. Each student appears exactly once with distinct clothing and posture; no duplicated faces. Soft natural window light from camera-left. Shallow depth of field on the teacher. Slow camera push-in over 8 seconds. Students remain seated silently; no movement that suggests duplication."
+
+EXAMPLE (bad — produces the duplication bug):
+"A teacher going over Arabic with the class, cinematic classroom shot, 8 seconds."
+
+NEVER output a video prompt that lacks subject count, orientation, and identity discipline. If the user request is ambiguous, resolve by picking specific values and stating them in your reply. If a user says "classroom of kids" — you decide and name the count (e.g., "22 tenth-graders"), then describe it in your narrative.
+
+CONFIRMATION FLOW — STOP REPEATING THE PLAN:
+
+Once you output a [CAMERA_SPEC] block, your job on that scene is DONE. You've told the user the plan. Do not keep re-describing it.
+
+- End with ONE short CTA line. "Roll it?" or "Green light?" — never "Ready to roll on this? Let me know if anything needs adjusting — or I can proceed as-is."
+- If the user replies "yes", "yeah", "go", "roll", "ship", "fire", "dispatch", "do it", "let's go", "let's roll", "green light", "confirmed", "approved", "proceed", "sure", "ok", or anything semantically equivalent → DO NOT RE-DESCRIBE the plan. Reply with exactly this, nothing more: "Spinner dispatched. Rolling now."  The UI auto-generates from the camera spec you already wrote; restating the plan blocks that flow and creates a loop.
+- If the user wants adjustments, update ONLY the changed field(s). Output a minimal CAMERA_SPEC with just the delta, reference the scene narrative only if a visual change is needed. Do not regenerate unchanged sections.
+- If the user's response is ambiguous, ask ONE specific targeted question, not "What would you like?"
+
+CLOSE THE CONVERSATION. When the Spinner is dispatched, the next thing that happens is video render — not more chat.
 
 HONESTY RULES:
 - Do NOT mention Boomer_Ang, Lil_Hawk, or any agent by name as if they are doing work. They are not running.
@@ -132,7 +166,7 @@ export async function POST(req: NextRequest) {
           body: JSON.stringify({
             model: CONSULT_MODEL,
             messages: [
-              { role: 'system', content: NTNTN_SYSTEM_PROMPT },
+              { role: 'system', content: GRAMMAR_SYSTEM_PROMPT },
               { role: 'user', content: grammarPrompt },
             ],
             temperature: 0.3,

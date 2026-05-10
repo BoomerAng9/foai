@@ -1,0 +1,74 @@
+{
+  "$schema": "iller_ang_create_batch_v1",
+  "batch_id": "shield_division_deployment_bay_hero_stills_v1",
+  "date": "2026-04-17",
+  "owner": "Iller_Ang (Office of the CDO)",
+  "description": "5 hero stills establishing the ACHIEVEMOR Shield Division Deployment Bay scene before any character-level animation. Per DEPLOYMENT_BAY_SCENE.md Approach 2 (CONFIRMED).",
+  "execution_note": "Iller_Ang's standing directive routes cinematic hero imagery to Recraft V4 Pro. These are NOT character portraits — those use the render-shield-division.ts (Ideogram V3) path. Hero stills establish the architectural space.",
+  "assets": [
+    {
+      "asset_type": "cinematic_hero_still",
+      "slug": "deployment_bay_nominal_ops",
+      "subject": "Establishing shot of ACHIEVEMOR Shield Division Deployment Bay at nominal operational tempo",
+      "context": "Wide establishing frame. Polished black floor with orange #FF6B00 DEPLOY-chevron inlays forming navigational paths. Suspended holographic topology of 10 ACHIEVEMOR platforms rotating slowly at bay center, Cosmos-rendered in cyan-green. Three substrate pylons (Linux x86_64, macOS ARM64, WASM RISC-V) visibly separate in the center with the CIA Tri-Factor rendered as a triskele inlaid in the polished floor between them. Elevated Gold & Platinum catwalk runs above the main floor with platinum trim. Blue Squad detection stations front-of-floor, Black Squad sealed wing with steel door and SAT panel at left, Purple Squad bridge-walkway connecting Black wing to Blue stations, White Squad conscience balcony at right, Paranoia's glass-walled independent booth visible behind the platinum catwalk with NO doorway to any office. ACHEEVY overhead comms beacon glowing above Paranoia's booth. Dark grey MOLLE-paneled walls. Cool operational base lighting with warm amber pools at independent stations and platinum-white at the Gold catwalk. Cinematic architectural photography framing, high detail, no human characters in this frame — the space is the subject.",
+      "image_model": "recraft_v4_pro",
+      "aspect_ratio": "21:9",
+      "output_format": "png",
+      "nft_mint": false
+    },
+    {
+      "asset_type": "cinematic_hero_still",
+      "slug": "black_squad_mission_launch",
+      "subject": "Reaper and Captain at SAT gate as Black Squad launches a kinetic mission",
+      "context": "Medium-wide shot at the sealed Black Squad wing. Steel door opening on hydraulic tracks revealing the armory-dark interior beyond. Captain (Lil_Hook_Hawk, platinum-edged tactical canon Hawk, Mission Orchestrator) at the SAT authorization panel holding a signed Scope Authorization Token. Reaper (Lil_Scope_Hawk, black-anodized A.I.M.S. chestplate, HUD-scope right-eye optical augmentation) stepping through the gate in low-light, Spinner weaponized boomerang visibly armed in chest-rig. Halo (Lil_Mast_Hawk, platinum-chrome chestplate, luminous halo ring on helmet) visible in background at the platinum co-signer console on the Gold & Platinum catwalk above, hand on the co-sign sigil — implying his signature co-authorized this launch. Tactical red-amber glow from the armory interior. DEPLOY chevron inlays on the floor glow brighter along the mission path. NO firearms on any Hawk. Cinematic 35mm lens framing, dramatic rim lighting, high atmospheric haze.",
+      "image_model": "recraft_v4_pro",
+      "aspect_ratio": "21:9",
+      "output_format": "png",
+      "nft_mint": false
+    },
+    {
+      "asset_type": "cinematic_hero_still",
+      "slug": "paranoia_flinch_hourly_simulation",
+      "subject": "Paranoia (Lil_Doubt_Hawk) has triggered an hourly compromise simulation; the organism layer ripples across the platform topology hologram",
+      "context": "Cross-shot from Paranoia's independent glass-walled booth out toward the Deployment Bay. Paranoia in foreground — platinum A.I.M.S. chestplate with signature single ACHEEVY-orange #FF6B00 accent line across the top, secondary small orange ACHIEVEMOR checkmark badge beside main crest, amber eyes, covert antenna on helmet, hand gesturing at her simulation console. The 10-platform holographic topology in mid-background ripples with a red-orange alert wave propagating outward from the simulated compromise point. Several Gold & Platinum Hawks on the catwalk glance toward Paranoia's booth — expressions of recognition, not fear. Crypt_Ang's office door visible in the deep background, LIGHT VISIBLE BUT UNRESPONSIVE — the door does not connect to Paranoia's booth (this architectural detail is critical and must be legible: there is NO doorway between them). ACHEEVY overhead comms beacon above Paranoia's booth is actively channeling (visible light pulse along the vertical line). Dramatic cool lighting with the simulation's red-orange wave providing the only warm fill. Cinematic editorial photography framing.",
+      "image_model": "recraft_v4_pro",
+      "aspect_ratio": "21:9",
+      "output_format": "png",
+      "nft_mint": false
+    },
+    {
+      "asset_type": "cinematic_hero_still",
+      "slug": "phoenix_protocol_rebirth",
+      "subject": "Shift-change rebirth — a Hawk dematerializing at old post while replacement instance materializes at new post, per 24-hour Phoenix Protocol",
+      "context": "Mid-shot capturing a single Golden Image pedestal at peak rebirth moment. The outgoing Hawk instance is visibly dissolving in golden particulate light at the pedestal, while the incoming replacement instance is materializing a few steps away in a complementary golden sheen — ONE frame captures both states overlapping, showing the handoff is graceful, not a disruption. The Hawk in question (pick Doc / Lil_Patch_Hawk — Blue Squad remediation, who orchestrates Phoenix Protocol deployments) is at a remediation console with patches in progress visible on-screen. Peer Blue Squad Hawks at adjacent stations continue operating, undisturbed — this is routine. The pedestal base has a cryptographic golden-image signature glyph inscribed. Warm gold key light, cool ambient operational fill. Cinematic detail on the particulate dissolve and rematerialize effect.",
+      "image_model": "recraft_v4_pro",
+      "aspect_ratio": "21:9",
+      "output_format": "png",
+      "nft_mint": false
+    },
+    {
+      "asset_type": "cinematic_hero_still",
+      "slug": "p0_incident_titan_command",
+      "subject": "Titan (Lil_Bell_Hawk) declaring P0 incident — Degradation Spectrum Mode 3 Survival activating",
+      "context": "Wide dramatic shot of the Deployment Bay under Mode 3 Survival. Titan (Lil_Bell_Hawk, Gold & Platinum Squad Incident Commander) stands at the central command position on the Gold catwalk, gauntlet raised in the P0 declaration pose. Mode 3 Survival banner across upper walls in ACHIEVEMOR-orange warning red. The three substrate pylons (Linux, macOS, WASM) visibly switch their operational patterns — lights cycling from blue-nominal to amber-degraded to red-survival across their vertical length. Doc (Lil_Patch_Hawk) and Cipher (Lil_Lab_Hawk) already in motion on the bay floor heading toward their consoles. Paranoia visible in her booth confirming no active-adversary before Mode 3 commits. Hex (Lil_Peel_Hawk) at formal-verification console — the 5 formally verified kernel components display showing all green as the degradation scales. Dramatic high-contrast lighting, red-orange crisis key light from above, cool steel-blue fill on the substrates, Titan backlit in platinum. Cinematic wide-aspect editorial composition.",
+      "image_model": "recraft_v4_pro",
+      "aspect_ratio": "21:9",
+      "output_format": "png",
+      "nft_mint": false
+    }
+  ],
+  "dmaic_gate": {
+    "define": "Each still has a named purpose in establishing the space — must be identifiable from thumbnail",
+    "measure": "4K output, 21:9 aspect for cinematic feel, 300 DPI if ever printed",
+    "analyze": "No firearms of any kind. Spinner is the only armament visible. ACHIEVEMOR wordmark legible where visible, never distorted. DEPLOY chevron correct on every Hawk",
+    "improve": "Every architectural element encodes a v1.6 fact — if an element doesn't carry a governance payload, remove it",
+    "control": "No content moderation violations. No sensitive operational detail that couldn't be shown publicly"
+  },
+  "next_steps_after_generation": [
+    "Hero stills DMAIC gate review by Iller_Ang",
+    "Review frames with user — any adjustments before locking scene canon",
+    "Lil_Viz_Hawk receives approved stills as reference geometry for Omniverse scene skeleton",
+    "Cosmos WFM integration for the 10-platform topology and Merkle-chain visualizer",
+    "Live Look In front-end wires into the scene via runtime/live-look-in/"
+  ]
+}

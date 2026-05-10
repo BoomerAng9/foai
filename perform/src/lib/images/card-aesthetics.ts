@@ -75,6 +75,34 @@ function brandOverlay(): string {
   return 'TOP-LEFT CORNER: Leave a clean, uncluttered dark zone approximately 180x180 pixels for a logo overlay that will be added in post-processing. Do NOT draw any logos, brand marks, lion images, crown images, text watermarks, or any branding anywhere on the image.';
 }
 
+/**
+ * Helmet-on / no-face rule (2026-04-18).
+ * Every aesthetic card that depicts a football athlete must hide the face
+ * behind a reflective black mirror visor. No likeness, no identifiable
+ * facial features, no expression. The player reads as "team colorway in
+ * helmet + uniform." Append this to every prompt that shows a football
+ * athlete. Non-football sports (basketball/baseball/etc.) swap this for
+ * their sport-specific face-occluding gear via `facelessRule(sport)`.
+ */
+function facelessRule(sport: Sport = 'football'): string {
+  switch (sport) {
+    case 'football':
+    case 'flag_football':
+      return 'ATHLETE FACE: Hidden behind a reflective BLACK MIRROR visor attached to the full football helmet. Fully opaque visor — ZERO facial features, ZERO expression, ZERO identifiable likeness. The player is anonymous; only the team colorway, helmet silhouette, and jersey number identify them. No eyes, no mouth, no skin tone visible on the face. NO logos, NO decals, NO team name text on helmet or jersey.';
+    case 'hockey':
+      return 'ATHLETE FACE: Hidden behind a reflective cage-and-visor combination on the hockey helmet. Fully shadowed — ZERO facial features, ZERO expression. Anonymous silhouette in team colorway.';
+    case 'lacrosse':
+      return 'ATHLETE FACE: Hidden behind the lacrosse helmet cage with a dark shadow across the face. ZERO facial features visible. Anonymous silhouette in team colorway.';
+    case 'baseball':
+    case 'softball':
+      return 'ATHLETE FACE: Obscured — pulled-down cap brim casting full shadow across the upper face, or batting helmet with dark visor-like shading. ZERO identifiable features, ZERO expression. Anonymous silhouette in team colorway.';
+    case 'basketball':
+      return 'ATHLETE FACE: Obscured — motion blur, backlight silhouette, or dramatic shadow across the face. ZERO identifiable likeness, ZERO expression. Anonymous silhouette in team colorway.';
+    default:
+      return 'ATHLETE FACE: Obscured — dramatic shadow, motion blur, or gear-occlusion across the face. ZERO identifiable likeness, ZERO expression. Anonymous silhouette in team colorway.';
+  }
+}
+
 /* ── The 5 aesthetic card specs ── */
 export const CARD_AESTHETICS: Record<CardAesthetic, CardStyleSpec> = {
   blueprint: {
@@ -90,6 +118,7 @@ ANNOTATIONS: Clean engineering callouts pointing to key body parts with measurem
 BOTTOM NAMEPLATE: White technical stencil font "${p.name.toUpperCase()}" on dark navy
 BELOW: "${p.position}" in cyan blueprint font
 ${brandOverlay()}
+${facelessRule()}
 Style: Premium architectural blueprint meets sports card, navy and white and cyan palette. All text crisp. NO logos, NO team names on any gear, NO brand marks.`;
     },
     negativePrompt: 'team logos, mascot logos, blurry text, cartoon, amateur, lion logo, crown, brand watermark',
@@ -110,6 +139,7 @@ BEHIND THE ATHLETE: A massive towering ${animal} silhouette/shadow looming behin
 BOTTOM NAMEPLATE: Bold gold "${p.name.toUpperCase()}" on dark matte plate
 BELOW: "${p.position}" and small text "${animal.toUpperCase()} — ${trait}" in refined gold
 ${brandOverlay()}
+${facelessRule()}
 Style: Dark fantasy sports card, ethereal spirit animal, cinematic dramatic lighting, gold and obsidian palette. All text sharp. NO logos on gear, NO brand marks.`;
     },
     negativePrompt: 'cute cartoon animal, team logos, bright daylight, blurry text, amateur, lion logo, crown',
@@ -128,6 +158,7 @@ CENTER: An athlete breaking free from a massive crystalline cocoon/chrysalis str
 BOTTOM NAMEPLATE: Bold metallic "${p.name.toUpperCase()}" with energy glow effect
 BELOW: "${p.position}" in accent color
 ${brandOverlay()}
+${facelessRule()}
 Style: Marvel Agents of SHIELD Terrigenesis inspired, sci-fi meets sports, crystalline structures, energy effects, dramatic backlighting. NO logos on gear. All text sharp. NO brand marks.`;
     },
     negativePrompt: 'cartoon, cute, team logos, bright daylight, blurry text, amateur, lion logo, crown',
@@ -148,6 +179,7 @@ Dramatic backlighting through the hole creates a halo/rim light effect. Concrete
 BOTTOM NAMEPLATE: Bold industrial stencil "${p.name.toUpperCase()}" — looks stamped into metal
 BELOW: "${p.position}" in accent color
 ${brandOverlay()}
+${facelessRule()}
 Style: Michael Bay-level destruction, hyper-realistic concrete physics, cinematic slow-motion debris. All text sharp. NO logos, NO brand marks.`;
     },
     negativePrompt: 'cartoon, gentle, team logos, clean wall, no debris, blurry text, amateur, lion logo, crown',
@@ -170,6 +202,7 @@ BOTTOM SECTION (20%): Clean dark panel with:
 - "${p.position} | Class of ${new Date().getFullYear() + 1}" in white
 BOTTOM-RIGHT CORNER: Leave a clean zone for logo overlay (added in post-production).
 ${brandOverlay()}
+${facelessRule()}
 Style: Premium sports commitment graphic, broadcast quality, 3D metallic typography, cinematic. All text sharp. NO school logos, NO mascot images, NO brand marks.`;
     },
     negativePrompt: 'bright white background, school logos, mascot images, cartoon, amateur, lion logo, crown',

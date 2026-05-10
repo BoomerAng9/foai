@@ -1,0 +1,13 @@
+{
+  "task_id": "task_verify_organic_claim_001",
+  "owner_goal": "Verify whether we can claim organic coffee or organic tea on public product pages.",
+  "objective": "Create a claim verification receipt for organic, fair-trade, and clean/lab-tested language before product copy is published.",
+  "department": "boomer_quality",
+  "task_type": "claim_verification",
+  "risk_tags": [
+    "certification",
+    "final_public"
+  ],
+  "approval_required": true,
+  "desired_output": "claim verification receipt with approved and rejected wording"
+}

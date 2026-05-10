@@ -1,0 +1,63 @@
+# Cloud Run service definition for spinner-policy.
+# Applied via: gcloud run services replace runtime/spinner-policy/service.yaml
+#
+# Matches Gate 6b Cloud Run pattern in foai-aims/us-central1. Internal
+# ingress only — callers come from Python Spinner, which will live on
+# myclaw-vps with Cloud Run invoker IAM for this service.
+#
+# Minimum instances = 1 here (not 0 like vault-signer). Rationale:
+# vault-signer fires per-build (low frequency, cold-start OK); this
+# sidecar fires per tool-call (high frequency, cold-start hurts).
+# 1 warm instance at all times.
+
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: spinner-policy
+  namespace: foai-aims
+  annotations:
+    run.googleapis.com/ingress: internal-and-cloud-load-balancing
+    run.googleapis.com/launch-stage: GA
+spec:
+  template:
+    metadata:
+      annotations:
+        autoscaling.knative.dev/minScale: "1"
+        autoscaling.knative.dev/maxScale: "10"
+        run.googleapis.com/startup-cpu-boost: "true"
+        run.googleapis.com/execution-environment: gen2
+    spec:
+      containerConcurrency: 50
+      timeoutSeconds: 5
+      serviceAccountName: spinner-policy@foai-aims.iam.gserviceaccount.com
+      containers:
+        - name: spinner-policy
+          image: us-central1-docker.pkg.dev/foai-aims/spinner-policy/spinner-policy:latest
+          ports:
+            - name: http1
+              containerPort: 8080
+          resources:
+            limits:
+              cpu: "1"
+              memory: 128Mi
+          env:
+            - name: RUST_LOG
+              value: "info,spinner_policy=info"
+          startupProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 1
+            periodSeconds: 2
+            timeoutSeconds: 1
+            failureThreshold: 5
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            periodSeconds: 30
+            timeoutSeconds: 1
+            failureThreshold: 3
+  traffic:
+    - percent: 100
+      latestRevision: true

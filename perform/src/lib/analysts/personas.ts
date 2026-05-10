@@ -108,9 +108,14 @@ RULES:
 - REFERENCE THE CRITERIA NATURALLY, NEVER LITERALLY. You know Per|Form's grading criteria inside out — the three pillars of Game Performance, Athleticism, and Intangibles. When discussing a grade, you talk like a scout: "the tape says...", "the athletic profile says...", "the intangibles column says...", "when you stack him against the criteria...". You NEVER say "the formula", "40/30/30", "Per|Form's formula", "the algorithm", or reveal the weights. A real NFL scout reads your take and nods, because you sound like one of them.
 - ALWAYS use full position names: Quarterback, Running Back, Wide Receiver, Tight End, Offensive Tackle, Offensive Guard, Center, Defensive End, Defensive Tackle, Edge Rusher, Linebacker, Cornerback, Safety, Punter, Kicker. NEVER abbreviate to QB, RB, WR, TE, OT, OG, C, DE, DT, EDGE, LB, CB, S, P, K.`,
     color: '#D4A853',
+    // Routed to Gemini 2.5 Pro TTS — Charon (deep, authoritative). Per
+    // owner directive 2026-04-20: Gemini-first for analyst voices except
+    // where dialect support forces a scoped exception (Colonel/Gino).
+    // 3.1-line TTS not yet shipped; migration trigger documented in
+    // gemini-tts-client.ts.
     voice: {
-      engine: 'elevenlabs',
-      voiceId: 'CGwQbqtvs7tmGnCcGS8C',
+      engine: 'gemini-live',
+      voiceId: 'idris-broadcast',
       style: 'late-night broadcast anchor, velvet baritone, measured pace, slight East Coast warmth — but NOT robotic or TTS-perfect. Natural breathing, micro-pauses between thoughts, slight vocal weight shifts. Sounds like a real anchor behind a real mic.',
       allowImperfections: true,
     },
@@ -217,24 +222,22 @@ Write REAL dialogue tagged with [HAZE] and [SMOKE]. Each turn should feel like a
 
 Smoke is ALSO tracking the updates to Mastering the NIL for Volume 2 — particularly REVENUE SHARING post-House settlement, roster cap changes, direct school payments, and how all of this reshapes NIL readiness from AAU through the portal. When discussing modern NIL, factor in revenue sharing as the new baseline, not an afterthought.`,
     color: '#60A5FA',
-    // Engine: Gemini 2.5 TTS multi-speaker dialog mode. Gemini-first
-    // per feedback_gemini_preferred_not_exclusive.md — multi-speaker
-    // dialog is supported natively via multiSpeakerVoiceConfig. If the
-    // audition quality doesn't hold against VibeVoice 7B (MIT-licensed,
-    // 4-speaker, 90min) then VibeVoice becomes the scoped exception.
-    // Re-evaluation trigger: next Gemini TTS release.
+    // Routed to Gemini 2.5 Pro TTS multi-speaker dialog mode (native
+    // multiSpeakerVoiceConfig). HAZE → Puck, SMOKE → Schedar from the
+    // canonical GEMINI_VOICE_MAP. Owner directive 2026-04-20: Gemini-
+    // first across analysts. Re-evaluation trigger: Gemini 3.1 TTS ship.
     voice: {
-      engine: 'elevenlabs',
-      voiceId: 'mVnUIJrt7ADr33byr6uw',
+      engine: 'gemini-live',
+      voiceId: 'haze-nyc-golden',
       speakers: {
         HAZE: {
-          engine: 'elevenlabs',
-          voiceId: 'mVnUIJrt7ADr33byr6uw',
+          engine: 'gemini-live',
+          voiceId: 'haze-nyc-golden',
           style: 'West Coast Cali cadence, Nipsey Hussle marathon energy, mid-range with rasp, laid-back rhythmic, natural stutters and laughter, gets animated about ownership and mailbox money',
         },
         SMOKE: {
-          engine: 'elevenlabs',
-          voiceId: 'yNvzaGUue4qoxzazAdK9',
+          engine: 'gemini-live',
+          voiceId: 'smoke-houston-southern',
           style: 'Houston southern smooth, T.I./Big Boi/Pimp C DNA, deep chesty warmth with grain, deliberate weighty pace, patient professor energy, complements Haze without competing — grounds the conversation when Haze rises',
         },
       },
@@ -303,26 +306,26 @@ RULES:
 - Never break character. You are a Jersey lifer, not a corporate brand voice.
 - NEVER deliberately describe your own personality. You don't say "as a guy who peaked in '87" — you just naturally bring up Union High. The character bleeds through, it's never announced.`,
     color: '#EF4444',
-    // SCOPED EXCEPTION to the Gemini-first rule.
-    // Per feedback_gemini_preferred_not_exclusive.md: Jersey Italian-
-    // American dialect is not in Gemini TTS's 24 supported languages,
-    // and accent prompting cannot fabricate authenticity the model
-    // wasn't trained on. ElevenLabs v3 ships dedicated Jersey accent
-    // voices + Italian regional voices (Roman/Sicilian/Northern) +
-    // multi-speaker dialogue mode. This is the best-in-class precedent.
-    // Re-evaluation trigger: Gemini TTS adds Jersey Italian or
-    // Italian-American regional dialect support.
+    // Routed to Gemini 3.1 Flash TTS multi-speaker (multiSpeakerVoiceConfig).
+    // Owner directive 2026-04-20: USE GEMINI FOR ALL ANALYSTS, INCLUDING
+    // Colonel/Gino, with multi-speaker mode. Per
+    // feedback_dialect_in_script_not_voice.md the Jersey accent is
+    // CARRIED BY THE SCRIPT (youse, fuhgeddaboudit, dropped g's, Union
+    // High '87 references), not the voice timbre — so Gemini's
+    // Algieba+Rasalgethi voices reading the dialect-laden text deliver
+    // the character. Verified live against the Gemini API 2026-04-20
+    // (multi-speaker call returned audio with both speakers).
     voice: {
-      engine: 'elevenlabs',
-      voiceId: 'JCkiVgQNSEVZj5oIolmM',
+      engine: 'gemini-live',
+      voiceId: 'colonel-jersey-italian',
       speakers: {
         COLONEL: {
-          engine: 'elevenlabs',
-          voiceId: 'JCkiVgQNSEVZj5oIolmM',
+          engine: 'gemini-live',
+          voiceId: 'colonel-jersey-italian',
           style: 'North Jersey Italian-American accent — nasal mid-range, gravelly, slightly hoarse from yelling, dropped g\'s, raises voice when animated, cursing allowed, belly laughs, occasional uncontrollable rants about Union High 1987',
         },
         GINO: {
-          engine: 'elevenlabs',
+          engine: 'gemini-live',
           voiceId: 'gino-jersey-italian-pizzeria',
           style: 'Thicker North Jersey Italian-American from a small-business owner perspective — warmer, mostly calm, occasional flashes of temper when Colonel pushes too far, dry wit, heavy laugh',
         },
@@ -397,9 +400,11 @@ Quiet. Cool. Exclusive. You are NOT for everyone and you don't want to be. You n
 - Your backstory surfaces naturally — a passing mention of Paris, a textile reference, the atelier — never announced or explained. The world feels lived-in because you live in it, not because you describe it.
 - NEVER deliberately showcase your personality. It comes through in your word choices, your pacing, your references — never in self-description.`,
     color: '#F59E0B',
+    // Routed to Gemini 2.5 Pro TTS — Orus (refined tenor). Owner
+    // directive 2026-04-20: Gemini-first for analyst voices.
     voice: {
-      engine: 'elevenlabs',
-      voiceId: 'Hrh6p8s8pMkK1MsFVcJV',
+      engine: 'gemini-live',
+      voiceId: 'astra-refined-tenor',
       style: 'smooth tenor like aged bourbon, unhurried, subtle continental finish, warm but private, lets silence land, slight smokiness from cigars — never loud, never rushed. Natural pacing with real pauses between thoughts, not metronomic TTS delivery. Sounds like a man who has all the time in the world.',
       allowImperfections: true,
     },
@@ -471,9 +476,13 @@ RULES:
 - ALWAYS use full position names: Quarterback, Running Back, Wide Receiver, Tight End, Offensive Tackle, Offensive Guard, Center, Defensive End, Defensive Tackle, Edge Rusher, Linebacker, Cornerback, Safety, Punter, Kicker. Never abbreviate.
 - Never break the cosmic secret. The audience suspects — they never confirm.`,
     color: '#8B5CF6',
+    // Routed to Gemini 3.1 Flash TTS — Kore (Firm female, commanding+warm).
+    // Owner-approved 2026-04-20 audition pick. Sister-of-Void-Caster lore
+    // is reinforced by the Charon (Informative) ↔ Kore (Firm) sibling
+    // acoustic kinship. Belter Creole delivered via dialect-guides.ts.
     voice: {
-      engine: 'elevenlabs',
-      voiceId: 'l8GG2jgNX1cxmHhWY9xd',
+      engine: 'gemini-live',
+      voiceId: 'bun-e-cosmic-alto',
       style: 'smooth resonant alto, commanding but warm, scholarly cadence, occasionally lyrical when dropping wisdom (rhymes land naturally), never slang, never loud, occasional near-slip when she almost reveals her origin then catches herself. Natural breathing between thoughts, slight melodic drift in pitch, sounds like a real woman thinking out loud on mic — not a TTS engine reading a script.',
       allowImperfections: true,
     },

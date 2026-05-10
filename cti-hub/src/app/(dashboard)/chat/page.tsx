@@ -134,24 +134,6 @@ function ChatWithACHEEVY() {
       .catch(() => {});
   }, [user]);
 
-  // Keep session alive — refresh token every 30 minutes
-  useEffect(() => {
-    if (!user) return;
-    const refreshSession = async () => {
-      try {
-        const token = await user.getIdToken(true);
-        await fetch('/api/auth/session', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ accessToken: token }),
-        });
-      } catch {}
-    };
-    refreshSession(); // Refresh on mount
-    const interval = setInterval(refreshSession, 30 * 60 * 1000); // Every 30 min
-    return () => clearInterval(interval);
-  }, [user]);
-
   useEffect(() => {
     if (!user) return; // Don't fetch until authed
     fetch('/api/conversations')

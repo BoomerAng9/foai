@@ -8,6 +8,7 @@
     "dev": "node --watch bot.js"
   },
   "dependencies": {
-    "node-telegram-bot-api": "^0.66.0"
+    "node-telegram-bot-api": "^0.66.0",
+    "postgres": "^3.4.5"
   }
 }

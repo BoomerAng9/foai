@@ -1,0 +1,67 @@
+# ============================================================================
+# TTD-DR — Test-Time Diffusion Deep-Researcher — Cloud Build + Cloud Run
+# ============================================================================
+# FastAPI service. HMAC-authed. Fires at RFP→BAMARAM Steps 2/4/5/6 under
+# ACHEEVY_BRAIN v3.1 §36.4.
+#
+# Secrets pulled from Secret Manager at container boot:
+#   - TTDR_HMAC_SECRET → required; ttd-dr-hmac-secret
+#
+# Trigger:
+#   gcloud builds submit --config=runtime/ttd-dr/cloudbuild.yaml \
+#     --project=foai-aims runtime/ttd-dr/
+#
+# Rollback:
+#   gcloud run services update-traffic ttd-dr \
+#     --to-revisions=<previous-revision>=100 --region=us-central1
+# ============================================================================
+
+steps:
+  - name: 'gcr.io/cloud-builders/docker'
+    id: build
+    args:
+      - build
+      - -t
+      - us-central1-docker.pkg.dev/foai-aims/ttd-dr/service:$COMMIT_SHA
+      - -t
+      - us-central1-docker.pkg.dev/foai-aims/ttd-dr/service:latest
+      - .
+
+  - name: 'gcr.io/cloud-builders/docker'
+    id: push-sha
+    args:
+      - push
+      - us-central1-docker.pkg.dev/foai-aims/ttd-dr/service:$COMMIT_SHA
+
+  - name: 'gcr.io/cloud-builders/docker'
+    id: push-latest
+    args:
+      - push
+      - us-central1-docker.pkg.dev/foai-aims/ttd-dr/service:latest
+
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    id: deploy
+    entrypoint: gcloud
+    args:
+      - run
+      - deploy
+      - ttd-dr
+      - --image=us-central1-docker.pkg.dev/foai-aims/ttd-dr/service:$COMMIT_SHA
+      - --region=us-central1
+      - --platform=managed
+      - --no-allow-unauthenticated
+      - --port=8010
+      - --memory=1Gi
+      - --cpu=1
+      - --min-instances=0
+      - --max-instances=5
+      - --timeout=300s
+      - --set-env-vars=PYTHONUNBUFFERED=1
+      - --set-secrets=TTDR_HMAC_SECRET=ttd-dr-hmac-secret:latest
+
+images:
+  - us-central1-docker.pkg.dev/foai-aims/ttd-dr/service:$COMMIT_SHA
+  - us-central1-docker.pkg.dev/foai-aims/ttd-dr/service:latest
+
+options:
+  logging: CLOUD_LOGGING_ONLY

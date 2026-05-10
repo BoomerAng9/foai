@@ -1,3 +1,12 @@
+/**
+ * Stripe Sqwaadrun add-on checkout — OUTBOUND path (sibling of
+ * `/api/stripe/checkout/route.ts`). Same Gate 1c canon status: direct
+ * Stripe calls are Phase-A interim; Phase-B turns this into a thin
+ * proxy over `@/lib/billing/stepper-billing-proxy.createCheckoutSession`
+ * with `product: 'sqwaadrun'`. See
+ * `docs/canon/stripe_architecture_carveout.md`.
+ */
+
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import {

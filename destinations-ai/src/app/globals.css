@@ -1,0 +1,99 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --stage: #0a0a0f;
+  --stage-deep: #050509;
+  --stage-mid: #13121c;
+
+  --panel-bg: linear-gradient(135deg, rgba(255, 255, 255, 0.06) 0%, rgba(10, 10, 15, 0.5) 100%);
+  --panel-bg-depth: linear-gradient(135deg, rgba(10, 10, 15, 0.55) 0%, rgba(18, 18, 26, 0.4) 100%);
+  --panel-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 8px 32px rgba(0, 0, 0, 0.5);
+  --border: rgba(255, 255, 255, 0.1);
+  --soft-border: rgba(255, 255, 255, 0.06);
+  --divider: rgba(255, 255, 255, 0.1);
+
+  --text: #ffffff;
+  --text-muted: #a1a1aa;
+  --text-dim: rgba(255, 255, 255, 0.55);
+  --text-faint: rgba(255, 255, 255, 0.3);
+
+  --hero-base: #07070b;
+  --hero-mix: linear-gradient(135deg, rgba(10, 10, 15, 0.8), rgba(20, 20, 30, 0.4));
+
+  --accent-orange: #ff6b00;
+  --accent-orange-hot: #ff8a3d;
+  --accent-tactical: #4fd1ff;
+}
+
+html,
+body {
+  background: var(--stage);
+  color: var(--text);
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+::selection {
+  background: rgba(255, 107, 0, 0.35);
+  color: #fff;
+}
+
+::-webkit-scrollbar {
+  height: 6px;
+  width: 6px;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+input[type='range'] {
+  -webkit-appearance: none;
+  appearance: none;
+  background: rgba(255, 255, 255, 0.08);
+  height: 4px;
+  border-radius: 999px;
+}
+input[type='range']::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  background: #ff6b00;
+  border-radius: 999px;
+  box-shadow: 0 0 10px rgba(255, 107, 0, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  border: none;
+  cursor: grab;
+}
+input[type='range']::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  background: #ff6b00;
+  border-radius: 999px;
+  box-shadow: 0 0 10px rgba(255, 107, 0, 0.7);
+  border: none;
+  cursor: grab;
+}
+
+/* Reduce motion for users who prefer it — accessibility default */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

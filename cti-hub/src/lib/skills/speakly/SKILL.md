@@ -210,7 +210,7 @@ ACHEEVY then executes this as a structured plan rather than parsing raw voice te
 
 ## GRAMMAR INTERACTION
 
-Grammar (NTNTN) remains the invisible filter. If Speakly detects intent that requires Grammar's filtering (content moderation, IP protection, brand voice), it flags the command accordingly. Grammar never speaks to the user. Grammar filters. Speakly structures. ACHEEVY executes.
+Grammar remains the invisible filter. If Speakly detects intent that requires Grammar's filtering (content moderation, IP protection, brand voice), it flags the command accordingly. Grammar never speaks to the user. Grammar filters. Speakly structures. ACHEEVY executes.
 
 ---
 

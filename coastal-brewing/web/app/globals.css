@@ -1,0 +1,68 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Light theme — lowcountry editorial (cream / warm-near-black / sage matcha accent) */
+    --background: 36 25% 92%;       /* #f3efe6 */
+    --foreground: 30 15% 9%;        /* #1a1612 */
+    --card: 0 0% 100%;
+    --card-foreground: 30 15% 9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 30 15% 9%;
+    --primary: 30 15% 9%;
+    --primary-foreground: 36 25% 96%;
+    --secondary: 36 18% 87%;
+    --secondary-foreground: 30 15% 9%;
+    --muted: 36 18% 87%;
+    --muted-foreground: 33 8% 39%;  /* #6a665d */
+    --accent: 90 30% 43%;           /* sage #6b8e4e — matcha-only */
+    --accent-foreground: 36 25% 96%;
+    --destructive: 0 70% 40%;
+    --destructive-foreground: 36 25% 96%;
+    --border: 33 25% 80%;           /* #d8d2c4 */
+    --input: 33 25% 80%;
+    --ring: 33 8% 39%;
+    --radius: 0;                    /* hairline-only, sharp corners — design.md §8 */
+  }
+
+  .dark {
+    /* Dark theme — primary surface (matte black / off-white / monochrome) */
+    --background: 0 0% 4%;          /* #0a0a0a */
+    --foreground: 40 16% 89%;       /* #e8e6e0 */
+    --card: 30 7% 5%;               /* #0f0e0d */
+    --card-foreground: 40 16% 89%;
+    --popover: 30 7% 5%;
+    --popover-foreground: 40 16% 89%;
+    --primary: 40 16% 89%;
+    --primary-foreground: 0 0% 4%;
+    --secondary: 30 7% 9%;
+    --secondary-foreground: 40 16% 89%;
+    --muted: 30 7% 9%;
+    --muted-foreground: 35 12% 60%; /* #a09c92 */
+    --muted-strong: 33 8% 39%;      /* #6a665d */
+    --accent: 38 38% 60%;           /* taupe #c0a572 — reserved highlight */
+    --accent-foreground: 0 0% 4%;
+    --destructive: 0 70% 50%;
+    --destructive-foreground: 40 16% 89%;
+    --border: 24 6% 10%;            /* #1a1816 */
+    --input: 24 6% 10%;
+    --ring: 35 12% 60%;
+  }
+}
+
+@layer base {
+  * { @apply border-border; }
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1, "ss01" 1;
+  }
+  /* Headlines use the display font (Inter on dark, Fraunces on light surfaces). */
+  h1, h2, h3, h4 { @apply font-display; letter-spacing: -0.02em; }
+  /* Lowercase filter pills & tracked-out small caps utilities */
+  .eyebrow { @apply font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground; }
+  .pill {
+    @apply inline-flex items-center rounded-full border border-border px-3 py-1 text-xs lowercase;
+  }
+}

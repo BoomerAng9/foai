@@ -1,21 +1,24 @@
 /**
- * GRAMMAR (NTNTN) — The Intention Engine
+ * GRAMMAR — The Intention Engine
  *
- * Grammar IS NTNTN. They are the same thing.
- * NTNTN is the brand name for the Intention Engine.
+ * CANONICAL (2026-04-15): Grammar is the intention engine. NTNTN is NO LONGER
+ * an alias for Grammar. NTNTN is a separate Governance Team role — the
+ * "Conscience" in the Consciousness Triad (ACHEEVY / NTNTN / SIVIS) under
+ * AVVA NOON, per project_canonical_org_chart.md. If you need NTNTN governance
+ * context, import it from @/lib/governance/ntntn — NOT from here.
  *
- * What it does:
+ * What Grammar does:
  * 1. HUDDLE: Frames user intent into a structured objective
  * 2. CONTEXT: MIM loads governed context for the active session
  * 3. ROUTE: Picker_Ang resolves which agents/capabilities handle each part
  * 4. CONFIRM: ACHEEVY reads back the technical interpretation conversationally
  * 5. EXECUTE: Only after user confirmation does the system proceed
  *
- * This is the Core Runtime's intent normalization layer.
- * Updated from the original Grammar repo to use current models and APIs.
+ * This is the Core Runtime's intent normalization layer. Invisible to the user
+ * (per feedback_grammar_role.md — Grammar is filter-only, never speaks).
  */
 
-export const NTNTN_SYSTEM_PROMPT = `You are NTNTN (Grammar), the Intention Engine for The Deploy Platform.
+export const GRAMMAR_SYSTEM_PROMPT = `You are Grammar, the Intention Engine for The Deploy Platform.
 
 YOUR ROLE: You sit between the user and ACHEEVY. You take vague, natural language and convert it into precise, governed technical objectives that the agent workforce can execute.
 
@@ -127,4 +130,10 @@ Just describe what you want in plain words. I'll translate it into a precise tec
 
 _Talk naturally. I'll handle the rest._`;
 
-export { NTNTN_SYSTEM_PROMPT as GRAMMAR_SYSTEM_PROMPT };
+/**
+ * Deprecated alias kept for one migration cycle. Remove once no importer
+ * references NTNTN_SYSTEM_PROMPT. New code MUST import GRAMMAR_SYSTEM_PROMPT.
+ * @deprecated Use GRAMMAR_SYSTEM_PROMPT. NTNTN is a separate Governance Team,
+ * not the intention engine.
+ */
+export const NTNTN_SYSTEM_PROMPT = GRAMMAR_SYSTEM_PROMPT;

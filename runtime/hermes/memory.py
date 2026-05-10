@@ -16,6 +16,14 @@ from aims_memory.agent_mixin import AgentMemoryMixin
 
 logger = structlog.get_logger("hermes.memory")
 
+# Legacy Firestore collection name — retained for the stats/recall
+# router endpoints in routers/memory_routes.py. The canonical memory
+# backend is now aims-memory/pgvector via AgentMemoryMixin below; the
+# Firestore collection is preserved for historical read-path compatibility
+# and post-migration tenant stats. New evaluations persist through the
+# pgvector path only.
+MEMORY_COLLECTION = "hermes_memory_evaluations"
+
 # Hermes mixin — engine tier, no dept
 _mixin: AgentMemoryMixin | None = None
 

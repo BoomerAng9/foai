@@ -1,0 +1,188 @@
+# 60-urbanism-phonetics.yaml — URBANISM register TTS phoneme guidance
+# Source: ~/foai/aims-tools/voice-library/dialect-library/URBANISM/
+# AAVE phonetic markers + 5%-Nation / Thun / Wu-Tang / Hyphy / Houston / etc.
+# subcultural lexicon. Rewrites force TTS to read each lexeme as the
+# correct register-marked phoneme rather than mangling the spelling.
+
+metadata:
+  name: urbanism-phonetics
+  scope: [all]
+  priority: 60
+  description: URBANISM (Indigenous American / Black American) register phoneme overrides.
+
+rules:
+  # ─── AAVE common phonetic markers ────────────────────────────────────
+  - id: urbanism.yall
+    type: regex
+    pattern: "\\b[Yy]all\\b"
+    replacement: "y'all"
+    notes: "yall → y'all. TTS often spells unmarked 'yall' as Y-A-L-L."
+
+  - id: urbanism.aint
+    type: regex
+    pattern: "\\b[Aa]int\\b"
+    replacement: "ain't"
+    notes: "aint → ain't (proper contraction)."
+
+  - id: urbanism.gonna
+    type: regex
+    pattern: "\\b[Gg]onna\\b"
+    replacement: "gonna"
+    no_rewrite: true
+    notes: "gonna usually OK — verify; add rewrite if TTS gets it wrong."
+
+  - id: urbanism.gon
+    type: regex
+    pattern: "\\b[Gg]on\\b(?=\\s+(?:be|have|get|do|go|tell|see))"
+    replacement: "gon'"
+    notes: "AAVE gon (going to) before verb — preserve as gon' contraction."
+
+  - id: urbanism.finna
+    type: regex
+    pattern: "\\b[Ff]inna\\b"
+    replacement: "finna"
+    no_rewrite: true
+    notes: "finna (fixing to) — verify FIN-uh; if mangled add explicit rewrite."
+
+  - id: urbanism.brutha
+    type: regex
+    pattern: "\\b[Bb]rutha\\b"
+    replacement: "bruh-thuh"
+    notes: "brutha (brother, AAVE soft -er) — BRUH-thuh."
+
+  - id: urbanism.brotha
+    type: regex
+    pattern: "\\b[Bb]rotha\\b"
+    replacement: "brah-thuh"
+    notes: "brotha (brother, deeper-vowel variant) — BRAH-thuh."
+
+  - id: urbanism.sista
+    type: regex
+    pattern: "\\b[Ss]ista\\b"
+    replacement: "sis-tuh"
+    notes: "sista (sister, AAVE soft -er) — SIS-tuh."
+
+  - id: urbanism.fixin-to
+    type: regex
+    pattern: "\\bfixin' to\\b"
+    replacement: "fixin' to"
+    no_rewrite: true
+    notes: "fixin' to — Coastal-Georgia-marked; verify."
+
+  - id: urbanism.bruh
+    type: regex
+    pattern: "\\b[Bb]ruh\\b"
+    replacement: "bruh"
+    no_rewrite: true
+    notes: "bruh — verify TTS reads BRUH not BRYUH."
+
+  # ─── Queensbridge Thun-language ──────────────────────────────────────
+  - id: urbanism.thun
+    type: regex
+    pattern: "\\b[Tt]hun\\b"
+    replacement: "thuhn"
+    notes: |
+      Queensbridge Thun (term of address ≈ son) — THUHN.
+      Per gatekeeping rule (URBANISM/regional/east-coast-ny.md): only
+      deploy on QB-rooted characters. Phonetic rewrite ensures correct
+      pronunciation when it IS deployed.
+
+  - id: urbanism.dun
+    type: regex
+    pattern: "\\b[Dd]un\\b(?=\\W)"
+    replacement: "duhn"
+    notes: "Queensbridge Dun variant of Thun — DUHN. Lookahead avoids matching 'Dunn' as a name."
+
+  # ─── 5%-Nation / Nation of Gods and Earths ───────────────────────────
+  - id: urbanism.peace-god
+    type: regex
+    pattern: "\\bpeace,?\\s+god\\b"
+    replacement: "peace, god"
+    no_rewrite: true
+    case_sensitive: false
+    notes: "peace, god (5%-Nation greeting) — verify TTS reads it; add phoneme rewrite if mangled."
+
+  - id: urbanism.cipher
+    type: regex
+    pattern: "\\b[Cc]ipher\\b"
+    replacement: "sigh-fer"
+    notes: "cipher (5%-Nation conversation/circle) — SIGH-fer (not SIGH-fr)."
+
+  # ─── Wu-Tang Slang ───────────────────────────────────────────────────
+  - id: urbanism.shaolin
+    type: regex
+    pattern: "\\b[Ss]haolin\\b"
+    replacement: "shao-lin"
+    notes: "Shaolin (Wu-Tang for Staten Island) — SHOW-lin."
+
+  - id: urbanism.cream-acronym
+    type: regex
+    pattern: "\\bC\\.R\\.E\\.A\\.M\\.\\b"
+    replacement: "cream"
+    notes: "C.R.E.A.M. — pronounced as the word 'cream', not letter-spelled."
+
+  # ─── Bay Area Hyphy ──────────────────────────────────────────────────
+  - id: urbanism.yadadamean
+    type: regex
+    pattern: "\\b[Yy]adadamean\\b"
+    replacement: "ya-da-da mean"
+    notes: "yadadamean (Keak Da Sneak coinage 'do you know what I mean') — YA-da-da MEAN."
+
+  - id: urbanism.hyphy
+    type: regex
+    pattern: "\\b[Hh]yphy\\b"
+    replacement: "hi-fee"
+    notes: "hyphy (energetic / wild — Bay Area) — HI-fee, not hippy or hifey."
+
+  - id: urbanism.thizz
+    type: regex
+    pattern: "\\b[Tt]hizz\\b"
+    replacement: "thizz"
+    no_rewrite: true
+    notes: "thizz — verify TTS reads it; gated to Bay-rooted characters per modulator."
+
+  # ─── Houston Screw / Slab ────────────────────────────────────────────
+  - id: urbanism.swangas
+    type: regex
+    pattern: "\\b[Ss]wangas\\b"
+    replacement: "swang-uhs"
+    notes: "swangas (chrome blade rims) — SWANG-uhs."
+
+  - id: urbanism.trill
+    type: regex
+    pattern: "\\b[Tt]rill\\b"
+    replacement: "trill"
+    no_rewrite: true
+    notes: "trill (UGK true+real) — verify."
+
+  # ─── Memphis Three 6 / horrorcore ────────────────────────────────────
+  - id: urbanism.crunk
+    type: regex
+    pattern: "\\b[Cc]runk\\b"
+    replacement: "crunk"
+    no_rewrite: true
+    notes: "crunk — verify."
+
+  - id: urbanism.trippy
+    type: regex
+    pattern: "\\b[Tt]rippy\\b"
+    replacement: "trippy"
+    no_rewrite: true
+    notes: "trippy — verify."
+
+  # ─── Detroit ──────────────────────────────────────────────────────────
+  - id: urbanism.what-up-doe
+    type: regex
+    pattern: "\\bwhat up doe\\b"
+    replacement: "what up doe"
+    no_rewrite: true
+    case_sensitive: false
+    notes: "what up doe (Detroit greeting) — DOE pronounced like the deer (DOH), not as in dough."
+
+# Notes
+# - Most entries are `no_rewrite: true` placeholders — they exist so
+#   we can ear-validate then convert to actual rewrites as TTS misses
+#   surface. This keeps the rule-pack auditable but doesn't rewrite
+#   anything that's already TTS-correct.
+# - Per-character / per-region scoping is the next iteration when
+#   the engine grows context-aware rule application.

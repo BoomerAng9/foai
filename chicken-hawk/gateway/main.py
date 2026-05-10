@@ -18,13 +18,28 @@ import structlog
 import uvicorn
 from fastapi import Depends, FastAPI, HTTPException, Request, status
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse, StreamingResponse
+from fastapi.responses import FileResponse, JSONResponse, StreamingResponse
+from fastapi.staticfiles import StaticFiles
+from pathlib import Path
 from pydantic import BaseModel, Field
 from starlette.middleware.base import BaseHTTPMiddleware
 
 from config import get_settings
 from event_bus import EventBus, TaskEvent, TaskStatus, get_event_bus
+from hermes_client import HermesClient, HermesNotConfigured
 from router import HawkResponse, Router
+
+# Pre-flight wiring (Wave 1, ecosystem-wide): NemoClaw policy gate + magic-link auth.
+# Both modules already implement their FastAPI routers; main.py mounts them below.
+from auth import (  # noqa: E402
+    router as auth_router,
+    _send_telegram,
+    get_owner_from_session,
+    OWNER_EMAILS,
+    SESSION_COOKIE,
+)
+from nemoclaw import router as nemoclaw_router, _evaluate, _append_event  # noqa: E402
+from public_chat import router as public_chat_router  # noqa: E402
 
 # ---------------------------------------------------------------------------
 # Structured logging setup
@@ -51,20 +66,28 @@ logger = structlog.get_logger(__name__)
 # ---------------------------------------------------------------------------
 _router: Router | None = None
 _event_bus: EventBus | None = None
+_hermes: HermesClient | None = None
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncIterator[None]:
-    global _router, _event_bus
+    global _router, _event_bus, _hermes
     settings = get_settings()
     _event_bus = get_event_bus()
     _router = Router(settings, event_bus=_event_bus)
-    logger.info("gateway_started", provider=settings.llm_provider)
+    _hermes = HermesClient()
+    logger.info(
+        "gateway_started",
+        provider=settings.llm_provider,
+        hermes_configured=_hermes.configured,
+    )
     yield
     if _event_bus:
         await _event_bus.close()
     if _router:
         await _router.aclose()
+    if _hermes:
+        await _hermes.aclose()
     logger.info("gateway_stopped")
 
 
@@ -108,7 +131,31 @@ app.add_middleware(
 # Security headers middleware
 # ---------------------------------------------------------------------------
 class SecurityHeadersMiddleware(BaseHTTPMiddleware):
-    """Add security headers to every response."""
+    """Add security headers to every response.
+
+    Owner-tier paths additionally get Cache-Control: no-store so the browser
+    bfcache (back/forward cache) doesn't restore a stale 'signed in' shell
+    after the cookie has expired or been cleared. Without this, navigating
+    away from /tools and pressing Back rendered a cached HTML body whose
+    embedded API calls then 401'd — appearing to drop the session.
+    """
+
+    # Paths that must never be cached by browsers, intermediaries, or the
+    # Next.js standalone runtime. Match by prefix.
+    _NO_STORE_PREFIXES = (
+        "/me",
+        "/tools",
+        "/run",
+        "/route",
+        "/check",
+        "/risk-event",
+        "/risk-events",
+        "/audit/",
+        "/hawks",
+        "/admin/",
+        "/login",
+        "/api/chicken-hawk/",
+    )
 
     async def dispatch(self, request: Request, call_next):
         response = await call_next(request)
@@ -119,10 +166,29 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
         response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
         response.headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=()"
         response.headers["Server"] = "ACHEEVY"
+        path = request.url.path
+        if any(path == p.rstrip("/") or path.startswith(p) for p in self._NO_STORE_PREFIXES):
+            response.headers["Cache-Control"] = "no-store, must-revalidate, private"
+            response.headers["Pragma"] = "no-cache"
+            response.headers["Expires"] = "0"
         return response
 
 
 app.add_middleware(SecurityHeadersMiddleware)
+
+
+# ---------------------------------------------------------------------------
+# Pre-flight wired routers (Wave 1, ecosystem-wide)
+#
+# `nemoclaw_router` exposes /check, /risk-event, /risk-events (Bearer-gated)
+# `auth_router`     exposes /login, /login/verify, /logout, /me (magic-link)
+#
+# These were defined as APIRouters but never mounted. Wave 1 mounts them so
+# every project that calls hawk.foai.cloud inherits policy gating + auth.
+# ---------------------------------------------------------------------------
+app.include_router(nemoclaw_router, prefix="", tags=["NemoClaw"])
+app.include_router(auth_router, prefix="", tags=["Auth"])
+app.include_router(public_chat_router, prefix="", tags=["PublicChat"])
 
 
 # ---------------------------------------------------------------------------
@@ -150,16 +216,85 @@ async def require_auth(request: Request) -> None:
     if token_param and token_param == secret:
         return
 
-    # Check session cookie
-    session_token = request.cookies.get("session_token")
-    if session_token and session_token == secret:
-        return
+    # Check owner-tier magic-link session cookie (JWT, bound to one of the
+    # OWNER_EMAILS aliases — Telegram-bound / project-bound / executive).
+    ch_session = request.cookies.get(SESSION_COOKIE)
+    if ch_session:
+        owner = get_owner_from_session(ch_session)
+        if owner and OWNER_EMAILS and owner in OWNER_EMAILS:
+            return
 
     raise HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Missing or invalid authentication",
         headers={"WWW-Authenticate": "Bearer"},
     )
+
+
+# ---------------------------------------------------------------------------
+# Tool Chest GUI — hawk.foai.cloud
+#
+# Customer-facing chat at /  (anonymous, persona-prepended via /api/public/chat)
+# Operator Tool Chest at /tools/*  (auth-gated via require_auth)
+#
+# Templates rendered as static FileResponse; static assets mounted at /static.
+# ---------------------------------------------------------------------------
+_GATEWAY_DIR = Path(__file__).resolve().parent
+_TEMPLATES_DIR = _GATEWAY_DIR / "templates"
+_STATIC_DIR = _GATEWAY_DIR / "static"
+
+if _STATIC_DIR.exists():
+    app.mount("/static", StaticFiles(directory=str(_STATIC_DIR)), name="static")
+
+
+def _serve(template: str) -> FileResponse:
+    path = _TEMPLATES_DIR / template
+    if not path.exists():
+        raise HTTPException(status_code=404, detail=f"Template '{template}' not found")
+    return FileResponse(str(path), media_type="text/html")
+
+
+@app.get("/", include_in_schema=False)
+async def customer_chat_page() -> FileResponse:
+    """Public-facing Chicken Hawk chat. Anonymous, rate-limited."""
+    if not get_settings().tool_chest_enabled:
+        raise HTTPException(status_code=503, detail="Tool Chest disabled")
+    return _serve("customer_chat.html")
+
+
+@app.get("/tools", include_in_schema=False, dependencies=[Depends(require_auth)])
+async def tools_index_page() -> FileResponse:
+    return _serve("tools_index.html")
+
+
+@app.get("/tools/tuning-loop", include_in_schema=False, dependencies=[Depends(require_auth)])
+async def tools_tuning_loop_page() -> FileResponse:
+    return _serve("tools_tuning_loop.html")
+
+
+@app.get("/tools/nemoclaw", include_in_schema=False, dependencies=[Depends(require_auth)])
+async def tools_nemoclaw_page() -> FileResponse:
+    return _serve("tools_nemoclaw.html")
+
+
+@app.get("/tools/hermes", include_in_schema=False, dependencies=[Depends(require_auth)])
+async def tools_hermes_page() -> FileResponse:
+    return _serve("tools_hermes.html")
+
+
+@app.get("/tools/lil-hawks", include_in_schema=False, dependencies=[Depends(require_auth)])
+async def tools_lil_hawks_page() -> FileResponse:
+    return _serve("tools_lil_hawks.html")
+
+
+@app.get("/tools/cron", include_in_schema=False, dependencies=[Depends(require_auth)])
+async def tools_cron_page() -> FileResponse:
+    return _serve("tools_cron.html")
+
+
+@app.get("/tools/audit", include_in_schema=False, dependencies=[Depends(require_auth)])
+async def tools_audit_page() -> FileResponse:
+    return _serve("tools_audit.html")
 
 
 # ---------------------------------------------------------------------------
@@ -245,6 +380,302 @@ async def list_hawks() -> dict:
     """Return the configured Lil_Hawk endpoints."""
     settings = get_settings()
     return {"hawks": list(settings.hawk_endpoints.keys())}
+
+
+# ---------------------------------------------------------------------------
+# /run action handler — Wave 1 ecosystem-wide contract
+#
+# Any FOAI project (Coastal, Per|Form, AIMS, future apps) POSTs:
+#   {"action": str, "payload": dict}
+# The gateway evaluates against NemoClaw and routes to:
+#   200 {ok, verdict: "allow",     ...} on allow + dispatch
+#   202 {ok, verdict: "escalate",  ...} on escalate (owner Telegram pinged)
+#   403 {ok, verdict: "denied",    ...} on deny    (risk event recorded)
+# Receipts are written to an in-memory ledger keyed by task_id (Wave 1).
+# Wave 2 migrates the ledger to AuditLedger (renamed Hermes SQLite).
+# ---------------------------------------------------------------------------
+import asyncio
+import time as _time
+import uuid as _uuid
+from datetime import datetime, timezone
+
+# In-memory receipt ledger (Wave 1). Keyed by task_id; bounded buffer.
+_RUN_LEDGER: list[dict] = []
+_RUN_LEDGER_MAX = 5000
+_RUN_LEDGER_LOCK = asyncio.Lock()
+
+
+class RunRequest(BaseModel):
+    action: str = Field(..., min_length=1, max_length=128)
+    payload: dict = Field(default_factory=dict)
+
+
+async def _record_run_receipt(receipt: dict) -> None:
+    async with _RUN_LEDGER_LOCK:
+        _RUN_LEDGER.append(receipt)
+        if len(_RUN_LEDGER) > _RUN_LEDGER_MAX:
+            del _RUN_LEDGER[: len(_RUN_LEDGER) - _RUN_LEDGER_MAX]
+
+
+@app.post("/run", tags=["Run"])
+async def run_action(req: RunRequest, _: None = Depends(require_auth)) -> JSONResponse:
+    """Execute an action through the NemoClaw policy gate.
+
+    Caller (FOAI agent) sends {action, payload}. Gateway maps `action` to
+    NemoClaw `action_type`, evaluates, and either dispatches, escalates,
+    or denies. Always writes a receipt to the in-memory ledger.
+    """
+    started = _time.perf_counter()
+    task_id = req.payload.get("task_id") or req.payload.get("session_id") or f"task_{_uuid.uuid4().hex[:12]}"
+    risk_tags = req.payload.get("risk_tags") or []
+    approval_id = req.payload.get("approval_id")
+    actor = req.payload.get("actor") or "agent"
+
+    verdict = _evaluate(req.action, risk_tags, approval_id)
+    decided_at = datetime.now(timezone.utc).isoformat()
+    receipt: dict = {
+        "receipt_id": f"rcpt_{_uuid.uuid4().hex[:16]}",
+        "task_id": task_id,
+        "action": req.action,
+        "actor": actor,
+        "verdict": verdict["verdict"],
+        "reason": verdict["reason"],
+        "basis": verdict["basis"],
+        "decided_at": decided_at,
+    }
+
+    if verdict["verdict"] == "deny":
+        # Record blocked-action attempt as a risk event, return 403.
+        _append_event({
+            "event_id": f"risk_{_uuid.uuid4().hex[:16]}",
+            "severity": "high",
+            "category": "blocked_action_attempt",
+            "description": f"NemoClaw denied '{req.action}': {verdict['reason']}",
+            "task_id": task_id,
+            "actor": actor,
+            "metadata": {"action": req.action, "risk_tags": risk_tags},
+            "recorded_at": decided_at,
+        })
+        receipt["elapsed_ms"] = (_time.perf_counter() - started) * 1000
+        await _record_run_receipt(receipt)
+        return JSONResponse(
+            status_code=403,
+            content={
+                "ok": False,
+                "verdict": "denied",
+                "message": "NemoClaw denied this action.",
+                "detail": verdict,
+                "receipt": receipt,
+            },
+        )
+
+    if verdict["verdict"] == "escalate":
+        # Notify owner via Telegram (auth._send_telegram); 202 pending approval.
+        try:
+            await _send_telegram(
+                f"⚠️ Approval needed for action '{req.action}' (task {task_id}).\n"
+                f"Reason: {verdict['reason']}"
+            )
+        except Exception as exc:
+            logger.warning("escalate_telegram_failed", error=str(exc))
+        receipt["elapsed_ms"] = (_time.perf_counter() - started) * 1000
+        await _record_run_receipt(receipt)
+        return JSONResponse(
+            status_code=202,
+            content={
+                "ok": False,
+                "verdict": "escalated",
+                "message": "Owner approval required; routed to Telegram.",
+                "detail": verdict,
+                "receipt": receipt,
+            },
+        )
+
+    # ---------------------------------------------------------------------------
+    # Action-specific dispatch (Wave 2).  Each block executes after NemoClaw
+    # allows and records its own fields into the receipt + response body.
+    # Fall-through to the generic allow response at the bottom.
+    # ---------------------------------------------------------------------------
+
+    # --- issue_coupon ---------------------------------------------------
+    # Issues a Coastal-specific discount code.  The runner-side spinner_tools
+    # validates actor authority + 30-day rate-limit before reaching here.
+    # This layer: double-checks allow-list, generates a unique promo code, and
+    # returns the code for LUC to relay to the Custee.
+    #
+    # Stripe integration note: when STRIPE_SECRET_KEY is configured, swap the
+    # generated code block with stripe.Coupon.create() + stripe.PromotionCode.
+    # The response envelope shape is intentionally identical so spinner_tools
+    # reads `stripe_coupon_id` / `promotion_code` unchanged in both modes.
+    # ---------------------------------------------------------------------------
+    if req.action == "issue_coupon":
+        COASTAL_COUPON_ALLOW_LIST = {
+            "TRY-ME":    {"type": "percent", "value": 100, "description": "Cost-recovery sample"},
+            "WELCOME10": {"type": "percent", "value": 10,  "description": "First-order welcome"},
+            "BREW20":    {"type": "percent", "value": 20,  "description": "Subscriber promo"},
+            "FREESHIP":  {"type": "fixed",   "value": 0,   "description": "Free shipping"},
+        }
+        coupon_code = req.payload.get("coupon_code", "")
+        custee_id   = req.payload.get("custee_id", "")
+        actor_tier  = req.payload.get("actor_tier", "")
+
+        if coupon_code not in COASTAL_COUPON_ALLOW_LIST:
+            receipt["elapsed_ms"] = (_time.perf_counter() - started) * 1000
+            receipt["action_result"] = "denied_off_list"
+            await _record_run_receipt(receipt)
+            return JSONResponse(
+                status_code=403,
+                content={
+                    "ok": False,
+                    "verdict": "denied",
+                    "message": f"Coupon '{coupon_code}' is not on the Coastal allow-list.",
+                    "receipt": receipt,
+                },
+            )
+
+        # Generate a unique per-Custee promotion code.
+        # Format: {BASE_CODE}-{custee_hash8}-{ts_hex8}
+        # Example: TRY-ME-A3B1C9D2-1F4E8A0B
+        # When Stripe is configured: replace with stripe.PromotionCode.create(...)
+        import hashlib as _hashlib
+        custee_hash = _hashlib.sha256(custee_id.encode()).hexdigest()[:8].upper()
+        ts_hex = hex(int(_time.time()))[2:].upper().zfill(8)
+        promo_code = f"{coupon_code}-{custee_hash}-{ts_hex}"
+
+        # Redemption URL: if STEPPER_ESCALATION_FORM_URL is set for Paperform,
+        # use it as the checkout entry point with the promo code as a URL param.
+        # Otherwise fall back to the storefront with a query param.
+        stepper_url = os.getenv("COASTAL_PAPERFORM_URL", "") or os.getenv("STEPPER_ESCALATION_FORM_URL", "")
+        if stepper_url:
+            redemption_url = f"{stepper_url}?promo={promo_code}"
+        else:
+            redemption_url = f"https://brewing.foai.cloud/cart?promo={promo_code}"
+
+        coupon_meta = COASTAL_COUPON_ALLOW_LIST[coupon_code]
+        receipt["elapsed_ms"] = (_time.perf_counter() - started) * 1000
+        receipt["action_result"] = "coupon_issued"
+        receipt["coupon_code"] = coupon_code
+        receipt["promo_code"] = promo_code
+        await _record_run_receipt(receipt)
+        return JSONResponse(
+            status_code=200,
+            content={
+                "ok": True,
+                "verdict": "allow",
+                "stripe_coupon_id": promo_code,   # protocol compat with spinner_tools
+                "promotion_code":   promo_code,
+                "redemption_url":   redemption_url,
+                "coupon_type":      coupon_meta["type"],
+                "coupon_value":     coupon_meta["value"],
+                "coupon_description": coupon_meta["description"],
+                "note": (
+                    "Give this code to the Custee: they apply it at checkout. "
+                    "Code is unique to this Custee and expires when rate-limit window resets."
+                ),
+                "receipt": receipt,
+            },
+        )
+
+    # Verdict == allow (generic fall-through for actions without a specific dispatch block).
+    receipt["elapsed_ms"] = (_time.perf_counter() - started) * 1000
+    await _record_run_receipt(receipt)
+    return JSONResponse(
+        status_code=200,
+        content={
+            "ok": True,
+            "verdict": "allow",
+            "message": "Action allowed; receipt recorded.",
+            "detail": verdict,
+            "receipt": receipt,
+        },
+    )
+
+
+@app.get("/audit/integrity-check", tags=["Audit"], dependencies=[Depends(require_auth)])
+async def audit_integrity_check() -> dict:
+    """Verify the in-memory receipt buffer end-to-end.
+
+    Wave 1 ledger has no chain hashing yet (planned Wave 2 once ledger moves
+    to AuditLedger persistent store). Returns {ok, chain_length, broken_at}.
+    With the in-memory buffer, the chain is always 'ok' by construction —
+    the real chain check belongs in Coastal's audit_ledger.py.
+    """
+    async with _RUN_LEDGER_LOCK:
+        chain_length = len(_RUN_LEDGER)
+    return {"ok": True, "chain_length": chain_length, "broken_at": None}
+
+
+@app.get("/audit/{task_id}", tags=["Audit"], dependencies=[Depends(require_auth)])
+async def get_audit_trail(task_id: str) -> dict:
+    """Return the in-memory receipt trail for a task_id.
+
+    Wave 1 reads from `_RUN_LEDGER` (bounded in-memory buffer). Wave 2
+    upgrades to AuditLedger (the renamed Coastal SQLite, migrated to Neon).
+    """
+    async with _RUN_LEDGER_LOCK:
+        receipts = [r for r in _RUN_LEDGER if r.get("task_id") == task_id]
+    return {"ok": True, "task_id": task_id, "count": len(receipts), "receipts": receipts}
+
+
+# ---------------------------------------------------------------------------
+# Hermes bridge — memory recall + evaluation trigger via the LearnAng engine
+# ---------------------------------------------------------------------------
+class HermesRecallRequest(BaseModel):
+    query: str = Field(..., min_length=1, max_length=8192)
+    tenant_id: str = Field("cti", max_length=64)
+    top_k: int = Field(5, ge=1, le=50)
+
+
+class HermesEvaluateRequest(BaseModel):
+    tenant_id: str = Field("cti", max_length=64)
+    eval_type: str = Field("daily", pattern=r"^(daily|weekly)$")
+
+
+@app.post("/hermes/recall", tags=["Hermes"], dependencies=[Depends(require_auth)])
+async def hermes_recall(payload: HermesRecallRequest) -> dict:
+    """Recall semantically-relevant past evaluations from the Hermes memory."""
+    if _hermes is None:
+        raise HTTPException(status_code=503, detail="Hermes client not initialised")
+    try:
+        results = await _hermes.recall_memory(
+            query=payload.query,
+            tenant_id=payload.tenant_id,
+            top_k=payload.top_k,
+        )
+    except HermesNotConfigured as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
+    return {"results": results, "count": len(results)}
+
+
+@app.post("/hermes/evaluate", tags=["Hermes"], dependencies=[Depends(require_auth)])
+async def hermes_evaluate(payload: HermesEvaluateRequest) -> dict:
+    """Trigger a Deep Think evaluation cycle on the Hermes engine."""
+    if _hermes is None:
+        raise HTTPException(status_code=503, detail="Hermes client not initialised")
+    try:
+        return await _hermes.trigger_evaluation(
+            tenant_id=payload.tenant_id,
+            eval_type=payload.eval_type,
+        )
+    except HermesNotConfigured as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
+    except Exception as exc:
+        logger.error("hermes_evaluate_failed", error=str(exc))
+        raise HTTPException(status_code=502, detail=f"Hermes call failed: {exc}") from exc
+
+
+@app.get("/hermes/health", tags=["Hermes"], dependencies=[Depends(require_auth)])
+async def hermes_health() -> dict:
+    """Return Hermes engine liveness + client configuration."""
+    if _hermes is None:
+        raise HTTPException(status_code=503, detail="Hermes client not initialised")
+    if not _hermes.configured:
+        return {"configured": False, "upstream": None}
+    try:
+        upstream = await _hermes.health()
+    except Exception as exc:
+        return {"configured": True, "upstream": None, "error": str(exc)}
+    return {"configured": True, "upstream": upstream}
 
 
 # ---------------------------------------------------------------------------

@@ -6,10 +6,21 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "setup": "npm install --prefix ../aims-tools/aims-pricing-matrix && npm install --prefix ../aims-tools/aims-pmo && npm install --prefix ../aims-tools/tie-matrix && npm install --prefix ../aims-tools/spinner && npm install",
+    "db:migrate": "tsx scripts/apply-all-migrations.ts",
+    "db:migrate:one": "tsx scripts/apply-migration.ts",
+    "test:e2e": "playwright test",
+    "test:e2e:install": "playwright install chromium",
+    "test:lh": "lhci autorun --config=./lighthouserc.json"
+  },
+  "engines": {
+    "node": "^20.0.0 || ^22.0.0",
+    "npm": ">=10.0.0"
   },
   "dependencies": {
     "@aims/spinner": "file:../aims-tools/spinner",
+    "@aims/tie-matrix": "file:../aims-tools/tie-matrix",
     "@dnd-kit/core": "^6.3.1",
     "@dnd-kit/sortable": "^10.0.0",
     "@dnd-kit/utilities": "^3.2.2",
@@ -29,8 +40,16 @@
     "vega-lite": "^6.4.2",
     "zustand": "^5.0.12"
   },
+  "overrides": {
+    "protobufjs": "^7.5.5",
+    "fast-xml-parser": "^5.7.1",
+    "gaxios": "^7.1.4",
+    "uuid": "^14.0.0"
+  },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
+    "@lhci/cli": "^0.14.0",
+    "@playwright/test": "^1.59.1",
     "@types/node": "^22.0.0",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
@@ -39,6 +58,7 @@
     "eslint-config-next": "^15.1.0",
     "postcss": "^8.4.0",
     "tailwindcss": "^3.4.0",
+    "tsx": "^4.19.0",
     "typescript": "^5.7.0"
   }
 }

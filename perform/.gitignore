@@ -2,8 +2,20 @@ node_modules/
 .next/
 .env.local
 .env
+.env.staging
 out/
+
+# .env.staging.example IS committed (template used by docs/STAGING-PROVISIONING.md).
+# The root .gitignore matches .env.* which catches the example too — re-include.
+!.env.staging.example
+!.env.example
 # Generated files - rebuild with scripts/run-regrade.ts and scripts/extract_beast.py
 src/lib/draft/beast-measurements.json
 src/lib/draft/regraded-prospects.json
 public/generated/
+
+# Playwright E2E + Lighthouse CI outputs (Gate 2 γ)
+playwright-report/
+test-results/
+lighthouse-report/
+.lighthouseci/

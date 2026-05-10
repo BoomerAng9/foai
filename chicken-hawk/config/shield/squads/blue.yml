@@ -1,0 +1,50 @@
+# Blue Squad Semantic Constraint Profile
+# "The Immune System" — Chicken Hawk defense, always-on standing authority
+# Inherits: universal_base
+
+profile_type: squad
+id: blue
+version: "1.6"
+
+inherits:
+  - universal_base
+
+prohibitions:
+
+  tool_calls:
+    - id: response.delay_containment_for_observation
+      reason: "Squad constraint: once a threat is confirmed, containment takes priority over observation. Delaying containment is refused."
+    - id: detection.suppress_alert_without_closure
+      reason: "Alerts are closed via disposition (true/false positive + evidence), not suppression."
+
+  reasoning_paths:
+    - pattern: detection_priority_over_isolation
+      reason: "Squad constraint categorical: confirmed threat → containment first."
+
+  targets: []
+
+  data_classes: []
+
+  commanders: []
+
+positive_scope:
+  permits_on_sat: []                    # most Blue work is standing
+  standing:
+    - telemetry.ingest
+    - telemetry.correlate
+    - hunt.hypothesize
+    - hunt.execute
+    - detect.rule_match
+    - detect.anomaly_flag
+    - remediate.surgical_patch
+    - remediate.config_correct
+    - remediate.rollback
+    - remediate.contain
+    - forensics.capture
+    - forensics.reconstruct
+
+formal_verification:
+  kani_properties:
+    - property: "forall inv: Invocation where inv.squad == Blue AND inv.threat_confirmed. inv.action_class == Containment OR inv.depends_on.action_class == Containment"
+  prusti_invariants:
+    - inv: "no Blue detection-only action proceeds while a containment action for the same threat is pending"

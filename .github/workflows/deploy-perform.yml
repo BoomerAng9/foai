@@ -1,0 +1,118 @@
+name: Deploy Per|Form to myclaw-vps
+
+# Gate 5 · Item 28 — CI auto-deploy. Replaces the manual
+# `ssh myclaw-vps && git pull && docker compose up -d --build perform`
+# loop we've been running since Gate 1. Triggers whenever main changes
+# inside perform/ or an app-level workspace dep.
+#
+# Required secrets (add via repo Settings → Secrets → Actions):
+#   DEPLOY_SSH_HOST          myclaw-vps IP or hostname (e.g. 31.97.133.29)
+#   DEPLOY_SSH_USER          root (or whoever owns /opt/foai-repo)
+#   DEPLOY_SSH_KEY           private key content (the id_ed25519_myclaw
+#                            private half; the VPS already has the pub key)
+#   DEPLOY_SSH_PORT          optional, defaults to 22
+#   SLACK_WEBHOOK_URL        optional — shared with healthcheck workflow
+#
+# Degrades gracefully: if DEPLOY_SSH_* secrets are missing the workflow
+# marks itself as skipped (not failed) so the manual ssh-and-rebuild path
+# stays operational during the secret provisioning window.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'perform/**'
+      - 'aims-tools/aims-pricing-matrix/**'
+      - 'aims-tools/aims-pmo/**'
+      - 'aims-tools/tie-matrix/**'
+      - 'aims-tools/spinner/**'
+      - '.github/workflows/deploy-perform.yml'
+  workflow_dispatch: {}
+
+concurrency:
+  group: deploy-perform
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Verify secrets are configured
+        id: secrets
+        env:
+          HOST: ${{ secrets.DEPLOY_SSH_HOST }}
+          USER: ${{ secrets.DEPLOY_SSH_USER }}
+          KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+        run: |
+          if [ -z "$HOST" ] || [ -z "$USER" ] || [ -z "$KEY" ]; then
+            echo "::warning::DEPLOY_SSH_* secrets not configured — skipping auto-deploy. Run manually per docs/ROLLBACK.md Path A."
+            echo "configured=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "configured=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      # Pinned to v1.2.0 (released 2025-01, widely audited). Do not float —
+      # auto-deploy supply chain risk per Code_Ang seven-gate protocol.
+      - name: Pull main + rebuild perform container
+        if: steps.secrets.outputs.configured == 'true'
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.DEPLOY_SSH_HOST }}
+          username: ${{ secrets.DEPLOY_SSH_USER }}
+          key: ${{ secrets.DEPLOY_SSH_KEY }}
+          port: ${{ secrets.DEPLOY_SSH_PORT || 22 }}
+          command_timeout: 10m
+          # set -e so a failed step aborts the ssh session. npx tsx runs
+          # the migrations idempotently before rebuild, so a forgotten
+          # migration doesn't reach the new container.
+          script: |
+            set -euo pipefail
+            cd /opt/foai-repo
+            git pull --ff-only origin main
+            cd perform
+            npx --yes tsx@4.19 scripts/apply-all-migrations.ts
+            docker compose up -d --build perform
+            # Wait up to 60s for /api/health to go green inside the container
+            # Traefik path out to the public URL is slower on cert renew days.
+            for i in $(seq 1 20); do
+              if docker exec perform-perform-1 wget -qO- http://localhost:3000/api/health 2>/dev/null | grep -q '"status":"ok"'; then
+                echo "Health check passed on attempt $i"
+                exit 0
+              fi
+              sleep 3
+            done
+            echo "::error::Container healthy-boot timeout — rollback via docs/ROLLBACK.md"
+            docker logs perform-perform-1 --tail 80
+            exit 1
+
+      - name: External health probe
+        if: steps.secrets.outputs.configured == 'true'
+        run: |
+          for i in $(seq 1 10); do
+            BODY=$(curl -sS --max-time 15 https://perform.foai.cloud/api/health || echo '{}')
+            STATUS=$(echo "$BODY" | jq -r '.status // "unknown"' 2>/dev/null || echo 'parse_error')
+            if [ "$STATUS" = "ok" ]; then
+              echo "External health OK: $BODY"
+              exit 0
+            fi
+            echo "attempt $i: status=$STATUS — retrying in 5s"
+            sleep 5
+          done
+          echo "::error::External health probe never went green"
+          exit 1
+
+      - name: Notify Slack on failure
+        if: failure() && env.SLACK_WEBHOOK_URL != ''
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          COMMIT: ${{ github.sha }}
+          ACTOR: ${{ github.actor }}
+        run: |
+          cat > /tmp/slack.json <<EOF
+          {
+            "text": ":rotating_light: *Per|Form auto-deploy FAILED*\nCommit: \`${COMMIT:0:12}\` by ${ACTOR}\nRun: ${RUN_URL}\nRecovery: \`docs/ROLLBACK.md\`"
+          }
+          EOF
+          curl -sS -X POST -H 'Content-Type: application/json' --data @/tmp/slack.json "$SLACK_WEBHOOK_URL" || true

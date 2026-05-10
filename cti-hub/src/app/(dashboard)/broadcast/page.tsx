@@ -150,7 +150,7 @@ export default function BroadcastStudio() {
   const [showScenarios, setShowScenarios] = useState(false);
   const [voiceEnabled, setVoiceEnabled] = useState(true);
   // Grammar status from the chat-route SSE meta frame.
-  // 'applied'     enriched the user's prompt with NTNTN output
+  // 'applied'     Grammar enriched the user's prompt
   // 'passthrough' message bypassed Grammar (passthrough phrase)
   // 'failed'      Grammar call errored — falling back to raw input
   const [grammarStatus, setGrammarStatus] = useState<'applied' | 'passthrough' | 'failed' | null>(null);
@@ -379,8 +379,25 @@ export default function BroadcastStudio() {
   const handleChatSend = useCallback(async () => {
     if (!chatInput.trim()) return;
     const userMsg = chatInput;
-    setChatMessages(prev => [...prev, { role: 'user', content: userMsg }]);
     setChatInput('');
+
+    // Confirmation short-circuit: when a camera spec is pending and the user
+    // replies with a confirmation word, fire the Spinner directly instead of
+    // round-tripping to ILLA. Stops ILLA from re-describing the same plan
+    // and turning a single-step dispatch into a conversation loop.
+    const confirmationPattern =
+      /^(yes+|yea+h*|yep+|yup+|yeh|sure|ok(ay)?|aight|iight|go+|run+|roll+|ship+|fire+|do\s*it|send\s*it|dispatch|green\s*light|light\s*it|let'?s\s*(go|do\s*it|roll|ship)|confirmed?|approved?|proceed|make\s*it|commit|ride)\s*[.!?]*$/i;
+    if (pendingVideoPrompt && videoStatus === 'idle' && confirmationPattern.test(userMsg.trim())) {
+      setChatMessages(prev => [
+        ...prev,
+        { role: 'user', content: userMsg },
+        { role: 'illa', content: 'Spinner dispatched. Rolling now.' },
+      ]);
+      handleGenerateVideo();
+      return;
+    }
+
+    setChatMessages(prev => [...prev, { role: 'user', content: userMsg }]);
 
     // Add streaming placeholder
     const streamId = `illa-${Date.now()}`;
@@ -731,27 +748,44 @@ export default function BroadcastStudio() {
                 </span>
               </div>
             ) : videoStatus === 'generating' ? (
+              // Spinner dispatched — the canonical Boomer_Ang loader rotates with
+              // a gold halo. Brand canon: Spinner = execution (see feedback_spinner_grammar_inworld_roles.md).
+              // The render itself IS the Spinner in flight.
               <div className="flex flex-col items-center gap-4">
-                <div className="relative w-20 h-20">
-                  <svg className="w-20 h-20 -rotate-90" viewBox="0 0 80 80">
-                    <circle cx="40" cy="40" r="34" stroke="rgba(255,255,255,0.08)" strokeWidth="6" fill="none" />
-                    <circle cx="40" cy="40" r="34" stroke={BC.gold} strokeWidth="6" fill="none"
-                      strokeDasharray={`${2 * Math.PI * 34}`}
-                      strokeDashoffset={`${2 * Math.PI * 34 * (1 - videoProgress / 100)}`}
-                      strokeLinecap="round"
-                      className="transition-all duration-500"
-                    />
-                  </svg>
-                  <span className="absolute inset-0 flex items-center justify-center text-[13px] font-mono font-bold" style={{ color: BC.gold }}>
+                <div className="relative w-32 h-32">
+                  {/* Gold halo — pulsing glow under the Spinner */}
+                  <div
+                    className="absolute inset-0 rounded-full animate-pulse"
+                    style={{
+                      background: 'radial-gradient(circle, rgba(212,168,83,0.35) 0%, transparent 70%)',
+                    }}
+                  />
+                  {/* Rotating Spinner (the canonical boomerang) */}
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src="/boomer-ang-loader.png"
+                    alt="Spinner in flight"
+                    className="w-full h-full relative animate-spin"
+                    style={{
+                      animationDuration: '1.2s',
+                      filter: 'drop-shadow(0 0 14px rgba(212,168,83,0.55))',
+                    }}
+                  />
+                </div>
+                <span
+                  className="text-[11px] font-mono font-bold tracking-[0.2em]"
+                  style={{ color: BC.amber }}
+                >
+                  SPINNER DISPATCHED
+                </span>
+                <div className="flex items-center gap-3">
+                  <span className="text-[9px] font-mono" style={{ color: BC.textGhost }}>
+                    Executing render
+                  </span>
+                  <span className="text-[10px] font-mono tabular-nums" style={{ color: BC.gold }}>
                     {videoProgress}%
                   </span>
                 </div>
-                <span className="text-[11px] font-mono" style={{ color: BC.amber }}>
-                  Generating video...
-                </span>
-                <span className="text-[9px] font-mono" style={{ color: BC.textGhost }}>
-                  This typically takes 30-90 seconds
-                </span>
               </div>
             ) : (
               <div className="flex flex-col items-center gap-3">

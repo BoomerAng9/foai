@@ -1,3 +1,18 @@
+/**
+ * Stripe checkout session creation — OUTBOUND path.
+ *
+ * CANON STATUS (per docs/canon/stripe_architecture_carveout.md, Gate 1c):
+ * This file calls Stripe directly via the Stripe SDK, which violates the
+ * `project_billing_via_stepper.md` rule ("Stripe → Stepper → Taskade →
+ * plug APIs. Stripe NEVER called directly"). This is a Phase-A interim
+ * state; the Phase-B migration turns this route into a thin proxy that
+ * calls `@/lib/billing/stepper-billing-proxy.createCheckoutSession()`
+ * and removes the Stripe SDK import from this file.
+ *
+ * Do NOT expand the direct-Stripe surface here. Any new billing flow
+ * goes through the proxy interface.
+ */
+
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import { getStripePriceId } from '@/lib/billing/plans';

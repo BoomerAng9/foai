@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Policy Gate · Tool Chest</title>
+<link rel="stylesheet" href="/static/css/main.css">
+</head>
+<body class="theme-dark">
+<div class="tc-shell">
+  <aside class="tc-sidebar">
+    <h2>Tool Chest</h2>
+    <nav class="tc-nav">
+      <a href="/tools">Overview</a>
+      <a href="/tools/tuning-loop">Tuning Loop</a>
+      <a href="/tools/nemoclaw">Policy Gate</a>
+      <a href="/tools/hermes">Agent Runtime</a>
+      <a href="/tools/lil-hawks">Lil_Hawks</a>
+      <a href="/tools/cron">Scheduled Jobs</a>
+      <a href="/tools/audit">Audit Chain</a>
+      <hr style="border:0;border-top:1px solid var(--border);margin:12px 0">
+      <a href="/">← Customer chat</a>
+    </nav>
+  </aside>
+  <main class="tc-main">
+    <div class="tc-header">
+      <div>
+        <h1>Policy Gate</h1>
+        <div class="subtitle">Verdict tester — ask "would this be allowed?" without dispatching.</div>
+      </div>
+      <div id="tc-health"></div>
+    </div>
+
+    <div class="tc-card">
+      <h3>Test a verdict</h3>
+      <p class="desc">Action verb + optional risk tags. No dispatch happens.</p>
+      <label class="tc-label">Action type</label>
+      <input id="ng-action" class="tc-input" placeholder="e.g. summarize, recommend_bundle, send_payment">
+      <label class="tc-label">Risk tags (comma-separated)</label>
+      <input id="ng-tags" class="tc-input" placeholder="e.g. money, customer_payment_data">
+      <div style="display:flex;gap:8px;margin-top:14px">
+        <button id="ng-check" class="tc-btn">Check verdict</button>
+        <button id="ng-clear" class="tc-btn ghost">Clear</button>
+      </div>
+      <div id="ng-result" style="margin-top:18px"></div>
+    </div>
+
+    <div class="tc-card">
+      <h3>Risk tags catalog</h3>
+      <div style="display:flex;flex-wrap:wrap;gap:8px">
+        <span class="tc-pill muted">legal</span>
+        <span class="tc-pill muted">money</span>
+        <span class="tc-pill muted">health</span>
+        <span class="tc-pill muted">certification</span>
+        <span class="tc-pill muted">customer_payment_data</span>
+        <span class="tc-pill muted">supplier_change</span>
+        <span class="tc-pill muted">final_public</span>
+      </div>
+    </div>
+
+    <div class="tc-card">
+      <h3>Recent risk events</h3>
+      <div id="ng-events" class="tc-empty">loading…</div>
+    </div>
+  </main>
+</div>
+<script src="/static/js/tools_common.js" defer></script>
+<script src="/static/js/tools_nemoclaw.js" defer></script>
+</body>
+</html>

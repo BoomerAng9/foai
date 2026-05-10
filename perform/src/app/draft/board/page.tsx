@@ -8,9 +8,10 @@
 import { useEffect, useState, useMemo } from 'react';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
-import PaywallGate from '@/components/PaywallGate';
 import { BackHomeNav } from '@/components/layout/BackHomeNav';
 import { positionColor } from '@/lib/ui/positions';
+import { LiveTicker } from '@/components/live/LiveTicker';
+import { PlayerIndexDrawer } from '@/components/player-index/PlayerIndexDrawer';
 
 interface PlayerRow {
   id: number; name: string; position: string; school: string;
@@ -84,8 +85,9 @@ export default function DraftBoardPage() {
   }), [filtered, sortBy]);
 
   return (
-    <PaywallGate>
-      <div className="min-h-screen" style={{ background: T.bg, color: T.text }}>
+    <div className="min-h-screen" style={{ background: T.bg, color: T.text }}>
+        <PlayerIndexDrawer />
+        <LiveTicker />
         <div style={{ background: T.navyDeep, color: '#FFF', borderBottom: `2px solid ${T.red}` }}>
           <div className="max-w-7xl mx-auto px-6 py-3 flex items-center justify-between text-[11px] font-bold tracking-[0.18em] uppercase">
             <div className="flex items-center gap-3">
@@ -236,6 +238,5 @@ export default function DraftBoardPage() {
           PER|FORM BIG BOARD - CANONICAL 40/30/30 - PUBLISHED BY ACHIEVEMOR
         </footer>
       </div>
-    </PaywallGate>
   );
 }

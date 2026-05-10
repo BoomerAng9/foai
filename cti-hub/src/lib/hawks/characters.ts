@@ -16,7 +16,7 @@
 export interface CharacterProfile {
   slug: string;             // file slug (kebab case)
   callsign: string;         // public name
-  rank: 'commander' | 'supervisor' | 'dispatcher' | 'core' | 'expansion' | 'specialist';
+  rank: 'commander' | 'supervisor' | 'dispatcher' | 'core' | 'expansion' | 'specialist' | 'shield';
   imagePath: string;        // /public/hawks/{slug}.png
   imageReady: boolean;      // false until Iller_Ang renders production art
   visualDescription: string; // Iller_Ang prompt seed

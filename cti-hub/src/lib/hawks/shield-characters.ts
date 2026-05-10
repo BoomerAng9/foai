@@ -1,0 +1,361 @@
+/**
+ * SHIELD DIVISION — CHARACTER DATA (CANONICAL 32-HAWK FLEET)
+ * =========================================================
+ * Reconciled from SHIELD_DIVISION_CHARACTER_BRIEF.md.
+ * Grouped by Squad.
+ */
+
+export interface HawkProfile {
+  name: string;
+  slug: string;
+  squad: 'Gold & Platinum' | 'Black' | 'Blue' | 'White' | 'Purple';
+  role: string;
+  unit: string;
+  personality: string;
+  stats: { speed: number; intel: number; stealth: number; combat: number };
+  visual: string;
+  // CharacterProfile compat
+  callsign?: string;
+  imagePath?: string;
+  imageReady?: boolean;
+  visualDescription?: string;
+  gear?: string[];
+  signatureColor?: string;
+}
+
+export const SHIELD_BRAND_PROMPT = "Shield Division: Tactical-realistic, cinematic sci-fi, dark navy port at night, high-contrast neon green and cyan accents, ed25519 glyphs, 5-lens helmet clusters.";
+
+export const SHIELD_DIVISION: HawkProfile[] = [
+  // ─── GOLD & PLATINUM SQUAD (8 Hawks) — Governance & Identity ───
+  {
+    name: 'Halo',
+    slug: 'lil_mast_hawk',
+    squad: 'Gold & Platinum',
+    role: 'Identity / MFA Lead',
+    unit: 'IDENTITY',
+    personality: 'Absolute, composed sentinel. The co-signature gate.',
+    stats: { speed: 6, intel: 10, stealth: 5, combat: 7 },
+    visual: 'Platinum helmet with luminous halo ring, gold eyes, ed25519 co-signer glyph.',
+  },
+  {
+    name: 'Paranoia',
+    slug: 'lil_doubt_hawk',
+    squad: 'Gold & Platinum',
+    role: 'Independent Auditor',
+    unit: 'AUDIT',
+    personality: 'Adversarial, watchful of allies. Reports directly to ACHEEVY.',
+    stats: { speed: 7, intel: 10, stealth: 8, combat: 6 },
+    visual: 'Platinum armor with signature ACHEEVY-orange accent stripe.',
+  },
+  {
+    name: 'Hex',
+    slug: 'lil_peel_hawk',
+    squad: 'Gold & Platinum',
+    role: 'Formal Verifier',
+    unit: 'VERIFICATION',
+    personality: 'Mathematical, precision-focused. Malware reverse-engineer.',
+    stats: { speed: 5, intel: 10, stealth: 6, combat: 8 },
+    visual: 'Multi-lens helmet (5-lens cluster), etched proof-obligation glyphs.',
+  },
+  {
+    name: 'Oracle',
+    slug: 'lil_oracle_hawk',
+    squad: 'Gold & Platinum',
+    role: 'Strategic Forecaster',
+    unit: 'INTEL',
+    personality: 'Predictive, calm, sees the mission three steps ahead.',
+    stats: { speed: 5, intel: 10, stealth: 7, combat: 4 },
+    visual: 'Platinum armor with crystalline sensor array.',
+  },
+  {
+    name: 'Vault',
+    slug: 'lil_salt_hawk',
+    squad: 'Gold & Platinum',
+    role: 'HSM Custodian',
+    unit: 'SECRETS',
+    personality: 'Impenetrable, silent. Guardian of the root keys.',
+    stats: { speed: 4, intel: 9, stealth: 6, combat: 10 },
+    visual: 'Reinforced platinum plate, vault-door chestplate motif.',
+  },
+  {
+    name: 'Ghost',
+    slug: 'lil_drift_hawk',
+    squad: 'Gold & Platinum',
+    role: 'Stealth Operations',
+    unit: 'INFILTRATION',
+    personality: 'Invisible, precise. The one who was never there.',
+    stats: { speed: 10, intel: 8, stealth: 10, combat: 7 },
+    visual: 'Phasing platinum plumage, matte-transparent helmet.',
+  },
+  {
+    name: 'Titan',
+    slug: 'lil_titan_hawk',
+    squad: 'Gold & Platinum',
+    role: 'Infrastructure Guard',
+    unit: 'CORE',
+    personality: 'Indomitable, massive presence. Defense of the root.',
+    stats: { speed: 3, intel: 7, stealth: 2, combat: 10 },
+    visual: 'Heavy platinum plating, reinforced exoskeleton.',
+  },
+  {
+    name: 'Mirror',
+    slug: 'lil_mirror_hawk',
+    squad: 'Gold & Platinum',
+    role: 'Deception & Honeypots',
+    unit: 'DECEPTION',
+    personality: 'Reflective, deceptive. Leading threats into the maze.',
+    stats: { speed: 8, intel: 9, stealth: 9, combat: 5 },
+    visual: 'Polished mirror-chrome finish, shifting reflections.',
+  },
+
+  // ─── WHITE SQUAD (8 Hawks) — Privacy & Policy ───
+  {
+    name: 'Privacy',
+    slug: 'lil_seal_hawk',
+    squad: 'White',
+    role: 'Edge Redaction',
+    unit: 'PRIVACY',
+    personality: 'Deterministic, composed boundary-guardian.',
+    stats: { speed: 7, intel: 9, stealth: 10, combat: 5 },
+    visual: 'Clean white armor, mirror-chrome chestplate with redaction runes.',
+  },
+  {
+    name: 'Counsel',
+    slug: 'lil_counsel_hawk',
+    squad: 'White',
+    role: 'Policy Advisor',
+    unit: 'GOVERNANCE',
+    personality: 'Legalistic, precise. Enforcer of the Charter.',
+    stats: { speed: 5, intel: 10, stealth: 4, combat: 3 },
+    visual: 'White robes over tactical gear, glowing digital scroll.',
+  },
+  {
+    name: 'Compass',
+    slug: 'lil_compass_hawk',
+    squad: 'White',
+    role: 'Boundary Navigator',
+    unit: 'COMPLIANCE',
+    personality: 'Directional, steady. Ensures data stays within borders.',
+    stats: { speed: 6, intel: 9, stealth: 7, combat: 4 },
+    visual: 'White armor with compass-rose HUD.',
+  },
+  {
+    name: 'Frame',
+    slug: 'lil_frame_hawk',
+    squad: 'White',
+    role: 'Constraint Engineer',
+    unit: 'STRUCTURE',
+    personality: 'Architectural, firm. Builds the sandboxes.',
+    stats: { speed: 5, intel: 9, stealth: 5, combat: 8 },
+    visual: 'Grid-patterned white plate, blueprint projections.',
+  },
+  {
+    name: 'Warden',
+    slug: 'lil_warden_hawk',
+    squad: 'White',
+    role: 'Admission Controller',
+    unit: 'ACCESS',
+    personality: 'Authoritative, vigilant. The final gatekeeper.',
+    stats: { speed: 4, intel: 8, stealth: 3, combat: 10 },
+    visual: 'Heavy white armor, energy-shield wingtips.',
+  },
+  {
+    name: 'Ledger',
+    slug: 'lil_ledger_hawk',
+    squad: 'White',
+    role: 'Audit Log Chain',
+    unit: 'EVIDENCE',
+    personality: 'Impartial, recording. The witness of every byte.',
+    stats: { speed: 5, intel: 10, stealth: 6, combat: 2 },
+    visual: 'Ink-black plumage with white accents, glowing ledger stream.',
+  },
+  {
+    name: 'Herald',
+    slug: 'lil_herald_hawk',
+    squad: 'White',
+    role: 'Alert Dispatcher',
+    unit: 'COMMUNICATION',
+    personality: 'Clear, urgent. The voice of the Shield.',
+    stats: { speed: 9, intel: 7, stealth: 5, combat: 4 },
+    visual: 'White and silver wings, sonic-wave emitter.',
+  },
+  {
+    name: 'Quarterback',
+    slug: 'lil_quarterback_hawk',
+    squad: 'White',
+    role: 'Mission Orchestrator',
+    unit: 'STRATEGY',
+    personality: 'Tactical, decisive. Directing the White Squad flow.',
+    stats: { speed: 8, intel: 9, stealth: 4, combat: 6 },
+    visual: 'White command-helmet, holographic playbook.',
+  },
+
+  // ─── BLACK SQUAD (6 Hawks) — Cyber / Offense ───
+  {
+    name: 'Reaper',
+    slug: 'lil_scope_hawk',
+    squad: 'Black',
+    role: 'Kinetic Execution',
+    unit: 'CYBER',
+    personality: 'Aggressive, high-entropy, sniper-grade precision.',
+    stats: { speed: 7, intel: 9, stealth: 9, combat: 10 },
+    visual: 'Matte-black armor, HUD-scope optic, black-anodized chestplate.',
+  },
+  {
+    name: 'Captain',
+    slug: 'lil_hook_hawk',
+    squad: 'Black',
+    role: 'Team Lead / SAT',
+    unit: 'CYBER',
+    personality: 'Commanding, reliable. The point of authorization.',
+    stats: { speed: 8, intel: 9, stealth: 6, combat: 9 },
+    visual: 'Black armor with commander stripes, glowing SAT key.',
+  },
+  {
+    name: 'Specs',
+    slug: 'lil_recon_hawk',
+    squad: 'Black',
+    role: 'Reconnaissance',
+    unit: 'CYBER',
+    personality: 'Observant, data-hungry. Seeing the unseen.',
+    stats: { speed: 9, intel: 8, stealth: 10, combat: 5 },
+    visual: 'Advanced binocular helmet, signal-gathering sensors.',
+  },
+  {
+    name: 'Tagger',
+    slug: 'lil_tag_hawk',
+    squad: 'Black',
+    role: 'Target Tagging',
+    unit: 'CYBER',
+    personality: 'Fast, precise. Marking the vulnerabilities.',
+    stats: { speed: 10, intel: 7, stealth: 8, combat: 7 },
+    visual: 'Sleek black frame, laser-marker wingtips.',
+  },
+  {
+    name: 'Spider',
+    slug: 'lil_site_hawk',
+    squad: 'Black',
+    role: 'Site Pivoting',
+    unit: 'CYBER',
+    personality: 'Inquisitive, multi-threaded. Mapping the maze.',
+    stats: { speed: 7, intel: 9, stealth: 7, combat: 6 },
+    visual: 'Black webbing motif, multi-directional sensors.',
+  },
+  {
+    name: 'Proof',
+    slug: 'lil_test_hawk',
+    squad: 'Black',
+    role: 'Validation Testing',
+    unit: 'CYBER',
+    personality: 'Relentless, empirical. Proving the exploit.',
+    stats: { speed: 6, intel: 10, stealth: 5, combat: 8 },
+    visual: 'Black armor with binary streams, validation-rune etching.',
+  },
+
+  // ─── BLUE SQUAD (6 Hawks) — Cyber / Defense ───
+  {
+    name: 'Sentry',
+    slug: 'lil_watch_hawk',
+    squad: 'Blue',
+    role: 'Monitoring',
+    unit: 'CYBER',
+    personality: 'Vigilant, never-blinking. Guardian of the wall.',
+    stats: { speed: 6, intel: 8, stealth: 7, combat: 9 },
+    visual: 'Dark blue armor, massive sensor-shield, glowing eye.',
+  },
+  {
+    name: 'Sparks',
+    slug: 'lil_wire_hawk',
+    squad: 'Blue',
+    role: 'Circuit Integrity',
+    unit: 'CYBER',
+    personality: 'Energetic, fast-acting. Repairing the lines.',
+    stats: { speed: 9, intel: 7, stealth: 5, combat: 6 },
+    visual: 'Blue armor with electric arcs, tool-rig wings.',
+  },
+  {
+    name: 'Hound',
+    slug: 'lil_track_hawk',
+    squad: 'Blue',
+    role: 'Intrusion Tracking',
+    unit: 'CYBER',
+    personality: 'Tenacious, scent-driven. Hunting the threat.',
+    stats: { speed: 8, intel: 8, stealth: 6, combat: 8 },
+    visual: 'Blue armor with tracking HUD, acoustic-enhancer helmet.',
+  },
+  {
+    name: 'Doc',
+    slug: 'lil_patch_hawk',
+    squad: 'Blue',
+    role: 'Patch Management',
+    unit: 'CYBER',
+    personality: 'Clinical, efficient. Healing the vulnerabilities.',
+    stats: { speed: 7, intel: 9, stealth: 4, combat: 5 },
+    visual: 'Blue and white armor, medical-cross scanner, laser-welder.',
+  },
+  {
+    name: 'Cipher',
+    slug: 'lil_lab_hawk',
+    squad: 'Blue',
+    role: 'Cryptographic Ops',
+    unit: 'CYBER',
+    personality: 'Deeply analytical, cryptic. Master of the code.',
+    stats: { speed: 5, intel: 10, stealth: 9, combat: 4 },
+    visual: 'Blue armor with shifting runes, cryptographic-lens headset.',
+  },
+  {
+    name: 'Pulse',
+    slug: 'lil_pulse_hawk',
+    squad: 'Blue',
+    role: 'Performance Monitoring',
+    unit: 'CYBER',
+    personality: 'Rhythmic, steady. Measuring the heartbeat.',
+    stats: { speed: 8, intel: 9, stealth: 3, combat: 2 },
+    visual: 'Blue armor with oscillating lights, waveform-display chestplate.',
+  },
+
+  // ─── PURPLE SQUAD (4 Hawks) — Bridge & Scout ───
+  {
+    name: 'Bridge',
+    slug: 'lil_bridge_hawk',
+    squad: 'Purple',
+    role: 'Inter-squad Link',
+    unit: 'NETWORK',
+    personality: 'Connecting, diplomatic. The link between fleets.',
+    stats: { speed: 7, intel: 8, stealth: 6, combat: 4 },
+    visual: 'Purple armor with bridge-span motif, signal-booster antenna.',
+  },
+  {
+    name: 'Echo',
+    slug: 'lil_echo_hawk',
+    squad: 'Purple',
+    role: 'Signal Repeater',
+    unit: 'NETWORK',
+    personality: 'Recursive, patient. Ensuring no message is lost.',
+    stats: { speed: 6, intel: 7, stealth: 9, combat: 3 },
+    visual: 'Purple wings with acoustic-reflectors, sonar-dish helmet.',
+  },
+  {
+    name: 'Tuner',
+    slug: 'lil_tuner_hawk',
+    squad: 'Purple',
+    role: 'Frequency Specialist',
+    unit: 'SIGNAL',
+    personality: 'Precise, audio-focused. Finding the right band.',
+    stats: { speed: 8, intel: 9, stealth: 5, combat: 4 },
+    visual: 'Purple armor with dial controls, sound-wave HUD.',
+  },
+  {
+    name: 'Scout',
+    slug: 'lil_scout_hawk',
+    squad: 'Purple',
+    role: 'Early Warning',
+    unit: 'INTEL',
+    personality: 'Fast, forward-deployed. First eyes on target.',
+    stats: { speed: 10, intel: 7, stealth: 9, combat: 5 },
+    visual: 'Light purple frame, advanced optic-sensor cluster.',
+  },
+];
+
+export const ALL_SHIELD_DIVISION_PROFILES = SHIELD_DIVISION;
+

@@ -1,0 +1,10 @@
+{
+  "task_id": "task_support_classifier_001",
+  "owner_goal": "Classify incoming customer messages before drafting replies.",
+  "objective": "Classify message intent, urgency, sentiment, and escalation status.",
+  "department": "boomer_cx",
+  "task_type": "classify_support",
+  "risk_tags": [],
+  "approval_required": false,
+  "desired_output": "support classification labels"
+}

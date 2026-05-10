@@ -93,7 +93,19 @@ export function GradeDisplay({
   if (variant === 'badge') return pill;
 
   return (
-    <div className={className} style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+    <div className={className} style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+      <div
+        style={{
+          fontSize: 32,
+          fontWeight: 800,
+          lineHeight: 1,
+          color: band.badgeColor,
+          fontFamily: 'var(--font-bebas, var(--font-display, inherit))',
+          letterSpacing: 0.5,
+        }}
+      >
+        {score.toFixed(1)}
+      </div>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
         {pill}
         <span style={{ color: 'var(--pf-text)', fontWeight: 600, fontSize: 13 }}>
@@ -103,6 +115,20 @@ export function GradeDisplay({
       <span style={{ color: 'var(--pf-muted, #94a3b8)', fontSize: 11 }}>
         {tierLabel.context}
       </span>
+      {tierLabel.projection && (
+        <span
+          style={{
+            color: 'var(--pf-muted, #94a3b8)',
+            fontSize: 11,
+            fontStyle: 'italic',
+            borderTop: '1px solid var(--pf-border, rgba(148,163,184,0.2))',
+            paddingTop: 4,
+            marginTop: 2,
+          }}
+        >
+          {tierLabel.projection}
+        </span>
+      )}
     </div>
   );
 }

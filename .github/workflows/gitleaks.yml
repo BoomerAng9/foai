@@ -1,0 +1,43 @@
+name: Gitleaks Secret Scan
+
+# Gate 6 · Item 38 — secret hygiene. Runs gitleaks on every push + PR
+# to catch new leaks before they enter history. Weekly schedule re-scans
+# full history to catch rule-pack updates flagging old commits.
+#
+# Baseline established 2026-04-22 in PR ο: 31 historical findings across
+# acheevy/agent-009/* (imported external agent docs — 14), cti-hub/* (8),
+# perform/scripts/rewrite-scouting-batch.mjs (2, current code clean — env
+# vars used), and other deploy scripts (3). Triage + owner rotation plan
+# in docs/SECURITY_AUDIT_2026_04_22.md.
+#
+# This workflow enforces a NEW-COMMIT floor: no NEW secret may land, even
+# though the historical 31 require owner-side rotation separately.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    - cron: '0 14 * * 1'
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # Full history for full-repo scans (needed for the weekly cron).
+          # On push/PR triggers, gitleaks diff-mode still works against
+          # HEAD so this isn't more expensive than needed.
+          fetch-depth: 0
+
+      # Pinned to v8.18.4 per Code_Ang supply-chain protocol (no float,
+      # no @latest). Bump deliberately + review the rule changes.
+      - name: Run Gitleaks
+        uses: gitleaks/gitleaks-action@v2.3.9
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # No license key = free for public repos; paid key unlocks
+          # private-repo scans if the repo visibility changes.
+          GITLEAKS_LICENSE: ${{ secrets.GITLEAKS_LICENSE }}

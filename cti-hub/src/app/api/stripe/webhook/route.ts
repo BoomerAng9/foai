@@ -1,3 +1,22 @@
+/**
+ * Stripe webhook receiver — INBOUND path.
+ *
+ * CANON STATUS (per docs/canon/stripe_architecture_carveout.md, Gate 1c):
+ * The Stripe SDK signature verification (`stripe.webhooks.constructEvent`)
+ * is a SANCTIONED CARVEOUT. Stripe cannot deliver webhooks to Stepper /
+ * Taskade directly; the endpoint must verify the signature here before
+ * trusting the payload.
+ *
+ * HOWEVER the side-effect pattern below — direct Neon writes to
+ * `subscriptions` + `profiles` — violates the
+ * `project_billing_via_stepper.md` rule. This is a Phase-A interim
+ * state; the Phase-C migration rewires each handler case to call
+ * `@/lib/billing/stepper-billing-proxy.publishWebhookEvent(...)` and
+ * removes the `sql` import from this file.
+ *
+ * The signature-verification block stays. The DB-mutation blocks migrate.
+ */
+
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import { determinePlanFromPriceId, determineSqwaadrunTierFromPriceId, SQWAADRUN_TIERS } from '@/lib/billing/plans';

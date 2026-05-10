@@ -245,7 +245,7 @@ let _pricing: WorkforcePricingRow[] | null = null;
 export function getPricing(): WorkforcePricingRow[] {
   if (_pricing) return _pricing;
   const out: WorkforcePricingRow[] = [];
-  const sheet = raw['HIDT Per Class Time'] || [];
+  const sheet = raw['A.I.M.S. Per Class Time'] || [];
   for (let i = 1; i < sheet.length; i++) {
     const r = sheet[i] || [];
     const institute = clean(r[0]);

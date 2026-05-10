@@ -1,0 +1,353 @@
+# ACHIEVEMOR Shield Division — Deployment Bay scene descriptor
+#
+# Consumed by NVIDIA Omniverse / Cosmos WFM to construct the Live Look
+# In viewport. Maps directly to the text layout in
+# `../DEPLOYMENT_BAY_SCENE.md` and the concept frames in
+# `cti-hub/public/hawks/shield/scene/*.png`.
+#
+# Every architectural element here encodes a v1.6 governance fact —
+# see the `encodes:` field on each region. A viewer of Live Look In
+# is reading the security model visually.
+
+version: "1.0"
+scene_id: shield_division_deployment_bay_v1
+source_doc: foai/runtime/live-look-in/DEPLOYMENT_BAY_SCENE.md
+concept_frames:
+  - cti-hub/public/hawks/shield/scene/deployment_bay_nominal_ops.png
+  - cti-hub/public/hawks/shield/scene/black_squad_mission_launch.png
+  - cti-hub/public/hawks/shield/scene/paranoia_flinch_hourly_simulation.png
+  - cti-hub/public/hawks/shield/scene/phoenix_protocol_rebirth.png
+  - cti-hub/public/hawks/shield/scene/p0_incident_titan_command.png
+
+# ---------------------------------------------------------------------------
+# World dimensions (Omniverse units = meters)
+# ---------------------------------------------------------------------------
+
+world:
+  units: meter
+  floor_dimensions: { x: 40, y: 30 }    # main bay floor
+  ceiling_height: 12                     # high ceiling for catwalk above
+  orientation: "north is +z, east is +x"
+  origin: center_of_main_floor
+
+# ---------------------------------------------------------------------------
+# Floor inlays — DEPLOY chevron nav-paths in ACHEEVY-orange #FF6B00
+# ---------------------------------------------------------------------------
+
+floor:
+  material: polished_black_composite
+  inlay_color: "#FF6B00"
+  inlays:
+    - id: central_triskele
+      shape: triskele
+      encodes: "CIA Tri-Factor mathematical intersection (v1.6 §2.3)"
+      location: { x: 0, z: 0 }
+      scale: 4.0
+    - id: nav_chevron_to_black_wing
+      shape: chevron_stripe
+      encodes: "Mission path from common floor to Black Squad sealed wing"
+      from: { x: 0, z: 0 }
+      to: { x: -15, z: 10 }
+    - id: nav_chevron_to_deployment_pedestals
+      shape: chevron_stripe
+      encodes: "Mission return path from wing to Golden Image pedestals"
+      from: { x: -15, z: 10 }
+      to: { x: 0, z: -5 }
+
+# ---------------------------------------------------------------------------
+# Substrate pylons — v1.6 §3.1 Substrate Heterogeneity
+# ---------------------------------------------------------------------------
+
+substrate_pylons:
+  encodes: "Three-substrate Spinner consensus; single zero-day cannot achieve quorum"
+  pylons:
+    - id: primary_linux
+      label: "Linux x86_64 (Primary)"
+      position: { x: -2, z: 0 }
+      height: 3.5
+      led_color_nominal: "#0080FF"
+      led_color_degraded: "#FFA500"
+      led_color_survival: "#FF0000"
+    - id: observer_macos
+      label: "macOS ARM64 (Observer 1)"
+      position: { x: 0, z: 0 }
+      height: 3.5
+      led_color_nominal: "#0080FF"
+    - id: observer_wasm
+      label: "WASM RISC-V (Observer 2)"
+      position: { x: 2, z: 0 }
+      height: 3.5
+      led_color_nominal: "#0080FF"
+
+# ---------------------------------------------------------------------------
+# Suspended 10-platform topology holograph (center of bay, mid-air)
+# ---------------------------------------------------------------------------
+
+platform_topology_holograph:
+  encodes: "The 10 ACHIEVEMOR platforms the Shield Division protects"
+  position: { x: 0, y: 6, z: 0 }    # mid-air, above the substrate pylons
+  renderer: cosmos_wfm
+  rotation_rate_rpm: 2
+  nodes:
+    - id: foai
+      label: FOAI
+    - id: deploy
+      label: Deploy Platform
+    - id: per_form
+      label: Per|Form
+    - id: aims
+      label: AIMS
+    - id: cti_hub
+      label: CTI Hub
+    - id: smelter_os
+      label: Smelter OS
+    - id: okai
+      label: OPEN|KLASS AI
+    - id: blockwise
+      label: Blockwise AI
+    - id: destinations
+      label: Destinations AI
+    - id: broadcast
+      label: Broad|Cast
+  edges: auto_interconnect          # Cosmos WFM derives platform-to-platform
+
+# ---------------------------------------------------------------------------
+# Squad territories — spatial regions with Hawk posts
+# ---------------------------------------------------------------------------
+
+squad_territories:
+
+  black_squad_wing:
+    epithet: "The Kinetic Hammer"
+    encodes: "SAT-gated offensive operations; sealed when inactive"
+    floor_region: { x_min: -20, x_max: -10, z_min: 5, z_max: 15 }
+    entry: sealed_steel_door
+    entry_position: { x: -10, z: 10 }
+    entry_authorization_panel: sat_terminal
+    ambient_light: amber_alert
+    posts:
+      - hawk: Lil_Hook_Hawk     # Captain, Mission Orchestrator
+        position: { x: -11, z: 10 }    # at the SAT gate
+      - hawk: Lil_Recon_Hawk    # Specs, Payload Architect
+        position: { x: -18, z: 8 }
+      - hawk: Lil_Tag_Hawk      # Tagger, Recon
+        position: { x: -18, z: 12 }
+      - hawk: Lil_Scope_Hawk    # Reaper, Kinetic Execution
+        position: { x: -15, z: 6 }
+      - hawk: Lil_Site_Hawk     # Spider, Lateral Movement
+        position: { x: -15, z: 14 }
+      - hawk: Lil_Test_Hawk     # Proof, Exfiltration Testing
+        position: { x: -13, z: 10 }
+
+  blue_squad_detection:
+    epithet: "The Immune System"
+    encodes: "Standing-authority detection; always-on, always-front"
+    floor_region: { x_min: -10, x_max: 10, z_min: -12, z_max: -6 }
+    ambient_light: cool_operational
+    posts:
+      - hawk: Lil_Watch_Hawk    # Sentry, Detection Engine
+        position: { x: -6, z: -8 }
+      - hawk: Lil_Wire_Hawk     # Sparks, Signal Intel
+        position: { x: -3, z: -8 }
+      - hawk: Lil_Track_Hawk    # Hound, Threat Hunter
+        position: { x: 0, z: -8 }
+      - hawk: Lil_Patch_Hawk    # Doc, Remediation
+        position: { x: 3, z: -8 }
+      - hawk: Lil_Lab_Hawk      # Cipher, Forensics
+        position: { x: 6, z: -8 }
+      - hawk: Lil_Pulse_Hawk    # Latency, Performance Guard
+        position: { x: 9, z: -8 }
+
+  purple_squad_bridge:
+    epithet: "The Nervous System"
+    encodes: "Bridging between Black and Blue via formally-verified APIs"
+    floor_region: { x_min: -10, x_max: -5, z_min: -6, z_max: 5 }    # a walkway
+    ambient_light: muted_violet
+    posts:
+      - hawk: Lil_Arc_Hawk      # Bridge, Integration Lead
+        position: { x: -8, z: 0 }
+      - hawk: Lil_Mime_Hawk     # Echo, Adversary Emulation
+        position: { x: -8, z: -3 }
+      - hawk: Lil_Chord_Hawk    # Tuner, Detection Engineering
+        position: { x: -8, z: 3 }
+      - hawk: Lil_Loop_Hawk     # Scout, BAS
+        position: { x: -6, z: 0 }
+
+  white_squad_conscience_balcony:
+    epithet: "The Conscience & Law"
+    encodes: "Advisory overwatch; sees the floor, governs the rules"
+    floor_region: { x_min: 10, x_max: 20, z_min: -5, z_max: 10 }
+    elevation: 4                           # balcony level, above main floor
+    ambient_light: clean_white
+    posts:
+      - hawk: Lil_Script_Hawk   # Counsel
+        position: { x: 12, y: 4, z: -2 }
+      - hawk: Lil_Vane_Hawk     # Compass
+        position: { x: 14, y: 4, z: -2 }
+      - hawk: Lil_Grid_Hawk     # Frame
+        position: { x: 16, y: 4, z: -2 }
+      - hawk: Lil_Lock_Hawk     # Warden, Privacy Budget custodian
+        position: { x: 18, y: 4, z: 0 }
+      - hawk: Lil_Book_Hawk     # Ledger
+        position: { x: 12, y: 4, z: 4 }
+      - hawk: Lil_Tell_Hawk     # Herald
+        position: { x: 14, y: 4, z: 4 }
+      - hawk: Lil_Play_Hawk     # Quarterback
+        position: { x: 18, y: 4, z: 8 }
+      - hawk: Lil_Seal_Hawk     # Privacy, edge redaction
+        position: { x: 16, y: 4, z: 6 }
+
+  gold_platinum_catwalk:
+    epithet: "The Soul & Core"
+    encodes: "Elevated overwatch; PLATFORM_OWNER SAT + Halo co-sign"
+    floor_region: { x_min: -20, x_max: 20, z_min: 12, z_max: 14 }
+    elevation: 8                           # catwalk above main floor
+    ambient_light: platinum_white
+    posts:
+      - hawk: Lil_Mast_Hawk     # Halo, Squad Lead, co-signer
+        position: { x: 0, y: 8, z: 13 }    # central choke-point
+      - hawk: Lil_Omen_Hawk     # Oracle, Threat Intel
+        position: { x: -10, y: 8, z: 13 }
+      - hawk: Lil_Salt_Hawk     # Vault, HSM
+        position: { x: -5, y: 8, z: 13 }
+      - hawk: Lil_Drift_Hawk    # Ghost, Deep Cover
+        position: { x: 5, y: 8, z: 13 }
+      - hawk: Lil_Bell_Hawk     # Titan, Incident Commander
+        position: { x: 10, y: 8, z: 13 }
+      - hawk: Lil_Veil_Hawk     # Mirror, Deception
+        position: { x: 15, y: 8, z: 13 }
+      - hawk: Lil_Peel_Hawk     # Hex, Formal Verifier
+        position: { x: -15, y: 8, z: 13 }
+
+  paranoia_independent_booth:
+    encodes: "Independent auditor — reports to ACHEEVY, NOT Crypt_Ang"
+    construction: glass_walled_booth
+    position: { x: 0, y: 10, z: 16 }       # above + behind the Gold catwalk
+    ambient_light: amber_independent
+    door_to_crypt_ang_office: NONE          # STRUCTURAL — architectural encoding of the governance rule
+    direct_link_overhead: acheevy_comms_beacon
+    posts:
+      - hawk: Lil_Doubt_Hawk    # Paranoia
+        position: { x: 0, y: 10, z: 16 }
+
+# ---------------------------------------------------------------------------
+# Crypt_Ang's office — exists in the bay but with NO connecting door to
+# Paranoia's booth. The architectural separation IS the governance rule.
+# ---------------------------------------------------------------------------
+
+crypt_ang_office:
+  role: "Shield Division Lead / vCISO"
+  position: { x: 0, z: 20 }               # far wall, well behind Gold catwalk
+  construction: solid_walled_office
+  door_to_paranoia_booth: NONE             # CANON — never connect this door
+  visible_from_paranoia_booth: true        # line-of-sight exists; physical connection does not
+
+# ---------------------------------------------------------------------------
+# Golden Image pedestals — Phoenix Protocol 24h rebirth stations
+# ---------------------------------------------------------------------------
+
+golden_image_pedestals:
+  encodes: "24-hour ephemeral rebirth, APT foothold deletion (v1.6 §3.3)"
+  count: 32                                # one per Hawk
+  renderer: particulate_dissolve_rematerialize
+  cycle_hours: 24
+  material: brushed_gold_platinum
+  layout: one_per_hawk_at_post
+
+# ---------------------------------------------------------------------------
+# Overhead fixtures
+# ---------------------------------------------------------------------------
+
+overhead:
+  acheevy_comms_beacon:
+    position: { x: 0, y: 11, z: 16 }       # directly above Paranoia's booth
+    encodes: "Independent reporting line to ACHEEVY (reports_to_override)"
+    color_idle: "#FFFFFF20"
+    color_active: "#FF6B00"                 # glows ACHEEVY-orange on channel open
+  merkle_chain_visualizer:
+    position_wall: north                    # back wall of bay
+    renderer: cosmos_wfm
+    encodes: "v1.6 §2 tamper-evident sec_audit chain — daily Merkle root"
+  attack_coverage_heatmap:
+    position_wall: south_balcony            # behind Bridge's post
+    renderer: holographic_panel
+    encodes: "ATT&CK coverage heatmap owned by Bridge (Lil_Arc_Hawk)"
+
+# ---------------------------------------------------------------------------
+# Signature scene beats — matches the 5 concept frames in scene/*.png
+# ---------------------------------------------------------------------------
+
+signature_beats:
+
+  nominal_ops:
+    description: "Full bay activity, 32 Hawks at posts, topology rotating"
+    camera: wide_establishing
+    corresponding_still: deployment_bay_nominal_ops.png
+
+  black_squad_launch:
+    description: "SAT gate opens; Reaper transits sealed wing"
+    camera: medium_wide_on_sat_gate
+    active_beat: true
+    triggers:
+      - sat_terminal.authorizes
+      - halo_cosign_visible_on_catwalk
+      - deploy_chevron_inlay_glows_along_mission_path
+    corresponding_still: black_squad_mission_launch.png
+
+  paranoia_flinch:
+    description: "Hourly compromise simulation; topology ripples red"
+    camera: cross_shot_from_paranoia_booth
+    active_beat: true
+    triggers:
+      - paranoia_booth.glows_orange
+      - platform_topology.red_wave_propagates
+      - acheevy_comms_beacon.activates
+      - gold_hawks.glance_toward_booth
+      - crypt_ang_office.light_visible_but_unresponsive      # no connection
+    corresponding_still: paranoia_flinch_hourly_simulation.png
+
+  phoenix_rebirth:
+    description: "Hawk dissolves + rematerializes on Golden Image pedestal"
+    camera: medium_on_pedestal
+    active_beat: true
+    triggers:
+      - outgoing_hawk.dissolve_in_golden_particulate
+      - incoming_hawk.rematerialize_on_peer_pedestal
+      - peer_hawks.continue_working
+    corresponding_still: phoenix_protocol_rebirth.png
+
+  p0_incident:
+    description: "Titan declares Mode 3; substrate pylons cycle red"
+    camera: wide_dramatic_on_catwalk
+    active_beat: true
+    triggers:
+      - titan.raises_command_gauntlet
+      - mode_3_survival_banner.activates
+      - substrate_pylons.cycle_blue_to_amber_to_red
+      - doc_and_cipher.move_to_consoles
+      - paranoia.confirms_no_active_adversary
+    corresponding_still: p0_incident_titan_command.png
+
+# ---------------------------------------------------------------------------
+# Renderer dependencies
+# ---------------------------------------------------------------------------
+
+renderer:
+  engine: nvidia_omniverse
+  world_format: usd
+  character_models:
+    source: cti-hub/public/hawks/shield/*.png
+    pipeline: reference_driven_modeling     # use portraits as concept refs
+  dynamic_renderers:
+    cosmos_wfm:
+      nodes:
+        - platform_topology_holograph
+        - merkle_chain_visualizer
+        - attack_coverage_heatmap
+  lighting:
+    scheme: cinematic_key_fill_rim
+    dynamic_zones:
+      - paranoia_booth (amber when channel-active)
+      - gold_catwalk (platinum-white always)
+      - black_wing (sealed-dark; amber when SAT opens)
+      - bay_floor (cool operational base)

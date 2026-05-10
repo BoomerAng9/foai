@@ -1,0 +1,75 @@
+version: "3.0"
+default_route: nvidia
+
+routes:
+  nvidia:
+    purpose: low_cost_high_volume_model_work
+    allowed_task_types:
+      - draft_caption
+      - draft_email
+      - classify_support
+      - summarize_daily_ops
+      - cluster_reviews
+      - draft_faq
+      - draft_product_copy
+      - draft_outreach
+    disallowed_risk_tags:
+      - legal
+      - money
+      - certification
+      - health
+      - fda
+      - final_public
+      - supplier_change
+      - customer_payment_data
+    timeout_seconds: 45
+    retry_count: 1
+    fallback_route: premium_review
+
+  feynman:
+    purpose: evidence_research_verification
+    allowed_task_types:
+      - supplier_due_diligence
+      - claim_verification
+      - market_watch
+      - competitor_research
+      - product_evidence
+      - copy_evidence_review
+    output_required:
+      - cited_brief
+      - source_list
+      - confidence
+      - allowed_claim_language
+      - rejected_claim_language
+
+  premium_review:
+    purpose: high_judgment_or_fallback
+    allowed_task_types:
+      - final_public_copy
+      - policy_language
+      - owner_decision_memo
+      - high_risk_refund
+      - supplier_change_review
+
+  owner:
+    purpose: final_approval
+    triggers:
+      - spend_money
+      - change_supplier
+      - publish_certification_claim
+      - publish_health_claim
+      - sign_contract
+      - file_legal_document
+      - approve_refund_above_threshold
+      - launch_public_campaign
+
+risk_tags_requiring_owner:
+  - legal
+  - money
+  - certification
+  - health
+  - fda
+  - final_public
+  - supplier_change
+  - ad_spend
+  - contract

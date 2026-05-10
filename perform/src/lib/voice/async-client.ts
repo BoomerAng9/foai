@@ -10,7 +10,7 @@
  *   POST /text_to_speech/with_timestamps — word-level timing
  *   WSS  /text_to_speech/websocket/ws — WebSocket incremental
  *
- * Hermes routing modes that use this adapter:
+ * Mode-router modes that use this adapter:
  *   analyst_voice, podcast_longform, user_custom_voice, studio_production
  */
 

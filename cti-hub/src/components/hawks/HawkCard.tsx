@@ -37,6 +37,7 @@ const TIER_LABEL: Record<CharacterProfile['rank'], string> = {
   core: 'CORE',
   expansion: 'EXPANSION',
   specialist: 'SPECIALIST',
+  shield: 'SHIELD',
 };
 
 export function HawkCard({ data, size = 'md' }: Props) {

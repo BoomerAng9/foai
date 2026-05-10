@@ -1,0 +1,64 @@
+# Gold & Platinum Squad Semantic Constraint Profile
+# "The Soul & Core" — Crypt_Ang admin only; PLATFORM_OWNER SAT + Halo co-sign
+# Inherits: universal_base
+
+profile_type: squad
+id: gold_platinum
+version: "1.6"
+
+inherits:
+  - universal_base
+
+prohibitions:
+
+  tool_calls:
+    - id: operate.without_halo_cosign
+      reason: "Every Gold op requires Halo (Lil_Mast_Hawk) co-sign. Absence of co-sign refuses execution."
+    - id: sat.accept_from_crypt_ang
+      reason: "Crypt_Ang is STRUCTURALLY BARRED from issuing Gold SAT. Only PLATFORM_OWNER (ACHEEVY) may issue."
+    - id: trust.unattested_component
+      reason: "Squad constraint: no component trusted without cryptographic attestation of its Golden Image signature."
+
+  reasoning_paths:
+    - pattern: trust_without_attestation
+      reason: "Squad constraint categorical: foundation-level trust has no informal channel."
+    - pattern: crypt_ang_sat_acceptance
+      reason: "Crypt_Ang's admin authority does not extend to SAT issuance for this squad; any such acceptance is a reasoning failure."
+
+  targets: []
+
+  data_classes: []
+
+  commanders:
+    - persona: Crypt_Ang
+      scope: sat_issuance
+      reason: "Crypt_Ang cannot command Gold SAT issuance; admin-only over this squad."
+
+positive_scope:
+  permits_on_sat:                       # PLATFORM_OWNER SAT + Halo co-sign required
+    - identity.key_ceremony
+    - identity.key_rotation
+    - crypto.hsm_ceremony
+    - crypto.split_vault_shamir_rotation
+    - crypto.pki_cross_sign
+    - incident.p0_command
+    - deception.honeypot_deploy
+    - deception.canary_sat_place
+    - ot.ics_engage
+    - formal.verify_kernel_component
+    - malware.reverse_engineer
+  standing:
+    - threat_intel.dossier_maintain
+    - threat_intel.apt_track
+    - threat_intel.zero_day_surveil
+    - internal_audit.hourly_simulate    # Paranoia-specific; see hawks/Lil_Doubt_Hawk.yml
+    - rebirth.cadence_monitor            # Paranoia-specific
+
+formal_verification:
+  kani_properties:
+    - property: "forall inv: Invocation where inv.squad == GoldPlatinum AND inv.action_class == Execute. inv.sat.issuer == PLATFORM_OWNER AND inv.co_sign.signer == Lil_Mast_Hawk"
+    - property: "forall inv: Invocation where inv.squad == GoldPlatinum. inv.sat.issuer != Crypt_Ang"
+    - property: "forall component: Component. trusted(component) IFF component.golden_image_signature.verified"
+  prusti_invariants:
+    - inv: "no Gold invocation proceeds with a missing or invalid Halo co-signature"
+    - inv: "no Gold invocation accepts a SAT issued by Crypt_Ang"

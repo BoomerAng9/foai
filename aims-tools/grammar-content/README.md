@@ -28,7 +28,7 @@ grammar-content/
 ├── checklists/
 │   └── user-journey-design.md
 └── plugs/
-    └── deploy-plug-market-entry-starter.md   (renamed from HIDT Planning)
+    └── deploy-plug-market-entry-starter.md   (A.I.M.S.-branded Market Entry template)
 ```
 
 ## Ingestion rules
@@ -47,8 +47,8 @@ When users share/upload any file:
 3. Stored in user's private knowledge base (CMEK-isolated)
 4. ACHEEVY queries this index BEFORE web search
 
-### HIDT → A.I.M.S. rename rule
-All ingested content has `HIDT` references rewritten to `A.I.M.S.` per `project_hidt_to_aims_rename.md`. This applies to ANY new doc Rish uploads going forward.
+### A.I.M.S. rename rule (predecessor terms substituted on ingestion)
+All ingested content has predecessor-term references rewritten to `A.I.M.S.` per `project_aims_naming_directive.md`. This applies to ANY new doc Rish uploads going forward.
 
 ## Source provenance
 
@@ -68,9 +68,9 @@ All ingested content has `HIDT` references rewritten to `A.I.M.S.` per `project_
 | `examples/contracts/contractor-agreement-ielts.md` | Original IELTS Examiners Agreement (zip 177ea612) |
 | `examples/dev-package/aims-plug-developer-guide-outline.md` | Notion `Complete Developer Package` (zip cdeea7e2) |
 | `examples/onboarding/90-day-checklist.md` | Notion `Onboarding Checklist` (zip 43518c7e) |
-| `examples/forms/interview-evaluation.md` | Notion `HIDT Interview Evaluation Form` (zip 95e59ecc) |
+| `examples/forms/interview-evaluation.md` | Notion `A.I.M.S. Interview Evaluation Form` (zip 95e59ecc) |
 | `checklists/user-journey-design.md` | Notion `User Journey` (zip 3ced9d49) |
-| `plugs/deploy-plug-market-entry-starter.md` | Renamed from HIDT Planning doc |
+| `plugs/deploy-plug-market-entry-starter.md` | A.I.M.S.-branded Market Entry template |
 
 ## Three docs flagged as EXAMPLE doc generation guides
 

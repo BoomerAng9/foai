@@ -9,7 +9,68 @@ import { getGradeForScore } from '@/lib/tie/grades';
 import { getVerticalTierLabel } from '@/lib/tie/verticals';
 import { positionColor } from '@/lib/ui/positions';
 import { staggerContainer, staggerItem, heroStagger, heroItem, scrollReveal } from '@/lib/motion';
-import PaywallGate from '@/components/PaywallGate';
+import { AnonymousHelmet } from '@/components/cards/AnonymousHelmet';
+
+/* ── Height formatting: Beast ships "6052" (6'5" + 2/8 frac) ─────── */
+function formatHeight(h?: string | null): string {
+  if (!h) return '—';
+  const trimmed = String(h).trim();
+  if (!trimmed) return '—';
+  // Already formatted (contains ' or ")
+  if (/['"\s]/.test(trimmed)) return trimmed;
+  const n = parseInt(trimmed, 10);
+  if (!Number.isFinite(n)) return trimmed;
+  // Beast 4-digit convention: FIIF → feet, inches, eighths
+  if (trimmed.length === 4) {
+    const ft = Math.floor(n / 1000);
+    const inch = Math.floor((n % 1000) / 10);
+    const frac = n % 10;
+    return frac > 0 ? `${ft}'${inch} ${frac}/8"` : `${ft}'${inch}"`;
+  }
+  return trimmed;
+}
+
+/* ── Projected round → career outlook copy ───────────────────────── */
+// Tier-led so the round and tier text can't contradict each other.
+// Previously this glued together two independent DB values, which could
+// produce "Projected Round 2. Projects as a generational prospect."
+// when projected_round was stale relative to tie_tier. Now each tier
+// carries an expected round; if the DB round is higher (worse) than
+// tier expects, we prefer the tier-derived round.
+const TIER_SPEC: Record<string, { round: number; text: string }> = {
+  PRIME:   { round: 1, text: 'generational, build-your-franchise-around prospect' },
+  A_PLUS:  { round: 1, text: 'immediate NFL starter with Pro Bowl ceiling' },
+  A:       { round: 1, text: 'first-round starter with All-Pro upside in the right scheme' },
+  A_MINUS: { round: 1, text: 'high-floor Day-1 contributor' },
+  B_PLUS:  { round: 2, text: 'second-round value with starter-level potential by year 2' },
+  B:       { round: 2, text: 'Day-2 contributor, projected rotational starter' },
+  B_MINUS: { round: 3, text: 'late Day-2 / early Day-3 developmental' },
+  C_PLUS:  { round: 4, text: 'Day-3 depth with special-teams upside' },
+};
+function careerOutlookCopy(tier: string | null, round: number | null, nflComp: string | null): string {
+  const spec = tier ? TIER_SPEC[tier] : undefined;
+  const effectiveRound = spec ? Math.min(spec.round, round ?? spec.round) : round;
+  const rd = effectiveRound ? `Projected Round ${effectiveRound}` : 'Projection pending';
+  const tierText = spec?.text ?? 'late-round flier / UDFA';
+  const comp = nflComp ? ` NFL comp profile reads closest to ${nflComp}.` : '';
+  return `${rd}. Projects as a ${tierText}.${comp}`;
+}
+
+/* ── Grade reasoning — reads off pillar scores ───────────────────── */
+function gradeReasoningCopy(perf: number, attr: number, intg: number): string {
+  const parts: string[] = [];
+  const rank = (label: string, n: number, cuts: [number, string][]): string => {
+    const [hi, mid, lo] = cuts;
+    if (n >= hi[0]) return `${label} ${hi[1]}`;
+    if (n >= mid[0]) return `${label} ${mid[1]}`;
+    if (n >= lo[0]) return `${label} ${lo[1]}`;
+    return `${label} below-average`;
+  };
+  parts.push(rank('Performance', perf, [[90, 'elite on-field impact'], [80, 'well-above-average production'], [70, 'solid starter-level']]));
+  parts.push(rank('Attributes', attr, [[90, 'elite physical profile'], [80, 'strong athletic measurables'], [70, 'adequate physical base']]));
+  parts.push(rank('Intangibles', intg, [[90, 'championship-level makeup'], [80, 'high-floor character + IQ'], [70, 'serviceable mental profile']]));
+  return parts.join(' · ');
+}
 
 interface PlayerRow {
   id: number;
@@ -180,7 +241,6 @@ export default function PlayerDetailPage({ params }: { params: Promise<{ player:
   const intgScore = Math.min(Math.round(score * 0.95 + 3 + (score % 3)), 100);
 
   return (
-    <PaywallGate>
     <div className="min-h-screen flex flex-col" style={{ background: 'var(--pf-bg)', color: 'var(--pf-text)' }}>
       <Header />
 
@@ -219,20 +279,17 @@ export default function PlayerDetailPage({ params }: { params: Promise<{ player:
                 {/* Left: Name block */}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-3 mb-2">
-                    {/* Headshot */}
-                    {headshotUrl ? (
-                      <div className="shrink-0 w-14 h-14 sm:w-16 sm:h-16 rounded-full overflow-hidden ring-2 ring-white/10">
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={headshotUrl} alt={data.name} className="w-full h-full object-cover" />
-                      </div>
-                    ) : (
-                      <div
-                        className="shrink-0 w-14 h-14 sm:w-16 sm:h-16 rounded-full flex items-center justify-center ring-2 ring-white/10 font-outfit font-bold text-lg"
-                        style={{ background: `${posColor}25`, color: posColor }}
-                      >
-                        {data.name.split(' ').map((n) => n[0]).join('').slice(0, 2)}
-                      </div>
-                    )}
+                    <div
+                      className="shrink-0 w-14 h-14 sm:w-16 sm:h-16 rounded-full flex items-center justify-center ring-2 ring-white/10 overflow-hidden"
+                      style={{ background: `${posColor}18` }}
+                    >
+                      <AnonymousHelmet
+                        accentColor={posColor}
+                        size={56}
+                        allowImage={!!headshotUrl}
+                        imageUrl={headshotUrl}
+                      />
+                    </div>
                     <h1 className="font-outfit text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-white truncate">
                       {data.name}
                     </h1>
@@ -255,7 +312,7 @@ export default function PlayerDetailPage({ params }: { params: Promise<{ player:
                     {data.height && (
                       <>
                         <span className="text-white/20">|</span>
-                        <span>{data.height}</span>
+                        <span>{formatHeight(data.height)}</span>
                       </>
                     )}
                     {data.weight && <span>{data.weight} lbs</span>}
@@ -348,6 +405,59 @@ export default function PlayerDetailPage({ params }: { params: Promise<{ player:
               </motion.div>
             </motion.div>
 
+            {/* ── Per|Form Assessment — Bio + Why + Career Outlook ── */}
+            <motion.div
+              variants={scrollReveal}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, margin: '-40px' }}
+              className="mb-10 grid gap-4 md:grid-cols-3"
+            >
+              {/* Bio */}
+              <div
+                className="rounded-xl p-5"
+                style={{ background: 'rgba(255,107,0,0.06)', border: '1px solid rgba(255,107,0,0.22)' }}
+              >
+                <h3 className="text-xs font-mono font-bold tracking-[0.2em] mb-3" style={{ color: '#FF6B00' }}>
+                  BIO
+                </h3>
+                <p className="text-sm text-white/75 leading-relaxed">
+                  {data.scouting_summary
+                    ? data.scouting_summary
+                    : `${data.name} · ${data.position} · ${data.school}${data.class_year ? ` (${data.class_year})` : ''}. ${data.height ? formatHeight(data.height) : ''}${data.weight ? `, ${data.weight} lbs` : ''}.`}
+                </p>
+              </div>
+
+              {/* Why this grade */}
+              <div
+                className="rounded-xl p-5"
+                style={{ background: 'rgba(212,168,83,0.06)', border: '1px solid rgba(212,168,83,0.22)' }}
+              >
+                <h3 className="text-xs font-mono font-bold tracking-[0.2em] mb-3" style={{ color: '#D4A853' }}>
+                  WHY THIS GRADE
+                </h3>
+                <p className="text-sm text-white/75 leading-relaxed mb-3">
+                  {gradeReasoningCopy(perfScore, attrScore, intgScore)}
+                </p>
+                <div className="text-[10px] font-mono tracking-widest uppercase text-white/40">
+                  Per|Form TIE · 40/30/30 over Performance · Attributes · Intangibles
+                </div>
+              </div>
+
+              {/* Career Outlook */}
+              <div
+                className="rounded-xl p-5"
+                style={{ background: 'rgba(147,197,253,0.06)', border: '1px solid rgba(147,197,253,0.22)' }}
+              >
+                <h3 className="text-xs font-mono font-bold tracking-[0.2em] mb-3" style={{ color: '#93C5FD' }}>
+                  CAREER OUTLOOK
+                </h3>
+                <p className="text-sm text-white/75 leading-relaxed">
+                  {careerOutlookCopy(data.tie_tier, data.projected_round, data.nfl_comparison)}
+                </p>
+              </div>
+            </motion.div>
+
             {/* ── Scouting Summary ────────────────────────── */}
             {data.scouting_summary && (
               <motion.div
@@ -405,7 +515,7 @@ export default function PlayerDetailPage({ params }: { params: Promise<{ player:
               const displayStats = parsedStats.length > 0
                 ? parsedStats
                 : [
-                    ...(data.height ? [{ value: data.height, label: 'HEIGHT' }] : []),
+                    ...(data.height ? [{ value: formatHeight(data.height), label: 'HEIGHT' }] : []),
                     ...(data.weight ? [{ value: `${data.weight}`, label: 'WEIGHT (LBS)' }] : []),
                     ...(data.class_year ? [{ value: data.class_year, label: 'CLASS' }] : []),
                   ];
@@ -622,6 +732,5 @@ export default function PlayerDetailPage({ params }: { params: Promise<{ player:
 
       <Footer />
     </div>
-    </PaywallGate>
   );
 }

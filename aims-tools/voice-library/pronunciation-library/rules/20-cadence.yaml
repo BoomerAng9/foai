@@ -1,0 +1,53 @@
+# 20-cadence.yaml — Punctuation + cadence smoothing for TTS
+
+metadata:
+  name: cadence-punctuation
+  scope: [all]
+  priority: 20
+  description: Smooth choppy TTS pauses. Em-dash → comma; ellipsis → comma.
+
+rules:
+  - id: cadence.em-dash
+    type: literal
+    pattern: "—"
+    replacement: ", "
+    notes: "Em-dash creates long TTS pause — comma is natural micro-pause."
+
+  - id: cadence.en-dash-spaced
+    type: literal
+    pattern: " – "
+    replacement: ", "
+    notes: "Space-en-dash-space → comma."
+
+  - id: cadence.double-dash
+    type: literal
+    pattern: "--"
+    replacement: ", "
+    notes: "Double-hyphen sometimes used as em-dash → comma."
+
+  - id: cadence.ellipsis
+    type: literal
+    pattern: "…"
+    replacement: ", "
+    notes: "Ellipsis → comma. Avoids the exaggerated TTS trail-off."
+
+  - id: cadence.three-dots
+    type: literal
+    pattern: "..."
+    replacement: ", "
+    notes: "Three dots → comma (same reason as ellipsis)."
+
+  - id: cadence.double-exclaim
+    type: regex
+    pattern: "!{2,}"
+    replacement: "."
+    notes: "Multiple exclamation marks → period. Per ACHEEVY canon, no exclamation marks at all."
+
+  - id: cadence.exclaim-to-period
+    type: literal
+    pattern: "!"
+    replacement: "."
+    notes: |
+      Exclamation marks read as forced energy in TTS — incompatible
+      with ACHEEVY's measured cadence. Per character canon, ACHEEVY
+      uses NO exclamation marks anyway; this is a safety net.

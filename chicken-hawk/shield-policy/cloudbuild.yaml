@@ -1,0 +1,184 @@
+# ACHIEVEMOR Shield Policy — Cloud Build CI
+#
+# Runs on every commit to `main` and on pull requests (via GitHub App
+# trigger configured in the foai-aims GCP project console). Replaces
+# the previous GitHub Actions workflow; the Linux builder is consistent
+# with the Substrate Heterogeneity production target, and the line-
+# ending issue that blocked #232 (Windows CRLF vs Linux LF) no longer
+# exists because the generator always runs on Linux here.
+#
+# Trigger setup (one-time, via gcloud):
+#   gcloud builds triggers create github \
+#     --name=shield-policy-verify \
+#     --project=foai-aims \
+#     --region=us-central1 \
+#     --repo-name=foai \
+#     --repo-owner=BoomerAng9 \
+#     --branch-pattern="^main$" \
+#     --build-config=chicken-hawk/shield-policy/cloudbuild.yaml \
+#     --included-files="chicken-hawk/shield-policy/**,chicken-hawk/shield-policy-wire/**,chicken-hawk/config/shield/**,chicken-hawk/config/shield_personas.yml,chicken-hawk/scripts/compile-shield-policy.py,runtime/spinner/schema/**,runtime/spinner/tests/fixtures/**"
+#
+# Same command with --pull-request-pattern=".*" for PR trigger.
+
+timeout: 1800s              # 30 min cap — Kani can be slow on cold cache
+
+options:
+  logging: CLOUD_LOGGING_ONLY
+  machineType: E2_HIGHCPU_8     # cargo build parallelism
+
+substitutions:
+  # Default: verify + test + Kani discharge. As of 2026-04-20 the 54
+  # Kani proof harnesses run on every PR — a regression in any kernel
+  # component invariant fails the build via Kani's non-zero exit code.
+  # Set _RUN_KANI=no to skip (e.g. for a non-kernel docs-only change
+  # where the ~5-7 min cold-start cost isn't worth it).
+  _RUN_KANI: "yes"
+  # Verify the crate compiles across all three v1.6 §3.1 substrate
+  # targets (Linux x86_64 / macOS ARM64 / WASM). As of 2026-04-19 all
+  # three pass without modification — graduated from soft-gate to
+  # required default. Set to "no" to skip (e.g. during Kani-only
+  # verification runs).
+  _RUN_SUBSTRATES: "yes"
+
+steps:
+  # ── Step 1: YAML → Rust drift gate ──────────────────────────────
+  - id: drift-gate
+    name: python:3.12-slim
+    entrypoint: bash
+    args:
+      - -eu
+      - -c
+      - |
+        cd chicken-hawk
+        pip install --quiet "PyYAML>=6"
+        python scripts/compile-shield-policy.py --check
+
+  # ── Step 2: cargo check ─────────────────────────────────────────
+  - id: cargo-check
+    name: rust:1-bookworm      # stable Rust on Debian
+    entrypoint: bash
+    waitFor: [drift-gate]
+    args:
+      - -eu
+      - -c
+      - |
+        cd chicken-hawk/shield-policy
+        cargo check --all-targets
+
+  # ── Step 3: cargo test (runtime) ────────────────────────────────
+  - id: cargo-test
+    name: rust:1-bookworm
+    entrypoint: bash
+    waitFor: [cargo-check]
+    args:
+      - -eu
+      - -c
+      - |
+        cd chicken-hawk/shield-policy
+        cargo test --lib
+
+  # ── Step 3b: shield-policy-wire (sibling crate) ─────────────────
+  # Phase A step 2 of the P0 plan (runtime/spinner/RUST_REWRITE_PLAN.md).
+  # Compiles + tests the protobuf wire format adapter. Generated Rust
+  # is committed under chicken-hawk/shield-policy-wire/src/generated/
+  # so no protoc / C toolchain is required on this builder image.
+  - id: cargo-check-wire
+    name: rust:1-bookworm
+    entrypoint: bash
+    waitFor: [cargo-check]
+    args:
+      - -eu
+      - -c
+      - |
+        cd chicken-hawk/shield-policy-wire
+        cargo check --all-targets
+
+  - id: cargo-test-wire
+    name: rust:1-bookworm
+    entrypoint: bash
+    waitFor: [cargo-check-wire]
+    args:
+      - -eu
+      - -c
+      - |
+        cd chicken-hawk/shield-policy-wire
+        cargo test
+        # Parity fixture check — re-emit deterministically, diff
+        # against committed fixtures (both the crate-local copy and
+        # the Python-shared copy under runtime/spinner/tests/fixtures).
+        # Fails the build if the canonical invocation's encoded bytes
+        # drift from what was committed.
+        cargo test parity_emit_fixture -- --ignored
+        git diff --exit-code \
+          tests/fixtures/invocation.bin \
+          ../../runtime/spinner/tests/fixtures/invocation.bin \
+          || {
+            echo "Wire fixture drift detected — regenerate locally and commit."
+            exit 1
+          }
+
+  # ── Step 4: Scene governance audit (if scene YAML changed) ──────
+  - id: scene-audit
+    name: python:3.12-slim
+    entrypoint: bash
+    waitFor: [drift-gate]                # parallel to cargo steps
+    args:
+      - -eu
+      - -c
+      - |
+        pip install --quiet "PyYAML>=6"
+        if [ -f runtime/live-look-in/scene/build_scene_plan.py ]; then
+          python runtime/live-look-in/scene/build_scene_plan.py --audit-only
+        else
+          echo "scene build_scene_plan.py not present — skipping (v1 of this pipeline)"
+        fi
+
+  # ── Step 5: Substrate Heterogeneity verification (optional) ─────
+  # Per v1.6 §3.1, the policy engine runs on three substrates
+  # simultaneously for byzantine resilience. This step validates the
+  # crate compiles cleanly on each. Gated on _RUN_SUBSTRATES=yes.
+  # See SUBSTRATE_HETEROGENEITY.md for the current gap list (WASM
+  # no_std compat is the main outstanding item).
+  - id: substrate-verify
+    name: rust:1-bookworm
+    entrypoint: bash
+    waitFor: [cargo-test]
+    args:
+      - -eu
+      - -c
+      - |
+        if [ "${_RUN_SUBSTRATES}" = "yes" ]; then
+          cd chicken-hawk/shield-policy
+          bash scripts/verify-substrates.sh --strict
+        else
+          echo "skipping substrate verification (_RUN_SUBSTRATES=no)."
+        fi
+
+  # ── Step 6: Kani proof discharge (required by default) ──────────
+  # Kani install on Cloud Build runners is ~3-5 min (faster than cold
+  # GitHub runner due to better bandwidth). Full discharge ~5-7 min
+  # across the 54 harnesses (cia + snr + degradation + phoenix + zkp
+  # + substrate-consensus). Runs on every PR by default — a failing
+  # harness fails the build via Kani's non-zero exit code. Override
+  # with --substitutions=_RUN_KANI=no only for docs-only changes.
+  - id: kani-discharge
+    name: rust:1-bookworm
+    entrypoint: bash
+    waitFor: [cargo-test]
+    args:
+      - -eu
+      - -c
+      - |
+        if [ "${_RUN_KANI}" = "yes" ]; then
+          cd chicken-hawk/shield-policy
+          cargo install --quiet --locked kani-verifier
+          cargo kani setup
+          cargo kani --features kani
+        else
+          echo "skipping kani (_RUN_KANI=no). Remove the override to run the 54 harnesses."
+        fi
+
+# No image artifacts produced — this is a verify pipeline, not a build
+# pipeline. The shield-policy crate is a library consumed by Spinner
+# via PyO3 (future) or sidecar (alternate); the deploy pipeline for
+# those consumers lives elsewhere.

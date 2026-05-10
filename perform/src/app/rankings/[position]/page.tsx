@@ -88,7 +88,6 @@ export default function PositionRankingPage() {
   const positionKey = (params.position as string)?.toUpperCase() || 'QB';
   const [players, setPlayers] = useState<Player[]>([]);
   const [loading, setLoading] = useState(true);
-  const [headshotUrl, setHeadshotUrl] = useState<string | null>(null);
 
   const label = POSITION_LABELS[positionKey] || positionKey;
   const accentColor = GROUP_COLORS[positionKey] || '#00BCD4';
@@ -114,17 +113,6 @@ export default function PositionRankingPage() {
         });
 
         setPlayers(all);
-
-        // Fetch headshot for #1 player
-        if (all.length > 0) {
-          const top = all[0];
-          fetch(`/api/players/headshot?name=${encodeURIComponent(top.name)}&school=${encodeURIComponent(top.school)}`)
-            .then(r => r.json())
-            .then(d => {
-              if (d.url) setHeadshotUrl(d.url);
-            })
-            .catch(() => {});
-        }
       } catch {
         /* ignore */
       } finally {
@@ -315,7 +303,7 @@ export default function PositionRankingPage() {
                   </div>
                 </div>
 
-                {/* Right side: #1 player headshot */}
+                {/* Right side: #1 anonymous helmet silhouette (no face, no likeness) */}
                 <div className="hidden lg:flex relative w-80 items-end justify-center overflow-hidden">
                   {/* Gradient fade from left */}
                   <div
@@ -325,44 +313,91 @@ export default function PositionRankingPage() {
                     }}
                   />
 
-                  {/* Subtle radial glow behind headshot */}
+                  {/* Subtle radial glow behind helmet */}
                   <div
                     className="absolute bottom-0 right-10 w-64 h-64 rounded-full z-0"
                     style={{
-                      background: `radial-gradient(circle, ${accentColor}15 0%, transparent 70%)`,
+                      background: `radial-gradient(circle, ${accentColor}22 0%, transparent 70%)`,
                     }}
                   />
 
-                  {headshotUrl ? (
-                    <motion.img
-                      initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                  {top5.length > 0 && (
+                    <motion.div
+                      initial={{ opacity: 0, scale: 0.92, y: 20 }}
                       animate={{ opacity: 1, scale: 1, y: 0 }}
                       transition={{ duration: 0.8, delay: 0.5, ease: [0.16, 1, 0.3, 1] }}
-                      src={headshotUrl}
-                      alt={top5[0]?.name || 'Top prospect'}
-                      className="relative z-20 w-56 h-auto object-contain drop-shadow-2xl"
-                      style={{
-                        filter: 'drop-shadow(0 0 30px rgba(0,188,212,0.2))',
-                      }}
-                    />
-                  ) : top5.length > 0 ? (
-                    <motion.div
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      transition={{ delay: 0.6 }}
-                      className="relative z-20 w-44 h-56 rounded-lg flex items-center justify-center mb-4"
-                      style={{ background: 'rgba(0,188,212,0.08)', border: '1px solid rgba(0,188,212,0.15)' }}
+                      className="relative z-20 flex flex-col items-center pb-8"
                     >
-                      <div className="text-center">
-                        <div className="text-5xl font-extrabold" style={{ color: accentColor, fontStyle: 'italic' }}>
+                      <svg
+                        width="240"
+                        height="280"
+                        viewBox="0 0 240 280"
+                        aria-label={`Top ${label.toLowerCase()} prospect silhouette`}
+                        style={{ filter: `drop-shadow(0 0 36px ${accentColor}44)` }}
+                      >
+                        {/* Shoulder pads */}
+                        <path
+                          d="M20 240 Q120 220 220 240 L220 276 L20 276 Z"
+                          fill="#0A0A0F"
+                          opacity={0.9}
+                        />
+                        {/* Jersey neck */}
+                        <path
+                          d="M85 232 Q120 216 155 232 L155 248 L85 248 Z"
+                          fill={accentColor}
+                          opacity={0.3}
+                        />
+                        {/* Helmet dome */}
+                        <path
+                          d="M40 175 Q40 70 120 70 Q200 70 200 175 L200 215 L40 215 Z"
+                          fill={accentColor}
+                          opacity={0.85}
+                        />
+                        {/* Single accent stripe */}
+                        <path
+                          d="M120 72 L120 180"
+                          stroke="white"
+                          strokeWidth="3"
+                          opacity={0.35}
+                        />
+                        {/* Visor — FULLY OPAQUE, no face */}
+                        <rect x="65" y="115" width="110" height="36" rx="6" fill="#000" />
+                        <rect x="65" y="115" width="110" height="36" rx="6" fill={accentColor} opacity={0.08} />
+                        {/* Facemask bars */}
+                        <path
+                          d="M58 170 L182 170 M70 185 L170 185 M80 200 L160 200"
+                          stroke="#0A0A0F"
+                          strokeWidth="4"
+                          strokeLinecap="round"
+                        />
+                        {/* Chin strap */}
+                        <path
+                          d="M72 208 Q120 224 168 208"
+                          stroke="#0A0A0F"
+                          strokeWidth="3"
+                          fill="none"
+                          strokeLinecap="round"
+                        />
+                      </svg>
+                      <div
+                        className="mt-3 text-center"
+                        style={{
+                          fontFamily: 'system-ui',
+                          letterSpacing: '0.2em',
+                        }}
+                      >
+                        <div
+                          className="text-6xl font-extrabold leading-none"
+                          style={{ color: accentColor, fontStyle: 'italic' }}
+                        >
                           #1
                         </div>
-                        <div className="text-xs font-bold text-white/40 mt-2 tracking-wider">
-                          {top5[0].name.split(' ').pop()?.toUpperCase()}
+                        <div className="text-[10px] font-bold text-white/50 mt-2 tracking-[0.3em]">
+                          {top5[0].name.toUpperCase()}
                         </div>
                       </div>
                     </motion.div>
-                  ) : null}
+                  )}
 
                   {/* Bottom-right logo badge */}
                   <div className="absolute bottom-4 right-4 z-30 flex items-center gap-2">

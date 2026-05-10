@@ -1,0 +1,43 @@
+[package]
+name = "spinner-policy"
+version = "0.1.0"
+edition = "2021"
+description = "Cloud Run Rust sidecar — HTTP facade over shield-policy::validate() accepting deploy.spinner.shield.v1 wire bytes."
+license-file = "../../LICENSE"
+
+[[bin]]
+name = "spinner-policy"
+path = "src/main.rs"
+
+[lib]
+name = "spinner_policy"
+path = "src/lib.rs"
+
+[dependencies]
+# Policy kernel + wire format live in the monorepo as path deps.
+shield-policy = { path = "../../chicken-hawk/shield-policy" }
+shield-policy-wire = { path = "../../chicken-hawk/shield-policy-wire" }
+
+# HTTP stack — exact pins so substrate-heterogeneity builds are reproducible.
+axum = "=0.8.9"
+tokio = { version = "=1.52.1", features = ["macros", "rt-multi-thread", "signal"] }
+tower = { version = "=0.5.3", features = ["util"] }
+tower-http = { version = "=0.6.8", features = ["trace"] }
+
+# Wire format.
+prost = "=0.14.3"
+
+# Tracing.
+tracing = "=0.1.44"
+tracing-subscriber = { version = "=0.3.23", features = ["env-filter", "fmt", "json"] }
+
+# Body bytes.
+bytes = "=1.11.1"
+
+[dev-dependencies]
+http-body-util = "=0.1.3"
+
+[profile.release]
+lto = true
+codegen-units = 1
+strip = "symbols"

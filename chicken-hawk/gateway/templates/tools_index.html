@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tool Chest · Chicken Hawk</title>
+<link rel="stylesheet" href="/static/css/main.css">
+</head>
+<body class="theme-dark">
+<div class="tc-shell">
+  <aside class="tc-sidebar">
+    <h2>Tool Chest</h2>
+    <nav class="tc-nav">
+      <a href="/tools" class="active">Overview</a>
+      <a href="/tools/tuning-loop">Tuning Loop</a>
+      <a href="/tools/nemoclaw">Policy Gate</a>
+      <a href="/tools/hermes">Agent Runtime</a>
+      <a href="/tools/lil-hawks">Lil_Hawks</a>
+      <a href="/tools/cron">Scheduled Jobs</a>
+      <a href="/tools/audit">Audit Chain</a>
+      <hr style="border:0;border-top:1px solid var(--border);margin:12px 0">
+      <a href="/">← Customer chat</a>
+    </nav>
+  </aside>
+  <main class="tc-main">
+    <div class="tc-header">
+      <div>
+        <h1>Tool Chest</h1>
+        <div class="subtitle">Owner-only. Chicken Hawk's three internal tools.</div>
+      </div>
+      <div id="tc-health"><span class="tc-pill muted">checking…</span></div>
+    </div>
+
+    <div class="tc-grid">
+      <a href="/tools/tuning-loop" class="tc-card" style="text-decoration:none;color:inherit">
+        <h3>Tuning Loop</h3>
+        <div class="desc">Autonomous-experiment engine. Self-improvement loop — prompt tuning, Lil_Hawk specialization, A/B routing.</div>
+        <span class="tc-pill warn">coming soon</span>
+      </a>
+      <a href="/tools/nemoclaw" class="tc-card" style="text-decoration:none;color:inherit">
+        <h3>Policy Gate</h3>
+        <div class="desc">Blocks, escalates, or allows actions by risk-tag. Test verdicts before dispatching.</div>
+        <span class="tc-pill ok">live</span>
+      </a>
+      <a href="/tools/hermes" class="tc-card" style="text-decoration:none;color:inherit">
+        <h3>Agent Runtime</h3>
+        <div class="desc">15+ HITL channels, skill registry, MCP servers. The execution shell behind every dispatch.</div>
+        <span class="tc-pill ok">live</span>
+      </a>
+      <a href="/tools/lil-hawks" class="tc-card" style="text-decoration:none;color:inherit">
+        <h3>Lil_Hawk Roster</h3>
+        <div class="desc">11 specialist agents — coding, automation, memory, graph, viz, and more. Spawn / inspect / retire.</div>
+        <span class="tc-pill ok">live</span>
+      </a>
+      <a href="/tools/cron" class="tc-card" style="text-decoration:none;color:inherit">
+        <h3>Scheduled Jobs</h3>
+        <div class="desc">Cron-style recurring tasks owned by Chicken Hawk. Read-only in Wave 1.</div>
+        <span class="tc-pill warn">read-only</span>
+      </a>
+      <a href="/tools/audit" class="tc-card" style="text-decoration:none;color:inherit">
+        <h3>Audit Chain</h3>
+        <div class="desc">SHA256 tamper-evident receipt chain. Every dispatch leaves a receipt.</div>
+        <span class="tc-pill ok">live</span>
+      </a>
+    </div>
+  </main>
+</div>
+<script src="/static/js/tools_common.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lil_Hawks · Tool Chest</title>
+<link rel="stylesheet" href="/static/css/main.css">
+</head>
+<body class="theme-dark">
+<div class="tc-shell">
+  <aside class="tc-sidebar">
+    <h2>Tool Chest</h2>
+    <nav class="tc-nav">
+      <a href="/tools">Overview</a>
+      <a href="/tools/tuning-loop">Tuning Loop</a>
+      <a href="/tools/nemoclaw">Policy Gate</a>
+      <a href="/tools/hermes">Agent Runtime</a>
+      <a href="/tools/lil-hawks">Lil_Hawks</a>
+      <a href="/tools/cron">Scheduled Jobs</a>
+      <a href="/tools/audit">Audit Chain</a>
+      <hr style="border:0;border-top:1px solid var(--border);margin:12px 0">
+      <a href="/">← Customer chat</a>
+    </nav>
+  </aside>
+  <main class="tc-main">
+    <div class="tc-header">
+      <div>
+        <h1>Lil_Hawks</h1>
+        <div class="subtitle">11 specialist agents under Chicken Hawk's command. Read-only roster (Wave 1).</div>
+      </div>
+      <div id="tc-health"></div>
+    </div>
+    <div class="tc-card">
+      <h3>Roster</h3>
+      <div id="lh-list" class="tc-empty">loading…</div>
+    </div>
+  </main>
+</div>
+<script src="/static/js/tools_common.js" defer></script>
+<script src="/static/js/tools_lil_hawks.js" defer></script>
+</body>
+</html>

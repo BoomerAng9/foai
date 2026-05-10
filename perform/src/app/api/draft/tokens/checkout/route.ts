@@ -1,11 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { requireAuth } from '@/lib/auth-guard';
+import { requireVerifiedEmail } from '@/lib/auth-guard';
 import { createTokenCheckout, TOKEN_PACKAGES } from '@/lib/stripe/tokens';
 
 export async function POST(req: NextRequest) {
   try {
-    const auth = await requireAuth(req);
-    if (!auth.ok) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    // Gate 2 · Item 13: paid actions require verified email (owner bypass).
+    // Returns 403 with code: 'email_unverified' + resend CTA when unverified.
+    const auth = await requireVerifiedEmail(req);
+    if (!auth.ok) return auth.response;
 
     const body = await req.json();
     const { package_id } = body;

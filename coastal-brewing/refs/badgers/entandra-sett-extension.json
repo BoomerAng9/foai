@@ -1,0 +1,512 @@
+{
+  "_meta": {
+    "patch_name": "sett-marketing-extension",
+    "patch_version": "1.2.0",
+    "patch_source": "The Sett — AIMS PMO",
+    "patch_date": "2026-04-19",
+    "keyword_count": 44,
+    "merge_target": "BARS-by-ACHIEVEMOR/dictionaries/entandra.json",
+    "description": "Marketing and funnel vocabulary contributed by The Sett (Melli Capensi + 12 BG'z). Extends the base Entandra dictionary into AIMS campaign-operational language.",
+    "merge_precondition": {
+      "target_repo_state_verified_on": "2026-04-19",
+      "target_file_exists": false,
+      "target_file_path": "dictionaries/entandra.json",
+      "note": "As of verification date, BoomerAng9/BARS-by-ACHIEVEMOR contains only LICENSE.md, POC_GUIDE.md, README.md. No base dictionary exists yet. This patch MUST be treated as a seed — either (a) initialize entandra.json as {\"keywords\":{}} and apply this patch, or (b) wait for the base 127-keyword Entandra to be committed, then use the collision-detection merge in the README before applying."
+    },
+    "known_collisions_with_documented_base": [],
+    "changelog": {
+      "1.0.0": "Initial 44-keyword draft",
+      "1.1.0": "Added target fields to 5 funnel-stage keywords; added stage + role metadata to Tunnel + Chamber for resolver funnel-position awareness; renamed Beacon action from ATTRIBUTION_PIXEL to ATTRIBUTION_SIGNAL (now covers pixel + postback + server-side); added merge_precondition and known_collisions to _meta; stress-test-validated",
+      "1.2.0": "Resolved Chamber collision via Path 2 (rename to Sett-Chamber). Updated Funnel.config.stage_names[3] and Journey.config.stages[3] to match. Zero known collisions remaining against documented base."
+    },
+    "collisions_resolved": [
+      {
+        "keyword_before": "Chamber",
+        "keyword_after": "Sett-Chamber",
+        "resolution_path": "Path 2 — Rename Sett keyword to namespace against base",
+        "resolved_on": "2026-04-19",
+        "rationale": "Preserves Sett TOUCHPOINT semantic without colliding with base CONTAINER_SETUP. Clean merge proven via stress-test Test 4."
+      }
+    ]
+  },
+  "keywords": {
+    "Sett": {
+      "action": "INIT_CONTEXT",
+      "target": "CampaignWorkspace",
+      "config": {
+        "scaffold": "clan_namespace",
+        "isolation": true
+      },
+      "description": "Initialize a campaign workspace scaffold — the clan namespace where a funnel is built.",
+      "contributed_by": "Meles Mehli"
+    },
+    "Tunnel": {
+      "action": "FUNNEL_PATH",
+      "target": "JourneyPath",
+      "stage": 3,
+      "role": "CONSIDERATION",
+      "config": {
+        "from": "Entrance",
+        "to": "Exit",
+        "branching": true
+      },
+      "description": "Single customer-path through the funnel from Entrance to Exit. Tunnels can branch. Occupies funnel stage 3 (Consideration).",
+      "contributed_by": "Meles Mehli"
+    },
+    "Journey": {
+      "action": "UX_PATTERN",
+      "target": "MultiTouchSequence",
+      "pattern": "FULL_FUNNEL_MULTI_TOUCH",
+      "config": {
+        "stages": [
+          "Surface",
+          "Entrance",
+          "Tunnel",
+          "Sett-Chamber",
+          "Exit",
+          "Home-Chamber",
+          "Clan"
+        ]
+      },
+      "description": "Full-funnel multi-touch sequence spanning all seven Sett stages.",
+      "contributed_by": "Meles Mehli"
+    },
+    "Beacon": {
+      "action": "ATTRIBUTION_SIGNAL",
+      "target": "ConversionTracker",
+      "config": {
+        "placement": "per_stage",
+        "mechanisms": [
+          "pixel",
+          "postback",
+          "server_side"
+        ]
+      },
+      "description": "Conversion tracking signal placed at a funnel stage. Supports pixel, postback, and server-side mechanisms.",
+      "contributed_by": "Meles Mehli / Java Nessa"
+    },
+    "Funnel": {
+      "action": "WORKFLOW",
+      "target": "ConversionArchitecture",
+      "config": {
+        "stages": 7,
+        "stage_names": [
+          "Surface",
+          "Entrance",
+          "Tunnel",
+          "Sett-Chamber",
+          "Exit",
+          "Home-Chamber",
+          "Clan"
+        ]
+      },
+      "description": "Multi-stage conversion architecture. The core Sett product.",
+      "contributed_by": "Melli Capensi / Meles Mehli"
+    },
+    "Surface": {
+      "action": "FUNNEL_STAGE",
+      "target": "FunnelStage",
+      "stage": 1,
+      "role": "AWARENESS",
+      "description": "Top-of-funnel awareness layer — where prospects first catch the scent.",
+      "contributed_by": "The Sett"
+    },
+    "Entrance": {
+      "action": "FUNNEL_STAGE",
+      "target": "FunnelStage",
+      "stage": 2,
+      "role": "INTEREST",
+      "description": "Click-in / interest layer — prospect approaches the tunnel mouth.",
+      "contributed_by": "The Sett"
+    },
+    "Exit": {
+      "action": "FUNNEL_STAGE",
+      "target": "FunnelStage",
+      "stage": 5,
+      "role": "CONVERSION",
+      "description": "Conversion point — prospect emerges transformed (signed, purchased, deployed).",
+      "contributed_by": "The Sett"
+    },
+    "Home-Chamber": {
+      "action": "FUNNEL_STAGE",
+      "target": "FunnelStage",
+      "stage": 6,
+      "role": "RETENTION",
+      "description": "Retention stage — customer returns to dwell; onboarded and active.",
+      "contributed_by": "The Sett"
+    },
+    "Clan": {
+      "action": "FUNNEL_STAGE",
+      "target": "FunnelStage",
+      "stage": 7,
+      "role": "ADVOCACY",
+      "description": "Advocacy stage — customer becomes Sett; brings others, seeds new tunnels.",
+      "contributed_by": "The Sett"
+    },
+    "Dig": {
+      "action": "DATA_MINING",
+      "target": "AudienceExcavation",
+      "config": {
+        "sources": [
+          "first_party",
+          "third_party"
+        ],
+        "surface": true
+      },
+      "description": "Audience excavation on first-party and third-party data sources.",
+      "contributed_by": "Taxi Dea"
+    },
+    "Bid": {
+      "action": "RTB_ACTION",
+      "target": "ProgrammaticAuction",
+      "config": {
+        "realtime": true,
+        "max_latency_ms": 100
+      },
+      "description": "Real-time bid submission in a programmatic auction.",
+      "contributed_by": "Taxi Dea"
+    },
+    "Lookalike": {
+      "action": "AUDIENCE_MODEL",
+      "target": "SimilarityExpansion",
+      "config": {
+        "from_seed": true,
+        "similarity_threshold": 0.8
+      },
+      "description": "Similarity-modeled audience expansion from a seed cohort.",
+      "contributed_by": "Taxi Dea"
+    },
+    "Buy-Side": {
+      "action": "DSP_ROLE",
+      "target": "DemandSidePlatform",
+      "config": {
+        "mode": "active"
+      },
+      "description": "Demand-side platform activation for media buying.",
+      "contributed_by": "Taxi Dea"
+    },
+    "Snout": {
+      "action": "OPPORTUNITY_SCAN",
+      "target": "LeadDiscovery",
+      "config": {
+        "continuous": true,
+        "scent_threshold": "configurable"
+      },
+      "description": "Lead and prospect discovery scan — sniffs out opportunities.",
+      "contributed_by": "Arcto Nyx"
+    },
+    "Pixel-Drop": {
+      "action": "DEPLOY_TRACKING",
+      "target": "TrackingPixel",
+      "config": {
+        "placement": "domain_wide"
+      },
+      "description": "Deploy a tracking pixel to a customer domain.",
+      "contributed_by": "Arcto Nyx"
+    },
+    "First-Party-Fold": {
+      "action": "CRM_INGEST",
+      "target": "DSPAudience",
+      "config": {
+        "hash": "sha256",
+        "consent_verified": true
+      },
+      "description": "Ingest first-party CRM audience into the DSP, hashed and consent-verified.",
+      "contributed_by": "Arcto Nyx"
+    },
+    "Nocturne": {
+      "action": "CREATIVE_MODE",
+      "target": "LongFormCinematic",
+      "config": {
+        "duration_seconds_min": 30,
+        "tone": "premium"
+      },
+      "description": "Premium, long-form, cinematic creative mode.",
+      "contributed_by": "Ana Kuma"
+    },
+    "Premium-Craft": {
+      "action": "CREATIVE_MODE",
+      "target": "HighExecution",
+      "config": {
+        "quality_tier": "top",
+        "review_gates": "full"
+      },
+      "description": "High-execution craft tier with full review gates.",
+      "contributed_by": "Ana Kuma"
+    },
+    "Region-Adapt": {
+      "action": "LOCALIZATION",
+      "target": "GeoAdaptiveRotation",
+      "config": {
+        "languages": "per_region",
+        "creative_variants": "auto"
+      },
+      "description": "Geo-adaptive creative and compliance rotation per region.",
+      "contributed_by": "Leu Kurus"
+    },
+    "Compliance-Gate": {
+      "action": "LEGAL_CHECK",
+      "target": "PrivacyComplianceValidator",
+      "config": {
+        "regimes": [
+          "GDPR",
+          "CCPA",
+          "LGPD",
+          "PIPL",
+          "DPDP"
+        ]
+      },
+      "description": "Privacy-regime compliance check — GDPR, CCPA, LGPD, PIPL, DPDP, etc.",
+      "contributed_by": "Leu Kurus"
+    },
+    "Climb-Stack": {
+      "action": "VIDEO_NAV",
+      "target": "MultiSurfaceStack",
+      "config": {
+        "surfaces": [
+          "CTV",
+          "OTT",
+          "DOOH",
+          "Audio"
+        ]
+      },
+      "description": "Traverse the CTV/OTT/DOOH/Audio stack of screen-or-speaker placements.",
+      "contributed_by": "Moscha Tah"
+    },
+    "CTV-Crown": {
+      "action": "CTV_PLACEMENT",
+      "target": "PremiumCTVInventory",
+      "config": {
+        "tier": "premium"
+      },
+      "description": "Premium Connected TV inventory placement.",
+      "contributed_by": "Moscha Tah"
+    },
+    "DOOH-Pin": {
+      "action": "DOOH_BUY",
+      "target": "DigitalOutOfHome",
+      "config": {
+        "geofenced": true
+      },
+      "description": "Digital out-of-home placement — geofenced physical-world screen buy.",
+      "contributed_by": "Moscha Tah"
+    },
+    "Mask": {
+      "action": "PERSONA_OVERLAY",
+      "target": "AudiencePersonaLayer",
+      "config": {
+        "persona_attrs": "configurable"
+      },
+      "description": "Persona-based audience overlay on top of a base targeting set.",
+      "contributed_by": "Persona Tah"
+    },
+    "Creator-Plug": {
+      "action": "INFLUENCER_DEAL",
+      "target": "CreatorPartnership",
+      "config": {
+        "deal_type": [
+          "UGC",
+          "sponsorship",
+          "integration"
+        ]
+      },
+      "description": "Influencer or creator partnership activation.",
+      "contributed_by": "Persona Tah"
+    },
+    "Batik-Weave": {
+      "action": "SOCIAL_PATTERN",
+      "target": "MultiPlatformRotation",
+      "config": {
+        "platforms": [
+          "Meta",
+          "TikTok",
+          "X",
+          "Reddit",
+          "LinkedIn",
+          "Threads",
+          "Pinterest",
+          "Mastodon",
+          "Discord"
+        ]
+      },
+      "description": "Multi-platform social rotation pattern across the open social web.",
+      "contributed_by": "Orien Talis"
+    },
+    "Micro-Tribe": {
+      "action": "NICHE_AUDIENCE",
+      "target": "SubHundredKCommunity",
+      "config": {
+        "max_size": 100000,
+        "engagement_floor": "high"
+      },
+      "description": "Sub-100k highly-engaged community audience — the niche micro-tribe.",
+      "contributed_by": "Orien Talis"
+    },
+    "Vertical-Deep": {
+      "action": "VERTICAL_CAMPAIGN",
+      "target": "VerticalScaffold",
+      "config": {
+        "verticals": "configurable"
+      },
+      "description": "Dedicated vertical campaign scaffold — per-vertical messaging and rotation.",
+      "contributed_by": "Eve Retti"
+    },
+    "Sector-Deep": {
+      "action": "SECTOR_CAMPAIGN",
+      "target": "SectorScaffold",
+      "config": {
+        "sectors": "configurable"
+      },
+      "description": "Dedicated industry-sector campaign scaffold.",
+      "contributed_by": "Eve Retti"
+    },
+    "Category-Switch": {
+      "action": "CAT_PIVOT",
+      "target": "CategoryPivot",
+      "config": {
+        "mid_campaign": true
+      },
+      "description": "Pivot between product categories mid-campaign without funnel rebuild.",
+      "contributed_by": "Eve Retti"
+    },
+    "Web3-Place": {
+      "action": "WEB3_MEDIA",
+      "target": "DecentralizedSurface",
+      "config": {
+        "surfaces": [
+          "on_chain",
+          "NFT_ad_slot",
+          "wallet_context"
+        ]
+      },
+      "description": "Placement on Web3 / decentralized surfaces.",
+      "contributed_by": "Cuc Phuong"
+    },
+    "Agent-to-Agent-Ad": {
+      "action": "A2A_AD_PROTOCOL",
+      "target": "AIAgentAdvertising",
+      "config": {
+        "protocol": "configurable"
+      },
+      "description": "Advertising protocol between AI agents — one agent pitches another on a customer's behalf.",
+      "contributed_by": "Cuc Phuong"
+    },
+    "AI-Native-Surface": {
+      "action": "AI_SURFACE",
+      "target": "AssistantEmbeddedPlacement",
+      "config": {
+        "surface_types": [
+          "chat_ad",
+          "assistant_embed",
+          "agent_response"
+        ]
+      },
+      "description": "Placement inside an AI-assistant surface — chat ads, assistant-embedded placements.",
+      "contributed_by": "Cuc Phuong"
+    },
+    "Emerging-Channel": {
+      "action": "NEW_CHANNEL",
+      "target": "ChannelIngestion",
+      "config": {
+        "auto_evaluate": true
+      },
+      "description": "Newly-emerged media channel ingestion and evaluation.",
+      "contributed_by": "Cuc Phuong"
+    },
+    "Signal-Read": {
+      "action": "FORECAST",
+      "target": "PreLaunchForecast",
+      "config": {
+        "scope": "all_stages"
+      },
+      "description": "Pre-launch audience-forecast operation across all funnel stages.",
+      "contributed_by": "Java Nessa"
+    },
+    "Forecast-Funnel": {
+      "action": "FUNNEL_PROJECTION",
+      "target": "SevenStageProjection",
+      "config": {
+        "stages": 7,
+        "confidence_interval": 0.9
+      },
+      "description": "Project forecast across all seven funnel stages with confidence intervals.",
+      "contributed_by": "Java Nessa"
+    },
+    "Attribution-Trail": {
+      "action": "MULTI_TOUCH_ATTR",
+      "target": "MultiTouchModel",
+      "config": {
+        "model_types": [
+          "linear",
+          "time_decay",
+          "data_driven",
+          "position_based"
+        ]
+      },
+      "description": "Multi-touch attribution modeling across the funnel.",
+      "contributed_by": "Java Nessa"
+    },
+    "Brand-Safety-Gate": {
+      "action": "SAFETY_CHECK",
+      "target": "BrandSafetyMonitor",
+      "config": {
+        "realtime": true,
+        "crisis_flag": true
+      },
+      "description": "Brand-safety monitoring with real-time crisis flagging.",
+      "contributed_by": "Java Nessa"
+    },
+    "Fuse-Light": {
+      "action": "VIRAL_TRIGGER",
+      "target": "ViralCampaignActivator",
+      "config": {
+        "seed_size": "configurable"
+      },
+      "description": "Activate a viral-intent campaign mechanism — light the fuse.",
+      "contributed_by": "Mar Ché"
+    },
+    "Earned-Quake": {
+      "action": "PR_AMPLIFY",
+      "target": "EarnedMediaSequence",
+      "config": {
+        "multi_wave": true
+      },
+      "description": "Earned-media amplification sequence — the ripple after the fuse.",
+      "contributed_by": "Mar Ché"
+    },
+    "Takeover-Stand": {
+      "action": "OOH_TAKEOVER",
+      "target": "PhysicalTakeover",
+      "config": {
+        "type": [
+          "Times_Square_class",
+          "mobile_billboards",
+          "wild_posting"
+        ]
+      },
+      "description": "Physical-world takeover activation — Times Square-class or mobile-billboard convoy.",
+      "contributed_by": "Mar Ché"
+    },
+    "Viral-Spray": {
+      "action": "SPREAD_PATTERN",
+      "target": "SeededSpread",
+      "config": {
+        "pattern": "configurable"
+      },
+      "description": "Seeded-spread viral pattern — chemical-defense-class unforgettable impact.",
+      "contributed_by": "Mar Ché"
+    },
+    "Sett-Chamber": {
+      "action": "TOUCHPOINT",
+      "target": "InteractionSurface",
+      "stage": 4,
+      "role": "EVALUATION",
+      "config": {
+        "persistent": true,
+        "tracked": true
+      },
+      "description": "Single campaign touchpoint — interaction surface inside a tunnel. Occupies funnel stage 4 (Evaluation). Namespaced as `Sett-Chamber` to avoid collision with base `Chamber` (CONTAINER_SETUP / Docker Compose).",
+      "contributed_by": "Meles Mehli"
+    }
+  }
+}

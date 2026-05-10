@@ -811,13 +811,13 @@
       "Age/Level",
       "Competitor & Price",
       "Competitor Discounted Fee for Full Payment (SAR)",
-      "HIDT Fee (SAR)",
-      "HIDT Discounted Fee for Full Payment (SAR)",
+      "A.I.M.S. Fee (SAR)",
+      "A.I.M.S. Discounted Fee for Full Payment (SAR)",
       "Price Difference (SAR)",
       "Price Difference with Full Payment (SAR)"
     ],
     [
-      "HIDT",
+      "A.I.M.S.",
       "English Language Education (Grade 1-Grade 5)",
       "Grade 1-Grade 5",
       "Al Faris International School - 39,000",
@@ -828,7 +828,7 @@
       "4387.5"
     ],
     [
-      "HIDT",
+      "A.I.M.S.",
       "English Language Education (KG to Grade 2)",
       "KG to Grade 2",
       "Pakistan International School (PISES) - 8,050",
@@ -839,7 +839,7 @@
       "905.62"
     ],
     [
-      "HIDT",
+      "A.I.M.S.",
       "English Language Education (KG 1 - Grade 6)",
       "KG 1 - Grade 6",
       "Gulf International English School - 18,000",
@@ -850,7 +850,7 @@
       "2025"
     ],
     [
-      "HIDT",
+      "A.I.M.S.",
       "Elementary English Course",
       "KG 1 - Grade 7",
       "Speak Up معهد - 2,000",
@@ -861,7 +861,7 @@
       "225"
     ],
     [
-      "HIDT",
+      "A.I.M.S.",
       "English Language Course for children",
       "6-13 years old",
       "Al-Faisal International Academy - 1,150",
@@ -877,14 +877,14 @@
       "Institution",
       "Program",
       "Duration (hours)",
-      "HIDT Fee (SAR)",
-      "HIDT Discount %40",
-      "HIDT Discount %15",
+      "A.I.M.S. Fee (SAR)",
+      "A.I.M.S. Discount %40",
+      "A.I.M.S. Discount %15",
       "33% Corporate Discount & Price (SAR)",
       "Market Discount & Price (SAR)"
     ],
     [
-      "HIDT",
+      "A.I.M.S.",
       "General English 101",
       "80",
       "1800",
@@ -894,7 +894,7 @@
       "1530"
     ],
     [
-      "HIDT",
+      "A.I.M.S.",
       "General English 102",
       "80",
       "1800",
@@ -904,7 +904,7 @@
       "1530"
     ],
     [
-      "HIDT",
+      "A.I.M.S.",
       "General English 103",
       "80",
       "1800",
@@ -914,7 +914,7 @@
       "1530"
     ],
     [
-      "HIDT",
+      "A.I.M.S.",
       "General English 104",
       "80",
       "1800",
@@ -924,7 +924,7 @@
       "1530"
     ],
     [
-      "HIDT",
+      "A.I.M.S.",
       "English for Specific Purposes",
       "80",
       "2000",
@@ -934,7 +934,7 @@
       "1700"
     ],
     [
-      "HIDT",
+      "A.I.M.S.",
       "English for Sports",
       "80",
       "2000",
@@ -944,7 +944,7 @@
       "1700"
     ],
     [
-      "HIDT",
+      "A.I.M.S.",
       "Professional Writing",
       "80",
       "2000",
@@ -954,7 +954,7 @@
       "1700"
     ]
   ],
-  "HIDT Per Class Time": [
+  "A.I.M.S. Per Class Time": [
     [
       "Institute",
       "Course",
@@ -970,7 +970,7 @@
       ""
     ],
     [
-      "HIDT",
+      "A.I.M.S.",
       "General English 101",
       "80",
       "1h 45m",
@@ -984,7 +984,7 @@
       ""
     ],
     [
-      "HIDT",
+      "A.I.M.S.",
       "General English 102",
       "80",
       "1h 45m",
@@ -998,7 +998,7 @@
       ""
     ],
     [
-      "HIDT",
+      "A.I.M.S.",
       "General English 103",
       "80",
       "1h 45m",
@@ -1012,7 +1012,7 @@
       ""
     ],
     [
-      "HIDT",
+      "A.I.M.S.",
       "General English 104",
       "80",
       "1h 45m",
@@ -1026,7 +1026,7 @@
       " "
     ],
     [
-      "HIDT",
+      "A.I.M.S.",
       "English for Specific Purposes",
       "80",
       "1h 45m",
@@ -1040,7 +1040,7 @@
       ""
     ],
     [
-      "HIDT",
+      "A.I.M.S.",
       "English for Sports",
       "80",
       "1h 45m",
@@ -1054,7 +1054,7 @@
       ""
     ],
     [
-      "HIDT",
+      "A.I.M.S.",
       "Professional Writing",
       "80",
       "1h 45m",
@@ -1068,7 +1068,7 @@
       ""
     ],
     [
-      "HIDT",
+      "A.I.M.S.",
       "Public Speaking",
       "80",
       "1h 45m",

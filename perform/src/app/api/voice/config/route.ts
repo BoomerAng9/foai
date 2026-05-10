@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth-guard';
 import { getRealtimeConfig, type STTMode } from '@/lib/voice/stt-router';
-import { ANALYST_VOICES } from '@/lib/voice/hermes-tts-router';
+import { ANALYST_VOICES } from '@/lib/voice/mode-tts-router';
 
 /**
  * GET /api/voice/config

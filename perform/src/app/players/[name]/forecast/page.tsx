@@ -11,6 +11,7 @@ import { PillarRadar } from '@/components/tie/PillarRadar';
 import { CompLandscape } from '@/components/tie/CompLandscape';
 import Link from 'next/link';
 import { BackHomeNav } from '@/components/layout/BackHomeNav';
+import { AnonymousHelmet } from '@/components/cards/AnonymousHelmet';
 
 interface ForecastResponse {
   player: {
@@ -190,21 +191,13 @@ export default function ForecastPage({ params }: { params: Promise<{ name: strin
                   background: 'radial-gradient(circle at 50% 30%, #1A2A4A, #06122A)',
                 }}
               >
-                {p.identity.headshotUrl ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={p.identity.headshotUrl}
-                    alt={p.identity.name}
-                    className="absolute inset-0 w-full h-full object-cover object-top"
-                    onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }}
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <AnonymousHelmet
+                    size={200}
+                    allowImage={!!p.identity.headshotUrl}
+                    imageUrl={p.identity.headshotUrl}
                   />
-                ) : (
-                  <div className="absolute inset-0 flex items-center justify-center" style={{ color: 'rgba(255,255,255,0.15)' }}>
-                    <span className="text-6xl font-black">
-                      {p.identity.name.split(' ').map(s => s[0]).join('').slice(0, 2)}
-                    </span>
-                  </div>
-                )}
+                </div>
               </div>
             </div>
           </div>

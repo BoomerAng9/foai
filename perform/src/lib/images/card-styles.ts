@@ -9,7 +9,16 @@
  * 2. NEVER describe or reference team logos, mascots, conference marks — AI hallucinates them
  * 3. Use team COLORS to imply branding, never team NAMES on uniforms/helmets
  * 4. Text (name, position) goes on NAMEPLATE/BANNER zones, never on jerseys or helmets
+ *
+ * HELMET-SWAP (2026-04-18):
+ * - `helmetContext` (optional) carries a pre-resolved HelmetResolution from
+ *   team-helmet-resolver.ts. When present, reveal-state prompts use its
+ *   NFL color phrase + team-accurate helmet descriptor. This is the
+ *   college→NFL swap that fires the moment `drafted_by_team` is populated
+ *   for a player. Cache keys should include helmetCacheKey() output.
  */
+
+import type { HelmetResolution } from './team-helmet-resolver';
 
 export type CardVariation =
   | 'classic_silver'
@@ -45,8 +54,16 @@ export interface CardPromptInput {
   projectedRound: number;
   nflComparison?: string;
   trend?: 'rising' | 'falling' | 'steady';
-  teamColors?: string;       // Actual school colors (for reveal state)
+  teamColors?: string;       // Actual school colors (for reveal state, legacy)
   state?: 'locked' | 'reveal'; // Two-state card system
+  /**
+   * Pre-resolved helmet context from team-helmet-resolver.ts.
+   * When present, supersedes `teamColors` for the reveal state and provides
+   * a team-accurate helmet descriptor (e.g., "solid orange helmet no stripe"
+   * for Cleveland, "gold helmet with green stripe" for Green Bay).
+   * Set automatically post-draft when `drafted_by_team` is populated.
+   */
+  helmetContext?: HelmetResolution;
 }
 
 /* ── Brand colors per canonical tier (for LOCKED state) ── */
@@ -72,9 +89,14 @@ function athleteVisual(p: CardPromptInput): string {
     return `football athlete wearing a modern sleek helmet with a reflective BLACK MIRROR visor (fully opaque, face hidden behind visor), matte ${colors} helmet shell with minimal geometric stripe (NO logos, NO decals, NO team marks, NO text on helmet), jersey in ${colors}, solid blank chest panels without any lettering numbers or logos, athletic shoulder pads beneath jersey. Mysterious silhouetted pose.`;
   }
 
-  // REVEAL: Actual school colors, still no hallucinated logos
-  const colors = p.teamColors || 'deep crimson and gold';
-  return `football athlete wearing a modern sleek helmet with a reflective BLACK MIRROR visor (fully opaque, face partially obscured), matte ${colors} helmet shell with simple geometric stripe pattern (NO logos, NO decals, NO conference marks, NO NCAA marks, NO team name text), jersey in ${colors}, solid chest panels without any lettering or numbers or logos on the chest, athletic shoulder pads beneath jersey. Confident hero pose.`;
+  // REVEAL: Actual team colors, still no hallucinated logos. If a resolved
+  // helmetContext is present (post-draft NFL, or richer college mapping),
+  // prefer its team-accurate helmet descriptor; otherwise fall back to the
+  // legacy `teamColors` string or the generic palette.
+  const ctx = p.helmetContext;
+  const colors = ctx?.colorPhrase || p.teamColors || 'deep crimson and gold';
+  const helmet = ctx?.helmetPhrase || `matte ${colors} helmet shell with simple geometric stripe pattern`;
+  return `football athlete wearing a modern sleek ${helmet} — with a reflective BLACK MIRROR visor (fully opaque, face fully obscured, zero facial features visible, zero expression), NO logos, NO decals, NO conference marks, NO NCAA marks, NO NFL shield, NO team name text on helmet or jersey; jersey in ${colors}, solid chest panels without any lettering or numbers or logos on the chest, athletic shoulder pads beneath jersey. Confident hero pose. Player is anonymous — only the team colorway and helmet silhouette identify them.`;
 }
 
 /* ── Per|Form Card Style Library ── */
@@ -327,4 +349,57 @@ export function listCardVariations(): Array<{ id: CardVariation; name: string; d
     name: spec.name,
     description: spec.description,
   }));
+}
+
+/* ── Helper: Build a CardPromptInput from a perform_players-shaped row ──
+ * Integrates the team-helmet-resolver so the college→NFL swap happens
+ * automatically based on `drafted_by_team`. Safe to call with partial data
+ * — missing fields fall back to generic palettes (never throws).
+ */
+import { resolveHelmet } from './team-helmet-resolver';
+
+export interface PlayerRowForCard {
+  name: string;
+  position: string;
+  school: string;
+  jersey_number?: number | string | null;
+  grade?: number | null;
+  tie_grade?: string | null;
+  tie_tier?: string | null;
+  projected_round?: number | null;
+  nfl_comparison?: string | null;
+  trend?: string | null;
+  drafted_by_team?: string | null;
+  college_color_phrase?: string | null;
+}
+
+export function buildCardPromptInputFromPlayer(
+  row: PlayerRowForCard,
+  opts: { state?: 'locked' | 'reveal' } = {},
+): CardPromptInput {
+  const helmetContext = resolveHelmet({
+    school: row.school,
+    drafted_by_team: row.drafted_by_team,
+    college_color_phrase: row.college_color_phrase,
+  });
+
+  // Post-draft → always reveal state; pre-draft → honor caller's choice,
+  // defaulting to locked so the college identity stays concealed until draft.
+  const state =
+    opts.state ?? (helmetContext.context === 'nfl' ? 'reveal' : 'locked');
+
+  return {
+    name: row.name,
+    position: row.position,
+    school: row.school,
+    jerseyNumber: row.jersey_number ?? undefined,
+    grade: row.grade ?? 0,
+    tieGrade: row.tie_grade ?? row.tie_tier ?? 'C',
+    projectedRound: row.projected_round ?? 0,
+    nflComparison: row.nfl_comparison ?? undefined,
+    trend: (row.trend as 'rising' | 'falling' | 'steady' | undefined) ?? undefined,
+    teamColors: helmetContext.colorPhrase,
+    state,
+    helmetContext,
+  };
 }
