@@ -190,32 +190,106 @@ const CAST: CastMember[] = [
     story:
       "Honey-badger-strategic — reads the deal, quotes the bracket, sets the timeline. Different lane from the retail counter: wholesale + corporate + catering + large-order intake. Within the discount ladder (12u → 15%, 50u → 25%, 100u+ → 35%) she locks the deal; above the ladder she routes to ACHEEVY. Selene voice, Belter Creole light layered into her phrasing.",
   },
-  // The Sett — Melli's marketing BG'z. Each carries one differentiator on
-  // top of the Marketing-tier uniform (dark navy collared coat + palm-and-
-  // storks Coastal mark + chevron one tier below Melli's + headset).
+  // The Sett — 12 mustelid Marketing-tier specialists, each from a distinct
+  // global region. Bios pulled from canonical persona files at
+  // ~/foai/aims-tools/voice-library/personas/<slug>.md (Origin & Background).
+  // Species canon enforced: not all are honey badgers. Each carries one
+  // role differentiator on top of the Marketing-tier uniform.
   {
     id: "persona_tah",
     display_name: "Persona Tah",
-    function: "Marketing · influencer engagement",
+    function: "Creator & community lead",
     pmo: "marketing",
     story:
-      "Persona is the influencer-engagement Sett BG. Tablet always in paw, social-feed grid never more than a glance away. Smaller frame than Melli, brighter curiosity in the eyes — she sees the brand through the audience first, then the product. Knows which creator picks up a Coastal bag and turns it into a 3-second story.",
+      "Persona Tah builds the creator and community programs that turn Coastal customers into authentic voices for the brand. Raised in Ghana's Volta Region inside the Ewe storytelling tradition and trained at the University of Ghana, she scaled her last creator program from twelve voices to four hundred — and she's doing the same work for the Lowcountry now. The community is the author. She just makes room for the story.",
   },
   {
     id: "eve_retti",
     display_name: "Eve Retti",
-    function: "Marketing · vertical campaigns",
+    function: "Vertical intelligence lead",
     pmo: "marketing",
     story:
-      "Eve owns the vertical-campaign lane — the longer arc that ties one product launch to the next quarter's launch. Reading glasses on a thin black cord, leather portfolio under the arm. Quietly precise. Every campaign she ships is half the fuel for the next one.",
+      "Eve Retti goes deeper into a category than any brief asks for, then hands back a two-page synthesis you can act on. Raised in Alba between her enologist father's lab and the Slow Food archive, trained at Bocconi and Turin, she treats specialty coffee the way the Langhe treats Nebbiolo — every hill knows what it is. Coastal knows exactly which hill it stands on because she does the digging.",
   },
   {
     id: "leu_kurus",
     display_name: "Leu Kurus",
-    function: "Marketing · cross-region",
+    function: "Cross-region compliance lead",
     pmo: "marketing",
     story:
-      "Leu is the cross-region BG — the one who's almost always at a regional pop-up, an airport lounge, or a partner event. Dark travel duster over the Marketing coat, messenger bag across the chest, stainless travel-tumbler in paw. Brings the regions back into the room.",
+      "Leu Kurus is the binding-clearance answer Coastal calls before any campaign crosses a border. Raised in Cluj-Napoca where four legal traditions overlap, trained at Babeș-Bolyai and the EU's Vrije Universiteit Brussel, he has cleared seventeen brands across thirty-one regulatory frameworks. He maps every exit before The Sett enters the territory. In these markets yes, in these markets conditional, in these markets here is the revision.",
+  },
+  {
+    id: "ana_kuma",
+    display_name: "Ana Kuma",
+    function: "Tunnel narrative lead",
+    pmo: "marketing",
+    story:
+      "Ana Kuma builds the trust sequences that turn first-time Coastal subscribers into long-term customers. Trained in Tokyo and London at the intersection of brand theory and behavioral economics, she handcrafts every email, every cadence, every reveal so the story arrives in exactly the right order. With Ana, the welcome never rushes — and that is precisely why it lands.",
+  },
+  {
+    id: "arcto_nyx",
+    display_name: "Arcto Nyx",
+    function: "Entrance · CRM lead",
+    pmo: "marketing",
+    story:
+      "Arcto Nyx guards the front door of every Coastal customer relationship. Trained as a CRM architect across Norwegian banking and Nordic DTC, he treats your data the way an Arctic engineer treats a load-bearing structure — precisely toleranced, GDPR-clean, and built to last. Every lead that reaches Coastal is correctly identified, correctly segmented, and correctly served.",
+  },
+  {
+    id: "cuc_phuong",
+    display_name: "Cuc Phuong",
+    function: "Emerging surfaces lead",
+    pmo: "marketing",
+    story:
+      "Cuc Phuong scouts the marketing surfaces that don't exist yet — and brings home the ones worth building on. Trained in Hanoi and Singapore across blockchain provenance, agent-discoverable commerce, and zero-party data, she keeps Coastal three to five years ahead while staying honest about which signals are real. When the future of buying coffee is an AI agent asking for \"specialty, Fairtrade, no chemicals,\" Coastal will already be findable.",
+  },
+  {
+    id: "java_nessa",
+    display_name: "Java Nessa",
+    function: "Forecasting & attribution lead",
+    pmo: "marketing",
+    story:
+      "Java Nessa grew up in Yogyakarta visiting Borobudur as a local — she learned that complex systems become legible when you study the structure long enough. With a UGM statistics degree and a quantitative-marketing postgrad from Edinburgh, she models attribution in three cases — base, optimistic, conservative — so Coastal invests against the truth, never the most flattering number.",
+  },
+  {
+    id: "mar_che",
+    display_name: "Mar Che",
+    function: "Surface PR & earned media lead",
+    pmo: "marketing",
+    story:
+      "Mar Che came up in Buenos Aires — Clarín journalist father, San Telmo theater-director mother — then crossed to London to learn how stories get placed instead of just told. He pursues earned media the way a Greater Grison crosses any terrain: national tech press, regional Lowcountry food media, niche newsletters — finding the angle that's already true, then making sure the right journalist finds it first.",
+  },
+  {
+    id: "meles_mehli",
+    display_name: "Meles Mehli",
+    function: "Tunnel architect · exit & UX",
+    pmo: "marketing",
+    story:
+      "Meles Mehli grew up in Addis Ababa watching his aunt conduct the three-round jebena buna ceremony — a ritual where sequence matters as much as the coffee. With civil engineering and HCI from Addis Ababa University and an interaction-design postgrad from KTH Stockholm, he treats Coastal's checkout as the last load-bearing wall before conversion — every field classified before it's removed.",
+  },
+  {
+    id: "moscha_tah",
+    display_name: "Moscha Tah",
+    function: "Video, CTV, DOOH & audio lead",
+    pmo: "marketing",
+    story:
+      "Tbilisi-born and trained at the National Film and Television School outside London, Moscha conducts your video stack the way her mother conducted Georgian polyphonic choirs — every voice in its register, every cue arriving on time. She decides what runs on CTV, on the DOOH screen at the farmers' market, and in your morning podcast spot, so the Coastal story compounds across every moving-image and audio surface.",
+  },
+  {
+    id: "orien_talis",
+    display_name: "Orien Talis",
+    function: "Social & native lead",
+    pmo: "marketing",
+    story:
+      "Raised in Puerto Princesa where the Philippines was already among the most platform-fluent populations on Earth, Orien is platform-endemic — TikTok is briefed differently from Reels, Reels differently from LinkedIn, every time. She catches the algorithm windows three months before the competition, and your content arrives in each feed speaking that platform's exact language.",
+  },
+  {
+    id: "taxi_dea",
+    display_name: "Taxi Dea",
+    function: "Programmatic awareness lead",
+    pmo: "marketing",
+    story:
+      "Nogales-born, Tucson-trained, Taxi learned at her father's customs counter that the person who controls the surface controls the price — then took that into every DSP that matters. She doesn't buy impressions for Coastal; she buys decisions, every dollar accountable, every audience segment defensible, brand safety pre-bid on every campaign.",
   },
   // ── Accounting ────────────────────────────────────────────────────────
   // LUC is NOT a Boomer_Ang — his own department: Accounting.
