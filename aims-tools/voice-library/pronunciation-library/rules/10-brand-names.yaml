@@ -1,0 +1,57 @@
+# 10-brand-names.yaml — Brand / character / acronym pronunciation
+# Display canonical spelling stays UNCHANGED everywhere — only TTS sees rewrites.
+
+metadata:
+  name: brand-names
+  scope: [all]
+  priority: 10
+  description: Brand + character + acronym pronunciation for FOAI ecosystem.
+
+rules:
+  - id: brand.acheevy
+    type: regex
+    pattern: "\\b(ACHEEVY|Acheevy|acheevy)\\b"
+    replacement: "Achievee"
+    case_sensitive: true
+    display_canonical: ACHEEVY
+    notes: "Owner directive 2026-05-03 — pronounced Achievee (achieve+ee). Display ACHEEVY everywhere."
+
+  - id: brand.foai.spoken
+    type: regex
+    pattern: "\\bFOAI\\b"
+    replacement: "The Future of AI"
+    case_sensitive: false
+    display_canonical: FOAI
+    notes: "Per feedback_foai_pronounce_full_phrase_not_acronym.md — voice ALWAYS reads as 'The Future of AI'."
+
+  - id: brand.achievemor
+    type: literal
+    pattern: ACHIEVEMOR
+    replacement: ""
+    no_rewrite: true
+    display_canonical: ACHIEVEMOR
+    notes: |
+      DO NOT rewrite. Brand canon is ACHIEVEMOR all-caps. Inworld
+      applyTextNormalization=ON handles pronunciation. If owner ear-flags
+      a mispronunciation, add a TTS-only phoneme override here without
+      changing display_canonical.
+
+  - id: brand.boomer-ang.suffix
+    type: regex
+    pattern: "_Ang\\b"
+    replacement: " Ang"
+    case_sensitive: true
+    notes: "Boomer_Ang names: TTS reads underscore as 'underscore'. Strip to space-separated for natural pronunciation."
+
+  - id: brand.luc-ang.expand
+    type: regex
+    pattern: "\\bLUC_Ang\\b"
+    replacement: "Luc Ang"
+    case_sensitive: true
+    notes: "LUC_Ang → 'Luc Ang' (not L-U-C). Override before generic _Ang rule above."
+
+  - id: brand.coastal.cobranding
+    type: literal
+    pattern: "Coastal Brewing Co."
+    replacement: "Coastal Brewing Co"
+    notes: "Period-after-Co causes TTS to read it as a sentence break. Drop the period at TTS layer."

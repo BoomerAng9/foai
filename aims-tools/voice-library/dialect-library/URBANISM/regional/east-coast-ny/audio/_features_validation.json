@@ -1,0 +1,222 @@
+{
+  "target_profile": "acheevy_baritone",
+  "files_analyzed": 2,
+  "results": [
+    {
+      "file": "C:\\Users\\rishj\\foai\\aims-tools\\voice-library\\dialect-library\\URBANISM\\regional\\east-coast-ny\\audio\\nas_nas-drink-champs-full-episode_e18ac00c.mp3",
+      "filename": "nas_nas-drink-champs-full-episode_e18ac00c.mp3",
+      "sample_rate": 48000,
+      "samples": 8640000,
+      "loaded_duration_sec": 180.0,
+      "f0_hz_mean": 151.0979,
+      "f0_hz_median": 151.1349,
+      "f0_hz_std": 31.1946,
+      "f0_hz_min": 97.9989,
+      "f0_hz_max": 209.0972,
+      "voiced_fraction": 0.4184,
+      "spectral_centroid_hz": 4443.7409,
+      "spectral_rolloff_hz": 8755.2019,
+      "spectral_bandwidth_hz": 3918.6791,
+      "zero_crossing_rate": 0.1312,
+      "rms_mean": 0.1014,
+      "rms_db": -19.8751,
+      "rms_std": 0.0696,
+      "speech_rate_syllables_per_sec": 3.4333,
+      "duration_sec": 30.0,
+      "hnr_db": 2.3667,
+      "mfcc_mean": [
+        -217.697,
+        110.719,
+        -26.392,
+        27.781,
+        -32.407,
+        39.289,
+        -22.534,
+        1.351,
+        -13.321,
+        -13.956,
+        -7.46,
+        -3.812,
+        -5.492
+      ],
+      "best_window_start_sec": 60.0,
+      "window_seconds": 30.0,
+      "windows_evaluated": 6,
+      "window_summaries": [
+        {
+          "start_sec": 0.0,
+          "match_percent": 17.6,
+          "f0_hz_mean": 262.4661,
+          "speech_rate_sps": 5.8333,
+          "hnr_db": 4.1684
+        },
+        {
+          "start_sec": 30.0,
+          "match_percent": 10.3,
+          "f0_hz_mean": 265.1665,
+          "speech_rate_sps": 6.2,
+          "hnr_db": 2.31
+        },
+        {
+          "start_sec": 60.0,
+          "match_percent": 33.6,
+          "f0_hz_mean": 151.0979,
+          "speech_rate_sps": 3.4333,
+          "hnr_db": 2.3667
+        },
+        {
+          "start_sec": 90.0,
+          "match_percent": 21.8,
+          "f0_hz_mean": 209.9189,
+          "speech_rate_sps": 4.8,
+          "hnr_db": 3.693
+        },
+        {
+          "start_sec": 120.0,
+          "match_percent": 21.5,
+          "f0_hz_mean": 269.4837,
+          "speech_rate_sps": 4.7667,
+          "hnr_db": 4.6604
+        },
+        {
+          "start_sec": 150.0,
+          "match_percent": 16.2,
+          "f0_hz_mean": 203.085,
+          "speech_rate_sps": 5.7,
+          "hnr_db": 3.5029
+        }
+      ],
+      "match": {
+        "overall_match_percent": 33.6,
+        "feature_scores": {
+          "f0_hz_mean": 0.183,
+          "f0_hz_median": 0.123,
+          "spectral_centroid_hz": 0.0,
+          "spectral_rolloff_hz": 0.002,
+          "speech_rate_syllables_per_sec": 0.973,
+          "hnr_db": 0.225,
+          "voiced_fraction": 0.805,
+          "rms_db": 0.965
+        },
+        "missing_features": []
+      }
+    },
+    {
+      "file": "C:\\Users\\rishj\\foai\\aims-tools\\voice-library\\dialect-library\\URBANISM\\regional\\east-coast-ny\\audio\\nasir-jones_2001-nas-disses-hot-97-camron-nore-nelly_e4f3a630.mp3",
+      "filename": "nasir-jones_2001-nas-disses-hot-97-camron-nore-nelly_e4f3a630.mp3",
+      "sample_rate": 48000,
+      "samples": 8640000,
+      "loaded_duration_sec": 180.0,
+      "f0_hz_mean": 122.3393,
+      "f0_hz_median": 93.0344,
+      "f0_hz_std": 55.589,
+      "f0_hz_min": 65.4064,
+      "f0_hz_max": 207.6523,
+      "voiced_fraction": 0.5716,
+      "spectral_centroid_hz": 3154.778,
+      "spectral_rolloff_hz": 7184.5311,
+      "spectral_bandwidth_hz": 3379.3296,
+      "zero_crossing_rate": 0.0617,
+      "rms_mean": 0.1207,
+      "rms_db": -18.3675,
+      "rms_std": 0.0482,
+      "speech_rate_syllables_per_sec": 1.8667,
+      "duration_sec": 30.0,
+      "hnr_db": 4.6913,
+      "mfcc_mean": [
+        -201.498,
+        136.443,
+        -33.89,
+        71.886,
+        -22.982,
+        34.722,
+        0.836,
+        1.828,
+        11.318,
+        -6.96,
+        19.469,
+        -6.775,
+        11.292
+      ],
+      "best_window_start_sec": 0.0,
+      "window_seconds": 30.0,
+      "windows_evaluated": 6,
+      "window_summaries": [
+        {
+          "start_sec": 0.0,
+          "match_percent": 57.7,
+          "f0_hz_mean": 122.3393,
+          "speech_rate_sps": 1.8667,
+          "hnr_db": 4.6913
+        },
+        {
+          "start_sec": 30.0,
+          "match_percent": 18.6,
+          "f0_hz_mean": 182.5599,
+          "speech_rate_sps": 4.7333,
+          "hnr_db": 1.488
+        },
+        {
+          "start_sec": 60.0,
+          "match_percent": 21.6,
+          "f0_hz_mean": 185.8766,
+          "speech_rate_sps": 4.4667,
+          "hnr_db": 1.9191
+        },
+        {
+          "start_sec": 90.0,
+          "match_percent": 16.0,
+          "f0_hz_mean": 191.4239,
+          "speech_rate_sps": 6.2,
+          "hnr_db": 2.9912
+        },
+        {
+          "start_sec": 120.0,
+          "match_percent": 29.4,
+          "f0_hz_mean": 211.8552,
+          "speech_rate_sps": 3.6667,
+          "hnr_db": 3.0623
+        },
+        {
+          "start_sec": 150.0,
+          "match_percent": 15.7,
+          "f0_hz_mean": 222.3973,
+          "speech_rate_sps": 6.8,
+          "hnr_db": 2.6593
+        }
+      ],
+      "match": {
+        "overall_match_percent": 57.7,
+        "feature_scores": {
+          "f0_hz_mean": 0.786,
+          "f0_hz_median": 0.962,
+          "spectral_centroid_hz": 0.115,
+          "spectral_rolloff_hz": 0.049,
+          "speech_rate_syllables_per_sec": 0.411,
+          "hnr_db": 0.451,
+          "voiced_fraction": 0.994,
+          "rms_db": 0.902
+        },
+        "missing_features": []
+      }
+    }
+  ],
+  "ranked": [
+    {
+      "rank": 1,
+      "file": "nasir-jones_2001-nas-disses-hot-97-camron-nore-nelly_e4f3a630.mp3",
+      "match_percent": 57.7,
+      "f0_hz_mean": 122.3393,
+      "speech_rate_sps": 1.8667,
+      "duration_sec": 30.0
+    },
+    {
+      "rank": 2,
+      "file": "nas_nas-drink-champs-full-episode_e18ac00c.mp3",
+      "match_percent": 33.6,
+      "f0_hz_mean": 151.0979,
+      "speech_rate_sps": 3.4333,
+      "duration_sec": 30.0
+    }
+  ]
+}

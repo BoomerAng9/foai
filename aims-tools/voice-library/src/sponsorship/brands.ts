@@ -48,7 +48,7 @@ export const COASTAL_BRAND: BrandIdentity = {
   url: 'https://brewing.foai.cloud',
   positioning_one_liner: 'Nothing chemically, ever.',
   positioning_long:
-    'Small-batch coffee, whole-leaf tea, ceremonial matcha. Sourced through verified partners. Every public claim has a paper trail. Every cup is what the label says it is.',
+    'Small-batch coffee, whole-leaf tea, ceremonial matcha — brewed honest, served by ACHEEVY. Sourced through verified partners. Every public claim has a paper trail.',
   approved_claims: [
     'small-batch',
     'whole-leaf tea',

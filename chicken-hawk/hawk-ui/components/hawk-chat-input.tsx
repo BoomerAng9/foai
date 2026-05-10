@@ -3,7 +3,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { SendHorizontal, Lightbulb, Plus, Mic, MicOff, X, FileText, Image as ImageIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { SpinnerVoice } from '@/components/spinner-voice';
 import { MicPermissionHelp } from '@/components/mic-permission-help';
 
 export interface Attachment {
@@ -293,8 +292,6 @@ export function HawkChatInput({
                 {listening ? <Mic className="size-4" /> : <MicOff className="size-4" />}
               </button>
             )}
-
-            <SpinnerVoice ownerSession={ownerSession} />
           </div>
 
           <div className="flex-1" />

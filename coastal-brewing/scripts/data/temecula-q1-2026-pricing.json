@@ -1,0 +1,208 @@
+{
+  "supplier": "Temecula Coffee Roasters",
+  "effective_quarter": "Q1 2026",
+  "extracted_at": "2026-05-05",
+  "source_pdf": "iCloudDrive/.../Coastal Brewing/TCR Q1 2026 Drop Ship Pricing.pdf",
+  "notes": [
+    "Drop-ship prices include shipping cost (Coastal does NOT pay separate shipping on drop-ship orders).",
+    "Bulk prices are EX-WAREHOUSE — Coastal becomes responsible for product as soon as shipper picks up. Bulk shipping is a courtesy, not included.",
+    "Drop-ship has NO MOQ. Bulk MOQ varies by size: 5lb = 1/SKU, 2lb = 6/SKU, 1lb = 12/SKU, 12oz = 12/SKU, 2oz = 12/SKU.",
+    "International orders are not guaranteed or refundable. Customs/duties not included in TCR billing.",
+    "Functional Coffee SKUs require an active Premium Product Subscription ($39/mo) — must follow Functional Products Page limitations.",
+    "Instant Coffee SKUs require an active Premium Product Subscription as above.",
+    "Fairtrade single-origin SKUs require Fairtrade Program subscription ($39/mo + onboarding fee)."
+  ],
+  "subscription_tiers_2026": {
+    "self_serve_production_access": {"cost_per_month_usd": 0, "description": "No start-up costs, no monthly fee. Full drop-ship access."},
+    "fda_compliant_business_address": {"cost_per_month_usd": 30, "description": "Professional business address linked to brand and used on labels. Necessary for many wholesale accounts. NOT a mail service or registered agent."},
+    "fairtrade_program": {"cost_per_month_usd": 39, "onboarding_fee": true, "description": "Sell certified Fairtrade single-origin coffees."},
+    "functional_coffee": {"cost_per_month_usd": 39, "description": "Access to functional coffee + tea products. Subscription required."},
+    "collective_membership": {"cost_per_month_usd": 50, "description": "Small-group training. Permits the claim 'we are a member of a Roasters Collective and we as a collective, source, profile and roast our coffee.'"},
+    "business_builder_membership": {"cost_per_month_usd": 100, "description": "Bundle: FDA Address + Functional Program + Collective Membership."},
+    "elite_business_partner_program": {"cost_per_month_usd": 250, "description": "All Business Builder benefits + 1:1 monthly business-development coaching + priority fulfillment + unique fulfillment options."},
+    "full_print_bag_storage": {"cost_per_month_usd_per_box": 10, "description": "Storage and use of custom full-print bags."}
+  },
+  "moq": {
+    "dropship": {"all_sizes": "no_moq"},
+    "bulk": {
+      "5lb": 1,
+      "2lb": 6,
+      "1lb": 12,
+      "12oz": 12,
+      "2oz_sample": 12
+    }
+  },
+  "fulfillment_sla": {
+    "order_to_ship_business_days": "2-5",
+    "ship_to_delivery_business_days": "1-5",
+    "average_non_holiday_total_business_days": 5,
+    "carriers": ["USPS", "UPS", "FedEx"],
+    "expedited_shipping_available": false,
+    "international": {
+      "available": true,
+      "guaranteed": false,
+      "refundable": false,
+      "ships_via": "USPS 1st Class International for 0-3 lbs, USPS Priority International for 3+ lbs",
+      "share_of_business_pct": 1.4,
+      "share_of_shipping_issues_pct": 18,
+      "customs_and_duties_included": false
+    },
+    "label_review_required": true,
+    "label_format": {
+      "size_inches": "3x5",
+      "size_pixels": "900x1500",
+      "color_space": "CMYK",
+      "file_format": "JPEG",
+      "fda_compliance_required": true
+    }
+  },
+  "tcr_error_rate_pct": 0.0425,
+  "return_policy": {
+    "customer_error": "Coastal pays — re-enter order, notify TCR, expedited.",
+    "tcr_error": "TCR refunds + pays for new coffee + new shipping + expedites.",
+    "carrier_or_theft": "Coastal pays shipping; TCR pays for coffee up to $25.00; expedited.",
+    "rule": "Never have a customer send coffee back — TCR discards returns."
+  },
+  "shopify_integration": {
+    "tcr_app_url": "https://tcr-app.herokuapp.com/reauth",
+    "support_url": "https://temeculacoffeeroasters.com/pages/support-info",
+    "fulfill_from_location": "TCR Fulfillment",
+    "exact_sku_match_required": true,
+    "approved_label_required_per_sku_before_listing": true
+  },
+  "pricing_tiers_usd": {
+    "tier_a_house_blends": {
+      "tcr_skus": ["ITALY", "FRENCH", "6BEAN", "CHRIS", "MED", "COWB", "BBLEND"],
+      "names": ["Italian Roast", "French Roast", "6Bean Blend / 6Bean Espresso", "Christmas Blend", "Medium Blend", "Cowboy Blend", "Breakfast Blend"],
+      "dropship": {"12oz": 15.78, "1lb": 20.51, "2lb": 35.90, "5lb": 68.72},
+      "bulk":     {"2oz": 2.50, "12oz": 10.25, "1lb": 13.65, "2lb": 26.58, "5lb": 47.00}
+    },
+    "tier_b_premium_blends": {
+      "tcr_skus": ["BB+", "AFRICA", "MAX", "BLOND", "KOPI", "COLD"],
+      "names": ["Breakfast Blend +", "African Blend / African Espresso", "Max Caf Blend", "Sweet Espresso / Blonde", "Kopi Safari", "Cold Brew"],
+      "dropship": {"12oz": 16.21, "1lb": 21.07, "2lb": 36.88, "5lb": 70.59},
+      "bulk":     {"2oz": 2.50, "12oz": 10.50, "1lb": 13.97, "2lb": 27.23, "5lb": 47.00}
+    },
+    "tier_c_decaf_special": {
+      "tcr_skus": ["DECAES", "DEPER", "HALFCAF", "WBAR", "MONTH"],
+      "names": ["Decaf Espresso", "Decaf", "Half Caf", "Whiskey Barrel", "Coffee of the Month"],
+      "dropship": {"12oz": 16.50, "1lb": 21.45, "2lb": 37.54, "5lb": 71.86},
+      "bulk":     {"2oz": 2.50, "12oz": 10.75, "1lb": 14.30, "2lb": 27.88, "5lb": 49.00}
+    },
+    "tier_d_flavored": {
+      "tcr_skus": ["DBAI", "SMOR", "FRVAN", "HAZL", "MEXCH", "CHHAZ", "CINHAZ", "VANHAZ", "CARA", "PUMP", "MOCHA", "CINN", "TURT", "MINT", "CANDY", "PECAN"],
+      "names": ["Dubai Chocolate", "S'mores", "French Vanilla", "Hazelnut", "Mexican Chocolate", "Chocolate Hazelnut", "Cinnamon Hazelnut", "Vanilla Hazelnut", "Caramel", "Pumpkin Spice", "Mocha", "Cinnamon Roll", "Turtle", "Mint", "Candy Cane", "Pecan Pie"],
+      "ingredients": "Coffee, Natural Flavorings",
+      "statement_of_identity": "Flavored Coffee",
+      "dropship": {"12oz": 16.27, "1lb": 21.15, "2lb": 37.01, "5lb": 70.86},
+      "bulk":     {"2oz": 2.50, "12oz": 10.60, "1lb": 14.10, "2lb": 27.49, "5lb": 49.00}
+    },
+    "tier_e_single_origin_standard": {
+      "tcr_skus": ["COLO", "COSTA", "ETHN", "GUAT", "HOND", "INDOR", "MEX", "NIC", "PNG", "PERU", "TANZ", "UGAN"],
+      "names": ["Colombia", "Costa Rica", "Ethiopia (Natural)", "Guatemala", "Honduras", "Robusta (Indonesia)", "Mexico", "Nicaragua", "Papua New Guinea", "Peru", "Tanzania", "Uganda"],
+      "dropship": {"12oz": 16.47, "1lb": 21.41, "2lb": 37.47, "5lb": 71.73},
+      "bulk":     {"2oz": 2.50, "12oz": 10.75, "1lb": 14.30, "2lb": 27.88, "5lb": 50.00}
+    },
+    "tier_f_single_origin_premium": {
+      "tcr_skus": ["BALI", "BRAZ", "KENYA", "SUM"],
+      "names": ["Bali", "Brazil", "Kenya", "Sumatra"],
+      "dropship": {"12oz": 16.78, "1lb": 21.81, "2lb": 38.17, "5lb": 73.08},
+      "bulk":     {"2oz": 2.50, "12oz": 11.00, "1lb": 14.63, "2lb": 28.53, "5lb": 51.00}
+    },
+    "tier_g_single_origin_fairtrade": {
+      "tcr_skus": ["FTSUM", "FTPERU", "FTDECPERU", "FTDECAES", "FTGUAT", "FTHOND", "FTCOLO"],
+      "names": ["Sumatra FT", "Peru FT", "Decaf FT", "Decaf Espresso FT", "Guatemala FT", "Honduras FT", "Colombia FT"],
+      "subscription_required": "fairtrade_program",
+      "dropship": {"12oz": 16.75, "1lb": 22.00, "2lb": 40.00, "5lb": 73.00},
+      "bulk":     {"2oz": 2.50, "12oz": 11.00, "1lb": 14.63, "2lb": 28.53, "5lb": 51.00}
+    }
+  },
+  "sample_packs": {
+    "moq_bulk": 12,
+    "best_sellers": {
+      "tcr_sku": "TPROBSPACK",
+      "contents": ["Bali", "Mexico", "Peru", "Breakfast Blend", "Cowboy Blend", "6Bean"],
+      "format": "6 x 2oz drip bags inside 16oz black stand-up pouch with custom outer label",
+      "dropship_each": 18.00,
+      "bulk_each": 14.00
+    },
+    "single_origin": {
+      "tcr_sku": "TPROSOPACK",
+      "contents": ["Brazil", "Colombia", "Costa Rica", "Honduras", "Tanzania", "Ethiopia"],
+      "format": "6 x 2oz drip bags inside 16oz black stand-up pouch with custom outer label",
+      "dropship_each": 18.00,
+      "bulk_each": 14.00
+    },
+    "flavored": {
+      "tcr_sku": "TPROFCPACK",
+      "contents": ["Caramel", "Cinnamon Hazelnut", "Cinnamon", "French Vanilla", "Hazelnut", "Mocha"],
+      "ingredients": "Coffee, Natural Flavorings",
+      "format": "6 x 2oz drip bags inside 16oz black stand-up pouch with custom outer label",
+      "dropship_each": 18.00,
+      "bulk_each": 14.00
+    }
+  },
+  "single_use_cups_kcup": {
+    "moq_bulk": 12,
+    "format": "12 count single-use cups, recyclable foil lid + recyclable cup, packed in recyclable black box with custom label. NET WT 4.2oz (120g). Label format: 12K{BLEND}-DRIP-16OZ-BLACK. Statement of identity: Specialty Grade Coffee or similar.",
+    "warning": "NOT competitive with bulk nitro-purged cups — positioned as fresh-roast convenience for existing brand customers.",
+    "skus": {
+      "12K6BEAN": {"name": "6Bean", "dropship_12pack": 14.50, "dropship_48pack": 39.00, "bulk_12pack": 11.00, "bulk_48pack": 32.00},
+      "12KCOWB":  {"name": "Cowboy Blend", "dropship_12pack": 14.50, "dropship_48pack": 39.00, "bulk_12pack": 11.00, "bulk_48pack": 32.00},
+      "12KBBLEND": {"name": "Breakfast Blend", "dropship_12pack": 14.50, "dropship_48pack": 39.00, "bulk_12pack": 11.00, "bulk_48pack": 32.00},
+      "12KPERU":   {"name": "Peru", "dropship_12pack": 14.50, "dropship_48pack": null, "bulk_12pack": 11.00, "bulk_48pack": null},
+      "12KMEXICO": {"name": "Mexico", "dropship_12pack": 14.50, "dropship_48pack": null, "bulk_12pack": 11.00, "bulk_48pack": null},
+      "12KBALI":   {"name": "Bali", "dropship_12pack": 14.50, "dropship_48pack": null, "bulk_12pack": 11.00, "bulk_48pack": null},
+      "12KDEPER":  {"name": "Decaf", "dropship_12pack": 15.00, "dropship_48pack": null, "bulk_12pack": 12.00, "bulk_48pack": null}
+    }
+  },
+  "tea_loose_leaf": {
+    "moq_bulk": 12,
+    "standard_teas": {
+      "tcr_skus": ["TJAS", "TENG", "TCHAI", "TEARL", "TPEACH", "TMANG", "TMINT", "TROO", "THIB"],
+      "names": ["Jasmine", "English Breakfast", "Masala Chai", "Earl Gray", "Peach Paradise", "Mango Treat", "Moroccan Mint", "Apple Cider Rooibos", "Hibiscus Berry Tea"],
+      "dropship_3oz": 12.00,
+      "bulk_1oz": 8.00
+    },
+    "premium_teas": {
+      "tcr_skus": ["THOJ", "TMATCH"],
+      "names": ["Hojicha (Roasted Green Tea)", "Matcha Green Tea Powder"],
+      "dropship_3oz": 15.00,
+      "bulk_1oz": 11.00
+    },
+    "statements_of_identity": {
+      "TJAS": "Loose Leaf Tea",
+      "TENG": "Loose Leaf Tea",
+      "TCHAI": "Loose Leaf Flavored Tea",
+      "TEARL": "Loose Leaf Flavored Tea",
+      "TPEACH": "Loose Leaf Flavored Tea",
+      "TMANG": "Loose Leaf Flavored Tea",
+      "TMINT": "Mint Green Tea",
+      "TROO": "Flavored Herbal Tea",
+      "THIB": "Flavored Herbal Tea",
+      "THOJ": "Hojicha Roasted Green Tea",
+      "TMATCH": "Matcha Green Tea Powder"
+    }
+  },
+  "instant_coffee": {
+    "subscription_required": "premium_product_subscription",
+    "tcr_sku": "INSTMED",
+    "name": "Instant Coffee — Medium Roast",
+    "size": "3oz",
+    "dropship": 16.00,
+    "bulk_moq_12": 12.00,
+    "statement_of_identity": "Instant Coffee"
+  },
+  "functional_coffee_and_tea": {
+    "subscription_required": "functional_coffee",
+    "size_dropship": "8oz",
+    "moq_bulk_12_size": "1oz",
+    "skus": {
+      "TRIODARK":   {"name": "Coffee With Mushrooms — Dark / ground",   "statement_of_identity": "Ground Coffee With Mushrooms",      "dropship_8oz": 16.00, "bulk_1oz": 12.00},
+      "TRIOMED":    {"name": "Coffee With Mushrooms — Medium / ground", "statement_of_identity": "Ground Coffee With Mushrooms",      "dropship_8oz": 16.00, "bulk_1oz": 12.00},
+      "TRIOINSTAC": {"name": "Instant Coffee With Mushrooms",            "statement_of_identity": "Instant Coffee With Mushrooms",      "dropship_8oz": 16.00, "bulk_1oz": 12.00},
+      "TRIOMATCH":  {"name": "Matcha With Mushrooms",                    "statement_of_identity": "Matcha Green Tea With Mushrooms",    "dropship_8oz": 16.00, "bulk_1oz": 12.00},
+      "TRIOHOJ":    {"name": "Hojicha With Mushrooms",                   "statement_of_identity": "Roasted Green Tea With Mushrooms",   "dropship_8oz": 16.00, "bulk_1oz": 12.00}
+    }
+  }
+}

@@ -1,0 +1,32 @@
+[
+  {
+    "speaker": "AZ Anthony Cruz",
+    "register": "queensbridge-affiliated-baritone",
+    "group": "URBANISM",
+    "region": "east-coast-ny"
+  },
+  {
+    "speaker": "Cormega",
+    "register": "queensbridge-baritone",
+    "group": "URBANISM",
+    "region": "east-coast-ny"
+  },
+  {
+    "speaker": "Havoc Mobb Deep",
+    "register": "queensbridge-baritone-thun-language",
+    "group": "URBANISM",
+    "region": "east-coast-ny"
+  },
+  {
+    "speaker": "GZA Wu-Tang",
+    "register": "shaolin-baritone-wu-tang-slang",
+    "group": "URBANISM",
+    "region": "east-coast-ny"
+  },
+  {
+    "speaker": "Raekwon Wu-Tang",
+    "register": "shaolin-mafia-coded-wu-tang-slang",
+    "group": "URBANISM",
+    "region": "east-coast-ny"
+  }
+]

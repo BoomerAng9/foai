@@ -1,0 +1,811 @@
+{
+  "target_profile": "acheevy_baritone",
+  "files_analyzed": 5,
+  "results": [
+    {
+      "file": "C:\\Users\\rishj\\foai\\aims-tools\\voice-library\\dialect-library\\URBANISM\\regional\\east-coast-ny\\audio\\az-anthony-cruz_az-on-illmatic-jay-z-the-firm-mixtape-cu_23748ac4.mp3",
+      "filename": "az-anthony-cruz_az-on-illmatic-jay-z-the-firm-mixtape-cu_23748ac4.mp3",
+      "sample_rate": 48000,
+      "samples": 23040000,
+      "loaded_duration_sec": 480.0,
+      "f0_hz_mean": 187.5472,
+      "f0_hz_median": 169.6432,
+      "f0_hz_std": 62.882,
+      "f0_hz_min": 114.5388,
+      "f0_hz_max": 291.9734,
+      "voiced_fraction": 0.5592,
+      "spectral_centroid_hz": 3046.7505,
+      "spectral_rolloff_hz": 5913.5237,
+      "spectral_bandwidth_hz": 3039.8922,
+      "zero_crossing_rate": 0.0732,
+      "rms_mean": 0.1224,
+      "rms_db": -18.241,
+      "rms_std": 0.0705,
+      "speech_rate_syllables_per_sec": 4.1333,
+      "duration_sec": 30.0,
+      "hnr_db": 3.0662,
+      "mfcc_mean": [
+        -206.389,
+        142.714,
+        -44.026,
+        34.33,
+        -22.288,
+        10.26,
+        -20.776,
+        5.671,
+        6.169,
+        -19.624,
+        -10.311,
+        -1.562,
+        -7.215
+      ],
+      "best_window_start_sec": 270.0,
+      "window_seconds": 30.0,
+      "windows_evaluated": 16,
+      "window_summaries": [
+        {
+          "start_sec": 0.0,
+          "match_percent": 23.6,
+          "f0_hz_mean": 157.8321,
+          "speech_rate_sps": 5.8333,
+          "hnr_db": 3.7451,
+          "transcript_span": "remember I I felt like everything was going through like Sony at that time. going through like Sony at that time. going through like Sony at that time. Like Style was pushing like everyone Like Style was pushing like everyone Like Style was pushing like everyone kind of like I believe the firm and then kind of like I believe the firm and then kind of like I believe the firm and then but then the firm winded up at but then the firm winded up at but then the firm winded up at Interscope. So, was it like was it Interscope. So, was it like was it Interscope. So, was it like was it different? diffe"
+        },
+        {
+          "start_sec": 30.0,
+          "match_percent": 23.5,
+          "f0_hz_mean": 165.8271,
+          "speech_rate_sps": 4.9333,
+          "hnr_db": 4.6859,
+          "transcript_span": "after the fact, yeah. Came in after the fact. fact. fact. Yeah. So, how So, Yeah. So, how So, Yeah. So, how So, let's talk about The Firm. How did you let's talk about The Firm. How did you let's talk about The Firm. How did you How did What was this idea? How did What was this idea? How did What was this idea? Was That that was on um my album More Was That that was on um my album More Was That that was on um my album More Money More Murder. Um Firm Rally 1. Me Money More Murder. Um Firm Rally 1. Me Money More Murder. Um Firm Rally 1. Me Me and Nas was talking about it, you Me and Nas was talk"
+        },
+        {
+          "start_sec": 60.0,
+          "match_percent": 18.9,
+          "f0_hz_mean": 167.5503,
+          "speech_rate_sps": 6.3333,
+          "hnr_db": 4.7143,
+          "transcript_span": "but I've been to her brother's. So, I lived around the corner like year before lived around the corner like year before lived around the corner like year before I moved to the East I lived around the I moved to the East I lived around the I moved to the East I lived around the corner from Foxy. I knew Gavin and you corner from Foxy. I knew Gavin and you corner from Foxy. I knew Gavin and you know what I mean? So, met Foxy whatever through the homies met Foxy whatever through the homies introduced her to Nas, you know what I introduced her to Nas, you know what I introduced her to Nas, you know"
+        },
+        {
+          "start_sec": 90.0,
+          "match_percent": 19.6,
+          "f0_hz_mean": 173.1322,
+          "speech_rate_sps": 5.1333,
+          "hnr_db": 5.1575,
+          "transcript_span": "This is like ain't no time to think, you know what I ain't no time to think, you know what I ain't no time to think, you know what I mean? Nah, my album also meet Foxy. You mean? Nah, my album also meet Foxy. You mean? Nah, my album also meet Foxy. You working on your album? All right, cool. working on your album? All right, cool. working on your album? All right, cool. Yo, bring her to the studio. She doing Yo, bring her to the studio. She doing Yo, bring her to the studio. She doing her [&nbsp;__&nbsp;] She got that [&nbsp;__&nbsp;] Oh, [&nbsp;__&nbsp;] her [&nbsp;__&nbsp;] She got that [&nb"
+        },
+        {
+          "start_sec": 120.0,
+          "match_percent": 24.5,
+          "f0_hz_mean": 159.0581,
+          "speech_rate_sps": 5.5,
+          "hnr_db": 5.5541,
+          "transcript_span": "Put it like that. Um then I think he went to uh Westinghouse and met Big. went to uh Westinghouse and met Big. went to uh Westinghouse and met Big. But you and Jay was in school together. But you and Jay was in school together. But you and Jay was in school together. Yeah, facts. So, Jay-Z Yeah, facts. So, Jay-Z Yeah, facts. So, Jay-Z This is Brooklyn schools, man. They and This is Brooklyn schools, man. They and This is Brooklyn schools, man. They and AZ Right. AZ Right. AZ Right. was in what kind of school was it high was in what kind of school was it high was in what kind of school was it h"
+        },
+        {
+          "start_sec": 150.0,
+          "match_percent": 20.1,
+          "f0_hz_mean": 193.4732,
+          "speech_rate_sps": 7.2,
+          "hnr_db": 4.4294,
+          "transcript_span": "battle? I wouldn't call it a battle. We rap. Ain't no battle. Jay probably was rap. Ain't no battle. Jay probably was rap. Ain't no battle. Jay probably was the same as he is now he was then, you the same as he is now he was then, you the same as he is now he was then, you know what I mean? Sounded like you you know what I mean? Sounded like you you know what I mean? Sounded like you you really get the better one or that And really get the better one or that And really get the better one or that And I was listening I'm a new jack. I'M A I was listening I'm a new jack. I'M A I was listening I'm"
+        },
+        {
+          "start_sec": 180.0,
+          "match_percent": 19.9,
+          "f0_hz_mean": 166.5409,
+          "speech_rate_sps": 6.5,
+          "hnr_db": 3.2826,
+          "transcript_span": "with Busta Rhymes? Nah, I didn't. That's That's That's the Big and Busta and all That's That's the Big and Busta and all That's That's the Big and Busta and all them at at um them at at um them at at um What's that? Yeah, I don't know what What's that? Yeah, I don't know what What's that? Yeah, I don't know what school they went to. Big, Busta, and school they went to. Big, Busta, and school they went to. Big, Busta, and Biggie I'm like and Jay. Biggie I'm like and Jay. Biggie I'm like and Jay. I don't know one of them Westinghouse I don't know one of them Westinghouse I don't know one of them"
+        },
+        {
+          "start_sec": 210.0,
+          "match_percent": 18.6,
+          "f0_hz_mean": 208.825,
+          "speech_rate_sps": 6.0,
+          "hnr_db": 3.3951,
+          "transcript_span": "it you know it's therapeutic, man. You put your put your thoughts on on paper. put your put your thoughts on on paper. put your put your thoughts on on paper. Mhm. It's a beautiful thing. Mhm. Yeah. Mhm. It's a beautiful thing. Mhm. Yeah. Mhm. It's a beautiful thing. Mhm. Yeah. So, let's take it back to So, let's take it back to So, let's take it back to uh the first album. Right. You got to uh the first album. Right. You got to uh the first album. Right. You got to pick this first single. Right. You and pick this first single. Right. You and pick this first single. Right. You and LES is in th"
+        },
+        {
+          "start_sec": 240.0,
+          "match_percent": 18.8,
+          "f0_hz_mean": 234.3941,
+          "speech_rate_sps": 8.0,
+          "hnr_db": 5.1412,
+          "transcript_span": "Armagnac? You good with some Let's do some [&nbsp;__&nbsp;] LET'S GET GET US GET US SOME some [&nbsp;__&nbsp;] LET'S GET GET US GET US SOME some [&nbsp;__&nbsp;] LET'S GET GET US GET US SOME CHAMPAGNE ARMAGNAC, MAN. GET US SOME CHAMPAGNE ARMAGNAC, MAN. GET US SOME CHAMPAGNE ARMAGNAC, MAN. GET US SOME CHAMPAGNE ARMAGNAC, MAN. YOUR OWN BOTTLE. YOUR OWN BOTTLE, YOU YOUR OWN BOTTLE. YOUR OWN BOTTLE, YOU KNOW WHAT I'M SAYING? I should be I KNOW WHAT I'M SAYING? I should be I KNOW WHAT I'M SAYING? I should be I should be low. should be low. should be low. Cuz we celebrating you today, baby. You Cuz "
+        },
+        {
+          "start_sec": 270.0,
+          "match_percent": 29.3,
+          "f0_hz_mean": 187.5472,
+          "speech_rate_sps": 4.1333,
+          "hnr_db": 3.0662,
+          "transcript_span": "Snoop said it's like a Grammy. You know what I'm saying? So, what I'm saying? So, what I'm saying? So, Yeah. Yes. Holy moly guacamole. We going Yeah. Yes. Holy moly guacamole. We going Yeah. Yes. Holy moly guacamole. We going to give you some champagne Armagnac. I to give you some champagne Armagnac. I to give you some champagne Armagnac. I wanted to bring you some flowers, too, wanted to bring you some flowers, too, wanted to bring you some flowers, too, but they said somebody DID THAT ALREADY. IT'S ABOUT YOU, MY BROTHER. SO GOOD. SO, IT'S ABOUT YOU, MY BROTHER. SO GOOD. SO, um all right beca"
+        },
+        {
+          "start_sec": 300.0,
+          "match_percent": 19.0,
+          "f0_hz_mean": 190.506,
+          "speech_rate_sps": 5.4,
+          "hnr_db": 3.7361,
+          "transcript_span": "from Illmatic to your album this looks like it's perfect to me. So, Sugar Hill like it's perfect to me. So, Sugar Hill like it's perfect to me. So, Sugar Hill perfect? YEAH. perfect? YEAH. perfect? YEAH. NO, it didn't because we street NO, it didn't because we street NO, it didn't because we street [&nbsp;__&nbsp;] and we [&nbsp;__&nbsp;] and we [&nbsp;__&nbsp;] and we thinking about rapping. I'm not thinking thinking about rapping. I'm not thinking thinking about rapping. I'm not thinking about the business of it. Yo, man, you about the business of it. Yo, man, you about the business of it. Y"
+        },
+        {
+          "start_sec": 330.0,
+          "match_percent": 18.6,
+          "f0_hz_mean": 173.64,
+          "speech_rate_sps": 7.0333,
+          "hnr_db": 5.4622,
+          "transcript_span": "happy with that. I'm happy with just I want to I want to develop my style. I want to I want to develop my style. I want to I want to develop my style. I want to want to want to speak to my people's Uh-huh. speak to my people's Uh-huh. speak to my people's Uh-huh. management like yo, come on, bro. We got management like yo, come on, bro. We got management like yo, come on, bro. We got to We got to make some hits, man. You to We got to make some hits, man. You to We got to make some hits, man. You know what I mean? You see what's going know what I mean? You see what's going know what I mean? You"
+        },
+        {
+          "start_sec": 360.0,
+          "match_percent": 17.7,
+          "f0_hz_mean": 190.4326,
+          "speech_rate_sps": 6.4333,
+          "hnr_db": 5.1463,
+          "transcript_span": "You know what I mean? All right. So, So, Sugar Hill you didn't like this? So, So, Sugar Hill you didn't like this? So, So, Sugar Hill you didn't like this? I didn't like it. I didn't like it. I didn't like it. Why? Just told you. It was a was a dance Why? Just told you. It was a was a dance Why? Just told you. It was a was a dance record. It was It was a commercial record. It was It was a commercial record. It was It was a commercial record. But But But what was told to me record. But But But what was told to me record. But But But what was told to me which made made it fly like spitting which"
+        },
+        {
+          "start_sec": 390.0,
+          "match_percent": 21.3,
+          "f0_hz_mean": 181.3122,
+          "speech_rate_sps": 7.3,
+          "hnr_db": 4.625,
+          "transcript_span": "coming through busting their guns army fatigue [&nbsp;__&nbsp;] You know what I mean? fatigue [&nbsp;__&nbsp;] You know what I mean? fatigue [&nbsp;__&nbsp;] You know what I mean? Yeah. I don't want to get all suited and Yeah. I don't want to get all suited and Yeah. I don't want to get all suited and booted. At that time I didn't but booted. At that time I didn't but booted. At that time I didn't but Right. It was being ahead of the game, Right. It was being ahead of the game, Right. It was being ahead of the game, right? In reality cuz it was like all right? In reality cuz it was like all ri"
+        },
+        {
+          "start_sec": 420.0,
+          "match_percent": 24.9,
+          "f0_hz_mean": 146.7183,
+          "speech_rate_sps": 6.0,
+          "hnr_db": 2.5177,
+          "transcript_span": "I wrote it Right. and delivered it and and and it it worked. All right. and and it it worked. All right. and and it it worked. All right. Now, um you learning the business. Right. you learning the business. Right. Was that a shock to you because, you Was that a shock to you because, you Was that a shock to you because, you know, most of the time most of us would know, most of the time most of us would know, most of the time most of us would probably do this cuz we rhyme good for probably do this cuz we rhyme good for probably do this cuz we rhyme good for fun. But then you got to realize you g"
+        },
+        {
+          "start_sec": 450.0,
+          "match_percent": 22.3,
+          "f0_hz_mean": 154.7507,
+          "speech_rate_sps": 6.1667,
+          "hnr_db": 4.007,
+          "transcript_span": "happened? What What did you What did you What did you What was the first check What did you What was the first check What did you What was the first check from though? From From from EMI. EMI? from though? From From from EMI. EMI? from though? From From from EMI. EMI? EMI. I remember prior to me signing I EMI. I remember prior to me signing I EMI. I remember prior to me signing I went on a the tour with Nas, right? For went on a the tour with Nas, right? For went on a the tour with Nas, right? For the Illmatic tour and [&nbsp;__&nbsp;] I was happy the Illmatic tour and [&nbsp;__&nbsp;] I was h"
+        }
+      ],
+      "match": {
+        "overall_match_percent": 29.3,
+        "feature_scores": {
+          "f0_hz_mean": 0.004,
+          "f0_hz_median": 0.021,
+          "spectral_centroid_hz": 0.157,
+          "spectral_rolloff_hz": 0.274,
+          "speech_rate_syllables_per_sec": 0.647,
+          "hnr_db": 0.284,
+          "voiced_fraction": 0.999,
+          "rms_db": 0.895
+        },
+        "missing_features": []
+      },
+      "best_window_transcript": "Snoop said it's like a Grammy. You know what I'm saying? So, what I'm saying? So, what I'm saying? So, Yeah. Yes. Holy moly guacamole. We going Yeah. Yes. Holy moly guacamole. We going Yeah. Yes. Holy moly guacamole. We going to give you some champagne Armagnac. I to give you some champagne Armagnac. I to give you some champagne Armagnac. I wanted to bring you some flowers, too, wanted to bring you some flowers, too, wanted to bring you some flowers, too, but they said somebody DID THAT ALREADY. IT'S ABOUT YOU, MY BROTHER. SO GOOD. SO, IT'S ABOUT YOU, MY BROTHER. SO GOOD. SO, um all right because damn I would have um all right because damn I would have um all right because damn I would have never thought that. never thought that. never thought that. To me as an outsider looking in as To me"
+    },
+    {
+      "file": "C:\\Users\\rishj\\foai\\aims-tools\\voice-library\\dialect-library\\URBANISM\\regional\\east-coast-ny\\audio\\cormega_cormega-talks-his-career-shares-stories-_925c8eaa.mp3",
+      "filename": "cormega_cormega-talks-his-career-shares-stories-_925c8eaa.mp3",
+      "sample_rate": 48000,
+      "samples": 23040000,
+      "loaded_duration_sec": 480.0,
+      "f0_hz_mean": 153.3733,
+      "f0_hz_median": 141.0138,
+      "f0_hz_std": 70.2184,
+      "f0_hz_min": 103.8262,
+      "f0_hz_max": 215.4733,
+      "voiced_fraction": 0.3672,
+      "spectral_centroid_hz": 2841.4089,
+      "spectral_rolloff_hz": 5939.2441,
+      "spectral_bandwidth_hz": 3031.3051,
+      "zero_crossing_rate": 0.062,
+      "rms_mean": 0.1099,
+      "rms_db": -19.1777,
+      "rms_std": 0.0845,
+      "speech_rate_syllables_per_sec": 3.2333,
+      "duration_sec": 30.0,
+      "hnr_db": 3.4229,
+      "mfcc_mean": [
+        -208.511,
+        136.542,
+        -21.586,
+        54.249,
+        -9.701,
+        4.096,
+        -10.814,
+        -9.059,
+        -2.213,
+        -6.748,
+        -7.488,
+        -2.782,
+        -8.607
+      ],
+      "best_window_start_sec": 450.0,
+      "window_seconds": 30.0,
+      "windows_evaluated": 16,
+      "window_summaries": [
+        {
+          "start_sec": 0.0,
+          "match_percent": 19.9,
+          "f0_hz_mean": 207.4819,
+          "speech_rate_sps": 4.8,
+          "hnr_db": 4.2986,
+          "transcript_span": "posted it or whatever i did and i just see the or whatever i did and i just see the or whatever i did and i just see the fans reaction fans reaction fans reaction of how the firm because it was a super of how the firm because it was a super of how the firm because it was a super group group group it was the very first super group to me it was the very first super group to me it was the very first super group to me yeah yeah yeah yeah yeah it was so all right now yeah yeah it was so all right now yeah yeah it was so all right now getting into that let's get straight getting into that let's get "
+        },
+        {
+          "start_sec": 30.0,
+          "match_percent": 27.9,
+          "f0_hz_mean": 196.2785,
+          "speech_rate_sps": 2.8,
+          "hnr_db": 3.5342,
+          "transcript_span": "that the crazy [&nbsp;__&nbsp;] is mega just real talk i never knew why he dissed it i was i never knew why he dissed it i was actually in the session actually in the session actually in the session i went upstairs i said it to him while i went upstairs i said it to him while i went upstairs i said it to him while he was here i went upstairs and he came he was here i went upstairs and he came he was here i went upstairs and he came back that's the reason why i asked him back that's the reason why i asked him back that's the reason why i asked him was because when they got edited you was becaus"
+        },
+        {
+          "start_sec": 60.0,
+          "match_percent": 21.6,
+          "f0_hz_mean": 199.3386,
+          "speech_rate_sps": 4.4,
+          "hnr_db": 3.0412,
+          "transcript_span": "that do you want to try some champagne not yet no yeah so listen okay before we get to that so listen okay before we get to that okay okay okay you just said that you asked say to say you just said that you asked say to say you just said that you asked say to say what you said i asked nature what you said i asked nature what you said i asked nature why did he do that because i thought why did he do that because i thought why did he do that because i thought this is what i thought this is what i thought this is what i thought when i went to the bathroom nah so when i went to the bathroom nah so"
+        },
+        {
+          "start_sec": 90.0,
+          "match_percent": 37.0,
+          "f0_hz_mean": 175.0513,
+          "speech_rate_sps": 3.5333,
+          "hnr_db": 4.2303,
+          "transcript_span": "you made me proud just now you just did a you had a great a you had a great a you had a great journalistic moment just now okay do you journalistic moment just now okay do you journalistic moment just now okay do you realize for all these years in hip-hop realize for all these years in hip-hop realize for all these years in hip-hop no journalists ever kept it 100 like no journalists ever kept it 100 like no journalists ever kept it 100 like that wow remember they were that wow remember they were that wow remember they were people was trying to paint pictures of people was trying to paint pictu"
+        },
+        {
+          "start_sec": 120.0,
+          "match_percent": 25.8,
+          "f0_hz_mean": 171.2575,
+          "speech_rate_sps": 4.6,
+          "hnr_db": 3.9383,
+          "transcript_span": "and they just said it on your show so no i knew i didn't know but but the so no i knew i didn't know but but the so no i knew i didn't know but but the perception was perception was perception was that you started it exactly it's true that you started it exactly it's true that you started it exactly it's true it's true you're right you see what i'm it's true you're right you see what i'm it's true you're right you see what i'm saying saying saying so when that happened i was shocked i so when that happened i was shocked i so when that happened i was shocked i was like wow was like wow was like"
+        },
+        {
+          "start_sec": 150.0,
+          "match_percent": 36.9,
+          "f0_hz_mean": 165.501,
+          "speech_rate_sps": 3.1667,
+          "hnr_db": 3.4215,
+          "transcript_span": "nori you knew about who i was on the street prior to you knew who i was street prior to you knew who i was street prior to you knew who i was as a rapper yeah and that's true i did as a rapper yeah and that's true i did as a rapper yeah and that's true i did hear about core hear about core hear about core mega on the street prior to me hearing mega on the street prior to me hearing mega on the street prior to me hearing about you as a rapper about you as a rapper about you as a rapper i heard about you getting busy on the i heard about you getting busy on the i heard about you getting busy on "
+        },
+        {
+          "start_sec": 180.0,
+          "match_percent": 19.2,
+          "f0_hz_mean": 294.384,
+          "speech_rate_sps": 6.3667,
+          "hnr_db": 5.9085,
+          "transcript_span": "position so you you know when you and i was so you you know when you and i was so you you know when you and i was probably having little discrepancies or probably having little discrepancies or probably having little discrepancies or whatever whatever whatever you hearing that nature this dude that you hearing that nature this dude that you hearing that nature this dude that [&nbsp;__&nbsp;] had to [&nbsp;__&nbsp;] you up no [&nbsp;__&nbsp;] had to [&nbsp;__&nbsp;] you up no [&nbsp;__&nbsp;] had to [&nbsp;__&nbsp;] you up no that started the discrepancies that was that started the discrepancie"
+        },
+        {
+          "start_sec": 210.0,
+          "match_percent": 22.5,
+          "f0_hz_mean": 261.0397,
+          "speech_rate_sps": 5.3667,
+          "hnr_db": 5.9298,
+          "transcript_span": "knows this jungle so i didn't know see knows this jungle so i didn't know see i never knew so when i heard that record i never knew so when i heard that record i never knew so when i heard that record i was just mad i'm thinking everybody's i was just mad i'm thinking everybody's i was just mad i'm thinking everybody's going at me wow so i'm like damn i'm going at me wow so i'm like damn i'm going at me wow so i'm like damn i'm like damn i thought me and nori was cool like damn i thought me and nori was cool like damn i thought me and nori was cool damn like you know what now i know now damn l"
+        },
+        {
+          "start_sec": 240.0,
+          "match_percent": 20.8,
+          "f0_hz_mean": 242.028,
+          "speech_rate_sps": 4.9333,
+          "hnr_db": 4.8534,
+          "transcript_span": "you might be in my life the handshake in my life the handshake in my life the handshake so it's like i was just like wow like so it's like i was just like wow like so it's like i was just like wow like that just shocked me that just shocked me that just shocked me so um it is what it is like so um it is what it is like so um it is what it is like that started everything if that record that started everything if that record that started everything if that record never came out there never been no never came out there never been no never came out there never been no distance i had no reason to d"
+        },
+        {
+          "start_sec": 270.0,
+          "match_percent": 27.7,
+          "f0_hz_mean": 168.4511,
+          "speech_rate_sps": 3.8333,
+          "hnr_db": 2.5611,
+          "transcript_span": "but mega i'm gonna be honest with you but mega i'm gonna be honest with you at that time mega was like one of the most arrogant mega was like one of the most arrogant in this dude explain that to me in this dude explain that to me in this dude explain that to me that's how you came up girls okay like that's how you came up girls okay like that's how you came up girls okay like whenever i used to come around whenever i used to come around whenever i used to come around i'll see you i i just realized and later i'll see you i i just realized and later i'll see you i i just realized and later on o"
+        },
+        {
+          "start_sec": 300.0,
+          "match_percent": 26.5,
+          "f0_hz_mean": 191.9062,
+          "speech_rate_sps": 4.1333,
+          "hnr_db": 3.6042,
+          "transcript_span": "arrogance like in my like explain to me what made you think what made you think what made you think tell you what the difference is tell you what the difference is tell you what the difference is confidence as a rapper as a human being confidence as a rapper as a human being confidence as a rapper as a human being pretty much both pretty much both pretty much both pretty much both pretty much both pretty much both because and i'm gonna keep it real you because and i'm gonna keep it real you because and i'm gonna keep it real you was always like a fly dude it's always was always like a fly dude"
+        },
+        {
+          "start_sec": 330.0,
+          "match_percent": 29.3,
+          "f0_hz_mean": 184.4397,
+          "speech_rate_sps": 4.1,
+          "hnr_db": 4.2617,
+          "transcript_span": "because because because if you put you and nature together and nature together and nature together a person is going to remember you no a person is going to remember you no a person is going to remember you no disrespect to nate that's my brother but disrespect to nate that's my brother but disrespect to nate that's my brother but that person's going to remember you it's that person's going to remember you it's that person's going to remember you it's something about your order something something about your order something something about your order something about your style about your style"
+        },
+        {
+          "start_sec": 360.0,
+          "match_percent": 26.3,
+          "f0_hz_mean": 234.4526,
+          "speech_rate_sps": 4.4667,
+          "hnr_db": 4.5066,
+          "transcript_span": "could say about me wow if that's the worst that's actually if that's the worst that's actually if that's the worst that's actually because that's like they said jordan because that's like they said jordan because that's like they said jordan they said kobe's arrogant i was they said kobe's arrogant i was they said kobe's arrogant i was confident but at the same time you said confident but at the same time you said confident but at the same time you said i wear polo all the time i wear polo all the time i wear polo all the time there's a girl named tt from there's a girl named tt from there's a"
+        },
+        {
+          "start_sec": 390.0,
+          "match_percent": 22.7,
+          "f0_hz_mean": 229.7949,
+          "speech_rate_sps": 5.8,
+          "hnr_db": 5.8554,
+          "transcript_span": "come on come on come on come on come on come on why people don't say oh mega mem why people don't say oh mega mem why people don't say oh mega mem remember that remember that remember that piece mega hat i was wearing diamonds piece mega hat i was wearing diamonds piece mega hat i was wearing diamonds before everybody too wow but i never before everybody too wow but i never before everybody too wow but i never made nobody feel less about it that same made nobody feel less about it that same made nobody feel less about it that same diamond pen diamond pen diamond pen you see me on it i gave it "
+        },
+        {
+          "start_sec": 420.0,
+          "match_percent": 19.6,
+          "f0_hz_mean": 210.3137,
+          "speech_rate_sps": 5.6333,
+          "hnr_db": 3.4764,
+          "transcript_span": "great dude the great dude i [&nbsp;__&nbsp;] with you so when you so when you you so when you so when you you so when you so when you stay to yourself and you yo people stay to yourself and you yo people stay to yourself and you yo people see more of me than i've seen in myself see more of me than i've seen in myself see more of me than i've seen in myself because it's like because it's like because it's like i'm not an outgoing person i'm not the i'm not an outgoing person i'm not the i'm not an outgoing person i'm not the type person i say how you doing my name type person i say how you doin"
+        },
+        {
+          "start_sec": 450.0,
+          "match_percent": 41.4,
+          "f0_hz_mean": 153.3733,
+          "speech_rate_sps": 3.2333,
+          "hnr_db": 3.4229,
+          "transcript_span": "some people just that's really pretty much the opposite of arrogance you know much the opposite of arrogance you know much the opposite of arrogance you know what i'm saying so it's like what i'm saying so it's like what i'm saying so it's like so if the worst that somebody could say so if the worst that somebody could say so if the worst that somebody could say about me is i'm arrogant i must be a about me is i'm arrogant i must be a about me is i'm arrogant i must be a hell of a dude you've never heard nobody hell of a dude you've never heard nobody hell of a dude you've never heard nobody s"
+        }
+      ],
+      "match": {
+        "overall_match_percent": 41.4,
+        "feature_scores": {
+          "f0_hz_mean": 0.154,
+          "f0_hz_median": 0.26,
+          "spectral_centroid_hz": 0.265,
+          "spectral_rolloff_hz": 0.267,
+          "speech_rate_syllables_per_sec": 0.999,
+          "hnr_db": 0.317,
+          "voiced_fraction": 0.659,
+          "rms_db": 0.94
+        },
+        "missing_features": []
+      },
+      "best_window_transcript": "some people just that's really pretty much the opposite of arrogance you know much the opposite of arrogance you know much the opposite of arrogance you know what i'm saying so it's like what i'm saying so it's like what i'm saying so it's like so if the worst that somebody could say so if the worst that somebody could say so if the worst that somebody could say about me is i'm arrogant i must be a about me is i'm arrogant i must be a about me is i'm arrogant i must be a hell of a dude you've never heard nobody hell of a dude you've never heard nobody hell of a dude you've never heard nobody say mega is a snake say mega is a snake say mega is a snake all right you've never felt all right you've never felt all right you've never felt uncomfortable around me you've never uncomfortable around"
+    },
+    {
+      "file": "C:\\Users\\rishj\\foai\\aims-tools\\voice-library\\dialect-library\\URBANISM\\regional\\east-coast-ny\\audio\\havoc-mobb-deep_havoc-drink-champs-full-episode_22133b83.mp3",
+      "filename": "havoc-mobb-deep_havoc-drink-champs-full-episode_22133b83.mp3",
+      "sample_rate": 48000,
+      "samples": 23040000,
+      "loaded_duration_sec": 480.0,
+      "f0_hz_mean": 122.5689,
+      "f0_hz_median": 111.2781,
+      "f0_hz_std": 29.3361,
+      "f0_hz_min": 96.8732,
+      "f0_hz_max": 183.9317,
+      "voiced_fraction": 0.4533,
+      "spectral_centroid_hz": 3425.3125,
+      "spectral_rolloff_hz": 7111.0275,
+      "spectral_bandwidth_hz": 3562.8062,
+      "zero_crossing_rate": 0.0806,
+      "rms_mean": 0.0489,
+      "rms_db": -26.2066,
+      "rms_std": 0.0278,
+      "speech_rate_syllables_per_sec": 3.4667,
+      "duration_sec": 30.0,
+      "hnr_db": 4.7173,
+      "mfcc_mean": [
+        -252.872,
+        129.554,
+        -32.391,
+        44.331,
+        -12.787,
+        29.679,
+        -20.319,
+        6.88,
+        -12.278,
+        -10.03,
+        -5.833,
+        -9.912,
+        -1.356
+      ],
+      "best_window_start_sec": 120.0,
+      "window_seconds": 30.0,
+      "windows_evaluated": 16,
+      "window_summaries": [
+        {
+          "start_sec": 0.0,
+          "match_percent": 52.8,
+          "f0_hz_mean": 131.1972,
+          "speech_rate_sps": 3.7667,
+          "hnr_db": 5.9523,
+          "transcript_span": "once you got to see that when he was here I love that people show the love here I love that people show the love here I love that people show the love but then again as a person who knows him but then again as a person who knows him but then again as a person who knows him I wish he could have been here to see I wish he could have been here to see I wish he could have been here to see that was was that something like how you that was was that something like how you that was was that something like how you felt annoyed oh for sure but Pete really felt annoyed oh for sure but Pete really felt an"
+        },
+        {
+          "start_sec": 30.0,
+          "match_percent": 49.2,
+          "f0_hz_mean": 117.9577,
+          "speech_rate_sps": 6.3,
+          "hnr_db": 5.4036,
+          "transcript_span": "and he got that one me to go do shows and stuff we bump into the gods they and stuff we bump into the gods they and stuff we bump into the gods they have told me to decide driving knowledge have told me to decide driving knowledge have told me to decide driving knowledge you know I'm not uh you know too much you know I'm not uh you know too much you know I'm not uh you know too much into the gaudy and stuff like that but into the gaudy and stuff like that but into the gaudy and stuff like that but he would take some information from that he would take some information from that he would take s"
+        },
+        {
+          "start_sec": 60.0,
+          "match_percent": 27.5,
+          "f0_hz_mean": 170.0797,
+          "speech_rate_sps": 4.8333,
+          "hnr_db": 5.3749,
+          "transcript_span": "lot of dudes coming to show for you so he always had you know oh there's"
+        },
+        {
+          "start_sec": 90.0,
+          "match_percent": 40.3,
+          "f0_hz_mean": 136.5473,
+          "speech_rate_sps": 5.2333,
+          "hnr_db": 5.4201,
+          "transcript_span": "lot of dudes coming to show for you so he always had you know oh there's he always had you know oh there's he always had you know oh there's definitely a mob deep album in the stash definitely a mob deep album in the stash definitely a mob deep album in the stash enemy but I just want to give it a enemy but I just want to give it a enemy but I just want to give it a little bit of time you know to mean so little bit of time you know to mean so little bit of time you know to mean so fully recorders is something out a piece fully recorders is something out a piece fully recorders is something out"
+        },
+        {
+          "start_sec": 120.0,
+          "match_percent": 63.4,
+          "f0_hz_mean": 122.5689,
+          "speech_rate_sps": 3.4667,
+          "hnr_db": 4.7173,
+          "transcript_span": "piece it together stuff this already record and stuff like that because you record and stuff like that because you record and stuff like that because you know I think that's what people want and know I think that's what people want and know I think that's what people want and you know just one last hoorah you know him stuff like that so that's you know him stuff like that so that's definitely in the mix right all right definitely in the mix right all right definitely in the mix right all right that's what's up man you know um again that's what's up man you know um again that's what's up man yo"
+        },
+        {
+          "start_sec": 150.0,
+          "match_percent": 24.0,
+          "f0_hz_mean": 166.6888,
+          "speech_rate_sps": 2.0333,
+          "hnr_db": 4.5617,
+          "transcript_span": "so the crazy she is this was crazy right so the crazy she is this was crazy right that I want everybody to really pay that I want everybody to really pay that I want everybody to really pay attention to this I've been working on attention to this I've been working on attention to this I've been working on my full show for two years finally dr. my full show for two years finally dr. my full show for two years finally dr. diehl finally we had to pick the choices diehl finally we had to pick the choices diehl finally we had to pick the choices good to pick where we had to film right good to pick "
+        },
+        {
+          "start_sec": 180.0,
+          "match_percent": 42.2,
+          "f0_hz_mean": 185.1526,
+          "speech_rate_sps": 2.9667,
+          "hnr_db": 4.9598,
+          "transcript_span": "pushed me towards it nice I said I wanna face there was nothing like this face there was nothing like this face there was nothing like this freestyle and there was like God made me freestyle and there was like God made me freestyle and there was like God made me like like see like the last hour with like like see like the last hour with like like see like the last hour with the [&nbsp;__&nbsp;] would do them look stupid the [&nbsp;__&nbsp;] would do them look stupid the [&nbsp;__&nbsp;] would do them look stupid because I picked this and then it just because I picked this and then it just beca"
+        },
+        {
+          "start_sec": 210.0,
+          "match_percent": 40.0,
+          "f0_hz_mean": 135.67,
+          "speech_rate_sps": 4.8,
+          "hnr_db": 5.0069,
+          "transcript_span": "minute but it was very chic to me man don't sit on Arab dope dope thing and don't sit on Arab dope dope thing and don't sit on Arab dope dope thing and the relationship that I see I have a the relationship that I see I have a the relationship that I see I have a moral deep those bad you know we shop he's a first video was you know we shop he's a first video was first happened H and IC IC was on Timmy first happened H and IC IC was on Timmy first happened H and IC IC was on Timmy chemistry with Queensbridge no what chemistry with Queensbridge no what chemistry with Queensbridge no what happened"
+        },
+        {
+          "start_sec": 240.0,
+          "match_percent": 36.4,
+          "f0_hz_mean": 133.2906,
+          "speech_rate_sps": 6.1333,
+          "hnr_db": 4.2987,
+          "transcript_span": "station in my hand right I'll get my car wash he was thinking we've got to go out wash he was thinking we've got to go out wash he was thinking we've got to go out there your mother go to Queens because there your mother go to Queens because there your mother go to Queens because he's like poverty shooting his video he's like poverty shooting his video he's like poverty shooting his video he's like you know I'm gonna follow you he's like you know I'm gonna follow you he's like you know I'm gonna follow you he was bar itself Wow I can't hit a he was bar itself Wow I can't hit a he was bar itsel"
+        },
+        {
+          "start_sec": 270.0,
+          "match_percent": 26.7,
+          "f0_hz_mean": 154.8363,
+          "speech_rate_sps": 4.7667,
+          "hnr_db": 4.756,
+          "transcript_span": "them 20 he wait to wished for that the other relax brother other relax brother other relax brother I love me always supported me so it that I love me always supported me so it that I love me always supported me so it that is also a muppet show to to house God I is also a muppet show to to house God I is also a muppet show to to house God I shall know the who show that we announce shall know the who show that we announce shall know the who show that we announce this corner Guardian he's coming out in this corner Guardian he's coming out in this corner Guardian he's coming out in the February yo"
+        },
+        {
+          "start_sec": 300.0,
+          "match_percent": 10.1,
+          "f0_hz_mean": 255.0345,
+          "speech_rate_sps": 7.0667,
+          "hnr_db": 3.8498,
+          "transcript_span": "off you know I'm saying do I you see a marketing plan sister 90mm these marketing plan sister 90mm these marketing plan sister 90mm these [&nbsp;__&nbsp;] have a marketing plan I've [&nbsp;__&nbsp;] have a marketing plan I've [&nbsp;__&nbsp;] have a marketing plan I've been working out which I gotta walk which I gotta walk [Laughter] got marketing plans yeah what was what got marketing plans yeah what was what was your favorites from studio session was your favorites from studio session was your favorites from studio session at Bow Wow"
+        },
+        {
+          "start_sec": 330.0,
+          "match_percent": 46.1,
+          "f0_hz_mean": 122.2704,
+          "speech_rate_sps": 5.4,
+          "hnr_db": 3.0966,
+          "transcript_span": "was your favorites from studio session at Bow Wow at Bow Wow at Bow Wow it might have been life's a [&nbsp;__&nbsp;] Wow I it might have been life's a [&nbsp;__&nbsp;] Wow I it might have been life's a [&nbsp;__&nbsp;] Wow I would pick that you know what cuz it was would pick that you know what cuz it was would pick that you know what cuz it was so it was just so okay - you know I'm so it was just so okay - you know I'm so it was just so okay - you know I'm running around with Nas and DJ and you running around with Nas and DJ and you running around with Nas and DJ and you know I'm saying he do"
+        },
+        {
+          "start_sec": 360.0,
+          "match_percent": 45.7,
+          "f0_hz_mean": 129.6793,
+          "speech_rate_sps": 4.4,
+          "hnr_db": 3.2218,
+          "transcript_span": "you know maybe just going through the you know maybe just going through the travels and then it's just like I'm just travels and then it's just like I'm just travels and then it's just like I'm just DJing hanging out making beats in the DJing hanging out making beats in the DJing hanging out making beats in the crib cuz I'm doing I'm selling CDs I'm crib cuz I'm doing I'm selling CDs I'm crib cuz I'm doing I'm selling CDs I'm like the neighborhood DJ your sweet 16 like the neighborhood DJ your sweet 16 like the neighborhood DJ your sweet 16 you know anybody's party that was cydia you know anyb"
+        },
+        {
+          "start_sec": 390.0,
+          "match_percent": 32.6,
+          "f0_hz_mean": 141.6512,
+          "speech_rate_sps": 6.1333,
+          "hnr_db": 4.0053,
+          "transcript_span": "this is like yo I just can't get together we got eight records just bring together we got eight records just bring together we got eight records just bring all your pizzas of studio and I'm gonna all your pizzas of studio and I'm gonna all your pizzas of studio and I'm gonna go through some joints and AC was dead go through some joints and AC was dead go through some joints and AC was dead okay okay okay already already okay I'll bring the already already okay I'll bring the already already okay I'll bring the joints got my little folder floppy disc joints got my little folder floppy disc join"
+        },
+        {
+          "start_sec": 420.0,
+          "match_percent": 24.8,
+          "f0_hz_mean": 151.1689,
+          "speech_rate_sps": 5.1,
+          "hnr_db": 4.0948,
+          "transcript_span": "Widow say yes I'm going to beat Widow say yes I'm going to beat something to join you know man I'm just something to join you know man I'm just something to join you know man I'm just playing and I ain't even come over okay playing and I ain't even come over okay playing and I ain't even come over okay love see they get to play everything in love see they get to play everything in love see they get to play everything in the first record I pulled up was the the the first record I pulled up was the the the first record I pulled up was the the I see public Sarna for your love so I'm I see public "
+        },
+        {
+          "start_sec": 450.0,
+          "match_percent": 18.2,
+          "f0_hz_mean": 213.1661,
+          "speech_rate_sps": 6.7333,
+          "hnr_db": 5.4398,
+          "transcript_span": "playing a beat and then he was saying he wasn't [Music] I love being a bear but that was so you I love being a bear but that was so you ain't eat this guy and you playing the ain't eat this guy and you playing the ain't eat this guy and you playing the beat and that [&nbsp;__&nbsp;] kicks visualize"
+        }
+      ],
+      "match": {
+        "overall_match_percent": 63.4,
+        "feature_scores": {
+          "f0_hz_mean": 0.781,
+          "f0_hz_median": 0.903,
+          "spectral_centroid_hz": 0.048,
+          "spectral_rolloff_hz": 0.055,
+          "speech_rate_syllables_per_sec": 0.965,
+          "hnr_db": 0.454,
+          "voiced_fraction": 0.89,
+          "rms_db": 0.871
+        },
+        "missing_features": []
+      },
+      "best_window_transcript": "piece it together stuff this already record and stuff like that because you record and stuff like that because you record and stuff like that because you know I think that's what people want and know I think that's what people want and know I think that's what people want and you know just one last hoorah you know him stuff like that so that's you know him stuff like that so that's definitely in the mix right all right definitely in the mix right all right definitely in the mix right all right that's what's up man you know um again that's what's up man you know um again that's what's up man you know um again my market oldest is the two so to my market oldest is the two so to my market oldest is the two so to everybody cause we all took it hard like everybody cause we all took it hard like "
+    },
+    {
+      "file": "C:\\Users\\rishj\\foai\\aims-tools\\voice-library\\dialect-library\\URBANISM\\regional\\east-coast-ny\\audio\\nas_nas-drink-champs-full-episode_e18ac00c.mp3",
+      "filename": "nas_nas-drink-champs-full-episode_e18ac00c.mp3",
+      "sample_rate": 48000,
+      "samples": 8640000,
+      "loaded_duration_sec": 180.0,
+      "f0_hz_mean": 151.0979,
+      "f0_hz_median": 151.1349,
+      "f0_hz_std": 31.1946,
+      "f0_hz_min": 97.9989,
+      "f0_hz_max": 209.0972,
+      "voiced_fraction": 0.4184,
+      "spectral_centroid_hz": 4443.7409,
+      "spectral_rolloff_hz": 8755.2019,
+      "spectral_bandwidth_hz": 3918.6791,
+      "zero_crossing_rate": 0.1312,
+      "rms_mean": 0.1014,
+      "rms_db": -19.8751,
+      "rms_std": 0.0696,
+      "speech_rate_syllables_per_sec": 3.4333,
+      "duration_sec": 30.0,
+      "hnr_db": 2.3667,
+      "mfcc_mean": [
+        -217.697,
+        110.719,
+        -26.392,
+        27.781,
+        -32.407,
+        39.289,
+        -22.534,
+        1.351,
+        -13.321,
+        -13.956,
+        -7.46,
+        -3.812,
+        -5.492
+      ],
+      "best_window_start_sec": 60.0,
+      "window_seconds": 30.0,
+      "windows_evaluated": 6,
+      "window_summaries": [
+        {
+          "start_sec": 0.0,
+          "match_percent": 17.6,
+          "f0_hz_mean": 262.4661,
+          "speech_rate_sps": 5.8333,
+          "hnr_db": 4.1684
+        },
+        {
+          "start_sec": 30.0,
+          "match_percent": 10.3,
+          "f0_hz_mean": 265.1665,
+          "speech_rate_sps": 6.2,
+          "hnr_db": 2.31
+        },
+        {
+          "start_sec": 60.0,
+          "match_percent": 33.6,
+          "f0_hz_mean": 151.0979,
+          "speech_rate_sps": 3.4333,
+          "hnr_db": 2.3667
+        },
+        {
+          "start_sec": 90.0,
+          "match_percent": 21.8,
+          "f0_hz_mean": 209.9189,
+          "speech_rate_sps": 4.8,
+          "hnr_db": 3.693
+        },
+        {
+          "start_sec": 120.0,
+          "match_percent": 21.5,
+          "f0_hz_mean": 269.4837,
+          "speech_rate_sps": 4.7667,
+          "hnr_db": 4.6604
+        },
+        {
+          "start_sec": 150.0,
+          "match_percent": 16.2,
+          "f0_hz_mean": 203.085,
+          "speech_rate_sps": 5.7,
+          "hnr_db": 3.5029
+        }
+      ],
+      "match": {
+        "overall_match_percent": 33.6,
+        "feature_scores": {
+          "f0_hz_mean": 0.183,
+          "f0_hz_median": 0.123,
+          "spectral_centroid_hz": 0.0,
+          "spectral_rolloff_hz": 0.002,
+          "speech_rate_syllables_per_sec": 0.973,
+          "hnr_db": 0.225,
+          "voiced_fraction": 0.805,
+          "rms_db": 0.965
+        },
+        "missing_features": []
+      }
+    },
+    {
+      "file": "C:\\Users\\rishj\\foai\\aims-tools\\voice-library\\dialect-library\\URBANISM\\regional\\east-coast-ny\\audio\\nasir-jones_2001-nas-disses-hot-97-camron-nore-nelly_e4f3a630.mp3",
+      "filename": "nasir-jones_2001-nas-disses-hot-97-camron-nore-nelly_e4f3a630.mp3",
+      "sample_rate": 48000,
+      "samples": 8640000,
+      "loaded_duration_sec": 180.0,
+      "f0_hz_mean": 122.3393,
+      "f0_hz_median": 93.0344,
+      "f0_hz_std": 55.589,
+      "f0_hz_min": 65.4064,
+      "f0_hz_max": 207.6523,
+      "voiced_fraction": 0.5716,
+      "spectral_centroid_hz": 3154.778,
+      "spectral_rolloff_hz": 7184.5311,
+      "spectral_bandwidth_hz": 3379.3296,
+      "zero_crossing_rate": 0.0617,
+      "rms_mean": 0.1207,
+      "rms_db": -18.3675,
+      "rms_std": 0.0482,
+      "speech_rate_syllables_per_sec": 1.8667,
+      "duration_sec": 30.0,
+      "hnr_db": 4.6913,
+      "mfcc_mean": [
+        -201.498,
+        136.443,
+        -33.89,
+        71.886,
+        -22.982,
+        34.722,
+        0.836,
+        1.828,
+        11.318,
+        -6.96,
+        19.469,
+        -6.775,
+        11.292
+      ],
+      "best_window_start_sec": 0.0,
+      "window_seconds": 30.0,
+      "windows_evaluated": 6,
+      "window_summaries": [
+        {
+          "start_sec": 0.0,
+          "match_percent": 57.7,
+          "f0_hz_mean": 122.3393,
+          "speech_rate_sps": 1.8667,
+          "hnr_db": 4.6913,
+          "transcript_span": "and i was told and begged to do the and i was told and begged to do the summer jam i was begged summer jam i was begged summer jam i was begged to come to hot 97 because i had a hot to come to hot 97 because i had a hot to come to hot 97 because i had a hot new new new record that nobody wanted to support record that nobody wanted to support record that nobody wanted to support except for the streets except for the streets except for the streets and um and and it was told to come there and um and and it was told to come there and um and and it was told to come there and save angie martinez's j"
+        },
+        {
+          "start_sec": 30.0,
+          "match_percent": 18.6,
+          "f0_hz_mean": 182.5599,
+          "speech_rate_sps": 4.7333,
+          "hnr_db": 1.488,
+          "transcript_span": "community people know that i was dissed this morning by hot 97 and told dissed this morning by hot 97 and told dissed this morning by hot 97 and told that what i couldn't do on the show that what i couldn't do on the show that what i couldn't do on the show which is really which is really which is really is is really outrageous it really shows is is really outrageous it really shows is is really outrageous it really shows that the wrong people are in power that the wrong people are in power that the wrong people are in power you know his hip hop thing comes from you know his hip hop thing come"
+        },
+        {
+          "start_sec": 60.0,
+          "match_percent": 21.6,
+          "f0_hz_mean": 185.8766,
+          "speech_rate_sps": 4.4667,
+          "hnr_db": 1.9191,
+          "transcript_span": "hip hop back into your own hands man throw a back into your own hands man throw a back into your own hands man throw a party in the streets for free party in the streets for free party in the streets for free you know make it safe man hire the you know make it safe man hire the you know make it safe man hire the nation of islam or somebody to protect nation of islam or somebody to protect nation of islam or somebody to protect it it it it's time that we take it back into our it's time that we take it back into our it's time that we take it back into our hands because when it's being held in ha"
+        },
+        {
+          "start_sec": 90.0,
+          "match_percent": 16.0,
+          "f0_hz_mean": 191.4239,
+          "speech_rate_sps": 6.2,
+          "hnr_db": 2.9912,
+          "transcript_span": "last year it happened to be the this was toward me by jake and he the this was toward me by jake and he the this was toward me by jake and he was all high almighty was all high almighty was all high almighty right then i dropped to eat the napalm right then i dropped to eat the napalm right then i dropped to eat the napalm bomb and their whole crew was running bomb and their whole crew was running bomb and their whole crew was running like roaches like roaches like roaches and now you got this station over there and now you got this station over there and now you got this station over there cr"
+        },
+        {
+          "start_sec": 120.0,
+          "match_percent": 29.4,
+          "f0_hz_mean": 211.8552,
+          "speech_rate_sps": 3.6667,
+          "hnr_db": 3.0623,
+          "transcript_span": "i'm not going for it it's not going to happen it is this is a it's not going to happen it is this is a it's not going to happen it is this is a perfect opportunity you have the perfect opportunity you have the perfect opportunity you have the alternative alternative alternative to choose any radio station you want to to choose any radio station you want to to choose any radio station you want to choose and power 105 choose and power 105 choose and power 105 plays everything old school new school plays everything old school new school plays everything old school new school if you want to listen"
+        },
+        {
+          "start_sec": 150.0,
+          "match_percent": 15.7,
+          "f0_hz_mean": 222.3973,
+          "speech_rate_sps": 6.8,
+          "hnr_db": 2.6593,
+          "transcript_span": "this you probably ain't gonna hear none of your records over there but it's none of your records over there but it's none of your records over there but it's okay you know why we have over 1200 okay you know why we have over 1200 okay you know why we have over 1200 stations stations stations and we're gonna hold you down i know and we're gonna hold you down i know and we're gonna hold you down i know coke's gonna make a few calls coke's gonna make a few calls coke's gonna make a few calls mike's gonna make a few more calls yeah mike's gonna make a few more calls yeah mike's gonna make a few mo"
+        }
+      ],
+      "match": {
+        "overall_match_percent": 57.7,
+        "feature_scores": {
+          "f0_hz_mean": 0.786,
+          "f0_hz_median": 0.962,
+          "spectral_centroid_hz": 0.115,
+          "spectral_rolloff_hz": 0.049,
+          "speech_rate_syllables_per_sec": 0.411,
+          "hnr_db": 0.451,
+          "voiced_fraction": 0.994,
+          "rms_db": 0.902
+        },
+        "missing_features": []
+      },
+      "best_window_transcript": "and i was told and begged to do the and i was told and begged to do the summer jam i was begged summer jam i was begged summer jam i was begged to come to hot 97 because i had a hot to come to hot 97 because i had a hot to come to hot 97 because i had a hot new new new record that nobody wanted to support record that nobody wanted to support record that nobody wanted to support except for the streets except for the streets except for the streets and um and and it was told to come there and um and and it was told to come there and um and and it was told to come there and save angie martinez's job and i was and save angie martinez's job and i was and save angie martinez's job and i was told to come there told to come there told to come there and help the ratings at 97 bob flex you and help t"
+    }
+  ],
+  "ranked": [
+    {
+      "rank": 1,
+      "file": "havoc-mobb-deep_havoc-drink-champs-full-episode_22133b83.mp3",
+      "match_percent": 63.4,
+      "f0_hz_mean": 122.5689,
+      "speech_rate_sps": 3.4667,
+      "duration_sec": 30.0
+    },
+    {
+      "rank": 2,
+      "file": "nasir-jones_2001-nas-disses-hot-97-camron-nore-nelly_e4f3a630.mp3",
+      "match_percent": 57.7,
+      "f0_hz_mean": 122.3393,
+      "speech_rate_sps": 1.8667,
+      "duration_sec": 30.0
+    },
+    {
+      "rank": 3,
+      "file": "cormega_cormega-talks-his-career-shares-stories-_925c8eaa.mp3",
+      "match_percent": 41.4,
+      "f0_hz_mean": 153.3733,
+      "speech_rate_sps": 3.2333,
+      "duration_sec": 30.0
+    },
+    {
+      "rank": 4,
+      "file": "nas_nas-drink-champs-full-episode_e18ac00c.mp3",
+      "match_percent": 33.6,
+      "f0_hz_mean": 151.0979,
+      "speech_rate_sps": 3.4333,
+      "duration_sec": 30.0
+    },
+    {
+      "rank": 5,
+      "file": "az-anthony-cruz_az-on-illmatic-jay-z-the-firm-mixtape-cu_23748ac4.mp3",
+      "match_percent": 29.3,
+      "f0_hz_mean": 187.5472,
+      "speech_rate_sps": 4.1333,
+      "duration_sec": 30.0
+    }
+  ]
+}

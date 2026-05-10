@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { FlaskConical, Shield, Cpu, Bird, Calendar, FileSearch } from 'lucide-react';
+import { FlaskConical, Shield, Cpu, Bird, Calendar, FileSearch, Activity, AlertTriangle } from 'lucide-react';
 
 interface PanelMeta {
   href: string;
@@ -11,11 +11,25 @@ interface PanelMeta {
 
 const panels: PanelMeta[] = [
   {
-    href: '/tools/tuning-loop',
-    title: 'Tuning Loop',
-    blurb: 'Self-improvement engine — prompt tuning, Lil_Hawk specialization, A/B routing experiments.',
-    status: 'soon',
-    icon: <FlaskConical className="size-5 text-foai-gold" />,
+    href: '/tools/live-plan',
+    title: 'Live Plan',
+    blurb: 'SSE feed of every dispatch, escalation, and completion as it happens. Real-time fleet visibility.',
+    status: 'live',
+    icon: <Activity className="size-5 text-foai-gold" />,
+  },
+  {
+    href: '/tools/lil-hawks',
+    title: 'Lil_Hawks',
+    blurb: 'Eleven specialist agents under Chicken Hawk. Click a row to dispatch — every call routes through NemoClaw.',
+    status: 'live',
+    icon: <Bird className="size-5 text-foai-gold" />,
+  },
+  {
+    href: '/tools/risk-events',
+    title: 'Risk Events',
+    blurb: 'Policy denials, hardening trips, audit anomalies. Filter by severity. Sorted newest-first.',
+    status: 'live',
+    icon: <AlertTriangle className="size-5 text-foai-gold" />,
   },
   {
     href: '/tools/nemoclaw',
@@ -32,11 +46,11 @@ const panels: PanelMeta[] = [
     icon: <Cpu className="size-5 text-foai-gold" />,
   },
   {
-    href: '/tools/lil-hawks',
-    title: 'Lil_Hawk Roster',
-    blurb: 'Eleven specialist agents under Chicken Hawk. Spawn, inspect, retire (Wave 2).',
+    href: '/tools/audit',
+    title: 'Audit Chain',
+    blurb: 'SHA256 tamper-evident receipt chain. Every dispatch leaves a receipt.',
     status: 'live',
-    icon: <Bird className="size-5 text-foai-gold" />,
+    icon: <FileSearch className="size-5 text-foai-gold" />,
   },
   {
     href: '/tools/cron',
@@ -46,11 +60,11 @@ const panels: PanelMeta[] = [
     icon: <Calendar className="size-5 text-foai-gold" />,
   },
   {
-    href: '/tools/audit',
-    title: 'Audit Chain',
-    blurb: 'SHA256 tamper-evident receipt chain. Every dispatch leaves a receipt.',
-    status: 'live',
-    icon: <FileSearch className="size-5 text-foai-gold" />,
+    href: '/tools/tuning-loop',
+    title: 'Tuning Loop',
+    blurb: 'Self-improvement engine — prompt tuning, Lil_Hawk specialization, A/B routing experiments.',
+    status: 'soon',
+    icon: <FlaskConical className="size-5 text-foai-gold" />,
   },
 ];
 
@@ -60,7 +74,7 @@ export default function ToolsOverview() {
       <header className="mb-10">
         <h1 className="text-3xl font-semibold tracking-tight">Tool Chest</h1>
         <p className="text-foai-muted mt-2">
-          Where you steer Chicken Hawk. Six panels — policy gating, runtime, agents, schedules, audit.
+          Where you steer Chicken Hawk. Eight panels — live plan, agents, risk events, policy gating, runtime, audit, schedules.
         </p>
       </header>
 

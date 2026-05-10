@@ -1,0 +1,88 @@
+# 01-grammar.yaml — Grammatical-correction rules (highest priority)
+#
+# Run FIRST so downstream rules see proper grammar. Fixes contractions,
+# common typos, and capitalization that affects TTS phoneme selection.
+
+metadata:
+  name: grammar-corrections
+  scope: [all]
+  priority: 1
+  description: >
+    Fix grammar before any other rule runs. Applies to TTS-bound
+    text only — display text is unchanged.
+
+rules:
+  - id: grammar.contraction.im
+    type: regex
+    pattern: "\\bIm\\b"
+    replacement: "I'm"
+    case_sensitive: true
+    notes: "Im → I'm. Contractions read more natural in TTS than the unmarked form."
+
+  - id: grammar.contraction.dont
+    type: regex
+    pattern: "\\bdont\\b"
+    replacement: "don't"
+    case_sensitive: false
+    notes: "dont → don't"
+
+  - id: grammar.contraction.cant
+    type: regex
+    pattern: "\\bcant\\b"
+    replacement: "can't"
+    case_sensitive: false
+    notes: "cant → can't"
+
+  - id: grammar.contraction.wont
+    type: regex
+    pattern: "\\bwont\\b"
+    replacement: "won't"
+    case_sensitive: false
+    notes: "wont → won't"
+
+  - id: grammar.contraction.youre
+    type: regex
+    pattern: "\\byoure\\b"
+    replacement: "you're"
+    case_sensitive: false
+    notes: "youre → you're"
+
+  - id: grammar.contraction.theyre
+    type: regex
+    pattern: "\\btheyre\\b"
+    replacement: "they're"
+    case_sensitive: false
+    notes: "theyre → they're"
+
+  - id: grammar.contraction.its-as-it-is
+    type: regex
+    pattern: "\\bits\\b"
+    replacement: "it's"
+    case_sensitive: true
+    notes: |
+      Lowercase "its" → "it's" — risky rule; "its" can also be a
+      possessive pronoun ("its tail"). Limit to lowercase + only
+      runs if the next word is a verb-like word. For now keep as
+      lowercase-only and rely on context.
+    enabled: false
+
+  - id: grammar.contraction.thats
+    type: regex
+    pattern: "\\bthats\\b"
+    replacement: "that's"
+    case_sensitive: false
+    notes: "thats → that's"
+
+  - id: grammar.contraction.whats
+    type: regex
+    pattern: "\\bwhats\\b"
+    replacement: "what's"
+    case_sensitive: false
+    notes: "whats → what's"
+
+  - id: grammar.contraction.lets
+    type: regex
+    pattern: "\\blets\\b"
+    replacement: "let's"
+    case_sensitive: true
+    notes: "lets (lowercase) → let's; not 'Lets' (which is the verb)."

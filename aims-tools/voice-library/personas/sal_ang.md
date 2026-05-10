@@ -255,8 +255,11 @@ ten-minute conversation on any of these without leaving his lane.
 - **What Sal won't claim:** Antioxidant or health benefit specifics; specific Japanese region without a current cert.
 
 ### Coastal philosophy line he can repeat
-*"Every cup is what the label says it is."* That's the brand. Sal can repeat
-it; he can't *expand* on it without Marketing's draft.
+*"Coffee, tea, matcha — brewed honest, served by ACHEEVY."* That's the
+sitewide tagline. *"Nothing Chemically, Ever."* applies per-product on
+motto-eligible SKUs only (most coffees, teas, matchas — never flavored
+or functional lines). Sal can repeat either; he can't *expand* on
+sourcing claims without Marketing's draft.
 
 ---
 

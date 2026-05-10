@@ -12,7 +12,7 @@ const POLICIES = [
   { href: "/policies/delivery-responsibility", title: "Package Theft & Delivery Responsibility", blurb: "Who's responsible at each stage and what to do if a package is missing." },
   { href: "/policies/privacy", title: "Privacy Policy", blurb: "What we collect, how we use it, your rights under CCPA, GDPR, and state privacy laws." },
   { href: "/policies/terms", title: "Terms of Service & Sale", blurb: "The contractual basis for using the storefront and buying our coffee." },
-  { href: "/policies/label-claims", title: "Label Claims & Sourcing Disclosure", blurb: "What we claim and why. Every cup is what the label says it is." },
+  { href: "/policies/label-claims", title: "Label Claims & Sourcing Disclosure", blurb: "What we claim, what we don't, and why. Per-product motto, per-tier sourcing, paper trail on every public claim." },
   { href: "/policies/health-disclaimer", title: "FDA & Health Claims Disclaimer", blurb: "Coffee is food, not medicine. We don't make health, supplement, or therapeutic claims." },
   { href: "/policies/prop-65", title: "California Proposition 65 Notice", blurb: "Required California warning for roasted coffee acrylamide, in plain English." },
   { href: "/policies/accessibility", title: "Accessibility Statement", blurb: "WCAG 2.1 AA target. How to report a barrier and what we'll do about it." },

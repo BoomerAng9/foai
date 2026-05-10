@@ -43,10 +43,20 @@ OPENAI_IMAGE_ENDPOINT = "https://api.openai.com/v1/images/edits"
 # Default provider per owner directive 2026-04-29 (after Ideogram canon-fail
 # + OpenAI direct billing-limit). Verified working 2026-04-29: Sal-as-reference
 # yields canon-aligned environmental portraits at ~$0.05/image, 2-3 min each.
+#
+# Fallback chain per owner directive 2026-05-02 (after Kie.ai upstream broke
+# gpt-image-2-image-to-image with opaque "Internal Error" responses):
+#   primary  → gpt-image-2-image-to-image  (Image Gen 2.0)
+#   fallback → nano-banana-2               (Google Gemini 3.1 Flash Image,
+#                                           Feb 2026 launch — newest available)
+# FORBIDDEN fallback: /api/v1/gpt4o-image/generate (GPT-4o Image, older).
+# Owner rule: fallback direction is ALWAYS newer/more recent, NEVER older.
+# See feedback_never_gpt4o_image_always_newest_fallback_2026_05_02.md.
 KIE_AI_API_KEY = os.environ.get("KIE_AI_API_KEY") or os.environ.get("Kie_Ai_Api_Key")
 KIE_CREATE_TASK_ENDPOINT = "https://api.kie.ai/api/v1/jobs/createTask"
 KIE_RECORD_INFO_ENDPOINT = "https://api.kie.ai/api/v1/jobs/recordInfo"
 KIE_GPT_IMAGE_2_MODEL = "gpt-image-2-image-to-image"
+KIE_NANO_BANANA_2_MODEL = "nano-banana-2"
 
 # Public URL for the canonical Sal_Ang reference. Required by Kie.ai's
 # input_urls parameter (must be publicly reachable). Hosted on the foai
@@ -334,18 +344,29 @@ CHARACTERS: list[dict] = [
         ),
     },
     {
-        "id": "mat_ang",
-        "display_name": "Mat_Ang",
-        "name_tag": "MAT",
+        "id": "macha_ang",
+        "display_name": "Ma'Cha_Ang",
+        "name_tag": "MACHA",
         "function": "Matcha specialist",
         "gender": "female",
         "race": "White",
         "hair": "shoulder-length French braids visible above the visor",
         "uniform": "sundress",
         "scene_cue": (
-            "summer-break shift, both hands working a matcha whisk over a small "
-            "ceramic bowl, focused posture"
+            "ceremonial-grade matcha preparation — both hands working a bamboo "
+            "chasen whisk over a small handmade chawan ceramic bowl set on a "
+            "wooden tea tray, posture quiet, deliberate, focused; the vibrant "
+            "green of freshly whisked matcha visible inside the bowl"
         ),
+        # Canonical visor override — Ma'Cha is the ONLY Coastal cast member
+        # whose visor LED + chest ANG patch glow MINT GREEN (#A8F0C6) instead
+        # of the cast-default orange. Owner directive: mint green is exclusive
+        # to Ma'Cha_Ang as the function-color tie to matcha. All other glow
+        # elements remain orange across the rest of the cast.
+        "visor_override": {
+            "led_color_name": "mint green",
+            "led_color_hex": "#A8F0C6",
+        },
     },
     # ─── Back-office (1) ────────────────────────────────────────────────
     {
@@ -461,6 +482,34 @@ def build_prompt(char: dict) -> str:
             "HARD tactical-visor polymer, structured and rigid."
         ),
     ]
+
+    # Per-character visor color override. Sal-anchor reference is orange,
+    # so the override clause is placed LAST and worded forcefully so the
+    # generator does not default back to the reference image's color.
+    override = char.get("visor_override")
+    if override:
+        color_name = override["led_color_name"]
+        color_hex = override["led_color_hex"]
+        parts.append(
+            f"CRITICAL COLOR OVERRIDE — {char['display_name']} is the ONE "
+            f"exception to the cast-default orange visor. For THIS character "
+            f"only, BOTH glow elements render in {color_name.upper()} "
+            f"({color_hex}) instead of orange: "
+            f"  (1) the upper visor LED display showing the name "
+            f"'{char['name_tag']}' glows vibrant {color_name} ({color_hex}) "
+            f"in block letters with a clean white outline (NOT orange — "
+            f"this character's visor is {color_name}, mark of the matcha "
+            f"function);  "
+            f"  (2) the chest 'ANG' patch glows the same vibrant {color_name} "
+            f"({color_hex}) block letters with white outline (NOT orange).  "
+            f"Every other Coastal cast portrait in this set is orange; "
+            f"{char['display_name']}'s {color_name} visor is the canonical "
+            f"function-color tie to matcha. Do NOT render any orange glow "
+            f"on this character. The reference image (Sal_Ang) shows orange "
+            f"because Sal is sales — copy Sal's STRUCTURE and COVERAGE and "
+            f"COMPOSITION, but render the glow {color_name} ({color_hex}) "
+            f"for {char['display_name']}."
+        )
     return " ".join(parts)
 
 
@@ -568,14 +617,17 @@ def _generate_via_openai(char: dict) -> Path:
     return out_path
 
 
-def _generate_via_kie(char: dict) -> Path:
-    """Generate via Kie.ai gpt-image-2-image-to-image ('Image Gen 2.0').
+class _KieFailure(RuntimeError):
+    """Raised when a single Kie.ai model attempt fails. Allows the wrapper
+    to walk the fallback chain without abandoning the run."""
 
-    Async task-based: POST creates a task with the public Sal reference URL
-    as input_urls; poll /jobs/recordInfo until state=success; download the
-    resultUrl (tempfile.aiquickdraw.com) into OUTPUT_DIR.
 
-    Verified working canon-aligned 2026-04-29.
+def _kie_run_one(char: dict, prompt: str, model: str, ref_field: str) -> Path:
+    """Run ONE Kie.ai model attempt against the unified jobs API.
+
+    `ref_field` is the input field name for the Sal reference URL — older
+    `gpt-image-2-image-to-image` uses `input_urls`; the unified Google
+    nano-banana family uses `image_input`.
     """
     if not KIE_AI_API_KEY:
         raise SystemExit(
@@ -583,30 +635,30 @@ def _generate_via_kie(char: dict) -> Path:
             "ssh myclaw-vps 'docker exec openclaw-sop5-openclaw-1 env | grep -i KIE_AI_API_KEY'"
         )
 
-    prompt = build_prompt(char)
     headers = {"Authorization": f"Bearer {KIE_AI_API_KEY}", "Content-Type": "application/json"}
-
-    create_payload = {
-        "model": KIE_GPT_IMAGE_2_MODEL,
-        "input": {
-            "prompt": prompt,
-            "input_urls": [SAL_REFERENCE_URL],
-            "aspect_ratio": "3:4",
-            "resolution": "2K",
-        },
+    input_block = {
+        "prompt": prompt,
+        ref_field: [SAL_REFERENCE_URL],
+        "aspect_ratio": "3:4",
+        "resolution": "2K",
     }
-    resp = requests.post(KIE_CREATE_TASK_ENDPOINT, headers=headers, json=create_payload, timeout=60)
+    if model == KIE_NANO_BANANA_2_MODEL:
+        input_block["output_format"] = "png"
+
+    create_payload = {"model": model, "input": input_block}
+    resp = requests.post(
+        KIE_CREATE_TASK_ENDPOINT, headers=headers, json=create_payload, timeout=60
+    )
     if resp.status_code != 200:
-        raise RuntimeError(
-            f"[{char['id']}] Kie.ai createTask {resp.status_code}: {resp.text[:500]}"
+        raise _KieFailure(
+            f"createTask HTTP {resp.status_code}: {resp.text[:300]}"
         )
     body = resp.json()
     if body.get("code") != 200:
-        raise RuntimeError(f"[{char['id']}] Kie.ai create error: {body}")
+        raise _KieFailure(f"create error: {body}")
     task_id = body["data"]["taskId"]
 
-    # Poll up to ~5 minutes (50 polls * 6s).
-    for _ in range(50):
+    for _ in range(50):  # ~5 minutes
         time.sleep(6)
         poll = requests.get(
             KIE_RECORD_INFO_ENDPOINT,
@@ -617,30 +669,59 @@ def _generate_via_kie(char: dict) -> Path:
         if poll.status_code != 200:
             continue
         pdata = poll.json().get("data", {})
-        state = pdata.get("state", "")
+        state = (pdata.get("state") or "").lower()
         if state == "success":
             result_json = pdata.get("resultJson", "")
             try:
                 result = json.loads(result_json) if isinstance(result_json, str) else result_json
                 urls = result.get("resultUrls", []) or []
                 if not urls:
-                    raise RuntimeError(
-                        f"[{char['id']}] Kie.ai success but no resultUrls: {pdata}"
-                    )
+                    raise _KieFailure(f"success but no resultUrls: {pdata}")
                 image_url = urls[0]
             except (json.JSONDecodeError, KeyError, AttributeError) as e:
-                raise RuntimeError(f"[{char['id']}] Kie.ai resultJson parse: {e} / {result_json[:300]}")
+                raise _KieFailure(f"resultJson parse: {e} / {result_json[:300]}")
             img_resp = requests.get(image_url, timeout=120)
             img_resp.raise_for_status()
             out_path = OUTPUT_DIR / f"{char['id']}.png"
             out_path.write_bytes(img_resp.content)
             return out_path
         if state in ("fail", "failed", "error"):
-            raise RuntimeError(
-                f"[{char['id']}] Kie.ai task {state}: {pdata.get('failMsg') or pdata}"
+            raise _KieFailure(
+                f"task {state}: {pdata.get('failMsg') or pdata.get('errorMessage') or pdata}"
             )
 
-    raise RuntimeError(f"[{char['id']}] Kie.ai task {task_id} timed out after 5 minutes")
+    raise _KieFailure(f"task {task_id} timed out after 5 minutes")
+
+
+def _generate_via_kie(char: dict) -> Path:
+    """Generate via Kie.ai with a hardcoded newer-only fallback chain.
+
+    Fallback chain (always newer/never older — owner directive 2026-05-02):
+      1. gpt-image-2-image-to-image  (Image Gen 2.0)
+      2. nano-banana-2               (Google Gemini 3.1 Flash Image, Feb 2026)
+
+    FORBIDDEN: any path through GPT-4o Image (`/api/v1/gpt4o-image/generate`
+    or model `gpt-4o-image`). Owner rule: fallback direction is ALWAYS newer.
+    See feedback_never_gpt4o_image_always_newest_fallback_2026_05_02.md.
+    """
+    prompt = build_prompt(char)
+    chain = [
+        ("gpt-image-2-image-to-image (Image Gen 2.0)", KIE_GPT_IMAGE_2_MODEL, "input_urls"),
+        ("nano-banana-2 (Gemini 3.1 Flash Image)", KIE_NANO_BANANA_2_MODEL, "image_input"),
+    ]
+    last_error: Exception | None = None
+    for label, model, ref_field in chain:
+        try:
+            print(f"    [{char['id']}] trying {label}...", flush=True)
+            return _kie_run_one(char, prompt, model, ref_field)
+        except _KieFailure as e:
+            print(f"    [{char['id']}] {label} FAILED: {e}", flush=True)
+            last_error = e
+    raise RuntimeError(
+        f"[{char['id']}] all Kie.ai models in newer-only chain failed. "
+        f"Last error: {last_error}. "
+        f"Do NOT silently fall back to GPT-4o Image — surface this and ask owner."
+    )
 
 
 def generate_portrait(char: dict, *, provider: str = "kie") -> Path:

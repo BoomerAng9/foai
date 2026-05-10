@@ -1,0 +1,26 @@
+{
+  "name": "coastal-send-email",
+  "description": "Coastal Brewing Co. transactional email gateway (SendGrid via Firebase Cloud Function).",
+  "version": "1.0.0",
+  "main": "lib/index.js",
+  "engines": {
+    "node": "20"
+  },
+  "scripts": {
+    "build": "tsc",
+    "build:watch": "tsc --watch",
+    "deploy": "firebase deploy --only functions:sendEmail --project ai-managed-services",
+    "logs": "firebase functions:log --project ai-managed-services",
+    "lint": "eslint --ext .ts .",
+    "serve": "npm run build && firebase emulators:start --only functions"
+  },
+  "dependencies": {
+    "firebase-functions": "^6.0.0",
+    "firebase-admin": "^12.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.4.0"
+  },
+  "private": true
+}

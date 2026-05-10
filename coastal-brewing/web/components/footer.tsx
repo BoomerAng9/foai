@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { Wordmark } from "@/components/wordmark";
 
 export function Footer() {
@@ -61,9 +62,12 @@ export function Footer() {
       {/* Three-line signature row */}
       <div className="border-t border-border/60">
         <div className="container relative grid grid-cols-1 items-center gap-2 py-8 text-center font-mono text-[10px] uppercase tracking-wordmark text-muted-foreground md:grid-cols-3">
-          <span className="md:text-left">© {new Date().getFullYear()} Coastal Brewing.</span>
-          <span className="text-foreground">Every cup is what the label says it is.</span>
-          <span className="md:text-right">Powered by: A.I.M.S. (AI MANAGED SOLUTIONS) est.2025</span>
+          <span className="md:text-left">© {new Date().getFullYear()} Coastal Brewing Co.</span>
+          <span className="text-foreground">Nothing Chemically, Ever.</span>
+          <span className="md:text-right flex items-center justify-end gap-3">
+            <span>Powered by: A.I.M.S. (AI MANAGED SOLUTIONS) est.2025</span>
+            <Image src="/plr-logo.png" alt="Made in PLR" width={36} height={36} className="inline-block opacity-80 hover:opacity-100 transition-opacity" />
+          </span>
         </div>
       </div>
 

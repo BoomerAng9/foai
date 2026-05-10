@@ -111,11 +111,23 @@ export async function POST(req: NextRequest) {
     const amountCents = Math.round(msrp * 100);
     const productName = f.product_name || f.sku;
 
+    // Pull the customer's coastal_uid from the cookie if present. This is
+    // what ties the eventual purchase webhook back to their user_profile
+    // row in the coastal Neon schema, so the next greeting variant can
+    // reference the actual SKU they bought ("How was that Coastal Blend?").
+    // Anonymous-no-cookie buyers still pay; their purchase just won't be
+    // tied to a profile until they identify themselves later.
+    const coastalUidCookie = req.cookies.get("coastal_uid")?.value || "";
+
     // Stripe metadata is flat key→string. Prefix intake fields with `intake_`
-    // so the webhook can rehydrate them into a TaskPacket.
-    const checkoutMetadata = {
+    // so the webhook can rehydrate them into a TaskPacket. coastal_uid is
+    // top-level so the webhook handler in api_server.py can pick it up
+    // directly via session_meta.get("coastal_uid").
+    const checkoutMetadata: Record<string, string> = {
       task_id: taskId,
       sku: f.sku,
+      product: "coastal-brewing",
+      sku_label: productName,
       customer_email: f.customer_email,
       intake_task_id: taskId,
       intake_product_name: productName,
@@ -129,6 +141,9 @@ export async function POST(req: NextRequest) {
       intake_delivery_window_preference: f.delivery_window_preference || "",
       intake_gift_message: (f.gift_message || "").slice(0, 480),
     };
+    if (coastalUidCookie) {
+      checkoutMetadata.coastal_uid = coastalUidCookie;
+    }
 
     const checkoutPayload = {
       sku: f.sku,

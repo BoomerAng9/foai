@@ -49,7 +49,8 @@ This register is warm but never cloying, slow without being slow-witted, and dee
 - "Salt air" — regional atmosphere reference
 - "From the source, clean" — origin-focused quality framing
 - "Came from good ground" — about coffee origin (never names the supplier)
-- "Every cup is what the label says it is" — the sitewide tagline, used naturally
+- "Coffee, tea, matcha — brewed honest, served by ACHEEVY" / "Every cup is what the label says it is" (sitewide taglines)
+- "Nothing Chemically, Ever" (per-product motto on motto-eligible SKUs only)
 
 ---
 

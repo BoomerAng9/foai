@@ -1,0 +1,96 @@
+# 50-belter-creole.yaml — Belter Creole conlang TTS phoneme guidance
+# Source: ~/foai/aims-tools/voice-library/syntax-library/belter-creole.md
+# Belter is a constructed creole (The Expanse / FOAI brand-extension); TTS
+# default English phonemes mishandle most Belter vocabulary. These rewrites
+# force TTS to read each lexeme as the correct phoneme.
+
+metadata:
+  name: belter-creole-phonetics
+  scope: [all]
+  priority: 50
+  description: Belter Creole vocabulary phoneme overrides for retail TTS.
+
+rules:
+  # Terms of address / greeting
+  - id: belter.kopeng
+    type: regex
+    pattern: "\\b[Kk]openg\\b"
+    replacement: "ko-peng"
+    notes: "kopeng (friend / partner) — TTS reads single-cluster; force two syllables KO-peng."
+
+  - id: belter.bossmang
+    type: regex
+    pattern: "\\b[Bb]ossmang\\b"
+    replacement: "boss-mang"
+    notes: "bossmang (boss + person) — force BOSS-mahng."
+
+  - id: belter.beratna
+    type: regex
+    pattern: "\\b[Bb]eratna\\b"
+    replacement: "buh-rot-na"
+    notes: "beratna (brother) — buh-RAHT-nah."
+
+  - id: belter.sasa-ke
+    type: regex
+    pattern: "\\bsasa ke\\b"
+    replacement: "sah-sah keh"
+    case_sensitive: false
+    notes: "sasa ke (do you understand? / you know) — sah-sah KEH."
+
+  # Common qualifiers
+  - id: belter.gut
+    type: regex
+    pattern: "\\b[Gg]ut\\b(?! morning| evening| night)"
+    replacement: "goot"
+    notes: "Belter gut (good) — goot (long oo). Negative-lookahead so 'gut morning' style isn't rewritten."
+
+  - id: belter.bist-bien
+    type: regex
+    pattern: "\\bbist bien\\b"
+    replacement: "beest bee-en"
+    case_sensitive: false
+    notes: "bist bien (you well? / hello) — BEEST bee-EN."
+
+  # Pronouns / articles (Belter shifts)
+  - id: belter.ya
+    type: regex
+    pattern: "\\b[Yy]a\\b(?!ll|h)"
+    replacement: "yah"
+    notes: |
+      Belter ya (you) — force YAH. Negative-lookahead so 'yall'
+      (URBANISM y'all) and 'yah' (also Belter) aren't double-rewritten.
+    enabled: false   # high false-positive risk in mixed-English text; enable per-character
+
+  - id: belter.mi
+    type: regex
+    pattern: "\\b[Mm]i\\b(?=\\s+\\w)"
+    replacement: "mee"
+    notes: "Belter mi (I/me) — mee. Lookahead avoids matching unrelated 'mi' in compound words."
+    enabled: false   # off by default; enable per-character
+
+  # Brand-conlang phrases
+  - id: belter.for-sa-witer
+    type: regex
+    pattern: "\\bfor[\\- ]sa[\\- ]witer\\b"
+    replacement: "for-sah-wit-er"
+    case_sensitive: false
+    notes: "for-sa-witer — FOR-sah-WIT-er. Brand-conlang exile phrase."
+
+  - id: belter.welwala
+    type: regex
+    pattern: "\\b[Ww]elwala\\b"
+    replacement: "well-wah-lah"
+    notes: "welwala (sellout / one-who-lives-with-the-Inners) — WELL-wah-lah."
+
+  - id: belter.tilaba
+    type: regex
+    pattern: "\\b[Tt]ilaba\\b"
+    replacement: "tee-lah-bah"
+    notes: "tilaba (rich-one / Inner) — TEE-lah-bah."
+
+# Notes for engine
+# - Several rules are `enabled: false` by default because they
+#   risk false-positive matches in mixed English/Belter text.
+#   Per-character enabling (e.g. only Bar_Ang gets the heavy
+#   ya / mi rewrites since he's full-Belter) is the next step
+#   when the engine grows per-character rule-pack toggles.

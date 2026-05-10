@@ -11,7 +11,7 @@ export default function HealthDisclaimerPage() {
     <PolicyPageLayout
       eyebrow="Health & FDA"
       title="FDA & Health Claims Disclaimer."
-      lastUpdated="April 30, 2026"
+      lastUpdated="May 6, 2026"
     >
       <h2 className="font-display text-2xl font-semibold text-foreground">What we sell</h2>
       <p>Coastal Brewing Co. sells <strong className="text-foreground">coffee, tea, matcha, and chai</strong> as conventional food and beverage products under U.S. Food and Drug Administration (FDA) labeling regulations.</p>
@@ -51,8 +51,15 @@ export default function HealthDisclaimerPage() {
         <li>If you have a severe allergy and need ingredient documentation for a specific lot, write <a className="text-accent hover:underline" href="mailto:bpo@achievemor.io">bpo@achievemor.io</a> and we&apos;ll forward the certificate of analysis.</li>
       </ul>
 
-      <h2 className="font-display text-2xl font-semibold text-foreground">If functional / mushroom products are offered</h2>
-      <p>Should Coastal add functional or mushroom coffee to the Storefront in the future, those products are sold as <strong className="text-foreground">food, not as supplements</strong>, in compliance with FDA rules. The label and product page will state the Statement of Identity exactly as the FDA requires (e.g., <em>Ground Coffee with Mushrooms</em>), list ingredients in descending order, carry a California Proposition 65 notice, and use only traditional-use language for the mushrooms (<em>long valued for, traditionally used, appreciated for</em>) — never therapeutic claims.</p>
+      <h2 className="font-display text-2xl font-semibold text-foreground">Functional / mushroom products</h2>
+      <p>Coastal carries a small line of functional blends — coffee and tea blended with traditional medicinal mushrooms. Those products are sold as <strong className="text-foreground">food, not as supplements</strong>, in compliance with FDA rules. Each label and product page states the Statement of Identity exactly as the FDA requires:</p>
+      <ul className="ml-5 list-disc space-y-1">
+        <li><strong className="text-foreground">Ground Coffee With Mushrooms</strong> — Dark and Medium roasts.</li>
+        <li><strong className="text-foreground">Instant Coffee With Mushrooms</strong>.</li>
+        <li><strong className="text-foreground">Roasted Green Tea With Mushrooms</strong> — our hojicha blend.</li>
+        <li><strong className="text-foreground">Matcha Green Tea With Mushrooms</strong>.</li>
+      </ul>
+      <p>Ingredients are listed in descending order. A <Link href="/policies/prop-65" className="text-accent hover:underline">California Proposition 65</Link> notice appears on every functional package. Marketing copy uses <strong className="text-foreground">traditional-use language only</strong> — <em>&ldquo;long valued for,&rdquo; &ldquo;traditionally used,&rdquo; &ldquo;appreciated for&rdquo;</em> — never therapeutic, immunity, focus, energy, or cognitive claims. The <em>Nothing Chemically, Ever.</em> motto does not extend to the functional line by design; the per-product motto-eligibility rule excludes blends with non-coffee inputs.</p>
 
       <h2 className="font-display text-2xl font-semibold text-foreground">Pregnant, nursing, or under 18</h2>
       <p>We do not direct our marketing to anyone under 18, and we recommend pregnant or nursing customers consult their physicians regarding caffeine.</p>
