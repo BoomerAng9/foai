@@ -1130,6 +1130,21 @@ async def stripe_webhook(request: Request) -> dict:
         raise HTTPException(status_code=400, detail=f"signature verification failed: {e}")
 
     out_path = STRIPE_EVENTS_DIR / f"{event['id']}.json"
+
+    # Stripe at-least-once delivery: webhook may redeliver on 5xx or
+    # network blip. Idempotency guard — if we've already written this
+    # event to disk, this is a retry. Return the prior envelope without
+    # re-firing escalation/order processing (which would duplicate
+    # audit-ledger rows + Telegram messages).
+    if out_path.exists():
+        return {
+            "received": True,
+            "event_id": event["id"],
+            "type": event["type"],
+            "path": str(out_path),
+            "idempotent_replay": True,
+            "message": "Event already processed — Stripe at-least-once redelivery skipped.",
+        }
     out_path.write_text(json.dumps(event, indent=2, default=str), encoding="utf-8")
 
     # On successful Checkout, auto-fire /run with the order packet so the
@@ -1137,11 +1152,39 @@ async def stripe_webhook(request: Request) -> dict:
     # Stripe paid → /run → NemoClaw → Telegram approval → SMTP send.
     run_report: Optional[Dict[str, Any]] = None
     rag_report: Optional[Dict[str, Any]] = None
+    escalation_report: Optional[Dict[str, Any]] = None
     if event.get("type") == "checkout.session.completed":
         try:
             session = event["data"]["object"]
             session_meta = dict(session.get("metadata") or {})
             session_meta["checkout_session_id"] = session.get("id")
+
+            # Path A escalation branch: if metadata carries an escalation
+            # token (minted by /api/escalation/form-url), record the
+            # commit + fire owner Telegram. Owner directive 2026-05-09 —
+            # Stripe Checkout replaces Paperform as the canonical
+            # commitment surface for above-cap deals.
+            _esc_token = session_meta.get("escalation_token")
+            _esc_flow = session_meta.get("flow") == "stepper_escalation"
+            if _esc_token and _esc_flow:
+                try:
+                    escalation_report = _record_escalation_commit(
+                        escalation_token=_esc_token,
+                        qty=int(session_meta.get("qty", 1)),
+                        cadence="ppu",  # Path A v1 bakes terms into the link at mint time
+                        delivery_window="standard",
+                        payment_terms="pay-on-order",
+                        notes=f"checkout_session={session.get('id')}",
+                        stripe_session_id=session.get("id"),
+                        stripe_customer_id=session.get("customer"),
+                        stripe_payment_intent_id=session.get("payment_intent"),
+                        source="stripe_webhook",
+                    )
+                except HTTPException as _esc_exc:
+                    escalation_report = {"error": _esc_exc.detail, "status": _esc_exc.status_code}
+                except Exception as _esc_exc:
+                    escalation_report = {"error": str(_esc_exc)}
+
             packet = _build_task_packet_from_session(session_meta)
             if packet is not None:
                 # Inject the gateway token so the internal call to /run passes _auth.
@@ -1208,6 +1251,7 @@ async def stripe_webhook(request: Request) -> dict:
         "path": str(out_path),
         "run_report": run_report,
         "rag_report": rag_report,
+        "escalation_report": escalation_report,
     }
 
 
@@ -1827,52 +1871,71 @@ def get_quote(req: QuoteRequest) -> dict:
 
 
 # ---------------------------------------------------------------------------
-# /api/escalation/commit — Paperform webhook consumer for T1 escalation.
+# /api/escalation/* — T1 above-cap escalation flow.
 #
-# Owner directive 2026-05-01: Stripe is built into Paperform + Stepper.
-# The Paperform form handles payment-method-on-file (or upfront charge)
-# natively as the canonical commitment gate. When a Custee submits the
-# T1 commitment-confirmation form, Paperform webhooks here. Runner
-# verifies the HMAC token (issued by Spinner when an agent hit its tier
-# ceiling), records the volume_commitment in the audit ledger, and fires
-# Telegram to ACHEEVY/owner.
+# Owner directive 2026-05-09 (Path A — supersedes 2026-05-01 Paperform plan):
+# Stripe Checkout / Payment Link is the canonical commitment surface.
+# Paperform + Stepper.io are NOT used for Coastal launch. The HMAC
+# escalation_token (minted by Spinner when an agent hits its tier
+# ceiling) rides along in Stripe Checkout Session metadata; on
+# `checkout.session.completed` the /stripe/webhook handler fires the
+# audit-ledger record + Telegram approval prompt.
 #
-# Form spec lives in iCloudDrive/.../coastal-business-plan/paperform-
-# escalation-form-spec.md. Set STEPPER_ESCALATION_FORM_URL env var to
-# the live Paperform URL once owner builds it.
+# Two entry points exist for the commit-record:
+#   1. /stripe/webhook → checkout.session.completed branch (canonical)
+#   2. POST /api/escalation/commit (back-compat for direct testing /
+#      future webhook senders); identical logic via _record_escalation_commit
 # ---------------------------------------------------------------------------
 
 from agents.shared import authority_tiers as _at  # noqa: E402
 
 
 class EscalationCommitRequest(BaseModel):
-    """Webhook payload from Paperform's T1 commitment-confirmation form.
+    """Direct-call payload for /api/escalation/commit.
 
-    The form spec (paperform-escalation-form-spec.md) defines these fields.
-    Paperform's Stripe integration handles payment authorization or
-    method-on-file before this webhook fires.
+    Path A canonical commit fires from /stripe/webhook
+    (checkout.session.completed); this endpoint stays for direct testing
+    and any future external webhook sender that wants to replay the same
+    record-shape.
     """
     escalation_token: str
     qty: int
-    cadence: str  # "ppu" | "3-month" | "6-month" | "9-month-pay9-get12" | "quarterly-bulk"
-    delivery_window: str  # "standard" | "priority" | "instant"
-    payment_terms: str  # "pay-on-order" | "net-30" | "custom"
+    cadence: str = "ppu"  # "ppu" | "3-month" | "6-month" | "9-month-pay9-get12" | "quarterly-bulk"
+    delivery_window: str = "standard"  # "standard" | "priority" | "instant"
+    payment_terms: str = "pay-on-order"  # "pay-on-order" | "net-30" | "custom"
     notes: str = ""
-    # Paperform-side fields populated automatically (not part of the Custee form):
-    paperform_submission_id: Optional[str] = None
-    paperform_form_id: Optional[str] = None
-    stripe_customer_id: Optional[str] = None  # Paperform→Stripe ID after auth
-    stripe_payment_method_id: Optional[str] = None
+    stripe_session_id: Optional[str] = None
+    stripe_customer_id: Optional[str] = None
+    stripe_payment_intent_id: Optional[str] = None
 
 
-@app.post("/api/escalation/commit")
-def escalation_commit(req: EscalationCommitRequest) -> dict:
-    """Receive Paperform webhook after Custee completes the T1 commitment
-    confirmation form. Validates HMAC token + records volume_commitment +
-    fires Telegram. ACHEEVY then enters the chat with full context to
-    finalize the deal.
+def _record_escalation_commit(
+    *,
+    escalation_token: str,
+    qty: int,
+    cadence: str,
+    delivery_window: str,
+    payment_terms: str,
+    notes: str = "",
+    stripe_session_id: Optional[str] = None,
+    stripe_customer_id: Optional[str] = None,
+    stripe_payment_intent_id: Optional[str] = None,
+    source: str = "direct",  # "stripe_webhook" | "direct"
+) -> dict:
+    """Validate the HMAC escalation token, write the audit-ledger row,
+    and fire the owner-Telegram approval prompt. Used by both
+    /stripe/webhook (canonical Path A) and POST /api/escalation/commit
+    (back-compat).
+
+    IDEMPOTENT: if an audit_ledger volume_commitment row already exists
+    for this escalation_id, returns the existing-record envelope without
+    re-firing Telegram or re-inserting. Closes the 5-min HMAC token
+    replay window — same valid token POSTed twice = single commit.
+
+    Raises HTTPException(403) on invalid/expired token. Returns the
+    response envelope on success.
     """
-    payload = _at.verify_stepper_escalation_token(req.escalation_token)
+    payload = _at.verify_stepper_escalation_token(escalation_token)
     if payload is None:
         raise HTTPException(
             status_code=403,
@@ -1880,14 +1943,42 @@ def escalation_commit(req: EscalationCommitRequest) -> dict:
         )
 
     escalation_id = payload["escalation_id"]
+
+    # Idempotency guard — query audit_ledger for an existing
+    # volume_commitment row with this escalation_id. If found, return
+    # the existing-record envelope without re-firing. SQLite-persisted
+    # so survives container restarts (unlike in-memory replay-set).
+    try:
+        prior = audit_ledger.query_audit_trail(escalation_id) or {}
+        prior_actions = prior.get("action_receipts") or []
+        already_committed = any(
+            (r.get("action_type") == "volume_commitment" and r.get("status") == "committed")
+            for r in prior_actions
+        )
+        if already_committed:
+            return {
+                "ok": True,
+                "escalation_id": escalation_id,
+                "state": "already_committed",
+                "actor_tier_at_escalation": payload["tier"],
+                "message": (
+                    "Volume commitment was already recorded. ACHEEVY has the context. "
+                    "Custee should return to the chat surface — Sal will pick up where you left off."
+                ),
+            }
+    except Exception:
+        # Audit-trail query failed; proceed with insert (better to risk
+        # a duplicate audit row than to lose the commit).
+        pass
     summary = (
-        f"qty={req.qty} cadence={req.cadence} delivery={req.delivery_window} "
-        f"terms={req.payment_terms} actor={payload['actor']} "
+        f"src={source} qty={qty} cadence={cadence} delivery={delivery_window} "
+        f"terms={payment_terms} actor={payload['actor']} "
         f"requested_pct={payload['requested_pct']:.1f} sku={payload['sku']} "
         f"custee={payload['custee_id']} "
-        f"paperform_sub={req.paperform_submission_id or '-'} "
-        f"stripe_customer={req.stripe_customer_id or '-'} "
-        f"notes={req.notes[:120]}"
+        f"stripe_session={stripe_session_id or '-'} "
+        f"stripe_customer={stripe_customer_id or '-'} "
+        f"stripe_pi={stripe_payment_intent_id or '-'} "
+        f"notes={notes[:120]}"
     )
     audit_ledger.insert_action_receipt(
         task_id=escalation_id,
@@ -1900,15 +1991,16 @@ def escalation_commit(req: EscalationCommitRequest) -> dict:
 
     if TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID:
         msg = (
-            f"T1 escalation committed via Paperform — Coastal Brewing\n"
+            f"T1 escalation committed via Stripe — Coastal Brewing\n"
             f"escalation_id: {escalation_id}\n"
+            f"source: {source}\n"
             f"actor: {payload['actor']} ({payload['tier']})\n"
             f"sku: {payload['sku']}\n"
             f"requested_pct: {payload['requested_pct']:.1f}%\n"
-            f"committed: qty={req.qty} cadence={req.cadence}\n"
-            f"  delivery={req.delivery_window} terms={req.payment_terms}\n"
-            f"stripe_customer: {req.stripe_customer_id or '(not yet)'}\n"
-            f"notes: {req.notes[:200]}\n\n"
+            f"committed: qty={qty} cadence={cadence}\n"
+            f"  delivery={delivery_window} terms={payment_terms}\n"
+            f"stripe_session: {stripe_session_id or '(direct)'}\n"
+            f"notes: {notes[:200]}\n\n"
             f"ACHEEVY: enter the chat with full context."
         )
         try:
@@ -1932,34 +2024,99 @@ def escalation_commit(req: EscalationCommitRequest) -> dict:
     }
 
 
+@app.post("/api/escalation/commit")
+def escalation_commit(req: EscalationCommitRequest) -> dict:
+    """Direct/back-compat endpoint. Canonical Path A commit happens in
+    /stripe/webhook on checkout.session.completed. This endpoint stays
+    for direct testing and any future external sender."""
+    return _record_escalation_commit(
+        escalation_token=req.escalation_token,
+        qty=req.qty,
+        cadence=req.cadence,
+        delivery_window=req.delivery_window,
+        payment_terms=req.payment_terms,
+        notes=req.notes,
+        stripe_session_id=req.stripe_session_id,
+        stripe_customer_id=req.stripe_customer_id,
+        stripe_payment_intent_id=req.stripe_payment_intent_id,
+        source="direct",
+    )
+
+
 @app.get("/api/escalation/form-url")
 def escalation_form_url(token: str = Query(default="")) -> dict:
-    """Resolve the Paperform escalation form URL, with the HMAC token
-    embedded as a hidden-field prefill. Runner caller (Spinner) uses this
-    to compose the redirect link surfaced to the Custee in chat:
-    `https://stepper.coastalbrewing.co/t1-commit?escalation_token=<token>`.
+    """Mint a Stripe Checkout Session for the escalation deal and return
+    its hosted URL. Path A canonical (2026-05-09) — replaces the
+    previously-planned Paperform redirect.
 
-    Set `STEPPER_ESCALATION_FORM_URL` env to the Paperform URL once owner
-    builds it. Until then, returns a not-configured envelope so Spinner
-    can fall back to the existing `escalate_to_owner` Telegram path.
+    The escalation_token (HMAC, contains sku + qty + actor +
+    requested_pct + custee_id) decodes to the deal terms; runner looks
+    up SKU pricing in catalog, applies the requested discount, and
+    creates a single-use Checkout Session with the token in metadata.
+
+    Endpoint name kept (`form-url`) for caller back-compat (Spinner +
+    chat surface already call this); response shape unchanged
+    (`{ok, redirect_url}`); only the redirect target changes.
     """
-    base = os.environ.get("STEPPER_ESCALATION_FORM_URL", "")
-    if not base:
-        return {
-            "ok": False,
-            "verdict": "not_configured",
-            "message": (
-                "Paperform escalation form URL not yet set. "
-                "Owner: build the form per paperform-escalation-form-spec.md "
-                "and set STEPPER_ESCALATION_FORM_URL env on aims-vps."
-            ),
-        }
     if not token:
         raise HTTPException(status_code=400, detail="missing_token")
-    sep = "&" if "?" in base else "?"
+    payload = _at.verify_stepper_escalation_token(token)
+    if payload is None:
+        return {
+            "ok": False,
+            "verdict": "invalid_or_expired_token",
+            "message": "Escalation token failed HMAC verification or has expired (5 min TTL).",
+        }
+    if not (STRIPE_AVAILABLE and _stripe_is_configured()):
+        return {
+            "ok": False,
+            "verdict": "stripe_not_configured",
+            "message": (
+                "Stripe is not configured on this runner. Set STRIPE_SECRET_KEY "
+                "+ STRIPE_WEBHOOK_SECRET in coastal-runner env. Falls back to "
+                "the existing escalate_to_owner Telegram path until then."
+            ),
+        }
+
+    # Look up SKU pricing for the escalation deal
+    from catalog import get_product_internal as _catalog_lookup  # noqa: E402
+    sku = str(payload.get("sku", ""))
+    qty = int(payload.get("qty", 1))
+    requested_pct = float(payload.get("requested_pct", 0))
+    product = _catalog_lookup(sku)
+    if not product or "msrp" not in product:
+        return {
+            "ok": False,
+            "verdict": "sku_not_in_catalog",
+            "message": f"SKU `{sku}` not found in catalog. Cannot price escalation.",
+        }
+    msrp = float(product["msrp"])
+    discounted = msrp * (1.0 - requested_pct / 100.0)
+    unit_price_cents = max(1, int(round(discounted * 100)))
+    line_label = (
+        f"{product.get('name', sku)} × {qty} — escalation deal "
+        f"({requested_pct:.1f}% off MSRP, approved by {payload.get('actor', '?')})"
+    )
+    checkout_url = _stripe_escalation_checkout_create(
+        escalation_token=token,
+        payload=payload,
+        line_label=line_label,
+        unit_price_cents=unit_price_cents,
+        qty=qty,
+    )
+    if not checkout_url:
+        return {
+            "ok": False,
+            "verdict": "stripe_session_create_failed",
+            "message": "Stripe Checkout Session creation failed; check coastal.escalation logs.",
+        }
     return {
         "ok": True,
-        "redirect_url": f"{base}{sep}escalation_token={token}",
+        "redirect_url": checkout_url,
+        "escalation_id": payload.get("escalation_id"),
+        "unit_price_cents": unit_price_cents,
+        "qty": qty,
+        "discount_pct": requested_pct,
     }
 
 
@@ -2684,7 +2841,21 @@ def _coastal_catalog_context() -> str:
             origin = p.get("origin") or p.get("ingredients") or ""
             origin_short = origin[:60] if origin else ""
             price = f"${msrp}" if msrp else ""
-            lines.append(f"  - {sku}: {name} {price} {origin_short}".strip())
+            # Surface certifications + key tags so the LLM can answer
+            # "what fair-trade / organic / decaf options do you have"
+            # without inventing or denying their existence.
+            certs = p.get("certifications") or []
+            tags = p.get("tags") or []
+            badges: List[str] = []
+            for c in certs:
+                if c and str(c).lower() not in [b.lower() for b in badges]:
+                    badges.append(str(c).lower())
+            for t in tags:
+                ts = str(t).lower()
+                if ts in ("fairtrade", "organic", "decaf", "kosher", "rainforest", "shade-grown") and ts not in badges:
+                    badges.append(ts)
+            badge_str = f" [{', '.join(badges)}]" if badges else ""
+            lines.append(f"  - {sku}: {name} {price} {origin_short}{badge_str}".strip())
     return "\n".join(lines) + "\n\n"
 
 
@@ -2852,10 +3023,10 @@ async def _stream_employee_response(
     messages: list,
     websocket: WebSocket,
     input_tokens: int,
-) -> tuple[str, int, int]:
+) -> tuple[str, int, int, bool]:
     """
     Stream a DeepSeek response for the given employee over the WebSocket.
-    Returns (full_response_text, thinking_token_count, response_token_count).
+    Returns (full_response_text, thinking_token_count, response_token_count, stream_failed).
     """
     anim_type = EMPLOYEE_ANIMATION.get(employee, "espresso_cup")
     anim_size, anim_dur = get_animation_size(anim_type, input_tokens)
@@ -2898,10 +3069,24 @@ async def _stream_employee_response(
     # OpenRouter-specific — Inworld Router emits the reasoning tokens
     # natively without that flag.
 
+    stream_failed = False
     try:
         async with httpx.AsyncClient(timeout=90) as client:
             async with client.stream("POST", f"{_GW_URL}/chat/completions",
                                      headers=headers, json=payload) as resp:
+                if resp.status_code != 200:
+                    err_body = await resp.aread()
+                    log.warning(
+                        "AIMS Gateway non-200 for %s: %s — %s",
+                        model, resp.status_code,
+                        err_body.decode("utf-8", "replace")[:300],
+                    )
+                    await websocket.send_json(WsError(
+                        code="gateway_error",
+                        message=f"Gateway error ({resp.status_code}): {err_body.decode('utf-8', 'replace')[:100]}",
+                    ).model_dump())
+                    return full_response, thinking_count, response_count, True
+
                 async for token_type, content in parse_openrouter_stream(resp.aiter_lines()):
                     if token_type == THINKING:
                         thinking_count += 1
@@ -2928,6 +3113,7 @@ async def _stream_employee_response(
                     elif token_type == DONE:
                         break
     except Exception as exc:
+        stream_failed = True
         await websocket.send_json(WsError(
             code="stream_error",
             message=f"Stream interrupted: {exc}",
@@ -2942,7 +3128,7 @@ async def _stream_employee_response(
             employee=employee,
         ).model_dump())
 
-    return full_response, thinking_count, response_count
+    return full_response, thinking_count, response_count, stream_failed
 
 
 @app.websocket("/api/v1/chat/stream")
@@ -2992,6 +3178,10 @@ async def chat_stream(websocket: WebSocket, token: Optional[str] = Query(default
     try:
         while True:
             raw = await websocket.receive_json()
+            # Handle keepalive ping from the frontend's 25s heartbeat.
+            if raw.get("type") == "ping":
+                continue
+
             msg = WsUserMessage.model_validate(raw)
 
             if msg.interrupt_current:
@@ -3002,6 +3192,23 @@ async def chat_stream(websocket: WebSocket, token: Optional[str] = Query(default
             user_content = msg.content.strip()
             if not user_content:
                 continue
+
+            # Honor a desired_employee hint from the frontend (set by
+            # explicit-route detection in chat-panel: "talk to Melli",
+            # "bulk order", etc.). Validate against known employees so a
+            # bad client can't route into a non-existent agent.
+            if msg.desired_employee and msg.desired_employee in _EMPLOYEE_SURFACE:
+                if msg.desired_employee != employee:
+                    await websocket.send_json(WsEscalationEvent(
+                        from_employee=employee,
+                        from_tier=EMPLOYEE_TIER.get(employee, "T3"),
+                        to_employee=msg.desired_employee,
+                        to_tier=EMPLOYEE_TIER.get(msg.desired_employee, "T2"),
+                        reason="user_request",
+                        new_animation_type=EMPLOYEE_ANIMATION.get(msg.desired_employee, "espresso_cup"),
+                        delegation_language=None,
+                    ).model_dump())
+                    employee = msg.desired_employee
 
             # Detect escalation before calling the model
             escalation = detect_escalation(user_content, employee)
@@ -3037,12 +3244,19 @@ async def chat_stream(websocket: WebSocket, token: Optional[str] = Query(default
             input_tokens = sum(len(m["content"].split()) * 1.3 for m in messages)
 
             # Stream the response
-            full_response, think_tokens, resp_tokens = await _stream_employee_response(
+            full_response, think_tokens, resp_tokens, stream_failed = await _stream_employee_response(
                 employee=employee,
                 messages=messages,
                 websocket=websocket,
                 input_tokens=int(input_tokens),
             )
+
+            # On stream failure: WsError already sent. Skip the rest of the
+            # turn (no history append, no WsResponseComplete) so the client
+            # state stays clean and the user can retry. Continuing the loop
+            # waits for the next user message on the same WebSocket.
+            if stream_failed:
+                continue
 
             # Append to history — only include assistant turn if there was
             # a real response. An empty full_response means the stream
@@ -3056,6 +3270,19 @@ async def chat_stream(websocket: WebSocket, token: Optional[str] = Query(default
             if len(history) > 12:
                 history = history[-12:]
 
+            # Detect handoff intent in Sal's reply so the next turn
+            # starts on the right agent without waiting for escalation logic.
+            next_emp: Optional[str] = None
+            if full_response and employee == "sal_ang":
+                _r = full_response.lower()
+                if any(p in _r for p in ("get melli", "loop in melli", "bring in melli",
+                                          "melli will", "melli can", "hand this to melli",
+                                          "melli handles", "melli takes")):
+                    next_emp = "melli_capensi"
+                elif any(p in _r for p in ("get luc", "bring in luc", "luc will",
+                                            "luc can", "luc handles", "lu-cal")):
+                    next_emp = "luc_ang"
+
             # Emit turn complete
             cost_estimate = (think_tokens * 0.0000005) + (resp_tokens * 0.0000015)
             await websocket.send_json(WsResponseComplete(
@@ -3064,6 +3291,7 @@ async def chat_stream(websocket: WebSocket, token: Optional[str] = Query(default
                 cost_usd_estimate=round(cost_estimate, 6),
                 employee=employee,
                 tier=EMPLOYEE_TIER.get(employee, "T1"),
+                next_employee=next_emp,
             ).model_dump())
 
             # Audit log
@@ -3495,6 +3723,62 @@ def _stripe_customer_create(email: str, name: Optional[str] = None) -> Optional[
         return None
 
 
+def _stripe_escalation_checkout_create(
+    *,
+    escalation_token: str,
+    payload: Dict[str, Any],
+    line_label: str,
+    unit_price_cents: int,
+    qty: int,
+) -> Optional[str]:
+    """Mint a single-use Stripe Checkout Session for an above-cap escalation
+    deal. Owner directive 2026-05-09 (Path A): Stripe Payment Link / Checkout
+    is the canonical commitment surface — replaces the previously-planned
+    Paperform escalation form. The HMAC `escalation_token` rides along in
+    `metadata` so /stripe/webhook can replay the commit-record on
+    `checkout.session.completed`.
+
+    Returns the hosted checkout URL or None if Stripe isn't configured.
+    """
+    if not STRIPE_AVAILABLE or not _stripe_is_configured():
+        return None
+    try:
+        import stripe as _stripe   # noqa: E402
+        session = _stripe.checkout.Session.create(
+            mode="payment",
+            payment_method_types=["card"],
+            line_items=[
+                {
+                    "price_data": {
+                        "currency": "usd",
+                        "product_data": {"name": line_label},
+                        "unit_amount": int(unit_price_cents),
+                    },
+                    "quantity": int(qty),
+                }
+            ],
+            success_url=f"{AUTH_PUBLIC_URL}/account?escalation=committed&session_id={{CHECKOUT_SESSION_ID}}",
+            cancel_url=f"{AUTH_PUBLIC_URL}/account?escalation=cancelled",
+            metadata={
+                "escalation_token": escalation_token,
+                "escalation_id": str(payload.get("escalation_id", "")),
+                "actor":          str(payload.get("actor", "")),
+                "actor_tier":     str(payload.get("tier", "")),
+                "sku":            str(payload.get("sku", "")),
+                "qty":            str(qty),
+                "requested_pct":  str(payload.get("requested_pct", "")),
+                "custee_id":      str(payload.get("custee_id", "")),
+                "vertical":       "coastal-brewing",
+                "flow":           "stepper_escalation",
+            },
+        )
+        return session.get("url") if isinstance(session, dict) else getattr(session, "url", None)
+    except Exception as exc:
+        log = __import__("logging").getLogger("coastal.escalation")
+        log.warning("stripe escalation checkout create failed: %s", exc)
+        return None
+
+
 class AuthSignupRequest(BaseModel):
     email: str
     name: Optional[str] = None
@@ -3722,14 +4006,14 @@ async def auth_login(body: AuthLoginRequest):
     })
     link = f"{AUTH_PUBLIC_URL}/auth/verify?token={token}"
 
-    # Email delivery via the Firebase Cloud Function gateway (per the
-    # 2026-05-06 GCP/Firebase-not-Resend canon). The function lives in
-    # the foai-aims Firebase project at
-    # `coastal-brewing/firebase-functions/send-email/`. When
-    # COASTAL_EMAIL_FUNCTION_URL + COASTAL_EMAIL_FUNCTION_SECRET are
-    # set, the adapter signs + POSTs and the magic link goes by email.
-    # When unset (dev mode), we return the link inline so cross-device
-    # login stays testable without the function deployed.
+    # Email delivery via GCP Application Integration "Send Email" task
+    # (owner directive 2026-05-09: GCP-native, no third-party email
+    # vendor). The runner POSTs plaintext subject + body to the
+    # AppInt API trigger; the integration's Send Email task fires
+    # inside the ai-managed-services GCP project. When
+    # COASTAL_APPINT_EMAIL_URL is unset (dev mode), we return the link
+    # inline so cross-device login stays testable without the
+    # integration published.
     response_payload: Dict[str, Any] = {
         "ok": True,
         "sent": True,
@@ -3747,7 +4031,7 @@ async def auth_login(body: AuthLoginRequest):
         _magic_link_body = None                # type: ignore
 
     if _email_is_configured() and _email_send and _magic_link_body:
-        html, text = _magic_link_body(
+        _, text = _magic_link_body(
             recipient_email=email,
             magic_link=link,
             ttl_minutes=AUTH_TOKEN_TTL_SEC // 60,
@@ -3756,18 +4040,18 @@ async def auth_login(body: AuthLoginRequest):
             _email_send(
                 to=email,
                 subject="Pull up to the counter — your Coastal sign-in link",
-                html=html,
                 text=text,
                 template_id="auth_magic_link",
             )
         except Exception as exc:
             log = __import__("logging").getLogger("coastal.auth")
-            log.warning("email function send raised for %s: %s", email, exc)
+            log.warning("appint email send raised for %s: %s", email, exc)
         # Don't leak send-status to the caller. Generic body either way
         # to prevent email-enumeration attacks.
     else:
-        # Dev mode — surface the magic link until the Firebase Function
-        # is deployed + COASTAL_EMAIL_FUNCTION_URL lands in the runner env.
+        # Dev mode — surface the magic link until the AppInt
+        # integration is published + COASTAL_APPINT_EMAIL_URL lands in
+        # the runner env.
         response_payload["magic_link"] = link
 
     return response_payload
