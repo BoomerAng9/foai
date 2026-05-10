@@ -7,6 +7,7 @@ import { Wordmark } from "@/components/wordmark";
 
 const NAV_LINKS = [
   { href: "/products", label: "Offerings" },
+  { href: "/pricing", label: "Pricing" },
   { href: "/recipes", label: "Recipes" },
   { href: "/team", label: "Team" },
   { href: "/about/governance", label: "Commitment" },
@@ -22,6 +23,7 @@ const DRAWER_GROUPS = [
       { href: "/products?cat=tea", label: "Tea" },
       { href: "/products?cat=matcha", label: "Matcha" },
       { href: "/products?cat=subscription", label: "Subscriptions" },
+      { href: "/pricing", label: "Pricing & Tiers" },
       { href: "/merch", label: "Merch" },
       { href: "/products", label: "Shop All" },
     ],
