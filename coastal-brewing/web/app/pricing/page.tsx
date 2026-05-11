@@ -33,7 +33,7 @@ const SUBSCRIPTIONS: Subscription[] = [
     sku: "coastal-tea-monthly",
     name: "Tea Monthly",
     tagline: "A new Lowcountry Tea every month.",
-    price: "$24.99",
+    price: "$26.99",
     priceNote: "/ month, ships free over $50",
     image: "/products/coastal-tea-monthly.png",
     whatYouGet: [
@@ -41,6 +41,7 @@ const SUBSCRIPTIONS: Subscription[] = [
       "Variety swap each cycle — we won't repeat",
       "Tasting note from Sal in every box",
       "Pause or cancel any time",
+      "First order: +$6.54 service initiation (one-time, transparent on receipt)",
     ],
     cta: { label: "Start Tea Monthly", href: "/chat?sku=coastal-tea-monthly&intent=subscribe" },
   },
@@ -48,7 +49,7 @@ const SUBSCRIPTIONS: Subscription[] = [
     sku: "coastal-coffee-monthly",
     name: "Coffee Monthly",
     tagline: "One bag a month, picked for your palate.",
-    price: "$26.99",
+    price: "$34.99",
     priceNote: "/ month, ships free over $50",
     image: "/products/coastal-coffee-monthly.png",
     whatYouGet: [
@@ -56,6 +57,7 @@ const SUBSCRIPTIONS: Subscription[] = [
       "Sal rotates origin + roast based on what you like",
       "Tasting note printed on the bag",
       "Skip a month, swap the bag, or cancel any time",
+      "First order: +$6.54 service initiation (one-time, transparent on receipt)",
     ],
     cta: { label: "Start Coffee Monthly", href: "/chat?sku=coastal-coffee-monthly&intent=subscribe" },
     recommended: true,
@@ -64,7 +66,7 @@ const SUBSCRIPTIONS: Subscription[] = [
     sku: "coastal-functional-coffee-monthly",
     name: "Functional Coffee Monthly",
     tagline: "Specialty coffee blended with Lion's Mane, Cordyceps, and Reishi.",
-    price: "$33.99",
+    price: "$44.99",
     priceNote: "/ month, ships free over $50",
     image: "/products/coastal-functional-coffee-monthly.png",
     whatYouGet: [
@@ -72,6 +74,7 @@ const SUBSCRIPTIONS: Subscription[] = [
       "Specialty Arabica blended with Lion's Mane, Cordyceps, and Reishi",
       "Mushrooms long valued in culinary traditions for clarity, vitality, and balance",
       "Sold as a food, not a supplement",
+      "First order: +$6.54 service initiation (one-time, transparent on receipt)",
     ],
     cta: { label: "Start Functional Monthly", href: "/chat?sku=coastal-functional-coffee-monthly&intent=subscribe" },
   },
@@ -79,7 +82,7 @@ const SUBSCRIPTIONS: Subscription[] = [
     sku: "coastal-combo-monthly",
     name: "Combo Monthly",
     tagline: "One coffee + one tea — the household pack.",
-    price: "$44.99",
+    price: "$59.99",
     priceNote: "/ month, ships free over $50",
     image: "/products/coastal-combo-monthly.png",
     whatYouGet: [
@@ -87,6 +90,7 @@ const SUBSCRIPTIONS: Subscription[] = [
       "Best per-bag value across the catalog",
       "Coordinated picks — coffee + tea that play well together",
       "Pause or cancel any time",
+      "First order: +$6.54 service initiation (one-time, transparent on receipt)",
     ],
     cta: { label: "Start Combo Monthly", href: "/chat?sku=coastal-combo-monthly&intent=subscribe" },
   },
@@ -462,13 +466,36 @@ export default function PricingPage() {
               </p>
             </ScrollReveal>
 
-            <div className="mt-12 grid gap-6 md:grid-cols-3">
+            <div className="mt-12 grid gap-6 md:grid-cols-3 lg:grid-cols-4">
               {SUBSCRIPTIONS.map((sub, i) => (
                 <ScrollReveal key={sub.sku} delay={0.08 * i}>
                   <SubscriptionCard sub={sub} />
                 </ScrollReveal>
               ))}
             </div>
+
+            {/* ─── $6.54 service initiation disclosure ─── */}
+            <ScrollReveal delay={0.4}>
+              <div className="mt-10 rounded-lg border border-border bg-card/30 p-6">
+                <p className="font-mono text-[10px] uppercase tracking-widest text-accent">
+                  Service initiation — one-time, transparent
+                </p>
+                <h3 className="mt-2 font-display text-lg font-semibold text-foreground">
+                  $6.54 on your first order. Then never again.
+                </h3>
+                <p className="mt-3 text-sm leading-relaxed text-foreground/80">
+                  Every Coastal subscription includes access to your agentic
+                  concierge — Sal at the bar, LUC at the curation desk, Melli
+                  on the wholesale line, ACHEEVY tying it together. The
+                  service initiation fee is a one-time $6.54 charge that
+                  appears as a line item on your first receipt. It covers
+                  setting up your agentic concierge for the way you actually
+                  drink coffee or tea. No recurring AI fees — ever. The fee
+                  shows up once, transparently, on the same receipt as your
+                  first delivery.
+                </p>
+              </div>
+            </ScrollReveal>
           </div>
         </section>
 
