@@ -6,104 +6,13 @@ import { Footer } from "@/components/footer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { ScrollReveal } from "@/components/scroll-reveal";
-import { SubscriptionCheckoutButton } from "@/components/subscription-checkout-button";
 import { TierMark } from "@/components/tier-mark";
-import { cn } from "@/lib/utils";
 
 export const metadata = {
   title: "Subscriptions & Bundles — Coastal Brewing Co.",
   description:
     "Monthly coffee + tea subscriptions, sample-pack flights, and bundles for the way you brew. Save when you subscribe — every order is a conversation.",
 };
-
-// ─────────────────────────── Subscriptions ───────────────────────────
-
-type Subscription = {
-  sku: string;
-  name: string;
-  tagline: string;
-  price: string;
-  priceNote: string;
-  // Monthly retail in cents — drives the cadence picker in the checkout button.
-  // Must match scripts/membership_subscribe.py SKU_CATALOG canon.
-  monthlyRetailCents: number;
-  image: string;
-  whatYouGet: string[];
-  cta: { label: string; href: string };
-  recommended?: boolean;
-};
-
-const SUBSCRIPTIONS: Subscription[] = [
-  {
-    sku: "coastal-tea-monthly",
-    name: "Tea Monthly",
-    tagline: "A new Lowcountry Tea every month.",
-    price: "$26.99",
-    priceNote: "/ month, ships free over $50",
-    monthlyRetailCents: 2699,
-    image: "/products/coastal-tea-monthly.png",
-    whatYouGet: [
-      "One 3oz Lowcountry Tea tin per month (~30 cups brewed)",
-      "Variety swap each cycle — we won't repeat",
-      "Tasting note from Sal in every box",
-      "Pause or cancel any time",
-      "First order: +$6.54 service initiation (one-time, transparent on receipt)",
-    ],
-    cta: { label: "Start Tea Monthly", href: "/chat?sku=coastal-tea-monthly&intent=subscribe" },
-  },
-  {
-    sku: "coastal-coffee-monthly",
-    name: "Coffee Monthly",
-    tagline: "One bag a month, picked for your palate.",
-    price: "$34.99",
-    priceNote: "/ month, ships free over $50",
-    monthlyRetailCents: 3499,
-    image: "/products/coastal-coffee-monthly.png",
-    whatYouGet: [
-      "One 12oz coffee bag per month (~24 cups brewed)",
-      "Sal rotates origin + roast based on what you like",
-      "Tasting note printed on the bag",
-      "Skip a month, swap the bag, or cancel any time",
-      "First order: +$6.54 service initiation (one-time, transparent on receipt)",
-    ],
-    cta: { label: "Start Coffee Monthly", href: "/chat?sku=coastal-coffee-monthly&intent=subscribe" },
-    recommended: true,
-  },
-  {
-    sku: "coastal-functional-coffee-monthly",
-    name: "Functional Coffee Monthly",
-    tagline: "Specialty coffee blended with Lion's Mane, Cordyceps, and Reishi.",
-    price: "$44.99",
-    priceNote: "/ month, ships free over $50",
-    monthlyRetailCents: 4499,
-    image: "/products/coastal-functional-coffee-monthly.png",
-    whatYouGet: [
-      "One 12oz functional coffee bag per month (~24 cups brewed)",
-      "Specialty Arabica blended with Lion's Mane, Cordyceps, and Reishi",
-      "Mushrooms long valued in culinary traditions for clarity, vitality, and balance",
-      "Sold as a food, not a supplement",
-      "First order: +$6.54 service initiation (one-time, transparent on receipt)",
-    ],
-    cta: { label: "Start Functional Monthly", href: "/chat?sku=coastal-functional-coffee-monthly&intent=subscribe" },
-  },
-  {
-    sku: "coastal-combo-monthly",
-    name: "Combo Monthly",
-    tagline: "One coffee + one tea — the household pack.",
-    price: "$59.99",
-    priceNote: "/ month, ships free over $50",
-    monthlyRetailCents: 5999,
-    image: "/products/coastal-combo-monthly.png",
-    whatYouGet: [
-      "One 12oz coffee + one 3oz tea per month (~54 cups combined)",
-      "Best per-bag value across the catalog",
-      "Coordinated picks — coffee + tea that play well together",
-      "Pause or cancel any time",
-      "First order: +$6.54 service initiation (one-time, transparent on receipt)",
-    ],
-    cta: { label: "Start Combo Monthly", href: "/chat?sku=coastal-combo-monthly&intent=subscribe" },
-  },
-];
 
 // ─────────────────────────── Bundles ───────────────────────────────────
 
@@ -206,68 +115,6 @@ const BUNDLES: Bundle[] = [
 ];
 
 // ─────────────────────────── Components ────────────────────────────────
-
-function SubscriptionCard({ sub }: { sub: Subscription }) {
-  return (
-    <Card
-      className={cn(
-        "relative flex flex-col h-full overflow-hidden transition-all hover:-translate-y-0.5",
-        sub.recommended &&
-          "border-accent ring-1 ring-accent/30 shadow-[0_0_0_1px_hsl(var(--accent)/0.2),0_8px_24px_-12px_hsl(var(--accent)/0.4)]",
-      )}
-      data-pricing-tier={`subscription-${sub.sku}`}
-    >
-      {sub.recommended && (
-        <div className="absolute top-3 right-3 z-10 rounded-full bg-accent px-2.5 py-1 text-[9px] font-semibold uppercase tracking-widest text-accent-foreground">
-          Most Popular
-        </div>
-      )}
-      <div className="relative aspect-square overflow-hidden bg-secondary">
-        <Image
-          src={sub.image}
-          alt={sub.name}
-          fill
-          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-          className="object-contain p-4"
-        />
-      </div>
-      <CardContent className="flex flex-1 flex-col gap-4 p-6">
-        <div>
-          <h3 className="font-display text-2xl font-semibold tracking-[-0.02em] leading-tight">
-            {sub.name}
-          </h3>
-          <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">
-            {sub.tagline}
-          </p>
-        </div>
-        <div className="border-y border-border/60 py-3">
-          <p className="font-display text-3xl font-semibold tracking-[-0.02em]">
-            {sub.price}
-            <span className="ml-1 font-mono text-xs font-normal text-muted-foreground tracking-normal">
-              {sub.priceNote}
-            </span>
-          </p>
-        </div>
-        <ul className="flex-1 space-y-2 text-sm leading-snug">
-          {sub.whatYouGet.map((it) => (
-            <li key={it} className="flex gap-2">
-              <Check className="mt-0.5 h-4 w-4 shrink-0 text-accent" strokeWidth={2.5} />
-              <span className="text-foreground/85">{it}</span>
-            </li>
-          ))}
-        </ul>
-      </CardContent>
-      <CardFooter className="p-6 pt-0">
-        <SubscriptionCheckoutButton
-          sku={sub.sku}
-          ctaLabel={sub.cta.label}
-          monthlyRetailCents={sub.monthlyRetailCents}
-          variant={sub.recommended ? "accent" : "ghost"}
-        />
-      </CardFooter>
-    </Card>
-  );
-}
 
 function BundleCard({ bundle }: { bundle: Bundle }) {
   return (
@@ -455,59 +302,6 @@ export default function PricingPage() {
           </div>
         </section>
 
-        {/* ──────────── Pay-as-you-go monthly subscriptions ──────────── */}
-        <section className="border-b border-border/50">
-          <div className="container py-16 md:py-20">
-            <ScrollReveal>
-              <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-accent">
-                Pay-as-you-go · monthly subscriptions
-              </p>
-              <h2 className="mt-3 font-display text-[clamp(28px,4vw,40px)] font-semibold tracking-[-0.02em] leading-[1.05] max-w-2xl">
-                One delivery a month.<br />
-                <span className="text-foreground/60">Picked for the way you drink.</span>
-              </h2>
-              <p className="mt-4 max-w-2xl text-base leading-relaxed text-muted-foreground">
-                No annual commitment. Every subscription saves you 15% off
-                catalog. Skip a month, swap a bag, or cancel — Sal will work
-                with you. Prices anchored to the specialty + functional band
-                (Trade, Atlas, Four Sigmatic, MUD\WTR, Harney &amp; Sons) — see{" "}
-                <Link href="/compare" className="text-accent underline-offset-4 hover:underline">/compare</Link>{" "}
-                for the full chart.
-              </p>
-            </ScrollReveal>
-
-            <div className="mt-12 grid gap-6 md:grid-cols-3 lg:grid-cols-4">
-              {SUBSCRIPTIONS.map((sub, i) => (
-                <ScrollReveal key={sub.sku} delay={0.08 * i}>
-                  <SubscriptionCard sub={sub} />
-                </ScrollReveal>
-              ))}
-            </div>
-
-            {/* ─── $6.54 service initiation disclosure ─── */}
-            <ScrollReveal delay={0.4}>
-              <div className="mt-10 rounded-lg border border-border bg-card/30 p-6">
-                <p className="font-mono text-[10px] uppercase tracking-widest text-accent">
-                  Service initiation — one-time, transparent
-                </p>
-                <h3 className="mt-2 font-display text-lg font-semibold text-foreground">
-                  $6.54 on your first order. Then never again.
-                </h3>
-                <p className="mt-3 text-sm leading-relaxed text-foreground/80">
-                  Every Coastal subscription includes access to your agentic
-                  concierge — Sal at the bar, LUC at the curation desk, Melli
-                  on the wholesale line, ACHEEVY tying it together. The
-                  service initiation fee is a one-time $6.54 charge that
-                  appears as a line item on your first receipt. It covers
-                  setting up your agentic concierge for the way you actually
-                  drink coffee or tea. No recurring AI fees — ever. The fee
-                  shows up once, transparently, on the same receipt as your
-                  first delivery.
-                </p>
-              </div>
-            </ScrollReveal>
-          </div>
-        </section>
 
         {/* ──────────── Bundles ──────────── */}
         <section className="border-b border-border/50 bg-card/20">
