@@ -57,6 +57,11 @@ TOKEN_ENV_CANDIDATES = (
 )
 
 WEBHOOK_SECRET_ENV_CANDIDATES = (
+    # Owner canon (matches Mercury_API_Token naming pattern — verified 2026-05-11):
+    "Mercury_Webhook_Token",
+    "Mercury_Webhook_Token2",
+    "Mercury_Webhook_Token3",
+    # Alt naming (Mercury UI labels the field "Signing Secret"):
     "Mercury_Webhook_Secret",
     "Mercury_Webhook_Secret2",
     "Mercury_Webhook_Secret3",
@@ -307,6 +312,21 @@ def verify_webhook(payload: bytes, signature: str) -> bool:
         return hmac.compare_digest(expected, sig)
     except (TypeError, ValueError):
         return False
+
+
+def is_bootstrap_mode() -> bool:
+    """Time-bounded operator escape hatch — accepts unsigned webhook probes
+    so providers (Mercury) can run their create-time Verify step BEFORE the
+    signing secret has been wired into runner env. Off by default; flip on
+    only during initial webhook provisioning, flip OFF immediately after.
+
+    Truthy values: 1 / true / yes / on (case-insensitive). Anything else
+    (including unset) keeps the default-deny posture intact.
+    """
+    val = (os.environ.get("MERCURY_WEBHOOK_BOOTSTRAP")
+           or os.environ.get("Mercury_Webhook_Bootstrap")
+           or "")
+    return val.strip().lower() in {"1", "true", "yes", "on"}
 
 
 def parse_event(payload: bytes) -> dict:

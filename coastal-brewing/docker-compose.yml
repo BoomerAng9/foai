@@ -72,6 +72,12 @@ services:
       Mercury_API_Token3: "${Mercury_API_Token3:-}"
       # Mercury webhook signing secret(s) — per-endpoint, rotates separately
       # from the API token. /mercury/webhook verifies HMAC-SHA256 of body.
+      # Owner canon: Mercury_Webhook_Token (matches Mercury_API_Token pattern).
+      # Mercury UI labels this field "Signing Secret"; the alt names are
+      # kept for cross-vertical reuse.
+      Mercury_Webhook_Token: "${Mercury_Webhook_Token:-}"
+      Mercury_Webhook_Token2: "${Mercury_Webhook_Token2:-}"
+      Mercury_Webhook_Token3: "${Mercury_Webhook_Token3:-}"
       Mercury_Webhook_Secret: "${Mercury_Webhook_Secret:-}"
       Mercury_Webhook_Secret2: "${Mercury_Webhook_Secret2:-}"
       Mercury_Webhook_Secret3: "${Mercury_Webhook_Secret3:-}"
