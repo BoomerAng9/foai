@@ -10,6 +10,7 @@ import secrets
 
 REFERRAL_PREFIX = "CBC-"
 REFUND_THRESHOLD = 2
+MEMBERSHIP_PRODUCT_ID = "coastal_membership_standard_annual"
 
 
 class ReferralRejected(Exception):
@@ -51,3 +52,63 @@ class ReferralLedger:
 
     def refund_eligible(self, code: str) -> bool:
         return self.count_referrals(code) >= REFUND_THRESHOLD
+
+
+def _extract_product_id(event: dict) -> str | None:
+    try:
+        items = event["data"]["object"]["items"]["data"]
+        return items[0]["price"]["product"]
+    except (KeyError, IndexError, TypeError):
+        return None
+
+
+def handle_subscription_created(
+    event: dict,
+    *,
+    ledger: ReferralLedger,
+    on_welcome_box_queued,
+    seen_event_ids: dict | None = None,
+) -> dict:
+    """Dispatch a Stripe `customer.subscription.created` event for the
+    membership product. Returns a result dict; never raises on shape
+    issues — invalid events return {handled: False, reason: ...}.
+
+    When `seen_event_ids` is provided (event_id → referral_code), replays
+    of the same Stripe event id short-circuit with
+    `handled=False, reason='duplicate event'` and echo back the original
+    referral_code so callers can avoid re-queueing the welcome box.
+    """
+    product_id = _extract_product_id(event)
+    if product_id != MEMBERSHIP_PRODUCT_ID:
+        return {
+            "handled": False,
+            "reason": f"product {product_id!r} is not a membership product",
+        }
+
+    event_id = event.get("id", "")
+    if seen_event_ids is not None and event_id in seen_event_ids:
+        return {
+            "handled": False,
+            "reason": "duplicate event",
+            "referral_code": seen_event_ids[event_id],
+        }
+
+    obj = event["data"]["object"]
+    customer_email = obj.get("metadata", {}).get("customer_email", "")
+    referral_code = mint_referral_code()
+
+    welcome_task = {
+        "customer_email": customer_email,
+        "referral_code": referral_code,
+        "stripe_subscription_id": obj.get("id"),
+    }
+    on_welcome_box_queued(welcome_task)
+
+    if seen_event_ids is not None:
+        seen_event_ids[event_id] = referral_code
+
+    return {
+        "handled": True,
+        "referral_code": referral_code,
+        "customer_email": customer_email,
+    }
