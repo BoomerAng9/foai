@@ -8,8 +8,10 @@ Auth: reads `MERCURY_API_TOKEN` from environment. Token is never echoed to
 stdout, never logged, never serialized to a result. The self-test only
 reports the count of accounts visible, not the account details themselves.
 
-API base: https://backend.mercury.com/api/v1
+API base: https://api.mercury.com/api/v1
 Docs: https://docs.mercury.com/reference
+Auth header: `Authorization: Bearer secret-token:<token>` — the `secret-token:`
+prefix IS part of the bearer value per Mercury's OpenAPI spec.
 
 Mercury Banking API — accounts / transactions / treasury (read-side, no
 sensitive ops surfaced in this Hawk).
@@ -21,6 +23,8 @@ cadence.
 """
 from __future__ import annotations
 
+import hashlib
+import hmac
 import json
 import logging
 import os
@@ -33,11 +37,34 @@ from typing import Any
 
 logger = logging.getLogger("lil_mercury_hawk")
 
-MERCURY_BASE = "https://backend.mercury.com/api/v1"
+MERCURY_BASE = "https://api.mercury.com/api/v1"
 TOKEN_ENV_CANDIDATES = (
-    "MERCURY_API_TOKEN",   # canonical Mercury docs name
-    "MERCURY_API_KEY",     # alt
-    "COASTAL_MERCURY_TOKEN",  # COASTAL_-namespace alt
+    # Owner's actual naming (verified 2026-05-11 on aims-vps):
+    "Mercury_API_Token",       # PRIMARY — owner's case + format
+    "Mercury_API_Token2",      # failover slot 2 (no underscore before number)
+    "Mercury_API_Token3",      # failover slot 3
+    # Mercury docs / canonical alternates kept for cross-vertical reuse:
+    "MERCURY_API_TOKEN",
+    "MERCURY_API_TOKEN_1",
+    "MERCURY_API_TOKEN_2",
+    "MERCURY_API_TOKEN_3",
+    "MERCURY_API_KEY",
+    "MERCURY_API_KEY_1",
+    "MERCURY_API_KEY_2",
+    "MERCURY_API_KEY_3",
+    "MERCURY_TOKEN",
+    "COASTAL_MERCURY_TOKEN",
+)
+
+WEBHOOK_SECRET_ENV_CANDIDATES = (
+    "Mercury_Webhook_Secret",
+    "Mercury_Webhook_Secret2",
+    "Mercury_Webhook_Secret3",
+    "MERCURY_WEBHOOK_SECRET",
+    "MERCURY_WEBHOOK_SECRET_1",
+    "MERCURY_WEBHOOK_SECRET_2",
+    "MERCURY_WEBHOOK_SECRET_3",
+    "COASTAL_MERCURY_WEBHOOK_SECRET",
 )
 
 CACHE_DIR = Path(os.environ.get("LIL_HAWK_CACHE_DIR", str(Path.home() / ".cache" / "agentic-cli" / "mercury")))
@@ -58,15 +85,37 @@ class MercuryAPIError(RuntimeError):
         self.status = status
 
 
+_BEARER_PREFIX_STRIP = ("Bearer ", "bearer ")
+
+
 def _resolve_token() -> str:
     """Return the Mercury API token from environment. Tries canonical name
     first, then alts. Raises MercuryNotConfigured if none set.
-    Token is never logged; only the env var NAME that matched is logged."""
+
+    Token is never logged; only the env var NAME that matched is logged.
+
+    PRESERVES the `secret-token:` prefix — per Mercury's OpenAPI spec, the
+    full string including that prefix IS the bearer value. Only strips the
+    `Bearer ` prefix in case someone pastes the full header form.
+    Auto-adds `secret-token:` if the user pasted the raw token without it.
+    """
     for name in TOKEN_ENV_CANDIDATES:
         val = os.environ.get(name)
-        if val:
-            logger.debug("Mercury token loaded from env var %s", name)
-            return val
+        if not val:
+            continue
+        # Strip "Bearer " if present (user pasted the full header form)
+        for prefix in _BEARER_PREFIX_STRIP:
+            if val.startswith(prefix):
+                val = val[len(prefix):]
+                break
+        val = val.strip()
+        if not val:
+            continue
+        # Auto-add secret-token: prefix if missing (raw token paste)
+        if not val.startswith("secret-token:"):
+            val = "secret-token:" + val
+        logger.debug("Mercury token loaded from env var %s", name)
+        return val
     raise MercuryNotConfigured(
         f"None of {TOKEN_ENV_CANDIDATES} are set. Add one to the runner env."
     )
@@ -213,6 +262,90 @@ def mint_invoice(
         "pay_link": resp.get("pay_link") or resp.get("hosted_pay_url"),
         "status": resp.get("status"),
         "total_cents": resp.get("total_cents") or total_cents,
+    }
+
+
+def _resolve_webhook_secret() -> str | None:
+    """Return Mercury webhook secret from environment, or None if unset.
+    Unlike _resolve_token, this does NOT raise — webhook endpoints translate
+    a missing secret into a 503 rather than crashing the process. Secret is
+    never logged; only the env var NAME that matched is logged.
+    """
+    for name in WEBHOOK_SECRET_ENV_CANDIDATES:
+        val = os.environ.get(name)
+        if val and val.strip():
+            logger.debug("Mercury webhook secret loaded from env var %s", name)
+            return val.strip()
+    return None
+
+
+def verify_webhook(payload: bytes, signature: str) -> bool:
+    """Verify a Mercury webhook signature against the configured secret.
+
+    Mercury signs webhook deliveries with HMAC-SHA256 of the raw request
+    body using a per-endpoint secret. The signature header may arrive as
+    `sha256=<hex>` or bare `<hex>`; both forms accepted.
+
+    Returns False (never raises) when secret is unconfigured or signature
+    mismatches — endpoint translates False → HTTP 400/503. Uses
+    hmac.compare_digest for constant-time comparison to prevent
+    signature-timing attacks.
+    """
+    secret = _resolve_webhook_secret()
+    if not secret:
+        return False
+    if not signature:
+        return False
+    sig = signature.strip()
+    if sig.startswith("sha256="):
+        sig = sig[len("sha256="):]
+    sig = sig.strip()
+    if not sig:
+        return False
+    expected = hmac.new(secret.encode("utf-8"), payload, hashlib.sha256).hexdigest()
+    try:
+        return hmac.compare_digest(expected, sig)
+    except (TypeError, ValueError):
+        return False
+
+
+def parse_event(payload: bytes) -> dict:
+    """Parse a Mercury webhook envelope into a slim, owner-facing projection.
+
+    NEVER leaks bank routing details, account numbers, full customer profile,
+    or raw payload internals. Endpoint can log this projection to the
+    audit ledger + fire owner Telegram without redaction.
+
+    Returns:
+        {
+          "event_id": str,
+          "type": str,
+          "created": str | None,
+          "invoice_id": str | None,
+          "status": str | None,
+          "total_cents": int | None,
+          "paid_at": str | None,
+          "customer_email": str | None,
+        }
+    """
+    try:
+        raw = json.loads(payload.decode("utf-8")) if payload else {}
+    except (ValueError, UnicodeDecodeError):
+        raw = {}
+    if not isinstance(raw, dict):
+        raw = {}
+    data = raw.get("data") or {}
+    if not isinstance(data, dict):
+        data = {}
+    return {
+        "event_id": raw.get("id"),
+        "type": raw.get("type"),
+        "created": raw.get("created"),
+        "invoice_id": data.get("id") if raw.get("type", "").startswith("invoice.") else None,
+        "status": data.get("status"),
+        "total_cents": data.get("total_cents"),
+        "paid_at": data.get("paid_at"),
+        "customer_email": data.get("customer_email"),
     }
 
 

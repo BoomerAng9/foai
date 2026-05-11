@@ -63,6 +63,18 @@ services:
       KATTEB_COASTAL_BRAND_ID: "${KATTEB_COASTAL_BRAND_ID:-2029}"
       CHICKEN_HAWK_URL: "${CHICKEN_HAWK_URL:-https://hawk.foai.cloud}"
       CHICKEN_HAWK_BEARER: "${CHICKEN_HAWK_BEARER:-}"
+      # Mercury Banking + Invoicing API — replaces Stripe for the Coastal
+      # subscription + initiation flow (owner directive 2026-05-11). Owner's
+      # naming uses MixedCase, no underscore before the failover number.
+      # Lil_Mercury_Hawk tries Mercury_API_Token first, then 2, then 3.
+      Mercury_API_Token: "${Mercury_API_Token:-}"
+      Mercury_API_Token2: "${Mercury_API_Token2:-}"
+      Mercury_API_Token3: "${Mercury_API_Token3:-}"
+      # Mercury webhook signing secret(s) — per-endpoint, rotates separately
+      # from the API token. /mercury/webhook verifies HMAC-SHA256 of body.
+      Mercury_Webhook_Secret: "${Mercury_Webhook_Secret:-}"
+      Mercury_Webhook_Secret2: "${Mercury_Webhook_Secret2:-}"
+      Mercury_Webhook_Secret3: "${Mercury_Webhook_Secret3:-}"
       TZ: "UTC"
     networks:
       - foai-internal
