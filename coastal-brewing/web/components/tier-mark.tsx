@@ -71,64 +71,51 @@ export function TierMark({ variant }: Props) {
   }
 
   if (variant === "custee-card") {
-    // CSS-rendered "credit card" mark. Cream face, dark wordmark, gold
-    // accent strip. Placeholder for a future Higgsfield-rendered card.
+    // Cream paper card, "COASTAL CUSTEE CARD" wordmark in dark coffee,
+    // gold pinstripe border, small wood stork stamp lower-right.
+    // Higgsfield render via nano_banana_2 (2026-05-11) per brand canon.
     return (
-      <div
-        className={`${box} bg-gradient-to-br from-[#f5efe2] to-[#e8dfc8] ring-1 ring-[#c9b78a] flex flex-col justify-between p-1.5`}
-        data-tier-mark="custee-card"
-      >
-        <div className="h-1 w-3 rounded-sm bg-[#c9b78a]" />
-        <div className="font-mono text-[6px] uppercase tracking-[0.15em] text-[#1c1814] leading-tight">
-          Coastal
-          <br />
-          Custee
-          <br />
-          Card
-        </div>
+      <div className={`${box} bg-[#1c1814]`} data-tier-mark="custee-card">
+        <Image
+          src="/brand/cards/coastal-custee-card.png"
+          alt="Coastal Custee Card"
+          fill
+          sizes="64px"
+          className="object-cover"
+        />
       </div>
     );
   }
 
   if (variant === "wood-stork-standard") {
-    // CSS placeholder — dark tile, cream wordmark, no accent. Owner can
-    // replace with a Higgsfield-rendered wood-stork card asset later.
+    // Dark espresso card with cream wood stork etching center,
+    // "WOOD STORK · STANDARD" wordmark, thin gold pinstripe edge.
+    // Higgsfield render via nano_banana_2 (2026-05-11).
     return (
-      <div
-        className={`${box} bg-[#1c1814] ring-1 ring-[#3a3128] flex flex-col justify-between p-1.5`}
-        data-tier-mark="wood-stork-standard"
-      >
-        <div className="font-mono text-[5px] uppercase tracking-[0.15em] text-[#c9b78a] leading-tight">
-          B2B
-        </div>
-        <div className="font-mono text-[6px] uppercase tracking-[0.15em] text-[#f5efe2] leading-tight">
-          Wood
-          <br />
-          Stork
-          <br />
-          Standard
-        </div>
+      <div className={`${box} bg-[#1c1814]`} data-tier-mark="wood-stork-standard">
+        <Image
+          src="/brand/cards/wood-stork-standard.png"
+          alt="Wood Stork Standard"
+          fill
+          sizes="64px"
+          className="object-cover"
+        />
       </div>
     );
   }
 
-  // wood-stork-reserve — same CSS placeholder, deeper black + heavier
-  // gold accent to mark the highest tier.
+  // wood-stork-reserve — jet-black card with ornate gold-foil engraved
+  // wood stork + gold filigree border. Highest tier (whitelabel).
+  // Higgsfield render via nano_banana_2 (2026-05-11).
   return (
-    <div
-      className={`${box} bg-[#0a0907] ring-1 ring-[#c9b78a] flex flex-col justify-between p-1.5`}
-      data-tier-mark="wood-stork-reserve"
-    >
-      <div className="font-mono text-[5px] uppercase tracking-[0.15em] text-[#c9b78a] leading-tight">
-        Whitelabel
-      </div>
-      <div className="font-mono text-[6px] uppercase tracking-[0.15em] text-[#c9b78a] leading-tight">
-        Wood
-        <br />
-        Stork
-        <br />
-        Reserve
-      </div>
+    <div className={`${box} bg-[#0a0907]`} data-tier-mark="wood-stork-reserve">
+      <Image
+        src="/brand/cards/wood-stork-reserve.png"
+        alt="Wood Stork Reserve"
+        fill
+        sizes="64px"
+        className="object-cover"
+      />
     </div>
   );
 }
