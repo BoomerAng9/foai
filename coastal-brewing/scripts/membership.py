@@ -11,6 +11,27 @@ import secrets
 REFERRAL_PREFIX = "CBC-"
 REFUND_THRESHOLD = 2
 MEMBERSHIP_PRODUCT_ID = "coastal_membership_standard_annual"
+MEMBER_DISCOUNT_COUPON = "MEMBER_15"
+MEMBER_TIERS = frozenset({"standard", "lifetime_member", "lifetime_concierge"})
+
+
+def is_member(customer_metadata: dict | None) -> bool:
+    """True if the Stripe Customer's metadata flags them as a member tier
+    eligible for the MEMBER_15 auto-discount.
+    """
+    if not customer_metadata:
+        return False
+    tier = (customer_metadata.get("membership_tier") or "").strip().lower()
+    return tier in MEMBER_TIERS
+
+
+def discount_for(customer_metadata: dict | None) -> list[dict]:
+    """Return the Stripe `discounts` list to attach to a Checkout Session
+    for this Customer. Empty list for non-members (Stripe accepts both
+    omit and empty list)."""
+    if is_member(customer_metadata):
+        return [{"coupon": MEMBER_DISCOUNT_COUPON}]
+    return []
 
 
 class ReferralRejected(Exception):
