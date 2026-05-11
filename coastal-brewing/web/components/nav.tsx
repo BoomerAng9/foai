@@ -27,6 +27,8 @@ const DRAWER_GROUPS = [
       { href: "/products?cat=subscription", label: "Subscriptions" },
       { href: "/pricing", label: "Pricing & Tiers" },
       { href: "/membership", label: "Standard Membership" },
+      { href: "/wood-stork", label: "Wood Stork (B2B)" },
+      { href: "/pooler-pass", label: "Pooler Pass (Local)" },
       { href: "/compare", label: "How we compare" },
       { href: "/live", label: "Live look-in (members)" },
       { href: "/merch", label: "Merch" },
