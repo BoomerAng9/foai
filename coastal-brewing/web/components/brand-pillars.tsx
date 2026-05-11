@@ -32,9 +32,9 @@ export function BrandPillars() {
             Three things you can hold us to
           </p>
           <h2 className="mt-3 font-display text-[clamp(28px,4vw,44px)] font-semibold tracking-[-0.02em] leading-[1.05]">
-            Nothing chemically, ever.
+            Sourced with care.
             <span className="block text-foreground/55">
-              Served by ACHEEVY.
+              Nothing chemically, ever.
             </span>
           </h2>
         </ScrollReveal>
