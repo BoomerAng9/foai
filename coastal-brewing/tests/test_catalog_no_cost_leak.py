@@ -51,11 +51,16 @@ def test_list_products_with_category_strips_cost_fields():
 
 def test_get_product_strips_cost_fields():
     # Pick a known SKU from the canonical catalog
-    p = catalog.get_product("coastal-italian-roast-12oz")
-    assert p is not None, "coastal-italian-roast-12oz missing from catalog"
-    _assert_no_forbidden(p, "get_product('coastal-italian-roast-12oz')")
-    # Public fields should still be present
-    assert p["msrp"] == 19.99
+    sku = "coastal-italian-roast-12oz"
+    p = catalog.get_product(sku)
+    assert p is not None, f"{sku} missing from catalog"
+    _assert_no_forbidden(p, f"get_product('{sku}')")
+    # Public msrp must match the post-pricing-policy value the catalog computed
+    # at module load (cost + margin floor). Decoupled from the literal placeholder
+    # so tests survive future price-anchor changes.
+    internal = catalog.get_product_internal(sku)
+    assert isinstance(p["msrp"], (int, float)) and p["msrp"] > 0
+    assert p["msrp"] == internal["msrp"], "public view must mirror canonical msrp"
     assert p["name"] == "Coastal Italian Roast"
 
 
@@ -92,10 +97,12 @@ def test_internal_list_preserves_cost_data():
 def test_calc_line_still_works_after_refactor():
     # calc_line reads cost via the internal accessor — refactor must not
     # break the margin breakdown shape.
-    line = catalog.calc_line("coastal-italian-roast-12oz", qty=2, discount_pct=10.0)
+    sku = "coastal-italian-roast-12oz"
+    internal = catalog.get_product_internal(sku)
+    line = catalog.calc_line(sku, qty=2, discount_pct=10.0)
     assert "error" not in line
     assert line["qty"] == 2
-    assert line["msrp_unit"] == 19.99
+    assert line["msrp_unit"] == internal["msrp"], "msrp_unit must mirror canonical msrp"
     assert line["unit_cost"] > 0
     assert line["margin_pct"] > 0
 

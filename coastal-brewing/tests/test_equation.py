@@ -172,8 +172,10 @@ def test_floor_scales_with_qty():
 # quote() — master integration
 # ---------------------------------------------------------------------------
 
-def test_quote_floor_exceeds_price_no_discount_possible():
-    # Italian Roast at PPU Individual: msrp 19.99, floor 25.58. Floor wins.
+def test_quote_sal_above_tier_cap_escalates():
+    # Sal's bare-tier cap is 10% (no bundle). A 15% request from Sal must
+    # escalate even when max_giveable is comfortably above 15% — the binding
+    # ceiling is whichever is smaller of (tier cap, floor max_giveable).
     q = equation.quote(
         sku_id="coastal-italian-roast-12oz",
         qty=1,
@@ -181,13 +183,14 @@ def test_quote_floor_exceeds_price_no_discount_possible():
         pillars=[],
         frequency="ppu",
         actor="sal_ang",
-        requested_discount_pct=5.0,
+        requested_discount_pct=15.0,
     )
-    # Sal cap is 10%, but max_giveable here is 0 (floor exceeds price).
-    # Binding ceiling = 0 → 5% requested → escalation required.
+    # Sal's cap is 10% → 15% request must escalate.
     assert q["escalation_required"]
-    assert q["stepper_token"]  # token issued
-    assert q["_internal_max_giveable_pct"] == 0.0
+    assert q["stepper_token"]
+    # Sanity: the floor isn't the binding ceiling at current pricing
+    # (post-pricing-policy MSRP keeps room above Sal's tier cap).
+    assert q["_internal_max_giveable_pct"] > 10.0
 
 
 def test_quote_sal_within_ceiling_applied():
@@ -248,7 +251,22 @@ def test_quote_acheevy_uncapped_at_tier_but_floor_binds():
 
 
 def test_quote_acheevy_above_floor_still_escalates():
-    # Same setup, but ACHEEVY tries 50% which exceeds floor's max_giveable (~39%).
+    # ACHEEVY is uncapped at the tier layer, but the floor still binds.
+    # Pick a discount safely above the SKU's current max_giveable so the
+    # escalation triggers via floor-binding, not tier cap. Read max_giveable
+    # via a probe quote and request +5% above it.
+    probe = equation.quote(
+        sku_id="coastal-italian-roast-12oz",
+        qty=12,
+        vibe="family",
+        pillars=["sourcing-verified"],
+        frequency="3-month",
+        actor="acheevy",
+        requested_discount_pct=0.0,
+        is_bundle=True,
+    )
+    above_floor = round(probe["_internal_max_giveable_pct"] + 5.0, 2)
+
     q = equation.quote(
         sku_id="coastal-italian-roast-12oz",
         qty=12,
@@ -256,10 +274,13 @@ def test_quote_acheevy_above_floor_still_escalates():
         pillars=["sourcing-verified"],
         frequency="3-month",
         actor="acheevy",
-        requested_discount_pct=50.0,
+        requested_discount_pct=above_floor,
         is_bundle=True,
     )
-    assert q["escalation_required"]
+    assert q["escalation_required"], (
+        f"ACHEEVY requesting {above_floor}% above max_giveable "
+        f"{probe['_internal_max_giveable_pct']:.2f}% must escalate"
+    )
     # Even the digital twin can't go below the floor.
 
 
