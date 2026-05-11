@@ -24,16 +24,18 @@
 
 ---
 
-## Revised two-tier deal structure
+## Revised two-deal structure — BOTH PAY-ONCE
 
-Replaces the prior 3-tier single-deal recommendation. Final price bands pending the 2025-2026 trend research, but structure is locked.
+Replaces the prior 3-tier single-deal recommendation. **Critical clarification 2026-05-11**: BOTH deals are one-time payments, AppSumo-style. No recurring billing on either. The "1-year deal" buys 1 year of access with premium managed-service support; the "lifetime deal" buys lifetime access with the "subject to change" disclaimer. Customer pays once, never gets billed again on that purchase.
 
 ### Deal types (every tier offers both)
 
-| Deal | Price posture | Support | Risk profile |
-|---|---|---|---|
-| **One-year deal** | Higher — full year of explicit support SLA | Full SLA for 12 months; standard month-to-month renewal after | Premium-tier buyer hedge |
-| **Lifetime deal** | Lower entry — easier to commit | Lifetime usage rights "as long as we operate"; explicit "subject to change at any time" disclaimer in TOS | Mass-market acquisition |
+| Deal | Payment | Access | Support / SLA | Risk profile |
+|---|---|---|---|---|
+| **1-year deal (managed)** | One-time payment, HIGHER price | 12 months of access | Full premium SLA included for those 12 months (response-time tiers + onboarding + hands-on managed config) | Premium-tier buyer who wants a managed launch |
+| **Lifetime deal** | One-time payment, LOWER entry price | Lifetime access "as long as we operate" | Best-effort only; no SLA. Disclaimer in TOS: "subject to change at any time" | Mass-market acquisition |
+
+**Why is 1-year priced HIGHER than lifetime?** Because the 1-year deal is the *managed-service* offering — buyers pay for a premium onboarding + active support during their first year, not for the access itself. The lifetime deal is bare-bones engine access. Same engine, different service envelope.
 
 ### Tier structure (applies to both deal types)
 
