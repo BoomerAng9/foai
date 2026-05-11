@@ -714,6 +714,14 @@ async def mercury_webhook(request: Request) -> dict:
     )
     payload = await request.body()
     if not lil_mercury_hawk.verify_webhook(payload, sig):
+        # Bootstrap escape hatch — Mercury's create-time "Verify endpoint"
+        # probe arrives BEFORE the signing secret can be wired into runner
+        # env (chicken-and-egg). Operator flips MERCURY_WEBHOOK_BOOTSTRAP=1
+        # to accept the unsigned probe so the dashboard save proceeds, then
+        # immediately flips it back off once the secret is configured.
+        if lil_mercury_hawk.is_bootstrap_mode():
+            return {"ok": True, "bootstrap": True,
+                    "warning": "signature not verified (bootstrap mode); disable MERCURY_WEBHOOK_BOOTSTRAP once secret is wired"}
         raise HTTPException(status_code=400, detail="signature verification failed")
 
     proj = lil_mercury_hawk.parse_event(payload)

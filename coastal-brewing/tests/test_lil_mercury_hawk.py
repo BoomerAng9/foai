@@ -285,6 +285,31 @@ def test_parse_webhook_event_unknown_type_still_returns_slim(monkeypatch):
     assert proj["invoice_id"] is None
 
 
+def test_is_bootstrap_mode_off_by_default(monkeypatch):
+    """Bootstrap mode (which accepts unsigned webhook probes) must be OFF
+    unless an explicit env flag is set. Default-deny posture."""
+    import lil_mercury_hawk  # noqa: PLC0415
+
+    for name in ("MERCURY_WEBHOOK_BOOTSTRAP", "Mercury_Webhook_Bootstrap"):
+        monkeypatch.delenv(name, raising=False)
+
+    assert lil_mercury_hawk.is_bootstrap_mode() is False
+
+
+def test_is_bootstrap_mode_on_when_env_truthy(monkeypatch):
+    """When operator sets MERCURY_WEBHOOK_BOOTSTRAP=1, mode is on. Accepts
+    "1" / "true" / "yes" (case-insensitive). Anything else = off."""
+    import lil_mercury_hawk  # noqa: PLC0415
+
+    for truthy in ("1", "true", "TRUE", "yes", "YES", "on"):
+        monkeypatch.setenv("MERCURY_WEBHOOK_BOOTSTRAP", truthy)
+        assert lil_mercury_hawk.is_bootstrap_mode() is True, f"truthy '{truthy}' should enable bootstrap"
+
+    for falsy in ("0", "false", "no", "off", ""):
+        monkeypatch.setenv("MERCURY_WEBHOOK_BOOTSTRAP", falsy)
+        assert lil_mercury_hawk.is_bootstrap_mode() is False, f"falsy '{falsy}' should NOT enable bootstrap"
+
+
 def test_mint_invoice_returns_slim_projection(monkeypatch):
     """mint_invoice returns only id / pay_link / status / total — never the
     Mercury raw payload (which may include account routing details)."""
