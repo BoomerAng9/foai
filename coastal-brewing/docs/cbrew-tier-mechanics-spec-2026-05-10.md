@@ -153,8 +153,11 @@ When Print Press fires Amazon account creation:
 | **Coastal Custee Card** (= existing Standard Membership) | $199/yr | National DTC + Amazon | 15% off + free ship under $15 freight | Refer-2-fee-back unchanged |
 | **Wood Stork Standard** | $499/yr | B2B, multi-location, referrers | **18-50% tiered by referral count** | Auto-promotes via Stripe coupon |
 | **Wood Stork Reserve** | $999/yr | Licensee prospects | Same 18-50% tier + ACHEEVY pod + LP visit | Discount applies to product orders, not membership renewal |
-| Lifetime Member | $999 once | (existing canon) | 15% | Unchanged |
-| Lifetime Concierge | $4,999 once | (existing canon) | 25% | Unchanged |
+
+> Note: Lifetime Member ($999 once) and Lifetime Concierge ($4,999 once) tiers
+> were retired from Coastal canon 2026-05-11 per owner directive — lifetime is
+> now the AIMS / Plug-Me-In licensee tier only. See
+> `lifetime-tier-positioning-2026-05-11.md`.
 
 ---
 

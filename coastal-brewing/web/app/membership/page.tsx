@@ -53,7 +53,7 @@ const TERMS = [
   {
     n: 4,
     label: "15% member discount",
-    body: "Auto-applied 15% off all retail-priced products at checkout. Stacks with free-delivery benefit. Does not stack with bulk-pricing tiers or with Lifetime Concierge's 25% discount tier.",
+    body: "Auto-applied 15% off all retail-priced products at checkout. Stacks with free-delivery benefit. Does not stack with bulk-pricing tiers.",
   },
   {
     n: 5,
@@ -146,22 +146,22 @@ export default function MembershipPage() {
                   <td className="px-4 py-3 text-muted-foreground">—</td>
                 </tr>
                 <tr>
-                  <td className="px-4 py-3">Lifetime Member</td>
-                  <td className="px-4 py-3">$999 once</td>
-                  <td className="px-4 py-3">15%</td>
+                  <td className="px-4 py-3">Wood Stork Standard</td>
+                  <td className="px-4 py-3">$499 / yr</td>
+                  <td className="px-4 py-3">18-50% (referral-tiered)</td>
                   <td className="px-4 py-3 text-muted-foreground">—</td>
                 </tr>
                 <tr>
-                  <td className="px-4 py-3">Lifetime Concierge</td>
-                  <td className="px-4 py-3">$4,999 once</td>
-                  <td className="px-4 py-3">25%</td>
+                  <td className="px-4 py-3">Wood Stork Reserve</td>
+                  <td className="px-4 py-3">$999 / yr</td>
+                  <td className="px-4 py-3">18-50% (referral-tiered)</td>
                   <td className="px-4 py-3">Yes</td>
                 </tr>
               </tbody>
             </table>
           </div>
           <p className="mt-3 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
-            Standard is the on-ramp · Lifetime tiers stay open for one-time commits
+            Standard is the on-ramp · Wood Stork is for B2B and licensee prospects
           </p>
         </section>
 

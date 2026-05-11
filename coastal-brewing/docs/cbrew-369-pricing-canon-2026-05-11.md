@@ -72,7 +72,9 @@ Wood Stork's tiered referral discount (per `cbrew-tier-mechanics-spec-2026-05-10
 | 3-6-9 cadence discount (15/20/25%) | Membership renewal payment | This IS the cadence discount |
 | Wood Stork referral discount (18-50%) | Product orders only (bags, gear) | N/A — applied at product checkout, not membership |
 | Coastal Custee 15% member discount | Product orders | Replaces the 18% Wood Stork base when in product checkout flow (Wood Stork tier wins) |
-| Lifetime Concierge 25% | Product orders | Owner-call: stacks or wins, TBD per renewal contract |
+
+> Lifetime Concierge 25% row removed 2026-05-11 — Lifetime tiers were retired
+> from Coastal canon per owner directive. See `lifetime-tier-positioning-2026-05-11.md`.
 
 ---
 

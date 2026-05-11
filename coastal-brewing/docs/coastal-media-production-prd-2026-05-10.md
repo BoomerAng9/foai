@@ -125,8 +125,7 @@ The matrix dimensions:
 | **Account structure** | Individual → household → small office → multi-location → enterprise |
 | **Category** | Each product category has its own multiplier — a Custeez who only drinks decaf is priced differently than one who roams across single-origins |
 | **Pillar** | Three pillars (Curation / Experience / Provenance) at three levels each — pick the pillars that matter to you, skip the ones that don't |
-| **Lifetime tier** | Two doors (founder-tier and inner-circle) for Custeez who want to stop thinking about it |
-| **White-label tier** | (Platform side) Three tiers for licensee brands — Wholesale Direct, Platform Partner, Full Launch |
+| **White-label tier** | (Platform side) Three tiers for licensee brands — Wholesale Direct, Platform Partner, Full Launch — plus Lifetime (AppSumo-style) for the AIMS / Plug-Me-In SDK |
 | **Negotiation envelope** | A live dimension — every quoted price has a floor and a ceiling, and the team works with the Custeez to land inside it |
 
 The result is a generated personal plan per Custeez, computed at

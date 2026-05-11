@@ -246,8 +246,12 @@ def test_is_member_recognizes_standard_tier():
     assert membership.is_member({"membership_tier": "standard"}) is True
 
 
-def test_is_member_recognizes_lifetime_tiers():
-    """Lifetime Member + Lifetime Concierge also count as members for MEMBER_15."""
+def test_is_member_recognizes_grandfathered_lifetime_tiers():
+    """Grandfathered Lifetime Member + Lifetime Concierge records still count as
+    members for MEMBER_15. Lifetime tiers were retired from Coastal canon
+    2026-05-11 (see docs/lifetime-tier-positioning-2026-05-11.md), but
+    pre-retirement Stripe Customer records keep their auto-discount until
+    owner ratifies a migration."""
     from scripts import membership  # noqa: PLC0415
 
     assert membership.is_member({"membership_tier": "lifetime_member"}) is True

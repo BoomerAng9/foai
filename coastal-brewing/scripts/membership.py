@@ -12,6 +12,17 @@ REFERRAL_PREFIX = "CBC-"
 REFUND_THRESHOLD = 2
 MEMBERSHIP_PRODUCT_ID = "coastal_membership_standard_annual"
 MEMBER_DISCOUNT_COUPON = "MEMBER_15"
+# NOTE 2026-05-11: Lifetime Member + Lifetime Concierge tiers were retired
+# from Coastal canon per owner directive (see
+# `docs/lifetime-tier-positioning-2026-05-11.md`). Lifetime is now the
+# AIMS / Plug-Me-In licensee tier, NOT a Coastal beverage tier.
+#
+# The lifetime_* tier keys are KEPT in this frozenset as
+# legacy/grandfathered so any existing Stripe Customer records minted
+# pre-retirement continue to receive the MEMBER_15 auto-coupon at
+# checkout. No NEW Coastal customers should be assigned these tiers.
+# Owner ratification pending on whether to actively migrate grandfathered
+# customers off these tier keys; until then, behavior is unchanged.
 MEMBER_TIERS = frozenset({"standard", "lifetime_member", "lifetime_concierge"})
 
 

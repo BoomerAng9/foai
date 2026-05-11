@@ -151,7 +151,7 @@ Owner-gated. Recommend wiring `Lil_Mercury_Hawk` (read-side first) when the seco
 2. **Membership name**: Coastal Custee Card / Coastal Co. Card / Pooler Pass / Coastal Reserve / Stork Card / something else?
 3. **Welcome-box dripper**: still ceramic V60-style, or upgrade given the higher price point? (Could swap to a Kalita Wave or Coastal-branded ceramic mug.)
 4. **Grocery move**: green-light Food Lion Local Goodness application now, or after membership goes live?
-5. **Lifetime tier price-anchor adjustment**: if Standard goes to $599/yr, do the Lifetime tiers ($999 once / $4999 once) still feel right, or does Lifetime move to $1499 / $5999 to maintain the spread?
+5. ~~Lifetime tier price-anchor adjustment~~ — **RESOLVED 2026-05-11**: Lifetime tiers retired from Coastal canon. Lifetime is now AIMS / Plug-Me-In licensee tier only. See `lifetime-tier-positioning-2026-05-11.md`.
 
 ---
 
