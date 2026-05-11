@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 
 import { Nav } from "@/components/nav";
 import { Footer } from "@/components/footer";
+import { MembershipCheckoutForm } from "@/components/membership-checkout-form";
 
 export const metadata: Metadata = {
   title: "Standard Membership · Coastal Brewing Co.",
@@ -112,9 +113,8 @@ export default function MembershipPage() {
         <section className="mb-14 rounded-lg border border-border bg-card/40 p-8">
           <h2 className="font-serif text-2xl text-foreground">Join</h2>
           <p className="mt-3 text-foreground/75">
-            Standard Membership opens at $199/year. Checkout opens shortly — drop your
-            email below and we&rsquo;ll write you the moment your invite is ready, or
-            reach out directly to{" "}
+            Standard Membership is $199 a year. Drop your email below and
+            you&rsquo;ll go straight to secure checkout. Questions? Reach out to{" "}
             <a
               className="text-accent underline-offset-4 hover:underline"
               href="mailto:members@coastalbrewing.co"
@@ -123,29 +123,7 @@ export default function MembershipPage() {
             </a>
             .
           </p>
-          <form
-            className="mt-6 flex flex-col gap-3 sm:flex-row"
-            action="mailto:members@coastalbrewing.co"
-            method="post"
-            encType="text/plain"
-          >
-            <input
-              type="email"
-              name="email"
-              required
-              placeholder="you@your-coast.com"
-              className="flex-1 rounded-md border border-border bg-background px-4 py-3 text-base text-foreground placeholder:text-muted-foreground focus:border-accent focus:outline-none"
-            />
-            <button
-              type="submit"
-              className="rounded-md bg-accent px-6 py-3 font-mono text-xs uppercase tracking-widest text-accent-foreground transition-colors hover:bg-accent/90"
-            >
-              Reserve my spot
-            </button>
-          </form>
-          <p className="mt-3 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
-            No charge today · checkout link arrives via email
-          </p>
+          <MembershipCheckoutForm />
         </section>
 
         <section className="mb-14">
