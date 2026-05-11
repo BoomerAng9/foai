@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { ScrollReveal } from "@/components/scroll-reveal";
 import { SubscriptionCheckoutButton } from "@/components/subscription-checkout-button";
+import { TierMark } from "@/components/tier-mark";
 import { cn } from "@/lib/utils";
 
 export const metadata = {
@@ -373,9 +374,10 @@ export default function PricingPage() {
             </ScrollReveal>
 
             <div className="mt-10 overflow-hidden rounded-lg border border-border">
-              <table className="w-full text-sm">
+              <table className="w-full text-sm" data-pricing-table="tier-comparison">
                 <thead>
                   <tr className="bg-muted/30 text-left font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+                    <th className="px-4 py-3 w-20">Mark</th>
                     <th className="px-4 py-3">Tier</th>
                     <th className="px-4 py-3">9-month plan (best deal)</th>
                     <th className="px-4 py-3">Audience</th>
@@ -383,51 +385,56 @@ export default function PricingPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border text-foreground/85">
-                  <tr>
-                    <td className="px-4 py-3 font-medium">Pooler Pass Standard</td>
-                    <td className="px-4 py-3 font-mono">$49 / yr</td>
-                    <td className="px-4 py-3 text-foreground/70 text-[13px]">Local 50–100 mi from Pooler 31322</td>
-                    <td className="px-4 py-3 text-right">
+                  <tr data-tier-row="pooler-pass-standard">
+                    <td className="px-4 py-3 align-middle"><TierMark variant="plr-cream" /></td>
+                    <td className="px-4 py-3 font-medium align-middle">Pooler Pass Standard</td>
+                    <td className="px-4 py-3 font-mono align-middle">$49 / yr</td>
+                    <td className="px-4 py-3 text-foreground/70 text-[13px] align-middle">Local 50–100 mi from Pooler 31322</td>
+                    <td className="px-4 py-3 text-right align-middle">
                       <Link href="/pooler-pass" className="font-mono text-[11px] uppercase tracking-widest text-accent hover:underline">
                         Details →
                       </Link>
                     </td>
                   </tr>
-                  <tr>
-                    <td className="px-4 py-3 font-medium">Pooler Pass Plus</td>
-                    <td className="px-4 py-3 font-mono">$99 / yr</td>
-                    <td className="px-4 py-3 text-foreground/70 text-[13px]">Local power-buyers, more perks</td>
-                    <td className="px-4 py-3 text-right">
+                  <tr data-tier-row="pooler-pass-plus">
+                    <td className="px-4 py-3 align-middle"><TierMark variant="plr-gold" /></td>
+                    <td className="px-4 py-3 font-medium align-middle">Pooler Pass Plus</td>
+                    <td className="px-4 py-3 font-mono align-middle">$99 / yr</td>
+                    <td className="px-4 py-3 text-foreground/70 text-[13px] align-middle">Local power-buyers, more perks</td>
+                    <td className="px-4 py-3 text-right align-middle">
                       <Link href="/pooler-pass" className="font-mono text-[11px] uppercase tracking-widest text-accent hover:underline">
                         Details →
                       </Link>
                     </td>
                   </tr>
-                  <tr className="bg-accent/[0.06]">
-                    <td className="px-4 py-3 font-medium">Coastal Custee Card</td>
-                    <td className="px-4 py-3 font-mono">$199 / yr</td>
-                    <td className="px-4 py-3 text-foreground/70 text-[13px]">National DTC + Amazon — the default tier</td>
-                    <td className="px-4 py-3 text-right">
+                  <tr className="bg-accent/[0.06]" data-tier-row="coastal-custee-card">
+                    <td className="px-4 py-3 align-middle"><TierMark variant="custee-card" /></td>
+                    <td className="px-4 py-3 font-medium align-middle">Coastal Custee Card</td>
+                    <td className="px-4 py-3 font-mono align-middle">$199 / yr</td>
+                    <td className="px-4 py-3 text-foreground/70 text-[13px] align-middle">National DTC + Amazon — the default tier</td>
+                    <td className="px-4 py-3 text-right align-middle">
                       <Link href="/membership" className="font-mono text-[11px] uppercase tracking-widest text-accent hover:underline">
                         Details →
                       </Link>
                     </td>
                   </tr>
-                  <tr>
-                    <td className="px-4 py-3 font-medium">Wood Stork Standard</td>
-                    <td className="px-4 py-3 font-mono">$499 / yr</td>
-                    <td className="px-4 py-3 text-foreground/70 text-[13px]">B2B, multi-location, referrers</td>
-                    <td className="px-4 py-3 text-right">
+                  <tr data-tier-row="wood-stork-standard">
+                    <td className="px-4 py-3 align-middle"><TierMark variant="wood-stork-standard" /></td>
+                    <td className="px-4 py-3 font-medium align-middle">Wood Stork Standard</td>
+                    <td className="px-4 py-3 font-mono align-middle">$499 / yr</td>
+                    <td className="px-4 py-3 text-foreground/70 text-[13px] align-middle">B2B, multi-location, referrers</td>
+                    <td className="px-4 py-3 text-right align-middle">
                       <Link href="/wood-stork" className="font-mono text-[11px] uppercase tracking-widest text-accent hover:underline">
                         Details →
                       </Link>
                     </td>
                   </tr>
-                  <tr>
-                    <td className="px-4 py-3 font-medium">Wood Stork Reserve</td>
-                    <td className="px-4 py-3 font-mono">$999 / yr</td>
-                    <td className="px-4 py-3 text-foreground/70 text-[13px]">Largest accounts, owner-domain whitelabel partners</td>
-                    <td className="px-4 py-3 text-right">
+                  <tr data-tier-row="wood-stork-reserve">
+                    <td className="px-4 py-3 align-middle"><TierMark variant="wood-stork-reserve" /></td>
+                    <td className="px-4 py-3 font-medium align-middle">Wood Stork Reserve</td>
+                    <td className="px-4 py-3 font-mono align-middle">$999 / yr</td>
+                    <td className="px-4 py-3 text-foreground/70 text-[13px] align-middle">Largest accounts, owner-domain whitelabel partners</td>
+                    <td className="px-4 py-3 text-right align-middle">
                       <Link href="/wood-stork" className="font-mono text-[11px] uppercase tracking-widest text-accent hover:underline">
                         Details →
                       </Link>
