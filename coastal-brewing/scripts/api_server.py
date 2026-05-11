@@ -4245,11 +4245,17 @@ def _stripe_wood_stork_checkout_create(
         return None
 
 
+ALLOWED_WOOD_STORK_PRODUCTS = {
+    "bulk-coffee", "bulk-tea", "multi-location", "whitelabel",
+}
+
+
 class WoodStorkCheckoutRequest(BaseModel):
     email: str
     business_name: str
     tier: str  # "standard" | "reserve"
     cadence: str = "9mo"  # "monthly" | "3mo" | "6mo" | "9mo"  (default = best deal)
+    products: list[str] = Field(default_factory=list)
 
 
 @app.post("/api/membership/wood-stork/checkout")
@@ -4258,12 +4264,19 @@ def wood_stork_checkout(
     x_coastal_token: str = Header(""),
 ) -> dict:
     """Mint a Stripe Checkout Session for a Wood Stork subscription at
-    the requested 3-6-9 cadence."""
+    the requested 3-6-9 cadence. Products list captured in Stripe
+    Checkout metadata so /stripe/webhook can fulfill the right B2B
+    shipment scale."""
     _auth(x_coastal_token)
+    if not STRIPE_AVAILABLE or not _stripe_is_configured():
+        raise HTTPException(status_code=503, detail="Stripe not configured on this runner")
+
     email = (body.email or "").strip().lower()
     business_name = (body.business_name or "").strip()
     tier = (body.tier or "").strip().lower()
     cadence_id = (body.cadence or "9mo").strip().lower()
+    products = [str(p).strip().lower() for p in (body.products or []) if p]
+
     if not email or "@" not in email:
         raise HTTPException(status_code=400, detail="email required")
     if not business_name:
@@ -4271,36 +4284,78 @@ def wood_stork_checkout(
     if tier not in ("standard", "reserve"):
         raise HTTPException(status_code=400, detail="tier must be 'standard' or 'reserve'")
     if not _cadence_mod.is_valid_cadence(cadence_id):
-        raise HTTPException(
-            status_code=400,
-            detail="cadence must be 'monthly', '3mo', '6mo', or '9mo'",
+        raise HTTPException(status_code=400, detail="cadence must be 'monthly', '3mo', '6mo', or '9mo'")
+    if products:
+        invalid = [p for p in products if p not in ALLOWED_WOOD_STORK_PRODUCTS]
+        if invalid:
+            raise HTTPException(
+                status_code=400,
+                detail=f"unknown products: {invalid}; allowed: {sorted(ALLOWED_WOOD_STORK_PRODUCTS)}",
+            )
+    if tier == "standard" and "whitelabel" in products:
+        raise HTTPException(status_code=400, detail="whitelabel is Wood Stork Reserve only")
+
+    monthly_retail = membership_wood_stork.monthly_retail_for_tier(tier)  # type: ignore[arg-type]
+    total_cents = _cadence_mod.cadence_total_cents(monthly_retail, cadence_id)  # type: ignore[arg-type]
+    cadence_label = _cadence_mod.CADENCES[cadence_id]["label"]  # type: ignore[index]
+    tier_label = f"Wood Stork {tier.capitalize()}"
+    products_label = ", ".join(products) if products else "—"
+    day_iso = _time.strftime("%Y-%m-%d", _time.gmtime())
+    intent_id = f"ws_{hashlib.sha256(f'{email}|{tier}|{cadence_id}|{day_iso}|{products_label}'.encode()).hexdigest()[:16]}"
+
+    metadata = {
+        "product": "coastal-brewing", "flow": "wood_stork",
+        "tier": f"wood-stork-{tier}", "cadence": cadence_id,
+        "products": products_label, "intent_id": intent_id,
+        "custee_email": email, "business_name": business_name,
+    }
+
+    try:
+        import stripe as _stripe  # noqa: PLC0415
+        from adapters.stripe_adapter import _init_stripe  # noqa: PLC0415
+        _init_stripe()
+        session = _stripe.checkout.Session.create(
+            mode="payment", customer_email=email,
+            line_items=[{
+                "price_data": {
+                    "currency": "usd", "unit_amount": total_cents,
+                    "product_data": {
+                        "name": f"{tier_label} · {cadence_label}",
+                        "description": f"{business_name} · Products: {products_label}",
+                        "metadata": {"tier": f"wood-stork-{tier}", "intent_id": intent_id},
+                    },
+                }, "quantity": 1,
+            }],
+            metadata=metadata, payment_intent_data={"metadata": metadata},
+            success_url=f"{AUTH_PUBLIC_URL}/wood-stork/thank-you?intent={intent_id}",
+            cancel_url=f"{AUTH_PUBLIC_URL}/wood-stork?canceled=1",
+            billing_address_collection="auto",
         )
-    price_id = _wood_stork_price_id(tier, cadence_id)
-    if not price_id:
-        env = _wood_stork_price_env(tier, cadence_id)
-        raise HTTPException(
-            status_code=503,
-            detail=f"wood stork {tier} {cadence_id} not yet configured — {env} env unset",
-        )
-    url = _stripe_wood_stork_checkout_create(
-        customer_email=email,
-        business_name=business_name,
-        tier=tier,
-        cadence_id=cadence_id,
+        checkout_url = session.url if hasattr(session, "url") else session.get("url")
+        session_id = session.id if hasattr(session, "id") else session.get("id")
+    except Exception as exc:  # noqa: BLE001
+        log = __import__("logging").getLogger("coastal.wood_stork")
+        log.warning("stripe wood stork checkout create failed: %s", exc)
+        raise HTTPException(status_code=502, detail=f"checkout session mint failed: {exc}") from exc
+
+    _send_telegram_message(
+        f"Wood Stork {tier} subscription intent\nintent: {intent_id}\nbusiness: {business_name}\n"
+        f"custee: {email}\ncadence: {cadence_id} ({cadence_label})\nproducts: {products_label}\n"
+        f"total: ${total_cents/100:.2f}\nsession: {session_id or '?'}"
     )
-    if not url:
-        raise HTTPException(status_code=503, detail="checkout session mint failed")
-    return {"ok": True, "redirect_url": url}
+
+    return {
+        "ok": True, "intent_id": intent_id, "session_id": session_id,
+        "redirect_url": checkout_url, "total_cents": total_cents,
+        "cadence": cadence_id, "tier": f"wood-stork-{tier}", "products": products,
+    }
 
 
 @app.get("/api/membership/wood-stork/cadence-pricing")
 def wood_stork_cadence_pricing(
     tier: str = Query(..., regex="^(standard|reserve)$"),
-    x_coastal_token: str = Header(""),
 ) -> dict:
-    """Return the 4-cadence pricing table for a Wood Stork tier — powers
-    the cadence picker UI without bouncing through Stripe."""
-    _auth(x_coastal_token)
+    """Public — 4-cadence pricing table for a Wood Stork tier."""
     return {
         "ok": True,
         "tier": tier,
@@ -4335,12 +4390,10 @@ class PoolerPassEligibilityRequest(BaseModel):
 @app.post("/api/membership/pooler-pass/eligibility")
 def pooler_pass_eligibility(
     body: PoolerPassEligibilityRequest,
-    x_coastal_token: str = Header(""),
 ) -> dict:
-    """Server-side ZIP eligibility check for Pooler Pass. Returns the
-    eligibility band (local / extended / out_of_radius) and the friendly
-    upsell message when out of radius."""
-    _auth(x_coastal_token)
+    """Public — server-side ZIP eligibility check for Pooler Pass. No
+    token (ZIP radius math is publicly knowable; powers the frontend
+    gate without bouncing through the token-gated proxy)."""
     zip_code = (body.zip or "").strip()
     if not zip_code or not zip_code.isdigit() or len(zip_code) != 5:
         raise HTTPException(status_code=400, detail="zip must be a 5-digit code")
@@ -4377,11 +4430,17 @@ def _stripe_pooler_pass_checkout_create(
         return None
 
 
+ALLOWED_POOLER_PASS_PRODUCTS = {
+    "tea", "coffee", "functional-coffee", "combo",
+}
+
+
 class PoolerPassCheckoutRequest(BaseModel):
     email: str
     zip: str
     tier: str  # "standard" | "plus"
     cadence: str = "9mo"  # default = best deal
+    products: list[str] = Field(default_factory=list)
 
 
 @app.post("/api/membership/pooler-pass/checkout")
@@ -4390,12 +4449,19 @@ def pooler_pass_checkout(
     x_coastal_token: str = Header(""),
 ) -> dict:
     """Gate Pooler Pass checkout on server-side ZIP eligibility, then mint
-    a Stripe Checkout Session at the requested 3-6-9 cadence."""
+    a Stripe Checkout Session at the requested 3-6-9 cadence with the
+    chosen product combination (tea / coffee / functional-coffee /
+    combo)."""
     _auth(x_coastal_token)
+    if not STRIPE_AVAILABLE or not _stripe_is_configured():
+        raise HTTPException(status_code=503, detail="Stripe not configured on this runner")
+
     email = (body.email or "").strip().lower()
     zip_code = (body.zip or "").strip()
     tier = (body.tier or "").strip().lower()
     cadence_id = (body.cadence or "9mo").strip().lower()
+    products = [str(p).strip().lower() for p in (body.products or []) if p]
+
     if not email or "@" not in email:
         raise HTTPException(status_code=400, detail="email required")
     if not zip_code or not zip_code.isdigit() or len(zip_code) != 5:
@@ -4403,42 +4469,82 @@ def pooler_pass_checkout(
     if tier not in ("standard", "plus"):
         raise HTTPException(status_code=400, detail="tier must be 'standard' or 'plus'")
     if not _cadence_mod.is_valid_cadence(cadence_id):
+        raise HTTPException(status_code=400, detail="cadence must be 'monthly', '3mo', '6mo', or '9mo'")
+    if not products:
+        raise HTTPException(status_code=400, detail="select at least one product")
+    invalid = [p for p in products if p not in ALLOWED_POOLER_PASS_PRODUCTS]
+    if invalid:
         raise HTTPException(
             status_code=400,
-            detail="cadence must be 'monthly', '3mo', '6mo', or '9mo'",
+            detail=f"unknown products: {invalid}; allowed: {sorted(ALLOWED_POOLER_PASS_PRODUCTS)}",
         )
-    # Re-verify eligibility server-side — frontend gate is convenience,
-    # this is the source of truth.
     if not membership_pooler_pass.is_zip_eligible(zip_code):
         raise HTTPException(
             status_code=400,
             detail="zip is outside the 100-mile Pooler Pass eligibility band — see Coastal Custee Card",
         )
-    price_id = _pooler_pass_price_id(tier, cadence_id)
-    if not price_id:
-        env = _pooler_pass_price_env(tier, cadence_id)
-        raise HTTPException(
-            status_code=503,
-            detail=f"pooler pass {tier} {cadence_id} not yet configured — {env} env unset",
+
+    monthly_retail = membership_pooler_pass.monthly_retail_for_tier(tier)  # type: ignore[arg-type]
+    total_cents = _cadence_mod.cadence_total_cents(monthly_retail, cadence_id)  # type: ignore[arg-type]
+    cadence_label = _cadence_mod.CADENCES[cadence_id]["label"]  # type: ignore[index]
+    tier_label = f"Pooler Pass {tier.capitalize()}"
+    products_label = ", ".join(products)
+    day_iso = _time.strftime("%Y-%m-%d", _time.gmtime())
+    intent_id = f"pp_{hashlib.sha256(f'{email}|{tier}|{cadence_id}|{day_iso}|{products_label}'.encode()).hexdigest()[:16]}"
+
+    metadata = {
+        "product": "coastal-brewing", "flow": "pooler_pass",
+        "tier": f"pooler-pass-{tier}", "cadence": cadence_id,
+        "products": products_label, "intent_id": intent_id,
+        "custee_email": email, "zip": zip_code,
+    }
+
+    try:
+        import stripe as _stripe  # noqa: PLC0415
+        from adapters.stripe_adapter import _init_stripe  # noqa: PLC0415
+        _init_stripe()
+        session = _stripe.checkout.Session.create(
+            mode="payment", customer_email=email,
+            line_items=[{
+                "price_data": {
+                    "currency": "usd", "unit_amount": total_cents,
+                    "product_data": {
+                        "name": f"{tier_label} · {cadence_label}",
+                        "description": f"Products: {products_label}",
+                        "metadata": {"tier": f"pooler-pass-{tier}", "intent_id": intent_id},
+                    },
+                }, "quantity": 1,
+            }],
+            metadata=metadata, payment_intent_data={"metadata": metadata},
+            success_url=f"{AUTH_PUBLIC_URL}/pooler-pass/thank-you?intent={intent_id}",
+            cancel_url=f"{AUTH_PUBLIC_URL}/pooler-pass?canceled=1",
+            billing_address_collection="auto",
         )
-    url = _stripe_pooler_pass_checkout_create(
-        customer_email=email,
-        zip_code=zip_code,
-        tier=tier,
-        cadence_id=cadence_id,
+        checkout_url = session.url if hasattr(session, "url") else session.get("url")
+        session_id = session.id if hasattr(session, "id") else session.get("id")
+    except Exception as exc:  # noqa: BLE001
+        log = __import__("logging").getLogger("coastal.pooler_pass")
+        log.warning("stripe pooler pass checkout create failed: %s", exc)
+        raise HTTPException(status_code=502, detail=f"checkout session mint failed: {exc}") from exc
+
+    _send_telegram_message(
+        f"Pooler Pass {tier} subscription intent\nintent: {intent_id}\ncustee: {email}\n"
+        f"zip: {zip_code}\ncadence: {cadence_id} ({cadence_label})\nproducts: {products_label}\n"
+        f"total: ${total_cents/100:.2f}\nsession: {session_id or '?'}"
     )
-    if not url:
-        raise HTTPException(status_code=503, detail="checkout session mint failed")
-    return {"ok": True, "redirect_url": url}
+
+    return {
+        "ok": True, "intent_id": intent_id, "session_id": session_id,
+        "redirect_url": checkout_url, "total_cents": total_cents,
+        "cadence": cadence_id, "tier": f"pooler-pass-{tier}", "products": products,
+    }
 
 
 @app.get("/api/membership/pooler-pass/cadence-pricing")
 def pooler_pass_cadence_pricing(
     tier: str = Query(..., regex="^(standard|plus)$"),
-    x_coastal_token: str = Header(""),
 ) -> dict:
-    """Return the 4-cadence pricing table for a Pooler Pass tier."""
-    _auth(x_coastal_token)
+    """Public — 4-cadence pricing table for a Pooler Pass tier."""
     return {
         "ok": True,
         "tier": tier,
