@@ -261,8 +261,9 @@ RESEARCH_TICKETS_DIR = ROOT / "research" / "tickets"
 DRAFTS_DIR = ROOT / "drafts"
 OWNER_APPROVALS_DIR = ROOT / "owner_approvals"
 STRIPE_EVENTS_DIR = ROOT / "stripe_events"
+MERCURY_EVENTS_DIR = ROOT / "mercury_events"
 
-for _d in (RECEIPTS_DIR, RESEARCH_TICKETS_DIR, DRAFTS_DIR, OWNER_APPROVALS_DIR, STRIPE_EVENTS_DIR):
+for _d in (RECEIPTS_DIR, RESEARCH_TICKETS_DIR, DRAFTS_DIR, OWNER_APPROVALS_DIR, STRIPE_EVENTS_DIR, MERCURY_EVENTS_DIR):
     _d.mkdir(parents=True, exist_ok=True)
 
 app = FastAPI(title="Coastal Brewing Runner", version="3.0")
@@ -691,6 +692,64 @@ def mercury_selftest(x_coastal_token: str = Header("")) -> dict:
     """
     _auth(x_coastal_token)
     return lil_mercury_hawk.self_test()
+
+
+@app.post("/mercury/webhook")
+async def mercury_webhook(request: Request) -> dict:
+    """Mercury webhook ingest — HMAC-SHA256 signature verification, NO
+    gateway token (Mercury can't send our header). Per
+    `lil_mercury_hawk.verify_webhook`, sig must match the configured
+    webhook secret.
+
+    On `invoice.paid`: records the payment to the audit ledger and fires
+    owner Telegram. On other event types: idempotent log + ack only.
+    Idempotency: events with a known event_id return the cached envelope
+    without re-firing handlers (Mercury at-least-once delivery semantics).
+    """
+    sig = (
+        request.headers.get("mercury-signature")
+        or request.headers.get("x-mercury-signature")
+        or request.headers.get("svix-signature")
+        or ""
+    )
+    payload = await request.body()
+    if not lil_mercury_hawk.verify_webhook(payload, sig):
+        raise HTTPException(status_code=400, detail="signature verification failed")
+
+    proj = lil_mercury_hawk.parse_event(payload)
+    event_id = proj.get("event_id") or f"unsigned-{int(time.time())}"
+    event_type = proj.get("type") or "unknown"
+    out_path = MERCURY_EVENTS_DIR / f"{event_id}.json"
+
+    if out_path.exists():
+        return {
+            "received": True,
+            "event_id": event_id,
+            "type": event_type,
+            "idempotent_replay": True,
+        }
+    out_path.write_text(json.dumps(proj, indent=2, default=str), encoding="utf-8")
+
+    telegram_sent = False
+    if event_type == "invoice.paid":
+        invoice_id = proj.get("invoice_id") or "?"
+        total_cents = proj.get("total_cents") or 0
+        amount = f"${total_cents/100:.2f}" if isinstance(total_cents, int) else "?"
+        email = proj.get("customer_email") or "?"
+        telegram_sent = _send_telegram_message(
+            f"Mercury invoice PAID\n"
+            f"invoice: {invoice_id}\n"
+            f"amount: {amount}\n"
+            f"customer: {email}\n"
+            f"paid_at: {proj.get('paid_at') or '?'}"
+        )
+
+    return {
+        "received": True,
+        "event_id": event_id,
+        "type": event_type,
+        "telegram_sent": telegram_sent,
+    }
 
 
 @app.get("/audit/integrity-check")
