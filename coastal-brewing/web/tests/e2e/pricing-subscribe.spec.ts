@@ -70,6 +70,34 @@ test("9mo cadence updates total display before submit", async ({ page }) => {
   await expect(teaCard).toContainText("$188.72");
 });
 
+test("5-tier comparison table renders all rows + marks", async ({ page }) => {
+  await page.goto("/pricing");
+  const table = page.locator('[data-pricing-table="tier-comparison"]');
+  await table.scrollIntoViewIfNeeded();
+  await expect(table).toBeVisible();
+
+  for (const tier of [
+    "pooler-pass-standard",
+    "pooler-pass-plus",
+    "coastal-custee-card",
+    "wood-stork-standard",
+    "wood-stork-reserve",
+  ]) {
+    await expect(table.locator(`[data-tier-row="${tier}"]`)).toBeVisible();
+  }
+  for (const mark of [
+    "plr-cream",
+    "plr-gold",
+    "custee-card",
+    "wood-stork-standard",
+    "wood-stork-reserve",
+  ]) {
+    await expect(table.locator(`[data-tier-mark="${mark}"]`)).toBeVisible();
+  }
+
+  await table.screenshot({ path: "test-results/tier-comparison-table.png" });
+});
+
 test("Coffee Monthly card has its own independent CTA + form", async ({ page }) => {
   await page.goto("/pricing");
   const coffeeCard = page.locator('[data-pricing-tier="subscription-coastal-coffee-monthly"]');
