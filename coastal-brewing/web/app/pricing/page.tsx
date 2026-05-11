@@ -33,11 +33,11 @@ const SUBSCRIPTIONS: Subscription[] = [
     sku: "coastal-tea-monthly",
     name: "Tea Monthly",
     tagline: "A new Lowcountry Tea every month.",
-    price: "$30.99",
+    price: "$24.99",
     priceNote: "/ month, ships free over $50",
     image: "/products/coastal-tea-monthly.png",
     whatYouGet: [
-      "One 3oz Lowcountry Tea tin per month",
+      "One 3oz Lowcountry Tea tin per month (~30 cups brewed)",
       "Variety swap each cycle — we won't repeat",
       "Tasting note from Sal in every box",
       "Pause or cancel any time",
@@ -48,11 +48,11 @@ const SUBSCRIPTIONS: Subscription[] = [
     sku: "coastal-coffee-monthly",
     name: "Coffee Monthly",
     tagline: "One bag a month, picked for your palate.",
-    price: "$39.49",
+    price: "$26.99",
     priceNote: "/ month, ships free over $50",
     image: "/products/coastal-coffee-monthly.png",
     whatYouGet: [
-      "One 12oz coffee bag per month",
+      "One 12oz coffee bag per month (~24 cups brewed)",
       "Sal rotates origin + roast based on what you like",
       "Tasting note printed on the bag",
       "Skip a month, swap the bag, or cancel any time",
@@ -61,14 +61,29 @@ const SUBSCRIPTIONS: Subscription[] = [
     recommended: true,
   },
   {
+    sku: "coastal-functional-coffee-monthly",
+    name: "Functional Coffee Monthly",
+    tagline: "Specialty coffee blended with Lion's Mane, Cordyceps, and Reishi.",
+    price: "$33.99",
+    priceNote: "/ month, ships free over $50",
+    image: "/products/coastal-functional-coffee-monthly.png",
+    whatYouGet: [
+      "One 12oz functional coffee bag per month (~24 cups brewed)",
+      "Specialty Arabica blended with Lion's Mane, Cordyceps, and Reishi",
+      "Mushrooms long valued in culinary traditions for clarity, vitality, and balance",
+      "Sold as a food, not a supplement",
+    ],
+    cta: { label: "Start Functional Monthly", href: "/chat?sku=coastal-functional-coffee-monthly&intent=subscribe" },
+  },
+  {
     sku: "coastal-combo-monthly",
     name: "Combo Monthly",
     tagline: "One coffee + one tea — the household pack.",
-    price: "$67.49",
+    price: "$44.99",
     priceNote: "/ month, ships free over $50",
     image: "/products/coastal-combo-monthly.png",
     whatYouGet: [
-      "One 12oz coffee + one 3oz tea per month",
+      "One 12oz coffee + one 3oz tea per month (~54 cups combined)",
       "Best per-bag value across the catalog",
       "Coordinated picks — coffee + tea that play well together",
       "Pause or cancel any time",
@@ -194,13 +209,13 @@ function SubscriptionCard({ sub }: { sub: Subscription }) {
           Most Popular
         </div>
       )}
-      <div className="relative aspect-[4/3] overflow-hidden bg-secondary">
+      <div className="relative aspect-square overflow-hidden bg-secondary">
         <Image
           src={sub.image}
           alt={sub.name}
           fill
           sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-          className="object-cover object-top"
+          className="object-contain p-4"
         />
       </div>
       <CardContent className="flex flex-1 flex-col gap-4 p-6">
@@ -252,13 +267,13 @@ function BundleCard({ bundle }: { bundle: Bundle }) {
       className="flex flex-col h-full overflow-hidden transition-all hover:-translate-y-0.5 hover:border-accent/60"
       data-pricing-tier={`bundle-${bundle.sku}`}
     >
-      <div className="relative aspect-[4/3] overflow-hidden bg-secondary">
+      <div className="relative aspect-square overflow-hidden bg-secondary">
         <Image
           src={bundle.image}
           alt={bundle.name}
           fill
           sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-          className="object-cover object-top"
+          className="object-contain p-4"
         />
       </div>
       <CardContent className="flex flex-1 flex-col gap-4 p-6">
@@ -331,20 +346,119 @@ export default function PricingPage() {
           </div>
         </section>
 
-        {/* ──────────── Subscriptions ──────────── */}
+        {/* ──────────── C|Brew Membership Ladder (annual via 3-6-9 cadence) ──────────── */}
+        <section className="border-b border-border/50 bg-card/30">
+          <div className="container py-16 md:py-20">
+            <ScrollReveal>
+              <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-accent">
+                C|Brew Yearly Membership · 3-6-9 cadence
+              </p>
+              <h2 className="mt-3 font-display text-[clamp(28px,4vw,40px)] font-semibold tracking-[-0.02em] leading-[1.05] max-w-2xl">
+                Pay for 9 months,<br />
+                <span className="text-foreground/60">we deliver 12.</span>
+              </h2>
+              <p className="mt-4 max-w-2xl text-base leading-relaxed text-muted-foreground">
+                Every membership tier offers four cadences: monthly (0% off),
+                3-month (15% off), 6-month (20% off), and the headline
+                9-month plan (25% off, pay 9 months, get 12 months of access).
+                The 9-mo plan is the best deal in the catalog.
+              </p>
+            </ScrollReveal>
+
+            <div className="mt-10 overflow-hidden rounded-lg border border-border">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="bg-muted/30 text-left font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+                    <th className="px-4 py-3">Tier</th>
+                    <th className="px-4 py-3">9-month plan (best deal)</th>
+                    <th className="px-4 py-3">Audience</th>
+                    <th className="px-4 py-3"></th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-border text-foreground/85">
+                  <tr>
+                    <td className="px-4 py-3 font-medium">Pooler Pass Standard</td>
+                    <td className="px-4 py-3 font-mono">$49 / yr</td>
+                    <td className="px-4 py-3 text-foreground/70 text-[13px]">Local 50–100 mi from Pooler 31322</td>
+                    <td className="px-4 py-3 text-right">
+                      <Link href="/pooler-pass" className="font-mono text-[11px] uppercase tracking-widest text-accent hover:underline">
+                        Details →
+                      </Link>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td className="px-4 py-3 font-medium">Pooler Pass Plus</td>
+                    <td className="px-4 py-3 font-mono">$99 / yr</td>
+                    <td className="px-4 py-3 text-foreground/70 text-[13px]">Local power-buyers, more perks</td>
+                    <td className="px-4 py-3 text-right">
+                      <Link href="/pooler-pass" className="font-mono text-[11px] uppercase tracking-widest text-accent hover:underline">
+                        Details →
+                      </Link>
+                    </td>
+                  </tr>
+                  <tr className="bg-accent/[0.06]">
+                    <td className="px-4 py-3 font-medium">Coastal Custee Card</td>
+                    <td className="px-4 py-3 font-mono">$199 / yr</td>
+                    <td className="px-4 py-3 text-foreground/70 text-[13px]">National DTC + Amazon — the default tier</td>
+                    <td className="px-4 py-3 text-right">
+                      <Link href="/membership" className="font-mono text-[11px] uppercase tracking-widest text-accent hover:underline">
+                        Details →
+                      </Link>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td className="px-4 py-3 font-medium">Wood Stork Standard</td>
+                    <td className="px-4 py-3 font-mono">$499 / yr</td>
+                    <td className="px-4 py-3 text-foreground/70 text-[13px]">B2B, multi-location, referrers</td>
+                    <td className="px-4 py-3 text-right">
+                      <Link href="/wood-stork" className="font-mono text-[11px] uppercase tracking-widest text-accent hover:underline">
+                        Details →
+                      </Link>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td className="px-4 py-3 font-medium">Wood Stork Reserve</td>
+                    <td className="px-4 py-3 font-mono">$999 / yr</td>
+                    <td className="px-4 py-3 text-foreground/70 text-[13px]">Largest accounts, owner-domain whitelabel partners</td>
+                    <td className="px-4 py-3 text-right">
+                      <Link href="/wood-stork" className="font-mono text-[11px] uppercase tracking-widest text-accent hover:underline">
+                        Details →
+                      </Link>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <p className="mt-4 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+              All annual prices show the 9-mo plan landing · monthly + 3/6-mo cadences also available on each tier page
+            </p>
+            <p className="mt-2 font-mono text-[10px] uppercase tracking-widest">
+              <Link href="/compare" className="text-accent hover:underline">
+                See how Coastal compares vs every major DTC coffee brand →
+              </Link>
+            </p>
+          </div>
+        </section>
+
+        {/* ──────────── Pay-as-you-go monthly subscriptions ──────────── */}
         <section className="border-b border-border/50">
           <div className="container py-16 md:py-20">
             <ScrollReveal>
               <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-accent">
-                01 / Subscriptions
+                Pay-as-you-go · monthly subscriptions
               </p>
               <h2 className="mt-3 font-display text-[clamp(28px,4vw,40px)] font-semibold tracking-[-0.02em] leading-[1.05] max-w-2xl">
                 One delivery a month.<br />
                 <span className="text-foreground/60">Picked for the way you drink.</span>
               </h2>
               <p className="mt-4 max-w-2xl text-base leading-relaxed text-muted-foreground">
-                Every subscription saves you 15% off catalog. Skip a month,
-                swap a bag, or cancel — Sal will work with you.
+                No annual commitment. Every subscription saves you 15% off
+                catalog. Skip a month, swap a bag, or cancel — Sal will work
+                with you. Prices anchored to the specialty + functional band
+                (Trade, Atlas, Four Sigmatic, MUD\WTR, Harney &amp; Sons) — see{" "}
+                <Link href="/compare" className="text-accent underline-offset-4 hover:underline">/compare</Link>{" "}
+                for the full chart.
               </p>
             </ScrollReveal>
 
