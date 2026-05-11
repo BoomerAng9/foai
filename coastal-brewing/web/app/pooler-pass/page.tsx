@@ -48,7 +48,7 @@ const PLUS_EXTRAS = [
 const ELIGIBILITY = [
   { range: "Inside 50 mi", verdict: "Eligible · Local", places: "Pooler, Savannah, Richmond Hill, Bloomingdale, Garden City, Port Wentworth, Tybee Island, Hilton Head Island, Bluffton" },
   { range: "50–100 mi", verdict: "Eligible · Extended Local", places: "Beaufort, Statesboro, Brunswick, Hinesville, Jesup, Vidalia, Walterboro, Charleston (edge)" },
-  { range: "Outside 100 mi", verdict: "Not eligible — see Coastal Custee Card", places: "Anywhere else; Coastal Custee Card ($199/yr) is the right fit" },
+  { range: "Outside 100 mi", verdict: "Not eligible — see Coastal Custee Card", places: "Anywhere else; Coastal Custee Card (from $29.99/mo, ships nationwide) is the right fit" },
 ];
 
 export default function PoolerPassPage() {
@@ -64,12 +64,17 @@ export default function PoolerPassPage() {
             Pooler Pass
           </h1>
           <p className="mt-3 font-mono text-sm text-muted-foreground">
-            Standard $49 / yr · Plus $99 / yr
+            Standard from $7.49/mo · Plus from $14.99/mo
+            <span className="block mt-1 text-foreground/70">
+              3-month, 6-month, or 9-month plans — pay 9 months, get 12.
+            </span>
           </p>
           <p className="mt-6 max-w-2xl text-base leading-relaxed text-foreground/80">
             For locals — within 50 to 100 miles of Pooler (ZIP 31322). Discount when
             you walk in, free local pickup, member-only events at the storefront, and
-            first dibs on what just came out of the back.
+            first dibs on what just came out of the back. Pick the cadence that fits —
+            month-to-month for try-out, 9-month plan for full support (you pay 9 months,
+            we deliver 12).
           </p>
         </header>
 
@@ -104,7 +109,7 @@ export default function PoolerPassPage() {
 
         <section className="mb-14">
           <p className="mb-6 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
-            Standard tier benefits — $49 / yr
+            Standard tier benefits — from $7.49/mo
           </p>
           <ul className="space-y-6">
             {STANDARD_BENEFITS.map((b) => (
@@ -118,7 +123,7 @@ export default function PoolerPassPage() {
 
         <section className="mb-14">
           <p className="mb-6 font-mono text-[10px] uppercase tracking-widest text-accent">
-            Plus tier extras — $99 / yr
+            Plus tier extras — from $14.99/mo
           </p>
           <p className="mb-6 text-sm text-foreground/70">
             Everything in Standard, plus:

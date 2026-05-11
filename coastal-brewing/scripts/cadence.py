@@ -1,0 +1,149 @@
+"""Coastal Brewing Co. — 3-6-9 cadence pricing helper.
+
+Single source of truth for the C|Brew cadence schedule. Owner-ratified
+2026-05-11 (mirrors A.I.M.S. Tesla 3-6-9 + existing Coastal billing
+matrix Dimension 1).
+
+Every C|Brew tier publishes a single monthly retail price. From that,
+four cadence options derive deterministically:
+    monthly : 0% off,  pay 1, deliver 1
+    3mo     : 15% off, pay 3, deliver 3
+    6mo     : 20% off, pay 6, deliver 6
+    9mo     : 25% off, pay 9, deliver 12  ← the "pay 9, get 12" headline
+
+No Stripe SDK calls, no DB, no HTTP. The api_server layer wraps this.
+"""
+from __future__ import annotations
+
+from typing import Literal
+
+
+CadenceId = Literal["monthly", "3mo", "6mo", "9mo"]
+
+
+# Cadence definitions — DO NOT EDIT without updating
+# `cbrew-369-pricing-canon-2026-05-11.md` first.
+CADENCES: dict[CadenceId, dict] = {
+    "monthly": {
+        "label": "Month-to-month",
+        "discount": 0.00,
+        "months_paid": 1,
+        "months_delivered": 1,
+        "stripe_interval": "month",
+        "stripe_interval_count": 1,
+        "framing": "Standard. No commitment.",
+    },
+    "3mo": {
+        "label": "3-month plan",
+        "discount": 0.15,
+        "months_paid": 3,
+        "months_delivered": 3,
+        "stripe_interval": "month",
+        "stripe_interval_count": 3,
+        "framing": "First commitment — supporting us.",
+    },
+    "6mo": {
+        "label": "6-month plan",
+        "discount": 0.20,
+        "months_paid": 6,
+        "months_delivered": 6,
+        "stripe_interval": "month",
+        "stripe_interval_count": 6,
+        "framing": "Balance — buying into the mission.",
+    },
+    "9mo": {
+        "label": "9-month plan (pay 9, get 12)",
+        "discount": 0.25,
+        "months_paid": 9,
+        "months_delivered": 12,
+        "stripe_interval": "month",
+        "stripe_interval_count": 12,
+        "framing": "Full support — pay 9, get 12.",
+    },
+}
+
+
+def is_valid_cadence(cadence: str) -> bool:
+    """True if cadence is one of the four canon C|Brew cadences."""
+    return cadence in CADENCES
+
+
+def cadence_total(monthly_retail: float, cadence: CadenceId) -> float:
+    """Return the at-cadence total payment for a tier with the given
+    monthly retail price.
+
+    Examples:
+        cadence_total(29.99, "monthly") → 29.99
+        cadence_total(29.99, "3mo")     → 76.4745   (3 * 29.99 * 0.85)
+        cadence_total(29.99, "6mo")     → 143.952   (6 * 29.99 * 0.80)
+        cadence_total(29.99, "9mo")     → 202.4325  (9 * 29.99 * 0.75)
+    """
+    if not is_valid_cadence(cadence):
+        raise ValueError(f"unknown cadence: {cadence!r}")
+    spec = CADENCES[cadence]
+    return spec["months_paid"] * monthly_retail * (1 - spec["discount"])
+
+
+def cadence_total_cents(monthly_retail: float, cadence: CadenceId) -> int:
+    """Same as cadence_total but rounded to integer cents — for Stripe."""
+    return round(cadence_total(monthly_retail, cadence) * 100)
+
+
+def months_delivered(cadence: CadenceId) -> int:
+    """How many months of access this cadence delivers (9mo → 12)."""
+    if not is_valid_cadence(cadence):
+        raise ValueError(f"unknown cadence: {cadence!r}")
+    return CADENCES[cadence]["months_delivered"]
+
+
+def equivalent_yearly_cost(monthly_retail: float, cadence: CadenceId) -> float:
+    """Annualized cost when the customer renews at this cadence enough
+    times to cover 12 months of delivery.
+
+    monthly: 12 renewals / yr  → 12 * monthly_retail
+    3mo:     4 renewals / yr   → 4 * cadence_total
+    6mo:     2 renewals / yr   → 2 * cadence_total
+    9mo:     1 renewal / yr    → 1 * cadence_total (delivers full 12 mo)
+    """
+    if not is_valid_cadence(cadence):
+        raise ValueError(f"unknown cadence: {cadence!r}")
+    delivered = months_delivered(cadence)
+    renewals_per_year = 12 / delivered
+    return cadence_total(monthly_retail, cadence) * renewals_per_year
+
+
+def yearly_savings_pct(monthly_retail: float, cadence: CadenceId) -> float:
+    """Percent saved per year vs straight-monthly billing."""
+    if not is_valid_cadence(cadence):
+        raise ValueError(f"unknown cadence: {cadence!r}")
+    if cadence == "monthly":
+        return 0.0
+    baseline = 12 * monthly_retail
+    actual = equivalent_yearly_cost(monthly_retail, cadence)
+    return (baseline - actual) / baseline
+
+
+def cadence_pricing_table(monthly_retail: float) -> list[dict]:
+    """Build a JSON-friendly cadence pricing table for the frontend
+    cadence picker. Each row is a single cadence option with all the
+    numbers needed for display.
+    """
+    rows: list[dict] = []
+    for cadence_id in ("monthly", "3mo", "6mo", "9mo"):
+        spec = CADENCES[cadence_id]
+        total = cadence_total(monthly_retail, cadence_id)  # type: ignore[arg-type]
+        delivered = spec["months_delivered"]
+        rows.append({
+            "cadence_id": cadence_id,
+            "label": spec["label"],
+            "framing": spec["framing"],
+            "discount_pct": int(spec["discount"] * 100),
+            "months_paid": spec["months_paid"],
+            "months_delivered": delivered,
+            "total_charge": round(total, 2),
+            "monthly_equivalent": round(total / delivered, 2),
+            "yearly_savings_pct": round(
+                yearly_savings_pct(monthly_retail, cadence_id) * 100, 1  # type: ignore[arg-type]
+            ),
+        })
+    return rows

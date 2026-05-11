@@ -2,26 +2,65 @@
 
 No Stripe SDK calls, no DB, no HTTP. The api_server layer wraps this.
 
-Owner-ratified mechanics 2026-05-10:
-  - Wood Stork Standard $499/yr · Reserve $999/yr
+Owner-ratified mechanics 2026-05-10 + 3-6-9 cadence pivot 2026-05-11:
+  - Wood Stork Standard / Reserve, priced per 3-6-9 cadence canon
+    (`cbrew-369-pricing-canon-2026-05-11.md`)
+  - Monthly retail: Standard $74.99/mo, Reserve $149.99/mo
+  - 4 cadences per tier: monthly / 3mo (15% off) / 6mo (20%) / 9mo (25%, deliver 12)
   - Referral discount is a TIERED PERCENT on member's own product orders:
       0      → 18% (base Wood Stork)
       1-5    → 25%
       5-10   → 35%
       10-20  → 45%
       20+    → 50% (caps here)
-  - Discount applies to PRODUCT orders only, not membership renewals,
-    not wholesale-pricing tiers
+  - Referral discount applies to PRODUCT orders only, NOT membership renewals
+    (membership renewals get the 3-6-9 cadence discount instead)
 """
 from __future__ import annotations
 
 from typing import Literal
 
+import cadence
 
-WOOD_STORK_STANDARD_PRODUCT_ID = "coastal_membership_wood_stork_standard_annual"
-WOOD_STORK_RESERVE_PRODUCT_ID = "coastal_membership_wood_stork_reserve_annual"
+
+# Monthly retail anchors per `cbrew-369-pricing-canon-2026-05-11.md` §2
+WOOD_STORK_STANDARD_MONTHLY_RETAIL = 74.99
+WOOD_STORK_RESERVE_MONTHLY_RETAIL = 149.99
+
+# Stripe product ID prefixes — full ID is `<prefix>_<cadence>` per the
+# 4-cadence schedule (e.g. `coastal_membership_wood_stork_standard_9mo`)
+WOOD_STORK_STANDARD_PRODUCT_PREFIX = "coastal_membership_wood_stork_standard"
+WOOD_STORK_RESERVE_PRODUCT_PREFIX = "coastal_membership_wood_stork_reserve"
 
 WoodStorkTier = Literal["standard", "reserve"]
+
+
+def monthly_retail_for_tier(tier: WoodStorkTier) -> float:
+    """Resolve the monthly retail anchor for a Wood Stork tier."""
+    if tier == "standard":
+        return WOOD_STORK_STANDARD_MONTHLY_RETAIL
+    if tier == "reserve":
+        return WOOD_STORK_RESERVE_MONTHLY_RETAIL
+    raise ValueError(f"unknown Wood Stork tier: {tier!r}")
+
+
+def cadence_pricing(tier: WoodStorkTier) -> list[dict]:
+    """Return the 4-cadence pricing table for the given Wood Stork tier."""
+    return cadence.cadence_pricing_table(monthly_retail_for_tier(tier))
+
+
+def stripe_product_id(tier: WoodStorkTier, cadence_id: str) -> str:
+    """Resolve the Stripe product ID for a tier × cadence combination.
+
+    Format: `coastal_membership_wood_stork_{standard|reserve}_{monthly|3mo|6mo|9mo}`
+    """
+    if not cadence.is_valid_cadence(cadence_id):
+        raise ValueError(f"unknown cadence: {cadence_id!r}")
+    prefix = (
+        WOOD_STORK_STANDARD_PRODUCT_PREFIX if tier == "standard"
+        else WOOD_STORK_RESERVE_PRODUCT_PREFIX
+    )
+    return f"{prefix}_{cadence_id}"
 
 
 # Stripe coupon IDs (mint these in dashboard before backend goes live).
@@ -91,30 +130,28 @@ def is_at_cap(count: int) -> bool:
     return count >= 21
 
 
-def product_id_for_tier(tier: WoodStorkTier) -> str:
-    """Resolve the Stripe product ID for the given Wood Stork tier."""
-    if tier == "standard":
-        return WOOD_STORK_STANDARD_PRODUCT_ID
-    if tier == "reserve":
-        return WOOD_STORK_RESERVE_PRODUCT_ID
-    raise ValueError(f"unknown Wood Stork tier: {tier!r}")
-
-
 def build_checkout_params(
     *,
     customer_email: str,
     business_name: str,
     tier: WoodStorkTier,
+    cadence_id: str,
     price_id: str,
     public_url: str,
 ) -> dict:
-    """Build the Stripe Checkout Session params for a Wood Stork subscription.
+    """Build the Stripe Checkout Session params for a Wood Stork subscription
+    at the given 3-6-9 cadence.
 
     Pure dict — no SDK call. Caller passes this to
-    `stripe.checkout.Session.create(**params)`.
+    `stripe.checkout.Session.create(**params)`. The price_id must already
+    correspond to the right tier × cadence (caller resolves via env var
+    map).
     """
     if tier not in ("standard", "reserve"):
         raise ValueError(f"unknown Wood Stork tier: {tier!r}")
+    if not cadence.is_valid_cadence(cadence_id):
+        raise ValueError(f"unknown cadence: {cadence_id!r}")
+    cadence_spec = cadence.CADENCES[cadence_id]
     return {
         "mode": "subscription",
         "payment_method_types": ["card"],
@@ -128,6 +165,9 @@ def build_checkout_params(
             "customer_email": customer_email,
             "business_name": business_name,
             "membership_tier": f"wood_stork_{tier}",
+            "cadence": cadence_id,
+            "months_paid": str(cadence_spec["months_paid"]),
+            "months_delivered": str(cadence_spec["months_delivered"]),
             "flow": "wood_stork_signup",
             "vertical": "coastal-brewing",
         },
@@ -166,14 +206,20 @@ def format_signup_telegram(
     business_name: str,
     customer_email: str,
     tier: WoodStorkTier,
+    cadence_id: str = "9mo",
 ) -> str:
     """Telegram ping for a fresh Wood Stork signup."""
-    price = "$499/yr" if tier == "standard" else "$999/yr"
     label = "Standard" if tier == "standard" else "Reserve"
+    monthly_retail = monthly_retail_for_tier(tier)
+    cad_total = cadence.cadence_total(monthly_retail, cadence_id)  # type: ignore[arg-type]
+    cad_spec = cadence.CADENCES[cadence_id]
+    cad_label = cad_spec["label"]
     return (
         f"[Coastal Brewing Co.] new Wood Stork {label} member — {business_name}\n"
-        f"  email:    {customer_email}\n"
-        f"  tier:     Wood Stork {label} ({price})\n"
-        f"  action:   account flagged with WSTORK_BASE coupon (18%); "
+        f"  email:     {customer_email}\n"
+        f"  tier:      Wood Stork {label}\n"
+        f"  cadence:   {cad_label} (${cad_total:.2f} charged, "
+        f"{cad_spec['months_delivered']}mo access)\n"
+        f"  action:    account flagged with WSTORK_BASE coupon (18%) on product orders; "
         f"discount tiers up automatically with each successful referral."
     )

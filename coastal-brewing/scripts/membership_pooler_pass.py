@@ -2,21 +2,29 @@
 
 No Stripe SDK calls, no DB, no HTTP. The api_server layer wraps this.
 
-Owner-ratified mechanics 2026-05-10:
-  - Pooler Pass Standard $49/yr · Plus $99/yr
+Owner-ratified mechanics 2026-05-10 + 3-6-9 cadence pivot 2026-05-11:
+  - Pooler Pass Standard / Plus, priced per 3-6-9 cadence canon
+    (`cbrew-369-pricing-canon-2026-05-11.md`)
+  - Monthly retail: Standard $7.49/mo, Plus $14.99/mo
+  - 4 cadences per tier: monthly / 3mo (15% off) / 6mo (20%) / 9mo (25%, deliver 12)
   - Geographic gate: 50-100 mile radius from 31322 (Pooler, GA)
-  - Re-verify ZIP at each annual renewal
-  - Out-of-radius signups upsell to Coastal Custee Card ($199/yr)
+  - Re-verify ZIP at each renewal
+  - Out-of-radius signups upsell to Coastal Custee Card (which also runs 3-6-9)
 """
 from __future__ import annotations
 
 from typing import Literal
 
+import cadence
 from geo import eligibility_band, eligibility_response
 
 
-POOLER_PASS_STANDARD_PRODUCT_ID = "coastal_membership_pooler_pass_standard_annual"
-POOLER_PASS_PLUS_PRODUCT_ID = "coastal_membership_pooler_pass_plus_annual"
+# Monthly retail anchors per `cbrew-369-pricing-canon-2026-05-11.md` §2
+POOLER_PASS_STANDARD_MONTHLY_RETAIL = 7.49
+POOLER_PASS_PLUS_MONTHLY_RETAIL = 14.99
+
+POOLER_PASS_STANDARD_PRODUCT_PREFIX = "coastal_membership_pooler_pass_standard"
+POOLER_PASS_PLUS_PRODUCT_PREFIX = "coastal_membership_pooler_pass_plus"
 
 PoolerPassTier = Literal["standard", "plus"]
 
@@ -37,13 +45,32 @@ def check_eligibility(zip_code: str) -> dict:
     return eligibility_response(zip_code)
 
 
-def product_id_for_tier(tier: PoolerPassTier) -> str:
-    """Resolve the Stripe product ID for the given Pooler Pass tier."""
+def monthly_retail_for_tier(tier: PoolerPassTier) -> float:
+    """Resolve the monthly retail anchor for a Pooler Pass tier."""
     if tier == "standard":
-        return POOLER_PASS_STANDARD_PRODUCT_ID
+        return POOLER_PASS_STANDARD_MONTHLY_RETAIL
     if tier == "plus":
-        return POOLER_PASS_PLUS_PRODUCT_ID
+        return POOLER_PASS_PLUS_MONTHLY_RETAIL
     raise ValueError(f"unknown Pooler Pass tier: {tier!r}")
+
+
+def cadence_pricing(tier: PoolerPassTier) -> list[dict]:
+    """Return the 4-cadence pricing table for the given Pooler Pass tier."""
+    return cadence.cadence_pricing_table(monthly_retail_for_tier(tier))
+
+
+def stripe_product_id(tier: PoolerPassTier, cadence_id: str) -> str:
+    """Resolve the Stripe product ID for a tier × cadence combination.
+
+    Format: `coastal_membership_pooler_pass_{standard|plus}_{monthly|3mo|6mo|9mo}`
+    """
+    if not cadence.is_valid_cadence(cadence_id):
+        raise ValueError(f"unknown cadence: {cadence_id!r}")
+    prefix = (
+        POOLER_PASS_STANDARD_PRODUCT_PREFIX if tier == "standard"
+        else POOLER_PASS_PLUS_PRODUCT_PREFIX
+    )
+    return f"{prefix}_{cadence_id}"
 
 
 def build_checkout_params(
@@ -51,10 +78,12 @@ def build_checkout_params(
     customer_email: str,
     zip_code: str,
     tier: PoolerPassTier,
+    cadence_id: str,
     price_id: str,
     public_url: str,
 ) -> dict:
-    """Build the Stripe Checkout Session params for a Pooler Pass subscription.
+    """Build the Stripe Checkout Session params for a Pooler Pass subscription
+    at the given 3-6-9 cadence.
 
     Caller must verify ZIP eligibility BEFORE calling this — the function
     does NOT re-check (api_server layer enforces the gate to avoid double
@@ -62,6 +91,9 @@ def build_checkout_params(
     """
     if tier not in ("standard", "plus"):
         raise ValueError(f"unknown Pooler Pass tier: {tier!r}")
+    if not cadence.is_valid_cadence(cadence_id):
+        raise ValueError(f"unknown cadence: {cadence_id!r}")
+    cadence_spec = cadence.CADENCES[cadence_id]
     return {
         "mode": "subscription",
         "payment_method_types": ["card"],
@@ -75,6 +107,9 @@ def build_checkout_params(
             "customer_email": customer_email,
             "zip_code": zip_code,
             "membership_tier": f"pooler_pass_{tier}",
+            "cadence": cadence_id,
+            "months_paid": str(cadence_spec["months_paid"]),
+            "months_delivered": str(cadence_spec["months_delivered"]),
             "flow": "pooler_pass_signup",
             "vertical": "coastal-brewing",
         },
@@ -87,17 +122,23 @@ def format_signup_telegram(
     zip_code: str,
     tier: PoolerPassTier,
     distance_mi: float | None,
+    cadence_id: str = "9mo",
 ) -> str:
     """Telegram ping when a new Pooler Pass member signs up."""
-    price = "$49/yr" if tier == "standard" else "$99/yr"
     label = "Standard" if tier == "standard" else "Plus"
     band, _ = eligibility_band(zip_code)
     band_label = "Local" if band == "local" else "Extended Local"
     distance_str = f"{distance_mi:.1f} mi" if distance_mi is not None else "(unknown)"
+    monthly_retail = monthly_retail_for_tier(tier)
+    cad_total = cadence.cadence_total(monthly_retail, cadence_id)  # type: ignore[arg-type]
+    cad_spec = cadence.CADENCES[cadence_id]
+    cad_label = cad_spec["label"]
     return (
         f"[Coastal Brewing Co.] new Pooler Pass {label} member\n"
-        f"  email:    {customer_email}\n"
-        f"  zip:      {zip_code} ({distance_str} from Pooler · {band_label})\n"
-        f"  tier:     Pooler Pass {label} ({price})\n"
-        f"  action:   add to Pooler events list; storefront knows your name."
+        f"  email:     {customer_email}\n"
+        f"  zip:       {zip_code} ({distance_str} from Pooler · {band_label})\n"
+        f"  tier:      Pooler Pass {label}\n"
+        f"  cadence:   {cad_label} (${cad_total:.2f} charged, "
+        f"{cad_spec['months_delivered']}mo access)\n"
+        f"  action:    add to Pooler events list; storefront knows your name."
     )

@@ -3838,21 +3838,31 @@ def membership_checkout(
     return {"ok": True, "redirect_url": url}
 
 
+# ────────────────────────── 3-6-9 cadence helper ──────────────────────────
+# Owner-ratified 2026-05-11 (`cbrew-369-pricing-canon-2026-05-11.md`).
+# Single source of truth for the 4-cadence schedule: monthly / 3mo / 6mo / 9mo.
+import cadence as _cadence_mod  # noqa: E402
+
+
 # ────────────────────────── Wood Stork tier ──────────────────────────
-# Owner-ratified 2026-05-10 mechanics:
-#   - Standard $499/yr · Reserve $999/yr
+# Owner-ratified 2026-05-10 mechanics + 3-6-9 cadence pivot 2026-05-11:
+#   - Standard / Reserve, priced per 3-6-9 cadence canon
+#   - 4 cadences per tier: monthly / 3mo (15% off) / 6mo (20%) / 9mo (25%, deliver 12)
 #   - Tiered referral discount on member's own product orders (18% → 50% cap)
-# Pure logic in scripts/membership_wood_stork.py — this layer mints
-# Stripe Checkout Sessions and exposes the HTTP surface.
+# Pure logic in scripts/membership_wood_stork.py + scripts/cadence.py.
 
 import membership_wood_stork  # noqa: E402
 
-WOOD_STORK_STANDARD_PRICE_ID = os.environ.get(
-    "STRIPE_COASTAL_WOOD_STORK_STANDARD_PRICE_ID", ""
-)
-WOOD_STORK_RESERVE_PRICE_ID = os.environ.get(
-    "STRIPE_COASTAL_WOOD_STORK_RESERVE_PRICE_ID", ""
-)
+
+def _wood_stork_price_env(tier: str, cadence_id: str) -> str:
+    """Resolve the env var name holding the Stripe price ID for a
+    Wood Stork tier × cadence combination."""
+    return f"STRIPE_COASTAL_WOOD_STORK_{tier.upper()}_{cadence_id.upper()}_PRICE_ID"
+
+
+def _wood_stork_price_id(tier: str, cadence_id: str) -> str:
+    """Read the Stripe price ID env var for a Wood Stork tier × cadence."""
+    return os.environ.get(_wood_stork_price_env(tier, cadence_id), "")
 
 
 def _stripe_wood_stork_checkout_create(
@@ -3860,16 +3870,12 @@ def _stripe_wood_stork_checkout_create(
     customer_email: str,
     business_name: str,
     tier: str,
+    cadence_id: str,
 ) -> Optional[str]:
-    """Mint a Stripe Checkout Session for a Wood Stork subscription.
-
-    Returns the hosted checkout URL or None if Stripe / price ID isn't
-    configured.
+    """Mint a Stripe Checkout Session for a Wood Stork subscription at
+    the given cadence. Returns hosted URL or None if not configured.
     """
-    price_id = (
-        WOOD_STORK_STANDARD_PRICE_ID if tier == "standard"
-        else WOOD_STORK_RESERVE_PRICE_ID
-    )
+    price_id = _wood_stork_price_id(tier, cadence_id)
     if not STRIPE_AVAILABLE or not _stripe_is_configured() or not price_id:
         return None
     try:
@@ -3878,6 +3884,7 @@ def _stripe_wood_stork_checkout_create(
             customer_email=customer_email,
             business_name=business_name,
             tier=tier,  # type: ignore[arg-type]
+            cadence_id=cadence_id,
             price_id=price_id,
             public_url=AUTH_PUBLIC_URL,
         )
@@ -3893,6 +3900,7 @@ class WoodStorkCheckoutRequest(BaseModel):
     email: str
     business_name: str
     tier: str  # "standard" | "reserve"
+    cadence: str = "9mo"  # "monthly" | "3mo" | "6mo" | "9mo"  (default = best deal)
 
 
 @app.post("/api/membership/wood-stork/checkout")
@@ -3900,50 +3908,75 @@ def wood_stork_checkout(
     body: WoodStorkCheckoutRequest,
     x_coastal_token: str = Header(""),
 ) -> dict:
-    """Mint a Stripe Checkout Session for a Wood Stork subscription and
-    return the hosted URL."""
+    """Mint a Stripe Checkout Session for a Wood Stork subscription at
+    the requested 3-6-9 cadence."""
     _auth(x_coastal_token)
     email = (body.email or "").strip().lower()
     business_name = (body.business_name or "").strip()
     tier = (body.tier or "").strip().lower()
+    cadence_id = (body.cadence or "9mo").strip().lower()
     if not email or "@" not in email:
         raise HTTPException(status_code=400, detail="email required")
     if not business_name:
         raise HTTPException(status_code=400, detail="business_name required")
     if tier not in ("standard", "reserve"):
         raise HTTPException(status_code=400, detail="tier must be 'standard' or 'reserve'")
-    price_env = (
-        "STRIPE_COASTAL_WOOD_STORK_STANDARD_PRICE_ID" if tier == "standard"
-        else "STRIPE_COASTAL_WOOD_STORK_RESERVE_PRICE_ID"
-    )
-    price_id = WOOD_STORK_STANDARD_PRICE_ID if tier == "standard" else WOOD_STORK_RESERVE_PRICE_ID
+    if not _cadence_mod.is_valid_cadence(cadence_id):
+        raise HTTPException(
+            status_code=400,
+            detail="cadence must be 'monthly', '3mo', '6mo', or '9mo'",
+        )
+    price_id = _wood_stork_price_id(tier, cadence_id)
     if not price_id:
+        env = _wood_stork_price_env(tier, cadence_id)
         raise HTTPException(
             status_code=503,
-            detail=f"wood stork {tier} not yet configured — {price_env} env unset",
+            detail=f"wood stork {tier} {cadence_id} not yet configured — {env} env unset",
         )
     url = _stripe_wood_stork_checkout_create(
-        customer_email=email, business_name=business_name, tier=tier,
+        customer_email=email,
+        business_name=business_name,
+        tier=tier,
+        cadence_id=cadence_id,
     )
     if not url:
         raise HTTPException(status_code=503, detail="checkout session mint failed")
     return {"ok": True, "redirect_url": url}
 
 
+@app.get("/api/membership/wood-stork/cadence-pricing")
+def wood_stork_cadence_pricing(
+    tier: str = Query(..., regex="^(standard|reserve)$"),
+    x_coastal_token: str = Header(""),
+) -> dict:
+    """Return the 4-cadence pricing table for a Wood Stork tier — powers
+    the cadence picker UI without bouncing through Stripe."""
+    _auth(x_coastal_token)
+    return {
+        "ok": True,
+        "tier": tier,
+        "monthly_retail": membership_wood_stork.monthly_retail_for_tier(tier),  # type: ignore[arg-type]
+        "cadences": membership_wood_stork.cadence_pricing(tier),  # type: ignore[arg-type]
+    }
+
+
 # ────────────────────────── Pooler Pass tier ──────────────────────────
-# Owner-ratified 2026-05-10 mechanics:
-#   - Standard $49/yr · Plus $99/yr
+# Owner-ratified 2026-05-10 mechanics + 3-6-9 cadence pivot 2026-05-11:
+#   - Standard / Plus, priced per 3-6-9 cadence canon
+#   - 4 cadences per tier: monthly / 3mo (15% off) / 6mo (20%) / 9mo (25%, deliver 12)
 #   - Geographic gate: 50-100 mile radius from 31322 (Pooler, GA)
 # Pure logic + ZIP haversine in scripts/membership_pooler_pass.py + scripts/geo.py.
 
 import membership_pooler_pass  # noqa: E402
 
-POOLER_PASS_STANDARD_PRICE_ID = os.environ.get(
-    "STRIPE_COASTAL_POOLER_PASS_STANDARD_PRICE_ID", ""
-)
-POOLER_PASS_PLUS_PRICE_ID = os.environ.get(
-    "STRIPE_COASTAL_POOLER_PASS_PLUS_PRICE_ID", ""
-)
+
+def _pooler_pass_price_env(tier: str, cadence_id: str) -> str:
+    """Resolve env var name for Pooler Pass tier × cadence price ID."""
+    return f"STRIPE_COASTAL_POOLER_PASS_{tier.upper()}_{cadence_id.upper()}_PRICE_ID"
+
+
+def _pooler_pass_price_id(tier: str, cadence_id: str) -> str:
+    return os.environ.get(_pooler_pass_price_env(tier, cadence_id), "")
 
 
 class PoolerPassEligibilityRequest(BaseModel):
@@ -3970,12 +4003,11 @@ def _stripe_pooler_pass_checkout_create(
     customer_email: str,
     zip_code: str,
     tier: str,
+    cadence_id: str,
 ) -> Optional[str]:
-    """Mint a Stripe Checkout Session for a Pooler Pass subscription."""
-    price_id = (
-        POOLER_PASS_STANDARD_PRICE_ID if tier == "standard"
-        else POOLER_PASS_PLUS_PRICE_ID
-    )
+    """Mint a Stripe Checkout Session for a Pooler Pass subscription at
+    the given cadence."""
+    price_id = _pooler_pass_price_id(tier, cadence_id)
     if not STRIPE_AVAILABLE or not _stripe_is_configured() or not price_id:
         return None
     try:
@@ -3984,6 +4016,7 @@ def _stripe_pooler_pass_checkout_create(
             customer_email=customer_email,
             zip_code=zip_code,
             tier=tier,  # type: ignore[arg-type]
+            cadence_id=cadence_id,
             price_id=price_id,
             public_url=AUTH_PUBLIC_URL,
         )
@@ -3999,6 +4032,7 @@ class PoolerPassCheckoutRequest(BaseModel):
     email: str
     zip: str
     tier: str  # "standard" | "plus"
+    cadence: str = "9mo"  # default = best deal
 
 
 @app.post("/api/membership/pooler-pass/checkout")
@@ -4006,18 +4040,24 @@ def pooler_pass_checkout(
     body: PoolerPassCheckoutRequest,
     x_coastal_token: str = Header(""),
 ) -> dict:
-    """Gate Pooler Pass checkout on server-side ZIP eligibility. Out-of-radius
-    requests return 400 with the upsell hint, NOT a Stripe URL."""
+    """Gate Pooler Pass checkout on server-side ZIP eligibility, then mint
+    a Stripe Checkout Session at the requested 3-6-9 cadence."""
     _auth(x_coastal_token)
     email = (body.email or "").strip().lower()
     zip_code = (body.zip or "").strip()
     tier = (body.tier or "").strip().lower()
+    cadence_id = (body.cadence or "9mo").strip().lower()
     if not email or "@" not in email:
         raise HTTPException(status_code=400, detail="email required")
     if not zip_code or not zip_code.isdigit() or len(zip_code) != 5:
         raise HTTPException(status_code=400, detail="zip must be a 5-digit code")
     if tier not in ("standard", "plus"):
         raise HTTPException(status_code=400, detail="tier must be 'standard' or 'plus'")
+    if not _cadence_mod.is_valid_cadence(cadence_id):
+        raise HTTPException(
+            status_code=400,
+            detail="cadence must be 'monthly', '3mo', '6mo', or '9mo'",
+        )
     # Re-verify eligibility server-side — frontend gate is convenience,
     # this is the source of truth.
     if not membership_pooler_pass.is_zip_eligible(zip_code):
@@ -4025,22 +4065,37 @@ def pooler_pass_checkout(
             status_code=400,
             detail="zip is outside the 100-mile Pooler Pass eligibility band — see Coastal Custee Card",
         )
-    price_env = (
-        "STRIPE_COASTAL_POOLER_PASS_STANDARD_PRICE_ID" if tier == "standard"
-        else "STRIPE_COASTAL_POOLER_PASS_PLUS_PRICE_ID"
-    )
-    price_id = POOLER_PASS_STANDARD_PRICE_ID if tier == "standard" else POOLER_PASS_PLUS_PRICE_ID
+    price_id = _pooler_pass_price_id(tier, cadence_id)
     if not price_id:
+        env = _pooler_pass_price_env(tier, cadence_id)
         raise HTTPException(
             status_code=503,
-            detail=f"pooler pass {tier} not yet configured — {price_env} env unset",
+            detail=f"pooler pass {tier} {cadence_id} not yet configured — {env} env unset",
         )
     url = _stripe_pooler_pass_checkout_create(
-        customer_email=email, zip_code=zip_code, tier=tier,
+        customer_email=email,
+        zip_code=zip_code,
+        tier=tier,
+        cadence_id=cadence_id,
     )
     if not url:
         raise HTTPException(status_code=503, detail="checkout session mint failed")
     return {"ok": True, "redirect_url": url}
+
+
+@app.get("/api/membership/pooler-pass/cadence-pricing")
+def pooler_pass_cadence_pricing(
+    tier: str = Query(..., regex="^(standard|plus)$"),
+    x_coastal_token: str = Header(""),
+) -> dict:
+    """Return the 4-cadence pricing table for a Pooler Pass tier."""
+    _auth(x_coastal_token)
+    return {
+        "ok": True,
+        "tier": tier,
+        "monthly_retail": membership_pooler_pass.monthly_retail_for_tier(tier),  # type: ignore[arg-type]
+        "cadences": membership_pooler_pass.cadence_pricing(tier),  # type: ignore[arg-type]
+    }
 
 
 def _stripe_escalation_checkout_create(
