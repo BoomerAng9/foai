@@ -3928,6 +3928,110 @@ def membership_checkout(
     return {"ok": True, "redirect_url": url}
 
 
+# ────────────────────────── Mercury-backed /pricing subscription ──────────────────────────
+# Owner directive 2026-05-11: replace Stripe with Mercury Invoicing for the
+# 4 /pricing subscription SKUs. Mercury invoice recipient is our internal
+# inbox (noreply@achievemor.io) — Custee never sees the Mercury-branded
+# email. Endpoint returns the hosted pay_link to the frontend which
+# redirects the browser straight to Mercury's pay page.
+import scripts.membership_subscribe as membership_subscribe  # noqa: E402
+
+# Where Mercury delivers invoice emails. Defaults to our central no-reply
+# inbox so Sacred Separation holds — Custee never receives Mercury-branded
+# mail directly.
+MERCURY_INVOICE_RECIPIENT_EMAIL = os.environ.get(
+    "MERCURY_INVOICE_RECIPIENT_EMAIL", "noreply@achievemor.io"
+)
+
+
+class MembershipSubscribeRequest(BaseModel):
+    email: str  # Custee email (NOT the Mercury invoice recipient)
+    sku: str
+    cadence: str = "monthly"  # "monthly" | "3mo" | "6mo" | "9mo"
+
+
+@app.post("/api/membership/subscribe")
+def membership_subscribe_endpoint(
+    body: MembershipSubscribeRequest,
+    x_coastal_token: str = Header(""),
+) -> dict:
+    """Mint a Mercury invoice for a /pricing subscription. Returns the
+    hosted pay_link; the frontend redirects the browser to it.
+
+    Mercury invoice recipient is our internal noreply@achievemor.io inbox
+    — Custee never sees the Mercury-branded email. After pay, the
+    invoice.paid webhook fires the owner Telegram + records the audit
+    ledger row + queues shipment.
+    """
+    _auth(x_coastal_token)
+    custee_email = (body.email or "").strip().lower()
+    sku = (body.sku or "").strip().lower()
+    cadence_id = (body.cadence or "monthly").strip().lower()
+
+    if not custee_email or "@" not in custee_email:
+        raise HTTPException(status_code=400, detail="email required")
+    if not membership_subscribe.is_valid_sku(sku):
+        raise HTTPException(
+            status_code=400,
+            detail=f"sku must be one of: {sorted(membership_subscribe.SKU_CATALOG.keys())}",
+        )
+    if not _cadence_mod.is_valid_cadence(cadence_id):
+        raise HTTPException(
+            status_code=400,
+            detail="cadence must be 'monthly', '3mo', '6mo', or '9mo'",
+        )
+
+    try:
+        line_items = membership_subscribe.build_invoice_line_items(
+            sku=sku, cadence=cadence_id, is_first_invoice=True,
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+    total_cents = sum(li["unit_price_cents"] * li["quantity"] for li in line_items)
+    day_iso = time.strftime("%Y-%m-%d", time.gmtime())
+    intent_id = membership_subscribe.make_subscription_intent_id(
+        email=custee_email, sku=sku, cadence=cadence_id, day_iso=day_iso,
+    )
+
+    try:
+        result = lil_mercury_hawk.mint_invoice(
+            customer_email=MERCURY_INVOICE_RECIPIENT_EMAIL,
+            line_items=line_items,
+            notes=f"intent={intent_id} sku={sku} cadence={cadence_id}",
+        )
+    except lil_mercury_hawk.MercuryNotConfigured as exc:
+        raise HTTPException(
+            status_code=503,
+            detail="Mercury Invoicing not configured on this runner",
+        ) from exc
+    except lil_mercury_hawk.MercuryAPIError as exc:
+        raise HTTPException(
+            status_code=502, detail=f"Mercury API error: {exc.status}",
+        ) from exc
+
+    _send_telegram_message(
+        f"Mercury subscription intent\n"
+        f"intent: {intent_id}\n"
+        f"custee: {custee_email}\n"
+        f"sku: {membership_subscribe.sku_display_name(sku)} ({sku})\n"
+        f"cadence: {cadence_id}\n"
+        f"total: ${total_cents/100:.2f}\n"
+        f"invoice: {result.get('invoice_id') or '?'}\n"
+        f"pay_link: {result.get('pay_link') or '?'}"
+    )
+
+    return {
+        "ok": True,
+        "intent_id": intent_id,
+        "invoice_id": result.get("invoice_id"),
+        "pay_link": result.get("pay_link"),
+        "total_cents": total_cents,
+        "cadence": cadence_id,
+        "sku": sku,
+    }
+
+
 # ────────────────────────── 3-6-9 cadence helper ──────────────────────────
 # Owner-ratified 2026-05-11 (`cbrew-369-pricing-canon-2026-05-11.md`).
 # Single source of truth for the 4-cadence schedule: monthly / 3mo / 6mo / 9mo.
