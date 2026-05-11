@@ -3838,6 +3838,211 @@ def membership_checkout(
     return {"ok": True, "redirect_url": url}
 
 
+# ────────────────────────── Wood Stork tier ──────────────────────────
+# Owner-ratified 2026-05-10 mechanics:
+#   - Standard $499/yr · Reserve $999/yr
+#   - Tiered referral discount on member's own product orders (18% → 50% cap)
+# Pure logic in scripts/membership_wood_stork.py — this layer mints
+# Stripe Checkout Sessions and exposes the HTTP surface.
+
+import membership_wood_stork  # noqa: E402
+
+WOOD_STORK_STANDARD_PRICE_ID = os.environ.get(
+    "STRIPE_COASTAL_WOOD_STORK_STANDARD_PRICE_ID", ""
+)
+WOOD_STORK_RESERVE_PRICE_ID = os.environ.get(
+    "STRIPE_COASTAL_WOOD_STORK_RESERVE_PRICE_ID", ""
+)
+
+
+def _stripe_wood_stork_checkout_create(
+    *,
+    customer_email: str,
+    business_name: str,
+    tier: str,
+) -> Optional[str]:
+    """Mint a Stripe Checkout Session for a Wood Stork subscription.
+
+    Returns the hosted checkout URL or None if Stripe / price ID isn't
+    configured.
+    """
+    price_id = (
+        WOOD_STORK_STANDARD_PRICE_ID if tier == "standard"
+        else WOOD_STORK_RESERVE_PRICE_ID
+    )
+    if not STRIPE_AVAILABLE or not _stripe_is_configured() or not price_id:
+        return None
+    try:
+        import stripe as _stripe   # noqa: E402
+        params = membership_wood_stork.build_checkout_params(
+            customer_email=customer_email,
+            business_name=business_name,
+            tier=tier,  # type: ignore[arg-type]
+            price_id=price_id,
+            public_url=AUTH_PUBLIC_URL,
+        )
+        session = _stripe.checkout.Session.create(**params)
+        return session.get("url") if isinstance(session, dict) else getattr(session, "url", None)
+    except Exception as exc:
+        log = __import__("logging").getLogger("coastal.wood_stork")
+        log.warning("stripe wood stork checkout create failed: %s", exc)
+        return None
+
+
+class WoodStorkCheckoutRequest(BaseModel):
+    email: str
+    business_name: str
+    tier: str  # "standard" | "reserve"
+
+
+@app.post("/api/membership/wood-stork/checkout")
+def wood_stork_checkout(
+    body: WoodStorkCheckoutRequest,
+    x_coastal_token: str = Header(""),
+) -> dict:
+    """Mint a Stripe Checkout Session for a Wood Stork subscription and
+    return the hosted URL."""
+    _auth(x_coastal_token)
+    email = (body.email or "").strip().lower()
+    business_name = (body.business_name or "").strip()
+    tier = (body.tier or "").strip().lower()
+    if not email or "@" not in email:
+        raise HTTPException(status_code=400, detail="email required")
+    if not business_name:
+        raise HTTPException(status_code=400, detail="business_name required")
+    if tier not in ("standard", "reserve"):
+        raise HTTPException(status_code=400, detail="tier must be 'standard' or 'reserve'")
+    price_env = (
+        "STRIPE_COASTAL_WOOD_STORK_STANDARD_PRICE_ID" if tier == "standard"
+        else "STRIPE_COASTAL_WOOD_STORK_RESERVE_PRICE_ID"
+    )
+    price_id = WOOD_STORK_STANDARD_PRICE_ID if tier == "standard" else WOOD_STORK_RESERVE_PRICE_ID
+    if not price_id:
+        raise HTTPException(
+            status_code=503,
+            detail=f"wood stork {tier} not yet configured — {price_env} env unset",
+        )
+    url = _stripe_wood_stork_checkout_create(
+        customer_email=email, business_name=business_name, tier=tier,
+    )
+    if not url:
+        raise HTTPException(status_code=503, detail="checkout session mint failed")
+    return {"ok": True, "redirect_url": url}
+
+
+# ────────────────────────── Pooler Pass tier ──────────────────────────
+# Owner-ratified 2026-05-10 mechanics:
+#   - Standard $49/yr · Plus $99/yr
+#   - Geographic gate: 50-100 mile radius from 31322 (Pooler, GA)
+# Pure logic + ZIP haversine in scripts/membership_pooler_pass.py + scripts/geo.py.
+
+import membership_pooler_pass  # noqa: E402
+
+POOLER_PASS_STANDARD_PRICE_ID = os.environ.get(
+    "STRIPE_COASTAL_POOLER_PASS_STANDARD_PRICE_ID", ""
+)
+POOLER_PASS_PLUS_PRICE_ID = os.environ.get(
+    "STRIPE_COASTAL_POOLER_PASS_PLUS_PRICE_ID", ""
+)
+
+
+class PoolerPassEligibilityRequest(BaseModel):
+    zip: str
+
+
+@app.post("/api/membership/pooler-pass/eligibility")
+def pooler_pass_eligibility(
+    body: PoolerPassEligibilityRequest,
+    x_coastal_token: str = Header(""),
+) -> dict:
+    """Server-side ZIP eligibility check for Pooler Pass. Returns the
+    eligibility band (local / extended / out_of_radius) and the friendly
+    upsell message when out of radius."""
+    _auth(x_coastal_token)
+    zip_code = (body.zip or "").strip()
+    if not zip_code or not zip_code.isdigit() or len(zip_code) != 5:
+        raise HTTPException(status_code=400, detail="zip must be a 5-digit code")
+    return membership_pooler_pass.check_eligibility(zip_code)
+
+
+def _stripe_pooler_pass_checkout_create(
+    *,
+    customer_email: str,
+    zip_code: str,
+    tier: str,
+) -> Optional[str]:
+    """Mint a Stripe Checkout Session for a Pooler Pass subscription."""
+    price_id = (
+        POOLER_PASS_STANDARD_PRICE_ID if tier == "standard"
+        else POOLER_PASS_PLUS_PRICE_ID
+    )
+    if not STRIPE_AVAILABLE or not _stripe_is_configured() or not price_id:
+        return None
+    try:
+        import stripe as _stripe   # noqa: E402
+        params = membership_pooler_pass.build_checkout_params(
+            customer_email=customer_email,
+            zip_code=zip_code,
+            tier=tier,  # type: ignore[arg-type]
+            price_id=price_id,
+            public_url=AUTH_PUBLIC_URL,
+        )
+        session = _stripe.checkout.Session.create(**params)
+        return session.get("url") if isinstance(session, dict) else getattr(session, "url", None)
+    except Exception as exc:
+        log = __import__("logging").getLogger("coastal.pooler_pass")
+        log.warning("stripe pooler pass checkout create failed: %s", exc)
+        return None
+
+
+class PoolerPassCheckoutRequest(BaseModel):
+    email: str
+    zip: str
+    tier: str  # "standard" | "plus"
+
+
+@app.post("/api/membership/pooler-pass/checkout")
+def pooler_pass_checkout(
+    body: PoolerPassCheckoutRequest,
+    x_coastal_token: str = Header(""),
+) -> dict:
+    """Gate Pooler Pass checkout on server-side ZIP eligibility. Out-of-radius
+    requests return 400 with the upsell hint, NOT a Stripe URL."""
+    _auth(x_coastal_token)
+    email = (body.email or "").strip().lower()
+    zip_code = (body.zip or "").strip()
+    tier = (body.tier or "").strip().lower()
+    if not email or "@" not in email:
+        raise HTTPException(status_code=400, detail="email required")
+    if not zip_code or not zip_code.isdigit() or len(zip_code) != 5:
+        raise HTTPException(status_code=400, detail="zip must be a 5-digit code")
+    if tier not in ("standard", "plus"):
+        raise HTTPException(status_code=400, detail="tier must be 'standard' or 'plus'")
+    # Re-verify eligibility server-side — frontend gate is convenience,
+    # this is the source of truth.
+    if not membership_pooler_pass.is_zip_eligible(zip_code):
+        raise HTTPException(
+            status_code=400,
+            detail="zip is outside the 100-mile Pooler Pass eligibility band — see Coastal Custee Card",
+        )
+    price_env = (
+        "STRIPE_COASTAL_POOLER_PASS_STANDARD_PRICE_ID" if tier == "standard"
+        else "STRIPE_COASTAL_POOLER_PASS_PLUS_PRICE_ID"
+    )
+    price_id = POOLER_PASS_STANDARD_PRICE_ID if tier == "standard" else POOLER_PASS_PLUS_PRICE_ID
+    if not price_id:
+        raise HTTPException(
+            status_code=503,
+            detail=f"pooler pass {tier} not yet configured — {price_env} env unset",
+        )
+    url = _stripe_pooler_pass_checkout_create(
+        customer_email=email, zip_code=zip_code, tier=tier,
+    )
+    if not url:
+        raise HTTPException(status_code=503, detail="checkout session mint failed")
+    return {"ok": True, "redirect_url": url}
+
+
 def _stripe_escalation_checkout_create(
     *,
     escalation_token: str,
