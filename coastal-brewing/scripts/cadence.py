@@ -72,11 +72,11 @@ def cadence_total(monthly_retail: float, cadence: CadenceId) -> float:
     """Return the at-cadence total payment for a tier with the given
     monthly retail price.
 
-    Examples:
-        cadence_total(29.99, "monthly") → 29.99
-        cadence_total(29.99, "3mo")     → 76.4745   (3 * 29.99 * 0.85)
-        cadence_total(29.99, "6mo")     → 143.952   (6 * 29.99 * 0.80)
-        cadence_total(29.99, "9mo")     → 202.4325  (9 * 29.99 * 0.75)
+    Examples (Coastal Custee Card, annual headline $199 ⇒ derived monthly $29.48):
+        cadence_total(29.48, "monthly") → 29.48
+        cadence_total(29.48, "3mo")     → 75.17  (3 * 29.48 * 0.85)
+        cadence_total(29.48, "6mo")     → 141.50 (6 * 29.48 * 0.80)
+        cadence_total(29.48, "9mo")     → 198.99 (9 * 29.48 * 0.75 ≈ round headline $199)
     """
     if not is_valid_cadence(cadence):
         raise ValueError(f"unknown cadence: {cadence!r}")
@@ -121,6 +121,22 @@ def yearly_savings_pct(monthly_retail: float, cadence: CadenceId) -> float:
     baseline = 12 * monthly_retail
     actual = equivalent_yearly_cost(monthly_retail, cadence)
     return (baseline - actual) / baseline
+
+
+def monthly_retail_from_annual(annual_headline: float) -> float:
+    """Derive the monthly-retail anchor BACKWARD from a round annual headline
+    so that the 9-mo cadence lands EXACTLY on `annual_headline`.
+
+    The annual headline is the customer-facing canonical number ($49 / $99 /
+    $199 / $499 / $999). Monthly retail is a derived figure — fine to carry
+    extra decimal places internally; display rounds to 2dp.
+
+    9mo total = 9 * monthly * (1 - 0.25) = 6.75 * monthly
+    ⇒ monthly = annual_headline / 6.75
+    """
+    spec = CADENCES["9mo"]
+    divisor = spec["months_paid"] * (1 - spec["discount"])
+    return annual_headline / divisor
 
 
 def cadence_pricing_table(monthly_retail: float) -> list[dict]:

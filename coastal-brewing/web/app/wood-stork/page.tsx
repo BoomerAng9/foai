@@ -74,7 +74,7 @@ export default function WoodStorkPage() {
             Wood Stork
           </h1>
           <p className="mt-3 font-mono text-sm text-muted-foreground">
-            Standard from $74.99/mo · Reserve from $149.99/mo
+            Standard $499/yr · Reserve $999/yr · pay 9, get 12
             <span className="block mt-1 text-foreground/70">
               3-month, 6-month, or 9-month plans — pay 9 months, get 12.
             </span>
@@ -120,7 +120,7 @@ export default function WoodStorkPage() {
 
         <section className="mb-14">
           <p className="mb-6 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
-            Standard tier benefits — from $74.99/mo
+            Standard tier benefits — $499/yr (9-mo plan)
           </p>
           <ul className="space-y-6">
             {STANDARD_BENEFITS.map((b) => (
@@ -134,7 +134,7 @@ export default function WoodStorkPage() {
 
         <section className="mb-14">
           <p className="mb-6 font-mono text-[10px] uppercase tracking-widest text-accent">
-            Reserve tier extras — from $149.99/mo
+            Reserve tier extras — $999/yr (9-mo plan)
           </p>
           <p className="mb-6 text-sm text-foreground/70">
             Everything in Standard, plus:
