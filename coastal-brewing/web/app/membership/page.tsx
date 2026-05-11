@@ -165,6 +165,26 @@ export default function MembershipPage() {
           </p>
         </section>
 
+        <section className="mb-14 rounded-lg border border-accent/40 bg-accent/[0.04] p-8">
+          <p className="font-mono text-[10px] uppercase tracking-widest text-accent">
+            See how we compare
+          </p>
+          <h2 className="mt-3 font-serif text-2xl text-foreground">
+            Same shelf as Stumptown, Onyx, Counter Culture.
+          </h2>
+          <p className="mt-3 max-w-xl text-base leading-relaxed text-foreground/75">
+            Coastal sits inside the specialty-coffee price band on bag price — but we&rsquo;re
+            the only brand in the category with an annual membership tier and an agentic
+            team you can talk to, negotiate with, and watch work in real time.
+          </p>
+          <Link
+            href="/compare"
+            className="mt-5 inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-widest text-accent hover:text-foreground transition-colors"
+          >
+            See the side-by-side comparison →
+          </Link>
+        </section>
+
         <section className="mb-14">
           <h2 className="mb-6 font-serif text-2xl text-foreground">Terms</h2>
           <ol className="space-y-5">
