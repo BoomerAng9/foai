@@ -1283,6 +1283,22 @@ async def stripe_webhook(request: Request) -> dict:
                     membership.format_welcome_box_telegram(task)
                 ),
             )
+            # Flag the Stripe Customer with membership_tier so subsequent
+            # retail Checkout Sessions can attach the MEMBER_15 coupon via
+            # membership.discount_for(). Best-effort — failure here doesn't
+            # roll back the welcome-box ping that already fired.
+            if membership_report.get("handled") and STRIPE_AVAILABLE:
+                try:
+                    import stripe as _stripe   # noqa: E402
+                    customer_id = event.get("data", {}).get("object", {}).get("customer")
+                    if customer_id:
+                        _stripe.Customer.modify(
+                            customer_id,
+                            metadata={"membership_tier": "standard"},
+                        )
+                        membership_report["customer_flagged"] = True
+                except Exception as _flag_exc:
+                    membership_report["customer_flag_error"] = str(_flag_exc)
         except Exception as _ms_exc:
             membership_report = {"handled": False, "error": str(_ms_exc)}
 

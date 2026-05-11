@@ -234,3 +234,49 @@ def test_build_checkout_params_for_subscription():
     assert params["metadata"]["customer_email"] == "custee@example.com"
     assert params["metadata"]["flow"] == "membership_signup"
     assert params["metadata"]["vertical"] == "coastal-brewing"
+
+
+# ─── Phase 5: MEMBER_15 auto-discount ──────────────────────────────────
+
+
+def test_is_member_recognizes_standard_tier():
+    """A Stripe Customer flagged with membership_tier=standard counts as a member."""
+    from scripts import membership  # noqa: PLC0415
+
+    assert membership.is_member({"membership_tier": "standard"}) is True
+
+
+def test_is_member_recognizes_lifetime_tiers():
+    """Lifetime Member + Lifetime Concierge also count as members for MEMBER_15."""
+    from scripts import membership  # noqa: PLC0415
+
+    assert membership.is_member({"membership_tier": "lifetime_member"}) is True
+    assert membership.is_member({"membership_tier": "lifetime_concierge"}) is True
+
+
+def test_is_member_rejects_non_members():
+    """No tier / unknown tier / empty metadata → not a member."""
+    from scripts import membership  # noqa: PLC0415
+
+    assert membership.is_member({}) is False
+    assert membership.is_member({"membership_tier": ""}) is False
+    assert membership.is_member({"membership_tier": "trial"}) is False
+    assert membership.is_member(None) is False  # type: ignore[arg-type]
+
+
+def test_discount_for_member_returns_member15_coupon():
+    """A member's checkout gets [{coupon: MEMBER_15}] ready for Stripe."""
+    from scripts import membership  # noqa: PLC0415
+
+    assert membership.discount_for({"membership_tier": "standard"}) == [
+        {"coupon": "MEMBER_15"}
+    ]
+
+
+def test_discount_for_non_member_returns_empty():
+    """Non-members get an empty discount list (Stripe accepts empty list / omit)."""
+    from scripts import membership  # noqa: PLC0415
+
+    assert membership.discount_for({}) == []
+    assert membership.discount_for(None) == []  # type: ignore[arg-type]
+    assert membership.discount_for({"membership_tier": "trial"}) == []
