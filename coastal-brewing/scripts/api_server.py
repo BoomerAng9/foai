@@ -3769,6 +3769,59 @@ def _stripe_customer_create(email: str, name: Optional[str] = None) -> Optional[
         return None
 
 
+MEMBERSHIP_PRICE_ID = os.environ.get("STRIPE_COASTAL_MEMBERSHIP_STANDARD_PRICE_ID", "")
+
+
+def _stripe_membership_checkout_create(*, customer_email: str) -> Optional[str]:
+    """Mint a Stripe Checkout Session for the Standard Membership ($199/yr).
+
+    Returns the hosted checkout URL or None if Stripe / price ID isn't
+    configured (in which case the route returns a 503).
+    """
+    if not STRIPE_AVAILABLE or not _stripe_is_configured() or not MEMBERSHIP_PRICE_ID:
+        return None
+    try:
+        import stripe as _stripe   # noqa: E402
+        params = membership.build_checkout_params(
+            customer_email=customer_email,
+            membership_price_id=MEMBERSHIP_PRICE_ID,
+            public_url=AUTH_PUBLIC_URL,
+        )
+        session = _stripe.checkout.Session.create(**params)
+        return session.get("url") if isinstance(session, dict) else getattr(session, "url", None)
+    except Exception as exc:
+        log = __import__("logging").getLogger("coastal.membership")
+        log.warning("stripe membership checkout create failed: %s", exc)
+        return None
+
+
+class MembershipCheckoutRequest(BaseModel):
+    email: str
+
+
+@app.post("/api/membership/checkout")
+def membership_checkout(
+    body: MembershipCheckoutRequest,
+    x_coastal_token: str = Header(""),
+) -> dict:
+    """Mint a Stripe Checkout Session for the Standard Membership and return
+    the hosted URL. Frontend POSTs the customer's email and redirects the
+    browser to the returned URL."""
+    _auth(x_coastal_token)
+    email = (body.email or "").strip().lower()
+    if not email or "@" not in email:
+        raise HTTPException(status_code=400, detail="email required")
+    if not MEMBERSHIP_PRICE_ID:
+        raise HTTPException(
+            status_code=503,
+            detail="membership not yet configured — STRIPE_COASTAL_MEMBERSHIP_STANDARD_PRICE_ID env unset",
+        )
+    url = _stripe_membership_checkout_create(customer_email=email)
+    if not url:
+        raise HTTPException(status_code=503, detail="checkout session mint failed")
+    return {"ok": True, "redirect_url": url}
+
+
 def _stripe_escalation_checkout_create(
     *,
     escalation_token: str,
