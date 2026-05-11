@@ -52,7 +52,10 @@ export function SubscriptionCheckoutButton({ sku, ctaLabel, monthlyRetailCents, 
     setError(null);
     setSubmitting(true);
     try {
-      const res = await fetch("/api/membership/subscribe", {
+      // NB: not /api/* — nginx routes /api/* directly to coastal-runner,
+      // bypassing this Next.js proxy (which injects the gateway token).
+      // Must live at a path that nginx routes to coastal-web.
+      const res = await fetch("/forms-membership-subscribe", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, sku, cadence }),

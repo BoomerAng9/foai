@@ -1,7 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
 
-// Server-only proxy to coastal-runner /api/membership/subscribe.
-// X-Coastal-Token never reaches the browser.
+/**
+ * Server-only proxy to coastal-runner /api/membership/subscribe.
+ *
+ * Path lives OUTSIDE /api/* on purpose — host nginx routes every /api/*
+ * request directly to coastal-runner, which bypasses this Next.js route
+ * and means the runner sees no X-Coastal-Token (→ 401). Putting the
+ * proxy at /forms-membership-subscribe keeps it inside the Next.js
+ * default-/ rewrite group so this handler runs and can inject the
+ * gateway token before hitting the runner.
+ *
+ * X-Coastal-Token never reaches the browser.
+ */
 const RUNNER_BASE = process.env.COASTAL_RUNNER_INTERNAL || "http://coastal-runner:8080";
 const TOKEN = process.env.COASTAL_GATEWAY_TOKEN || "";
 
