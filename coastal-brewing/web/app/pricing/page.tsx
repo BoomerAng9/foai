@@ -6,6 +6,7 @@ import { Footer } from "@/components/footer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { ScrollReveal } from "@/components/scroll-reveal";
+import { SubscriptionCheckoutButton } from "@/components/subscription-checkout-button";
 import { cn } from "@/lib/utils";
 
 export const metadata = {
@@ -22,6 +23,9 @@ type Subscription = {
   tagline: string;
   price: string;
   priceNote: string;
+  // Monthly retail in cents — drives the cadence picker in the checkout button.
+  // Must match scripts/membership_subscribe.py SKU_CATALOG canon.
+  monthlyRetailCents: number;
   image: string;
   whatYouGet: string[];
   cta: { label: string; href: string };
@@ -35,6 +39,7 @@ const SUBSCRIPTIONS: Subscription[] = [
     tagline: "A new Lowcountry Tea every month.",
     price: "$26.99",
     priceNote: "/ month, ships free over $50",
+    monthlyRetailCents: 2699,
     image: "/products/coastal-tea-monthly.png",
     whatYouGet: [
       "One 3oz Lowcountry Tea tin per month (~30 cups brewed)",
@@ -51,6 +56,7 @@ const SUBSCRIPTIONS: Subscription[] = [
     tagline: "One bag a month, picked for your palate.",
     price: "$34.99",
     priceNote: "/ month, ships free over $50",
+    monthlyRetailCents: 3499,
     image: "/products/coastal-coffee-monthly.png",
     whatYouGet: [
       "One 12oz coffee bag per month (~24 cups brewed)",
@@ -68,6 +74,7 @@ const SUBSCRIPTIONS: Subscription[] = [
     tagline: "Specialty coffee blended with Lion's Mane, Cordyceps, and Reishi.",
     price: "$44.99",
     priceNote: "/ month, ships free over $50",
+    monthlyRetailCents: 4499,
     image: "/products/coastal-functional-coffee-monthly.png",
     whatYouGet: [
       "One 12oz functional coffee bag per month (~24 cups brewed)",
@@ -84,6 +91,7 @@ const SUBSCRIPTIONS: Subscription[] = [
     tagline: "One coffee + one tea — the household pack.",
     price: "$59.99",
     priceNote: "/ month, ships free over $50",
+    monthlyRetailCents: 5999,
     image: "/products/coastal-combo-monthly.png",
     whatYouGet: [
       "One 12oz coffee + one 3oz tea per month (~54 cups combined)",
@@ -249,17 +257,12 @@ function SubscriptionCard({ sub }: { sub: Subscription }) {
         </ul>
       </CardContent>
       <CardFooter className="p-6 pt-0">
-        <Button
-          asChild
+        <SubscriptionCheckoutButton
+          sku={sub.sku}
+          ctaLabel={sub.cta.label}
+          monthlyRetailCents={sub.monthlyRetailCents}
           variant={sub.recommended ? "accent" : "ghost"}
-          size="lg"
-          className="w-full font-mono text-[11px] uppercase tracking-widest"
-        >
-          <Link href={sub.cta.href} data-pricing-cta={`subscription-${sub.sku}`}>
-            {sub.cta.label}
-            <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
-          </Link>
-        </Button>
+        />
       </CardFooter>
     </Card>
   );
