@@ -3,6 +3,7 @@
 import { useState } from "react";
 
 import { CbrewCadencePicker, type CadenceId } from "@/components/cbrew-cadence-picker";
+import { ProductMatrixPicker, POOLER_PASS_PRODUCTS } from "@/components/product-matrix-picker";
 
 interface EligibilityResponse {
   ok?: boolean;
@@ -34,6 +35,7 @@ export function PoolerPassCheckoutForm() {
   const [email, setEmail] = useState("");
   const [tier, setTier] = useState<PoolerTier>("standard");
   const [cadence, setCadence] = useState<CadenceId>("9mo");
+  const [products, setProducts] = useState<string[]>(["coffee"]);
   const [eligibility, setEligibility] = useState<EligibilityResponse | null>(null);
   const [checking, setChecking] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -74,12 +76,18 @@ export function PoolerPassCheckoutForm() {
       setError("Please check ZIP eligibility before continuing.");
       return;
     }
+    if (products.length === 0) {
+      setError("Pick at least one product to include in your Pooler Pass.");
+      return;
+    }
     setSubmitting(true);
     try {
-      const res = await fetch("/api/membership/pooler-pass/checkout", {
+      // /forms/* path bypasses nginx /api/* prefix-rule so the Next.js
+      // proxy actually runs and injects the gateway token.
+      const res = await fetch("/forms/membership/pooler-pass/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, zip, tier, cadence }),
+        body: JSON.stringify({ email, zip, tier, cadence, products }),
       });
       const data: CheckoutResponse = await res.json().catch(() => ({}));
       if (!res.ok || !data.redirect_url) {
@@ -100,7 +108,7 @@ export function PoolerPassCheckoutForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="mt-6 flex flex-col gap-5">
+    <form onSubmit={handleSubmit} className="mt-6 flex flex-col gap-5" data-tier-checkout="pooler-pass">
       {/* ZIP gate */}
       <div className="flex flex-col gap-3">
         <label className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
@@ -191,6 +199,15 @@ export function PoolerPassCheckoutForm() {
             disabled={submitting}
           />
 
+          {/* Step 4 — product matrix */}
+          <ProductMatrixPicker
+            options={POOLER_PASS_PRODUCTS}
+            value={products}
+            onChange={setProducts}
+            legend="Step 4 — what you want in your Pooler Pass (pick any combination)"
+            disabled={submitting}
+          />
+
           <div className="flex flex-col gap-3 sm:flex-row">
             <input
               type="email"
@@ -205,7 +222,7 @@ export function PoolerPassCheckoutForm() {
             />
             <button
               type="submit"
-              disabled={submitting || !email}
+              disabled={submitting || !email || products.length === 0}
               className="rounded-md bg-accent px-6 py-3 font-mono text-xs uppercase tracking-widest text-accent-foreground transition-colors hover:bg-accent/90 disabled:cursor-not-allowed disabled:opacity-60"
             >
               {submitting ? "Starting checkout…" : "Get Pooler Pass"}

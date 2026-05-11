@@ -3,6 +3,7 @@
 import { useState } from "react";
 
 import { CbrewCadencePicker, type CadenceId } from "@/components/cbrew-cadence-picker";
+import { ProductMatrixPicker, WOOD_STORK_PRODUCTS } from "@/components/product-matrix-picker";
 
 interface CheckoutResponse {
   ok?: boolean;
@@ -22,18 +23,40 @@ export function WoodStorkCheckoutForm() {
   const [businessName, setBusinessName] = useState("");
   const [tier, setTier] = useState<WoodStorkTier>("standard");
   const [cadence, setCadence] = useState<CadenceId>("9mo");
+  const [products, setProducts] = useState<string[]>(["bulk-coffee"]);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Whitelabel is Reserve-only — clear it from selection if tier downshifts.
+  const effectiveProducts =
+    tier === "standard" ? products.filter((p) => p !== "whitelabel") : products;
+  // Filter visible options too so Standard customers don't see whitelabel.
+  const visibleOptions =
+    tier === "standard"
+      ? WOOD_STORK_PRODUCTS.filter((o) => o.id !== "whitelabel")
+      : WOOD_STORK_PRODUCTS;
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setError(null);
+    if (effectiveProducts.length === 0) {
+      setError("Pick at least one product to include in your Wood Stork.");
+      return;
+    }
     setSubmitting(true);
     try {
-      const res = await fetch("/api/membership/wood-stork/checkout", {
+      // /forms/* path bypasses nginx /api/* prefix-rule so the Next.js
+      // proxy actually runs and injects the gateway token.
+      const res = await fetch("/forms/membership/wood-stork/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, business_name: businessName, tier, cadence }),
+        body: JSON.stringify({
+          email,
+          business_name: businessName,
+          tier,
+          cadence,
+          products: effectiveProducts,
+        }),
       });
       const data: CheckoutResponse = await res.json().catch(() => ({}));
       if (!res.ok || !data.redirect_url) {
@@ -54,7 +77,11 @@ export function WoodStorkCheckoutForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="mt-6 flex flex-col gap-5">
+    <form
+      onSubmit={handleSubmit}
+      className="mt-6 flex flex-col gap-5"
+      data-tier-checkout="wood-stork"
+    >
       {/* Tier picker */}
       <div className="flex flex-col gap-3">
         <label className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
@@ -89,6 +116,16 @@ export function WoodStorkCheckoutForm() {
         disabled={submitting}
       />
 
+      {/* Product matrix — visible options filter on tier (whitelabel = Reserve only) */}
+      <ProductMatrixPicker
+        options={visibleOptions}
+        value={effectiveProducts}
+        onChange={setProducts}
+        legend="What you want from your Wood Stork (pick any combination)"
+        disabled={submitting}
+        minSelect={1}
+      />
+
       {/* Business name + email + submit */}
       <div className="flex flex-col gap-3 sm:flex-row">
         <input
@@ -118,7 +155,7 @@ export function WoodStorkCheckoutForm() {
         />
         <button
           type="submit"
-          disabled={submitting || !email || !businessName}
+          disabled={submitting || !email || !businessName || effectiveProducts.length === 0}
           className="rounded-md bg-accent px-6 py-3 font-mono text-xs uppercase tracking-widest text-accent-foreground transition-colors hover:bg-accent/90 disabled:cursor-not-allowed disabled:opacity-60"
         >
           {submitting ? "Starting checkout…" : "Become a Wood Stork"}
