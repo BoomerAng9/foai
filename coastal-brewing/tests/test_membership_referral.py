@@ -207,3 +207,30 @@ def test_format_welcome_box_telegram_message():
     # Sacred Separation: no vendor names in owner-facing copy
     assert "stripe" not in msg.lower()
     assert "sub_test_xyz" not in msg, "internal subscription id must not leak"
+
+
+# ─── Phase 3: Stripe Checkout Session params builder ──────────────────
+
+
+def test_build_checkout_params_for_subscription():
+    """Pure builder produces the Stripe Checkout Session params dict for the
+    membership subscription. No SDK call — just the args ready to pass."""
+    from scripts import membership  # noqa: PLC0415
+
+    params = membership.build_checkout_params(
+        customer_email="custee@example.com",
+        membership_price_id="price_1ABC123",
+        public_url="https://brewing.foai.cloud",
+    )
+
+    assert params["mode"] == "subscription", "membership is recurring annual"
+    assert params["line_items"] == [{"price": "price_1ABC123", "quantity": 1}]
+    assert params["customer_email"] == "custee@example.com"
+    assert params["success_url"].startswith("https://brewing.foai.cloud/membership/welcome")
+    assert "{CHECKOUT_SESSION_ID}" in params["success_url"]
+    assert params["cancel_url"] == "https://brewing.foai.cloud/membership"
+    # Metadata carries email so the webhook can mint the welcome-box task
+    # without re-fetching the Stripe Customer object.
+    assert params["metadata"]["customer_email"] == "custee@example.com"
+    assert params["metadata"]["flow"] == "membership_signup"
+    assert params["metadata"]["vertical"] == "coastal-brewing"

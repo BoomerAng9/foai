@@ -114,6 +114,31 @@ def handle_subscription_created(
     }
 
 
+def build_checkout_params(
+    *,
+    customer_email: str,
+    membership_price_id: str,
+    public_url: str,
+) -> dict:
+    """Build the Stripe Checkout Session params for the Standard Membership
+    subscription. Pure dict — no SDK call. Caller passes this to
+    `stripe.checkout.Session.create(**params)`.
+    """
+    return {
+        "mode": "subscription",
+        "payment_method_types": ["card"],
+        "line_items": [{"price": membership_price_id, "quantity": 1}],
+        "customer_email": customer_email,
+        "success_url": f"{public_url}/membership/welcome?session_id={{CHECKOUT_SESSION_ID}}",
+        "cancel_url": f"{public_url}/membership",
+        "metadata": {
+            "customer_email": customer_email,
+            "flow": "membership_signup",
+            "vertical": "coastal-brewing",
+        },
+    }
+
+
 def format_welcome_box_telegram(task: dict) -> str:
     """Build the Telegram message the owner sees when a welcome box must ship.
 
