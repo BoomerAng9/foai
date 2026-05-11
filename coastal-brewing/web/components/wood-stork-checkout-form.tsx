@@ -2,56 +2,38 @@
 
 import { useState } from "react";
 
-interface CheckoutResponse {
-  ok?: boolean;
-  redirect_url?: string;
-  error?: string;
-}
-
 type WoodStorkTier = "standard" | "reserve";
 
-const TIERS: Record<WoodStorkTier, { label: string; price: string; priceCents: number }> = {
-  standard: { label: "Wood Stork Standard · $499/yr", price: "$499", priceCents: 49900 },
-  reserve: { label: "Wood Stork Reserve · $999/yr", price: "$999", priceCents: 99900 },
+const TIERS: Record<WoodStorkTier, { label: string; price: string }> = {
+  standard: { label: "Wood Stork Standard · $499/yr (preview)", price: "$499" },
+  reserve: { label: "Wood Stork Reserve · $999/yr (preview)", price: "$999" },
 };
+
+const WAITLIST_EMAIL = "wholesale@coastalbrewing.co";
 
 export function WoodStorkCheckoutForm() {
   const [email, setEmail] = useState("");
   const [businessName, setBusinessName] = useState("");
   const [tier, setTier] = useState<WoodStorkTier>("standard");
-  const [submitting, setSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
-  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    setError(null);
-    setSubmitting(true);
-    try {
-      const res = await fetch("/api/membership/wood-stork/checkout", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, business_name: businessName, tier }),
-      });
-      const data: CheckoutResponse = await res.json().catch(() => ({}));
-      if (!res.ok || !data.redirect_url) {
-        setError(
-          data.error ||
-            "We couldn't start checkout right now. Please email wholesale@coastalbrewing.co and we'll set you up directly.",
-        );
-        setSubmitting(false);
-        return;
-      }
-      window.location.assign(data.redirect_url);
-    } catch {
-      setError(
-        "Network hiccup. Please email wholesale@coastalbrewing.co and we'll set you up directly.",
-      );
-      setSubmitting(false);
-    }
-  }
+  const subject = `Wood Stork waitlist — ${TIERS[tier].label}`;
+  const body =
+    `Business name: ${businessName || "(your business)"}\n` +
+    `Email: ${email || "(your email)"}\n` +
+    `Tier of interest: ${TIERS[tier].label}\n\n` +
+    `Please add me to the Wood Stork tier waitlist. I'll be ready to commit when ` +
+    `Coastal Brewing Co. opens checkout.`;
+  const mailto = `mailto:${WAITLIST_EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
 
   return (
-    <form onSubmit={handleSubmit} className="mt-6 flex flex-col gap-4">
+    <form
+      method="post"
+      action={mailto}
+      onSubmit={() => {
+        // Native mailto handoff — let the browser take it.
+      }}
+      className="mt-6 flex flex-col gap-4"
+    >
       <div className="flex flex-col gap-3">
         <label className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
           Tier
@@ -83,8 +65,7 @@ export function WoodStorkCheckoutForm() {
           placeholder="Business name"
           value={businessName}
           onChange={(e) => setBusinessName(e.target.value)}
-          disabled={submitting}
-          className="flex-1 rounded-md border border-border bg-background px-4 py-3 text-base text-foreground placeholder:text-muted-foreground focus:border-accent focus:outline-none disabled:opacity-60"
+          className="flex-1 rounded-md border border-border bg-background px-4 py-3 text-base text-foreground placeholder:text-muted-foreground focus:border-accent focus:outline-none"
         />
       </div>
 
@@ -97,25 +78,19 @@ export function WoodStorkCheckoutForm() {
           placeholder="you@your-business.com"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          disabled={submitting}
-          className="flex-1 rounded-md border border-border bg-background px-4 py-3 text-base text-foreground placeholder:text-muted-foreground focus:border-accent focus:outline-none disabled:opacity-60"
+          className="flex-1 rounded-md border border-border bg-background px-4 py-3 text-base text-foreground placeholder:text-muted-foreground focus:border-accent focus:outline-none"
         />
         <button
           type="submit"
-          disabled={submitting || !email || !businessName}
+          disabled={!email || !businessName}
           className="rounded-md bg-accent px-6 py-3 font-mono text-xs uppercase tracking-widest text-accent-foreground transition-colors hover:bg-accent/90 disabled:cursor-not-allowed disabled:opacity-60"
         >
-          {submitting ? "Starting checkout…" : `Become Wood Stork · ${TIERS[tier].price}`}
+          Join waitlist
         </button>
       </div>
 
-      {error && (
-        <p className="font-mono text-[11px] text-destructive" role="alert">
-          {error}
-        </p>
-      )}
       <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
-        Charged annually · referral discount auto-applies on next product order
+        Wood Stork checkout opens soon · waitlist sends to {WAITLIST_EMAIL}
       </p>
     </form>
   );
