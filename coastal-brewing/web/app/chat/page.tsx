@@ -25,7 +25,7 @@ export default async function ChatPage({
               Welcome to Coastal Brewing Co.
             </h1>
             <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
-              An AI Managed Organization. Made in Pooler, Georgia.
+              An AI Managed Organization. Coastal Brewing Co. · Pooler, Georgia.
             </p>
           </div>
           <Image

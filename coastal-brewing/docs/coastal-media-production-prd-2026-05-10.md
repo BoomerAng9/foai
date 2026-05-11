@@ -280,7 +280,7 @@ where we are.
 | **Sound (for video)** | Slow jazz pulled from Forsyth Park live nights. Oyster-roast crackle. Marsh-bird call. Distant boat horn. Wind through palm fronds. Not country, not beach-bro — Lowcountry-quiet. |
 | **Voice register** | Lowcountry — Sal's lead-counter patter has light AAVE layered with Southern warmth. Other cast members carry Charleston Ashby-Calhoun polish (Pip), Sweet Briar / Cambridge year (Eliza), Geechee Saturday-morning kitchen energy (Naya, Cou_Ang), New England transplant (Mads), Philly-Jersey-Shore vowels Trey is consciously dropping (Reg). |
 | **Food memory** | Oyster roasts, shrimp boils, bait runs, church kitchens that fed the neighborhood every Sunday after service, corner stores on the West Savannah side, marsh-mud walking, slow shrimp-boat money. |
-| **Provenance mark** | "Made in PLR" — Pooler, GA region code. Universal stork patch on every Sales uniform's lower-left chest. Customer-facing form on labels: "Made in Pooler, Georgia." Ships from Pooler GA 31322. |
+| **Provenance mark** | "Made in PLR" — Pooler, GA region code. Universal stork patch on every Sales uniform's lower-left chest. HQ designation: "Coastal Brewing Co. · Pooler, Georgia." Coffee is roasted in Temecula by TCR (supplier-anonymized in customer copy); ships seller-of-record under Coastal Brewing Co. |
 
 #### 3.3 What Pooler is NOT
 
@@ -297,10 +297,10 @@ We ARE Lowcountry GA — quiet, warm, slow, particular. Cream + copper, not whit
 
 #### 4.1 Brand promise (the anchor)
 
-> "**Roasted in the United States. Brewed honest. Served by a team that knows your name.**"
+> "**Roasted in the United States. Nothing chemically, ever. Served by a team that knows your name.**"
 
 Three pillars in one sentence. Roasted-in-US satisfies the supplier-anonymized
-provenance story. Brewed-honest satisfies "Nothing chemically, ever" + the
+provenance story. Nothing-chemically-ever is the canon tagline covering the
 no-syrups-no-extracts compliance lane. Served-by-a-team-that-knows-your-name
 satisfies the experience layer + the platform demo undertone.
 
@@ -814,7 +814,8 @@ When any video/asset has dialogue, on-screen text, or marketing copy:
 - "Free shipping over $50"
 - "Pause, swap, or cancel any time"
 - "Every order is a conversation"
-- "Made in Pooler, Georgia"
+- "Coastal Brewing Co. · Pooler, Georgia" (HQ designation, not manufacturing claim)
+- "Roasted in the United States"
 
 **Functional/Mushroom strict-lane (NEVER violate):**
 - "Specialty coffee blended with Lion's Mane, Cordyceps, and Reishi"
