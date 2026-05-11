@@ -126,6 +126,13 @@ NEMOCLAW_API_KEY = os.environ.get("NEMOCLAW_API_KEY", "")
 TELEGRAM_BOT_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN", "")
 TELEGRAM_CHAT_ID = os.environ.get("TELEGRAM_CHAT_ID", "")
 
+# ─── Standard Membership ledger (Phase 1+2) ────────────────────────────
+# Process-singleton; the api_server is single-replica today. When a
+# multi-replica deploy lands, swap this for a Firestore-backed adapter
+# behind the same ReferralLedger interface (Phase 4 ticket).
+import scripts.membership as membership  # noqa: E402
+_membership_ledger = membership.ReferralLedger()
+
 
 import base64
 import hashlib
@@ -197,6 +204,22 @@ def _verify_audit_token(token: str, task_id: str) -> bool:
         if payload.get("exp", 0) < int(_time.time()):
             return False
         return True
+    except Exception:
+        return False
+
+
+def _send_telegram_message(text: str) -> bool:
+    """Fire a plain Telegram message to the owner channel. Returns True on
+    HTTP 200, False otherwise (including missing token). Never raises."""
+    if not TELEGRAM_BOT_TOKEN or not TELEGRAM_CHAT_ID:
+        return False
+    try:
+        r = requests.post(
+            f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage",
+            json={"chat_id": TELEGRAM_CHAT_ID, "text": text, "disable_web_page_preview": True},
+            timeout=5,
+        )
+        return r.status_code == 200
     except Exception:
         return False
 
@@ -1244,6 +1267,25 @@ async def stripe_webhook(request: Request) -> dict:
         except Exception as e:
             run_report = {"error": str(e)}
 
+    # Standard Membership branch — wires Phase 1+2 logic into the live
+    # webhook. Only fires for the `coastal_membership_standard_annual`
+    # product; other subscription products (coffee/tea/combo retail)
+    # short-circuit inside membership.handle_subscription_created with
+    # handled=False. Filesystem idempotency guard above (line ~1140)
+    # prevents Stripe retries from double-firing the welcome-box ping.
+    membership_report: Optional[Dict[str, Any]] = None
+    if event.get("type") == "customer.subscription.created":
+        try:
+            membership_report = membership.handle_subscription_created(
+                event,
+                ledger=_membership_ledger,
+                on_welcome_box_queued=lambda task: _send_telegram_message(
+                    membership.format_welcome_box_telegram(task)
+                ),
+            )
+        except Exception as _ms_exc:
+            membership_report = {"handled": False, "error": str(_ms_exc)}
+
     return {
         "received": True,
         "event_id": event["id"],
@@ -1252,6 +1294,7 @@ async def stripe_webhook(request: Request) -> dict:
         "run_report": run_report,
         "rag_report": rag_report,
         "escalation_report": escalation_report,
+        "membership_report": membership_report,
     }
 
 

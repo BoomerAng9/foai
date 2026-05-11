@@ -112,3 +112,20 @@ def handle_subscription_created(
         "referral_code": referral_code,
         "customer_email": customer_email,
     }
+
+
+def format_welcome_box_telegram(task: dict) -> str:
+    """Build the Telegram message the owner sees when a welcome box must ship.
+
+    Customer-facing field stays customer-facing (email, code). Internal
+    fields (subscription id) stay out of the message — they live in the
+    audit ledger, not the owner-channel ping.
+    """
+    email = task.get("customer_email", "(missing email)")
+    code = task.get("referral_code", "(missing code)")
+    return (
+        "[Coastal Brewing Co.] new Standard Member — ship welcome box.\n"
+        f"  email:    {email}\n"
+        f"  referral: {code}\n"
+        "  action:   ceramic dripper + sticker set + 50g Habbak tin → ship within 10 business days."
+    )

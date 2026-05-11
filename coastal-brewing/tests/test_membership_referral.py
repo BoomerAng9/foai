@@ -182,3 +182,28 @@ def test_handle_subscription_created_is_idempotent_per_event_id():
     assert "duplicate" in second.get("reason", "").lower()
     assert second["referral_code"] == first["referral_code"], "duplicate response echoes original code"
     assert len(queued) == 1, f"welcome box must queue exactly once, got {len(queued)}"
+
+
+def test_format_welcome_box_telegram_message():
+    """The Telegram message owner sees when a welcome box must ship.
+
+    Must include the customer email, the referral code, and a one-line
+    action prompt. Must NOT name vendors (per Sacred Separation).
+    """
+    from scripts import membership  # noqa: PLC0415
+
+    task = {
+        "customer_email": "asg@achievemor.io",
+        "referral_code": "CBC-abc123XY",
+        "stripe_subscription_id": "sub_test_xyz",
+    }
+
+    msg = membership.format_welcome_box_telegram(task)
+
+    assert isinstance(msg, str) and msg, "must return non-empty string"
+    assert "asg@achievemor.io" in msg
+    assert "CBC-abc123XY" in msg
+    assert "welcome box" in msg.lower(), "must reference the welcome-box action"
+    # Sacred Separation: no vendor names in owner-facing copy
+    assert "stripe" not in msg.lower()
+    assert "sub_test_xyz" not in msg, "internal subscription id must not leak"
