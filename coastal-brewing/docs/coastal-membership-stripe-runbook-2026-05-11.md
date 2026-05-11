@@ -139,7 +139,7 @@ Future work. Plan:
 1. **Stripe coupon** — In dashboard, create a coupon `MEMBER_15`:
    - 15% off
    - Forever
-   - Restricted to Standard / Lifetime member customers (via Customer metadata flag `membership_tier`)
+   - Restricted to active member customers (via Customer metadata flag `membership_tier` — includes `standard`, plus grandfathered `lifetime_member`/`lifetime_concierge` records from before 2026-05-11 retirement)
 2. **Webhook extension** — On `customer.subscription.created` for membership product, also set the Customer metadata `membership_tier=standard` and apply the coupon.
 3. **Checkout integration** — On every retail checkout session created for a member-flagged customer, attach `discounts: [{coupon: "MEMBER_15"}]`.
 
@@ -149,7 +149,7 @@ This ships in a separate PR once the Phase 1–4 flow is verified live.
 
 ## What this runbook is NOT
 
-- **Not the Lifetime tier setup** — those are separate $999 / $4999 one-time products handled per `coastal-billing-matrix-spec-2026-05-09.md`. Same dashboard pattern; different price.
+- **Not a Lifetime tier setup** — Coastal Lifetime tiers were retired 2026-05-11 (see `lifetime-tier-positioning-2026-05-11.md`). Lifetime is now AIMS / Plug-Me-In licensee tier, handled separately under the AIMS stack — not in this runbook.
 - **Not the retail Shopify-TCR path** — bag/SKU sales stay on Shopify per canon.
 - **Not multi-vertical** — when other verticals (Per|Form, CTI Hub) need their own membership-style products, they get their own runbooks following the same pattern.
 

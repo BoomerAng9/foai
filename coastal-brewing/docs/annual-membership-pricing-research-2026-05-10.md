@@ -162,8 +162,10 @@ Re-verification at each annual renewal; if member moves out-of-radius mid-year, 
 | **Coastal Custee Card** (= existing Standard Membership) | $199/yr | National DTC + Amazon shoppers | "Membership IS the agentic experience" | EXISTING — `coastal-standard-membership-spec-2026-05-10.md` |
 | **Wood Stork Standard** | $499/yr | B2B, multi-location, referrers | "Volume + referral credits + business voice line" | NEW |
 | **Wood Stork Reserve** | $999/yr | Licensee prospects, largest accounts | "Dedicated pod + first-look licensee + named blend" | NEW |
-| **Lifetime Member** | $999 once | Long-haul commit Custees | (existing) | EXISTING — billing matrix |
-| **Lifetime Concierge** | $4,999 once | White-glove premium | (existing) | EXISTING — billing matrix |
+
+> Note: Lifetime Member + Lifetime Concierge tiers were retired from Coastal canon
+> 2026-05-11 per owner directive. Lifetime is now AIMS / Plug-Me-In licensee tier
+> only — see `lifetime-tier-positioning-2026-05-11.md`.
 
 **Note on $499/$799 anchor framing in `standard-membership-pricing-brief-2026-05-10.md`:** That document proposed a SoulCycle-class $799-anchor / $499-landing premium-experience tier. That tier maps cleanly to **Wood Stork Standard at $499**. The $799 anchor can be Wood Stork Reserve's negotiation anchor before haggling to $499-749 landing.
 

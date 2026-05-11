@@ -33,7 +33,7 @@
 |---|---|---|---|
 | Annual fee | $199 | — | $199 (recognized over 12 months) |
 | Welcome box (ceramic dripper + stickers + 50g Habbak tin) | ~$45 retail | ~$22 landed | -$22 (CAC absorbed, one-time) |
-| 15% lifetime discount on order volume | varies | -15% margin per order | absorbed; offset by retention uplift |
+| Ongoing 15% member discount on order volume | varies | -15% margin per order | absorbed; offset by retention uplift |
 | Free delivery (under $15 freight) | varies | -$8.50 avg per shipment | absorbed; ~$50/yr per active member |
 | Referral refund (max once, requires 2 new paid members) | -$199 if triggered | — | net-zero on referrer; +$398 in new gross fees |
 
@@ -41,21 +41,25 @@
 $199 (fee) − $22 (welcome box CAC) − $50 (delivery absorption) − $90 (15% margin sacrifice on $600 GMV) = **+$37 contribution**
 
 **Net first-year contribution per referrer member (with 2 successful referrals):**
-$199 (referrer's fee, refunded) + 2 × $199 (new referred fees) − 3 × $22 welcome box CAC − 3 × $50 delivery absorption = **+$166 net + 2 new lifetime members**
+$199 (referrer's fee, refunded) + 2 × $199 (new referred fees) − 3 × $22 welcome box CAC − 3 × $50 delivery absorption = **+$166 net + 2 new long-tenure members**
 
 The referral mechanic is positive-sum because the referred members carry their own fees forward. Blackbird relies on the same math.
 
 ## 3. Where it slots in the existing tier system
 
-Coastal already has two Lifetime tiers per `coastal-billing-matrix-spec-2026-05-09.md`:
+Coastal Custee tier ladder per `cbrew-369-pricing-canon-2026-05-11.md` (Lifetime tiers
+removed from Coastal canon 2026-05-11 — see `lifetime-tier-positioning-2026-05-11.md`):
 
-| Tier | Price | Type | 15% discount | Welcome box | Concierge |
+| Tier | Price | Type | Discount | Welcome box | Concierge |
 |---|---|---|---|---|---|
-| **Standard Membership** (NEW — this doc) | $199 / yr | annual recurring | ✅ | ✅ | ❌ |
-| **Lifetime Member** | $999 once | lifetime | ✅ | ✅ + digital asset | ❌ |
-| **Lifetime Concierge** | $4,999 once | lifetime | 25% | ✅ + named blend | ✅ |
+| Pooler Pass Standard | $89.88 / yr | annual (3-6-9 cadence) | 15% | ❌ | ❌ |
+| Pooler Pass Plus | $179.88 / yr | annual (3-6-9 cadence) | 15% | optional | ❌ |
+| **Standard Membership / Coastal Custee Card** (this doc) | $199 / yr (legacy) | annual recurring | ✅ | ✅ | ❌ |
+| Wood Stork Standard | $499 / yr (B2B/referrer) | annual | 18-50% (referral-tiered) | ✅ | partial |
+| Wood Stork Reserve | $999 / yr (licensee prospects) | annual | 18-50% (referral-tiered) | ✅ + named blend | ✅ |
 
-Standard Membership is the **on-ramp tier** — most Custees won't jump straight to a $999 lifetime. The $199 annual is the introductory commitment that proves the value loop, then upsells to lifetime over years 2-3.
+Standard Membership / Coastal Custee Card is the **on-ramp tier** — most Custees enter
+here and graduate up to Wood Stork tiers when their volume or referral activity justifies.
 
 ## 4. Terms and conditions (full)
 
@@ -84,8 +88,7 @@ Coastal Brewing Co. Standard Membership — Terms
 4. 15% MEMBER DISCOUNT
    Automatic 15% off all retail-priced products at checkout. Stacks
    with the membership free-delivery benefit. Does NOT stack with
-   bulk-pricing tiers (B2B pricing is already at-cost+) or with
-   Lifetime Concierge's 25% discount tier.
+   bulk-pricing tiers (B2B pricing is already at-cost+).
 
 5. WELCOME BOX
    Shipped within 10 business days of signup to the address on file.
@@ -149,7 +152,7 @@ Coastal Brewing Co. Standard Membership — Terms
 
 ## 6. What this PRD is NOT
 
-- **Not a replacement for the Lifetime tiers.** Lifetime stays at $999/$4999 for Custees who want the one-time commit.
+- **Not a lifetime offering.** Lifetime tiers were retired from Coastal canon 2026-05-11 — lifetime is now the AIMS / Plug-Me-In licensee tier (technology stack). Coastal beverages are annual/subscription only. See `lifetime-tier-positioning-2026-05-11.md`.
 - **Not a B2B offering.** Wholesale + office coffee programs (per Dimension 2 of the billing matrix) have their own at-cost pricing and don't need member discounts.
 - **Not a points/loyalty program.** This is flat-fee membership with referral mechanics — not punch-card or cumulative-spend rewards.
 
@@ -160,7 +163,7 @@ Coastal Brewing Co. Standard Membership — Terms
 | Welcome-box dripper choice | Hario V60 ceramic ($28 landed) | Could swap to Kalita Wave or Coastal-branded ceramic mug if preferred |
 | Habbak tin size in welcome box | 50g (~10 servings) | Could go 25g if margin pressure |
 | Referral refund timing | 30 days after second referral payment | Could shorten to 14 days |
-| Whether subscription Custees can ALSO be members | Yes — discount stacks with sub-pricing as long as not 25% Lifetime Concierge | Owner could carve out exception |
+| Whether subscription Custees can ALSO be members | Yes — discount stacks with sub-pricing (no other Coastal tier carries a competing percent-off) | Owner could carve out exception |
 | Sticker set count | 5 stickers (storefront-window-etching set) | Could expand to full brand set (10) |
 
 ## 8. Worked example (Custee onboarding)

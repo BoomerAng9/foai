@@ -19,7 +19,7 @@ AIMS exposes 8 dimensions that combine via `calculateBill()`:
 4. Task-Based Multipliers (9 task types, 1.0× to 3.0× cost)
 5. Three Pillars (Confidence / Convenience / Security — each standard/enhanced/maximum)
 6. White Label (Self-Managed / AIMS-Managed / Fully Autonomous)
-7. Lifetime Deal (BYOK / Platform / WhiteLabel — one-time)
+7. ~~Lifetime Deal~~ — REMOVED 2026-05-11 from Coastal canon. Lifetime is now AIMS / Plug-Me-In licensee tier only. See `lifetime-tier-positioning-2026-05-11.md`.
 8. Platform App Partitioning (Per|Form / LUC / Marketplace / WhiteLabel)
 
 Coastal mirrors this architecture with retail-coffee semantics. Same
@@ -371,44 +371,18 @@ export const COASTAL_WHITE_LABEL_PLANS = [
 ];
 ```
 
-### Dimension 7: Lifetime Coastal Membership (mirrors AIMS LTD)
+### Dimension 7: REMOVED 2026-05-11
 
-One-time membership tier for power Custees + brand-builders.
+Lifetime Coastal Membership tiers have been retired from Coastal canon per
+owner directive 2026-05-11. The lifetime-deal mechanic now belongs to the
+**AIMS / Plug-Me-In licensee tier** (technology stack), not Coastal
+beverages. Owner reasoning: Coastal beverage business may not last beyond a
+year, so a lifetime offer makes no sense; lifetime makes sense for the
+underlying technology a licensee wants to deploy under their own brand.
 
-```ts
-export const COASTAL_LIFETIME_PLANS = [
-  {
-    id: 'lifetime_member',
-    name: 'Lifetime Member',
-    tagline: 'Coastal counter access forever',
-    onetimePrice: 999,
-    features: [
-      'No subscription fees — ever',
-      'Standard Curation + Standard Experience pillars locked in',
-      '15% off all one-off orders forever',
-      'First-access to limited drops (Whiskey Barrel, Coffee of the Month)',
-      'Founding-member badge on profile',
-      'Custom Higgsfield-rendered "lifetime member" digital asset',
-      'Annual quarterly virtual visit with Sal',
-    ],
-  },
-  {
-    id: 'lifetime_concierge',
-    name: 'Lifetime Concierge',
-    tagline: 'Concierge access forever',
-    onetimePrice: 4999,
-    features: [
-      'Everything in Lifetime Member',
-      'Concierge Curation + Concierge Experience + Concierge Provenance locked in',
-      '25% off all one-off orders forever',
-      'Direct Telegram channel to Melli',
-      'Annual in-person Coastal HQ visit (Pooler GA) with founder',
-      'Custom annual blend named after you (limited 1/yr)',
-      'Reserve seat at any Coastal launch event',
-    ],
-  },
-];
-```
+See `lifetime-tier-positioning-2026-05-11.md` for the canon line.
+See `appsumo-lifetime-sdk-research-2026-05-11.md` for the AppSumo-style
+packaging research.
 
 ### Dimension 8: Catalog Surface Partitioning (mirrors AIMS Platform Apps)
 
@@ -483,7 +457,7 @@ export function calculateCoastalBill(
   shipAddressOrEmployeeCount: number,
   catalogMix: Partial<Record<CategoryId, number>>,    // weights summing to 100
   pillars: PillarSelection,
-  options?: { whiteLabelMode?: WhiteLabelMode; lifetimeMode?: LifetimeId },
+  options?: { whiteLabelMode?: WhiteLabelMode },
 ): CoastalBillEstimate { /* ... */ }
 ```
 
@@ -521,7 +495,7 @@ The 3 simplified tiers are pre-tuned matrix-snapshots:
 
 ### Tier 3 — Coastal Concierge
 
-- **Cadence**: 9-month (pay 9, get 12) OR Lifetime Concierge
+- **Cadence**: 9-month (pay 9, get 12)
 - **Account**: Individual / Household / Office
 - **Pillars**: Concierge / Coastal-Counter / Fully Traceable (max of each)
 - **Price anchor**: Custom — "Contact Sal" button that opens chat
@@ -576,7 +550,6 @@ Implementation:
 | Category multipliers (0.95-1.30 range) | OK? |
 | Pillar addon ranges (0-35% per pillar, max ~95% total) | OK? |
 | White Label pricing tiers ($2.5K / $7.5K / Custom) | Defensible or adjust? |
-| Lifetime Membership ($999 / $4,999) | Defensible? |
 | Live `/pricing` page visual style | Iller_Ang to render mockups for ratification |
 | Build Your Bag page priority | Ship at launch or post-launch? |
 

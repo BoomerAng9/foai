@@ -242,7 +242,7 @@ const XFACTORS: Xfactor[] = [
   },
   {
     title: "Account Assistant on call.",
-    body: "Members get an Account Assistant — your point of contact for reorders, recipe troubleshooting, gift sends, and anything else. Wood Stork tier gets 4 hours a month. Lifetime Concierge is white-glove. Nobody else in the category offers this.",
+    body: "Members get an Account Assistant — your point of contact for reorders, recipe troubleshooting, gift sends, and anything else. Wood Stork tier gets 4 hours a month. Wood Stork Reserve is white-glove. Nobody else in the category offers this.",
   },
 ];
 

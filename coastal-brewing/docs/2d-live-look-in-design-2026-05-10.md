@@ -141,9 +141,10 @@ The Standard Membership spec (`coastal-standard-membership-spec-2026-05-10.md` Â
 
 Implementation surface for membership-gating:
 
-- Middleware at `web/middleware.ts` checks `coastalbrewing.co/live` requests for an authenticated session AND an active Standard or Lifetime membership flag on the user record
+- Middleware at `web/middleware.ts` checks `coastalbrewing.co/live` requests for an authenticated session AND an active Standard Membership / Coastal Custee Card / Wood Stork membership flag on the user record
 - Non-members hitting `/live` get a paywall card pitching Standard Membership ($199/yr) with a screenshot teaser of the 2D view
-- Lifetime Concierge members get the admin overlay (KPI badges + service-health markers) as a tier perk
+- Wood Stork Reserve members get the admin overlay (KPI badges + service-health markers) as a tier perk
+- Lifetime tiers were retired from Coastal canon 2026-05-11 â€” any grandfathered lifetime customers retain access via existing member flag on their record. See `lifetime-tier-positioning-2026-05-11.md`.
 
 ## 6. Implementation surfaces (INTERNAL)
 
