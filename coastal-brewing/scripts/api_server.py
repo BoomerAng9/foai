@@ -133,6 +133,10 @@ TELEGRAM_CHAT_ID = os.environ.get("TELEGRAM_CHAT_ID", "")
 import scripts.membership as membership  # noqa: E402
 _membership_ledger = membership.ReferralLedger()
 
+# Lil_Mercury_Hawk — wraps Mercury Banking + Invoicing API. Replaces Stripe
+# for the Coastal subscription + initiation flow (owner directive 2026-05-11).
+import scripts.lil_mercury_hawk as lil_mercury_hawk  # noqa: E402
+
 
 import base64
 import hashlib
@@ -664,10 +668,29 @@ def healthz() -> dict:
         "auth_configured": bool(GATEWAY_TOKEN),
         "nemoclaw_configured": bool(NEMOCLAW_URL and NEMOCLAW_API_KEY),
         "stripe_configured": bool(STRIPE_AVAILABLE and _stripe_is_configured()),
+        "mercury_configured": any(
+            os.environ.get(n) for n in lil_mercury_hawk.TOKEN_ENV_CANDIDATES
+        ),
         "telegram_configured": bool(TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID),
         "audit_ledger": str(audit_ledger.DB_PATH),
         "time": utc_now(),
     }
+
+
+@app.get("/mercury/selftest")
+def mercury_selftest(x_coastal_token: str = Header("")) -> dict:
+    """Owner-only health check for the Lil_Mercury_Hawk wiring.
+
+    Never echoes the Mercury API token. Reports:
+      - ok: True if a token is set AND Mercury returns a valid /accounts response
+      - account_count: integer (no ids, names, or balances)
+      - token_var: which env-var name we read from (so owner sees the runner
+        is reading the var they actually set)
+
+    Gated behind the gateway token so random visitors can't probe this.
+    """
+    _auth(x_coastal_token)
+    return lil_mercury_hawk.self_test()
 
 
 @app.get("/audit/integrity-check")
