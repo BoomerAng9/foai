@@ -98,6 +98,44 @@ test("5-tier comparison table renders all rows + marks", async ({ page }) => {
   await table.screenshot({ path: "test-results/tier-comparison-table.png" });
 });
 
+test("Custee Card /membership flow — cadence picker + product matrix + Stripe redirect", async ({ page }) => {
+  await page.goto("/membership");
+  const form = page.locator('[data-membership-checkout="custee-card"]');
+  await form.scrollIntoViewIfNeeded();
+  await expect(form).toBeVisible();
+
+  // Cadence picker loaded all 4 cadences (rendered as buttons with totals).
+  await expect(form.getByText("$29.99")).toBeVisible();
+  await expect(form.getByText("$202.43")).toBeVisible();
+
+  // Product matrix renders all 5 options
+  const matrix = form.locator('[data-matrix-picker="products"]');
+  await expect(matrix.locator('[data-matrix-option="tea"]')).toBeVisible();
+  await expect(matrix.locator('[data-matrix-option="coffee"]')).toBeVisible();
+  await expect(matrix.locator('[data-matrix-option="functional-coffee"]')).toBeVisible();
+  await expect(matrix.locator('[data-matrix-option="combo"]')).toBeVisible();
+  await expect(matrix.locator('[data-matrix-option="sampler"]')).toBeVisible();
+
+  // Coffee is selected by default per component default
+  await expect(matrix.locator('[data-matrix-option="coffee"]')).toHaveAttribute(
+    "data-matrix-selected",
+    "true",
+  );
+
+  // Add tea + leave 9mo as default; fill email; submit
+  await matrix.locator('[data-matrix-option="tea"]').click();
+  await form.locator('input[type="email"]').fill("playwright-custee@achievemor.io");
+
+  await Promise.all([
+    page.waitForURL(/checkout\.stripe\.com/, { timeout: 30_000 }),
+    form.getByRole("button", { name: /get custee card/i }).click(),
+  ]);
+
+  const url = page.url();
+  expect(url).toMatch(/^https:\/\/checkout\.stripe\.com\//);
+  expect(url).toMatch(/cs_live_|cs_test_/);
+});
+
 test("Coffee Monthly card has its own independent CTA + form", async ({ page }) => {
   await page.goto("/pricing");
   const coffeeCard = page.locator('[data-pricing-tier="subscription-coastal-coffee-monthly"]');

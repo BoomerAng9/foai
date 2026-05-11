@@ -34,7 +34,7 @@ interface CadencePickerProps {
    * `flow` is "wood-stork" or "pooler-pass".
    */
   tier: string;
-  flow: "wood-stork" | "pooler-pass";
+  flow: "wood-stork" | "pooler-pass" | "custee-card";
   /** Initial selection (defaults to "9mo" — the best deal). */
   defaultCadence?: CadenceId;
   /** Fired when user picks a cadence. Parent stores this for checkout submit. */
@@ -61,10 +61,13 @@ export function CbrewCadencePicker({
     async function load() {
       setError(null);
       try {
-        const res = await fetch(
-          `/api/membership/${flow}/cadence-pricing?tier=${encodeURIComponent(tier)}`,
-          { cache: "no-store" },
-        );
+        // Custee Card is single-tier — its endpoint takes no `tier` query
+        // param and is public (no token). Other flows append ?tier=.
+        const url =
+          flow === "custee-card"
+            ? `/api/membership/custee-card/cadence-pricing`
+            : `/api/membership/${flow}/cadence-pricing?tier=${encodeURIComponent(tier)}`;
+        const res = await fetch(url, { cache: "no-store" });
         const data = await res.json().catch(() => ({}));
         if (!res.ok || !Array.isArray(data?.cadences)) {
           if (!cancelled) {

@@ -3928,6 +3928,136 @@ def membership_checkout(
     return {"ok": True, "redirect_url": url}
 
 
+# ────────────────────────── Coastal Custee Card — 3-6-9 cadence + product matrix ──────────────────────────
+# Owner-ratified 2026-05-11 — Custee Card is the "national DTC + Amazon default"
+# tier at $29.99 monthly retail per cbrew-369-pricing-canon-2026-05-11.md.
+
+CUSTEE_CARD_MONTHLY_RETAIL_DOLLARS = 29.99
+ALLOWED_CUSTEE_CARD_PRODUCTS = {
+    "tea", "coffee", "functional-coffee", "combo", "sampler",
+}
+
+
+@app.get("/api/membership/custee-card/cadence-pricing")
+def custee_card_cadence_pricing() -> dict:
+    """Public — return the 4-cadence pricing table for the Custee Card."""
+    import cadence as _cad_mod  # noqa: PLC0415
+    return {
+        "ok": True,
+        "tier": "custee-card",
+        "monthly_retail": CUSTEE_CARD_MONTHLY_RETAIL_DOLLARS,
+        "cadences": _cad_mod.cadence_pricing_table(CUSTEE_CARD_MONTHLY_RETAIL_DOLLARS),
+    }
+
+
+class CusteeCardCheckoutRequest(BaseModel):
+    email: str
+    cadence: str = "9mo"
+    products: list[str] = Field(default_factory=list)
+
+
+@app.post("/api/membership/custee-card/checkout")
+def custee_card_checkout(
+    body: CusteeCardCheckoutRequest,
+    x_coastal_token: str = Header(""),
+) -> dict:
+    """Mint a Stripe Checkout Session for a Custee Card subscription at
+    the chosen 3-6-9 cadence. Products list (tea / coffee / functional-
+    coffee / combo / sampler) captured in Stripe Checkout metadata so
+    /stripe/webhook can fulfill the right shipment combination."""
+    _auth(x_coastal_token)
+    if not STRIPE_AVAILABLE or not _stripe_is_configured():
+        raise HTTPException(status_code=503, detail="Stripe not configured on this runner")
+
+    email = (body.email or "").strip().lower()
+    cadence_id = (body.cadence or "9mo").strip().lower()
+    products = [str(p).strip().lower() for p in (body.products or []) if p]
+
+    if not email or "@" not in email:
+        raise HTTPException(status_code=400, detail="email required")
+    if not _cadence_mod.is_valid_cadence(cadence_id):
+        raise HTTPException(status_code=400, detail="cadence must be 'monthly', '3mo', '6mo', or '9mo'")
+    if not products:
+        raise HTTPException(status_code=400, detail="select at least one product")
+    invalid = [p for p in products if p not in ALLOWED_CUSTEE_CARD_PRODUCTS]
+    if invalid:
+        raise HTTPException(
+            status_code=400,
+            detail=f"unknown products: {invalid}; allowed: {sorted(ALLOWED_CUSTEE_CARD_PRODUCTS)}",
+        )
+
+    total_cents = _cadence_mod.cadence_total_cents(
+        CUSTEE_CARD_MONTHLY_RETAIL_DOLLARS, cadence_id,  # type: ignore[arg-type]
+    )
+    cadence_label = _cadence_mod.CADENCES[cadence_id]["label"]  # type: ignore[index]
+    products_label = ", ".join(products)
+    day_iso = _time.strftime("%Y-%m-%d", _time.gmtime())
+    intent_id = f"cct_{hashlib.sha256(f'{email}|{cadence_id}|{day_iso}|{products_label}'.encode()).hexdigest()[:16]}"
+
+    metadata = {
+        "product": "coastal-brewing",
+        "flow": "custee_card",
+        "tier": "custee-card",
+        "cadence": cadence_id,
+        "products": products_label,
+        "intent_id": intent_id,
+        "custee_email": email,
+    }
+
+    try:
+        import stripe as _stripe  # noqa: PLC0415
+        from adapters.stripe_adapter import _init_stripe  # noqa: PLC0415
+        _init_stripe()
+        session = _stripe.checkout.Session.create(
+            mode="payment",
+            customer_email=email,
+            line_items=[{
+                "price_data": {
+                    "currency": "usd",
+                    "unit_amount": total_cents,
+                    "product_data": {
+                        "name": f"Coastal Custee Card · {cadence_label}",
+                        "description": f"Products: {products_label}",
+                        "metadata": {"tier": "custee-card", "intent_id": intent_id},
+                    },
+                },
+                "quantity": 1,
+            }],
+            metadata=metadata,
+            payment_intent_data={"metadata": metadata},
+            success_url=f"{AUTH_PUBLIC_URL}/membership/thank-you?intent={intent_id}",
+            cancel_url=f"{AUTH_PUBLIC_URL}/membership?canceled=1",
+            billing_address_collection="auto",
+        )
+        checkout_url = session.url if hasattr(session, "url") else session.get("url")
+        session_id = session.id if hasattr(session, "id") else session.get("id")
+    except Exception as exc:  # noqa: BLE001
+        log = __import__("logging").getLogger("coastal.custee_card")
+        log.warning("stripe custee card checkout create failed: %s", exc)
+        raise HTTPException(status_code=502, detail=f"checkout session mint failed: {exc}") from exc
+
+    _send_telegram_message(
+        f"Custee Card subscription intent\n"
+        f"intent: {intent_id}\n"
+        f"custee: {email}\n"
+        f"cadence: {cadence_id} ({cadence_label})\n"
+        f"products: {products_label}\n"
+        f"total: ${total_cents/100:.2f}\n"
+        f"session: {session_id or '?'}"
+    )
+
+    return {
+        "ok": True,
+        "intent_id": intent_id,
+        "session_id": session_id,
+        "redirect_url": checkout_url,
+        "total_cents": total_cents,
+        "cadence": cadence_id,
+        "tier": "custee-card",
+        "products": products,
+    }
+
+
 # ────────────────────────── Stripe-backed /pricing subscription ──────────────────────────
 # Mercury's public REST API has NO invoicing surface — confirmed via live
 # probe on api.mercury.com/api/v1 with valid Mercury_API_Token + treasury
