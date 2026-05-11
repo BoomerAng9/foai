@@ -34,7 +34,7 @@ export function BrandPillars() {
           <h2 className="mt-3 font-display text-[clamp(28px,4vw,44px)] font-semibold tracking-[-0.02em] leading-[1.05]">
             Nothing chemically, ever.
             <span className="block text-foreground/55">
-              Brewed honest. Served by ACHEEVY.
+              Served by ACHEEVY.
             </span>
           </h2>
         </ScrollReveal>

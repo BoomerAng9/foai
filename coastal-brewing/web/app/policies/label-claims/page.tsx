@@ -90,7 +90,7 @@ export default function LabelClaimsPage() {
       <p className="text-sm">
         Questions? <a className="text-accent hover:underline" href="mailto:bpo@achievemor.io">bpo@achievemor.io</a>. For wholesale + sourcing transparency requests, mention &ldquo;Sourcing&rdquo; in the subject and we&apos;ll route warm.
       </p>
-      <p className="font-display text-sm italic">Brewed honest. Served by ACHEEVY. Owner-signed.</p>
+      <p className="font-display text-sm italic">Nothing chemically, ever. Served by ACHEEVY. Owner-signed.</p>
     </PolicyPageLayout>
   );
 }

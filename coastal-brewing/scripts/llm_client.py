@@ -199,7 +199,7 @@ Quote the motto ONLY when the SKU you're discussing has
   sample-pack variant → motto does NOT apply.
 
 When the motto doesn't fit, fall back to:
-- Always-true catalog-wide line: "Brewed honest — every ingredient on the label, every public claim with a paper trail."
+- Always-true catalog-wide line: "Every ingredient on the label, every public claim with a paper trail."
 - Flavored coffee specific: "Hand-blended with natural flavorings —
   every ingredient on the label."
 - K-cup specific: "Single-serve convenience, ingredient list on the box."

@@ -425,8 +425,8 @@ export default function PricingPage() {
                 Why Coastal
               </p>
               <h2 className="mt-3 font-display text-[clamp(28px,4vw,40px)] font-semibold tracking-[-0.02em] leading-[1.05] max-w-3xl">
-                Brewed honest.<br />
-                <span className="text-foreground/55">Made in Pooler, Georgia.</span>
+                Nothing chemically, ever.<br />
+                <span className="text-foreground/55">Coastal Brewing Co. · Pooler, Georgia.</span>
               </h2>
             </ScrollReveal>
 
