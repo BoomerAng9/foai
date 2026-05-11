@@ -4004,6 +4004,8 @@ def membership_subscribe_endpoint(
 
     try:
         import stripe as _stripe  # noqa: PLC0415
+        from adapters.stripe_adapter import _init_stripe  # noqa: PLC0415
+        _init_stripe()  # sets stripe.api_key + api_version once per call
         session = _stripe.checkout.Session.create(
             mode="payment",
             customer_email=custee_email,
