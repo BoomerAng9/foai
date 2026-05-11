@@ -5,7 +5,9 @@ No Stripe SDK calls, no DB, no HTTP. The api_server layer wraps this.
 Owner-ratified mechanics 2026-05-10 + 3-6-9 cadence pivot 2026-05-11:
   - Pooler Pass Standard / Plus, priced per 3-6-9 cadence canon
     (`cbrew-369-pricing-canon-2026-05-11.md`)
-  - Monthly retail: Standard $7.49/mo, Plus $14.99/mo
+  - Annual headlines (canon): Standard $49, Plus $99
+  - Monthly retail is DERIVED so the 9-mo cadence lands EXACTLY on the
+    round annual headline (Standard ≈ $7.26/mo, Plus ≈ $14.67/mo)
   - 4 cadences per tier: monthly / 3mo (15% off) / 6mo (20%) / 9mo (25%, deliver 12)
   - Geographic gate: 50-100 mile radius from 31322 (Pooler, GA)
   - Re-verify ZIP at each renewal
@@ -19,9 +21,13 @@ import cadence
 from geo import eligibility_band, eligibility_response
 
 
-# Monthly retail anchors per `cbrew-369-pricing-canon-2026-05-11.md` §2
-POOLER_PASS_STANDARD_MONTHLY_RETAIL = 7.49
-POOLER_PASS_PLUS_MONTHLY_RETAIL = 14.99
+# Annual headline anchors (canon): the round number a customer sees as
+# "the price for the year". Monthly retail is derived backward so the
+# 9-mo cadence lands EXACTLY on this headline.
+POOLER_PASS_STANDARD_ANNUAL = 49.0
+POOLER_PASS_PLUS_ANNUAL = 99.0
+POOLER_PASS_STANDARD_MONTHLY_RETAIL = cadence.monthly_retail_from_annual(POOLER_PASS_STANDARD_ANNUAL)
+POOLER_PASS_PLUS_MONTHLY_RETAIL = cadence.monthly_retail_from_annual(POOLER_PASS_PLUS_ANNUAL)
 
 POOLER_PASS_STANDARD_PRODUCT_PREFIX = "coastal_membership_pooler_pass_standard"
 POOLER_PASS_PLUS_PRODUCT_PREFIX = "coastal_membership_pooler_pass_plus"

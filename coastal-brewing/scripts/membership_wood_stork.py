@@ -5,7 +5,9 @@ No Stripe SDK calls, no DB, no HTTP. The api_server layer wraps this.
 Owner-ratified mechanics 2026-05-10 + 3-6-9 cadence pivot 2026-05-11:
   - Wood Stork Standard / Reserve, priced per 3-6-9 cadence canon
     (`cbrew-369-pricing-canon-2026-05-11.md`)
-  - Monthly retail: Standard $74.99/mo, Reserve $149.99/mo
+  - Annual headlines (canon): Standard $499, Reserve $999
+  - Monthly retail is DERIVED so the 9-mo cadence lands EXACTLY on the
+    round annual headline (Standard ≈ $73.93/mo, Reserve = $148.00/mo)
   - 4 cadences per tier: monthly / 3mo (15% off) / 6mo (20%) / 9mo (25%, deliver 12)
   - Referral discount is a TIERED PERCENT on member's own product orders:
       0      → 18% (base Wood Stork)
@@ -23,9 +25,13 @@ from typing import Literal
 import cadence
 
 
-# Monthly retail anchors per `cbrew-369-pricing-canon-2026-05-11.md` §2
-WOOD_STORK_STANDARD_MONTHLY_RETAIL = 74.99
-WOOD_STORK_RESERVE_MONTHLY_RETAIL = 149.99
+# Annual headline anchors (canon): the round number a customer sees as
+# "the price for the year". Monthly retail is derived backward so the
+# 9-mo cadence lands EXACTLY on this headline.
+WOOD_STORK_STANDARD_ANNUAL = 499.0
+WOOD_STORK_RESERVE_ANNUAL = 999.0
+WOOD_STORK_STANDARD_MONTHLY_RETAIL = cadence.monthly_retail_from_annual(WOOD_STORK_STANDARD_ANNUAL)
+WOOD_STORK_RESERVE_MONTHLY_RETAIL = cadence.monthly_retail_from_annual(WOOD_STORK_RESERVE_ANNUAL)
 
 # Stripe product ID prefixes — full ID is `<prefix>_<cadence>` per the
 # 4-cadence schedule (e.g. `coastal_membership_wood_stork_standard_9mo`)
