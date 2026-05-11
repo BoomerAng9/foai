@@ -4058,133 +4058,17 @@ def custee_card_checkout(
     }
 
 
-# ────────────────────────── Stripe-backed /pricing subscription ──────────────────────────
-# Mercury's public REST API has NO invoicing surface — confirmed via live
-# probe on api.mercury.com/api/v1 with valid Mercury_API_Token + treasury
-# permissions: /invoicing/* and /payment-links all 404 with Mercury's own
-# "We couldn't find the data" error. Reverted to Stripe Checkout for the
-# 4 /pricing subscription SKUs (owner-ratified 2026-05-11). Mercury stays
-# the destination bank where Stripe payouts land. Line-item logic +
-# intent-id remain processor-agnostic in `membership_subscribe.py`.
-import scripts.membership_subscribe as membership_subscribe  # noqa: E402
-
-
-class MembershipSubscribeRequest(BaseModel):
-    email: str  # Custee email
-    sku: str
-    cadence: str = "monthly"  # "monthly" | "3mo" | "6mo" | "9mo"
-
-
-@app.post("/api/membership/subscribe")
-def membership_subscribe_endpoint(
-    body: MembershipSubscribeRequest,
-    x_coastal_token: str = Header(""),
-) -> dict:
-    """Mint a Stripe Checkout Session for a /pricing subscription at the
-    requested 3-6-9 cadence. Two-line-item session: subscription line at
-    the cadence-discounted total + $6.54 service initiation (first invoice
-    only). Returns the hosted Checkout URL; frontend redirects the browser.
-
-    After pay, the existing /stripe/webhook handler fires owner Telegram
-    + records the audit ledger row + queues shipment (subscription-mode
-    branch wired off the metadata.intent_id).
-    """
-    _auth(x_coastal_token)
-    if not STRIPE_AVAILABLE or not _stripe_is_configured():
-        raise HTTPException(status_code=503, detail="Stripe not configured on this runner")
-
-    custee_email = (body.email or "").strip().lower()
-    sku = (body.sku or "").strip().lower()
-    cadence_id = (body.cadence or "monthly").strip().lower()
-
-    if not custee_email or "@" not in custee_email:
-        raise HTTPException(status_code=400, detail="email required")
-    if not membership_subscribe.is_valid_sku(sku):
-        raise HTTPException(
-            status_code=400,
-            detail=f"sku must be one of: {sorted(membership_subscribe.SKU_CATALOG.keys())}",
-        )
-    if not _cadence_mod.is_valid_cadence(cadence_id):
-        raise HTTPException(
-            status_code=400,
-            detail="cadence must be 'monthly', '3mo', '6mo', or '9mo'",
-        )
-
-    try:
-        line_items = membership_subscribe.build_invoice_line_items(
-            sku=sku, cadence=cadence_id, is_first_invoice=True,
-        )
-    except ValueError as exc:
-        raise HTTPException(status_code=400, detail=str(exc)) from exc
-
-    total_cents = sum(li["unit_price_cents"] * li["quantity"] for li in line_items)
-    day_iso = _time.strftime("%Y-%m-%d", _time.gmtime())
-    intent_id = membership_subscribe.make_subscription_intent_id(
-        email=custee_email, sku=sku, cadence=cadence_id, day_iso=day_iso,
-    )
-
-    metadata = {
-        "product": "coastal-brewing",
-        "flow": "membership_subscribe",
-        "sku": sku,
-        "cadence": cadence_id,
-        "intent_id": intent_id,
-        "custee_email": custee_email,
-    }
-
-    try:
-        import stripe as _stripe  # noqa: PLC0415
-        from adapters.stripe_adapter import _init_stripe  # noqa: PLC0415
-        _init_stripe()  # sets stripe.api_key + api_version once per call
-        session = _stripe.checkout.Session.create(
-            mode="payment",
-            customer_email=custee_email,
-            line_items=[
-                {
-                    "price_data": {
-                        "currency": "usd",
-                        "unit_amount": li["unit_price_cents"],
-                        "product_data": {
-                            "name": li["description"],
-                            "metadata": {"sku": sku, "intent_id": intent_id},
-                        },
-                    },
-                    "quantity": li["quantity"],
-                }
-                for li in line_items
-            ],
-            metadata=metadata,
-            payment_intent_data={"metadata": metadata},
-            success_url=f"{AUTH_PUBLIC_URL}/membership/thank-you?intent={intent_id}",
-            cancel_url=f"{AUTH_PUBLIC_URL}/pricing?canceled=1&sku={sku}",
-            billing_address_collection="auto",
-        )
-        checkout_url = session.url if hasattr(session, "url") else session.get("url")
-        session_id = session.id if hasattr(session, "id") else session.get("id")
-    except Exception as exc:  # noqa: BLE001
-        log = __import__("logging").getLogger("coastal.membership_subscribe")
-        log.warning("stripe membership subscribe checkout create failed: %s", exc)
-        raise HTTPException(status_code=502, detail=f"checkout session mint failed: {exc}") from exc
-
-    _send_telegram_message(
-        f"Stripe subscription intent\n"
-        f"intent: {intent_id}\n"
-        f"custee: {custee_email}\n"
-        f"sku: {membership_subscribe.sku_display_name(sku)} ({sku})\n"
-        f"cadence: {cadence_id}\n"
-        f"total: ${total_cents/100:.2f}\n"
-        f"session: {session_id or '?'}"
-    )
-
-    return {
-        "ok": True,
-        "intent_id": intent_id,
-        "session_id": session_id,
-        "redirect_url": checkout_url,
-        "total_cents": total_cents,
-        "cadence": cadence_id,
-        "sku": sku,
-    }
+# ────────────────────────── Legacy 4-product subscribe-flow (retired) ──────────────────────────
+# The 4-product /pricing subscribe flow (Tea/Coffee/Functional/Combo Monthly
+# as standalone tiers) was retired on 2026-05-11 per owner directive — those
+# were the wrong abstraction. Product selection now happens INSIDE each
+# membership tier (Pooler Pass / Custee Card / Wood Stork) via the
+# AIMS-style ProductMatrixPicker. See PR #409 (Custee Card) + PR #410
+# (Pooler + Wood Stork) for the replacement.
+#
+# `scripts/membership_subscribe.py` kept as a processor-agnostic line-item
+# helper for future scenarios (intent-id derivation, line-item builder).
+# It is no longer wired to any endpoint or frontend route.
 
 
 # ────────────────────────── 3-6-9 cadence helper ──────────────────────────
