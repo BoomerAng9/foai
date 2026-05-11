@@ -2,38 +2,60 @@
 
 import { useState } from "react";
 
+import { CbrewCadencePicker, type CadenceId } from "@/components/cbrew-cadence-picker";
+
+interface CheckoutResponse {
+  ok?: boolean;
+  redirect_url?: string;
+  error?: string;
+}
+
 type WoodStorkTier = "standard" | "reserve";
 
-const TIERS: Record<WoodStorkTier, { label: string; price: string }> = {
-  standard: { label: "Wood Stork Standard · $499/yr (preview)", price: "$499" },
-  reserve: { label: "Wood Stork Reserve · $999/yr (preview)", price: "$999" },
+const TIERS: Record<WoodStorkTier, { label: string }> = {
+  standard: { label: "Wood Stork Standard" },
+  reserve: { label: "Wood Stork Reserve" },
 };
-
-const WAITLIST_EMAIL = "wholesale@coastalbrewing.co";
 
 export function WoodStorkCheckoutForm() {
   const [email, setEmail] = useState("");
   const [businessName, setBusinessName] = useState("");
   const [tier, setTier] = useState<WoodStorkTier>("standard");
+  const [cadence, setCadence] = useState<CadenceId>("9mo");
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const subject = `Wood Stork waitlist — ${TIERS[tier].label}`;
-  const body =
-    `Business name: ${businessName || "(your business)"}\n` +
-    `Email: ${email || "(your email)"}\n` +
-    `Tier of interest: ${TIERS[tier].label}\n\n` +
-    `Please add me to the Wood Stork tier waitlist. I'll be ready to commit when ` +
-    `Coastal Brewing Co. opens checkout.`;
-  const mailto = `mailto:${WAITLIST_EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    setError(null);
+    setSubmitting(true);
+    try {
+      const res = await fetch("/api/membership/wood-stork/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, business_name: businessName, tier, cadence }),
+      });
+      const data: CheckoutResponse = await res.json().catch(() => ({}));
+      if (!res.ok || !data.redirect_url) {
+        setError(
+          data.error ||
+            "We couldn't start checkout right now. Please email wholesale@coastalbrewing.co and we'll set you up directly.",
+        );
+        setSubmitting(false);
+        return;
+      }
+      window.location.assign(data.redirect_url);
+    } catch {
+      setError(
+        "Network hiccup. Please email wholesale@coastalbrewing.co and we'll set you up directly.",
+      );
+      setSubmitting(false);
+    }
+  }
 
   return (
-    <form
-      method="post"
-      action={mailto}
-      onSubmit={() => {
-        // Native mailto handoff — let the browser take it.
-      }}
-      className="mt-6 flex flex-col gap-4"
-    >
+    <form onSubmit={handleSubmit} className="mt-6 flex flex-col gap-5">
+      {/* Tier picker */}
       <div className="flex flex-col gap-3">
         <label className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
           Tier
@@ -44,7 +66,8 @@ export function WoodStorkCheckoutForm() {
               key={t}
               type="button"
               onClick={() => setTier(t)}
-              className={`rounded-md border px-4 py-3 text-left text-sm transition-colors ${
+              disabled={submitting}
+              className={`rounded-md border px-4 py-3 text-left text-sm transition-colors disabled:cursor-not-allowed disabled:opacity-60 ${
                 tier === t
                   ? "border-accent bg-accent/10 text-foreground"
                   : "border-border bg-background text-foreground/70 hover:border-foreground/40"
@@ -56,6 +79,17 @@ export function WoodStorkCheckoutForm() {
         </div>
       </div>
 
+      {/* Cadence picker — keyed on tier so it refetches when tier changes */}
+      <CbrewCadencePicker
+        key={tier}
+        tier={tier}
+        flow="wood-stork"
+        defaultCadence="9mo"
+        onChange={setCadence}
+        disabled={submitting}
+      />
+
+      {/* Business name + email + submit */}
       <div className="flex flex-col gap-3 sm:flex-row">
         <input
           type="text"
@@ -65,7 +99,8 @@ export function WoodStorkCheckoutForm() {
           placeholder="Business name"
           value={businessName}
           onChange={(e) => setBusinessName(e.target.value)}
-          className="flex-1 rounded-md border border-border bg-background px-4 py-3 text-base text-foreground placeholder:text-muted-foreground focus:border-accent focus:outline-none"
+          disabled={submitting}
+          className="flex-1 rounded-md border border-border bg-background px-4 py-3 text-base text-foreground placeholder:text-muted-foreground focus:border-accent focus:outline-none disabled:opacity-60"
         />
       </div>
 
@@ -78,19 +113,25 @@ export function WoodStorkCheckoutForm() {
           placeholder="you@your-business.com"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="flex-1 rounded-md border border-border bg-background px-4 py-3 text-base text-foreground placeholder:text-muted-foreground focus:border-accent focus:outline-none"
+          disabled={submitting}
+          className="flex-1 rounded-md border border-border bg-background px-4 py-3 text-base text-foreground placeholder:text-muted-foreground focus:border-accent focus:outline-none disabled:opacity-60"
         />
         <button
           type="submit"
-          disabled={!email || !businessName}
+          disabled={submitting || !email || !businessName}
           className="rounded-md bg-accent px-6 py-3 font-mono text-xs uppercase tracking-widest text-accent-foreground transition-colors hover:bg-accent/90 disabled:cursor-not-allowed disabled:opacity-60"
         >
-          Join waitlist
+          {submitting ? "Starting checkout…" : "Become a Wood Stork"}
         </button>
       </div>
 
+      {error && (
+        <p className="font-mono text-[11px] text-destructive" role="alert">
+          {error}
+        </p>
+      )}
       <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
-        Wood Stork checkout opens soon · waitlist sends to {WAITLIST_EMAIL}
+        Charged at the cadence you choose · referral discount auto-applies on next product order
       </p>
     </form>
   );
