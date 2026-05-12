@@ -40,6 +40,11 @@ services:
       TELEGRAM_BOT_TOKEN: "${TELEGRAM_BOT_TOKEN:-}"
       TELEGRAM_CHAT_ID: "${TELEGRAM_CHAT_ID:-}"
       COASTAL_APPROVE_SECRET: "${COASTAL_APPROVE_SECRET:-}"
+      # HMAC secret used to sign + verify magic-link login tokens
+      # (`/api/v1/auth/login` → `/api/v1/auth/verify`). Without this var
+      # the runner 503s every login attempt with "COASTAL_AUTH_SECRET not
+      # configured". Same passthrough-hole class as NEON / INWORLD.
+      COASTAL_AUTH_SECRET: "${COASTAL_AUTH_SECRET:-}"
       # Transactional email via Google Workspace SMTP (post-approval supplier
       # + customer sends). If SMTP_USER + SMTP_PASSWORD are empty, sends are
       # recorded as 'skipped' in AuditLedger — no fake completion. Owner
