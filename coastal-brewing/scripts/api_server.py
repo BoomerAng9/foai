@@ -4140,6 +4140,12 @@ def custee_card_checkout(
     monthly_billing_cents = _cadence_mod.cadence_monthly_billing_cents(
         CUSTEE_CARD_MONTHLY_RETAIL_DOLLARS, cadence_id,  # type: ignore[arg-type]
     )
+    _envelope = _profitability_mod.check_envelope(
+        tier="custee-card",
+        basket=[{"product_id": "tier-only", "monthly_retail_cents": monthly_billing_cents}],
+    )
+    if not _envelope.ok:
+        raise HTTPException(status_code=400, detail=_envelope.reason or "envelope check failed")
     cadence_label = _cadence_mod.CADENCES[cadence_id]["label"]  # type: ignore[index]
     products_label = ", ".join(products)
     day_iso = _time.strftime("%Y-%m-%d", _time.gmtime())
@@ -4227,6 +4233,11 @@ def custee_card_checkout(
 # Owner-ratified 2026-05-11 (`cbrew-369-pricing-canon-2026-05-11.md`).
 # Single source of truth for the 4-cadence schedule: monthly / 3mo / 6mo / 9mo.
 import cadence as _cadence_mod  # noqa: E402
+
+# Profitability envelope gate — fences each tier checkout against billing
+# values that exceed the tier envelope (catches the derivation-bug class
+# from PRs #410-415 before a margin-negative Stripe Session is minted).
+import profitability as _profitability_mod  # noqa: E402
 
 
 # ────────────────────────── Wood Stork tier ──────────────────────────
@@ -4333,6 +4344,12 @@ def wood_stork_checkout(
 
     monthly_retail = membership_wood_stork.monthly_retail_for_tier(tier)  # type: ignore[arg-type]
     monthly_billing_cents = _cadence_mod.cadence_monthly_billing_cents(monthly_retail, cadence_id)  # type: ignore[arg-type]
+    _envelope = _profitability_mod.check_envelope(
+        tier=f"wood-stork-{tier}",
+        basket=[{"product_id": "tier-only", "monthly_retail_cents": monthly_billing_cents}],
+    )
+    if not _envelope.ok:
+        raise HTTPException(status_code=400, detail=_envelope.reason or "envelope check failed")
     cadence_label = _cadence_mod.CADENCES[cadence_id]["label"]  # type: ignore[index]
     tier_label = f"Wood Stork {tier.capitalize()}"
     products_label = ", ".join(products) if products else "—"
@@ -4523,6 +4540,12 @@ def pooler_pass_checkout(
 
     monthly_retail = membership_pooler_pass.monthly_retail_for_tier(tier)  # type: ignore[arg-type]
     monthly_billing_cents = _cadence_mod.cadence_monthly_billing_cents(monthly_retail, cadence_id)  # type: ignore[arg-type]
+    _envelope = _profitability_mod.check_envelope(
+        tier=f"pooler-pass-{tier}",
+        basket=[{"product_id": "tier-only", "monthly_retail_cents": monthly_billing_cents}],
+    )
+    if not _envelope.ok:
+        raise HTTPException(status_code=400, detail=_envelope.reason or "envelope check failed")
     cadence_label = _cadence_mod.CADENCES[cadence_id]["label"]  # type: ignore[index]
     tier_label = f"Pooler Pass {tier.capitalize()}"
     products_label = ", ".join(products)
