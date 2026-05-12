@@ -1,7 +1,7 @@
 """WebSocket message type definitions for the chain-of-command stream."""
 from __future__ import annotations
 from typing import Any, Dict, Optional
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class WsCupMetadata(BaseModel):
@@ -65,7 +65,11 @@ class WsError(BaseModel):
 # Inbound message from frontend
 class WsUserMessage(BaseModel):
     type: str = "user_message"
-    content: str
+    # max_length=2000 matches the cap on the HTTP /api/chat/send endpoint
+    # and the Inworld TTS per-request character cap (api_server.py:6208).
+    # Without the cap, an open WS with arbitrarily long messages bills
+    # an arbitrarily large LLM call per turn.
+    content: str = Field(default="", max_length=2000)
     conversation_id: Optional[str] = None
     interrupt_current: bool = False
     # Frontend can hint a specific agent for this turn (e.g. user typed

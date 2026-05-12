@@ -279,21 +279,62 @@ app.add_middleware(
     allow_headers=["Content-Type", "X-Coastal-Token"],
 )
 
-# Simple in-memory rate limiter: max 15 chat requests per IP per 60s window.
+# Simple in-memory rate limiter. Per-bucket-name (e.g., "chat", "voice",
+# "auth") + per-client-IP windows. Behind nginx the bare `request.client.host`
+# resolves to the nginx container's internal IP, so all callers share one
+# bucket — useless. _client_ip() reads X-Forwarded-For / X-Real-IP first.
 _RATE_LOCK = threading.Lock()
 _RATE_BUCKETS: Dict[str, list] = collections.defaultdict(list)
 _RATE_WINDOW_SEC = 60
-_RATE_MAX_CHAT = 15
+_RATE_LIMITS: Dict[str, int] = {
+    "chat": 15,    # /api/chat/send HTTP fallback per IP per minute
+    "ws_chat": 30, # /api/v1/chat/stream WS turns per IP per minute
+    "voice": 30,   # /api/v1/voice/synthesize{,/stream} per IP per minute (Inworld $$$)
+    "auth": 10,    # /auth/login + /auth/verify per IP per minute
+}
 
 
-def _check_rate_limit(ip: str) -> None:
+def _client_ip(headers, fallback: Optional[str] = None) -> str:
+    """Resolve the originating client IP from proxy headers.
+
+    nginx sets X-Forwarded-For (the right-most entry is the last proxy hop;
+    the LEFT-most is the original client). X-Real-IP carries the original
+    client directly when nginx is configured with `real_ip_header`. We try
+    headers in priority order and fall back to whatever the ASGI server
+    saw (typically the reverse-proxy's internal IP — useless but a sane
+    last resort for local-dev / out-of-proxy paths).
+    """
+    headers_lower = {k.lower(): v for k, v in headers.items()}
+    xff = headers_lower.get("x-forwarded-for", "")
+    if xff:
+        return xff.split(",")[0].strip()
+    real_ip = headers_lower.get("x-real-ip", "")
+    if real_ip:
+        return real_ip.strip()
+    return fallback or "unknown"
+
+
+def _check_rate_limit(bucket: str, key: str) -> None:
+    """Raise 429 if `key` has hit the per-minute limit for `bucket`.
+
+    bucket selects the limit (chat / ws_chat / voice / auth). key is
+    typically the client IP from _client_ip() but can be coastal_uid for
+    authenticated paths. Bucket key in the global dict is f"{bucket}:{key}"
+    so the same IP can hit chat + voice quotas independently.
+    """
+    limit = _RATE_LIMITS.get(bucket, 15)
+    full_key = f"{bucket}:{key}"
     now = _time.time()
     with _RATE_LOCK:
-        bucket = _RATE_BUCKETS[ip]
-        _RATE_BUCKETS[ip] = [t for t in bucket if now - t < _RATE_WINDOW_SEC]
-        if len(_RATE_BUCKETS[ip]) >= _RATE_MAX_CHAT:
+        # Prune old timestamps in this bucket
+        _RATE_BUCKETS[full_key] = [t for t in _RATE_BUCKETS[full_key] if now - t < _RATE_WINDOW_SEC]
+        if len(_RATE_BUCKETS[full_key]) >= limit:
             raise HTTPException(status_code=429, detail="Too many requests — slow down a little.")
-        _RATE_BUCKETS[ip].append(now)
+        _RATE_BUCKETS[full_key].append(now)
+        # Garbage-collect empty entries so a long-running container with
+        # many unique IPs doesn't grow _RATE_BUCKETS unbounded.
+        if not _RATE_BUCKETS[full_key]:
+            del _RATE_BUCKETS[full_key]
 
 
 _STATIC_DIR = ROOT / "static"
@@ -2352,7 +2393,10 @@ def api_chat_send(req: ApiChatRequest, request: Request) -> dict:
     the LLM is unconfigured, errors, or returns empty content. Either
     way the customer always receives a non-empty reply.
     """
-    _check_rate_limit(request.client.host if request.client else "unknown")
+    _check_rate_limit("chat", _client_ip(
+        request.headers,
+        fallback=request.client.host if request.client else None,
+    ))
     from llm_client import chat_completion, is_configured  # noqa: E402
 
     sid = req.session_id or f"sess_{secrets.token_hex(6)}"
@@ -3368,6 +3412,15 @@ async def chat_stream(websocket: WebSocket, token: Optional[str] = Query(default
     history: list = []
     session_id = secrets.token_hex(8)
 
+    # Resolve the client IP from proxy headers for per-turn rate limiting.
+    # Without this, the bare WS remote_addr behind nginx is the proxy's
+    # internal IP — a single LLM bill-drain attacker would share the limit
+    # with every legitimate customer.
+    ws_client_ip = _client_ip(
+        dict(websocket.headers),
+        fallback=websocket.client.host if websocket.client else None,
+    )
+
     try:
         while True:
             raw = await websocket.receive_json()
@@ -3384,6 +3437,21 @@ async def chat_stream(websocket: WebSocket, token: Optional[str] = Query(default
 
             user_content = msg.content.strip()
             if not user_content:
+                continue
+
+            # Per-turn rate limit. ws_chat bucket = 30 turns / IP / 60s.
+            # Each turn fires an LLM call billed in tokens — without this,
+            # an attacker holding a single open WS can drain the model
+            # wallet. Coastal_uid would be a better key once the cookie is
+            # HMAC-signed (deferred to a follow-up); for now IP is the
+            # honest tradeoff.
+            try:
+                _check_rate_limit("ws_chat", ws_client_ip)
+            except HTTPException:
+                await websocket.send_json(WsError(
+                    code="rate_limited",
+                    message="Too many turns — slow down a moment, please.",
+                ).model_dump())
                 continue
 
             # Honor a desired_employee hint from the frontend (set by
@@ -3533,10 +3601,20 @@ async def chat_stream(websocket: WebSocket, token: Optional[str] = Query(default
     except WebSocketDisconnect:
         pass
     except Exception as exc:
+        # Log the actual exception server-side; ONLY send a generic
+        # message to the browser. str(exc) can include internal paths,
+        # API endpoint fragments, DB error text, or env-var names
+        # depending on the library raising — none of which should reach
+        # an anonymous browser.
+        try:
+            _log = __import__("logging").getLogger("coastal.ws_chat")
+            _log.warning("ws_chat session error: %s", exc)
+        except Exception:
+            pass
         try:
             await websocket.send_json(WsError(
                 code="session_error",
-                message=str(exc),
+                message="Something hiccuped on our end — try again in a moment.",
             ).model_dump())
         except Exception:
             pass
@@ -4060,14 +4138,35 @@ def service_initiation_charge(
         )
 
     ledger = _service_init_load_ledger()
-    if _service_init_mod.has_paid_service_init(email, ledger=ledger):
-        existing = ledger[email]
-        return {
-            "ok": True,
-            "already_paid": True,
-            "paid_at": existing.get("paid_at"),
-            "intent_id": existing.get("intent_id"),
-        }
+    existing = ledger.get(email)
+    if existing:
+        status = existing.get("status", "paid")
+        if status == "paid":
+            return {
+                "ok": True,
+                "already_paid": True,
+                "paid_at": existing.get("paid_at"),
+                "intent_id": existing.get("intent_id"),
+            }
+        if status == "pending":
+            # A Stripe Checkout Session has been minted within the last
+            # 24h but the webhook hasn't confirmed payment yet. Surface
+            # the existing intent_id + url so the Custee returns to the
+            # SAME session — never mint a second one. Without this guard
+            # an impatient client (or hostile caller) can POST repeatedly
+            # within the webhook-delivery window and mint N parallel
+            # Stripe Sessions; if multiple complete, N × $6.54 is charged
+            # to the same card and only the first webhook delivery wins
+            # the ledger row — the rest are silent overcharges.
+            return {
+                "ok": True,
+                "already_paid": False,
+                "pending": True,
+                "intent_id": existing.get("intent_id"),
+                "session_id": existing.get("stripe_session_id"),
+                "redirect_url": existing.get("redirect_url"),
+                "amount_cents": _service_init_mod.SERVICE_INIT_AMOUNT_CENTS,
+            }
 
     if not STRIPE_AVAILABLE or not _stripe_is_configured():
         raise HTTPException(status_code=503, detail="Stripe not configured on this runner")
@@ -4096,7 +4195,26 @@ def service_initiation_charge(
     except Exception as exc:  # noqa: BLE001
         log = __import__("logging").getLogger("coastal.service_init")
         log.warning("stripe service-init checkout create failed: %s", exc)
-        raise HTTPException(status_code=502, detail=f"checkout session mint failed: {exc}") from exc
+        # Don't leak Stripe error internals to the caller.
+        raise HTTPException(status_code=502, detail="checkout session mint failed") from exc
+
+    # Pending-sentinel write — the Stripe webhook promotes this entry
+    # to status=paid on `checkout.session.completed`. Future calls in
+    # the webhook-delivery window short-circuit at the `status=pending`
+    # branch above instead of minting a new Session.
+    try:
+        ledger[email] = {
+            "status": "pending",
+            "intent_id": intent_id,
+            "trigger": trigger,
+            "stripe_session_id": session_id,
+            "redirect_url": checkout_url,
+            "minted_at": _time.strftime("%Y-%m-%dT%H:%M:%SZ", _time.gmtime()),
+        }
+        _service_init_save_ledger(ledger)
+    except Exception as _le:
+        log = __import__("logging").getLogger("coastal.service_init")
+        log.warning("service-init pending-sentinel write failed: %s", _le)
 
     _send_telegram_message(
         f"Service Initiation intent\nintent: {intent_id}\ncustee: {email}\n"
@@ -4122,6 +4240,37 @@ CUSTEE_CARD_MONTHLY_RETAIL_DOLLARS = 29.99
 ALLOWED_CUSTEE_CARD_PRODUCTS = {
     "tea", "coffee", "functional-coffee", "combo", "sampler",
 }
+
+
+def _cadence_subscription_data(cadence_id: str, metadata: dict) -> dict:
+    """Build Stripe subscription_data with a cancel_at horizon matching
+    the cadence commitment.
+
+    Owner-canon: 3mo / 6mo / 9mo are INSTALLMENT plans — the customer
+    pays N months at the discounted rate and Stripe stops billing.
+    Without a cancel_at, Stripe interprets `{interval: month}` as a
+    perpetual month-to-month subscription at the discounted rate,
+    which would (a) bill past the intended term forever and (b) let a
+    9mo signup cancel after one cycle and walk away with the 25%
+    discount for one month. Both bad.
+
+    monthly cadence has no horizon — perpetual month-to-month is the
+    intended behavior there.
+    """
+    sub: dict = {"metadata": metadata}
+    if cadence_id != "monthly":
+        spec = _cadence_mod.CADENCES.get(cadence_id)
+        if spec:
+            months_paid = int(spec.get("months_paid", 0))
+            if months_paid > 0:
+                # Use 30.5-day months (mean calendar month) so a 9-month
+                # plan signed up Jan 1 cancels around Oct 7, not Sep 27.
+                # The customer's first charge is immediate, so cancel_at
+                # = now + (months_paid * mean_month_seconds) lines the
+                # final charge up roughly on the anniversary.
+                seconds_per_month = int(30.5 * 86400)
+                sub["cancel_at"] = int(_time.time()) + months_paid * seconds_per_month
+    return sub
 
 
 @app.get("/api/membership/custee-card/cadence-pricing")
@@ -4182,6 +4331,7 @@ def custee_card_checkout(
     if not _envelope.ok:
         raise HTTPException(status_code=400, detail=_envelope.reason or "envelope check failed")
     cadence_label = _cadence_mod.CADENCES[cadence_id]["label"]  # type: ignore[index]
+    months_paid = int(_cadence_mod.CADENCES[cadence_id]["months_paid"])  # type: ignore[index]
     products_label = ", ".join(products)
     day_iso = _time.strftime("%Y-%m-%d", _time.gmtime())
     intent_id = f"cct_{hashlib.sha256(f'{email}|{cadence_id}|{day_iso}|{products_label}'.encode()).hexdigest()[:16]}"
@@ -4217,7 +4367,7 @@ def custee_card_checkout(
                 "quantity": 1,
             }],
             metadata=metadata,
-            subscription_data={"metadata": metadata},
+            subscription_data=_cadence_subscription_data(cadence_id, metadata),
             success_url=f"{AUTH_PUBLIC_URL}/membership/thank-you?intent={intent_id}",
             cancel_url=f"{AUTH_PUBLIC_URL}/membership?canceled=1",
             billing_address_collection="auto",
@@ -4227,7 +4377,8 @@ def custee_card_checkout(
     except Exception as exc:  # noqa: BLE001
         log = __import__("logging").getLogger("coastal.custee_card")
         log.warning("stripe custee card checkout create failed: %s", exc)
-        raise HTTPException(status_code=502, detail=f"checkout session mint failed: {exc}") from exc
+        # Don't leak Stripe error internals to the caller.
+        raise HTTPException(status_code=502, detail="checkout session mint failed") from exc
 
     _send_telegram_message(
         f"Custee Card subscription intent\n"
@@ -4415,7 +4566,7 @@ def wood_stork_checkout(
                     },
                 }, "quantity": 1,
             }],
-            metadata=metadata, subscription_data={"metadata": metadata},
+            metadata=metadata, subscription_data=_cadence_subscription_data(cadence_id, metadata),
             success_url=f"{AUTH_PUBLIC_URL}/wood-stork/thank-you?intent={intent_id}",
             cancel_url=f"{AUTH_PUBLIC_URL}/wood-stork?canceled=1",
             billing_address_collection="auto",
@@ -4425,7 +4576,8 @@ def wood_stork_checkout(
     except Exception as exc:  # noqa: BLE001
         log = __import__("logging").getLogger("coastal.wood_stork")
         log.warning("stripe wood stork checkout create failed: %s", exc)
-        raise HTTPException(status_code=502, detail=f"checkout session mint failed: {exc}") from exc
+        # Don't leak Stripe error internals (request IDs, error codes) to the caller.
+        raise HTTPException(status_code=502, detail="checkout session mint failed") from exc
 
     _send_telegram_message(
         f"Wood Stork {tier} subscription intent\nintent: {intent_id}\nbusiness: {business_name}\n"
@@ -4611,7 +4763,7 @@ def pooler_pass_checkout(
                     },
                 }, "quantity": 1,
             }],
-            metadata=metadata, subscription_data={"metadata": metadata},
+            metadata=metadata, subscription_data=_cadence_subscription_data(cadence_id, metadata),
             success_url=f"{AUTH_PUBLIC_URL}/pooler-pass/thank-you?intent={intent_id}",
             cancel_url=f"{AUTH_PUBLIC_URL}/pooler-pass?canceled=1",
             billing_address_collection="auto",
@@ -4621,7 +4773,8 @@ def pooler_pass_checkout(
     except Exception as exc:  # noqa: BLE001
         log = __import__("logging").getLogger("coastal.pooler_pass")
         log.warning("stripe pooler pass checkout create failed: %s", exc)
-        raise HTTPException(status_code=502, detail=f"checkout session mint failed: {exc}") from exc
+        # Don't leak Stripe error internals to the caller.
+        raise HTTPException(status_code=502, detail="checkout session mint failed") from exc
 
     _send_telegram_message(
         f"Pooler Pass {tier} subscription intent\nintent: {intent_id}\ncustee: {email}\n"
@@ -4906,15 +5059,22 @@ async def auth_signup(
 
 
 @app.post("/api/v1/auth/login")
-async def auth_login(body: AuthLoginRequest):
+async def auth_login(body: AuthLoginRequest, request: Request):
     """Send a magic-link to an existing account's email. Returns the link
-    in dev mode (when no email service is configured) so the owner can
-    test the flow without provisioning Resend / SES yet.
+    in dev mode (when COASTAL_DEBUG=true AND no email service is
+    configured) so the owner can test the flow locally without
+    provisioning Resend / SES.
 
     The link, when clicked, calls /auth/verify?token=... which sets the
     caller's coastal_uid cookie to the email's canonical coastal_uid —
     enabling cross-device login + history continuity.
     """
+    # Rate-limit at the IP level to prevent email-bombing an existing
+    # account or token-replay-loop attempts (10 req / IP / 60s).
+    _check_rate_limit("auth", _client_ip(
+        request.headers,
+        fallback=request.client.host if request.client else None,
+    ))
     if not _profile_layer.is_configured():
         raise HTTPException(status_code=503, detail="profile layer not configured")
     email = (body.email or "").strip().lower()
@@ -4975,10 +5135,21 @@ async def auth_login(body: AuthLoginRequest):
         # Don't leak send-status to the caller. Generic body either way
         # to prevent email-enumeration attacks.
     else:
-        # Dev mode — surface the magic link until the AppInt
-        # integration is published + COASTAL_APPINT_EMAIL_URL lands in
-        # the runner env.
-        response_payload["magic_link"] = link
+        # Email adapter not configured. Surface the magic-link inline
+        # ONLY if COASTAL_DEBUG=true is explicitly set in the runner
+        # env. Without the explicit gate, an attacker who triggers the
+        # adapter-import-failure path (or runs against a misconfigured
+        # deploy) would receive victim magic-links directly from the
+        # API. In prod we fail closed — caller gets a generic 200, no
+        # token reaches the wire.
+        if os.environ.get("COASTAL_DEBUG", "").strip().lower() in ("1", "true", "yes"):
+            response_payload["magic_link"] = link
+        else:
+            log = __import__("logging").getLogger("coastal.auth")
+            log.warning(
+                "auth_login: email adapter unconfigured for %s — magic-link suppressed (set COASTAL_DEBUG=true for inline)",
+                email,
+            )
 
     return response_payload
 
@@ -4987,10 +5158,18 @@ async def auth_login(body: AuthLoginRequest):
 async def auth_verify(
     token: str,
     response: Response,
+    request: Request,
 ):
     """Verify a magic-link token + set the caller's coastal_uid cookie to
     the verified profile's uid. Returns a redirect-friendly response so
     the frontend can call this from the /auth/verify page client-side."""
+    # Rate-limit replay attempts. A leaked token (browser history,
+    # access log) is replayable for the full TTL; throttling buys time
+    # for the genuine click before an attacker can stage one of their own.
+    _check_rate_limit("auth", _client_ip(
+        request.headers,
+        fallback=request.client.host if request.client else None,
+    ))
     payload = _auth_verify(token)
     if not payload:
         raise HTTPException(status_code=401, detail="invalid or expired token")
@@ -6193,13 +6372,19 @@ class WsVoiceSynthRequest(BaseModel):
 
 
 @app.post("/api/v1/voice/synthesize")
-async def voice_synthesize(body: WsVoiceSynthRequest):
+async def voice_synthesize(body: WsVoiceSynthRequest, request: Request):
     """Inworld TTS for the 4 wired Coastal characters. Returns base64-
     encoded WAV in `audioContent` for the frontend to decode and play
     (no streaming yet; voice-stream endpoint can be wired later for
     long messages). Customer surface only ever hits this with
     character_id='sal_ang' — internal voices accept calls for owner-
     side previews."""
+    # Anti-DoS: Inworld TTS is per-character billed. Without this an
+    # attacker can loop the endpoint and drain the wallet.
+    _check_rate_limit("voice", _client_ip(
+        request.headers,
+        fallback=request.client.host if request.client else None,
+    ))
     if not _INWORLD_API_KEY:
         raise HTTPException(status_code=503, detail="INWORLD_API_KEY not configured")
     text = (body.text or "").strip()
@@ -6367,6 +6552,7 @@ async def _inworld_stream_audio_bytes(text: str, voice_cfg: Dict[str, Any]):
 
 @app.get("/api/v1/voice/synthesize/stream")
 async def voice_synthesize_stream(
+    request: Request,
     text: str,
     character_id: str = "sal_ang",
 ):
@@ -6376,6 +6562,13 @@ async def voice_synthesize_stream(
     stripping → pronunciation engine → voice config lookup. The
     difference is the response — bytes flow as Inworld renders them.
     """
+    # Anti-DoS: Inworld TTS is per-character billed. GET endpoint is
+    # trivially triggerable from cross-origin <img>/<audio> tags without
+    # JS — must be rate-limited.
+    _check_rate_limit("voice", _client_ip(
+        request.headers,
+        fallback=request.client.host if request.client else None,
+    ))
     if not _INWORLD_API_KEY:
         raise HTTPException(status_code=503, detail="INWORLD_API_KEY not configured")
     text = (text or "").strip()
