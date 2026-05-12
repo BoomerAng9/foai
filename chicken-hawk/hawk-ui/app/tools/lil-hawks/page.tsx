@@ -1,7 +1,7 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { ChevronRight, Loader2, X, Send, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { useCallback, useEffect, useState } from 'react';
+import { ChevronRight, Loader2, X, Send, AlertCircle, CheckCircle2, Bird, Network } from 'lucide-react';
 
 const HAWK_DESCRIPTIONS: Record<string, string> = {
   Lil_TRAE_Hawk:    'Heavy coding, repo-wide refactors',
@@ -34,6 +34,8 @@ const SUGGESTED_ACTIONS: Record<string, string[]> = {
   Lil_Deep_Hawk:    ['squad_mission'],
 };
 
+type Tab = 'customer' | 'ops';
+
 interface DispatchReceipt {
   receipt_id?: string;
   task_id?: string;
@@ -46,9 +48,27 @@ interface DispatchReceipt {
   detail?: unknown;
 }
 
+interface OpsHawk {
+  name: string;
+  specialty: string;
+  status: string;
+  missions_run: number;
+  last_active: string | null;
+}
+
+interface OpsHawksResponse {
+  hawks: OpsHawk[];
+  total: number;
+  source_status: 'ok' | 'unavailable';
+  note?: string;
+}
+
 export default function LilHawksPanel() {
-  const [hawks, setHawks] = useState<string[]>([]);
+  const [tab, setTab] = useState<Tab>('customer');
+  const [customerHawks, setCustomerHawks] = useState<string[]>([]);
+  const [opsHawks, setOpsHawks] = useState<OpsHawksResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [opsError, setOpsError] = useState<string | null>(null);
   const [openHawk, setOpenHawk] = useState<string | null>(null);
   const [action, setAction] = useState('');
   const [payload, setPayload] = useState('{}');
@@ -56,16 +76,32 @@ export default function LilHawksPanel() {
   const [receipt, setReceipt] = useState<DispatchReceipt | null>(null);
   const [dispatchError, setDispatchError] = useState<string | null>(null);
 
-  useEffect(() => {
-    fetch('/api/gateway/hawks', { credentials: 'same-origin' })
-      .then(async (r) => {
-        if (r.status === 401) { window.location.href = '/login'; return; }
-        if (!r.ok) { setError(`HTTP ${r.status}`); return; }
-        const data = await r.json();
-        setHawks(data.hawks || []);
-      })
-      .catch((e: Error) => setError(e.message));
+  const loadCustomer = useCallback(async () => {
+    try {
+      const r = await fetch('/api/gateway/hawks', { credentials: 'same-origin' });
+      if (r.status === 401) { window.location.href = '/login'; return; }
+      if (!r.ok) { setError(`HTTP ${r.status}`); return; }
+      const data = await r.json();
+      setCustomerHawks(data.hawks || []);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : String(e));
+    }
   }, []);
+
+  const loadOps = useCallback(async () => {
+    try {
+      const r = await fetch('/api/gateway/sqwaadrun/hawks', { credentials: 'same-origin' });
+      if (r.status === 401) { window.location.href = '/login'; return; }
+      if (!r.ok) { setOpsError(`HTTP ${r.status}`); return; }
+      const data: OpsHawksResponse = await r.json();
+      setOpsHawks(data);
+    } catch (e) {
+      setOpsError(e instanceof Error ? e.message : String(e));
+    }
+  }, []);
+
+  useEffect(() => { loadCustomer(); }, [loadCustomer]);
+  useEffect(() => { if (tab === 'ops' && !opsHawks) loadOps(); }, [tab, opsHawks, loadOps]);
 
   function openDispatch(hawk: string) {
     setOpenHawk(hawk);
@@ -114,59 +150,33 @@ export default function LilHawksPanel() {
 
   return (
     <>
-      <header className="mb-8 flex items-start justify-between gap-4">
+      <header className="mb-6 flex items-start justify-between gap-4">
         <div>
           <h1 className="text-3xl font-semibold tracking-tight">Lil_Hawks</h1>
           <p className="text-foai-muted mt-2">
-            Eleven specialist agents under Chicken Hawk. Click a row to dispatch — every call routes through NemoClaw.
+            Two rosters under Chicken Hawk — customer-facing specialists, and the Sqwaadrun ops fleet.
           </p>
         </div>
       </header>
 
-      <section className="rounded-xl border border-foai-border bg-foai-surface/60 backdrop-blur p-6">
-        <h2 className="font-semibold text-lg mb-3">Roster</h2>
-        {error ? (
-          <div className="text-foai-gold text-sm">{error}</div>
-        ) : hawks.length === 0 ? (
-          <div className="text-foai-muted text-sm py-6 text-center">Loading roster…</div>
-        ) : (
-          <div className="overflow-hidden rounded-lg border border-foai-border/50">
-            <table className="w-full text-sm">
-              <thead className="text-xs uppercase text-foai-muted bg-white/[0.02]">
-                <tr>
-                  <th className="text-left px-4 py-2.5">Name</th>
-                  <th className="text-left px-4 py-2.5">Specialty</th>
-                  <th className="text-left px-4 py-2.5">Status</th>
-                  <th className="text-right px-4 py-2.5">Action</th>
-                </tr>
-              </thead>
-              <tbody>
-                {hawks.map((h) => (
-                  <tr key={h} className="border-t border-foai-border/50 hover:bg-white/[0.02] transition-colors">
-                    <td className="px-4 py-3 font-mono text-xs text-foai-gold">{h}</td>
-                    <td className="px-4 py-3 text-foai-muted">{HAWK_DESCRIPTIONS[h] || '—'}</td>
-                    <td className="px-4 py-3">
-                      <span className="text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-foai-cyan/15 text-foai-cyan">
-                        Configured
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 text-right">
-                      <button
-                        type="button"
-                        onClick={() => openDispatch(h)}
-                        className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold bg-foai-gold/15 text-foai-gold hover:bg-foai-gold/25 transition-colors"
-                      >
-                        Dispatch <ChevronRight className="size-3" />
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-        <p className="text-xs text-foai-muted mt-4">Every dispatch passes through NemoClaw policy gating. 200 = allowed, 202 = escalation, 403 = denied.</p>
-      </section>
+      <div className="mb-6 inline-flex items-center gap-1 rounded-lg border border-foai-border bg-foai-surface/60 p-1">
+        <TabButton active={tab === 'customer'} onClick={() => setTab('customer')} icon={<Bird className="size-3.5" />}>
+          Customer helpers
+          <span className="ml-1.5 text-[10px] font-mono opacity-70">({customerHawks.length})</span>
+        </TabButton>
+        <TabButton active={tab === 'ops'} onClick={() => setTab('ops')} icon={<Network className="size-3.5" />}>
+          Ops fleet
+          <span className="ml-1.5 text-[10px] font-mono opacity-70">
+            ({opsHawks?.total ?? '—'})
+          </span>
+        </TabButton>
+      </div>
+
+      {tab === 'customer' ? (
+        <CustomerHawksTable hawks={customerHawks} error={error} onDispatch={openDispatch} />
+      ) : (
+        <OpsHawksTable data={opsHawks} error={opsError} />
+      )}
 
       {openHawk && (
         <DispatchDrawer
@@ -187,6 +197,150 @@ export default function LilHawksPanel() {
   );
 }
 
+function TabButton({ active, onClick, icon, children }: { active: boolean; onClick: () => void; icon: React.ReactNode; children: React.ReactNode }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-md text-sm font-medium transition-colors ${
+        active
+          ? 'bg-foai-gold/15 text-foai-gold'
+          : 'text-foai-muted hover:text-foai-text hover:bg-foai-surface-2/50'
+      }`}
+    >
+      {icon}
+      {children}
+    </button>
+  );
+}
+
+function CustomerHawksTable({ hawks, error, onDispatch }: { hawks: string[]; error: string | null; onDispatch: (h: string) => void }) {
+  return (
+    <section className="rounded-xl border border-foai-border bg-foai-surface/60 backdrop-blur p-6">
+      <h2 className="font-semibold text-lg mb-1">Customer-helper roster</h2>
+      <p className="text-xs text-foai-muted mb-3">Eleven specialists Chicken Hawk dispatches via /run. NemoClaw policy-gates every call.</p>
+      {error ? (
+        <div className="text-foai-gold text-sm">{error}</div>
+      ) : hawks.length === 0 ? (
+        <div className="text-foai-muted text-sm py-6 text-center">Loading roster…</div>
+      ) : (
+        <div className="overflow-hidden rounded-lg border border-foai-border/50">
+          <table className="w-full text-sm">
+            <thead className="text-xs uppercase text-foai-muted bg-white/[0.02]">
+              <tr>
+                <th className="text-left px-4 py-2.5">Name</th>
+                <th className="text-left px-4 py-2.5">Specialty</th>
+                <th className="text-left px-4 py-2.5">Status</th>
+                <th className="text-right px-4 py-2.5">Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {hawks.map((h) => (
+                <tr key={h} className="border-t border-foai-border/50 hover:bg-white/[0.02] transition-colors">
+                  <td className="px-4 py-3 font-mono text-xs text-foai-gold">{h}</td>
+                  <td className="px-4 py-3 text-foai-muted">{HAWK_DESCRIPTIONS[h] || '—'}</td>
+                  <td className="px-4 py-3">
+                    <span className="text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-foai-cyan/15 text-foai-cyan">
+                      Configured
+                    </span>
+                  </td>
+                  <td className="px-4 py-3 text-right">
+                    <button
+                      type="button"
+                      onClick={() => onDispatch(h)}
+                      className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold bg-foai-gold/15 text-foai-gold hover:bg-foai-gold/25 transition-colors"
+                    >
+                      Dispatch <ChevronRight className="size-3" />
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+      <p className="text-xs text-foai-muted mt-4">200 = allowed, 202 = escalation, 403 = denied.</p>
+    </section>
+  );
+}
+
+function OpsHawksTable({ data, error }: { data: OpsHawksResponse | null; error: string | null }) {
+  if (error) {
+    return (
+      <section className="rounded-xl border border-foai-border bg-foai-surface/60 backdrop-blur p-6">
+        <div className="flex items-center gap-2 text-sm text-foai-gold">
+          <AlertCircle className="size-4" /> {error}
+        </div>
+      </section>
+    );
+  }
+  if (!data) {
+    return (
+      <section className="rounded-xl border border-foai-border bg-foai-surface/60 backdrop-blur p-6">
+        <div className="text-foai-muted text-sm py-6 text-center">
+          <Loader2 className="size-4 animate-spin inline-block mr-2" />
+          Loading ops fleet…
+        </div>
+      </section>
+    );
+  }
+
+  return (
+    <section className="rounded-xl border border-foai-border bg-foai-surface/60 backdrop-blur p-6">
+      <div className="flex items-center justify-between mb-3">
+        <div>
+          <h2 className="font-semibold text-lg">Sqwaadrun ops-fleet roster</h2>
+          <p className="text-xs text-foai-muted mt-1">
+            Scrape + automation specialists. Dispatched via Sqwaadrun missions, not the /run endpoint.
+          </p>
+        </div>
+        <span className={`text-[11px] font-semibold px-2.5 py-0.5 rounded-full ${
+          data.source_status === 'ok' ? 'bg-foai-cyan/15 text-foai-cyan' : 'bg-foai-gold/15 text-foai-gold'
+        }`}>
+          {data.source_status}
+        </span>
+      </div>
+
+      {data.hawks.length === 0 ? (
+        <div className="text-foai-muted text-sm py-8 text-center">
+          {data.note || 'No ops hawks reported. Sqwaadrun gateway may be offline.'}
+        </div>
+      ) : (
+        <div className="overflow-hidden rounded-lg border border-foai-border/50">
+          <table className="w-full text-sm">
+            <thead className="text-xs uppercase text-foai-muted bg-white/[0.02]">
+              <tr>
+                <th className="text-left px-4 py-2.5">Name</th>
+                <th className="text-left px-4 py-2.5">Specialty</th>
+                <th className="text-left px-4 py-2.5">Missions run</th>
+                <th className="text-left px-4 py-2.5">Last active</th>
+                <th className="text-left px-4 py-2.5">Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {data.hawks.map((h) => (
+                <tr key={h.name} className="border-t border-foai-border/50 hover:bg-white/[0.02] transition-colors">
+                  <td className="px-4 py-3 font-mono text-xs text-foai-gold">{h.name}</td>
+                  <td className="px-4 py-3 text-foai-muted">{h.specialty || '—'}</td>
+                  <td className="px-4 py-3 text-foai-muted font-mono text-xs">{h.missions_run ?? 0}</td>
+                  <td className="px-4 py-3 text-foai-muted text-xs">{h.last_active ? new Date(h.last_active).toLocaleString() : '—'}</td>
+                  <td className="px-4 py-3">
+                    <span className="text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-foai-cyan/15 text-foai-cyan">
+                      {h.status || 'configured'}
+                    </span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+      <p className="text-xs text-foai-muted mt-4">
+        Trigger ops missions from /tools/lanes (Lane A/B/C) or /tools/press once those panels land.
+      </p>
+    </section>
+  );
+}
 
 interface DrawerProps {
   hawk: string;

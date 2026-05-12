@@ -42,6 +42,12 @@ REQUIRES_OWNER_APPROVAL: set[str] = {
     "approve_certification_language", "change_ad_budget", "access_customer_payment_data",
     "access_payment_data", "launch_campaign", "place_wholesale_order", "sign_contract",
     "file_legal_document", "spend_money", "update_live_product_claims",
+    # Phase-4 deploy actions — even with owner-tier cookie, shipping code to
+    # production goes through Telegram confirm. First /run returns 202 +
+    # Telegram ping; owner replies with approval_id; second /run actually
+    # fires the deploy. Pre-flight typecheck + lint runs before any rollout.
+    "deploy_hawk_ui", "deploy_gateway", "deploy_sqwaadrun",
+    "deploy_rollback_hawk-ui", "deploy_rollback_gateway", "deploy_rollback_sqwaadrun",
 }
 ESCALATING_RISK_TAGS: set[str] = {
     "legal", "money", "certification", "health", "fda", "final_public",
@@ -65,6 +71,22 @@ ALLOWED_WITHOUT_APPROVAL: set[str] = {
     "quote_sku", "draft_campaign_brief", "funnel_design", "forecast_funnel",
     "sign_for_culture_attribution", "publish_signoff", "dispatch_bg",
     "handoff_to_marketing", "query_catalog", "query_audit_trail",
+    # Phase-1 lane + schedule actions — owner-tier cookie already gates the
+    # /run endpoint; these talk to internal Sqwaadrun + Print_Press surfaces
+    # and never produce customer-facing output directly (Sacred Separation
+    # holds — output lands in cache files; Press_Ang fanout is the only
+    # surface that touches customers).
+    "lane_a_trigger", "lane_b_trigger", "lane_c5_snapshot_fire",
+    "schedule_run_once",
+    # Phase-3 Print_Press control actions — owner-tier cookie gates /run;
+    # daemon_start spawns a long-running local process, dry_run + auth_test
+    # are read-only verifications.
+    "press_daemon_start", "press_dry_run", "press_auth_test",
+    # Phase-4b builder — Chicken Hawk creates full-stack sites via squad
+    # mission. Output lands in ~/chicken-hawk-workspaces/<name>/; nothing
+    # ships to production until /tools/deploy is explicitly fired (which
+    # IS owner-approval-gated). Building is safe; deploying is the gate.
+    "build_site",
 }
 
 
