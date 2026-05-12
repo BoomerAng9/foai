@@ -537,8 +537,9 @@ _ALIGNED_MSRP_BY_CATEGORY_SIZE: dict[tuple[str, str], float] = {
     ("functional", "8oz"):        56.99,
     ("functional", "3oz"):        56.99,
     ("functional", "1oz"):        56.99,
-    # Sampler packs (6×2oz drip bags)
-    ("sample_pack", "6x2oz"):     30.99,
+    # Sampler packs — catalog uses size="ea" (each) since the contents
+    # mix differs by sampler variant. Single canon anchor across variants.
+    ("sample_pack", "ea"):        30.99,
 }
 
 

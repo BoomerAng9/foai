@@ -49,7 +49,7 @@ EXPECTED_ALIGNED_MSRPS = {
     ("functional", "8oz"): 56.99,
     ("functional", "3oz"): 56.99,
     ("functional", "1oz"): 56.99,
-    ("sample_pack", "6x2oz"): 30.99,
+    ("sample_pack", "ea"): 30.99,
 }
 
 

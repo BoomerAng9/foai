@@ -74,7 +74,7 @@ const BUNDLES: Bundle[] = [
     sku: "coastal-best-sellers-sampler",
     name: "Best Sellers Sampler",
     tagline: "Six of our most-ordered roasts in one box.",
-    price: "$44.49",
+    price: "$30.99",
     savingsNote: "Six 2oz drip-bags",
     image: "/products/coastal-best-sellers-sampler.png",
     whatsInside: [
@@ -88,7 +88,7 @@ const BUNDLES: Bundle[] = [
     sku: "coastal-single-origin-sampler",
     name: "Single Origin Sampler",
     tagline: "Six origins, one cup at a time.",
-    price: "$44.49",
+    price: "$30.99",
     savingsNote: "Six 2oz drip-bags",
     image: "/products/coastal-best-sellers-sampler.png",
     whatsInside: [
@@ -102,7 +102,7 @@ const BUNDLES: Bundle[] = [
     sku: "coastal-flavored-sampler",
     name: "Flavored Sampler",
     tagline: "Naturally flavored — no syrups, no extracts.",
-    price: "$44.49",
+    price: "$30.99",
     savingsNote: "Six 2oz drip-bags",
     image: "/products/coastal-best-sellers-sampler.png",
     whatsInside: [
