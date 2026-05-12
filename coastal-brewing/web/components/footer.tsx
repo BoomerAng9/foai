@@ -24,9 +24,9 @@ export function Footer() {
             <li><Link href="/products?cat=coffee" className="text-foreground/80 hover:text-foreground">Coffee</Link></li>
             <li><Link href="/products?cat=tea" className="text-foreground/80 hover:text-foreground">Tea</Link></li>
             <li><Link href="/products?cat=matcha" className="text-foreground/80 hover:text-foreground">Matcha</Link></li>
-            <li><Link href="/products?cat=subscription" className="text-foreground/80 hover:text-foreground">Subscriptions</Link></li>
+            <li><Link href="/membership" className="text-foreground/80 hover:text-foreground">Subscriptions</Link></li>
             <li><Link href="/pricing" className="text-foreground/80 hover:text-foreground">Pricing &amp; Tiers</Link></li>
-            <li><Link href="/membership" className="text-foreground/80 hover:text-foreground">Standard Membership</Link></li>
+            <li><Link href="/membership" className="text-foreground/80 hover:text-foreground">Coastal Custee Card Plan</Link></li>
             <li><Link href="/wood-stork" className="text-foreground/80 hover:text-foreground">Wood Stork (B2B)</Link></li>
             <li><Link href="/pooler-pass" className="text-foreground/80 hover:text-foreground">Pooler Pass (Local)</Link></li>
             <li><Link href="/recipes" className="text-foreground/80 hover:text-foreground">Recipes</Link></li>
