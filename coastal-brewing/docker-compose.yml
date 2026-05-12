@@ -81,6 +81,12 @@ services:
       Mercury_Webhook_Secret: "${Mercury_Webhook_Secret:-}"
       Mercury_Webhook_Secret2: "${Mercury_Webhook_Secret2:-}"
       Mercury_Webhook_Secret3: "${Mercury_Webhook_Secret3:-}"
+      # Neon Postgres for the user-profile / Custee RAG layer — required
+      # for /auth/signup, /auth/login, /api/v1/users/*, and any session-
+      # bound preference / history feature. Without this var the runner
+      # 503s every signup with "profile layer not configured". DSN value
+      # lives in .env on aims-vps (read-only Neon credentials).
+      NEON_DATABASE_URL: "${NEON_DATABASE_URL:-}"
       TZ: "UTC"
     networks:
       - foai-internal
