@@ -10,7 +10,7 @@ export function Footer() {
         <div className="md:col-span-1">
           <Wordmark size="md" asLink={false} />
           <p className="mt-6 max-w-xs text-xs leading-relaxed text-muted-foreground">
-            Small-batch coffee, whole-leaf tea, ceremonial matcha. Lowcountry-rooted, AI-managed.
+            Small-batch coffee, whole-leaf tea, ceremonial matcha. Sourced honestly, packed in Pooler.
           </p>
         </div>
         <div>
@@ -54,7 +54,7 @@ export function Footer() {
             <li><Link href="/policies/accessibility" className="text-foreground/80 hover:text-foreground">Accessibility</Link></li>
           </ul>
           <p className="mt-4 text-[10px] leading-relaxed text-muted-foreground">
-            Public claims are sourced from verifiable supplier documentation. AI agents disclose AI when asked. Every public claim and supplier order is signed by the owner.
+            Every claim on a label is backed by paperwork from our supplier. Every order is signed off by the owner before it ships.
           </p>
         </div>
       </div>

@@ -4,9 +4,9 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 
 export const metadata = {
-  title: "About the owner — Coastal Brewing Co.",
+  title: "About — Coastal Brewing Co.",
   description:
-    "the owner is the founder, CEO, and only human-in-the-loop at Coastal Brewing Co. — the world's first humanless coffee company.",
+    "A Pooler, Georgia coffee shop. Real team. Real care. Specialty coffee, tea, and matcha — sourced honestly, signed off by a real person.",
 };
 
 export default function AboutPage() {
@@ -17,45 +17,45 @@ export default function AboutPage() {
         <div className="mx-auto max-w-3xl">
           <p className="font-mono text-[10px] uppercase tracking-widest text-accent">Who runs this place</p>
           <h1 className="mt-2 font-display text-4xl font-semibold md:text-5xl">
-            One human. Two AI teams. Zero rent.
+            A coffee shop. Real people behind every cup.
           </h1>
           <p className="mt-4 font-display text-lg italic text-muted-foreground">
-            In the age of agentic solutions and service delivery, we are building solutions the way service should be.
+            Built in Pooler, Georgia. Run with care from sourcing to your door.
           </p>
 
           <div className="mt-8 space-y-5 text-base leading-relaxed text-muted-foreground">
             <p>
-              I&apos;m the owner. I&apos;ve spent 15+ years building AI systems for organizations that
-              mostly didn&apos;t know what they wanted from AI. Coastal is the version where I built the org
-              chart first and the company second.
+              I&apos;m the owner. I&apos;ve spent 15+ years building software for
+              big companies that didn&apos;t always know what they wanted.
+              Coastal is what happens when you build the team first and the
+              shop second.
             </p>
             <p>
-              I&apos;m not Coastal&apos;s barista. I&apos;m not Coastal&apos;s marketer. I&apos;m
-              Coastal&apos;s <em>governor</em> — the human who signs the work the AI does. Every supplier order
-              routes to my Telegram before it ships. Every public claim goes through my hands before it goes
-              online. Every customer escalation hits me personally if my AI Sales team can&apos;t resolve it
-              cleanly. The audit system catches anything I might miss.
+              I&apos;m not the barista. I&apos;m not the marketer. I&apos;m
+              the owner — the person who signs off on every order before it
+              ships. Sal handles the counter. LUC keeps the store running.
+              Melli takes care of business customers. ACHEEVY runs the brand.
+              If they can&apos;t solve a problem, it comes to me.
             </p>
             <p>
-              That&apos;s the deal. The AI handles the conversation. I handle the consequences. The coffee is
-              sourced from a Fairtrade-certified specialty roaster I picked. And every receipt — for every
-              action, by every agent, on every order — is on file the moment it happens.
+              The coffee is sourced from a Fairtrade-certified specialty
+              roaster I picked myself. Every order, every claim, every refund
+              is on the record. If something&apos;s wrong, we make it right.
             </p>
             <p className="text-foreground">
-              If you have a problem with anything you read, hear, or buy from Coastal Brewing Co.,{" "}
-              <strong>it&apos;s mine to fix.</strong> Not the bot&apos;s.
+              If you have a problem with anything you read, hear, or buy from
+              Coastal Brewing Co., <strong>it&apos;s mine to fix.</strong>
             </p>
             <p className="font-display text-lg italic">— the owner</p>
           </div>
 
           <div className="mt-12 rounded-lg border border-border p-6">
-            <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">The credentials</p>
+            <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">Background</p>
             <ul className="mt-4 space-y-2 text-sm text-muted-foreground">
-              <li>15+ years AI Forward Deployment Engineer &amp; Product Architect</li>
+              <li>15+ years building software for large companies</li>
               <li>IBM-Certified Product Manager · Lean Six Sigma Black Belt</li>
-              <li>Architect of the AuditLedger audit system &amp; NemoClaw policy gate</li>
-              <li>Past responsibility: $2.9M government contracts under ISO 9001:2015</li>
-              <li>Founder of the broader FOAI ecosystem</li>
+              <li>Built the order-check system that signs off on every shipment</li>
+              <li>Past work: $2.9M government contracts under ISO 9001:2015</li>
             </ul>
           </div>
 
