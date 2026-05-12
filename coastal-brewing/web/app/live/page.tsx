@@ -7,7 +7,7 @@ import { Footer } from "@/components/footer";
 export const metadata: Metadata = {
   title: "Live look-in · Coastal Brewing Co.",
   description:
-    "Watch the Pooler storefront and back-of-house in real time on a 2D floor plan. Members-only. $199/year via Standard Membership.",
+    "Watch the Pooler storefront and back-of-house in real time on a 2D floor plan. Members-only. Plans start at $7.49/mo on Pooler Pass; $29.99/mo on the Coastal Custee Card Plan.",
 };
 
 const ROOMS = [
@@ -61,33 +61,33 @@ export default function LivePage() {
           className="mb-12 rounded-lg border border-accent/40 bg-accent/5 p-8"
         >
           <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
-            Locked · Standard Membership required
+            Locked · members only
           </p>
           <h2
             id="paywall"
             className="mt-3 font-serif text-2xl text-foreground sm:text-3xl"
           >
-            Members get in. $199 / year.
+            Members get in. Plans start at $7.49/mo.
           </h2>
           <p className="mt-4 text-base leading-relaxed text-foreground/80">
-            The live look-in is included with Standard Membership. So is unlimited free
-            delivery (under the $15 freight ceiling), 15% off everything, our welcome
-            box (ceramic dripper + Coastal Brewing Co. sticker set + a tin of Habbak),
-            and the refer-2-and-fee-returned mechanic.
+            The live look-in is included with any Coastal subscription. Every plan
+            gives you the same three things: pick what comes every month, save more
+            the longer you commit, and pause, swap, or cancel from your account any
+            time.
           </p>
           <div className="mt-6 flex flex-col gap-3 sm:flex-row">
             <Link
               href="/membership"
               className="rounded-md bg-accent px-6 py-3 text-center font-mono text-xs uppercase tracking-widest text-accent-foreground transition-colors hover:bg-accent/90"
             >
-              See membership terms
+              See the Coastal Custee Card Plan
             </Link>
-            <a
-              href="mailto:members@coastalbrewing.co"
+            <Link
+              href="/pooler-pass"
               className="rounded-md border border-border px-6 py-3 text-center font-mono text-xs uppercase tracking-widest text-foreground transition-colors hover:border-foreground/40"
             >
-              Email members@coastalbrewing.co
-            </a>
+              Locals · see Pooler Pass
+            </Link>
           </div>
         </section>
 
@@ -175,7 +175,7 @@ export default function LivePage() {
 
         <footer className="border-t border-border pt-6 text-center font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
           <Link href="/membership" className="hover:text-foreground">
-            Become a member · $199 / year
+            Become a member · plans from $7.49/mo
           </Link>
           <span className="mx-3">·</span>
           Made in PLR

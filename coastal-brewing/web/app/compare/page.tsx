@@ -10,7 +10,7 @@ import { ScrollReveal } from "@/components/scroll-reveal";
 export const metadata: Metadata = {
   title: "How Coastal Compares · Coastal Brewing Co.",
   description:
-    "Coastal Brewing Co. vs. the field — pricing, quality, and the X-factor every other coffee brand is missing: an agentic team that actually talks to you.",
+    "Coastal Brewing Co. vs. the field — pricing, quality, and what every other coffee brand is missing: a team you can actually talk to, prices you can actually negotiate, and a live look-in to the room where the work happens.",
 };
 
 // ────────────────────────── Pricing comparison ──────────────────────────
@@ -35,7 +35,7 @@ const COMPETITORS: Competitor[] = [
     bagPrice: "$28.99",
     bagSize: "12oz",
     membership: "$22.49/mo (9-mo plan)",
-    membershipNote: "C|Brew 3-6-9 · pay 9, get 12 · monthly + 3/6/9 cadences",
+    membershipNote: "Coastal Custee Card Plan · monthly + 3/6/9 cadences · pause/swap/cancel any time",
     freeShipThreshold: "Free under $15 freight",
     voiceAgent: true,
     liveLookIn: true,
@@ -225,24 +225,16 @@ type Xfactor = {
 
 const XFACTORS: Xfactor[] = [
   {
-    title: "An agentic team that actually talks to you.",
+    title: "A real team that actually talks to you.",
     body: "Sal at the bar. LUC at the curation desk. Melli on the wholesale line. Every one of them has a voice, a personality, and the authority to make a deal. No chatbot scripts. No \"please hold while I transfer you.\" Just a team.",
   },
   {
     title: "Every catalog price is a starting point.",
-    body: "Other brands publish a price and that's the price. We publish an opening anchor and let our team haggle with you. Sal can move 5–15% on his own. LUC can drop 25% if you commit. Bring volume to Melli and she goes deeper. Bundle with ACHEEVY and you can land 30% off. The negotiation is the experience.",
+    body: "Other brands publish a price and that's the price. We publish an opening anchor and let our team haggle with you. Sal can move 5–15% on his own. LUC can drop 25% if you commit. Bring volume to Melli and she goes deeper. The negotiation is the experience.",
   },
   {
     title: "A live look-in to the storefront.",
     body: "Members open the look-in and watch Pooler in real time on a 2D floor plan. Sal at the bar. The Sett crew in their tunnel. The Roos in the warehouse. The LP team on patrol. Nothing else in the category is doing this.",
-  },
-  {
-    title: "Hand-pack from a real human.",
-    body: "Standard Membership ships your welcome box hand-packed by Sal at the Pooler storefront. Ceramic pour-over dripper, storefront-window-etching sticker set, complimentary tin of Habbak. Real hands, real packing tape, real signature.",
-  },
-  {
-    title: "Account Assistant on call.",
-    body: "Members get an Account Assistant — your point of contact for reorders, recipe troubleshooting, gift sends, and anything else. Wood Stork tier gets 4 hours a month. Wood Stork Reserve is white-glove. Nobody else in the category offers this.",
   },
 ];
 
@@ -285,14 +277,14 @@ export default function ComparePage() {
               </h1>
               <p className="mt-5 max-w-2xl text-lg leading-relaxed text-muted-foreground">
                 We brew specialty coffee at a price the field already prints. Where we
-                separate is the <strong className="text-foreground">agentic experience</strong> wrapped around it — a team
+                separate is the <strong className="text-foreground">team experience</strong> wrapped around it — a team
                 you can actually talk to, prices you can actually negotiate, and a live
                 look-in to the room where the work happens.
               </p>
               <div className="mt-8 flex flex-col sm:flex-row gap-4">
                 <Button asChild variant="accent" size="lg" className="font-mono text-[11px] uppercase tracking-widest">
                   <Link href="/membership" data-compare-cta="join-membership">
-                    Join Standard Membership · $199/yr
+                    See the Coastal Custee Card Plan
                     <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
                   </Link>
                 </Button>
@@ -319,10 +311,12 @@ export default function ComparePage() {
                 <span className="text-foreground/55">Pricing across specialty + marketplace + wellness.</span>
               </h2>
               <p className="mt-4 max-w-2xl text-base leading-relaxed text-muted-foreground">
-                Coastal sits inside the specialty-coffee band on bag price and is the only
-                brand in the category with a flat annual membership tier. Wellness brands
+                Coastal sits inside the specialty-coffee band on bag price. Our
+                membership lineup runs from $7.49/mo (Pooler Pass Standard, for locals)
+                up to $149.99/mo (Wood Stork Reserve, for business) — with the
+                Coastal Custee Card Plan in the middle at $29.99/mo. Wellness brands
                 like AG1 and Magic Mind are included as a reference for what the market
-                will pay for an annual subscription tier when the experience justifies it.
+                will pay for a monthly subscription tier when the experience justifies it.
               </p>
             </ScrollReveal>
 
@@ -445,7 +439,7 @@ export default function ComparePage() {
               </p>
               <h2 className="mt-3 font-display text-[clamp(28px,4vw,40px)] font-semibold tracking-[-0.02em] leading-[1.05] max-w-3xl">
                 <Sparkles className="inline-block h-7 w-7 text-accent mr-2 -mt-1" strokeWidth={1.5} />
-                The agentic experience.
+                The team experience.
                 <br />
                 <span className="text-foreground/55">Nobody else in the category has this.</span>
               </h2>
@@ -482,14 +476,14 @@ export default function ComparePage() {
                 </h2>
                 <p className="mt-5 text-base leading-relaxed text-muted-foreground">
                   Coastal Brewing Co. ships specialty-grade coffee at the same price the
-                  field already publishes. The agentic team comes with the bag — at no
-                  extra charge to non-members, and unlocked at every level for our $199
-                  Standard Membership.
+                  field already publishes. The team comes with the bag — at no extra
+                  charge to non-members, and unlocked at every level for our monthly
+                  plans starting at $7.49/mo.
                 </p>
                 <div className="mt-9 flex flex-col sm:flex-row items-center justify-center gap-4">
                   <Button asChild variant="accent" size="lg" className="font-mono text-[11px] uppercase tracking-widest">
                     <Link href="/membership" data-compare-cta="final-membership">
-                      Join Standard Membership
+                      See the Coastal Custee Card Plan
                       <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
                     </Link>
                   </Button>
