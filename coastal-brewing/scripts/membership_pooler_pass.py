@@ -5,29 +5,35 @@ No Stripe SDK calls, no DB, no HTTP. The api_server layer wraps this.
 Owner-ratified mechanics 2026-05-10 + 3-6-9 cadence pivot 2026-05-11:
   - Pooler Pass Standard / Plus, priced per 3-6-9 cadence canon
     (`cbrew-369-pricing-canon-2026-05-11.md`)
-  - Annual headlines (canon): Standard $49, Plus $99
-  - Monthly retail is DERIVED so the 9-mo cadence lands EXACTLY on the
-    round annual headline (Standard ≈ $7.26/mo, Plus ≈ $14.67/mo)
+  - Canon monthly retail anchors (§2): Standard $7.49, Plus $14.99
+  - The 9-mo cadence total ($50.56 / $101.18) intentionally drifts ABOVE
+    the legacy $49 / $99 annual anchors — Sal/LUC/ACHEEVY haggle DOWN
+    to those round legacy numbers as built-in negotiation theater.
   - 4 cadences per tier: monthly / 3mo (15% off) / 6mo (20%) / 9mo (25%, deliver 12)
   - Geographic gate: 50-100 mile radius from 31322 (Pooler, GA)
   - Re-verify ZIP at each renewal
   - Out-of-radius signups upsell to Coastal Custee Card (which also runs 3-6-9)
+
+NOTE 2026-05-11 PM: prior implementation used
+`cadence.monthly_retail_from_annual()` to force the 9-mo total to land
+EXACTLY on the legacy $49 / $99 — that contradicted canon §2 which
+specifies clean monthly retail anchors with intentional drift. Constants
+are now direct (canon-compliant). See `pricing-canon-correction-2026-05-11.md`.
 """
 from __future__ import annotations
 
 from typing import Literal
 
-import cadence
+import cadence  # noqa: F401 — kept for is_valid_cadence + table imports below
 from geo import eligibility_band, eligibility_response
 
 
-# Annual headline anchors (canon): the round number a customer sees as
-# "the price for the year". Monthly retail is derived backward so the
-# 9-mo cadence lands EXACTLY on this headline.
-POOLER_PASS_STANDARD_ANNUAL = 49.0
-POOLER_PASS_PLUS_ANNUAL = 99.0
-POOLER_PASS_STANDARD_MONTHLY_RETAIL = cadence.monthly_retail_from_annual(POOLER_PASS_STANDARD_ANNUAL)
-POOLER_PASS_PLUS_MONTHLY_RETAIL = cadence.monthly_retail_from_annual(POOLER_PASS_PLUS_ANNUAL)
+# Canon monthly retail anchors per cbrew-369-pricing-canon-2026-05-11.md §2.
+# DO NOT derive these from the legacy annual headlines — canon says they
+# are the source of truth and the 9-mo total drifts above the legacy
+# annual on purpose.
+POOLER_PASS_STANDARD_MONTHLY_RETAIL = 7.49
+POOLER_PASS_PLUS_MONTHLY_RETAIL = 14.99
 
 POOLER_PASS_STANDARD_PRODUCT_PREFIX = "coastal_membership_pooler_pass_standard"
 POOLER_PASS_PLUS_PRODUCT_PREFIX = "coastal_membership_pooler_pass_plus"

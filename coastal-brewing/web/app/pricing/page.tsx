@@ -206,17 +206,18 @@ export default function PricingPage() {
           <div className="container py-16 md:py-20">
             <ScrollReveal>
               <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-accent">
-                C|Brew Yearly Membership · 3-6-9 cadence
+                C|Brew Membership · 3-6-9 cadence · billed monthly
               </p>
               <h2 className="mt-3 font-display text-[clamp(28px,4vw,40px)] font-semibold tracking-[-0.02em] leading-[1.05] max-w-2xl">
-                Pay for 9 months,<br />
-                <span className="text-foreground/60">we deliver 12.</span>
+                Pay monthly.<br />
+                <span className="text-foreground/60">Cancel anytime.</span>
               </h2>
               <p className="mt-4 max-w-2xl text-base leading-relaxed text-muted-foreground">
-                Every membership tier offers four cadences: monthly (0% off),
-                3-month (15% off), 6-month (20% off), and the headline
-                9-month plan (25% off, pay 9 months, get 12 months of access).
-                The 9-mo plan is the best deal in the catalog.
+                Every membership tier offers four monthly cadences: month-to-month
+                (0% off), 3-month plan (15% off), 6-month plan (20% off), and the
+                headline 9-month plan (25% off — pay 9 monthly bills, get 12
+                months of access). All cadences bill monthly and auto-renew at
+                the same discount. Cancel anytime.
               </p>
             </ScrollReveal>
 
@@ -226,7 +227,7 @@ export default function PricingPage() {
                   <tr className="bg-muted/30 text-left font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
                     <th className="px-4 py-3 w-20">Mark</th>
                     <th className="px-4 py-3">Tier</th>
-                    <th className="px-4 py-3">9-month plan (best deal)</th>
+                    <th className="px-4 py-3">Monthly bill · 9-mo plan</th>
                     <th className="px-4 py-3">Audience</th>
                     <th className="px-4 py-3"></th>
                   </tr>
@@ -235,7 +236,7 @@ export default function PricingPage() {
                   <tr data-tier-row="pooler-pass-standard">
                     <td className="px-4 py-3 align-middle"><TierMark variant="plr-cream" /></td>
                     <td className="px-4 py-3 font-medium align-middle">Pooler Pass Standard</td>
-                    <td className="px-4 py-3 font-mono align-middle">$49 / yr</td>
+                    <td className="px-4 py-3 font-mono align-middle">$5.62 / mo</td>
                     <td className="px-4 py-3 text-foreground/70 text-[13px] align-middle">Local 50–100 mi from Pooler 31322</td>
                     <td className="px-4 py-3 text-right align-middle">
                       <Link href="/pooler-pass" className="font-mono text-[11px] uppercase tracking-widest text-accent hover:underline">
@@ -246,7 +247,7 @@ export default function PricingPage() {
                   <tr data-tier-row="pooler-pass-plus">
                     <td className="px-4 py-3 align-middle"><TierMark variant="plr-gold" /></td>
                     <td className="px-4 py-3 font-medium align-middle">Pooler Pass Plus</td>
-                    <td className="px-4 py-3 font-mono align-middle">$99 / yr</td>
+                    <td className="px-4 py-3 font-mono align-middle">$11.24 / mo</td>
                     <td className="px-4 py-3 text-foreground/70 text-[13px] align-middle">Local power-buyers, more perks</td>
                     <td className="px-4 py-3 text-right align-middle">
                       <Link href="/pooler-pass" className="font-mono text-[11px] uppercase tracking-widest text-accent hover:underline">
@@ -257,7 +258,7 @@ export default function PricingPage() {
                   <tr className="bg-accent/[0.06]" data-tier-row="coastal-custee-card">
                     <td className="px-4 py-3 align-middle"><TierMark variant="custee-card" /></td>
                     <td className="px-4 py-3 font-medium align-middle">Coastal Custee Card</td>
-                    <td className="px-4 py-3 font-mono align-middle">$199 / yr</td>
+                    <td className="px-4 py-3 font-mono align-middle">$22.49 / mo</td>
                     <td className="px-4 py-3 text-foreground/70 text-[13px] align-middle">National DTC + Amazon — the default tier</td>
                     <td className="px-4 py-3 text-right align-middle">
                       <Link href="/membership" className="font-mono text-[11px] uppercase tracking-widest text-accent hover:underline">
@@ -268,7 +269,7 @@ export default function PricingPage() {
                   <tr data-tier-row="wood-stork-standard">
                     <td className="px-4 py-3 align-middle"><TierMark variant="wood-stork-standard" /></td>
                     <td className="px-4 py-3 font-medium align-middle">Wood Stork Standard</td>
-                    <td className="px-4 py-3 font-mono align-middle">$499 / yr</td>
+                    <td className="px-4 py-3 font-mono align-middle">$56.24 / mo</td>
                     <td className="px-4 py-3 text-foreground/70 text-[13px] align-middle">B2B, multi-location, referrers</td>
                     <td className="px-4 py-3 text-right align-middle">
                       <Link href="/wood-stork" className="font-mono text-[11px] uppercase tracking-widest text-accent hover:underline">
@@ -279,7 +280,7 @@ export default function PricingPage() {
                   <tr data-tier-row="wood-stork-reserve">
                     <td className="px-4 py-3 align-middle"><TierMark variant="wood-stork-reserve" /></td>
                     <td className="px-4 py-3 font-medium align-middle">Wood Stork Reserve</td>
-                    <td className="px-4 py-3 font-mono align-middle">$999 / yr</td>
+                    <td className="px-4 py-3 font-mono align-middle">$112.49 / mo</td>
                     <td className="px-4 py-3 text-foreground/70 text-[13px] align-middle">Largest accounts, owner-domain whitelabel partners</td>
                     <td className="px-4 py-3 text-right align-middle">
                       <Link href="/wood-stork" className="font-mono text-[11px] uppercase tracking-widest text-accent hover:underline">
@@ -292,8 +293,18 @@ export default function PricingPage() {
             </div>
 
             <p className="mt-4 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
-              All annual prices show the 9-mo plan landing · monthly + 3/6-mo cadences also available on each tier page
+              Monthly billing · auto-renews at the same cadence · cancel anytime · 9-mo plan delivers 12 months
             </p>
+
+            {/* Skip-the-plan path: own-name option to shop retail without a subscription */}
+            <p className="mt-4 text-sm text-foreground/80">
+              <span className="font-semibold">Don&apos;t want a plan?</span>{" "}
+              <Link href="#bundles" className="text-accent hover:underline" data-pricing-cta="skip-plan-bundles">
+                Shop standard prices below
+              </Link>{" "}
+              — no subscription, no commitment.
+            </p>
+
             <p className="mt-2 font-mono text-[10px] uppercase tracking-widest">
               <Link href="/compare" className="text-accent hover:underline">
                 See how Coastal compares vs every major DTC coffee brand →
@@ -304,7 +315,7 @@ export default function PricingPage() {
 
 
         {/* ──────────── Bundles ──────────── */}
-        <section className="border-b border-border/50 bg-card/20">
+        <section id="bundles" className="border-b border-border/50 bg-card/20">
           <div className="container py-16 md:py-20">
             <ScrollReveal>
               <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-accent">

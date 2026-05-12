@@ -48,9 +48,11 @@ test("Custee Card /membership flow — cadence picker + product matrix + Stripe 
   await form.scrollIntoViewIfNeeded();
   await expect(form).toBeVisible();
 
-  // Cadence picker loaded all 4 cadences (rendered as buttons with totals).
-  await expect(form.getByText("$29.99")).toBeVisible();
-  await expect(form.getByText("$202.43")).toBeVisible();
+  // Cadence picker loaded all 4 cadences (rendered as buttons with monthly billing).
+  // Owner canon 2026-05-11: 3/6/9 plans are INSTALLMENTS, headline shows
+  // monthly Stripe charge, not upfront cadence total.
+  await expect(form.getByText("$29.99/mo")).toBeVisible();
+  await expect(form.getByText("$22.49/mo")).toBeVisible(); // 9mo: 29.99 × 0.75
 
   // Product matrix renders all 5 options
   const matrix = form.locator('[data-matrix-picker="products"]');
