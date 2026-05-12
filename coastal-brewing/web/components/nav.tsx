@@ -15,6 +15,11 @@ const NAV_LINKS = [
   { href: "/about/governance", label: "Commitment" },
   { href: "/chat", label: "Chat" },
   { href: "/chat?agent=sales", label: "Order" },
+  // Owner directive 2026-05-11 PM: account creation must be reachable from
+  // desktop nav (was previously only in the mobile drawer's Account group).
+  // The drawer still carries the full Account group (My Account / Sign In /
+  // Open an Account) and is now available on desktop too via the hamburger.
+  { href: "/auth/signup", label: "Sign Up" },
 ];
 
 const DRAWER_GROUPS = [
@@ -146,9 +151,12 @@ export function Nav() {
               </Link>
             ))}
           </nav>
-          {/* Mobile hamburger */}
+          {/* Hamburger — desktop + mobile both. Owner directive 2026-05-11 PM:
+              desktop nav needs parity with the mobile drawer (Account group
+              with Sign In / Open an Account was previously only reachable
+              from the mobile drawer). */}
           <button
-            className="md:hidden text-foreground p-2 -mr-2"
+            className="text-foreground p-2 -mr-2 md:ml-4"
             aria-label={drawerOpen ? "Close menu" : "Open menu"}
             type="button"
             onClick={() => setDrawerOpen((o) => !o)}
@@ -189,7 +197,7 @@ export function Nav() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.25 }}
-            className="fixed inset-0 z-40 bg-foreground/20 backdrop-blur-sm md:hidden"
+            className="fixed inset-0 z-40 bg-foreground/20 backdrop-blur-sm"
             onClick={closeDrawer}
             aria-hidden="true"
           />
@@ -205,7 +213,7 @@ export function Nav() {
             animate={{ x: 0 }}
             exit={{ x: "100%" }}
             transition={{ type: "spring", damping: 28, stiffness: 280 }}
-            className="fixed right-0 top-0 z-50 h-full w-80 bg-background border-l border-border/60 shadow-2xl md:hidden flex flex-col"
+            className="fixed right-0 top-0 z-50 h-full w-80 bg-background border-l border-border/60 shadow-2xl flex flex-col"
           >
             {/* Drawer header */}
             <div className="flex h-20 items-center justify-between px-6 border-b border-border/60">
