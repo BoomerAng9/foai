@@ -8,48 +8,48 @@ import { WoodStorkCheckoutForm } from "@/components/wood-stork-checkout-form";
 export const metadata: Metadata = {
   title: "Wood Stork Membership · Coastal Brewing Co.",
   description:
-    "Wood Stork — Coastal Brewing Co.'s high-volume tier for multi-location buyers, corporate accounts, and prolific referrers. Tiered referral discount up to 50% off.",
+    "Wood Stork — for multi-location buyers, restaurants, and offices. Standard $56.24/mo or Reserve $112.49/mo on the 9-month plan. Referral discount up to 50% off.",
 };
 
 const STANDARD_BENEFITS = [
   {
     title: "Tiered referral discount — up to 50%",
-    body: "Your discount on product orders climbs with cumulative successful referrals: 18% base · 25% at 1–5 · 35% at 5–10 · 45% at 10–20 · 50% at 20+ (caps here). Auto-applied at checkout.",
+    body: "Your discount on product orders grows with every business you bring in: 18% base · 25% after 1-5 referrals · 35% after 5-10 · 45% after 10-20 · 50% after 20+ (the cap). Applied at checkout.",
   },
   {
-    title: "Free shipping, all freight classes",
-    body: "Bulk gear, case orders, drum-roaster accessories — included. No $15 freight ceiling.",
+    title: "Free shipping, every order",
+    body: "Bulk bags, case orders, gear — included. No $15 freight ceiling.",
   },
   {
-    title: "Priority Sal_Ang business voice line",
-    body: "Direct line for re-orders, swap requests, and rush situations. No phone tree.",
+    title: "Direct business line to Melli",
+    body: "Melli runs our business accounts. Call or chat any time for reorders, swaps, or rush jobs. No phone tree, no waiting.",
   },
   {
-    title: "Account Assistant — 4 hours / month",
-    body: "Your point of contact for the Coastal team. Reorders, recipe troubleshooting, gift sends, event coordination.",
+    title: "Account help — 4 hours / month",
+    body: "A dedicated point of contact for your business. Reorders, recipe help, gift sends, event coordination.",
   },
 ];
 
 const RESERVE_EXTRAS = [
   {
-    title: "Dedicated ACHEEVY pod",
-    body: "Standing 30-min monthly with the orchestrator. Quarterly business review.",
+    title: "Monthly business review with ACHEEVY",
+    body: "ACHEEVY runs the brand. You get a standing 30-minute monthly call to walk through your account. Quarterly deep-dive every three months.",
   },
   {
-    title: "LP team site visit — quarterly",
-    body: "Our Loss Prevention team comes to you for an on-site assessment + custom briefing.",
+    title: "Quarterly on-site visit",
+    body: "Our team comes to your business for an on-site walkthrough, a custom briefing, and to put faces to names.",
   },
   {
-    title: "First-look licensee pricing",
-    body: "Reserve members see Platform Partner ($15K/mo) and Full Launch ($50K-$500K/mo) tier preview before public release.",
+    title: "First look at partner pricing",
+    body: "If you're thinking about running the Coastal model for your own brand, Reserve members see partner-program pricing before it's public.",
   },
   {
     title: "Named Wood Stork blend",
     body: "We blend a coffee in your business's honor and ship it to you and your customers.",
   },
   {
-    title: "ACHEEVY Founders' Table",
-    body: "Private quarterly call with the human in the loop and ACHEEVY. Ask anything.",
+    title: "Founders' table",
+    body: "A private quarterly call with the owner and ACHEEVY. Ask anything.",
   },
 ];
 
@@ -74,18 +74,17 @@ export default function WoodStorkPage() {
             Wood Stork
           </h1>
           <p className="mt-3 font-mono text-sm text-muted-foreground">
-            Standard $499/yr · Reserve $999/yr · pay 9, get 12
+            Standard $56.24/mo · Reserve $112.49/mo · on the 9-month plan
             <span className="block mt-1 text-foreground/70">
-              3-month, 6-month, or 9-month plans — pay 9 months, get 12.
+              Monthly, 3-month, 6-month, or 9-month plans. Cancel anytime.
             </span>
           </p>
           <p className="mt-6 max-w-2xl text-base leading-relaxed text-foreground/80">
-            For multi-location buyers, corporate accounts, restaurants, and the people
-            who keep introducing us to their friends. Wood Stork tier rewards volume
-            and referrals with a discount that grows with every Custee you bring in —
-            up to 50% off your own orders. Choose the cadence that fits — month-to-month,
-            3-month, 6-month, or our 9-month plan that delivers a full year of access for
-            the price of nine months.
+            For multi-location buyers, restaurants, offices, and the people who keep
+            sending us new customers. Wood Stork rewards volume and referrals — your
+            discount grows with every business you bring in, up to 50% off your own
+            orders. Pick the plan that fits — month-to-month, 3-month, 6-month, or
+            the 9-month plan for the best rate (pay 9 months, get 12 months of access).
           </p>
         </header>
 
@@ -120,7 +119,7 @@ export default function WoodStorkPage() {
 
         <section className="mb-14">
           <p className="mb-6 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
-            Standard tier benefits — $499/yr (9-mo plan)
+            Standard tier benefits — $56.24/mo (9-month plan)
           </p>
           <ul className="space-y-6">
             {STANDARD_BENEFITS.map((b) => (
@@ -134,7 +133,7 @@ export default function WoodStorkPage() {
 
         <section className="mb-14">
           <p className="mb-6 font-mono text-[10px] uppercase tracking-widest text-accent">
-            Reserve tier extras — $999/yr (9-mo plan)
+            Reserve tier extras — $112.49/mo (9-month plan)
           </p>
           <p className="mb-6 text-sm text-foreground/70">
             Everything in Standard, plus:

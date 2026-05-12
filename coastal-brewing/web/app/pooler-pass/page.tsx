@@ -8,25 +8,25 @@ import { PoolerPassCheckoutForm } from "@/components/pooler-pass-checkout-form";
 export const metadata: Metadata = {
   title: "Pooler Pass · Coastal Brewing Co.",
   description:
-    "Pooler Pass — local Coastal Brewing Co. membership for the 50–100 mile radius around Pooler, GA (31322). $49/yr Standard or $99/yr Plus.",
+    "Pooler Pass — local membership for the 50-100 mile radius around Pooler, GA. Standard $5.62/mo or Plus $11.24/mo on the 9-month plan. Cancel anytime.",
 };
 
 const STANDARD_BENEFITS = [
   {
     title: "12% off in-store",
-    body: "Auto-applied at the Pooler storefront. Stacks with hand-pack and same-day pickup.",
+    body: "Applied at the counter every time you stop in. Stacks with same-day pickup.",
   },
   {
     title: "Free local pickup",
-    body: "No shipping cost when you pick up at the Pooler storefront. Pre-order via chat or just walk in.",
+    body: "No shipping cost when you pick up at the Pooler shop. Pre-order via chat or just walk in.",
   },
   {
     title: "Member-only Pooler events",
-    body: "Tasting nights, Sal_Ang storefront kiosk visits, monthly LP-team coffee chat. We invite, you show up.",
+    body: "Tasting nights, Sal at the counter for one-on-one pours, monthly community coffee chat. We invite, you show up.",
   },
   {
-    title: "First in line for storefront drops",
-    body: "Limited-batch drops, Tier F Reserve allocations, and one-off LP-team specials hit Pooler Pass members before national.",
+    title: "First in line for shop drops",
+    body: "Limited-batch roasts, reserve allocations, and seasonal specials reach Pooler Pass members before they go national.",
   },
 ];
 
@@ -36,19 +36,19 @@ const PLUS_EXTRAS = [
     body: "A 50g tin of our Saudi Hassawi mint shows up every month. Free.",
   },
   {
-    title: "First dibs on storefront-only drops",
+    title: "First dibs on shop-only drops",
     body: "Before Standard members. Before national. Pooler Pass Plus is first in line, full stop.",
   },
   {
-    title: "Pooler Local mention on the gratitude wall",
-    body: "Annual gratitude wall at the Pooler storefront. Your name on the brick (or close to it).",
+    title: "Your name on the gratitude wall",
+    body: "Annual wall at the Pooler shop. Your name goes on it — or as close to the brick as we can get.",
   },
 ];
 
 const ELIGIBILITY = [
   { range: "Inside 50 mi", verdict: "Eligible · Local", places: "Pooler, Savannah, Richmond Hill, Bloomingdale, Garden City, Port Wentworth, Tybee Island, Hilton Head Island, Bluffton" },
-  { range: "50–100 mi", verdict: "Eligible · Extended Local", places: "Beaufort, Statesboro, Brunswick, Hinesville, Jesup, Vidalia, Walterboro, Charleston (edge)" },
-  { range: "Outside 100 mi", verdict: "Not eligible — see Coastal Custee Card", places: "Anywhere else; Coastal Custee Card ($199/yr, ships nationwide) is the right fit" },
+  { range: "50-100 mi", verdict: "Eligible · Extended Local", places: "Beaufort, Statesboro, Brunswick, Hinesville, Jesup, Vidalia, Walterboro, Charleston (edge)" },
+  { range: "Outside 100 mi", verdict: "Not eligible — see Coastal Custee Card", places: "Anywhere else; Coastal Custee Card ($22.49/mo on the 9-month plan, ships nationwide) is the right fit" },
 ];
 
 export default function PoolerPassPage() {
@@ -64,17 +64,17 @@ export default function PoolerPassPage() {
             Pooler Pass
           </h1>
           <p className="mt-3 font-mono text-sm text-muted-foreground">
-            Standard $49/yr · Plus $99/yr · pay 9, get 12
+            Standard $5.62/mo · Plus $11.24/mo · on the 9-month plan
             <span className="block mt-1 text-foreground/70">
-              3-month, 6-month, or 9-month plans — pay 9 months, get 12.
+              Monthly, 3-month, 6-month, or 9-month plans. Cancel anytime.
             </span>
           </p>
           <p className="mt-6 max-w-2xl text-base leading-relaxed text-foreground/80">
-            For locals — within 50 to 100 miles of Pooler (ZIP 31322). Discount when
-            you walk in, free local pickup, member-only events at the storefront, and
-            first dibs on what just came out of the back. Pick the cadence that fits —
-            month-to-month for try-out, 9-month plan for full support (you pay 9 months,
-            we deliver 12).
+            For locals — within 50 to 100 miles of Pooler (ZIP 31322). A discount
+            when you walk in, free local pickup, member-only events at the shop, and
+            first dibs on what just came out of the back. Pick the plan that fits —
+            month-to-month to try it out, or the 9-month plan for the best rate (pay
+            9 months, get 12 months of access).
           </p>
         </header>
 
@@ -109,7 +109,7 @@ export default function PoolerPassPage() {
 
         <section className="mb-14">
           <p className="mb-6 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
-            Standard tier benefits — $49/yr (9-mo plan)
+            Standard tier benefits — $5.62/mo (9-month plan)
           </p>
           <ul className="space-y-6">
             {STANDARD_BENEFITS.map((b) => (
@@ -123,7 +123,7 @@ export default function PoolerPassPage() {
 
         <section className="mb-14">
           <p className="mb-6 font-mono text-[10px] uppercase tracking-widest text-accent">
-            Plus tier extras — $99/yr (9-mo plan)
+            Plus tier extras — $11.24/mo (9-month plan)
           </p>
           <p className="mb-6 text-sm text-foreground/70">
             Everything in Standard, plus:
