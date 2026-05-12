@@ -3128,6 +3128,7 @@ def _employee_system_prompt(employee: str, surface: str = "customer_chat_panel")
             "TAKE LITERAL REQUESTS LITERALLY: When the customer says exactly what they want — \"I want to start the Tea Monthly subscription,\" \"I'd like to order the Discovery Bundle,\" \"what's your best price on X\" — answer that request directly. Do NOT pivot to a 3-option catalog dump. Do NOT offer alternatives unless they ask. They came in to chat ABOUT THAT THING — confirm it, set up the next step, ask what they need to know. "
             "ANTI-ASSUMPTION RULE: NEVER invent or infer the customer's tastes, prior purchases, or preferences. Phrases like \"given your tea preference,\" \"since you like dark roast,\" \"based on what you usually drink\" are FORBIDDEN unless you have explicit RAG context from prior turns in this chat OR a documented prior order in the customer's profile. When in doubt, ASK directly: \"what kind of brew do you reach for?\" — never fabricate a preference. "
             "AUTHORITY: deals-of-the-day at your discretion + standing discounts ≤10% PPU, ≤15% bundles. HOLD the floor. Above ceiling? Hand it to ACHEEVY: \"Let me get ACHEEVY in on this — that's above the counter.\" DO NOT promise the discount yourself. "
+            "HARD HANDOFF RULE: when you say \"let me get ACHEEVY\" / \"loop in ACHEEVY\" / \"bring in ACHEEVY\" / \"that's above the counter\" / \"above my pay grade\", that sentence is the END of your turn. STOP writing. Do NOT continue with another paragraph. Do NOT roleplay ACHEEVY in your own response — never write \"ACHEEVY here\" or \"I'm ACHEEVY\" or anything that sounds like ACHEEVY is speaking. The system swaps the conversation to ACHEEVY for the next user message, and ACHEEVY introduces themself on their own next turn. Same rule for handoffs to LUC and Melli. "
             "ROUTING: customer wants to haggle / run numbers → pull LUC in. Bulk orders (12+ units) → Melli. Coupons / billing → LUC. Above-ceiling discount → ACHEEVY. "
             "TRUTH: Never invent origin, processing, roastery, varietal, price, or product spec. If catalog doesn't say it, you say plainly that you don't have that detail. Never name the supplier."
         ),
@@ -3457,16 +3458,34 @@ async def chat_stream(websocket: WebSocket, token: Optional[str] = Query(default
 
             # Detect handoff intent in Sal's reply so the next turn
             # starts on the right agent without waiting for escalation logic.
+            # Owner bug 2026-05-12 (PM): Sal was roleplaying ACHEEVY in his
+            # own response stream (Sal-voice IVC clone speaking "ACHEEVY
+            # here ...") because no ACHEEVY pattern existed here — only
+            # Melli + LUC. Now also catches LUC's reply if LUC defers to
+            # ACHEEVY for sign-off ("ACHEEVY signs" / "kick to ACHEEVY").
             next_emp: Optional[str] = None
-            if full_response and employee == "sal_ang":
+            if full_response and employee in ("sal_ang", "luc_ang", "melli_capensi"):
                 _r = full_response.lower()
-                if any(p in _r for p in ("get melli", "loop in melli", "bring in melli",
-                                          "melli will", "melli can", "hand this to melli",
-                                          "melli handles", "melli takes")):
+                if employee == "sal_ang" and any(
+                    p in _r for p in ("get melli", "loop in melli", "bring in melli",
+                                      "melli will", "melli can", "hand this to melli",
+                                      "melli handles", "melli takes")
+                ):
                     next_emp = "melli_capensi"
-                elif any(p in _r for p in ("get luc", "bring in luc", "luc will",
-                                            "luc can", "luc handles", "lu-cal")):
+                elif employee == "sal_ang" and any(
+                    p in _r for p in ("get luc", "bring in luc", "luc will",
+                                      "luc can", "luc handles", "lu-cal")
+                ):
                     next_emp = "luc_ang"
+                elif any(
+                    p in _r for p in ("get acheevy", "loop in acheevy", "bring in acheevy",
+                                      "above the counter", "above my pay grade",
+                                      "acheevy in on this", "kick to acheevy",
+                                      "acheevy signs", "hand this to acheevy",
+                                      "let me get acheevy", "let acheevy take",
+                                      "acheevy will sign", "above ceiling")
+                ):
+                    next_emp = "acheevy"
 
             # Emit turn complete
             cost_estimate = (think_tokens * 0.0000005) + (resp_tokens * 0.0000015)
