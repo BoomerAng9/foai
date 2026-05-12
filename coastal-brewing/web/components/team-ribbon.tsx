@@ -6,14 +6,15 @@ export function TeamRibbon() {
     <section className="border-y border-border/60">
       <div className="container flex flex-col items-start justify-between gap-6 py-16 md:flex-row md:items-end md:py-20">
         <div className="max-w-2xl">
-          <p className="eyebrow">Meet the cast</p>
+          <p className="eyebrow">Meet the team</p>
           <h2 className="mt-3 font-display text-2xl font-semibold tracking-[-0.02em] md:text-4xl">
-            The names behind your cup.
+            The people behind your cup.
           </h2>
           <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
-            Sal at the counter. ACHEEVY at the helm. Sixteen specialists
-            keeping things honest from sourcing to your doorstep — and one
-            human signature on every order.
+            Sal greets you at the counter. LUC manages the store. Melli
+            handles business accounts. ACHEEVY runs the brand. A full team
+            watches every step from the farm to your door — and one real
+            person signs off on every order before it ships.
           </p>
         </div>
         <Link

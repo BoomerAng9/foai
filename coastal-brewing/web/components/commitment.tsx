@@ -1,12 +1,12 @@
 type Commitment = { label: string; line: string };
 
 const COMMITMENTS: Commitment[] = [
-  { label: "Sourcing", line: "Specialty-grade beans, SCA 80+, traced to roaster." },
-  { label: "Claims", line: "Every public claim cites a verified Lot ID." },
-  { label: "Health", line: "No fillers. No marketing health hype. Flavored blends use natural flavorings only — every ingredient on the label." },
-  { label: "Pricing", line: "Standard rates published. Negotiated offers floor-bound." },
-  { label: "Returns", line: "If the cup isn't what the label says, we make it right." },
-  { label: "Data", line: "We don't sell your data. Receipts on every action." },
+  { label: "Sourcing", line: "Only top-grade beans. We can tell you which farm yours came from." },
+  { label: "Claims", line: "Anything we say on a label, we can prove. Just ask." },
+  { label: "Health", line: "No fillers. No health hype. Flavored coffee uses natural flavors only — every ingredient is on the label." },
+  { label: "Pricing", line: "Prices are posted up front. Want a deal? Talk to Sal — there's room to work with you." },
+  { label: "Returns", line: "If the cup isn't what the label says, we'll make it right." },
+  { label: "Data", line: "We don't sell your data. You get a receipt for every action." },
 ];
 
 export function Commitment() {

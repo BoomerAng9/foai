@@ -48,17 +48,17 @@ export function Hero() {
             </div>
 
             <h1 className="font-display font-semibold tracking-[-0.02em] leading-[1.05] text-[clamp(28px,4.5vw,48px)]">
-              Specialty coffee, whole-leaf tea, ceremonial matcha
-              <span className="block text-foreground/70">— handled with care at every step.</span>
+              Real coffee. Real tea. Real matcha.
+              <span className="block text-foreground/70">Built by a team that actually cares.</span>
             </h1>
 
             <p className="mt-6 max-w-xl text-base leading-relaxed text-muted-foreground md:text-lg">
-              Coastal Brewing Co. is powered by an AI-managed team on call
-              around the clock. Sales finds your cup, builds bundles, and walks
-              you to checkout. Marketing curates our story and connects us to
-              our community. Every order, every claim, every refund runs
-              through a policy gate and lands on the owner&apos;s desk for
-              final sign-off.
+              Welcome to Coastal Brewing Co. We&apos;re a Pooler, Georgia
+              coffee shop open around the clock. Sal — our Lead Barista —
+              helps you find your roast, builds a bundle, and walks you to
+              checkout. LUC keeps the store running. Melli takes care of
+              business customers. ACHEEVY runs the brand. Every order
+              passes one more set of eyes before it ships.
             </p>
 
             <div className="mt-6">
@@ -67,7 +67,7 @@ export function Hero() {
                 className="inline-flex items-center gap-2 rounded-full border border-border bg-card/30 px-4 py-2 text-xs text-muted-foreground hover:text-foreground hover:border-foreground/30 transition-colors"
               >
                 <Search className="h-3.5 w-3.5" />
-                <span>subscriptions open with verified supplier handshakes</span>
+                <span>monthly plans — pause or cancel any time</span>
               </Link>
             </div>
           </div>

@@ -25,8 +25,8 @@ const BENEFITS = [
     body: "Ceramic pour-over dripper for cutting through whatever you're brewing at home, our Coastal Brewing Co. storefront-window-etching sticker set, and a complimentary tin of Habbak — our Saudi Hassawi mint, sourced from our specialty tea partners.",
   },
   {
-    title: "Live 2D look-in",
-    body: "Open coastalbrewing.co/live and watch the Pooler storefront and back-of-house in real time on a 2D floor plan. Sal at the bar, the Sett in their tunnel, the Roos in the Warehouse — all moving as it happens. Members-only.",
+    title: "Live look-in",
+    body: "Open coastalbrewing.co/live to see what's happening at the Pooler shop and warehouse — Sal at the counter, the receiving team in back, the roasters working a fresh batch. Updates in real time. Members only.",
   },
   {
     title: "Refer 2, get your fee back",
@@ -146,14 +146,20 @@ export default function MembershipPage() {
                   <td className="px-4 py-3 text-muted-foreground">—</td>
                 </tr>
                 <tr>
+                  <td className="px-4 py-3">Coastal Custee Card</td>
+                  <td className="px-4 py-3">$22.49 / mo (9-mo plan)</td>
+                  <td className="px-4 py-3">Mix-and-match products</td>
+                  <td className="px-4 py-3 text-muted-foreground">—</td>
+                </tr>
+                <tr>
                   <td className="px-4 py-3">Wood Stork Standard</td>
-                  <td className="px-4 py-3">$499 / yr</td>
+                  <td className="px-4 py-3">$56.24 / mo (9-mo plan)</td>
                   <td className="px-4 py-3">18-50% (referral-tiered)</td>
                   <td className="px-4 py-3 text-muted-foreground">—</td>
                 </tr>
                 <tr>
                   <td className="px-4 py-3">Wood Stork Reserve</td>
-                  <td className="px-4 py-3">$999 / yr</td>
+                  <td className="px-4 py-3">$112.49 / mo (9-mo plan)</td>
                   <td className="px-4 py-3">18-50% (referral-tiered)</td>
                   <td className="px-4 py-3">Yes</td>
                 </tr>
@@ -161,7 +167,7 @@ export default function MembershipPage() {
             </table>
           </div>
           <p className="mt-3 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
-            Standard is the on-ramp · Wood Stork is for B2B and licensee prospects
+            Standard is the simple yearly plan · Custee Card mixes products on the 3-6-9 cadence · Wood Stork is for business customers
           </p>
         </section>
 
@@ -173,9 +179,11 @@ export default function MembershipPage() {
             Same shelf as Stumptown, Onyx, Counter Culture.
           </h2>
           <p className="mt-3 max-w-xl text-base leading-relaxed text-foreground/75">
-            Coastal sits inside the specialty-coffee price band on bag price — but we&rsquo;re
-            the only brand in the category with an annual membership tier and an agentic
-            team you can talk to, negotiate with, and watch work in real time.
+            Our bag prices sit right alongside the top specialty roasters. The
+            difference: we&rsquo;re the only one with a real team you can chat
+            with — Sal at the counter, LUC managing the floor, Melli on
+            business orders, ACHEEVY watching the brand. Talk to them, ask
+            for a deal, watch them work.
           </p>
           <Link
             href="/compare"

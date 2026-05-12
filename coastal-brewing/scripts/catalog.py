@@ -456,38 +456,90 @@ def _resolve_image_path(image_path: str) -> str:
     return _FALLBACK_IMAGE_PATH
 
 
-# Pricing policy — owner directive 2026-05-06.
-# Catalog stores cost-basis truth (wholesale_cost + fulfillment_cost
-# from the supplier pricing JSON). MSRPs are COMPUTED at module load
-# from cost + a single target-margin knob, then rounded to a "$X.99"
-# anchor. One policy lever instead of 236 hand-edited prices.
+# Pricing policy — owner directive 2026-05-11 PM (aligned-pricing canon).
 #
-# Default 60% gross margin — splits the difference between unworkable
-# (the prior placeholder ~12% was below Stripe fees + fulfillment) and
-# Sey/Onyx-tier (65%+). Tier overrides keep premium SKUs at higher
-# margin without dragging house-blend prices into specialty territory.
+# "Align all pricing to be at or slightly above the competition pricing,
+#  with a buffer for our Agentic add-on."
 #
-# Override env: COASTAL_MARGIN_FLOOR_PCT (e.g. 0.55 to drop sitewide).
+# Supersedes the prior Anchor→Haggle→Landing model (`reference_coastal_
+# anchor_haggle_landing_canon_2026_05_09`) for catalog MSRPs. The
+# anchor-haggle mechanic stays available for high-touch / B2B negotiation
+# via Sal/LUC/ACHEEVY/Melli, but the CATALOG starting price is now
+# market-aligned + Agentic buffer instead of 60%-margin opening anchor.
+#
+# Formula: research-derived market-top × 1.15 (Agentic add-on buffer),
+# rounded to $X.99 anchor. See `docs/pricing-aligned-canon-2026-05-11.md`
+# for the per-cohort math + sources.
+#
+# IMPLEMENTATION:
+#   1. `_ALIGNED_MSRP_BY_CATEGORY_SIZE` is the source of truth.
+#      `_compute_msrp` checks this table FIRST.
+#   2. SKUs not in the table fall back to margin-policy compute (legacy
+#      categories like `bundle`, `merch`, ad-hoc SKUs).
+#   3. The cost-floor (cost + $1.50) is always enforced — if the aligned
+#      MSRP somehow ends up below floor, the floor wins.
+#
+# Override env: COASTAL_MARGIN_FLOOR_PCT (legacy fallback for non-tabled
+# categories — does NOT override the aligned MSRP table).
 
 import os as _os_pricing
 
 _MARGIN_FLOOR_PCT = float(_os_pricing.environ.get("COASTAL_MARGIN_FLOOR_PCT", "0.60"))
 
-# Tier-level overrides take precedence when set. Categories not listed
-# fall back to the global floor. Owner can flip these without touching
-# any SKU row — single source of truth for pricing policy.
+# Per-category fallback margins — used ONLY when a SKU's (category, size)
+# is not in `_ALIGNED_MSRP_BY_CATEGORY_SIZE`. Legacy SKUs + bundles.
 _MARGIN_FLOOR_BY_CATEGORY: dict[str, float] = {
     "coffee":             0.60,
-    "specialty_coffee":   0.62,  # Whiskey Barrel / Cold Brew / Coffee of the Month
+    "specialty_coffee":   0.62,
     "flavored_coffee":    0.58,
     "tea":                0.62,
     "kcup":               0.55,
     "instant":            0.62,
-    "functional":         0.65,  # mushroom blends — premium tier
+    "functional":         0.65,
     "sample_pack":        0.55,
     "subscription":       0.55,
     "bundle":             0.50,
     "merch":              0.65,
+}
+
+# Canon source of truth — owner directive 2026-05-11 PM.
+# Maps (category, size) → final retail MSRP in dollars.
+# Pinned by `tests/test_aligned_pricing.py` so future drift fails CI.
+_ALIGNED_MSRP_BY_CATEGORY_SIZE: dict[tuple[str, str], float] = {
+    # Core coffee blends + single-origins (Tier A house)
+    ("coffee", "12oz"):           28.99,
+    ("coffee", "1lb"):            33.99,
+    ("coffee", "2lb"):            49.99,
+    ("coffee", "5lb"):           142.99,
+    # Specialty coffee (Whiskey Barrel, Cold Brew, Coffee of the Month)
+    ("specialty_coffee", "12oz"): 34.99,
+    ("specialty_coffee", "5lb"): 164.99,
+    # Flavored coffee — 12oz/1lb anchored to cost-floor (TCR wholesale
+    # on flavored runs higher than typical mass-market retail floor;
+    # full alignment to research's $16/12oz top isn't achievable without
+    # selling at a loss). See pricing-aligned-canon-2026-05-11.md §Cost
+    # constraints.
+    ("flavored_coffee", "12oz"):  19.99,
+    ("flavored_coffee", "1lb"):   24.99,
+    ("flavored_coffee", "2lb"):   41.99,
+    ("flavored_coffee", "5lb"):   99.99,
+    # Tea (loose-leaf 3oz cylinders + 1oz matcha tin)
+    ("tea", "3oz"):               18.99,
+    ("tea", "1oz"):               50.99,  # ceremonial matcha
+    # K-Cups (size field uses `12pk`/`48pk` per catalog convention).
+    # 12pk anchored to cost-floor — TCR's 12-pod wholesale exceeds
+    # research's $13/12pk market top. 48pk honors full alignment.
+    ("kcup", "12pk"):             17.99,
+    ("kcup", "48pk"):             45.99,
+    # Instant coffee
+    ("instant", "3oz"):           38.99,
+    # Functional (mushroom blends — coffee 8oz, hojicha 3oz, instant 3oz, matcha 1oz)
+    ("functional", "8oz"):        56.99,
+    ("functional", "3oz"):        56.99,
+    ("functional", "1oz"):        56.99,
+    # Sampler packs — catalog uses size="ea" (each) since the contents
+    # mix differs by sampler variant. Single canon anchor across variants.
+    ("sample_pack", "ea"):        30.99,
 }
 
 
@@ -505,17 +557,37 @@ def _round_to_anchor(price: float) -> float:
 
 
 def _compute_msrp(p: dict) -> float | None:
-    """Compute MSRP from cost + margin policy. Returns None if cost data
-    isn't available (e.g., bundles that price separately)."""
+    """Compute MSRP. Resolution order (owner directive 2026-05-11 PM):
+
+      1. Aligned MSRP table (research-derived, market-top × 1.15 buffer).
+      2. Margin-policy fallback (legacy categories / no table match).
+
+    The cost-floor (cost + $1.50) is enforced last — if either source
+    produces an MSRP below floor, the floor wins (next $X.99 above floor).
+    """
     cost = p.get("wholesale_cost")
     if cost is None:
         return None
     fulfillment = p.get("fulfillment_cost", 0.0) or 0.0
     landed = float(cost) + float(fulfillment)
+    floor_msrp = landed + 1.50
+
     category = p.get("category", "") or ""
-    target = _MARGIN_FLOOR_BY_CATEGORY.get(category, _MARGIN_FLOOR_PCT)
-    raw_msrp = landed / max(0.05, 1.0 - target)
-    return round(_round_to_anchor(raw_msrp), 2)
+    size = p.get("size", "") or ""
+
+    aligned = _ALIGNED_MSRP_BY_CATEGORY_SIZE.get((category, size))
+    if aligned is not None:
+        msrp = float(aligned)
+    else:
+        target = _MARGIN_FLOOR_BY_CATEGORY.get(category, _MARGIN_FLOOR_PCT)
+        raw_msrp = landed / max(0.05, 1.0 - target)
+        msrp = _round_to_anchor(raw_msrp)
+
+    # Floor enforcement — never sell at a loss regardless of canon table.
+    if msrp < floor_msrp:
+        msrp = _round_to_anchor(floor_msrp)
+
+    return round(msrp, 2)
 
 
 def _enrich_products() -> None:

@@ -32,9 +32,9 @@ type Competitor = {
 const COMPETITORS: Competitor[] = [
   {
     brand: "Coastal Brewing Co.",
-    bagPrice: "$24.99",
+    bagPrice: "$28.99",
     bagSize: "12oz",
-    membership: "$199/yr (9-mo plan)",
+    membership: "$22.49/mo (9-mo plan)",
     membershipNote: "C|Brew 3-6-9 · pay 9, get 12 · monthly + 3/6/9 cadences",
     freeShipThreshold: "Free under $15 freight",
     voiceAgent: true,
