@@ -93,6 +93,22 @@ def _migrate(conn: sqlite3.Connection) -> None:
     conn.execute("CREATE INDEX IF NOT EXISTS idx_risk_events_task ON risk_events(task_id)")
     conn.execute("CREATE INDEX IF NOT EXISTS idx_risk_events_severity ON risk_events(severity, created_at)")
 
+    # used_tokens (added 2026-05-12 PM): single-use magic-link replay guard.
+    # `jti` is the unique nonce the signer embeds in each token. First valid
+    # /auth/verify call inserts the row; replays hit the PRIMARY KEY
+    # constraint and are rejected at the helper layer. `exp_unix` is the
+    # token's own TTL — purge_expired_tokens() can drop rows older than
+    # that to keep the table compact.
+    conn.execute(
+        """CREATE TABLE IF NOT EXISTS used_tokens (
+            jti TEXT PRIMARY KEY,
+            email TEXT,
+            used_at TEXT NOT NULL,
+            exp_unix INTEGER NOT NULL
+        )"""
+    )
+    conn.execute("CREATE INDEX IF NOT EXISTS idx_used_tokens_exp ON used_tokens(exp_unix)")
+
 
 def init_schema() -> None:
     global _initialized
@@ -464,3 +480,55 @@ def query_recent_action_receipts(
 
 def is_available() -> bool:
     return SCHEMA_PATH.exists()
+
+
+# ─────────────────────────────────────────────────────────────────────
+# used_tokens — single-use magic-link replay guard (2026-05-12)
+# ─────────────────────────────────────────────────────────────────────
+# The signer embeds a unique `jti` in every magic-link token. The
+# verifier records the jti in this table on first valid use. Replays
+# hit the PRIMARY KEY constraint and `mark_token_used` returns False —
+# signalling the verifier to reject. Without this, a leaked token
+# (browser history, access log) is replayable for the full 30-min TTL.
+
+def mark_token_used(*, jti: str, email: Optional[str], exp_unix: int) -> bool:
+    """Atomically record a token's first use.
+
+    Returns True if this is the first time `jti` has been recorded
+    (caller proceeds with verification). Returns False if the row
+    already exists (replay attempt — caller must reject).
+    """
+    init_schema()
+    with _lock:
+        conn = _connect()
+        try:
+            try:
+                conn.execute(
+                    "INSERT INTO used_tokens (jti, email, used_at, exp_unix) VALUES (?, ?, ?, ?)",
+                    (jti, email or "", _utc_now(), int(exp_unix)),
+                )
+                return True
+            except sqlite3.IntegrityError:
+                # PRIMARY KEY conflict — jti already used. Replay.
+                return False
+        finally:
+            conn.close()
+
+
+def purge_expired_tokens(*, older_than_unix: int) -> int:
+    """Drop rows whose token expiry is older than the threshold.
+
+    Called opportunistically (e.g., on each successful verify) to keep
+    the table compact. Returns the number of rows deleted.
+    """
+    init_schema()
+    with _lock:
+        conn = _connect()
+        try:
+            cur = conn.execute(
+                "DELETE FROM used_tokens WHERE exp_unix < ?",
+                (int(older_than_unix),),
+            )
+            return int(cur.rowcount or 0)
+        finally:
+            conn.close()

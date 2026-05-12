@@ -3404,7 +3404,12 @@ async def chat_stream(websocket: WebSocket, token: Optional[str] = Query(default
     for _ck in _cookie_header.split(";"):
         _ck = _ck.strip()
         if _ck.startswith(f"{COASTAL_UID_COOKIE}="):
-            coastal_uid = _ck.split("=", 1)[1].strip() or None
+            _raw_uid = _ck.split("=", 1)[1].strip() or None
+            # Verify HMAC signature (or accept legacy unsigned).
+            # Forged signed cookies (mismatched HMAC) resolve to None
+            # — the WS handler proceeds as anonymous rather than
+            # treating the forged value as a real session.
+            coastal_uid = _resolve_uid_cookie(_raw_uid)
             break
 
     # Session state
@@ -3637,16 +3642,102 @@ COASTAL_UID_COOKIE = "coastal_uid"
 COASTAL_UID_MAX_AGE_SEC = 31_536_000  # 1 year
 
 
+# ─────────────────────────────────────────────────────────────────────
+# HMAC-signed coastal_uid cookie (2026-05-12)
+# ─────────────────────────────────────────────────────────────────────
+# Before this change, the cookie value was a raw `cuid_<32hex>` random.
+# Anyone who learned the value (XSS, leaked audit log, brute force on
+# the 128-bit space) could forge the session by setting the cookie.
+# Now: value = f"{uid}.{HMAC(AUTH_SECRET, uid)}" — forgery requires
+# the secret. _resolve_uid_cookie() handles backward-compatibility via
+# DUAL-READ for legacy unsigned cookies still in user browsers; legacy
+# cookies are accepted indefinitely (1-year max-age aging out
+# naturally) but the next write replaces them with a signed value.
+
+def _sign_uid_for_cookie(uid: str) -> str:
+    """Return the signed cookie value for a uid: `<uid>.<hmac8>`.
+
+    Truncating the HMAC to 16 hex chars (64 bits) keeps the cookie
+    short while leaving the forgery-resistance well above brute-force
+    threshold for an unprivileged web attacker.
+    """
+    if not AUTH_SECRET:
+        # Without a secret we can't sign. Return the bare uid — the
+        # verifier dual-reads it as legacy. This keeps dev environments
+        # without COASTAL_AUTH_SECRET set functional.
+        return uid
+    sig = _auth_hmac.new(
+        AUTH_SECRET.encode("utf-8"), uid.encode("ascii"), _auth_hashlib.sha256,
+    ).hexdigest()[:16]
+    return f"{uid}.{sig}"
+
+
+def _resolve_uid_cookie(raw: Optional[str]) -> Optional[str]:
+    """Resolve a raw cookie value to a verified uid, or None for
+    forgery / missing.
+
+    Three accept paths:
+      1. Signed format `<uid>.<hmac>`: verify HMAC with constant-time
+         compare. Mismatch → None (forgery).
+      2. Legacy unsigned format `cuid_<hex>`: dual-read — accept
+         indefinitely (cookies in user browsers from before this fix
+         are 1-year max-age, so they'll age out). Future writes from
+         _ensure_uid / auth_verify replace them with signed values.
+      3. None or unrecognized format → None.
+    """
+    if not raw:
+        return None
+    if "." in raw:
+        uid, sig = raw.rsplit(".", 1)
+        if not AUTH_SECRET:
+            # Can't verify without secret; treat as legacy (accept uid
+            # portion) so dev/local stays functional.
+            return uid or None
+        expected = _auth_hmac.new(
+            AUTH_SECRET.encode("utf-8"), uid.encode("ascii"), _auth_hashlib.sha256,
+        ).hexdigest()[:16]
+        if _auth_hmac.compare_digest(sig, expected):
+            return uid
+        # Signature mismatch — forged cookie. Reject.
+        return None
+    # Legacy unsigned cookie (no dot). Accept any non-empty value as
+    # the uid for backward compatibility with sessions minted before
+    # the signing rollout. Anonymous + signed-in flows will re-stamp
+    # via _ensure_uid / auth_verify on the next response.
+    return raw or None
+
+
 def _ensure_uid(coastal_uid: Optional[str], response: Response) -> str:
-    """Resolve or mint a coastal_uid for the caller. If a cookie is present,
-    return its value; otherwise mint a new one + set the cookie on the
-    response. Idempotent: subsequent calls reuse the existing cookie."""
-    if coastal_uid:
-        return coastal_uid
+    """Resolve or mint a coastal_uid for the caller.
+
+    Cookie discipline:
+      - Existing signed cookie → resolved uid is returned, no re-stamp.
+      - Existing legacy unsigned cookie → uid is accepted AND the
+        response gets a fresh signed cookie write so the migration
+        happens transparently on the next round trip.
+      - No cookie or forged cookie (signature mismatch) → mint a new
+        uid + write a signed cookie.
+    """
+    resolved = _resolve_uid_cookie(coastal_uid)
+    if resolved:
+        # Re-stamp opportunistically if the incoming cookie was legacy
+        # unsigned (no dot). Detected as "raw differs from what a
+        # signed version would look like."
+        if AUTH_SECRET and "." not in (coastal_uid or ""):
+            response.set_cookie(
+                key=COASTAL_UID_COOKIE,
+                value=_sign_uid_for_cookie(resolved),
+                max_age=COASTAL_UID_MAX_AGE_SEC,
+                httponly=True,
+                secure=True,
+                samesite="lax",
+                path="/",
+            )
+        return resolved
     new_uid = _profile_layer.new_coastal_uid()
     response.set_cookie(
         key=COASTAL_UID_COOKIE,
-        value=new_uid,
+        value=_sign_uid_for_cookie(new_uid),
         max_age=COASTAL_UID_MAX_AGE_SEC,
         httponly=True,
         secure=True,
@@ -3798,6 +3889,7 @@ async def users_session_summary(
     the summary server-side via Gemini."""
     if not _profile_layer.is_configured():
         raise HTTPException(status_code=503, detail="user-profile RAG disabled")
+    coastal_uid = _resolve_uid_cookie(coastal_uid)
     if not coastal_uid:
         return {"stored": False, "reason": "no coastal_uid cookie"}
     sid = _profile_layer.record_session_summary(
@@ -3902,6 +3994,7 @@ async def users_session_wrap(
     Frontend never touches the Gemini key."""
     if not _profile_layer.is_configured():
         raise HTTPException(status_code=503, detail="user-profile RAG disabled")
+    coastal_uid = _resolve_uid_cookie(coastal_uid)
     if not coastal_uid:
         return {"stored": False, "reason": "no coastal_uid cookie"}
     if not body.transcript:
@@ -3969,9 +4062,17 @@ AUTH_PUBLIC_URL = os.environ.get("COASTAL_PUBLIC_URL", "https://brewing.foai.clo
 
 
 def _auth_sign(payload: Dict[str, Any]) -> str:
-    """Sign a payload as base64(json).hmac. Compact, no JWT lib needed."""
+    """Sign a payload as base64(json).hmac. Compact, no JWT lib needed.
+
+    Always embeds a fresh `jti` nonce if the caller hasn't provided one.
+    The `jti` is recorded in the audit_ledger `used_tokens` table on
+    first /auth/verify success and rejected on every subsequent attempt
+    (single-use enforcement). See _auth_verify().
+    """
     if not AUTH_SECRET:
         raise HTTPException(status_code=503, detail="COASTAL_AUTH_SECRET not configured")
+    payload = dict(payload)
+    payload.setdefault("jti", secrets.token_urlsafe(16))
     body = _auth_b64.urlsafe_b64encode(
         json.dumps(payload, separators=(",", ":")).encode("utf-8")
     ).rstrip(b"=").decode("ascii")
@@ -3981,8 +4082,18 @@ def _auth_sign(payload: Dict[str, Any]) -> str:
     return f"{body}.{sig}"
 
 
-def _auth_verify(token: str) -> Optional[Dict[str, Any]]:
-    """Verify a token signature + TTL. Returns payload or None."""
+def _auth_verify(token: str, *, burn: bool = True) -> Optional[Dict[str, Any]]:
+    """Verify a token signature + TTL + first-use. Returns payload or None.
+
+    With burn=True (default, used by /auth/verify): on first valid use
+    the token's jti is recorded; replays return None. Callers that need
+    to inspect a token without consuming it (debug surfaces) can pass
+    burn=False.
+
+    Backward-compat: tokens minted before the jti rollout don't carry
+    a jti field. We synthesize one from sha256(body+sig)[:32] for
+    those so legacy tokens still burn correctly through the same path.
+    """
     if not AUTH_SECRET or not token or "." not in token:
         return None
     body, sig = token.rsplit(".", 1)
@@ -3997,8 +4108,31 @@ def _auth_verify(token: str) -> Optional[Dict[str, Any]]:
         payload = json.loads(raw)
     except Exception:
         return None
-    if int(payload.get("exp", 0)) < int(_auth_time.time()):
+    exp_unix = int(payload.get("exp", 0))
+    if exp_unix < int(_auth_time.time()):
         return None
+    if burn:
+        jti = payload.get("jti") or _auth_hashlib.sha256(
+            f"{body}.{sig}".encode("ascii")
+        ).hexdigest()[:32]
+        try:
+            is_first_use = audit_ledger.mark_token_used(
+                jti=str(jti),
+                email=payload.get("email"),
+                exp_unix=exp_unix,
+            )
+        except Exception as _exc:  # noqa: BLE001
+            log = __import__("logging").getLogger("coastal.auth")
+            log.warning("used_tokens write failed: %s — failing closed", _exc)
+            return None
+        if not is_first_use:
+            return None
+        # Opportunistically purge expired tokens (cheap; runs at most
+        # once per /auth/verify call). Keeps the table compact.
+        try:
+            audit_ledger.purge_expired_tokens(older_than_unix=int(_auth_time.time()))
+        except Exception:
+            pass
     return payload
 
 
@@ -4977,6 +5111,7 @@ async def account_welcome_card_audio(
     """Serve the caller's saved welcome-narration MP3. Auth-gated by the
     cookie + identity presence. Returns 404 if the user has no narration
     on file (caller falls back to silent mode)."""
+    coastal_uid = _resolve_uid_cookie(coastal_uid)
     if not coastal_uid or not _profile_layer.is_configured():
         raise HTTPException(status_code=401, detail="not authenticated")
     profile = _profile_layer.get_profile(coastal_uid)
@@ -4995,67 +5130,104 @@ async def account_welcome_card_audio(
 @app.post("/api/v1/auth/signup")
 async def auth_signup(
     body: AuthSignupRequest,
-    response: Response,
-    coastal_uid: Optional[str] = Cookie(default=None, alias=COASTAL_UID_COOKIE),
+    request: Request,
 ):
-    """Create an account: bind the caller's coastal_uid to the email and
-    create a Stripe Customer. Returns the authenticated profile.
+    """Begin a new-account flow: send a magic-link to the supplied email.
 
-    If a profile already exists for this email on a different coastal_uid
-    (e.g. user previously signed up from another browser), we DON'T move
-    the cookie — they stay on this device's history. That's owner-canon:
-    cross-device sync happens via /auth/login magic link, not silent on
-    signup.
+    Owner-canon 2026-05-12 PM: signup no longer binds the email to the
+    caller's coastal_uid or creates a Stripe Customer until the user
+    proves email ownership by clicking the magic link. Without this
+    step ANY caller could POST any email + name and pre-empt the
+    legitimate owner's signup (account pre-emption attack), plus
+    polluting the Stripe Customer list with unverified emails.
+
+    The flow is now:
+       1. Caller POSTs {email, name} here.
+       2. Server mints a signup-flavored magic-link token (extra
+          `signup=true` + `name=<value>` fields beyond the usual login
+          token shape) and emails the link.
+       3. User clicks link → /api/v1/auth/verify consumes the token,
+          mints a fresh signed coastal_uid cookie, binds the email,
+          creates the Stripe Customer, renders the welcome card.
+
+    Returns a generic check-inbox response. Same shape regardless of
+    whether the email already has an account (prevents enumeration).
     """
+    # Apply the same per-IP throttle as /auth/login so signup can't be
+    # used to mass-email arbitrary inboxes.
+    _check_rate_limit("auth", _client_ip(
+        request.headers,
+        fallback=request.client.host if request.client else None,
+    ))
     if not _profile_layer.is_configured():
         raise HTTPException(status_code=503, detail="profile layer not configured")
     email = (body.email or "").strip().lower()
     if not email or "@" not in email:
         raise HTTPException(status_code=400, detail="valid email required")
-    uid = _ensure_uid(coastal_uid, response)
-    # Make sure profile row exists (ensure_profile / upsert visit)
-    _profile_layer.upsert_profile_visit(uid)
-    # Bind email to the coastal_uid (sets profile.identity)
-    profile = _profile_layer.update_identity(uid, email)
-    # Create Stripe Customer (best-effort; non-fatal if Stripe is down)
-    stripe_customer_id = _stripe_customer_create(email, body.name)
-    # Always persist display_name + stripe_customer_id (when present) into
-    # profile metadata so /account can render them. Don't gate the write
-    # on Stripe being configured — display_name is independently useful.
-    meta = dict(profile.metadata or {})
-    if body.name:
-        meta["display_name"] = body.name
-    if stripe_customer_id:
-        meta["stripe_customer_id"] = stripe_customer_id
+    name = (body.name or "").strip()[:80]  # cap so we can stuff into token payload safely
 
-    # Welcome-card render (best-effort, non-fatal): generate the
-    # personalized message via Claude → render Sal narration via
-    # Inworld TTS → save MP3. The frontend on /account first-load
-    # reads `welcome_card_message` + `welcome_card_url` from /me to
-    # play the card. If either step fails, signup still succeeds and
-    # the welcome card falls back gracefully (static text + no audio).
-    welcome_text = _generate_welcome_message(body.name, email)
-    meta["welcome_card_message"] = welcome_text
-    meta["welcome_card_seen"] = False
+    # Mint a signup token. Distinct from login tokens via the `signup`
+    # flag so /auth/verify can fire the new-account branch (create
+    # Stripe Customer, welcome card). If the email already has a
+    # profile, that branch falls through to the login behavior — same
+    # token works for both, the caller never knows which path it took.
+    token = _auth_sign({
+        "email": email,
+        "name": name,
+        "signup": True,
+        "exp": int(_auth_time.time()) + AUTH_TOKEN_TTL_SEC,
+    })
+    link = f"{AUTH_PUBLIC_URL}/auth/verify?token={token}"
+
+    response_payload: Dict[str, Any] = {
+        "ok": True,
+        "sent": True,
+        "check_inbox": True,
+        "email": email,
+        "expires_in_sec": AUTH_TOKEN_TTL_SEC,
+    }
+
+    # Deliver via the same email adapter as /auth/login. Same dev-mode
+    # discipline: only return the link inline if COASTAL_DEBUG=true is
+    # explicitly set, otherwise fail closed.
     try:
-        narration_ok = await _render_welcome_narration(
-            welcome_text, "sal_ang", uid,
+        from adapters.email_adapter import (   # noqa: E402
+            is_configured as _email_is_configured,
+            send_email as _email_send,
+            magic_link_email_body as _magic_link_body,
         )
     except Exception:
-        narration_ok = False
-    if narration_ok:
-        meta["welcome_card_url"] = "/api/v1/account/welcome-card.mp3"
+        _email_is_configured = lambda: False  # type: ignore
+        _email_send = None                     # type: ignore
+        _magic_link_body = None                # type: ignore
 
-    if meta != (profile.metadata or {}):
-        _profile_layer.update_metadata(uid, meta)
-    return {
-        "ok": True,
-        "coastal_uid": uid,
-        "email": email,
-        "display_name": body.name,
-        "stripe_customer_id": stripe_customer_id,
-        "welcome_card_ready": narration_ok,
-    }
+    if _email_is_configured() and _email_send and _magic_link_body:
+        _, text = _magic_link_body(
+            recipient_email=email,
+            magic_link=link,
+            ttl_minutes=AUTH_TOKEN_TTL_SEC // 60,
+        )
+        try:
+            _email_send(
+                to=email,
+                subject="Confirm your Coastal Brewing Co. account",
+                text=text,
+                template_id="auth_signup_link",
+            )
+        except Exception as exc:
+            log = __import__("logging").getLogger("coastal.auth")
+            log.warning("appint email send raised for signup %s: %s", email, exc)
+    else:
+        if os.environ.get("COASTAL_DEBUG", "").strip().lower() in ("1", "true", "yes"):
+            response_payload["magic_link"] = link
+        else:
+            log = __import__("logging").getLogger("coastal.auth")
+            log.warning(
+                "auth_signup: email adapter unconfigured for %s — magic-link suppressed",
+                email,
+            )
+
+    return response_payload
 
 
 @app.post("/api/v1/auth/login")
@@ -5173,26 +5345,80 @@ async def auth_verify(
     payload = _auth_verify(token)
     if not payload:
         raise HTTPException(status_code=401, detail="invalid or expired token")
-    uid = payload["uid"]
     email = payload["email"]
-    # Re-stamp the cookie to the verified uid. Since the user is on a new
-    # device, we override their existing coastal_uid (if any) with the
-    # canonical one for this email so their history carries forward.
+    is_signup = bool(payload.get("signup"))
+    name = payload.get("name") or ""
+
+    # Resolve the profile to bind:
+    #   - Signup token: find_by_identity first. If an existing profile
+    #     binds this email, use it (idempotent — a second signup click
+    #     for the same email just logs the user in). Otherwise mint a
+    #     fresh uid.
+    #   - Login token: uses the uid embedded by /auth/login.
+    if is_signup:
+        existing = _profile_layer.find_by_identity(email)
+        if existing is not None:
+            uid = existing.coastal_uid
+        else:
+            uid = _profile_layer.new_coastal_uid()
+            # Insert the row so update_identity has something to bind to.
+            _profile_layer.upsert_profile_visit(uid)
+    else:
+        uid = payload["uid"]
+
+    # Re-stamp the cookie with a signed value pinned to the verified uid.
     response.set_cookie(
         key=COASTAL_UID_COOKIE,
-        value=uid,
+        value=_sign_uid_for_cookie(uid),
         max_age=COASTAL_UID_MAX_AGE_SEC,
         httponly=True,
         secure=True,
         samesite="lax",
         path="/",
     )
+
+    # On the SIGNUP branch only: now that email ownership is proven
+    # (the user clicked the link in their inbox), it's safe to bind
+    # identity, create the Stripe customer, and render the welcome
+    # card. These were previously done at signup time without
+    # verification — closes the account pre-emption attack.
+    stripe_customer_id: Optional[str] = None
+    welcome_card_ready = False
+    if is_signup:
+        try:
+            profile = _profile_layer.update_identity(uid, email)
+            stripe_customer_id = _stripe_customer_create(email, name)
+            meta = dict(profile.metadata or {})
+            if name:
+                meta["display_name"] = name
+            if stripe_customer_id:
+                meta["stripe_customer_id"] = stripe_customer_id
+            welcome_text = _generate_welcome_message(name, email)
+            meta["welcome_card_message"] = welcome_text
+            meta["welcome_card_seen"] = False
+            try:
+                welcome_card_ready = await _render_welcome_narration(
+                    welcome_text, "sal_ang", uid,
+                )
+            except Exception:
+                welcome_card_ready = False
+            if welcome_card_ready:
+                meta["welcome_card_url"] = "/api/v1/account/welcome-card.mp3"
+            if meta != (profile.metadata or {}):
+                _profile_layer.update_metadata(uid, meta)
+        except Exception as _exc:  # noqa: BLE001
+            log = __import__("logging").getLogger("coastal.auth")
+            log.warning("signup-verify finalize failed for %s: %s", email, _exc)
+
     profile = _profile_layer.get_profile(uid)
     return {
         "ok": True,
         "coastal_uid": uid,
         "email": email,
         "profile_present": profile is not None,
+        "signup": is_signup,
+        "stripe_customer_id": stripe_customer_id,
+        "welcome_card_ready": welcome_card_ready,
     }
 
 
@@ -5202,6 +5428,7 @@ async def auth_me(
 ):
     """Return the authenticated user's profile, or {authenticated: false}
     if the caller is anonymous. Used by /account to gate the page."""
+    coastal_uid = _resolve_uid_cookie(coastal_uid)
     if not coastal_uid or not _profile_layer.is_configured():
         return {"authenticated": False}
     profile = _profile_layer.get_profile(coastal_uid)
@@ -5639,6 +5866,7 @@ class CartSetQuantityRequest(BaseModel):
 
 @app.get("/api/v1/cart")
 async def cart_get(coastal_uid: Optional[str] = Cookie(default=None)):
+    coastal_uid = _resolve_uid_cookie(coastal_uid)
     if not coastal_uid:
         return {"ok": True, "items": [], "line_items": 0, "total_quantity": 0, "anonymous": True}
     if not cart_store.is_configured():
@@ -5664,6 +5892,7 @@ async def cart_add_item(body: CartAddItemRequest, response: Response, coastal_ui
 
 @app.patch("/api/v1/cart/items/{sku}")
 async def cart_patch_item(sku: str, body: CartSetQuantityRequest, coastal_uid: Optional[str] = Cookie(default=None)):
+    coastal_uid = _resolve_uid_cookie(coastal_uid)
     if not coastal_uid:
         raise HTTPException(status_code=400, detail="coastal_uid cookie required")
     if not cart_store.is_configured():
@@ -5678,6 +5907,7 @@ async def cart_patch_item(sku: str, body: CartSetQuantityRequest, coastal_uid: O
 
 @app.delete("/api/v1/cart/items/{sku}")
 async def cart_delete_item(sku: str, variant: Optional[str] = None, coastal_uid: Optional[str] = Cookie(default=None)):
+    coastal_uid = _resolve_uid_cookie(coastal_uid)
     if not coastal_uid:
         raise HTTPException(status_code=400, detail="coastal_uid cookie required")
     if not cart_store.is_configured():
@@ -5691,6 +5921,7 @@ async def cart_delete_item(sku: str, variant: Optional[str] = None, coastal_uid:
 
 @app.post("/api/v1/cart/clear")
 async def cart_clear(coastal_uid: Optional[str] = Cookie(default=None)):
+    coastal_uid = _resolve_uid_cookie(coastal_uid)
     if not coastal_uid:
         return {"ok": True, "cleared": False}
     if not cart_store.is_configured():
@@ -5995,6 +6226,7 @@ async def team_handoff(body: TeamHandoffRequest, coastal_uid: Optional[str] = Co
     hawk.foai.cloud/tools/risk-events under category=team_handoff.
     Future Betty Ann_Ang dashboard reads this stream to compute
     per-team-member effectiveness/efficiency."""
+    coastal_uid = _resolve_uid_cookie(coastal_uid)
     fr = (body.from_employee or "").strip()
     to = (body.to_employee or "").strip()
     if not fr or not to or fr == to:
@@ -6048,6 +6280,7 @@ async def loss_prevention_event(body: LossPreventionEventRequest, coastal_uid: O
        low_intent_warning  → low      (watch flag, not a close)
        other               → low
     """
+    coastal_uid = _resolve_uid_cookie(coastal_uid)
     severity_map = {
         "nerf_attempt":        "high",
         "session_too_long":    "medium",
@@ -6123,6 +6356,7 @@ async def account_welcome_dismiss(
     """Mark the post-signup welcome card as seen so it doesn't replay on
     subsequent /account loads. Auth-gated by the cookie + profile.identity
     presence — anonymous callers are quietly no-op'd."""
+    coastal_uid = _resolve_uid_cookie(coastal_uid)
     if not coastal_uid or not _profile_layer.is_configured():
         return {"ok": False, "reason": "not authenticated"}
     profile = _profile_layer.get_profile(coastal_uid)
