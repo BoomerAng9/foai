@@ -5987,8 +5987,12 @@ _INWORLD_VOICE_MAP: Dict[str, Dict[str, str]] = {
     "acheevy": {
         "voiceId": os.environ.get("INWORLD_VOICE_ID_ACHEEVY") or _COASTAL_V2_VOICEID["acheevy"],
         "model": "inworld-tts-2",
-        "deliveryMode": os.environ.get("INWORLD_DELIVERY_MODE_ACHEEVY") or "EXPRESSIVE",
-        "speakingRate": 0.95,
+        # Owner directive 2026-05-12 (cadence pass on McKnight v3 clone):
+        # more professional + more upbeat. EXPRESSIVE → STABLE (steadier,
+        # less emotional swing — Brand Director register). 0.95 → 1.10
+        # (faster pace, brighter delivery).
+        "deliveryMode": os.environ.get("INWORLD_DELIVERY_MODE_ACHEEVY") or "STABLE",
+        "speakingRate": float(os.environ.get("INWORLD_SPEAKING_RATE_ACHEEVY") or "1.10"),
     },
     # Marcus — Loss Prevention floor team. Register: calm, professional,
     # structured. Less warm than Sal, less authoritative than ACHEEVY.
