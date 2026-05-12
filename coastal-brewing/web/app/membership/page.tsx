@@ -95,8 +95,9 @@ export default function MembershipPage() {
         <section className="mb-14 rounded-lg border border-border bg-card/40 p-8">
           <h2 className="font-serif text-2xl text-foreground">Join</h2>
           <p className="mt-3 text-foreground/75">
-            Standard Membership is $199 a year. Drop your email below and
-            you&rsquo;ll go straight to secure checkout. Questions? Reach out to{" "}
+            Pick your cadence (monthly, 3-mo, 6-mo, or 9-mo), pick what
+            comes in your box, drop your email below — you&rsquo;ll go straight
+            to secure checkout. Questions? Reach out to{" "}
             <a
               className="text-accent underline-offset-4 hover:underline"
               href="mailto:members@coastalbrewing.co"
@@ -114,42 +115,32 @@ export default function MembershipPage() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="bg-muted/30 text-left font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
-                  <th className="px-4 py-3">Tier</th>
+                  <th className="px-4 py-3">Plan</th>
                   <th className="px-4 py-3">Price</th>
-                  <th className="px-4 py-3">Discount</th>
-                  <th className="px-4 py-3">Concierge</th>
+                  <th className="px-4 py-3">What fits in your box</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border text-foreground/85">
                 <tr className="bg-accent/5">
-                  <td className="px-4 py-3 font-medium">Standard Membership</td>
-                  <td className="px-4 py-3">$199 / yr</td>
-                  <td className="px-4 py-3">15%</td>
-                  <td className="px-4 py-3 text-muted-foreground">—</td>
+                  <td className="px-4 py-3 font-medium">Pooler Pass Plan (local)</td>
+                  <td className="px-4 py-3">$5.62 – $11.24 / mo</td>
+                  <td className="px-4 py-3">1–2 items per cycle</td>
                 </tr>
                 <tr>
-                  <td className="px-4 py-3">Coastal Custee Card</td>
+                  <td className="px-4 py-3 font-medium">Coastal Custee Card Plan</td>
                   <td className="px-4 py-3">$22.49 / mo (9-mo plan)</td>
-                  <td className="px-4 py-3">Mix-and-match products</td>
-                  <td className="px-4 py-3 text-muted-foreground">—</td>
+                  <td className="px-4 py-3">Mix-and-match each cycle</td>
                 </tr>
                 <tr>
-                  <td className="px-4 py-3">Wood Stork Standard</td>
-                  <td className="px-4 py-3">$56.24 / mo (9-mo plan)</td>
-                  <td className="px-4 py-3">18-50% (referral-tiered)</td>
-                  <td className="px-4 py-3 text-muted-foreground">—</td>
-                </tr>
-                <tr>
-                  <td className="px-4 py-3">Wood Stork Reserve</td>
-                  <td className="px-4 py-3">$112.49 / mo (9-mo plan)</td>
-                  <td className="px-4 py-3">18-50% (referral-tiered)</td>
-                  <td className="px-4 py-3">Yes</td>
+                  <td className="px-4 py-3">Wood Stork Plan</td>
+                  <td className="px-4 py-3">$56.24 – $112.49 / mo</td>
+                  <td className="px-4 py-3">Bulk / multi-location</td>
                 </tr>
               </tbody>
             </table>
           </div>
           <p className="mt-3 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
-            Standard is the simple yearly plan · Custee Card mixes products on the 3-6-9 cadence · Wood Stork is for business customers
+            Pooler Pass is local (50–100 mi from Pooler) · Custee Card ships nationwide · Wood Stork is for business customers
           </p>
         </section>
 
