@@ -3986,7 +3986,7 @@ def custee_card_checkout(
             detail=f"unknown products: {invalid}; allowed: {sorted(ALLOWED_CUSTEE_CARD_PRODUCTS)}",
         )
 
-    total_cents = _cadence_mod.cadence_total_cents(
+    monthly_billing_cents = _cadence_mod.cadence_monthly_billing_cents(
         CUSTEE_CARD_MONTHLY_RETAIL_DOLLARS, cadence_id,  # type: ignore[arg-type]
     )
     cadence_label = _cadence_mod.CADENCES[cadence_id]["label"]  # type: ignore[index]
@@ -4009,12 +4009,13 @@ def custee_card_checkout(
         from adapters.stripe_adapter import _init_stripe  # noqa: PLC0415
         _init_stripe()
         session = _stripe.checkout.Session.create(
-            mode="payment",
+            mode="subscription",
             customer_email=email,
             line_items=[{
                 "price_data": {
                     "currency": "usd",
-                    "unit_amount": total_cents,
+                    "unit_amount": monthly_billing_cents,
+                    "recurring": {"interval": "month"},
                     "product_data": {
                         "name": f"Coastal Custee Card · {cadence_label}",
                         "description": f"Products: {products_label}",
@@ -4024,7 +4025,7 @@ def custee_card_checkout(
                 "quantity": 1,
             }],
             metadata=metadata,
-            payment_intent_data={"metadata": metadata},
+            subscription_data={"metadata": metadata},
             success_url=f"{AUTH_PUBLIC_URL}/membership/thank-you?intent={intent_id}",
             cancel_url=f"{AUTH_PUBLIC_URL}/membership?canceled=1",
             billing_address_collection="auto",
@@ -4042,7 +4043,7 @@ def custee_card_checkout(
         f"custee: {email}\n"
         f"cadence: {cadence_id} ({cadence_label})\n"
         f"products: {products_label}\n"
-        f"total: ${total_cents/100:.2f}\n"
+        f"monthly: ${monthly_billing_cents/100:.2f}/mo\n"
         f"session: {session_id or '?'}"
     )
 
@@ -4051,7 +4052,7 @@ def custee_card_checkout(
         "intent_id": intent_id,
         "session_id": session_id,
         "redirect_url": checkout_url,
-        "total_cents": total_cents,
+        "monthly_billing_cents": monthly_billing_cents,
         "cadence": cadence_id,
         "tier": "custee-card",
         "products": products,
@@ -4180,7 +4181,7 @@ def wood_stork_checkout(
         raise HTTPException(status_code=400, detail="whitelabel is Wood Stork Reserve only")
 
     monthly_retail = membership_wood_stork.monthly_retail_for_tier(tier)  # type: ignore[arg-type]
-    total_cents = _cadence_mod.cadence_total_cents(monthly_retail, cadence_id)  # type: ignore[arg-type]
+    monthly_billing_cents = _cadence_mod.cadence_monthly_billing_cents(monthly_retail, cadence_id)  # type: ignore[arg-type]
     cadence_label = _cadence_mod.CADENCES[cadence_id]["label"]  # type: ignore[index]
     tier_label = f"Wood Stork {tier.capitalize()}"
     products_label = ", ".join(products) if products else "—"
@@ -4199,10 +4200,11 @@ def wood_stork_checkout(
         from adapters.stripe_adapter import _init_stripe  # noqa: PLC0415
         _init_stripe()
         session = _stripe.checkout.Session.create(
-            mode="payment", customer_email=email,
+            mode="subscription", customer_email=email,
             line_items=[{
                 "price_data": {
-                    "currency": "usd", "unit_amount": total_cents,
+                    "currency": "usd", "unit_amount": monthly_billing_cents,
+                    "recurring": {"interval": "month"},
                     "product_data": {
                         "name": f"{tier_label} · {cadence_label}",
                         "description": f"{business_name} · Products: {products_label}",
@@ -4210,7 +4212,7 @@ def wood_stork_checkout(
                     },
                 }, "quantity": 1,
             }],
-            metadata=metadata, payment_intent_data={"metadata": metadata},
+            metadata=metadata, subscription_data={"metadata": metadata},
             success_url=f"{AUTH_PUBLIC_URL}/wood-stork/thank-you?intent={intent_id}",
             cancel_url=f"{AUTH_PUBLIC_URL}/wood-stork?canceled=1",
             billing_address_collection="auto",
@@ -4225,12 +4227,12 @@ def wood_stork_checkout(
     _send_telegram_message(
         f"Wood Stork {tier} subscription intent\nintent: {intent_id}\nbusiness: {business_name}\n"
         f"custee: {email}\ncadence: {cadence_id} ({cadence_label})\nproducts: {products_label}\n"
-        f"total: ${total_cents/100:.2f}\nsession: {session_id or '?'}"
+        f"monthly: ${monthly_billing_cents/100:.2f}/mo\nsession: {session_id or '?'}"
     )
 
     return {
         "ok": True, "intent_id": intent_id, "session_id": session_id,
-        "redirect_url": checkout_url, "total_cents": total_cents,
+        "redirect_url": checkout_url, "monthly_billing_cents": monthly_billing_cents,
         "cadence": cadence_id, "tier": f"wood-stork-{tier}", "products": products,
     }
 
@@ -4369,7 +4371,7 @@ def pooler_pass_checkout(
         )
 
     monthly_retail = membership_pooler_pass.monthly_retail_for_tier(tier)  # type: ignore[arg-type]
-    total_cents = _cadence_mod.cadence_total_cents(monthly_retail, cadence_id)  # type: ignore[arg-type]
+    monthly_billing_cents = _cadence_mod.cadence_monthly_billing_cents(monthly_retail, cadence_id)  # type: ignore[arg-type]
     cadence_label = _cadence_mod.CADENCES[cadence_id]["label"]  # type: ignore[index]
     tier_label = f"Pooler Pass {tier.capitalize()}"
     products_label = ", ".join(products)
@@ -4388,10 +4390,11 @@ def pooler_pass_checkout(
         from adapters.stripe_adapter import _init_stripe  # noqa: PLC0415
         _init_stripe()
         session = _stripe.checkout.Session.create(
-            mode="payment", customer_email=email,
+            mode="subscription", customer_email=email,
             line_items=[{
                 "price_data": {
-                    "currency": "usd", "unit_amount": total_cents,
+                    "currency": "usd", "unit_amount": monthly_billing_cents,
+                    "recurring": {"interval": "month"},
                     "product_data": {
                         "name": f"{tier_label} · {cadence_label}",
                         "description": f"Products: {products_label}",
@@ -4399,7 +4402,7 @@ def pooler_pass_checkout(
                     },
                 }, "quantity": 1,
             }],
-            metadata=metadata, payment_intent_data={"metadata": metadata},
+            metadata=metadata, subscription_data={"metadata": metadata},
             success_url=f"{AUTH_PUBLIC_URL}/pooler-pass/thank-you?intent={intent_id}",
             cancel_url=f"{AUTH_PUBLIC_URL}/pooler-pass?canceled=1",
             billing_address_collection="auto",
@@ -4414,12 +4417,12 @@ def pooler_pass_checkout(
     _send_telegram_message(
         f"Pooler Pass {tier} subscription intent\nintent: {intent_id}\ncustee: {email}\n"
         f"zip: {zip_code}\ncadence: {cadence_id} ({cadence_label})\nproducts: {products_label}\n"
-        f"total: ${total_cents/100:.2f}\nsession: {session_id or '?'}"
+        f"monthly: ${monthly_billing_cents/100:.2f}/mo\nsession: {session_id or '?'}"
     )
 
     return {
         "ok": True, "intent_id": intent_id, "session_id": session_id,
-        "redirect_url": checkout_url, "total_cents": total_cents,
+        "redirect_url": checkout_url, "monthly_billing_cents": monthly_billing_cents,
         "cadence": cadence_id, "tier": f"pooler-pass-{tier}", "products": products,
     }
 

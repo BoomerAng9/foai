@@ -89,6 +89,23 @@ def cadence_total_cents(monthly_retail: float, cadence: CadenceId) -> int:
     return round(cadence_total(monthly_retail, cadence) * 100)
 
 
+def cadence_monthly_billing_cents(monthly_retail: float, cadence: CadenceId) -> int:
+    """Customer-facing per-month billing amount in cents for the chosen
+    cadence.
+
+    Owner directive 2026-05-11: 3/6/9 plans are INSTALLMENTS — Stripe bills
+    this amount monthly for `months_paid` months. Equals
+    `monthly_retail * (1 - cadence.discount)` rounded to integer cents.
+
+    Distinct from `monthly_equivalent` in `cadence_pricing_table()` which
+    spreads total over `months_delivered` (marketing comparison only).
+    """
+    if not is_valid_cadence(cadence):
+        raise ValueError(f"unknown cadence: {cadence!r}")
+    spec = CADENCES[cadence]
+    return round(monthly_retail * (1 - spec["discount"]) * 100)
+
+
 def months_delivered(cadence: CadenceId) -> int:
     """How many months of access this cadence delivers (9mo → 12)."""
     if not is_valid_cadence(cadence):
