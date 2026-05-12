@@ -215,6 +215,27 @@ export function Nav() {
               </button>
             </div>
 
+            {/* Sign-in CTA pinned to the top of the drawer. Owner bug
+                2026-05-12: existing-account customers had no obvious
+                login path — Sign In was buried 2 layers deep in the
+                Account accordion. Now it's the first thing visible
+                inside the drawer body. Magic-link login (passwordless)
+                via /api/v1/auth/login; verify cookie sets coastal_uid
+                on click-through. */}
+            <div className="border-b border-border/60 px-6 py-4">
+              <Link
+                href="/auth/login"
+                onClick={closeDrawer}
+                className="flex items-center justify-between rounded-md border border-foreground/20 bg-foreground/[0.03] px-4 py-3 text-sm font-medium text-foreground hover:border-foreground/40 hover:bg-foreground/[0.06] transition-colors"
+              >
+                <span>Sign in to your account</span>
+                <span aria-hidden="true" className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">passwordless</span>
+              </Link>
+              <p className="mt-2 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+                New here? <Link href="/auth/signup" onClick={closeDrawer} className="text-foreground/80 hover:text-foreground">Open an account →</Link>
+              </p>
+            </div>
+
             {/* Accordion link groups */}
             <nav className="flex-1 overflow-y-auto py-2">
               {DRAWER_GROUPS.map((group) => (
