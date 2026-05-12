@@ -63,7 +63,7 @@ export function Hero() {
 
             <div className="mt-6">
               <Link
-                href="/products?cat=subscription"
+                href="/membership"
                 className="inline-flex items-center gap-2 rounded-full border border-border bg-card/30 px-4 py-2 text-xs text-muted-foreground hover:text-foreground hover:border-foreground/30 transition-colors"
               >
                 <Search className="h-3.5 w-3.5" />

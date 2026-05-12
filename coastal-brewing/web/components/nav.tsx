@@ -16,7 +16,7 @@ const DRAWER_GROUPS = [
       { href: "/products?cat=coffee", label: "Coffee" },
       { href: "/products?cat=tea", label: "Tea" },
       { href: "/products?cat=matcha", label: "Matcha" },
-      { href: "/products?cat=subscription", label: "Subscriptions" },
+      { href: "/membership", label: "Plans (pick your cadence)" },
       { href: "/pricing", label: "Pricing & Tiers" },
       { href: "/membership", label: "Standard Membership" },
       { href: "/wood-stork", label: "Wood Stork (B2B)" },

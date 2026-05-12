@@ -6,69 +6,51 @@ import { Footer } from "@/components/footer";
 import { MembershipCheckoutForm } from "@/components/membership-checkout-form";
 
 export const metadata: Metadata = {
-  title: "Standard Membership · Coastal Brewing Co.",
+  title: "Coastal Custee Card Plan · Coastal Brewing Co.",
   description:
-    "Coastal Brewing Co. Standard Membership — $199/yr for unlimited free delivery, 15% off everything, our welcome box, and live 2D look-in to the Pooler storefront.",
+    "Coastal Custee Card Plan — pick what's in your box each cycle (tea, coffee, functional, combo, sampler). Monthly, 3-mo, 6-mo, or 9-mo cadences. Pause, swap, or cancel anytime.",
 };
 
+// Owner-ratified 2026-05-12: plan benefits are ONLY (1) the products you
+// pick each cycle and (2) the cadence discount. Prior copy oversold
+// unlimited free delivery, a 15% extra discount on everything, a $15-25
+// physical welcome box, a "live look-in" stream, and a refer-2-get-fee-back
+// loop — none of those are honor-able at scale today. Stripped.
 const BENEFITS = [
   {
-    title: "Unlimited free delivery",
-    body: "Under the $15 freight ceiling. Local Pooler / Savannah / Lowcountry orders are always free; most coffee, tea, merch, and home-product shipments qualify.",
+    title: "You pick what comes in your box",
+    body: "Tea, coffee, functional coffee, combo, or sampler — choose the bundle that fits this cycle. Swap your picks anytime from your account.",
   },
   {
-    title: "Automatic 15% discount",
-    body: "On every product — coffee, tea, gear, merch, the works. Stacks with the free-delivery benefit. Applied silently at checkout.",
+    title: "Cadence discount baked in",
+    body: "Month-to-month is full retail. The 3-month plan saves 15%. The 6-month plan saves 20%. The 9-month plan saves 25% AND delivers 12 months of bundles (pay 9, get 12).",
   },
   {
-    title: "Welcome box",
-    body: "Ceramic pour-over dripper for cutting through whatever you're brewing at home, our Coastal Brewing Co. storefront-window-etching sticker set, and a complimentary tin of Habbak — our Saudi Hassawi mint, sourced from our specialty tea partners.",
-  },
-  {
-    title: "Live look-in",
-    body: "Open coastalbrewing.co/live to see what's happening at the Pooler shop and warehouse — Sal at the counter, the receiving team in back, the roasters working a fresh batch. Updates in real time. Members only.",
-  },
-  {
-    title: "Refer 2, get your fee back",
-    body: "Refer up to two new paid members within twelve months and your $199 membership fee is refunded. Referrals must be brand new to Coastal Brewing Co. — not existing customers.",
+    title: "Pause, swap, or cancel anytime",
+    body: "No long-term lock-in. Pause delivery, swap your picks, or cancel from your account — your card isn't charged for skipped cycles.",
   },
 ];
 
 const TERMS = [
   {
     n: 1,
-    label: "Membership fee",
-    body: "$199 per year, charged on signup and each subsequent annual renewal. Paid via our secure payment processor at checkout.",
+    label: "Billing",
+    body: "Charged monthly at the cadence rate you pick (month / 3-mo / 6-mo / 9-mo). Card on file via our secure payment processor.",
   },
   {
     n: 2,
     label: "Renewal",
-    body: "Auto-renews on the anniversary date unless cancelled at least 7 calendar days before renewal. Self-service via your account or by emailing members@coastalbrewing.co.",
+    body: "Auto-renews at the same cadence on each cycle. Cancel any time from your account; your card isn't charged for the next cycle once cancelled.",
   },
   {
     n: 3,
-    label: "Free delivery",
-    body: "Free standard delivery on any order whose carrier freight cost is under $15. Heavy, oversized, or freight-class shipments may carry residual freight calculated at checkout. Coffee subscription deliveries are always free regardless of freight class.",
+    label: "What's in the box",
+    body: "Picked by you in the form below — tea, coffee, functional, combo, or sampler. Swap your picks any cycle from your account.",
   },
   {
     n: 4,
-    label: "15% member discount",
-    body: "Auto-applied 15% off all retail-priced products at checkout. Stacks with free-delivery benefit. Does not stack with bulk-pricing tiers.",
-  },
-  {
-    n: 5,
-    label: "Welcome box",
-    body: "Shipped within 10 business days of signup. Contains a ceramic pour-over dripper, a Coastal Brewing Co. storefront-window-etching sticker set, and a complimentary 50g tin of Habbak. Welcome box value is part of the membership fee and is non-refundable once shipped.",
-  },
-  {
-    n: 6,
-    label: "Referral refund",
-    body: "Refer two new paid members within 12 months of your signup, and your initial $199 fee is refunded within 30 days of the second referral completing payment. New paid members must never have been Coastal Brewing Co. retail customers, subscribers, or members before. Refund is one-time per account.",
-  },
-  {
-    n: 7,
     label: "Cancellation + refunds",
-    body: "Cancel within 7 days of signup for a full refund, provided the welcome box has not been shipped. After 7 days OR after welcome-box shipment, memberships are non-refundable except via the referral mechanism above.",
+    body: "Cancel any time before the next cycle bills. Refunds only for pre-shipment cycles inside the first 7 days; after that, cycles already shipped are not refundable.",
   },
 ];
 
@@ -82,15 +64,15 @@ export default function MembershipPage() {
             Coastal Brewing Co.
           </p>
           <h1 className="mt-3 font-serif text-4xl leading-tight text-foreground sm:text-5xl">
-            Standard Membership
+            Coastal Custee Card Plan
           </h1>
           <p className="mt-3 font-mono text-sm text-muted-foreground">
-            Regular price · $199 / year
+            $22.49 / mo on the 9-month plan · or pick monthly / 3-mo / 6-mo below
           </p>
           <p className="mt-6 max-w-2xl text-base leading-relaxed text-foreground/80">
-            Free delivery only applies to shipments under $15 in shipping cost — local
-            Pooler / Savannah / Lowcountry orders, most coffee and tea, most merch, most
-            home products. Bulk gear may carry residual freight.
+            Pick what comes in your box each cycle — tea, coffee, functional coffee,
+            combo, or sampler. Choose a cadence below; the longer plans save more.
+            Pause, swap, or cancel any time.
           </p>
         </header>
 
@@ -113,8 +95,9 @@ export default function MembershipPage() {
         <section className="mb-14 rounded-lg border border-border bg-card/40 p-8">
           <h2 className="font-serif text-2xl text-foreground">Join</h2>
           <p className="mt-3 text-foreground/75">
-            Standard Membership is $199 a year. Drop your email below and
-            you&rsquo;ll go straight to secure checkout. Questions? Reach out to{" "}
+            Pick your cadence (monthly, 3-mo, 6-mo, or 9-mo), pick what
+            comes in your box, drop your email below — you&rsquo;ll go straight
+            to secure checkout. Questions? Reach out to{" "}
             <a
               className="text-accent underline-offset-4 hover:underline"
               href="mailto:members@coastalbrewing.co"
@@ -132,42 +115,32 @@ export default function MembershipPage() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="bg-muted/30 text-left font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
-                  <th className="px-4 py-3">Tier</th>
+                  <th className="px-4 py-3">Plan</th>
                   <th className="px-4 py-3">Price</th>
-                  <th className="px-4 py-3">Discount</th>
-                  <th className="px-4 py-3">Concierge</th>
+                  <th className="px-4 py-3">What fits in your box</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border text-foreground/85">
                 <tr className="bg-accent/5">
-                  <td className="px-4 py-3 font-medium">Standard Membership</td>
-                  <td className="px-4 py-3">$199 / yr</td>
-                  <td className="px-4 py-3">15%</td>
-                  <td className="px-4 py-3 text-muted-foreground">—</td>
+                  <td className="px-4 py-3 font-medium">Pooler Pass Plan (local)</td>
+                  <td className="px-4 py-3">$5.62 – $11.24 / mo</td>
+                  <td className="px-4 py-3">1–2 items per cycle</td>
                 </tr>
                 <tr>
-                  <td className="px-4 py-3">Coastal Custee Card</td>
+                  <td className="px-4 py-3 font-medium">Coastal Custee Card Plan</td>
                   <td className="px-4 py-3">$22.49 / mo (9-mo plan)</td>
-                  <td className="px-4 py-3">Mix-and-match products</td>
-                  <td className="px-4 py-3 text-muted-foreground">—</td>
+                  <td className="px-4 py-3">Mix-and-match each cycle</td>
                 </tr>
                 <tr>
-                  <td className="px-4 py-3">Wood Stork Standard</td>
-                  <td className="px-4 py-3">$56.24 / mo (9-mo plan)</td>
-                  <td className="px-4 py-3">18-50% (referral-tiered)</td>
-                  <td className="px-4 py-3 text-muted-foreground">—</td>
-                </tr>
-                <tr>
-                  <td className="px-4 py-3">Wood Stork Reserve</td>
-                  <td className="px-4 py-3">$112.49 / mo (9-mo plan)</td>
-                  <td className="px-4 py-3">18-50% (referral-tiered)</td>
-                  <td className="px-4 py-3">Yes</td>
+                  <td className="px-4 py-3">Wood Stork Plan</td>
+                  <td className="px-4 py-3">$56.24 – $112.49 / mo</td>
+                  <td className="px-4 py-3">Bulk / multi-location</td>
                 </tr>
               </tbody>
             </table>
           </div>
           <p className="mt-3 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
-            Standard is the simple yearly plan · Custee Card mixes products on the 3-6-9 cadence · Wood Stork is for business customers
+            Pooler Pass is local (50–100 mi from Pooler) · Custee Card ships nationwide · Wood Stork is for business customers
           </p>
         </section>
 
