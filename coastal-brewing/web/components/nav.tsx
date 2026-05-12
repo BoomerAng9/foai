@@ -125,8 +125,19 @@ export function Nav() {
   return (
     <>
       <header className="sticky top-0 z-40 border-b border-border/60 bg-background/80 backdrop-blur">
-        <div className="container flex h-20 items-center justify-between">
+        <div className="container relative flex h-20 items-center justify-between">
           <Wordmark size="md" />
+          {/* Owner directive 2026-05-12: brand wordmark in the middle of
+              the header on every page. Absolutely positioned + centered
+              so it sits between the logo (left) and hamburger (right)
+              without pushing either off the row. */}
+          <Link
+            href="/"
+            aria-label="Coastal Brewing Co. — home"
+            className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 font-display text-lg font-semibold tracking-[-0.01em] text-foreground hover:text-foreground/80 transition-colors md:text-xl"
+          >
+            Coastal Brewing Co.
+          </Link>
           {/* Owner directive 2026-05-12: desktop mirrors the mobile menu
               structure — hamburger + drawer only. The flat top-bar of
               NAV_LINKS that previously rendered on desktop has been
