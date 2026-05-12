@@ -159,7 +159,7 @@ export default function PoolerPassPage() {
           </Link>
           <span className="mx-3">·</span>
           <Link href="/membership" className="hover:text-foreground">
-            Standard Membership
+            Coastal Custee Card Plan
           </Link>
           <span className="mx-3">·</span>
           Made in PLR

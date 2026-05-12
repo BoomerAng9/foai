@@ -316,7 +316,7 @@ export default function AccountPage() {
                   : "Set up a monthly pour and you'll see active subscriptions, next-run dates, and payment methods here."}
               </p>
               <Link
-                href="/products?cat=subscription"
+                href="/membership"
                 className={cn(
                   "mt-6 inline-flex items-center gap-2 border px-4 py-2 font-mono text-[11px] uppercase tracking-widest transition-colors",
                   state.stripe_customer_id
