@@ -309,7 +309,21 @@ export function ChatPanel({
   const pending = anim?.isThinking || (responseBuffer.length > 0);
 
   React.useEffect(() => {
-    scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
+    // Owner directive 2026-05-11: Chat must stay centered on the latest
+    // turn and follow the flow of the conversation. Smooth-scroll lagged
+    // behind streaming token output (queued animations dropped frames);
+    // instant scroll after rAF keeps the viewport pinned to the newest
+    // content through both per-message updates AND streaming chunks.
+    const pinToLatest = () => {
+      const el = scrollRef.current;
+      if (!el) return;
+      el.scrollTo({ top: el.scrollHeight, behavior: "auto" });
+    };
+    if (typeof window !== "undefined" && typeof window.requestAnimationFrame === "function") {
+      window.requestAnimationFrame(pinToLatest);
+    } else {
+      pinToLatest();
+    }
     transcriptRef.current = messages;
     // Persist messages so navigation (Guide Me → /products) doesn't lose
     // the visible conversation. Cap to last 30 turns so sessionStorage
