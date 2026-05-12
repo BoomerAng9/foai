@@ -5936,7 +5936,12 @@ _COASTAL_V2_VOICEID = {
     "sal_ang":       "default-4zhua1rhxjfl50z1dnkcba__coastal-sal-ang-v2",
     "luc_ang":       "default-4zhua1rhxjfl50z1dnkcba__coastal-luc-ang-v2",
     "melli_capensi": "default-4zhua1rhxjfl50z1dnkcba__coastal-melli-capensi-v2",
-    "acheevy":       "default-4zhua1rhxjfl50z1dnkcba__coastal-acheevy-v2",
+    # ACHEEVY-v3: re-cloned 2026-05-12 from a Brian McKnight Tammi Mac
+    # Late Show 30s window (smooth-R&B-tenor register per owner reference
+    # set: Brian McKnight / Case / Nas / AZ). Previous v2 was Nas-sourced;
+    # owner found the Nas register didn't match the Brand Director smooth-
+    # tenor brief. New IVC clone via `_clone_acheevy_mcknight.py`.
+    "acheevy":       "default-4zhua1rhxjfl50z1dnkcba__acheevy-mcknight-soulful-tenor-v3",
     # Marcus / Loss Prevention — defaults to ACHEEVY's clone until owner
     # records the dedicated LP team voice. Override via INWORLD_VOICE_ID_LP
     # to swap in a custom IVC clone without touching code.
@@ -5982,8 +5987,12 @@ _INWORLD_VOICE_MAP: Dict[str, Dict[str, str]] = {
     "acheevy": {
         "voiceId": os.environ.get("INWORLD_VOICE_ID_ACHEEVY") or _COASTAL_V2_VOICEID["acheevy"],
         "model": "inworld-tts-2",
-        "deliveryMode": os.environ.get("INWORLD_DELIVERY_MODE_ACHEEVY") or "EXPRESSIVE",
-        "speakingRate": 0.95,
+        # Owner directive 2026-05-12 (cadence pass on McKnight v3 clone):
+        # more professional + more upbeat. EXPRESSIVE → STABLE (steadier,
+        # less emotional swing — Brand Director register). 0.95 → 1.10
+        # (faster pace, brighter delivery).
+        "deliveryMode": os.environ.get("INWORLD_DELIVERY_MODE_ACHEEVY") or "STABLE",
+        "speakingRate": float(os.environ.get("INWORLD_SPEAKING_RATE_ACHEEVY") or "1.10"),
     },
     # Marcus — Loss Prevention floor team. Register: calm, professional,
     # structured. Less warm than Sal, less authoritative than ACHEEVY.
