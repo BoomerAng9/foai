@@ -24,6 +24,9 @@ export interface CadenceRow {
   months_paid: number;
   months_delivered: number;
   total_charge: number;
+  /** Customer's actual monthly Stripe bill — total / months_paid. */
+  monthly_billing: number;
+  /** Marketing comparison — total / months_delivered. */
   monthly_equivalent: number;
   yearly_savings_pct: number;
 }
@@ -133,18 +136,18 @@ export function CbrewCadencePicker({
                 </span>
               )}
               <span className="block font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
-                {cid === "monthly" ? "Month-to-month" : cid === "3mo" ? "3-month" : cid === "6mo" ? "6-month" : "9-month (pay 9, get 12)"}
+                {cid === "monthly" ? "Month-to-month" : cid === "3mo" ? "3-month plan" : cid === "6mo" ? "6-month plan" : "9-month plan (pay 9, get 12)"}
               </span>
               <span className="mt-1 block font-display text-xl font-semibold tracking-[-0.01em]">
-                {row ? `$${row.total_charge.toFixed(2)}` : "…"}
+                {row ? `$${row.monthly_billing.toFixed(2)}/mo` : "…"}
               </span>
               <span className="mt-0.5 block text-[11px] text-foreground/60">
                 {row ? (
                   cid === "monthly"
-                    ? "billed every month"
+                    ? "billed every month · cancel anytime"
                     : cid === "9mo"
-                      ? `12 months access · save ${row.yearly_savings_pct}%/yr`
-                      : `${row.months_delivered}-month plan · save ${row.yearly_savings_pct}%/yr`
+                      ? `9 monthly bills · 12 months delivery · save ${row.yearly_savings_pct}%/yr`
+                      : `${row.months_paid} monthly bills · save ${row.yearly_savings_pct}%/yr`
                 ) : "…"}
               </span>
             </button>

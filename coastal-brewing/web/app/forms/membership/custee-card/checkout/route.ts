@@ -82,7 +82,7 @@ export async function POST(req: NextRequest) {
     ok?: boolean;
     redirect_url?: string;
     intent_id?: string;
-    total_cents?: number;
+    monthly_billing_cents?: number;
     cadence?: string;
     products?: string[];
     detail?: unknown;
@@ -104,7 +104,7 @@ export async function POST(req: NextRequest) {
       ok: true,
       redirect_url: runnerJson.redirect_url,
       intent_id: runnerJson.intent_id,
-      total_cents: runnerJson.total_cents,
+      monthly_billing_cents: runnerJson.monthly_billing_cents,
       cadence: runnerJson.cadence,
       products: runnerJson.products,
     },

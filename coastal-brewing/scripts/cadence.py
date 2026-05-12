@@ -174,6 +174,13 @@ def cadence_pricing_table(monthly_retail: float) -> list[dict]:
             "months_paid": spec["months_paid"],
             "months_delivered": delivered,
             "total_charge": round(total, 2),
+            # Customer's actual monthly Stripe bill — total / months_paid.
+            # Owner-ratified 2026-05-11: 3/6/9 plans are INSTALLMENTS;
+            # this is the per-month figure the Custee sees on their card.
+            "monthly_billing": round(total / spec["months_paid"], 2),
+            # Marketing comparison figure — total spread over months_delivered
+            # (e.g., 9mo plan over 12 months of delivery). Lower than
+            # monthly_billing on the 9mo plan; equal otherwise.
             "monthly_equivalent": round(total / delivered, 2),
             "yearly_savings_pct": round(
                 yearly_savings_pct(monthly_retail, cadence_id) * 100, 1  # type: ignore[arg-type]

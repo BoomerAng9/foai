@@ -58,3 +58,31 @@ def test_unknown_cadence_raises():
 
     with pytest.raises(ValueError, match="cadence"):
         cadence.cadence_monthly_billing_cents(29.99, "annual")  # type: ignore[arg-type]
+
+
+# ────────────────────────── cadence_pricing_table extension ──────────────────────────
+
+
+def test_cadence_pricing_table_exposes_monthly_billing():
+    """The frontend cadence picker reads `monthly_billing` (customer's
+    actual per-month Stripe charge) as the headline. Distinct from
+    `monthly_equivalent` which spreads total over months_delivered."""
+    import cadence  # noqa: PLC0415
+
+    table = cadence.cadence_pricing_table(29.99)
+    by_id = {row["cadence_id"]: row for row in table}
+
+    # monthly plan: bill = retail
+    assert by_id["monthly"]["monthly_billing"] == 29.99
+
+    # 3mo: bill = retail × 0.85
+    assert by_id["3mo"]["monthly_billing"] == 25.49
+
+    # 6mo: bill = retail × 0.80
+    assert by_id["6mo"]["monthly_billing"] == 23.99
+
+    # 9mo: bill = retail × 0.75 = 22.49 (NOT total/12 = 16.87)
+    assert by_id["9mo"]["monthly_billing"] == 22.49
+
+    # monthly_equivalent on 9mo plan = total / months_delivered = 16.87
+    assert by_id["9mo"]["monthly_equivalent"] == 16.87
