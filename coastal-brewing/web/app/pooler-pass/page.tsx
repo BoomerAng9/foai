@@ -6,42 +6,34 @@ import { Footer } from "@/components/footer";
 import { PoolerPassCheckoutForm } from "@/components/pooler-pass-checkout-form";
 
 export const metadata: Metadata = {
-  title: "Pooler Pass · Coastal Brewing Co.",
+  title: "Pooler Pass Plan · Coastal Brewing Co.",
   description:
-    "Pooler Pass — local membership for the 50-100 mile radius around Pooler, GA. Standard $5.62/mo or Plus $11.24/mo on the 9-month plan. Cancel anytime.",
+    "Pooler Pass Plan — local plan for the 50-100 mile radius around Pooler, GA. Pick what's in your box each cycle. Standard $5.62/mo or Plus $11.24/mo on the 9-month plan. Pause, swap, or cancel anytime.",
 };
 
+// Owner-ratified 2026-05-12: plan benefits are ONLY (1) the products you pick
+// each cycle and (2) the cadence discount. Prior copy oversold in-store
+// discounts, member events, gratitude walls, and free local pickup — none
+// of those are honored at scale for a digital subscription. Stripped.
 const STANDARD_BENEFITS = [
   {
-    title: "12% off in-store",
-    body: "Applied at the counter every time you stop in. Stacks with same-day pickup.",
+    title: "You pick what comes in your box",
+    body: "Tea, coffee, functional coffee, or a combo — choose the bundle that fits this cycle. Swap your picks anytime from your account.",
   },
   {
-    title: "Free local pickup",
-    body: "No shipping cost when you pick up at the Pooler shop. Pre-order via chat or just walk in.",
+    title: "Cadence discount baked in",
+    body: "Month-to-month is full retail. The 3-month plan saves 15%. The 6-month plan saves 20%. The 9-month plan saves 25% AND delivers 12 months of bundles (pay 9, get 12).",
   },
   {
-    title: "Member-only Pooler events",
-    body: "Tasting nights, Sal at the counter for one-on-one pours, monthly community coffee chat. We invite, you show up.",
-  },
-  {
-    title: "First in line for shop drops",
-    body: "Limited-batch roasts, reserve allocations, and seasonal specials reach Pooler Pass members before they go national.",
+    title: "Pause, swap, or cancel anytime",
+    body: "No long-term lock-in. Pause delivery, swap your picks, or cancel from your account — your card isn't charged for skipped cycles.",
   },
 ];
 
 const PLUS_EXTRAS = [
   {
-    title: "Monthly Habbak refill",
-    body: "A 50g tin of our Saudi Hassawi mint shows up every month. Free.",
-  },
-  {
-    title: "First dibs on shop-only drops",
-    body: "Before Standard members. Before national. Pooler Pass Plus is first in line, full stop.",
-  },
-  {
-    title: "Your name on the gratitude wall",
-    body: "Annual wall at the Pooler shop. Your name goes on it — or as close to the brick as we can get.",
+    title: "Up to 2 items per cycle (not 1)",
+    body: "Standard picks one item per cycle; Plus packs up to two. Same plan, bigger box.",
   },
 ];
 
@@ -61,7 +53,7 @@ export default function PoolerPassPage() {
             Coastal Brewing Co. · C|Brew Yearly Subscription
           </p>
           <h1 className="mt-3 font-serif text-4xl leading-tight text-foreground sm:text-5xl">
-            Pooler Pass
+            Pooler Pass Plan
           </h1>
           <p className="mt-3 font-mono text-sm text-muted-foreground">
             Standard $5.62/mo · Plus $11.24/mo · on the 9-month plan

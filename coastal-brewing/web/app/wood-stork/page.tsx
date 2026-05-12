@@ -6,50 +6,35 @@ import { Footer } from "@/components/footer";
 import { WoodStorkCheckoutForm } from "@/components/wood-stork-checkout-form";
 
 export const metadata: Metadata = {
-  title: "Wood Stork Membership · Coastal Brewing Co.",
+  title: "Wood Stork Plan · Coastal Brewing Co.",
   description:
-    "Wood Stork — for multi-location buyers, restaurants, and offices. Standard $56.24/mo or Reserve $112.49/mo on the 9-month plan. Referral discount up to 50% off.",
+    "Wood Stork Plan — for multi-location buyers, restaurants, and offices. Pick the bulk bundle that fits each cycle. Standard $56.24/mo or Reserve $112.49/mo on the 9-month plan. Cancel anytime.",
 };
 
+// Owner-ratified 2026-05-12: plan benefits are ONLY (1) the products you
+// pick each cycle and (2) the cadence discount. Prior copy oversold a
+// referral discount tied to manual tracking, monthly account-rep hours,
+// on-site visits, founders'-table calls, and a "named Wood Stork blend"
+// — none of those are honor-able at scale today. Stripped.
 const STANDARD_BENEFITS = [
   {
-    title: "Tiered referral discount — up to 50%",
-    body: "Your discount on product orders grows with every business you bring in: 18% base · 25% after 1-5 referrals · 35% after 5-10 · 45% after 10-20 · 50% after 20+ (the cap). Applied at checkout.",
+    title: "You pick what comes in your box",
+    body: "Bulk coffee, bulk tea, or a multi-location split. Choose the mix that fits this cycle. Swap your picks anytime from your account.",
   },
   {
-    title: "Free shipping, every order",
-    body: "Bulk bags, case orders, gear — included. No $15 freight ceiling.",
+    title: "Cadence discount baked in",
+    body: "Month-to-month is full retail. The 3-month plan saves 15%. The 6-month plan saves 20%. The 9-month plan saves 25% AND delivers 12 months of bundles (pay 9, get 12).",
   },
   {
-    title: "Direct business line to Melli",
-    body: "Melli runs our business accounts. Call or chat any time for reorders, swaps, or rush jobs. No phone tree, no waiting.",
-  },
-  {
-    title: "Account help — 4 hours / month",
-    body: "A dedicated point of contact for your business. Reorders, recipe help, gift sends, event coordination.",
+    title: "Pause, swap, or cancel anytime",
+    body: "No long-term lock-in. Pause delivery, swap your picks, or cancel from your account — your card isn't charged for skipped cycles.",
   },
 ];
 
 const RESERVE_EXTRAS = [
   {
-    title: "Monthly business review with ACHEEVY",
-    body: "ACHEEVY runs the brand. You get a standing 30-minute monthly call to walk through your account. Quarterly deep-dive every three months.",
-  },
-  {
-    title: "Quarterly on-site visit",
-    body: "Our team comes to your business for an on-site walkthrough, a custom briefing, and to put faces to names.",
-  },
-  {
-    title: "First look at partner pricing",
-    body: "If you're thinking about running the Coastal model for your own brand, Reserve members see partner-program pricing before it's public.",
-  },
-  {
-    title: "Named Wood Stork blend",
-    body: "We blend a coffee in your business's honor and ship it to you and your customers.",
-  },
-  {
-    title: "Founders' table",
-    body: "A private quarterly call with the owner and ACHEEVY. Ask anything.",
+    title: "Whitelabel + larger envelope",
+    body: "Standard fits one to three addresses; Reserve adds the whitelabel option and supports up to ten locations on one account.",
   },
 ];
 
@@ -71,7 +56,7 @@ export default function WoodStorkPage() {
             Coastal Brewing Co. · C|Brew Yearly Subscription
           </p>
           <h1 className="mt-3 font-serif text-4xl leading-tight text-foreground sm:text-5xl">
-            Wood Stork
+            Wood Stork Plan
           </h1>
           <p className="mt-3 font-mono text-sm text-muted-foreground">
             Standard $56.24/mo · Reserve $112.49/mo · on the 9-month plan
