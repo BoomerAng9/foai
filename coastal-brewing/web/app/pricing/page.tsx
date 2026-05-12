@@ -236,7 +236,7 @@ export default function PricingPage() {
                   <tr data-tier-row="pooler-pass-standard">
                     <td className="px-4 py-3 align-middle"><TierMark variant="plr-cream" /></td>
                     <td className="px-4 py-3 font-medium align-middle">Pooler Pass Standard</td>
-                    <td className="px-4 py-3 font-mono align-middle">$5.44 / mo</td>
+                    <td className="px-4 py-3 font-mono align-middle">$5.62 / mo</td>
                     <td className="px-4 py-3 text-foreground/70 text-[13px] align-middle">Local 50–100 mi from Pooler 31322</td>
                     <td className="px-4 py-3 text-right align-middle">
                       <Link href="/pooler-pass" className="font-mono text-[11px] uppercase tracking-widest text-accent hover:underline">
@@ -247,7 +247,7 @@ export default function PricingPage() {
                   <tr data-tier-row="pooler-pass-plus">
                     <td className="px-4 py-3 align-middle"><TierMark variant="plr-gold" /></td>
                     <td className="px-4 py-3 font-medium align-middle">Pooler Pass Plus</td>
-                    <td className="px-4 py-3 font-mono align-middle">$11.00 / mo</td>
+                    <td className="px-4 py-3 font-mono align-middle">$11.24 / mo</td>
                     <td className="px-4 py-3 text-foreground/70 text-[13px] align-middle">Local power-buyers, more perks</td>
                     <td className="px-4 py-3 text-right align-middle">
                       <Link href="/pooler-pass" className="font-mono text-[11px] uppercase tracking-widest text-accent hover:underline">
@@ -258,7 +258,7 @@ export default function PricingPage() {
                   <tr className="bg-accent/[0.06]" data-tier-row="coastal-custee-card">
                     <td className="px-4 py-3 align-middle"><TierMark variant="custee-card" /></td>
                     <td className="px-4 py-3 font-medium align-middle">Coastal Custee Card</td>
-                    <td className="px-4 py-3 font-mono align-middle">$22.11 / mo</td>
+                    <td className="px-4 py-3 font-mono align-middle">$22.49 / mo</td>
                     <td className="px-4 py-3 text-foreground/70 text-[13px] align-middle">National DTC + Amazon — the default tier</td>
                     <td className="px-4 py-3 text-right align-middle">
                       <Link href="/membership" className="font-mono text-[11px] uppercase tracking-widest text-accent hover:underline">
@@ -269,7 +269,7 @@ export default function PricingPage() {
                   <tr data-tier-row="wood-stork-standard">
                     <td className="px-4 py-3 align-middle"><TierMark variant="wood-stork-standard" /></td>
                     <td className="px-4 py-3 font-medium align-middle">Wood Stork Standard</td>
-                    <td className="px-4 py-3 font-mono align-middle">$55.44 / mo</td>
+                    <td className="px-4 py-3 font-mono align-middle">$56.24 / mo</td>
                     <td className="px-4 py-3 text-foreground/70 text-[13px] align-middle">B2B, multi-location, referrers</td>
                     <td className="px-4 py-3 text-right align-middle">
                       <Link href="/wood-stork" className="font-mono text-[11px] uppercase tracking-widest text-accent hover:underline">
@@ -280,7 +280,7 @@ export default function PricingPage() {
                   <tr data-tier-row="wood-stork-reserve">
                     <td className="px-4 py-3 align-middle"><TierMark variant="wood-stork-reserve" /></td>
                     <td className="px-4 py-3 font-medium align-middle">Wood Stork Reserve</td>
-                    <td className="px-4 py-3 font-mono align-middle">$111.00 / mo</td>
+                    <td className="px-4 py-3 font-mono align-middle">$112.49 / mo</td>
                     <td className="px-4 py-3 text-foreground/70 text-[13px] align-middle">Largest accounts, owner-domain whitelabel partners</td>
                     <td className="px-4 py-3 text-right align-middle">
                       <Link href="/wood-stork" className="font-mono text-[11px] uppercase tracking-widest text-accent hover:underline">

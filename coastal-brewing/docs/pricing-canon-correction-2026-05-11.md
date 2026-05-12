@@ -51,15 +51,26 @@ All 3 tier checkout endpoints now mint Stripe Checkout Sessions in
 
 | Tier                 | Monthly retail | monthly  | 3-mo (15% off) | 6-mo (20% off) | 9-mo (25% off) |
 |----------------------|---------------:|---------:|---------------:|---------------:|---------------:|
-| Pooler Pass Standard | $7.26          | $7.26    | $6.17          | $5.81          | $5.44          |
-| Pooler Pass Plus     | $14.67         | $14.67   | $12.47         | $11.74         | $11.00         |
-| Coastal Custee Card  | $29.48         | $29.48   | $25.06         | $23.58         | $22.11         |
-| Wood Stork Standard  | $73.93         | $73.93   | $62.84         | $59.14         | $55.44         |
-| Wood Stork Reserve   | $148.00        | $148.00  | $125.80        | $118.40        | $111.00        |
+| Pooler Pass Standard | $7.49          | $7.49    | $6.37          | $5.99          | $5.62          |
+| Pooler Pass Plus     | $14.99         | $14.99   | $12.74         | $11.99         | $11.24         |
+| Coastal Custee Card  | $29.99         | $29.99   | $25.49         | $23.99         | $22.49         |
+| Wood Stork Standard  | $74.99         | $74.99   | $63.74         | $59.99         | $56.24         |
+| Wood Stork Reserve   | $149.99        | $149.99  | $127.49        | $119.99        | $112.49        |
 
-Monthly retail is derived from the annual landing headline (e.g., $199/yr)
-by `monthly = annual / 6.75` (matches the 9-mo cadence math:
-`9 × monthly × 0.75 = annual`).
+Monthly retail anchors are taken **directly** from
+[`cbrew-369-pricing-canon-2026-05-11.md`](./cbrew-369-pricing-canon-2026-05-11.md) §2
+(clean: $7.49 / $14.99 / $29.99 / $74.99 / $149.99). The 9-mo cadence
+total intentionally drifts ABOVE the legacy $49 / $99 / $199 / $499 / $999
+annual anchors — Sal/LUC/ACHEEVY haggle DOWN to those round numbers as
+built-in negotiation theater.
+
+> **Correction 2026-05-11 PM:** an earlier revision of this doc claimed
+> monthly retail was derived `monthly = annual / 6.75` from the legacy
+> annuals (which produced $7.26 / $14.67 / $29.48 / $73.93 / $148.00).
+> That contradicted canon §2 and was applied to `membership_pooler_pass.py`
+> + `membership_wood_stork.py` so 4 of 5 tiers were billing the wrong
+> amount on Stripe. Constants are now direct canon anchors; tests under
+> `tests/test_tier_retail_canon.py` pin them so this drift can't recur.
 
 #### Pay 9, get 12 (9mo plan)
 

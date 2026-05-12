@@ -5,9 +5,10 @@ No Stripe SDK calls, no DB, no HTTP. The api_server layer wraps this.
 Owner-ratified mechanics 2026-05-10 + 3-6-9 cadence pivot 2026-05-11:
   - Wood Stork Standard / Reserve, priced per 3-6-9 cadence canon
     (`cbrew-369-pricing-canon-2026-05-11.md`)
-  - Annual headlines (canon): Standard $499, Reserve $999
-  - Monthly retail is DERIVED so the 9-mo cadence lands EXACTLY on the
-    round annual headline (Standard ≈ $73.93/mo, Reserve = $148.00/mo)
+  - Canon monthly retail anchors (§2): Standard $74.99, Reserve $149.99
+  - The 9-mo cadence total ($506.18 / $1,012.43) intentionally drifts
+    ABOVE the legacy $499 / $999 annual anchors — Sal/LUC/ACHEEVY haggle
+    DOWN to those round legacy numbers as built-in negotiation theater.
   - 4 cadences per tier: monthly / 3mo (15% off) / 6mo (20%) / 9mo (25%, deliver 12)
   - Referral discount is a TIERED PERCENT on member's own product orders:
       0      → 18% (base Wood Stork)
@@ -25,13 +26,12 @@ from typing import Literal
 import cadence
 
 
-# Annual headline anchors (canon): the round number a customer sees as
-# "the price for the year". Monthly retail is derived backward so the
-# 9-mo cadence lands EXACTLY on this headline.
-WOOD_STORK_STANDARD_ANNUAL = 499.0
-WOOD_STORK_RESERVE_ANNUAL = 999.0
-WOOD_STORK_STANDARD_MONTHLY_RETAIL = cadence.monthly_retail_from_annual(WOOD_STORK_STANDARD_ANNUAL)
-WOOD_STORK_RESERVE_MONTHLY_RETAIL = cadence.monthly_retail_from_annual(WOOD_STORK_RESERVE_ANNUAL)
+# Canon monthly retail anchors per cbrew-369-pricing-canon-2026-05-11.md §2.
+# DO NOT derive these from the legacy annual headlines — canon says they
+# are the source of truth and the 9-mo total drifts above the legacy
+# annual on purpose.
+WOOD_STORK_STANDARD_MONTHLY_RETAIL = 74.99
+WOOD_STORK_RESERVE_MONTHLY_RETAIL = 149.99
 
 # Stripe product ID prefixes — full ID is `<prefix>_<cadence>` per the
 # 4-cadence schedule (e.g. `coastal_membership_wood_stork_standard_9mo`)
