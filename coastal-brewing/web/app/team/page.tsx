@@ -366,7 +366,7 @@ export default function TeamPage() {
         {/* Brand top — Coastal Brewing Co. logo (the one on Sal's apron) */}
         <div className="mb-12 flex flex-col items-start gap-4">
           <Image
-            src="/coastal-brewing-logo-official.png"
+            src="/coastal-logo.png"
             alt="Coastal Brewing Co."
             width={88}
             height={88}
