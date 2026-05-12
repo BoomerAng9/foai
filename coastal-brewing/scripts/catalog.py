@@ -4732,16 +4732,20 @@ PRODUCTS: dict[str, dict] = {
         "blurb": "Roasted hojicha green tea blended with traditional medicinal mushrooms long appreciated in herbal practice. Sold as food, not a supplement.",
     },
     # --- Monthly subscriptions ---
+    # RETIRED 2026-05-11 — the 4-product subscribe-flow (Coffee Monthly /
+    # Tea Monthly / Combo Monthly) was superseded by the per-tier
+    # ProductMatrixPicker shipped in PR #409-#411. Records remain so
+    # server-internal callers (audit ledger, margin calc, grandfathered
+    # Stripe lookups) can still resolve them, but customer-facing
+    # accessors (list_products / get_product / recommend_bundle) filter
+    # them out via the `retired_at` field.
     "coastal-coffee-monthly": {
         "image": "/products/coastal-coffee-monthly.png",
         "name": "Coffee Monthly Subscription",
         "category": "subscription",
         "size": "/mo",
-        # msrp auto-computed by _enrich_products() from cost basis + 55%
-        # subscription margin policy. Cost basis below reflects ONE 12oz
-        # Tier-A blend per delivery (TCR drop-ship $15.78). Sal-curated
-        # rotation may select Tier-B/C/D within the bag, but cost basis
-        # uses Tier-A as the floor anchor (most-shipped tier).
+        "retired_at": "2026-05-11",
+        "retired_reason": "Superseded by per-tier ProductMatrixPicker (Pooler Pass / Custee Card / Wood Stork). See PR #409-#411.",
         "msrp": 17.99,  # placeholder; overwritten by enrichment
         "wholesale_cost": 15.78,
         "fulfillment_cost": 1.8,
@@ -4755,9 +4759,8 @@ PRODUCTS: dict[str, dict] = {
         "name": "Tea Monthly Subscription",
         "category": "subscription",
         "size": "/mo",
-        # Cost basis: ONE 3oz standard Lowcountry Tea per delivery
-        # (TCR drop-ship $12.00). Premium teas (matcha/hojicha) ship
-        # under separate SKU at higher price tier.
+        "retired_at": "2026-05-11",
+        "retired_reason": "Superseded by per-tier ProductMatrixPicker. See PR #409-#411.",
         "msrp": 13.99,  # placeholder; overwritten by enrichment
         "wholesale_cost": 12.0,
         "fulfillment_cost": 1.8,
@@ -4771,11 +4774,8 @@ PRODUCTS: dict[str, dict] = {
         "name": "Combo Monthly Subscription",
         "category": "subscription",
         "size": "/mo",
-        # Cost basis: ONE Tier-A coffee ($15.78) + ONE standard tea
-        # ($12.00) bundled in same monthly delivery. Combined fulfill
-        # ~$2.50 (one shipment, two items). Owner-flagged 2026-05-10:
-        # prior cost basis $13.50 was ~50% under true sum — produced
-        # $34.49 MSRP that essentially eliminated all combo margin.
+        "retired_at": "2026-05-11",
+        "retired_reason": "Superseded by per-tier ProductMatrixPicker. See PR #409-#411.",
         "msrp": 24.99,  # placeholder; overwritten by enrichment
         "wholesale_cost": 27.78,
         "fulfillment_cost": 2.5,
@@ -4852,27 +4852,37 @@ def resolve_sku(product_id: str) -> str:
 def get_product(product_id: str) -> Optional[dict]:
     """Public-safe product lookup. Strips internal cost fields.
 
-    For server-internal callers that need cost data (margin calc, equation
-    floor, NemoClaw policy gate) use `get_product_internal()` instead.
+    Retired SKUs (those carrying a `retired_at` ISO date) return None — the
+    customer-facing surface should treat them as if they don't exist. Use
+    `get_product_internal()` if you need to resolve a retired record (audit
+    ledger, margin calc, grandfathered Stripe lookup).
     """
     p = PRODUCTS.get(resolve_sku(product_id))
-    return _strip_internal_fields(p) if p else None
+    if p is None or p.get("retired_at"):
+        return None
+    return _strip_internal_fields(p)
 
 
 def get_product_internal(product_id: str) -> Optional[dict]:
     """Server-internal product lookup. Returns full dict including cost fields.
 
+    Resolves retired SKUs too (callers that need them — audit, margin calc,
+    grandfathered billing — go through this entrypoint).
+
     NEVER serialize the result to an HTTP response without first running it
     through `_strip_internal_fields()`. Customer-facing API routes must call
-    `get_product()` (which strips by default), not this function.
+    `get_product()` (which strips internal fields AND filters retired SKUs).
     """
     return PRODUCTS.get(resolve_sku(product_id))
 
 
 def list_products(category: Optional[str] = None) -> list[dict]:
-    """Public-safe catalog listing. Strips internal cost fields from every entry."""
+    """Public-safe catalog listing. Strips internal cost fields and filters
+    out retired SKUs (those carrying a `retired_at` ISO date)."""
     items = []
     for pid, p in PRODUCTS.items():
+        if p.get("retired_at"):
+            continue
         if category and p.get("category") != category:
             continue
         items.append({**_strip_internal_fields(p), "id": pid})
@@ -5031,6 +5041,19 @@ def recommend_bundle(preferences: dict) -> dict:
     else:  # starter
         picks.append("coastal-discovery-bundle")
         rationale.append("Coastal Discovery Bundle — coffee, tea, matcha trio. Best for first-timers.")
+
+    # Filter retired SKUs out of customer-facing recommendations. If the
+    # filter leaves the picks list empty (e.g., size=monthly path which
+    # used to return only retired subscription SKUs), fall back to the
+    # discovery bundle so the Custee never gets an empty recommendation.
+    picks = [pid for pid in picks if pid in PRODUCTS and not PRODUCTS[pid].get("retired_at")]
+    if not picks:
+        picks = ["coastal-discovery-bundle"]
+        rationale = [
+            "The à la carte monthly subscription was retired — "
+            "try the Discovery Bundle to see what fits, then sign up "
+            "for a tier (Pooler Pass / Custee Card / Wood Stork) on /pricing."
+        ]
 
     # Defense-in-depth: strip internal fields from the working dict even
     # though `picks` below only serializes id/name/size/msrp/blurb. Future
