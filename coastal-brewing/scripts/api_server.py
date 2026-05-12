@@ -3498,6 +3498,15 @@ async def chat_stream(websocket: WebSocket, token: Optional[str] = Query(default
                 next_employee=next_emp,
             ).model_dump())
 
+            # CRITICAL: persist the handoff on the server side too.
+            # WsResponseComplete only tells the frontend who's up next —
+            # the server's session-local `employee` must also flip,
+            # otherwise the next iteration of this while-loop builds the
+            # sys_prompt from `_employee_system_prompt(employee)` with
+            # the OLD employee (Sal) and the routing fix is moot.
+            if next_emp and next_emp in _EMPLOYEE_SURFACE:
+                employee = next_emp
+
             # Audit log
             try:
                 audit_ledger.insert_action_receipt(
