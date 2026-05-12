@@ -41,6 +41,41 @@ from auth import (  # noqa: E402
 from nemoclaw import router as nemoclaw_router, _evaluate, _append_event  # noqa: E402
 from public_chat import router as public_chat_router  # noqa: E402
 
+# Phase-1 wiring (2026-05-11 PM build session): Lane A/B/C action handlers,
+# Sqwaadrun fleet proxy, schedule list/run-once. See ~/foai/chicken-hawk/
+# CLAUDE.md + FOAI Project/registry/chicken-hawk-action-registry.yaml.
+from lane_actions import (  # noqa: E402
+    trigger_lane_a,
+    trigger_lane_b,
+    fire_lane_c5_snapshot,
+)
+from schedule_actions import list_all_schedules, run_schedule_once  # noqa: E402
+from sqwaadrun_proxy import (  # noqa: E402
+    list_sqwaadrun_hawks,
+    get_active_missions as sqwaadrun_get_active_missions,
+    get_recent_missions as sqwaadrun_get_recent_missions,
+    get_cache_stats as sqwaadrun_get_cache_stats,
+)
+from lane_views import get_lane_cache, get_lane_drift  # noqa: E402
+from missions_views import list_missions, get_mission_spec  # noqa: E402
+from press_actions import daemon_start as press_daemon_start_handler  # noqa: E402
+from press_actions import dry_run as press_dry_run_handler  # noqa: E402
+from press_actions import auth_test as press_auth_test_handler  # noqa: E402
+from press_views import (  # noqa: E402
+    get_heartbeat as press_get_heartbeat,
+    get_receipts as press_get_receipts,
+    get_auth_list as press_get_auth_list,
+    get_token_index as press_get_token_index,
+)
+from deploy_actions import (  # noqa: E402
+    deploy_hawk_ui as deploy_hawk_ui_handler,
+    deploy_gateway as deploy_gateway_handler,
+    deploy_sqwaadrun as deploy_sqwaadrun_handler,
+    deploy_rollback as deploy_rollback_handler,
+    read_history as deploy_read_history,
+)
+from builder_actions import build_site as build_site_handler, get_stack_presets  # noqa: E402
+
 # ---------------------------------------------------------------------------
 # Structured logging setup
 # ---------------------------------------------------------------------------
@@ -155,6 +190,19 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
         "/admin/",
         "/login",
         "/api/chicken-hawk/",
+        # Phase-1 owner-tier endpoints (2026-05-11 PM)
+        "/schedules",
+        "/sqwaadrun/",
+        # Phase-2 owner-tier endpoints (2026-05-11 PM)
+        "/lanes/",
+        # Phase-3 owner-tier endpoints (2026-05-11 PM)
+        "/press/",
+        # Phase-4 owner-tier endpoints (2026-05-11 PM)
+        "/deploy/",
+        # Phase-4b owner-tier endpoints (2026-05-11 PM)
+        "/builder/",
+        # Phase-5 owner-tier endpoints (2026-05-11 PM)
+        "/missions",
     )
 
     async def dispatch(self, request: Request, call_next):
@@ -576,6 +624,137 @@ async def run_action(req: RunRequest, _: None = Depends(require_auth)) -> JSONRe
             },
         )
 
+    # --- Phase-1 lane + schedule actions ---------------------------------
+    # All four call internal services (Sqwaadrun gateway, CTI Hub admin
+    # endpoint, Print_Press CLI). NemoClaw has already allowed; we attach
+    # the upstream service's slim-projection result to the receipt body.
+    # ---------------------------------------------------------------------
+    if req.action == "lane_a_trigger":
+        result = await trigger_lane_a(req.payload)
+        receipt["elapsed_ms"] = (_time.perf_counter() - started) * 1000
+        receipt["action_result"] = result
+        await _record_run_receipt(receipt)
+        return JSONResponse(
+            status_code=200 if result.get("ok") else 502,
+            content={"ok": result.get("ok", False), "verdict": "allow", "detail": result, "receipt": receipt},
+        )
+
+    if req.action == "lane_b_trigger":
+        result = await trigger_lane_b(req.payload)
+        receipt["elapsed_ms"] = (_time.perf_counter() - started) * 1000
+        receipt["action_result"] = result
+        await _record_run_receipt(receipt)
+        return JSONResponse(
+            status_code=200 if result.get("ok") else 502,
+            content={"ok": result.get("ok", False), "verdict": "allow", "detail": result, "receipt": receipt},
+        )
+
+    if req.action == "lane_c5_snapshot_fire":
+        result = await fire_lane_c5_snapshot(req.payload)
+        receipt["elapsed_ms"] = (_time.perf_counter() - started) * 1000
+        receipt["action_result"] = {k: v for k, v in result.items() if k != "snapshot"}
+        await _record_run_receipt(receipt)
+        return JSONResponse(
+            status_code=200 if result.get("ok") else 502,
+            content={"ok": result.get("ok", False), "verdict": "allow", "detail": result, "receipt": receipt},
+        )
+
+    if req.action == "schedule_run_once":
+        result = await run_schedule_once(req.payload)
+        receipt["elapsed_ms"] = (_time.perf_counter() - started) * 1000
+        receipt["action_result"] = result
+        await _record_run_receipt(receipt)
+        return JSONResponse(
+            status_code=200 if result.get("ok") else 502,
+            content={"ok": result.get("ok", False), "verdict": "allow", "detail": result, "receipt": receipt},
+        )
+
+    # --- Phase-3 Print_Press control actions ----------------------------
+    if req.action == "press_daemon_start":
+        result = await press_daemon_start_handler(req.payload)
+        receipt["elapsed_ms"] = (_time.perf_counter() - started) * 1000
+        receipt["action_result"] = result
+        await _record_run_receipt(receipt)
+        return JSONResponse(
+            status_code=200 if result.get("ok") else 502,
+            content={"ok": result.get("ok", False), "verdict": "allow", "detail": result, "receipt": receipt},
+        )
+
+    if req.action == "press_dry_run":
+        result = await press_dry_run_handler(req.payload)
+        receipt["elapsed_ms"] = (_time.perf_counter() - started) * 1000
+        receipt["action_result"] = {k: v for k, v in result.items() if k != "stdout"}
+        await _record_run_receipt(receipt)
+        return JSONResponse(
+            status_code=200 if result.get("ok") else 502,
+            content={"ok": result.get("ok", False), "verdict": "allow", "detail": result, "receipt": receipt},
+        )
+
+    if req.action == "press_auth_test":
+        result = await press_auth_test_handler(req.payload)
+        receipt["elapsed_ms"] = (_time.perf_counter() - started) * 1000
+        receipt["action_result"] = result
+        await _record_run_receipt(receipt)
+        return JSONResponse(
+            status_code=200 if result.get("ok") else 502,
+            content={"ok": result.get("ok", False), "verdict": "allow", "detail": result, "receipt": receipt},
+        )
+
+    # --- Phase-4 deploy actions (NemoClaw escalates first call → Telegram → owner approves) ---
+    if req.action == "deploy_hawk_ui":
+        result = await deploy_hawk_ui_handler(req.payload)
+        receipt["elapsed_ms"] = (_time.perf_counter() - started) * 1000
+        receipt["action_result"] = {k: v for k, v in result.items() if k not in ("stdout_excerpt",)}
+        await _record_run_receipt(receipt)
+        return JSONResponse(
+            status_code=200 if result.get("ok") else 502,
+            content={"ok": result.get("ok", False), "verdict": "allow", "detail": result, "receipt": receipt},
+        )
+
+    if req.action == "deploy_gateway":
+        result = await deploy_gateway_handler(req.payload)
+        receipt["elapsed_ms"] = (_time.perf_counter() - started) * 1000
+        receipt["action_result"] = {k: v for k, v in result.items() if k not in ("stdout_excerpt",)}
+        await _record_run_receipt(receipt)
+        return JSONResponse(
+            status_code=200 if result.get("ok") else 502,
+            content={"ok": result.get("ok", False), "verdict": "allow", "detail": result, "receipt": receipt},
+        )
+
+    if req.action == "deploy_sqwaadrun":
+        result = await deploy_sqwaadrun_handler(req.payload)
+        receipt["elapsed_ms"] = (_time.perf_counter() - started) * 1000
+        receipt["action_result"] = {k: v for k, v in result.items() if k not in ("stdout_excerpt",)}
+        await _record_run_receipt(receipt)
+        return JSONResponse(
+            status_code=200 if result.get("ok") else 502,
+            content={"ok": result.get("ok", False), "verdict": "allow", "detail": result, "receipt": receipt},
+        )
+
+    if req.action.startswith("deploy_rollback"):
+        result = await deploy_rollback_handler(req.payload)
+        receipt["elapsed_ms"] = (_time.perf_counter() - started) * 1000
+        receipt["action_result"] = {k: v for k, v in result.items() if k not in ("stdout_excerpt",)}
+        await _record_run_receipt(receipt)
+        return JSONResponse(
+            status_code=200 if result.get("ok") else 502,
+            content={"ok": result.get("ok", False), "verdict": "allow", "detail": result, "receipt": receipt},
+        )
+
+    # --- Phase-4b builder — Chicken Hawk creates full-stack sites ----------
+    # Safe to allow without escalation: writes to ~/chicken-hawk-workspaces
+    # only. Ship-to-production requires explicit /tools/deploy which IS
+    # owner-Telegram-confirmed.
+    if req.action == "build_site":
+        result = await build_site_handler(req.payload)
+        receipt["elapsed_ms"] = (_time.perf_counter() - started) * 1000
+        receipt["action_result"] = result
+        await _record_run_receipt(receipt)
+        return JSONResponse(
+            status_code=200 if result.get("ok") else 400,
+            content={"ok": result.get("ok", False), "verdict": "allow", "detail": result, "receipt": receipt},
+        )
+
     # Verdict == allow (generic fall-through for actions without a specific dispatch block).
     receipt["elapsed_ms"] = (_time.perf_counter() - started) * 1000
     await _record_run_receipt(receipt)
@@ -589,6 +768,157 @@ async def run_action(req: RunRequest, _: None = Depends(require_auth)) -> JSONRe
             "receipt": receipt,
         },
     )
+
+
+# ---------------------------------------------------------------------------
+# Phase-1 read endpoints (2026-05-11 PM)
+#
+# /schedules         — merged Sqwaadrun + Print_Press schedule list
+# /sqwaadrun/hawks   — 20-Hawk ops fleet roster (distinct from the 11
+#                       customer-facing helpers at /hawks)
+# ---------------------------------------------------------------------------
+
+
+@app.get("/schedules", tags=["Schedules"], dependencies=[Depends(require_auth)])
+async def list_schedules() -> dict:
+    """Merged schedule registry: Sqwaadrun scrape cadence + Print_Press publish cadence."""
+    return await list_all_schedules()
+
+
+@app.get("/sqwaadrun/hawks", tags=["Sqwaadrun"], dependencies=[Depends(require_auth)])
+async def list_sqwaadrun_hawks_endpoint() -> dict:
+    """20-Hawk Sqwaadrun ops-fleet roster (Lil_Feed/Diff/Schema/.../Telegram).
+
+    Distinct from /hawks (11 customer-facing Lil_Hawk helpers). Renders in
+    hawk-ui /tools/lil-hawks under the 'Ops Fleet' tab.
+    """
+    return await list_sqwaadrun_hawks()
+
+
+# ---------------------------------------------------------------------------
+# Phase-2 lane view endpoints (2026-05-11 PM)
+#
+# /lanes/{id}/cache  — latest cached output for the lane
+# /lanes/{id}/drift  — drift-guard report (Python stages vs JSON spec)
+# ---------------------------------------------------------------------------
+
+
+@app.get("/lanes/{lane_id}/cache", tags=["Lanes"], dependencies=[Depends(require_auth)])
+async def get_lane_cache_endpoint(lane_id: str) -> dict:
+    """Latest cached payload for a lane.
+
+    lane-a   → ~/.cache/sqwaadrun/acheevy-monitor/latest.json
+    lane-b   → ~/.cache/sqwaadrun/lane-b-fallen-apps/latest.json
+    lane-c5  → ~/.cache/cti-hub/mindedge-snapshot/latest.json
+
+    Falls back to HTTP proxy against the Sqwaadrun gateway when filesystem
+    miss + the lane is Sqwaadrun-backed. Returns graceful 'unavailable'
+    payload so the hawk-ui renders empty state.
+    """
+    return await get_lane_cache(lane_id)
+
+
+@app.get("/lanes/{lane_id}/drift", tags=["Lanes"], dependencies=[Depends(require_auth)])
+async def get_lane_drift_endpoint(lane_id: str) -> dict:
+    """Drift-guard report: Python IMPLEMENTED_STAGES vs JSON spec pipeline[].stage.
+
+    status='ok' when implemented is a subset of spec (intended shape — score
+    and synthesize stages run externally to Sqwaadrun). status='drift' when
+    Python claims a stage the spec has dropped. status='spec_not_found' when
+    the iCloud-workspace spec file isn't reachable from the host.
+    """
+    return get_lane_drift(lane_id)
+
+
+# ---------------------------------------------------------------------------
+# Phase-3 Print_Press view endpoints (2026-05-11 PM)
+#
+# /press/heartbeat   — daemon liveness
+# /press/receipts    — delivery audit tail (?n=N, default 20, max 200)
+# /press/auth        — configured platforms (no secrets — CLI omits them)
+# /press/tokens      — caller-token presence index (NEVER returns secrets)
+# ---------------------------------------------------------------------------
+
+
+@app.get("/press/heartbeat", tags=["Press"], dependencies=[Depends(require_auth)])
+async def get_press_heartbeat() -> dict:
+    """Print_Press daemon liveness. HTTP-first, file-fallback."""
+    return await press_get_heartbeat()
+
+
+@app.get("/press/receipts", tags=["Press"], dependencies=[Depends(require_auth)])
+async def get_press_receipts(n: int = 20) -> dict:
+    """Last N Print_Press delivery receipts (audit trail)."""
+    return await press_get_receipts(n=n)
+
+
+@app.get("/press/auth", tags=["Press"], dependencies=[Depends(require_auth)])
+async def get_press_auth() -> dict:
+    """Configured publishing platforms — names only, never secrets."""
+    return await press_get_auth_list()
+
+
+@app.get("/press/tokens", tags=["Press"], dependencies=[Depends(require_auth)])
+async def get_press_tokens() -> dict:
+    """HMAC caller-token presence index. Never returns the secret value."""
+    return press_get_token_index()
+
+
+# ---------------------------------------------------------------------------
+# Phase-4 deploy history endpoint (2026-05-11 PM)
+# ---------------------------------------------------------------------------
+
+
+@app.get("/deploy/history", tags=["Deploy"], dependencies=[Depends(require_auth)])
+async def get_deploy_history(n: int = 20) -> dict:
+    """Recent deploy receipts (timestamp, target, verdict, elapsed, exit_code)."""
+    return deploy_read_history(n=n)
+
+
+# ---------------------------------------------------------------------------
+# Phase-4b builder endpoint (2026-05-11 PM)
+# ---------------------------------------------------------------------------
+
+
+@app.get("/builder/presets", tags=["Builder"], dependencies=[Depends(require_auth)])
+async def get_builder_presets() -> dict:
+    """Stack-preset catalog for the /tools/builder dropdown."""
+    return {"presets": get_stack_presets()}
+
+
+# ---------------------------------------------------------------------------
+# Phase-5 mission registry + sqwaadrun expanded endpoints (2026-05-11 PM)
+# ---------------------------------------------------------------------------
+
+
+@app.get("/missions", tags=["Missions"], dependencies=[Depends(require_auth)])
+async def list_missions_endpoint() -> dict:
+    """All FOAI mission specs with per-mission drift status."""
+    return list_missions()
+
+
+@app.get("/missions/{mission_id}/spec", tags=["Missions"], dependencies=[Depends(require_auth)])
+async def get_mission_spec_endpoint(mission_id: str) -> dict:
+    """Full spec body for one mission_id."""
+    return get_mission_spec(mission_id)
+
+
+@app.get("/sqwaadrun/missions/active", tags=["Sqwaadrun"], dependencies=[Depends(require_auth)])
+async def get_sqwaadrun_active_missions() -> dict:
+    """Currently-running Sqwaadrun missions (proxy)."""
+    return await sqwaadrun_get_active_missions()
+
+
+@app.get("/sqwaadrun/missions/recent", tags=["Sqwaadrun"], dependencies=[Depends(require_auth)])
+async def get_sqwaadrun_recent_missions(n: int = 20) -> dict:
+    """Last N completed Sqwaadrun missions."""
+    return await sqwaadrun_get_recent_missions(n=n)
+
+
+@app.get("/sqwaadrun/cache/stats", tags=["Sqwaadrun"], dependencies=[Depends(require_auth)])
+async def get_sqwaadrun_cache_stats() -> dict:
+    """Sqwaadrun scrape_cache.db statistics."""
+    return await sqwaadrun_get_cache_stats()
 
 
 @app.get("/audit/integrity-check", tags=["Audit"], dependencies=[Depends(require_auth)])
