@@ -5,22 +5,9 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X, ChevronDown } from "lucide-react";
 import { Wordmark } from "@/components/wordmark";
 
-const NAV_LINKS = [
-  { href: "/products", label: "Offerings" },
-  { href: "/pricing", label: "Pricing" },
-  { href: "/membership", label: "Membership" },
-  { href: "/compare", label: "Compare" },
-  { href: "/recipes", label: "Recipes" },
-  { href: "/team", label: "Team" },
-  { href: "/about/governance", label: "Commitment" },
-  { href: "/chat", label: "Chat" },
-  { href: "/chat?agent=sales", label: "Order" },
-  // Owner directive 2026-05-11 PM: account creation must be reachable from
-  // desktop nav (was previously only in the mobile drawer's Account group).
-  // The drawer still carries the full Account group (My Account / Sign In /
-  // Open an Account) and is now available on desktop too via the hamburger.
-  { href: "/auth/signup", label: "Sign Up" },
-];
+// NAV_LINKS removed 2026-05-12 — the flat desktop top-bar was retired in
+// favor of a single drawer surface that's identical on desktop + mobile.
+// All previously-listed routes are reachable from DRAWER_GROUPS below.
 
 const DRAWER_GROUPS = [
   {
@@ -34,6 +21,7 @@ const DRAWER_GROUPS = [
       { href: "/membership", label: "Standard Membership" },
       { href: "/wood-stork", label: "Wood Stork (B2B)" },
       { href: "/pooler-pass", label: "Pooler Pass (Local)" },
+      { href: "/recipes", label: "Recipes" },
       { href: "/compare", label: "How we compare" },
       { href: "/live", label: "Live look-in (members)" },
       { href: "/merch", label: "Merch" },
@@ -139,24 +127,13 @@ export function Nav() {
       <header className="sticky top-0 z-40 border-b border-border/60 bg-background/80 backdrop-blur">
         <div className="container flex h-20 items-center justify-between">
           <Wordmark size="md" />
-          {/* Desktop nav */}
-          <nav className="hidden items-center gap-8 md:flex">
-            {NAV_LINKS.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                className="font-sans text-[10px] uppercase tracking-wordmark text-foreground/80 hover:text-foreground"
-              >
-                {link.label}
-              </Link>
-            ))}
-          </nav>
-          {/* Hamburger — desktop + mobile both. Owner directive 2026-05-11 PM:
-              desktop nav needs parity with the mobile drawer (Account group
-              with Sign In / Open an Account was previously only reachable
-              from the mobile drawer). */}
+          {/* Owner directive 2026-05-12: desktop mirrors the mobile menu
+              structure — hamburger + drawer only. The flat top-bar of
+              NAV_LINKS that previously rendered on desktop has been
+              retired. Both viewports now use the single drawer surface
+              (Shop / Account / Company / Policies + CTA row). */}
           <button
-            className="text-foreground p-2 -mr-2 md:ml-4"
+            className="text-foreground p-2 -mr-2"
             aria-label={drawerOpen ? "Close menu" : "Open menu"}
             type="button"
             onClick={() => setDrawerOpen((o) => !o)}
