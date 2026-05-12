@@ -60,12 +60,18 @@ export function Hero() {
               passes one more set of eyes before it ships.
             </p>
 
-            <div className="mt-6">
+            <div className="mt-6 flex flex-wrap items-center gap-3">
               <Link
                 href="/membership"
                 className="inline-flex items-center gap-2 rounded-full border border-border bg-card/30 px-4 py-2 text-xs text-muted-foreground hover:text-foreground hover:border-foreground/30 transition-colors"
               >
                 <span>See the Coastal Custee Card Plan — pause, swap, or cancel any time</span>
+              </Link>
+              <Link
+                href="/auth/login"
+                className="text-xs text-foreground/70 hover:text-foreground underline-offset-4 hover:underline transition-colors"
+              >
+                Already have an account? Sign in →
               </Link>
             </div>
           </div>
