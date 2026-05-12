@@ -1277,6 +1277,38 @@ async def stripe_webhook(request: Request) -> dict:
             # commit + fire owner Telegram. Owner directive 2026-05-09 —
             # Stripe Checkout replaces Paperform as the canonical
             # commitment surface for above-cap deals.
+            # Service-initiation branch: $6.54 fee paid, record into the
+            # ledger so future trigger calls return already_paid=True.
+            _si_flow = session_meta.get("flow") == "service_initiation"
+            if _si_flow:
+                try:
+                    _si_email = (
+                        session_meta.get("customer_email")
+                        or session.get("customer_email")
+                        or session.get("customer_details", {}).get("email")
+                        or ""
+                    )
+                    _si_ledger = _service_init_load_ledger()
+                    _si_entry = _service_init_mod.record_service_init_paid(
+                        email=_si_email,
+                        ledger=_si_ledger,
+                        intent_id=str(session_meta.get("intent_id") or ""),
+                        trigger=str(session_meta.get("trigger") or "trial"),
+                        stripe_session_id=str(session.get("id") or ""),
+                        paid_at_iso=_time.strftime("%Y-%m-%dT%H:%M:%SZ", _time.gmtime()),
+                    )
+                    _service_init_save_ledger(_si_ledger)
+                    _send_telegram_message(
+                        f"Service Initiation paid\n"
+                        f"custee: {_si_email}\n"
+                        f"intent: {_si_entry.get('intent_id')}\n"
+                        f"trigger: {_si_entry.get('trigger')}\n"
+                        f"amount: $6.54"
+                    )
+                except Exception as _si_exc:
+                    log = __import__("logging").getLogger("coastal.service_init")
+                    log.warning("service-init ledger record failed: %s", _si_exc)
+
             _esc_token = session_meta.get("escalation_token")
             _esc_flow = session_meta.get("flow") == "stepper_escalation"
             if _esc_token and _esc_flow:
@@ -3926,6 +3958,124 @@ def membership_checkout(
     if not url:
         raise HTTPException(status_code=503, detail="checkout session mint failed")
     return {"ok": True, "redirect_url": url}
+
+
+# ────────────────────────── Service Initiation ($6.54, once per Custee) ──────────────────────────
+# Owner-ratified 2026-05-11: the $6.54 service-initiation fee is NOT
+# bundled into tier subscription checkouts. It fires once per Custee on
+# the first of either Meeting Mode trial start OR first standard-prices
+# retail order. Audit-ledger gated so it never double-fires.
+# Pure logic in scripts/service_initiation.py.
+
+import service_initiation as _service_init_mod  # noqa: E402
+
+SERVICE_INIT_LEDGER_PATH = pathlib.Path.home() / ".coastal" / "service-init-ledger.json"
+
+
+def _service_init_load_ledger() -> dict:
+    """Read the service-init ledger from disk. Empty dict on missing file
+    or parse error — first paying Custee creates it."""
+    try:
+        if SERVICE_INIT_LEDGER_PATH.exists():
+            return json.loads(SERVICE_INIT_LEDGER_PATH.read_text(encoding="utf-8"))
+    except Exception as exc:  # noqa: BLE001
+        log = __import__("logging").getLogger("coastal.service_init")
+        log.warning("service-init ledger load failed: %s", exc)
+    return {}
+
+
+def _service_init_save_ledger(ledger: dict) -> None:
+    """Persist the ledger to disk. Parent dir created on demand."""
+    SERVICE_INIT_LEDGER_PATH.parent.mkdir(parents=True, exist_ok=True)
+    SERVICE_INIT_LEDGER_PATH.write_text(json.dumps(ledger, indent=2), encoding="utf-8")
+
+
+class ServiceInitChargeRequest(BaseModel):
+    email: str
+    trigger: str  # "trial" | "retail_first_purchase"
+    reference_id: Optional[str] = None  # optional caller anchor (trial id / order id)
+
+
+@app.post("/api/service-initiation/charge")
+def service_initiation_charge(
+    body: ServiceInitChargeRequest,
+    x_coastal_token: str = Header(""),
+) -> dict:
+    """Fire the $6.54 service-initiation Stripe Checkout Session ONCE per
+    Custee. Idempotent — repeat calls for an already-paid email return
+    {ok: True, already_paid: True} without re-minting.
+
+    Triggered from:
+      - Meeting Mode trial start (trigger="trial")
+      - First standard-prices retail order (trigger="retail_first_purchase")
+
+    Webhook /stripe/webhook checkout.session.completed records the paid
+    entry into the ledger."""
+    _auth(x_coastal_token)
+    email = (body.email or "").strip().lower()
+    trigger = (body.trigger or "").strip().lower()
+
+    if not email or "@" not in email:
+        raise HTTPException(status_code=400, detail="email required")
+    if trigger not in _service_init_mod.ALLOWED_TRIGGERS:
+        raise HTTPException(
+            status_code=400,
+            detail=f"trigger must be one of {sorted(_service_init_mod.ALLOWED_TRIGGERS)}",
+        )
+
+    ledger = _service_init_load_ledger()
+    if _service_init_mod.has_paid_service_init(email, ledger=ledger):
+        existing = ledger[email]
+        return {
+            "ok": True,
+            "already_paid": True,
+            "paid_at": existing.get("paid_at"),
+            "intent_id": existing.get("intent_id"),
+        }
+
+    if not STRIPE_AVAILABLE or not _stripe_is_configured():
+        raise HTTPException(status_code=503, detail="Stripe not configured on this runner")
+
+    day_iso = _time.strftime("%Y-%m-%d", _time.gmtime())
+    intent_id = _service_init_mod.make_service_init_intent_id(email=email, day_iso=day_iso)
+    params = _service_init_mod.build_checkout_params(
+        customer_email=email,
+        intent_id=intent_id,
+        trigger=trigger,
+        public_url=AUTH_PUBLIC_URL,
+    )
+    # Carry the trial / order anchor through metadata so the webhook can
+    # correlate the completed payment back to its originating surface.
+    if body.reference_id:
+        params["metadata"]["reference_id"] = body.reference_id
+        params["payment_intent_data"]["metadata"]["reference_id"] = body.reference_id
+
+    try:
+        import stripe as _stripe  # noqa: PLC0415
+        from adapters.stripe_adapter import _init_stripe  # noqa: PLC0415
+        _init_stripe()
+        session = _stripe.checkout.Session.create(**params)
+        checkout_url = session.url if hasattr(session, "url") else session.get("url")
+        session_id = session.id if hasattr(session, "id") else session.get("id")
+    except Exception as exc:  # noqa: BLE001
+        log = __import__("logging").getLogger("coastal.service_init")
+        log.warning("stripe service-init checkout create failed: %s", exc)
+        raise HTTPException(status_code=502, detail=f"checkout session mint failed: {exc}") from exc
+
+    _send_telegram_message(
+        f"Service Initiation intent\nintent: {intent_id}\ncustee: {email}\n"
+        f"trigger: {trigger}\namount: $6.54\nsession: {session_id or '?'}"
+    )
+
+    return {
+        "ok": True,
+        "already_paid": False,
+        "intent_id": intent_id,
+        "session_id": session_id,
+        "redirect_url": checkout_url,
+        "amount_cents": _service_init_mod.SERVICE_INIT_AMOUNT_CENTS,
+        "trigger": trigger,
+    }
 
 
 # ────────────────────────── Coastal Custee Card — 3-6-9 cadence + product matrix ──────────────────────────
