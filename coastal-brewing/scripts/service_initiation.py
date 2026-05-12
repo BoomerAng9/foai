@@ -37,8 +37,21 @@ def make_service_init_intent_id(*, email: str, day_iso: str) -> str:
 
 
 def has_paid_service_init(email: str, *, ledger: dict) -> bool:
-    """True if a paid entry exists in the ledger for this email (case-insensitive)."""
-    return _normalize_email(email) in ledger
+    """True if a confirmed-paid entry exists for this email.
+
+    A "pending" sentinel (Stripe Checkout Session minted but webhook
+    not yet delivered) returns False so the caller treats it as
+    unpaid — but the caller-side double-charge guard at
+    `/api/service-initiation/charge` still short-circuits on pending
+    so the same Session is reused instead of a new one being minted.
+    """
+    key = _normalize_email(email)
+    entry = ledger.get(key)
+    if not entry:
+        return False
+    # Legacy entries without a `status` field are paid by default
+    # (status was introduced 2026-05-12 PM in the double-charge fix).
+    return entry.get("status", "paid") == "paid"
 
 
 def record_service_init_paid(
@@ -51,9 +64,10 @@ def record_service_init_paid(
     paid_at_iso: str,
 ) -> dict:
     """Record a paid service-initiation entry. Idempotent — if an entry
-    already exists for this email, the existing entry is returned
-    unchanged (first payment wins). Caller-side should check
-    has_paid_service_init() first to avoid the Stripe round-trip.
+    is already marked `paid`, return it unchanged (first payment wins).
+    If the existing entry is a `pending` sentinel (minted by /charge
+    but webhook hadn't landed yet), this promotes it to `paid` and
+    keeps the original intent_id + stripe_session_id.
     """
     if trigger not in ALLOWED_TRIGGERS:
         raise ValueError(
@@ -61,10 +75,12 @@ def record_service_init_paid(
         )
 
     key = _normalize_email(email)
-    if key in ledger:
-        return dict(ledger[key])
+    existing = ledger.get(key)
+    if existing and existing.get("status", "paid") == "paid":
+        return dict(existing)
 
     entry = {
+        "status": "paid",
         "paid_at": paid_at_iso,
         "intent_id": intent_id,
         "trigger": trigger,
