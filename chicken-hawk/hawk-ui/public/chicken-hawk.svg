@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Chicken Hawk">
+  <title>Chicken Hawk</title>
+  <!-- Gold disc — brand palette #E8A020 -->
+  <circle cx="32" cy="32" r="30" fill="#E8A020"/>
+  <!-- Slate field — FOAI bg #0F172A -->
+  <circle cx="32" cy="32" r="27" fill="#0F172A"/>
+  <!-- Hawk head silhouette, profile facing right, mech-style spirit -->
+  <path d="M 14 42 C 14 26 21 17 31 15 C 39 13.5 45 18 47 24 L 56 28 L 48 32 L 48 40 L 44 44 L 22 44 Z" fill="#E8A020"/>
+  <!-- Hooked beak — sharp, predatory -->
+  <path d="M 47 24 L 58 29 L 48 32 Z" fill="#E8A020"/>
+  <!-- Eye — slate dot with gold pupil -->
+  <circle cx="38" cy="27" r="2.6" fill="#0F172A"/>
+  <circle cx="38" cy="27" r="1.1" fill="#E8A020"/>
+  <!-- Brow accent — predatory ridge -->
+  <path d="M 32 23 L 42 22 L 41 26 L 32 26 Z" fill="#0F172A"/>
+</svg>

@@ -2,17 +2,25 @@
 
 // Meta-hero — shows Chicken Hawk *at work* as the marketing piece itself.
 // Animated chat exchange: visitor prompt → thinking trace → CH reply with
-// the canonical ASCII portrait. Demonstrates persona, voice, and avatar
-// in a single, self-explanatory unit.
+// BOTH a charming ASCII portrait (delivers what was literally asked) AND
+// the canon mech-style portrait (delivers what was actually wanted).
+// Demonstrates persona, voice, and the "ask once, get the whole answer"
+// posture in one self-explanatory unit.
 
 import { useEffect, useState } from 'react';
+import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import { HawkAvatar } from '@/components/hawk-avatar';
 
-const ASCII_PORTRAIT = ` ______
-<( o.o )>
- >^_^<
-( (--||--))`;
+// Tighter ASCII portrait — preserves the cute beat while reading cleaner
+// at the embedded 13px monospace size. Symmetric, balanced, hawk-shaped.
+const ASCII_PORTRAIT = String.raw`     ___
+   ,'   ',
+  ( o   o )
+   \  v  /
+  __\___/__
+ /| (   ) |\
+`;
 
 const THINKING_BEATS = [
   'Sketching the silhouette…',
@@ -22,9 +30,8 @@ const THINKING_BEATS = [
 ];
 
 const REPLY_TEXT =
-  "I'm Chicken Hawk. I help you draft, plan, decide, and dispatch routine work. " +
-  'I pause to check in when something needs your call — money, contracts, anything going public. ' +
-  'What are you trying to get done?';
+  "Here's the ASCII you asked for — plus the real one from the locker. " +
+  "What are you actually building today? Drop a brief and I'll get started.";
 
 type Phase = 'idle' | 'user' | 'thinking' | 'reply' | 'done';
 
@@ -145,9 +152,23 @@ export function HeroChatDemo() {
                 <div className="rounded-xl px-4 py-3 bg-foai-surface border border-foai-border shadow-card">
                   <p className="text-sm text-foai-text leading-relaxed mb-3">{REPLY_TEXT}</p>
                   <div className="my-2 h-px bg-foai-border" />
-                  <pre className="font-mono text-[13px] leading-tight text-foai-gold whitespace-pre">
+                  <div className="grid grid-cols-1 sm:grid-cols-[auto,1fr] gap-3 items-start">
+                    <pre className="font-mono text-[13px] leading-tight text-foai-gold whitespace-pre">
 {ASCII_PORTRAIT}
-                  </pre>
+                    </pre>
+                    <div className="rounded-lg overflow-hidden border border-foai-border bg-foai-bg/40 shrink-0">
+                      <Image
+                        src="/chicken-hawk/ch-mech-port-orange.png"
+                        alt="Chicken Hawk canon portrait"
+                        width={120}
+                        height={120}
+                        className="block w-full h-auto max-w-[120px]"
+                      />
+                      <div className="px-2 py-1 text-[10px] font-mono uppercase tracking-wider text-foai-muted text-center border-t border-foai-border">
+                        canon · mech
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </motion.div>
