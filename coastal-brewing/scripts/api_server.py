@@ -5936,7 +5936,12 @@ _COASTAL_V2_VOICEID = {
     "sal_ang":       "default-4zhua1rhxjfl50z1dnkcba__coastal-sal-ang-v2",
     "luc_ang":       "default-4zhua1rhxjfl50z1dnkcba__coastal-luc-ang-v2",
     "melli_capensi": "default-4zhua1rhxjfl50z1dnkcba__coastal-melli-capensi-v2",
-    "acheevy":       "default-4zhua1rhxjfl50z1dnkcba__coastal-acheevy-v2",
+    # ACHEEVY-v3: re-cloned 2026-05-12 from a Brian McKnight Tammi Mac
+    # Late Show 30s window (smooth-R&B-tenor register per owner reference
+    # set: Brian McKnight / Case / Nas / AZ). Previous v2 was Nas-sourced;
+    # owner found the Nas register didn't match the Brand Director smooth-
+    # tenor brief. New IVC clone via `_clone_acheevy_mcknight.py`.
+    "acheevy":       "default-4zhua1rhxjfl50z1dnkcba__acheevy-mcknight-soulful-tenor-v3",
     # Marcus / Loss Prevention — defaults to ACHEEVY's clone until owner
     # records the dedicated LP team voice. Override via INWORLD_VOICE_ID_LP
     # to swap in a custom IVC clone without touching code.
