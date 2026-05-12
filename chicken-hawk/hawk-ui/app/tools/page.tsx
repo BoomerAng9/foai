@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { FlaskConical, Shield, Cpu, Bird, Calendar, FileSearch, Activity, AlertTriangle } from 'lucide-react';
+import { FlaskConical, Shield, Cpu, Bird, Calendar, FileSearch, Activity, AlertTriangle, Radio, Megaphone, Rocket, Hammer, FileJson, Network } from 'lucide-react';
 
 interface PanelMeta {
   href: string;
@@ -20,9 +20,51 @@ const panels: PanelMeta[] = [
   {
     href: '/tools/lil-hawks',
     title: 'Lil_Hawks',
-    blurb: 'Eleven specialist agents under Chicken Hawk. Click a row to dispatch — every call routes through NemoClaw.',
+    blurb: 'Eleven customer-facing specialists + the Sqwaadrun ops fleet roster. Click to dispatch.',
     status: 'live',
     icon: <Bird className="size-5 text-foai-gold" />,
+  },
+  {
+    href: '/tools/lanes',
+    title: 'Lanes',
+    blurb: 'Lane A / B / C-5 control — trigger runs, inspect cache, watch drift, baseline progress.',
+    status: 'live',
+    icon: <Radio className="size-5 text-foai-gold" />,
+  },
+  {
+    href: '/tools/press',
+    title: 'Print_Press',
+    blurb: 'Daemon, schedules, delivery receipts, configured platforms, caller-token index.',
+    status: 'live',
+    icon: <Megaphone className="size-5 text-foai-gold" />,
+  },
+  {
+    href: '/tools/builder',
+    title: 'Builder',
+    blurb: 'Describe a site. The squad scaffolds it into a workspace. Ship from /tools/deploy.',
+    status: 'live',
+    icon: <Hammer className="size-5 text-foai-gold" />,
+  },
+  {
+    href: '/tools/deploy',
+    title: 'Deploy',
+    blurb: 'One-click ship — hawk-ui / gateway / sqwaadrun. Two-step with Telegram confirm.',
+    status: 'live',
+    icon: <Rocket className="size-5 text-foai-gold" />,
+  },
+  {
+    href: '/tools/missions',
+    title: 'Missions',
+    blurb: 'Mission spec registry. Drift status compares Python runtime vs JSON spec.',
+    status: 'live',
+    icon: <FileJson className="size-5 text-foai-gold" />,
+  },
+  {
+    href: '/tools/sqwaadrun',
+    title: 'Sqwaadrun',
+    blurb: 'Active missions, recent completions, scrape-cache stats. The ops fleet at work.',
+    status: 'live',
+    icon: <Network className="size-5 text-foai-gold" />,
   },
   {
     href: '/tools/risk-events',
@@ -74,7 +116,7 @@ export default function ToolsOverview() {
       <header className="mb-10">
         <h1 className="text-3xl font-semibold tracking-tight">Tool Chest</h1>
         <p className="text-foai-muted mt-2">
-          Where you steer Chicken Hawk. Eight panels — live plan, agents, risk events, policy gating, runtime, audit, schedules.
+          Where you steer Chicken Hawk. Live plan, agents, lanes, risk events, policy gating, runtime, audit, schedules.
         </p>
       </header>
 
