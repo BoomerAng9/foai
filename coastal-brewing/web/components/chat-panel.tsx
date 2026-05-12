@@ -1355,6 +1355,28 @@ function PromptEnhanceButton({
 // from the message's `employee` field (set when the WS routes to
 // sal_ang / melli_capensi / luc_ang / acheevy); without it the call
 // falls back to sal_ang since Sal is the customer-facing default.
+// Module-scope flag flipped to true on the first user-driven interaction
+// anywhere in the document. Browsers block audio.play() with
+// NotAllowedError until a user gesture has happened — so we gate
+// autoplay on this flag and let the customer hit "Hear" manually for the
+// very first message they see. The listener is registered once on
+// first PlayVoiceButton mount and self-removes on first match.
+let _userHasInteracted = false;
+let _userInteractListenerInstalled = false;
+function _installUserInteractListener() {
+  if (typeof window === "undefined" || _userInteractListenerInstalled) return;
+  _userInteractListenerInstalled = true;
+  const capture = () => {
+    _userHasInteracted = true;
+    document.removeEventListener("pointerdown", capture, true);
+    document.removeEventListener("keydown", capture, true);
+    document.removeEventListener("touchstart", capture, true);
+  };
+  document.addEventListener("pointerdown", capture, true);
+  document.addEventListener("keydown", capture, true);
+  document.addEventListener("touchstart", capture, true);
+}
+
 function PlayVoiceButton({
   text,
   messageKey,
@@ -1371,6 +1393,7 @@ function PlayVoiceButton({
   const autoplayedKeyRef = React.useRef<string | null>(null);
 
   React.useEffect(() => {
+    _installUserInteractListener();
     return () => {
       if (audioRef.current) {
         audioRef.current.pause();
@@ -1380,14 +1403,20 @@ function PlayVoiceButton({
     };
   }, []);
 
-  // Auto-play once per unique messageKey when the autoplay flag is on.
-  // Browser autoplay policy may block the first audio without a prior
-  // user gesture; in that case the customer can click the Hear button
-  // manually. After the first interaction, subsequent agent messages
-  // auto-play seamlessly.
+  // Auto-play once per unique messageKey when the autoplay flag is on AND
+  // the page has seen a user gesture. Without a gesture, the browser
+  // autoplay policy rejects audio.play() with NotAllowedError — that's
+  // not a real error, it's policy. Customer can click "Hear" manually
+  // and that click counts as the gesture, after which subsequent agent
+  // messages autoplay seamlessly.
   React.useEffect(() => {
     if (!autoplay) return;
     if (autoplayedKeyRef.current === messageKey) return;
+    if (!_userHasInteracted) {
+      // Don't mark this message as "attempted" — once the customer
+      // clicks anywhere, we re-check on the next autoplay effect cycle.
+      return;
+    }
     autoplayedKeyRef.current = messageKey;
     void play();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -1423,12 +1452,31 @@ function PlayVoiceButton({
       }
       audio.onended = () => setState("idle");
       audio.onerror = () => {
+        const code = audio?.error?.code;
+        const msg = audio?.error?.message;
+        // Element-level audio errors (network 503, MIME mismatch, CORS,
+        // etc.) — surface the reason in dev console so the operator can
+        // tell why playback failed.
+        // eslint-disable-next-line no-console
+        console.warn(`[voice] audio element error code=${code} msg=${msg ?? "(none)"}`);
         setState("error");
         window.setTimeout(() => setState("idle"), 2000);
       };
       await audio.play();
       setState("playing");
-    } catch {
+    } catch (err) {
+      const name = (err as DOMException)?.name;
+      const msg = (err as Error)?.message;
+      // eslint-disable-next-line no-console
+      console.warn(`[voice] play() rejected: ${name ?? "(unknown)"} — ${msg ?? "(no message)"}`);
+      // NotAllowedError = browser autoplay policy blocked the play().
+      // That's not a real error; the button is already on screen and
+      // the customer just hasn't tapped anything yet. Reset to idle so
+      // the "Hear" label stays inviting instead of showing an error.
+      if (name === "NotAllowedError") {
+        setState("idle");
+        return;
+      }
       setState("error");
       window.setTimeout(() => setState("idle"), 2000);
     }
