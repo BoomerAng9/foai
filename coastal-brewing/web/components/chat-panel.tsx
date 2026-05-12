@@ -305,19 +305,39 @@ export function ChatPanel({
   const wsMsgHandler = React.useRef<((evt: MessageEvent) => void) | null>(null);
   const sendTimeoutRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
   const scrollRef = React.useRef<HTMLDivElement>(null);
+  const rootRef = React.useRef<HTMLDivElement>(null);
   const transcriptRef = React.useRef<ChatMessage[]>([]);
   const pending = anim?.isThinking || (responseBuffer.length > 0);
 
   React.useEffect(() => {
-    // Owner directive 2026-05-11: Chat must stay centered on the latest
-    // turn and follow the flow of the conversation. Smooth-scroll lagged
-    // behind streaming token output (queued animations dropped frames);
-    // instant scroll after rAF keeps the viewport pinned to the newest
-    // content through both per-message updates AND streaming chunks.
+    // Owner directive 2026-05-11/12: Chat must stay centered on the latest
+    // turn AND remain in the page viewport. Two layers of scroll:
+    //   1. Inner scroll — chat-messages container scrolls to scrollHeight
+    //      so the newest message lands at the bottom of the chat's own
+    //      scroll area (closest to the input — what the customer reads
+    //      next).
+    //   2. Page scroll — the chat root scrollIntoView({block: "center"}) so
+    //      the whole panel sits in the middle of the browser viewport
+    //      regardless of how far the customer has scrolled past the hero.
+    //      Smooth-scroll lagged behind streaming token output on (1), so
+    //      we use behavior:"auto" inside the chat. Page-level (2) is
+    //      smooth so the body scroll feels gentle when a reply lands.
     const pinToLatest = () => {
-      const el = scrollRef.current;
-      if (!el) return;
-      el.scrollTo({ top: el.scrollHeight, behavior: "auto" });
+      const inner = scrollRef.current;
+      if (inner) inner.scrollTo({ top: inner.scrollHeight, behavior: "auto" });
+      const root = rootRef.current;
+      if (root && typeof root.scrollIntoView === "function") {
+        // Only push the page if the chat is not already mostly visible —
+        // avoid yanking the page on every responseBuffer token tick when
+        // the customer is already reading the chat in viewport.
+        const rect = root.getBoundingClientRect();
+        const vh = typeof window !== "undefined" ? window.innerHeight : 0;
+        const overlap = Math.max(0, Math.min(rect.bottom, vh) - Math.max(rect.top, 0));
+        const mostlyVisible = vh > 0 && overlap >= Math.min(rect.height, vh) * 0.7;
+        if (!mostlyVisible) {
+          root.scrollIntoView({ block: "center", behavior: "smooth" });
+        }
+      }
     };
     if (typeof window !== "undefined" && typeof window.requestAnimationFrame === "function") {
       window.requestAnimationFrame(pinToLatest);
@@ -947,7 +967,7 @@ export function ChatPanel({
   }, [contextIntent, contextSku, catalog.length, greetingResolved]);
 
   return (
-    <div className="flex h-full flex-col rounded-lg border border-border bg-card">
+    <div ref={rootRef} className="flex h-full flex-col rounded-lg border border-border bg-card">
       <SpinnerActivityOverlay
         open={spinnerOpen}
         taskId={spinnerTaskId}
