@@ -87,6 +87,24 @@ services:
       # 503s every signup with "profile layer not configured". DSN value
       # lives in .env on aims-vps (read-only Neon credentials).
       NEON_DATABASE_URL: "${NEON_DATABASE_URL:-}"
+      # Inworld TTS — v2 IVC clones for Sal / LUC / Melli / ACHEEVY / LP.
+      # Without INWORLD_API_KEY the runner 503s every /api/v1/voice/synthesize
+      # request and the frontend audio elements fire onerror silently — the
+      # customer hears nothing. Per-character voiceId + delivery-mode
+      # overrides let ops audition new IVC clones or swap to stock voices
+      # without code changes (set in .env, restart coastal-runner).
+      INWORLD_API_KEY: "${INWORLD_API_KEY:-}"
+      INWORLD_TTS_MODEL: "${INWORLD_TTS_MODEL:-inworld-tts-2}"
+      INWORLD_VOICE_ID_SAL: "${INWORLD_VOICE_ID_SAL:-}"
+      INWORLD_VOICE_ID_LUC: "${INWORLD_VOICE_ID_LUC:-}"
+      INWORLD_VOICE_ID_MELLI: "${INWORLD_VOICE_ID_MELLI:-}"
+      INWORLD_VOICE_ID_ACHEEVY: "${INWORLD_VOICE_ID_ACHEEVY:-}"
+      INWORLD_VOICE_ID_LP: "${INWORLD_VOICE_ID_LP:-}"
+      INWORLD_DELIVERY_MODE_SAL: "${INWORLD_DELIVERY_MODE_SAL:-}"
+      INWORLD_DELIVERY_MODE_LUC: "${INWORLD_DELIVERY_MODE_LUC:-}"
+      INWORLD_DELIVERY_MODE_MELLI: "${INWORLD_DELIVERY_MODE_MELLI:-}"
+      INWORLD_DELIVERY_MODE_ACHEEVY: "${INWORLD_DELIVERY_MODE_ACHEEVY:-}"
+      INWORLD_DELIVERY_MODE_LP: "${INWORLD_DELIVERY_MODE_LP:-}"
       TZ: "UTC"
     networks:
       - foai-internal

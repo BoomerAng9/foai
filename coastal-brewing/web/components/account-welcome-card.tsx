@@ -69,7 +69,15 @@ export function AccountWelcomeCard({
     const start = window.setTimeout(() => {
       a.play()
         .then(() => setAudioStarted(true))
-        .catch(() => setAudioStarted(false));
+        .catch((err) => {
+          const name = (err as DOMException)?.name;
+          const msg = (err as Error)?.message;
+          // eslint-disable-next-line no-console
+          console.warn(
+            `[welcome-card] audio.play() rejected: ${name ?? "(unknown)"} — ${msg ?? "(no message)"}`,
+          );
+          setAudioStarted(false);
+        });
     }, 600); // delay so the visual lands first
     return () => window.clearTimeout(start);
   }, [audioUrl]);
