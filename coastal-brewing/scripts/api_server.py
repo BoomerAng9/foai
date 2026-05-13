@@ -4496,6 +4496,20 @@ ALLOWED_CUSTEE_CARD_PRODUCTS = {
 }
 
 
+def _tier_monthly_retail(tier_id: str) -> float:
+    """Read the canonical monthly retail for a tier from pricing-config.json.
+
+    Returns 0.0 if the config file is missing or the tier key is absent so
+    callers can apply ``or <fallback>`` to preserve the canon-anchor pattern
+    (memory: feedback_coastal_tier_monthly_retail_is_canon_anchor).
+    The loader uses mtime-based caching — per-request cost is one os.stat().
+    """
+    import owner_config_loader as _ocl  # noqa: PLC0415
+    cfg_path = pathlib.Path(os.environ.get("COASTAL_OWNER_CONFIG_DIR", "/app/config")) / "pricing-config.json"
+    cfg = _ocl.load_json(cfg_path)
+    return float(cfg.get("tier_monthly_retail", {}).get(tier_id, 0.0))
+
+
 def _cadence_subscription_data(cadence_id: str, metadata: dict) -> dict:
     """Thin wrapper kept for the three checkout call sites. Pure logic
     lives in `cadence.subscription_data_for_cadence` (testable in
@@ -4552,7 +4566,7 @@ def custee_card_checkout(
         )
 
     monthly_billing_cents = _cadence_mod.cadence_monthly_billing_cents(
-        CUSTEE_CARD_MONTHLY_RETAIL_DOLLARS, cadence_id,  # type: ignore[arg-type]
+        _tier_monthly_retail("custee-card") or CUSTEE_CARD_MONTHLY_RETAIL_DOLLARS, cadence_id,  # type: ignore[arg-type]
     )
     _envelope = _profitability_mod.check_envelope(
         tier="custee-card",
@@ -4765,7 +4779,7 @@ def wood_stork_checkout(
     if tier == "standard" and "whitelabel" in products:
         raise HTTPException(status_code=400, detail="whitelabel is Wood Stork Reserve only")
 
-    monthly_retail = membership_wood_stork.monthly_retail_for_tier(tier)  # type: ignore[arg-type]
+    monthly_retail = _tier_monthly_retail(f"wood-stork-{tier}") or membership_wood_stork.monthly_retail_for_tier(tier)  # type: ignore[arg-type]
     monthly_billing_cents = _cadence_mod.cadence_monthly_billing_cents(monthly_retail, cadence_id)  # type: ignore[arg-type]
     _envelope = _profitability_mod.check_envelope(
         tier=f"wood-stork-{tier}",
@@ -4964,7 +4978,7 @@ def pooler_pass_checkout(
             detail="zip is outside the 100-mile Pooler Pass eligibility band — see Coastal Custee Card",
         )
 
-    monthly_retail = membership_pooler_pass.monthly_retail_for_tier(tier)  # type: ignore[arg-type]
+    monthly_retail = _tier_monthly_retail(f"pooler-pass-{tier}") or membership_pooler_pass.monthly_retail_for_tier(tier)  # type: ignore[arg-type]
     monthly_billing_cents = _cadence_mod.cadence_monthly_billing_cents(monthly_retail, cadence_id)  # type: ignore[arg-type]
     _envelope = _profitability_mod.check_envelope(
         tier=f"pooler-pass-{tier}",
