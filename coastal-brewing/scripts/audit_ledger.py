@@ -640,6 +640,28 @@ def delete_owner_passkey(email: str) -> None:
 # recent_events — owner activity feed (2026-05-13)
 # ─────────────────────────────────────────────────────────────────────
 
+def record_event(*, event_type: str, payload: dict[str, Any]) -> str:
+    """Generic audit event writer.
+
+    Writes a risk_event row with severity="low", category=event_type,
+    description=JSON-serialised payload, actor extracted from payload["email"]
+    if present. Returns the generated event_id.
+
+    This thin wrapper lets call sites (e.g. owner_console.py) emit
+    structured audit entries without coupling to the low-level
+    insert_risk_event signature.
+    """
+    actor = payload.get("email") or ""
+    description = json.dumps(payload, sort_keys=True, separators=(",", ":"))
+    return insert_risk_event(
+        severity="low",
+        category=event_type,
+        description=description,
+        actor=actor,
+        metadata=payload,
+    )
+
+
 def recent_events(*, limit: int = 50, since_unix: float = 0.0) -> list[dict]:
     """Return recent audit activity ordered newest-first.
 

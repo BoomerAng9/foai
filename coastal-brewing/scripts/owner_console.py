@@ -7,13 +7,17 @@ COASTAL_OWNER_EMAILS (env change → ongoing session denied).
 """
 from __future__ import annotations
 
+import json
 import logging
 import os
+from pathlib import Path
 from typing import Annotated
 
 from fastapi import APIRouter, Cookie, Depends, HTTPException, Request
+from pydantic import BaseModel
 
 import owner_auth
+from owner_config_loader import load_json, atomic_write_json
 
 log = logging.getLogger("coastal.owner_console")
 
@@ -62,6 +66,78 @@ def _cached_stripe_events() -> list[dict]:
     _STRIPE_EVENT_CACHE["at"] = time.time()
     _STRIPE_EVENT_CACHE["value"] = out
     return out
+
+
+def _config_dir() -> Path:
+    return Path(os.environ.get("COASTAL_OWNER_CONFIG_DIR", "/app/config"))
+
+
+def _pricing_path() -> Path:
+    return _config_dir() / "pricing-config.json"
+
+
+CONFIRM_PRICING = "CONFIRM PRICING CHANGE"
+
+
+class PricingUpdate(BaseModel):
+    tier_monthly_retail: dict[str, float] | None = None
+    tier_envelope_max_cents: dict[str, int] | None = None
+    cadence_discounts: dict[str, float] | None = None  # cadence_id → 0.0-0.40
+    confirmation_phrase: str = ""
+
+
+@router.get("/pricing")
+def get_pricing(owner: dict = Depends(require_owner)) -> dict:
+    return load_json(_pricing_path())
+
+
+@router.put("/pricing")
+def put_pricing(
+    body: PricingUpdate,
+    owner: dict = Depends(require_owner),
+) -> dict:
+    if body.confirmation_phrase != CONFIRM_PRICING:
+        raise HTTPException(
+            status_code=400,
+            detail=f"confirmation phrase mismatch (must be '{CONFIRM_PRICING}')",
+        )
+    current = load_json(_pricing_path())
+    new = json.loads(json.dumps(current))  # deep copy
+    if body.tier_monthly_retail:
+        for k, v in body.tier_monthly_retail.items():
+            if not (0 < v <= 999):
+                raise HTTPException(
+                    status_code=422,
+                    detail=f"tier_monthly_retail[{k}] out of bounds (0, 999]",
+                )
+            new.setdefault("tier_monthly_retail", {})[k] = float(v)
+    if body.tier_envelope_max_cents:
+        for k, v in body.tier_envelope_max_cents.items():
+            if not (0 < v <= 100000):
+                raise HTTPException(
+                    status_code=422,
+                    detail=f"tier_envelope_max_cents[{k}] out of bounds (0, 100000]",
+                )
+            new.setdefault("tier_envelope_max_cents", {})[k] = int(v)
+    if body.cadence_discounts:
+        for cid, disc in body.cadence_discounts.items():
+            if not (0.0 <= disc <= 0.40):
+                raise HTTPException(
+                    status_code=422,
+                    detail=f"cadence_discounts[{cid}] out of bounds [0.0, 0.40]",
+                )
+            new.setdefault("cadences", {}).setdefault(cid, {})["discount"] = float(disc)
+    atomic_write_json(_pricing_path(), new)
+    import audit_ledger
+    diff = {
+        "tier_monthly_retail": body.tier_monthly_retail,
+        "tier_envelope_max_cents": body.tier_envelope_max_cents,
+        "cadence_discounts": body.cadence_discounts,
+    }
+    audit_ledger.record_event(event_type="owner_pricing_update", payload={
+        "email": owner["email"], "diff": diff,
+    })
+    return new
 
 
 @router.get("/activity")
