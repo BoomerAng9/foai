@@ -4496,6 +4496,29 @@ ALLOWED_CUSTEE_CARD_PRODUCTS = {
 }
 
 
+def _tier_monthly_retail(tier_id: str) -> Optional[float]:
+    """Read the canonical monthly retail for a tier from pricing-config.json.
+    Returns None when the config file is missing OR the tier isn't in the
+    tier_monthly_retail block — so callers can `value if value is not None
+    else <canon fallback>` to preserve the canon-anchor pattern per memory
+    feedback_coastal_tier_monthly_retail_is_canon_anchor.
+    A literal 0.0 in config is treated as an owner-set value (e.g. promo),
+    NOT a fallback trigger."""
+    import owner_config_loader as _ocl  # noqa: PLC0415
+    cfg_path = pathlib.Path(os.environ.get("COASTAL_OWNER_CONFIG_DIR", "/app/config")) / "pricing-config.json"
+    cfg = _ocl.load_json(cfg_path)
+    tier_map = cfg.get("tier_monthly_retail")
+    if not isinstance(tier_map, dict):
+        return None
+    val = tier_map.get(tier_id)
+    if val is None:
+        return None
+    try:
+        return float(val)
+    except (TypeError, ValueError):
+        return None
+
+
 def _cadence_subscription_data(cadence_id: str, metadata: dict) -> dict:
     """Thin wrapper kept for the three checkout call sites. Pure logic
     lives in `cadence.subscription_data_for_cadence` (testable in
@@ -4551,8 +4574,9 @@ def custee_card_checkout(
             detail=f"unknown products: {invalid}; allowed: {sorted(ALLOWED_CUSTEE_CARD_PRODUCTS)}",
         )
 
+    _resolved_custee = _tier_monthly_retail("custee-card")
     monthly_billing_cents = _cadence_mod.cadence_monthly_billing_cents(
-        CUSTEE_CARD_MONTHLY_RETAIL_DOLLARS, cadence_id,  # type: ignore[arg-type]
+        _resolved_custee if _resolved_custee is not None else CUSTEE_CARD_MONTHLY_RETAIL_DOLLARS, cadence_id,
     )
     _envelope = _profitability_mod.check_envelope(
         tier="custee-card",
@@ -4765,7 +4789,8 @@ def wood_stork_checkout(
     if tier == "standard" and "whitelabel" in products:
         raise HTTPException(status_code=400, detail="whitelabel is Wood Stork Reserve only")
 
-    monthly_retail = membership_wood_stork.monthly_retail_for_tier(tier)  # type: ignore[arg-type]
+    _resolved_ws = _tier_monthly_retail(f"wood-stork-{tier}")
+    monthly_retail = _resolved_ws if _resolved_ws is not None else membership_wood_stork.monthly_retail_for_tier(tier)
     monthly_billing_cents = _cadence_mod.cadence_monthly_billing_cents(monthly_retail, cadence_id)  # type: ignore[arg-type]
     _envelope = _profitability_mod.check_envelope(
         tier=f"wood-stork-{tier}",
@@ -4964,7 +4989,8 @@ def pooler_pass_checkout(
             detail="zip is outside the 100-mile Pooler Pass eligibility band — see Coastal Custee Card",
         )
 
-    monthly_retail = membership_pooler_pass.monthly_retail_for_tier(tier)  # type: ignore[arg-type]
+    _resolved_pp = _tier_monthly_retail(f"pooler-pass-{tier}")
+    monthly_retail = _resolved_pp if _resolved_pp is not None else membership_pooler_pass.monthly_retail_for_tier(tier)
     monthly_billing_cents = _cadence_mod.cadence_monthly_billing_cents(monthly_retail, cadence_id)  # type: ignore[arg-type]
     _envelope = _profitability_mod.check_envelope(
         tier=f"pooler-pass-{tier}",
@@ -5480,7 +5506,12 @@ async def auth_verify(
             log.warning("signup-verify finalize failed for %s: %s", email, _exc)
 
     profile = _profile_layer.get_profile(uid)
-    return {
+
+    # Owner-only branch: if this email is in COASTAL_OWNER_EMAILS, signal
+    # the frontend to navigate to the WebAuthn enrolment or challenge step
+    # instead of the normal /membership/welcome or /account landing. The
+    # frontend reads `owner_redirect` and `owner_email` from the response.
+    response_payload = {
         "ok": True,
         "coastal_uid": uid,
         "email": email,
@@ -5489,6 +5520,20 @@ async def auth_verify(
         "stripe_customer_id": stripe_customer_id,
         "welcome_card_ready": welcome_card_ready,
     }
+    try:
+        import owner_auth  # noqa: PLC0415
+        import audit_ledger  # noqa: PLC0415
+        allowlist = owner_auth.parse_allowlist(os.environ.get("COASTAL_OWNER_EMAILS"))
+        if owner_auth.is_owner_email(email, allowlist):
+            has_passkey = audit_ledger.fetch_owner_passkey(email.lower()) is not None
+            response_payload["owner_redirect"] = "/owner/challenge" if has_passkey else "/owner/enroll"
+            response_payload["owner_email"] = email.lower()
+    except Exception as _exc:
+        # Don't break the normal verify flow on a config-side failure.
+        log = __import__("logging").getLogger("coastal.owner_auth")
+        log.warning("owner-branch in /auth/verify failed for %s: %s", email, _exc)
+
+    return response_payload
 
 
 @app.get("/api/v1/auth/me")
@@ -6472,21 +6517,71 @@ _INWORLD_TTS_MODEL = os.environ.get("INWORLD_TTS_MODEL", "inworld-tts-1.5-max")
 # studio-quality 24 kHz mono PCM with no compression artifacts. Dialect
 # expression in production comes from the LLM register-modulator + the
 # script wording at chat time — voice carries timbre + cadence.
-_COASTAL_V2_VOICEID = {
+#
+# ACHEEVY-v3: re-cloned 2026-05-12 from a Brian McKnight Tammi Mac
+# Late Show 30s window (smooth-R&B-tenor register per owner reference
+# set: Brian McKnight / Case / Nas / AZ). Previous v2 was Nas-sourced;
+# owner found the Nas register didn't match the Brand Director smooth-
+# tenor brief. New IVC clone via `_clone_acheevy_mcknight.py`.
+#
+# Marcus / Loss Prevention — defaults to ACHEEVY's clone until owner
+# records the dedicated LP team voice. Override via INWORLD_VOICE_ID_LP
+# to swap in a custom IVC clone without touching code.
+
+# Fallback canonical voice IDs if voice-config.json is missing.
+_COASTAL_V2_VOICEID_FALLBACK = {
     "sal_ang":       "default-4zhua1rhxjfl50z1dnkcba__coastal-sal-ang-v2",
     "luc_ang":       "default-4zhua1rhxjfl50z1dnkcba__coastal-luc-ang-v2",
     "melli_capensi": "default-4zhua1rhxjfl50z1dnkcba__coastal-melli-capensi-v2",
-    # ACHEEVY-v3: re-cloned 2026-05-12 from a Brian McKnight Tammi Mac
-    # Late Show 30s window (smooth-R&B-tenor register per owner reference
-    # set: Brian McKnight / Case / Nas / AZ). Previous v2 was Nas-sourced;
-    # owner found the Nas register didn't match the Brand Director smooth-
-    # tenor brief. New IVC clone via `_clone_acheevy_mcknight.py`.
     "acheevy":       "default-4zhua1rhxjfl50z1dnkcba__acheevy-mcknight-soulful-tenor-v3",
-    # Marcus / Loss Prevention — defaults to ACHEEVY's clone until owner
-    # records the dedicated LP team voice. Override via INWORLD_VOICE_ID_LP
-    # to swap in a custom IVC clone without touching code.
     "lp_ang":        "default-4zhua1rhxjfl50z1dnkcba__coastal-acheevy-v2",
 }
+
+
+def _coastal_v2_voiceid() -> Dict[str, str]:
+    """Read the IVC persona voice registry from voice-config.json.
+    Hot-reloads on file mtime change (no runner restart needed when the
+    owner updates a voice ID via /owner/cfg). Falls back to canonical
+    defaults if the config file is missing or persona_voice_ids is empty."""
+    import owner_config_loader as _loader  # noqa: PLC0415
+    cfg_path = pathlib.Path(os.environ.get("COASTAL_OWNER_CONFIG_DIR", "/app/config")) / "voice-config.json"
+    try:
+        cfg = _loader.load_json(cfg_path)
+        loaded = cfg.get("persona_voice_ids", {})
+        # Merge loaded values with fallback (loaded takes priority).
+        return {**_COASTAL_V2_VOICEID_FALLBACK, **loaded}
+    except Exception:
+        # If load fails, return fallback to preserve canon.
+        return _COASTAL_V2_VOICEID_FALLBACK
+
+
+class _VoiceRegistryProxy:
+    """Drop-in dict-like proxy that fetches voice IDs fresh from JSON
+    on every access. Supports the read patterns existing callers use:
+    `_COASTAL_V2_VOICEID["sal_ang"]`, `.get(k, default)`, `__contains__`."""
+    def __getitem__(self, k):
+        return _coastal_v2_voiceid()[k]
+
+    def get(self, k, default=None):
+        return _coastal_v2_voiceid().get(k, default)
+
+    def __contains__(self, k):
+        return k in _coastal_v2_voiceid()
+
+    def __iter__(self):
+        return iter(_coastal_v2_voiceid())
+
+    def keys(self):
+        return _coastal_v2_voiceid().keys()
+
+    def items(self):
+        return _coastal_v2_voiceid().items()
+
+    def values(self):
+        return _coastal_v2_voiceid().values()
+
+
+_COASTAL_V2_VOICEID = _VoiceRegistryProxy()
 
 _INWORLD_VOICE_MAP: Dict[str, Dict[str, str]] = {
     # All four personas now ride the v2 IVC clones generated 2026-05-05
@@ -7243,3 +7338,8 @@ async def voice_transcribe(audio: UploadFile = File(...)):
         raise
     except Exception as exc:
         raise HTTPException(status_code=502, detail=f"Inworld STT unexpected error: {exc}")
+
+
+# Owner console router — /api/v1/owner/* (cookie-gated)
+import owner_console  # noqa: E402
+app.include_router(owner_console.router)

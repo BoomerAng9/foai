@@ -1,0 +1,54 @@
+{
+  "cadences": {
+    "monthly": {
+      "label": "Month-to-month",
+      "discount": 0.00,
+      "months_paid": 1,
+      "months_delivered": 1,
+      "stripe_interval": "month",
+      "stripe_interval_count": 1,
+      "framing": "Standard. No commitment."
+    },
+    "3mo": {
+      "label": "3-month plan",
+      "discount": 0.15,
+      "months_paid": 3,
+      "months_delivered": 3,
+      "stripe_interval": "month",
+      "stripe_interval_count": 3,
+      "framing": "First commitment — supporting us."
+    },
+    "6mo": {
+      "label": "6-month plan",
+      "discount": 0.20,
+      "months_paid": 6,
+      "months_delivered": 6,
+      "stripe_interval": "month",
+      "stripe_interval_count": 6,
+      "framing": "Balance — buying into the mission."
+    },
+    "9mo": {
+      "label": "9-month plan (pay 9, get 12)",
+      "discount": 0.25,
+      "months_paid": 9,
+      "months_delivered": 12,
+      "stripe_interval": "month",
+      "stripe_interval_count": 12,
+      "framing": "Full support — pay 9, get 12."
+    }
+  },
+  "tier_monthly_retail": {
+    "pooler-pass-standard": 7.49,
+    "pooler-pass-plus":     14.99,
+    "custee-card":          29.99,
+    "wood-stork-standard":  74.99,
+    "wood-stork-reserve":   149.99
+  },
+  "tier_envelope_max_cents": {
+    "pooler-pass-standard": 1500,
+    "pooler-pass-plus":     3000,
+    "custee-card":          6000,
+    "wood-stork-standard":  15000,
+    "wood-stork-reserve":   30000
+  }
+}

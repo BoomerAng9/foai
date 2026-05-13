@@ -15,19 +15,40 @@ this module.
 """
 from __future__ import annotations
 
+import os
 from dataclasses import dataclass
+from pathlib import Path
+
+import owner_config_loader as _loader
 
 
 PER_ITEM_FLOOR_OVER_COST_CENTS = 150  # $1.50 floor over cost per item per month
 
-
-_TIER_ENVELOPES_CENTS: dict[str, int] = {
+# Hard-coded fallback — used when pricing-config.json is missing or the tier
+# key is absent.  Values are intentionally kept in sync with the JSON seed.
+_TIER_ENVELOPES_CENTS_FALLBACK: dict[str, int] = {
     "pooler-pass-standard": 1500,
     "pooler-pass-plus": 3000,
     "custee-card": 6000,
     "wood-stork-standard": 15000,
     "wood-stork-reserve": 30000,
 }
+
+
+def _config_dir() -> Path:
+    return Path(os.environ.get("COASTAL_OWNER_CONFIG_DIR", "/app/config"))
+
+
+def _envelope_cents() -> dict[str, int]:
+    """Merge of owner-managed pricing-config tier_envelope_max_cents over
+    the hard-coded canon fallback. Missing keys in the loaded config fall
+    through to canon — never KeyError on a tier the owner forgot to
+    configure."""
+    cfg = _loader.load_json(_config_dir() / "pricing-config.json")
+    loaded = cfg.get("tier_envelope_max_cents")
+    if not isinstance(loaded, dict):
+        return dict(_TIER_ENVELOPES_CENTS_FALLBACK)
+    return {**_TIER_ENVELOPES_CENTS_FALLBACK, **loaded}
 
 
 _TIER_UPGRADE_CHAIN: dict[str, str | None] = {
@@ -41,9 +62,10 @@ _TIER_UPGRADE_CHAIN: dict[str, str | None] = {
 
 def tier_envelope_cents(tier: str) -> int:
     """Return the monthly product retail cap for a tier, in cents."""
-    if tier not in _TIER_ENVELOPES_CENTS:
+    envelopes = _envelope_cents()
+    if tier not in envelopes:
         raise ValueError(f"unknown tier: {tier!r}")
-    return _TIER_ENVELOPES_CENTS[tier]
+    return envelopes[tier]
 
 
 def next_tier(tier: str) -> str | None:

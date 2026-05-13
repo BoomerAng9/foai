@@ -12,12 +12,15 @@ from __future__ import annotations
 
 import hashlib
 import json
+import logging
 import os
 import pathlib
 import sqlite3
 import threading
 from datetime import datetime, timezone
 from typing import Any, Optional
+
+log = logging.getLogger(__name__)
 
 GENESIS_HASH = "GENESIS"
 
@@ -108,6 +111,21 @@ def _migrate(conn: sqlite3.Connection) -> None:
         )"""
     )
     conn.execute("CREATE INDEX IF NOT EXISTS idx_used_tokens_exp ON used_tokens(exp_unix)")
+
+    # owner_passkeys (added 2026-05-12): WebAuthn credential storage for owner 2FA.
+    # One row per owner email. Stores the passkey credential_id + public_key for
+    # assertion verification on magic-link login. sign_count is the signature
+    # counter (cloned_authenticator replay protection).
+    conn.execute(
+        """CREATE TABLE IF NOT EXISTS owner_passkeys (
+            email TEXT PRIMARY KEY,
+            credential_id BLOB NOT NULL,
+            public_key BLOB NOT NULL,
+            sign_count INTEGER NOT NULL DEFAULT 0,
+            registered_at INTEGER NOT NULL,
+            last_used_at INTEGER NOT NULL DEFAULT 0
+        )"""
+    )
 
 
 def init_schema() -> None:
@@ -530,5 +548,617 @@ def purge_expired_tokens(*, older_than_unix: int) -> int:
                 (int(older_than_unix),),
             )
             return int(cur.rowcount or 0)
+        finally:
+            conn.close()
+
+
+# ─────────────────────────────────────────────────────────────────────
+# owner_passkeys — WebAuthn 2FA credentials per owner (2026-05-12)
+# ─────────────────────────────────────────────────────────────────────
+# One passkey per owner email. Stores credential_id + public_key for
+# WebAuthn assertion verification on magic-link login. sign_count
+# is the signature counter (cloned_authenticator replay protection).
+
+
+def register_owner_passkey(
+    *, email: str, credential_id: bytes, public_key: bytes, sign_count: int = 0,
+) -> None:
+    """Store a newly-registered WebAuthn passkey for an owner.
+
+    Overwrites any existing passkey for the email (one per email).
+    registered_at is set to now; last_used_at is 0 until first assertion.
+    """
+    import time as _t
+    init_schema()
+    with _lock:
+        conn = _connect()
+        try:
+            conn.execute(
+                "INSERT OR REPLACE INTO owner_passkeys "
+                "(email, credential_id, public_key, sign_count, registered_at, last_used_at) "
+                "VALUES (?, ?, ?, ?, ?, ?)",
+                (email, credential_id, public_key, sign_count, int(_t.time()), 0),
+            )
+        finally:
+            conn.close()
+
+
+def fetch_owner_passkey(email: str) -> dict | None:
+    """Retrieve a registered passkey for assertion verification.
+
+    Returns {email, credential_id, public_key, sign_count, registered_at,
+    last_used_at} or None if not found.
+    """
+    init_schema()
+    with _lock:
+        conn = _connect()
+        conn.row_factory = sqlite3.Row
+        try:
+            cur = conn.execute(
+                "SELECT email, credential_id, public_key, sign_count, registered_at, last_used_at "
+                "FROM owner_passkeys WHERE email = ?",
+                (email,),
+            )
+            row = cur.fetchone()
+            return dict(row) if row else None
+        finally:
+            conn.close()
+
+
+def bump_owner_passkey_sign_count(email: str, new_count: int) -> None:
+    """Update sign_count and last_used_at after a successful assertion.
+
+    Called after each verified WebAuthn assertion to increment the
+    signature counter (cloned_authenticator replay prevention) and
+    record the assertion timestamp.
+    """
+    import time as _t
+    init_schema()
+    with _lock:
+        conn = _connect()
+        try:
+            conn.execute(
+                "UPDATE owner_passkeys SET sign_count = ?, last_used_at = ? WHERE email = ?",
+                (new_count, int(_t.time()), email),
+            )
+        finally:
+            conn.close()
+
+
+def delete_owner_passkey(email: str) -> None:
+    """Remove a passkey registration (e.g., owner revokes or re-enrolls).
+
+    Idempotent: no-op if the passkey doesn't exist.
+    """
+    init_schema()
+    with _lock:
+        conn = _connect()
+        try:
+            conn.execute("DELETE FROM owner_passkeys WHERE email = ?", (email,))
+        finally:
+            conn.close()
+
+
+# ─────────────────────────────────────────────────────────────────────
+# recent_events — owner activity feed (2026-05-13)
+# ─────────────────────────────────────────────────────────────────────
+
+def record_event(*, event_type: str, payload: dict[str, Any]) -> str:
+    """Generic audit event writer.
+
+    Writes a risk_event row with severity="low", category=event_type,
+    description=JSON-serialised payload, actor extracted from payload["email"]
+    if present. Returns the generated event_id.
+
+    This thin wrapper lets call sites (e.g. owner_console.py) emit
+    structured audit entries without coupling to the low-level
+    insert_risk_event signature.
+    """
+    actor = payload.get("email") or ""
+    description = json.dumps(payload, sort_keys=True, separators=(",", ":"))
+    return insert_risk_event(
+        severity="low",
+        category=event_type,
+        description=description,
+        actor=actor,
+        metadata=payload,
+    )
+
+
+def recent_events(*, limit: int = 50, since_unix: float = 0.0) -> list[dict]:
+    """Return recent audit activity ordered newest-first.
+
+    Unions three primary signal tables: task_packets, action_receipts,
+    risk_events. Each row is normalised to:
+        {event_type, ts, payload}
+    where `ts` is a unix float derived from the ISO created_at column.
+
+    Args:
+        limit: max rows to return (applied after union + sort).
+        since_unix: if non-zero, exclude rows with ts <= since_unix
+                    (cursor-based pagination).
+    """
+    init_schema()
+    with _lock:
+        conn = _connect()
+        conn.row_factory = sqlite3.Row
+        try:
+            # Unified query: normalise ts via strftime epoch conversion.
+            sql = """
+                SELECT
+                    'task_packet' AS event_type,
+                    task_id       AS source_id,
+                    created_at,
+                    CAST(strftime('%s', created_at) AS REAL) AS ts,
+                    json_object(
+                        'task_id',   task_id,
+                        'goal',      owner_goal,
+                        'dept',      department,
+                        'task_type', task_type,
+                        'route',     route,
+                        'risk',      risk_level,
+                        'status',    status
+                    ) AS payload
+                FROM task_packets
+                WHERE (? = 0 OR CAST(strftime('%s', created_at) AS REAL) > ?)
+
+                UNION ALL
+
+                SELECT
+                    'action_receipt' AS event_type,
+                    action_id        AS source_id,
+                    created_at,
+                    CAST(strftime('%s', created_at) AS REAL) AS ts,
+                    json_object(
+                        'action_id',  action_id,
+                        'task_id',    task_id,
+                        'executor',   executor,
+                        'type',       action_type,
+                        'status',     status,
+                        'summary',    result_summary
+                    ) AS payload
+                FROM action_receipts
+                WHERE (? = 0 OR CAST(strftime('%s', created_at) AS REAL) > ?)
+
+                UNION ALL
+
+                SELECT
+                    'risk_event' AS event_type,
+                    event_id     AS source_id,
+                    created_at,
+                    CAST(strftime('%s', created_at) AS REAL) AS ts,
+                    json_object(
+                        'event_id',   event_id,
+                        'task_id',    task_id,
+                        'severity',   severity,
+                        'category',   category,
+                        'actor',      actor,
+                        'description',description
+                    ) AS payload
+                FROM risk_events
+                WHERE (? = 0 OR CAST(strftime('%s', created_at) AS REAL) > ?)
+
+                ORDER BY ts DESC
+                LIMIT ?
+            """
+            cutoff = float(since_unix)
+            rows = conn.execute(
+                sql,
+                (cutoff, cutoff, cutoff, cutoff, cutoff, cutoff, int(limit)),
+            ).fetchall()
+            out = []
+            for r in rows:
+                raw = dict(r)
+                # payload stored as JSON string by json_object()
+                payload_raw = raw.get("payload") or "{}"
+                try:
+                    payload = json.loads(payload_raw)
+                except (json.JSONDecodeError, TypeError):
+                    payload = {"raw": payload_raw}
+                out.append({
+                    "event_type": raw["event_type"],
+                    "ts": raw["ts"] or 0.0,
+                    "created_at": raw["created_at"],
+                    "source_id": raw["source_id"],
+                    "payload": payload,
+                })
+            return out
+        finally:
+            conn.close()
+
+
+# ---------------------------------------------------------------------------
+# NemoClaw queue helpers (added for owner_console /nemoclaw endpoints)
+# ---------------------------------------------------------------------------
+
+def list_pending_tasks(limit: int = 50) -> list[dict]:
+    """Return task_packets where approval_required=1 AND status='routed'.
+
+    These are the tasks awaiting owner sign-off.  Returns a list of dicts
+    with the columns that exist in the actual task_packets schema.
+    """
+    init_schema()
+    with _lock:
+        conn = _connect()
+        conn.row_factory = sqlite3.Row
+        try:
+            rows = conn.execute(
+                """SELECT task_id, created_at, owner_goal, department,
+                          task_type, route, risk_level, risk_tags, status
+                   FROM task_packets
+                   WHERE approval_required = 1 AND status = 'routed'
+                   ORDER BY created_at DESC
+                   LIMIT ?""",
+                (limit,),
+            ).fetchall()
+            return [dict(r) for r in rows]
+        finally:
+            conn.close()
+
+
+def set_task_status(task_id: str, new_status: str, *, actor: str = "") -> bool:  # noqa: ARG001
+    """Update task_packets.status.  Returns True if a row was updated.
+
+    NOTE: task_packets has no decided_by/decided_at columns — decided-by
+    metadata is stored in approval_receipts via insert_approval_decision.
+    The `actor` kwarg is accepted for call-site symmetry but is not persisted
+    on this table.
+    """
+    init_schema()
+    with _lock:
+        conn = _connect()
+        try:
+            cur = conn.execute(
+                "UPDATE task_packets SET status = ? WHERE task_id = ?",
+                (new_status, task_id),
+            )
+            conn.commit()
+            return cur.rowcount > 0
+        finally:
+            conn.close()
+
+
+# ---------------------------------------------------------------------------
+# Paginated audit event queries (added for /api/v1/owner/audit endpoint)
+# ---------------------------------------------------------------------------
+
+# Whitelist of allowed table names for query_events. Never interpolate user
+# input directly into SQL; always check against this set first.
+_ALLOWED_TABLES = {
+    "task_packets",
+    "action_receipts",
+    "risk_events",
+    "used_tokens",
+    "owner_passkeys",
+    "approval_decisions",
+}
+
+
+def query_events(
+    *,
+    table: str | None = None,
+    since: float | None = None,
+    until: float | None = None,
+    offset: int = 0,
+    limit: int = 50,
+) -> list[dict]:
+    """Read paginated rows from one or more audit tables.
+
+    If `table` is specified and is in the whitelist, query that specific table.
+    If `table` is None, UNION across task_packets, action_receipts, and
+    risk_events (same tables as recent_events()).
+
+    Args:
+        table: Optional table name (must be in _ALLOWED_TABLES). Defaults to None
+               (UNION across primary tables).
+        since: Optional unix-timestamp lower bound (inclusive: ts >= since).
+        until: Optional unix-timestamp upper bound (inclusive: ts <= until).
+        offset: Row offset for pagination (0-based).
+        limit: Max rows to return. Clamped to 1-200.
+
+    Returns:
+        List of dicts with keys: event_type, ts, created_at, source_id, payload.
+    """
+    init_schema()
+    offset = max(0, int(offset))
+    limit = max(1, min(int(limit), 200))
+
+    # Validate table whitelist
+    if table is not None and table not in _ALLOWED_TABLES:
+        log.warning("query_events: rejected table=%r (not in whitelist)", table)
+        return []
+
+    with _lock:
+        conn = _connect()
+        conn.row_factory = sqlite3.Row
+        try:
+            # Build the WHERE clause for timestamp filtering
+            # Each table has a created_at column in ISO format.
+            timestamp_where = ""
+            params: list[Any] = []
+
+            if since is not None or until is not None:
+                conditions = []
+                if since is not None:
+                    conditions.append("CAST(strftime('%s', created_at) AS REAL) >= ?")
+                    params.append(float(since))
+                if until is not None:
+                    conditions.append("CAST(strftime('%s', created_at) AS REAL) <= ?")
+                    params.append(float(until))
+                if conditions:
+                    timestamp_where = "WHERE " + " AND ".join(conditions)
+
+            if table is not None:
+                # Query a single table
+                # Build column list and payload structure for each table type
+                if table == "task_packets":
+                    sql = f"""
+                        SELECT
+                            'task_packet' AS event_type,
+                            task_id AS source_id,
+                            created_at,
+                            CAST(strftime('%s', created_at) AS REAL) AS ts,
+                            json_object(
+                                'task_id', task_id,
+                                'goal', owner_goal,
+                                'dept', department,
+                                'task_type', task_type,
+                                'route', route,
+                                'risk', risk_level,
+                                'status', status
+                            ) AS payload
+                        FROM task_packets
+                        {timestamp_where}
+                        ORDER BY ts DESC
+                        LIMIT ? OFFSET ?
+                    """
+                    params.extend([int(limit), int(offset)])
+                elif table == "action_receipts":
+                    sql = f"""
+                        SELECT
+                            'action_receipt' AS event_type,
+                            action_id AS source_id,
+                            created_at,
+                            CAST(strftime('%s', created_at) AS REAL) AS ts,
+                            json_object(
+                                'action_id', action_id,
+                                'task_id', task_id,
+                                'executor', executor,
+                                'type', action_type,
+                                'status', status,
+                                'summary', result_summary
+                            ) AS payload
+                        FROM action_receipts
+                        {timestamp_where}
+                        ORDER BY ts DESC
+                        LIMIT ? OFFSET ?
+                    """
+                    params.extend([int(limit), int(offset)])
+                elif table == "risk_events":
+                    sql = f"""
+                        SELECT
+                            'risk_event' AS event_type,
+                            event_id AS source_id,
+                            created_at,
+                            CAST(strftime('%s', created_at) AS REAL) AS ts,
+                            json_object(
+                                'event_id', event_id,
+                                'task_id', task_id,
+                                'severity', severity,
+                                'category', category,
+                                'actor', actor,
+                                'description', description
+                            ) AS payload
+                        FROM risk_events
+                        {timestamp_where}
+                        ORDER BY ts DESC
+                        LIMIT ? OFFSET ?
+                    """
+                    params.extend([int(limit), int(offset)])
+                elif table == "used_tokens":
+                    sql = f"""
+                        SELECT
+                            'used_token' AS event_type,
+                            jti AS source_id,
+                            created_at,
+                            CAST(strftime('%s', created_at) AS REAL) AS ts,
+                            json_object(
+                                'jti', jti,
+                                'email', email,
+                                'exp_unix', exp_unix
+                            ) AS payload
+                        FROM used_tokens
+                        {timestamp_where}
+                        ORDER BY ts DESC
+                        LIMIT ? OFFSET ?
+                    """
+                    params.extend([int(limit), int(offset)])
+                elif table == "owner_passkeys":
+                    sql = f"""
+                        SELECT
+                            'owner_passkey' AS event_type,
+                            credential_id AS source_id,
+                            created_at,
+                            CAST(strftime('%s', created_at) AS REAL) AS ts,
+                            json_object(
+                                'credential_id', credential_id,
+                                'owner_email', owner_email,
+                                'public_key', public_key
+                            ) AS payload
+                        FROM owner_passkeys
+                        {timestamp_where}
+                        ORDER BY ts DESC
+                        LIMIT ? OFFSET ?
+                    """
+                    params.extend([int(limit), int(offset)])
+                elif table == "approval_decisions":
+                    sql = f"""
+                        SELECT
+                            'approval_decision' AS event_type,
+                            task_id AS source_id,
+                            created_at,
+                            CAST(strftime('%s', created_at) AS REAL) AS ts,
+                            json_object(
+                                'task_id', task_id,
+                                'decision', decision,
+                                'reason', reason
+                            ) AS payload
+                        FROM approval_decisions
+                        {timestamp_where}
+                        ORDER BY ts DESC
+                        LIMIT ? OFFSET ?
+                    """
+                    params.extend([int(limit), int(offset)])
+                else:
+                    return []
+            else:
+                # UNION across task_packets, action_receipts, risk_events
+                # Replicate the pattern from recent_events() but with OFFSET support
+                sql = f"""
+                    SELECT
+                        'task_packet' AS event_type,
+                        task_id AS source_id,
+                        created_at,
+                        CAST(strftime('%s', created_at) AS REAL) AS ts,
+                        json_object(
+                            'task_id', task_id,
+                            'goal', owner_goal,
+                            'dept', department,
+                            'task_type', task_type,
+                            'route', route,
+                            'risk', risk_level,
+                            'status', status
+                        ) AS payload
+                    FROM task_packets
+                    {timestamp_where}
+
+                    UNION ALL
+
+                    SELECT
+                        'action_receipt' AS event_type,
+                        action_id AS source_id,
+                        created_at,
+                        CAST(strftime('%s', created_at) AS REAL) AS ts,
+                        json_object(
+                            'action_id', action_id,
+                            'task_id', task_id,
+                            'executor', executor,
+                            'type', action_type,
+                            'status', status,
+                            'summary', result_summary
+                        ) AS payload
+                    FROM action_receipts
+                    {timestamp_where}
+
+                    UNION ALL
+
+                    SELECT
+                        'risk_event' AS event_type,
+                        event_id AS source_id,
+                        created_at,
+                        CAST(strftime('%s', created_at) AS REAL) AS ts,
+                        json_object(
+                            'event_id', event_id,
+                            'task_id', task_id,
+                            'severity', severity,
+                            'category', category,
+                            'actor', actor,
+                            'description', description
+                        ) AS payload
+                    FROM risk_events
+                    {timestamp_where}
+
+                    ORDER BY ts DESC
+                    LIMIT ? OFFSET ?
+                """
+                # For UNION queries, the WHERE clause is replicated for each table
+                # so we need to duplicate the params for each table's WHERE clause
+                if since is not None or until is not None:
+                    # 3 tables, so multiply params by 3
+                    where_params = params.copy()
+                    params = where_params + where_params + where_params
+                params.extend([int(limit), int(offset)])
+
+            rows = conn.execute(sql, params).fetchall()
+            out = []
+            for r in rows:
+                raw = dict(r)
+                payload_raw = raw.get("payload") or "{}"
+                try:
+                    payload = json.loads(payload_raw)
+                except (json.JSONDecodeError, TypeError):
+                    payload = {"raw": payload_raw}
+                out.append({
+                    "event_type": raw["event_type"],
+                    "ts": raw["ts"] or 0.0,
+                    "created_at": raw["created_at"],
+                    "source_id": raw["source_id"],
+                    "payload": payload,
+                })
+            return out
+        finally:
+            conn.close()
+
+
+def count_events(
+    *,
+    table: str | None = None,
+    since: float | None = None,
+    until: float | None = None,
+) -> int:
+    """Return the count of events matching the same filter as query_events.
+
+    Args:
+        table: Optional table name (must be in _ALLOWED_TABLES).
+        since: Optional unix-timestamp lower bound (inclusive).
+        until: Optional unix-timestamp upper bound (inclusive).
+
+    Returns:
+        Total count of matching rows.
+    """
+    init_schema()
+
+    # Validate table whitelist
+    if table is not None and table not in _ALLOWED_TABLES:
+        log.warning("count_events: rejected table=%r (not in whitelist)", table)
+        return 0
+
+    with _lock:
+        conn = _connect()
+        try:
+            # Build the WHERE clause for timestamp filtering
+            timestamp_where = ""
+            params: list[Any] = []
+
+            if since is not None or until is not None:
+                conditions = []
+                if since is not None:
+                    conditions.append("CAST(strftime('%s', created_at) AS REAL) >= ?")
+                    params.append(float(since))
+                if until is not None:
+                    conditions.append("CAST(strftime('%s', created_at) AS REAL) <= ?")
+                    params.append(float(until))
+                if conditions:
+                    timestamp_where = "WHERE " + " AND ".join(conditions)
+
+            if table is not None:
+                # Count a single table
+                sql = f"SELECT COUNT(*) AS cnt FROM {table} {timestamp_where}"
+            else:
+                # Count across the 3 primary audit tables
+                sql = f"""
+                    SELECT (
+                        (SELECT COUNT(*) FROM task_packets {timestamp_where}) +
+                        (SELECT COUNT(*) FROM action_receipts {timestamp_where}) +
+                        (SELECT COUNT(*) FROM risk_events {timestamp_where})
+                    ) AS cnt
+                """
+                # For subqueries, we need to repeat the where params for each table
+                if since is not None or until is not None:
+                    where_params = params.copy()
+                    params = where_params + where_params + where_params
+
+            row = conn.execute(sql, params).fetchone()
+            return row[0] if row else 0
         finally:
             conn.close()
