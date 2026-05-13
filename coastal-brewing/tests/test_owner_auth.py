@@ -76,3 +76,17 @@ def test_lockout_clears_after_window(monkeypatch):
     fake_now = time.time() + owner_auth.LOCKOUT_WINDOW_SEC + 1
     monkeypatch.setattr(owner_auth.time, "time", lambda: fake_now)
     assert owner_auth.is_locked(email) is False
+
+
+def test_webauthn_registration_options_includes_email_as_user_id():
+    """start_registration returns a JSON-serialisable dict containing the
+    user identity + a fresh challenge. The browser uses this dict as
+    input to `navigator.credentials.create({publicKey: <opts>})`."""
+    opts = owner_auth.start_registration(
+        email="asg@achievemor.io",
+        rp_id="brewing.foai.cloud",
+        rp_name="Coastal Brewing Co.",
+    )
+    assert opts["user"]["name"] == "asg@achievemor.io"
+    assert opts["rp"]["id"] == "brewing.foai.cloud"
+    assert "challenge" in opts
