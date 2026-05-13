@@ -54,3 +54,14 @@ def test_owner_activity_accepts_valid_owner_cookie(client):
     cookie = owner_auth.sign_owner_cookie("asg@achievemor.io", "ut-owner-secret", ttl_sec=3600)
     r = client.get("/api/v1/owner/activity", cookies={"coastal_owner": cookie})
     assert r.status_code == 200
+
+
+def test_owner_activity_returns_owner_email(client):
+    cookie = owner_auth.sign_owner_cookie("asg@achievemor.io", "ut-owner-secret", ttl_sec=3600)
+    r = client.get("/api/v1/owner/activity?include_stripe=false", cookies={"coastal_owner": cookie})
+    assert r.status_code == 200
+    data = r.json()
+    assert data["owner_email"] == "asg@achievemor.io"
+    assert "events" in data
+    assert isinstance(data["events"], list)
+    assert "stripe_events" in data

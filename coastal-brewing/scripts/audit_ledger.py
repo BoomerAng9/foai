@@ -634,3 +634,109 @@ def delete_owner_passkey(email: str) -> None:
             conn.execute("DELETE FROM owner_passkeys WHERE email = ?", (email,))
         finally:
             conn.close()
+
+
+# ─────────────────────────────────────────────────────────────────────
+# recent_events — owner activity feed (2026-05-13)
+# ─────────────────────────────────────────────────────────────────────
+
+def recent_events(*, limit: int = 50, since_unix: float = 0.0) -> list[dict]:
+    """Return recent audit activity ordered newest-first.
+
+    Unions three primary signal tables: task_packets, action_receipts,
+    risk_events. Each row is normalised to:
+        {event_type, ts, payload}
+    where `ts` is a unix float derived from the ISO created_at column.
+
+    Args:
+        limit: max rows to return (applied after union + sort).
+        since_unix: if non-zero, exclude rows with ts <= since_unix
+                    (cursor-based pagination).
+    """
+    init_schema()
+    with _lock:
+        conn = _connect()
+        conn.row_factory = sqlite3.Row
+        try:
+            # Unified query: normalise ts via strftime epoch conversion.
+            sql = """
+                SELECT
+                    'task_packet' AS event_type,
+                    task_id       AS source_id,
+                    created_at,
+                    CAST(strftime('%s', created_at) AS REAL) AS ts,
+                    json_object(
+                        'task_id',   task_id,
+                        'goal',      owner_goal,
+                        'dept',      department,
+                        'task_type', task_type,
+                        'route',     route,
+                        'risk',      risk_level,
+                        'status',    status
+                    ) AS payload
+                FROM task_packets
+                WHERE (? = 0 OR CAST(strftime('%s', created_at) AS REAL) > ?)
+
+                UNION ALL
+
+                SELECT
+                    'action_receipt' AS event_type,
+                    action_id        AS source_id,
+                    created_at,
+                    CAST(strftime('%s', created_at) AS REAL) AS ts,
+                    json_object(
+                        'action_id',  action_id,
+                        'task_id',    task_id,
+                        'executor',   executor,
+                        'type',       action_type,
+                        'status',     status,
+                        'summary',    result_summary
+                    ) AS payload
+                FROM action_receipts
+                WHERE (? = 0 OR CAST(strftime('%s', created_at) AS REAL) > ?)
+
+                UNION ALL
+
+                SELECT
+                    'risk_event' AS event_type,
+                    event_id     AS source_id,
+                    created_at,
+                    CAST(strftime('%s', created_at) AS REAL) AS ts,
+                    json_object(
+                        'event_id',   event_id,
+                        'task_id',    task_id,
+                        'severity',   severity,
+                        'category',   category,
+                        'actor',      actor,
+                        'description',description
+                    ) AS payload
+                FROM risk_events
+                WHERE (? = 0 OR CAST(strftime('%s', created_at) AS REAL) > ?)
+
+                ORDER BY ts DESC
+                LIMIT ?
+            """
+            cutoff = float(since_unix)
+            rows = conn.execute(
+                sql,
+                (cutoff, cutoff, cutoff, cutoff, cutoff, cutoff, int(limit)),
+            ).fetchall()
+            out = []
+            for r in rows:
+                raw = dict(r)
+                # payload stored as JSON string by json_object()
+                payload_raw = raw.get("payload") or "{}"
+                try:
+                    payload = json.loads(payload_raw)
+                except (json.JSONDecodeError, TypeError):
+                    payload = {"raw": payload_raw}
+                out.append({
+                    "event_type": raw["event_type"],
+                    "ts": raw["ts"] or 0.0,
+                    "created_at": raw["created_at"],
+                    "source_id": raw["source_id"],
+                    "payload": payload,
+                })
+            return out
+        finally:
+            conn.close()
