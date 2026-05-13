@@ -5506,7 +5506,12 @@ async def auth_verify(
             log.warning("signup-verify finalize failed for %s: %s", email, _exc)
 
     profile = _profile_layer.get_profile(uid)
-    return {
+
+    # Owner-only branch: if this email is in COASTAL_OWNER_EMAILS, signal
+    # the frontend to navigate to the WebAuthn enrolment or challenge step
+    # instead of the normal /membership/welcome or /account landing. The
+    # frontend reads `owner_redirect` and `owner_email` from the response.
+    response_payload = {
         "ok": True,
         "coastal_uid": uid,
         "email": email,
@@ -5515,6 +5520,20 @@ async def auth_verify(
         "stripe_customer_id": stripe_customer_id,
         "welcome_card_ready": welcome_card_ready,
     }
+    try:
+        import owner_auth  # noqa: PLC0415
+        import audit_ledger  # noqa: PLC0415
+        allowlist = owner_auth.parse_allowlist(os.environ.get("COASTAL_OWNER_EMAILS"))
+        if owner_auth.is_owner_email(email, allowlist):
+            has_passkey = audit_ledger.fetch_owner_passkey(email.lower()) is not None
+            response_payload["owner_redirect"] = "/owner/challenge" if has_passkey else "/owner/enroll"
+            response_payload["owner_email"] = email.lower()
+    except Exception as _exc:
+        # Don't break the normal verify flow on a config-side failure.
+        log = __import__("logging").getLogger("coastal.owner_auth")
+        log.warning("owner-branch in /auth/verify failed for %s: %s", email, _exc)
+
+    return response_payload
 
 
 @app.get("/api/v1/auth/me")
