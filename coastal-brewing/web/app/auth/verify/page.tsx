@@ -40,7 +40,13 @@ function VerifyInner() {
           const body = await r.json().catch(() => ({}));
           throw new Error(body.detail || "Invalid or expired link");
         }
+        const data = await r.json().catch(() => ({}));
         if (cancelled) return;
+        if (data.owner_redirect && data.owner_email) {
+          const target = `${data.owner_redirect}?email=${encodeURIComponent(data.owner_email)}`;
+          router.push(target);
+          return;
+        }
         setState("ok");
         window.setTimeout(() => router.push("/account"), 700);
       } catch (err) {
