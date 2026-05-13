@@ -4496,18 +4496,27 @@ ALLOWED_CUSTEE_CARD_PRODUCTS = {
 }
 
 
-def _tier_monthly_retail(tier_id: str) -> float:
+def _tier_monthly_retail(tier_id: str) -> Optional[float]:
     """Read the canonical monthly retail for a tier from pricing-config.json.
-
-    Returns 0.0 if the config file is missing or the tier key is absent so
-    callers can apply ``or <fallback>`` to preserve the canon-anchor pattern
-    (memory: feedback_coastal_tier_monthly_retail_is_canon_anchor).
-    The loader uses mtime-based caching — per-request cost is one os.stat().
-    """
+    Returns None when the config file is missing OR the tier isn't in the
+    tier_monthly_retail block — so callers can `value if value is not None
+    else <canon fallback>` to preserve the canon-anchor pattern per memory
+    feedback_coastal_tier_monthly_retail_is_canon_anchor.
+    A literal 0.0 in config is treated as an owner-set value (e.g. promo),
+    NOT a fallback trigger."""
     import owner_config_loader as _ocl  # noqa: PLC0415
     cfg_path = pathlib.Path(os.environ.get("COASTAL_OWNER_CONFIG_DIR", "/app/config")) / "pricing-config.json"
     cfg = _ocl.load_json(cfg_path)
-    return float(cfg.get("tier_monthly_retail", {}).get(tier_id, 0.0))
+    tier_map = cfg.get("tier_monthly_retail")
+    if not isinstance(tier_map, dict):
+        return None
+    val = tier_map.get(tier_id)
+    if val is None:
+        return None
+    try:
+        return float(val)
+    except (TypeError, ValueError):
+        return None
 
 
 def _cadence_subscription_data(cadence_id: str, metadata: dict) -> dict:
@@ -4565,8 +4574,9 @@ def custee_card_checkout(
             detail=f"unknown products: {invalid}; allowed: {sorted(ALLOWED_CUSTEE_CARD_PRODUCTS)}",
         )
 
+    _resolved_custee = _tier_monthly_retail("custee-card")
     monthly_billing_cents = _cadence_mod.cadence_monthly_billing_cents(
-        _tier_monthly_retail("custee-card") or CUSTEE_CARD_MONTHLY_RETAIL_DOLLARS, cadence_id,  # type: ignore[arg-type]
+        _resolved_custee if _resolved_custee is not None else CUSTEE_CARD_MONTHLY_RETAIL_DOLLARS, cadence_id,
     )
     _envelope = _profitability_mod.check_envelope(
         tier="custee-card",
@@ -4779,7 +4789,8 @@ def wood_stork_checkout(
     if tier == "standard" and "whitelabel" in products:
         raise HTTPException(status_code=400, detail="whitelabel is Wood Stork Reserve only")
 
-    monthly_retail = _tier_monthly_retail(f"wood-stork-{tier}") or membership_wood_stork.monthly_retail_for_tier(tier)  # type: ignore[arg-type]
+    _resolved_ws = _tier_monthly_retail(f"wood-stork-{tier}")
+    monthly_retail = _resolved_ws if _resolved_ws is not None else membership_wood_stork.monthly_retail_for_tier(tier)
     monthly_billing_cents = _cadence_mod.cadence_monthly_billing_cents(monthly_retail, cadence_id)  # type: ignore[arg-type]
     _envelope = _profitability_mod.check_envelope(
         tier=f"wood-stork-{tier}",
@@ -4978,7 +4989,8 @@ def pooler_pass_checkout(
             detail="zip is outside the 100-mile Pooler Pass eligibility band — see Coastal Custee Card",
         )
 
-    monthly_retail = _tier_monthly_retail(f"pooler-pass-{tier}") or membership_pooler_pass.monthly_retail_for_tier(tier)  # type: ignore[arg-type]
+    _resolved_pp = _tier_monthly_retail(f"pooler-pass-{tier}")
+    monthly_retail = _resolved_pp if _resolved_pp is not None else membership_pooler_pass.monthly_retail_for_tier(tier)
     monthly_billing_cents = _cadence_mod.cadence_monthly_billing_cents(monthly_retail, cadence_id)  # type: ignore[arg-type]
     _envelope = _profitability_mod.check_envelope(
         tier=f"pooler-pass-{tier}",

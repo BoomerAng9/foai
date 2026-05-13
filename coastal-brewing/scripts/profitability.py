@@ -40,17 +40,15 @@ def _config_dir() -> Path:
 
 
 def _envelope_cents() -> dict[str, int]:
-    """Return the tier-envelope-max dict from pricing-config.json.
-
-    Falls back to the hard-coded dict if the config file is missing or
-    ``tier_envelope_max_cents`` is absent — preserving the canon-anchor
-    pattern documented in memory feedback_coastal_tier_monthly_retail_is_canon_anchor.
-    The loader uses mtime-based caching so per-request overhead is one
-    os.stat() call only.
-    """
+    """Merge of owner-managed pricing-config tier_envelope_max_cents over
+    the hard-coded canon fallback. Missing keys in the loaded config fall
+    through to canon — never KeyError on a tier the owner forgot to
+    configure."""
     cfg = _loader.load_json(_config_dir() / "pricing-config.json")
-    loaded: dict[str, int] = cfg.get("tier_envelope_max_cents", {})
-    return loaded if loaded else _TIER_ENVELOPES_CENTS_FALLBACK
+    loaded = cfg.get("tier_envelope_max_cents")
+    if not isinstance(loaded, dict):
+        return dict(_TIER_ENVELOPES_CENTS_FALLBACK)
+    return {**_TIER_ENVELOPES_CENTS_FALLBACK, **loaded}
 
 
 _TIER_UPGRADE_CHAIN: dict[str, str | None] = {
