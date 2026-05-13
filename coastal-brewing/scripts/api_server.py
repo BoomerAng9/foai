@@ -123,8 +123,27 @@ GATEWAY_TOKEN = os.environ.get("COASTAL_GATEWAY_TOKEN", "")
 COASTAL_PUBLIC_URL = os.environ.get("COASTAL_PUBLIC_URL", "https://brewing.foai.cloud")
 NEMOCLAW_URL = os.environ.get("NEMOCLAW_URL", "")
 NEMOCLAW_API_KEY = os.environ.get("NEMOCLAW_API_KEY", "")
-TELEGRAM_BOT_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN", "")
-TELEGRAM_CHAT_ID = os.environ.get("TELEGRAM_CHAT_ID", "")
+# Telegram routing — Coastal-dedicated bot preferred, fall back to the
+# legacy generic vars. The legacy `TELEGRAM_BOT_TOKEN` env on the
+# coastal-runner historically pointed at the Chicken_Hawk operator bot,
+# which meant Coastal customer-fulfillment pings (escalation approvals,
+# webhook notifications, service-initiation receipts) landed on the
+# operator's wire instead of the Coastal customer-event wire — breaking
+# Sacred Separation between operator surface and Coastal surface.
+#
+# Owner directive 2026-05-13: customer-event pings route through the
+# Coastal-dedicated `@CoastalBrewBot` (env var `COASTAL_BREW_BOT_TOKEN`
+# + `COASTAL_OWNER_TELEGRAM_CHAT_ID`). When the Coastal vars are unset
+# we keep the legacy fall-through so single-bot dev setups continue to
+# work, but production runner MUST set the Coastal vars.
+TELEGRAM_BOT_TOKEN = (
+    os.environ.get("COASTAL_BREW_BOT_TOKEN", "").strip()
+    or os.environ.get("TELEGRAM_BOT_TOKEN", "")
+)
+TELEGRAM_CHAT_ID = (
+    os.environ.get("COASTAL_OWNER_TELEGRAM_CHAT_ID", "").strip()
+    or os.environ.get("TELEGRAM_CHAT_ID", "")
+)
 
 # ─── Standard Membership ledger (Phase 1+2) ────────────────────────────
 # Process-singleton; the api_server is single-replica today. When a
@@ -4095,6 +4114,73 @@ AUTH_TOKEN_TTL_SEC = 1800  # 30 min — magic-link window
 AUTH_PUBLIC_URL = os.environ.get("COASTAL_PUBLIC_URL", "https://brewing.foai.cloud")
 
 
+def _deliver_magic_link_email(
+    *, email: str, link: str, subject: str, flow: str,
+) -> bool:
+    """Send a magic-link email via the preferred adapter chain.
+
+    Tries SMTP first (`adapters.email_sender` — Google Workspace via
+    `noreply@achievemor.io`, fully wired since deploy); falls back to
+    GCP AppInt (`adapters.email_adapter` — canonical surface per the
+    2026-05-09 owner directive but has been a silent no-op due to
+    `COASTAL_APPINT_EMAIL_URL` being unset). The first adapter that
+    accepts the message wins. Returns True iff at least one adapter
+    delivered.
+
+    `flow` is `signup` | `login` and is recorded in the AppInt
+    `template_id` + the log line to discriminate between the two
+    surfaces. Never raises — caller handles the "no adapter
+    delivered" case (dev-mode inline or fail-closed).
+    """
+    log = __import__("logging").getLogger("coastal.auth")
+    try:
+        from adapters.email_adapter import magic_link_email_body  # noqa: PLC0415
+    except Exception as exc:
+        log.warning("magic_link_email_body import failed: %s", exc)
+        return False
+    _, text = magic_link_email_body(
+        recipient_email=email,
+        magic_link=link,
+        ttl_minutes=AUTH_TOKEN_TTL_SEC // 60,
+    )
+
+    # 1. Preferred: SMTP via email_sender.
+    try:
+        from adapters.email_sender import (  # noqa: PLC0415
+            is_configured as _smtp_is_configured,
+            send as _smtp_send,
+        )
+        if _smtp_is_configured():
+            result = _smtp_send(to=email, subject=subject, body_markdown=text)
+            if result.sent:
+                return True
+            log.warning(
+                "smtp send not delivered (flow=%s to=%s): %s",
+                flow, email, result.detail or result.error,
+            )
+    except Exception as exc:
+        log.warning("smtp send raised (flow=%s to=%s): %s", flow, email, exc)
+
+    # 2. Fallback: GCP AppInt.
+    try:
+        from adapters.email_adapter import (  # noqa: PLC0415
+            is_configured as _appint_is_configured,
+            send_email as _appint_send,
+        )
+        if _appint_is_configured() and _appint_send is not None:
+            _appint_send(
+                to=email, subject=subject, text=text,
+                template_id=f"auth_{flow}_link",
+            )
+            return True
+    except Exception as exc:
+        log.warning(
+            "appint send raised (flow=%s to=%s): %s", flow, email, exc,
+        )
+
+    return False
+
+
 def _auth_sign(payload: Dict[str, Any]) -> str:
     """Sign a payload as base64(json).hmac. Compact, no JWT lib needed.
 
@@ -5208,43 +5294,27 @@ async def auth_signup(
         "expires_in_sec": AUTH_TOKEN_TTL_SEC,
     }
 
-    # Deliver via the same email adapter as /auth/login. Same dev-mode
-    # discipline: only return the link inline if COASTAL_DEBUG=true is
-    # explicitly set, otherwise fail closed.
-    try:
-        from adapters.email_adapter import (   # noqa: E402
-            is_configured as _email_is_configured,
-            send_email as _email_send,
-            magic_link_email_body as _magic_link_body,
-        )
-    except Exception:
-        _email_is_configured = lambda: False  # type: ignore
-        _email_send = None                     # type: ignore
-        _magic_link_body = None                # type: ignore
-
-    if _email_is_configured() and _email_send and _magic_link_body:
-        _, text = _magic_link_body(
-            recipient_email=email,
-            magic_link=link,
-            ttl_minutes=AUTH_TOKEN_TTL_SEC // 60,
-        )
-        try:
-            _email_send(
-                to=email,
-                subject="Confirm your Coastal Brewing Co. account",
-                text=text,
-                template_id="auth_signup_link",
-            )
-        except Exception as exc:
-            log = __import__("logging").getLogger("coastal.auth")
-            log.warning("appint email send raised for signup %s: %s", email, exc)
-    else:
+    # Deliver via the unified magic-link email helper. Prefers SMTP
+    # (email_sender — Google Workspace via noreply@achievemor.io, the
+    # adapter that's been fully configured since deploy) and falls back
+    # to GCP AppInt (email_adapter — the historical canonical surface
+    # which has been a silent no-op due to unset COASTAL_APPINT_EMAIL_URL
+    # since 2026-05-09). Dev-mode discipline preserved: COASTAL_DEBUG=true
+    # returns the link inline if neither adapter accepted delivery.
+    sent = _deliver_magic_link_email(
+        email=email,
+        link=link,
+        subject="Confirm your Coastal Brewing Co. account",
+        flow="signup",
+    )
+    if not sent:
         if os.environ.get("COASTAL_DEBUG", "").strip().lower() in ("1", "true", "yes"):
             response_payload["magic_link"] = link
         else:
             log = __import__("logging").getLogger("coastal.auth")
             log.warning(
-                "auth_signup: email adapter unconfigured for %s — magic-link suppressed",
+                "auth_signup: no email adapter delivered for %s — "
+                "magic-link suppressed",
                 email,
             )
 
@@ -5298,39 +5368,16 @@ async def auth_login(body: AuthLoginRequest, request: Request):
         "sent": True,
         "expires_in_sec": AUTH_TOKEN_TTL_SEC,
     }
-    try:
-        from adapters.email_adapter import (   # noqa: E402 — local import
-            is_configured as _email_is_configured,
-            send_email as _email_send,
-            magic_link_email_body as _magic_link_body,
-        )
-    except Exception:
-        _email_is_configured = lambda: False  # type: ignore
-        _email_send = None                     # type: ignore
-        _magic_link_body = None                # type: ignore
-
-    if _email_is_configured() and _email_send and _magic_link_body:
-        _, text = _magic_link_body(
-            recipient_email=email,
-            magic_link=link,
-            ttl_minutes=AUTH_TOKEN_TTL_SEC // 60,
-        )
-        try:
-            _email_send(
-                to=email,
-                subject="Pull up to the counter — your Coastal sign-in link",
-                text=text,
-                template_id="auth_magic_link",
-            )
-        except Exception as exc:
-            log = __import__("logging").getLogger("coastal.auth")
-            log.warning("appint email send raised for %s: %s", email, exc)
-        # Don't leak send-status to the caller. Generic body either way
-        # to prevent email-enumeration attacks.
-    else:
-        # Email adapter not configured. Surface the magic-link inline
-        # ONLY if COASTAL_DEBUG=true is explicitly set in the runner
-        # env. Without the explicit gate, an attacker who triggers the
+    sent = _deliver_magic_link_email(
+        email=email,
+        link=link,
+        subject="Pull up to the counter — your Coastal sign-in link",
+        flow="login",
+    )
+    if not sent:
+        # No adapter delivered. Surface the magic-link inline ONLY if
+        # COASTAL_DEBUG=true is explicitly set in the runner env.
+        # Without the explicit gate, an attacker who triggers the
         # adapter-import-failure path (or runs against a misconfigured
         # deploy) would receive victim magic-links directly from the
         # API. In prod we fail closed — caller gets a generic 200, no
@@ -5340,7 +5387,8 @@ async def auth_login(body: AuthLoginRequest, request: Request):
         else:
             log = __import__("logging").getLogger("coastal.auth")
             log.warning(
-                "auth_login: email adapter unconfigured for %s — magic-link suppressed (set COASTAL_DEBUG=true for inline)",
+                "auth_login: no email adapter delivered for %s — "
+                "magic-link suppressed (set COASTAL_DEBUG=true for inline)",
                 email,
             )
 
