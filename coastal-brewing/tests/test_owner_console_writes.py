@@ -372,3 +372,46 @@ def test_cfg_put_rejects_non_dict_email(client, owner_cookie, cfg_paths):
         cookies={"coastal_owner": owner_cookie},
     )
     assert r.status_code == 422
+
+
+# ---------------------------------------------------------------------------
+# WebAuthn enroll + challenge endpoint tests
+# ---------------------------------------------------------------------------
+
+def test_enroll_start_rejects_email_not_in_allowlist(client):
+    r = client.post("/api/v1/owner/enroll-start", json={"email": "not-owner@example.com"})
+    assert r.status_code == 403
+
+
+def test_enroll_start_returns_options_for_allowed_email(client):
+    r = client.post("/api/v1/owner/enroll-start", json={"email": "asg@achievemor.io"})
+    assert r.status_code == 200
+    opts = r.json()
+    assert opts["rp"]["id"] == "brewing.foai.cloud"  # default RP id
+    assert opts["user"]["name"] == "asg@achievemor.io"
+
+
+def test_challenge_start_404_when_no_passkey_enrolled(client):
+    # Fresh email with no enrolled passkey
+    r = client.post("/api/v1/owner/challenge-start", json={"email": "asg@achievemor.io"})
+    assert r.status_code == 404
+
+
+def test_challenge_start_423_when_locked(client, monkeypatch):
+    import owner_auth
+    owner_auth._LOCKOUT.clear()
+    for _ in range(owner_auth.LOCKOUT_THRESHOLD):
+        owner_auth.record_failure("asg@achievemor.io")
+    try:
+        r = client.post("/api/v1/owner/challenge-start", json={"email": "asg@achievemor.io"})
+        assert r.status_code == 423
+    finally:
+        owner_auth._LOCKOUT.clear()
+
+
+def test_enroll_finish_rejects_bad_email(client):
+    r = client.post(
+        "/api/v1/owner/enroll-finish",
+        json={"email": "not-owner@example.com", "credential": {}},
+    )
+    assert r.status_code == 403

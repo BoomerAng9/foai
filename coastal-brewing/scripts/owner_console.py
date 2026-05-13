@@ -14,7 +14,7 @@ import secrets
 from pathlib import Path
 from typing import Annotated
 
-from fastapi import APIRouter, Cookie, Depends, HTTPException, Request
+from fastapi import APIRouter, Cookie, Depends, HTTPException, Request, Response
 from pydantic import BaseModel
 
 import owner_auth
@@ -392,6 +392,104 @@ def put_cfg(body: CfgUpdate, owner: dict = Depends(require_owner)) -> dict:
         "email_changed": body.email_templates is not None,
     })
     return get_cfg(owner=owner)
+
+
+# ---------------------------------------------------------------------------
+# WebAuthn enroll + challenge endpoints (cookie-bootstrap, NOT cookie-gated)
+# ---------------------------------------------------------------------------
+
+class WebAuthnFinishBody(BaseModel):
+    email: str
+    credential: dict
+
+
+def _rp_id() -> str:
+    return os.environ.get("COASTAL_OWNER_RP_ID", "brewing.foai.cloud")
+
+
+def _expected_origin() -> str:
+    return os.environ.get("COASTAL_OWNER_RP_ORIGIN", "https://brewing.foai.cloud")
+
+
+def _check_owner_email_or_403(email: str) -> None:
+    allowlist = owner_auth.parse_allowlist(os.environ.get("COASTAL_OWNER_EMAILS"))
+    if not owner_auth.is_owner_email(email, allowlist):
+        raise HTTPException(status_code=403, detail="email not in owner allowlist")
+
+
+@router.post("/enroll-start")
+def enroll_start(payload: dict) -> dict:
+    """Open POST — bootstraps a passkey registration ceremony. No cookie
+    required (this is what mints the cookie). Email must be in
+    COASTAL_OWNER_EMAILS."""
+    email = (payload.get("email") or "").lower()
+    _check_owner_email_or_403(email)
+    return owner_auth.start_registration(
+        email=email, rp_id=_rp_id(), rp_name="Coastal Brewing Co.",
+    )
+
+
+@router.post("/enroll-finish")
+def enroll_finish(body: WebAuthnFinishBody) -> Response:
+    email = body.email.lower()
+    _check_owner_email_or_403(email)
+    ok = owner_auth.finish_registration(
+        email=email, credential_json=body.credential,
+        rp_id=_rp_id(), expected_origin=_expected_origin(),
+    )
+    if not ok:
+        raise HTTPException(status_code=400, detail="enrolment verification failed")
+    cookie = owner_auth.sign_owner_cookie(email, _owner_session_secret())
+    resp = Response(
+        content=json.dumps({"ok": True, "email": email}),
+        media_type="application/json",
+    )
+    resp.set_cookie(
+        "coastal_owner", cookie,
+        httponly=True, secure=True, samesite="strict",
+        max_age=owner_auth.DEFAULT_TTL_SEC,
+    )
+    return resp
+
+
+@router.post("/challenge-start")
+def challenge_start(payload: dict) -> dict:
+    email = (payload.get("email") or "").lower()
+    if owner_auth.is_locked(email):
+        raise HTTPException(
+            status_code=423,
+            detail="too many failed attempts; locked for 30 min",
+        )
+    _check_owner_email_or_403(email)
+    opts = owner_auth.start_authentication(email=email, rp_id=_rp_id())
+    if opts is None:
+        raise HTTPException(
+            status_code=404,
+            detail="no passkey enrolled; visit /owner/enroll first",
+        )
+    return opts
+
+
+@router.post("/challenge-finish")
+def challenge_finish(body: WebAuthnFinishBody) -> Response:
+    email = body.email.lower()
+    ok = owner_auth.finish_authentication(
+        email=email, credential_json=body.credential,
+        rp_id=_rp_id(), expected_origin=_expected_origin(),
+    )
+    if not ok:
+        raise HTTPException(status_code=400, detail="authentication failed")
+    cookie = owner_auth.sign_owner_cookie(email, _owner_session_secret())
+    resp = Response(
+        content=json.dumps({"ok": True, "email": email}),
+        media_type="application/json",
+    )
+    resp.set_cookie(
+        "coastal_owner", cookie,
+        httponly=True, secure=True, samesite="strict",
+        max_age=owner_auth.DEFAULT_TTL_SEC,
+    )
+    return resp
 
 
 @router.get("/audit")
