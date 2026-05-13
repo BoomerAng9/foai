@@ -35,11 +35,26 @@ import json
 import logging
 import os
 import time
+from pathlib import Path
 from typing import Optional
 
 import httpx
 
 log = logging.getLogger("coastal.email")
+
+# Fallback magic-link email body template. Matches email-templates.json
+# "magic_link.body" by design — this is the canon anchor. If JSON is
+# unreadable, we fall back to this inline constant.
+_FALLBACK_BODY = (
+    "Pull up to the counter.\n\n"
+    "Click below to sign in to your Coastal Brewing Co. account "
+    "— same cup, new device, no password to remember.\n\n"
+    "{magic_link}\n\n"
+    "This link expires in {ttl_minutes} minutes and can only be used once. "
+    "If you didn't ask to sign in, you can ignore this email — your "
+    "account stays as it is.\n\n"
+    "Real fine — Coastal Brewing Co.\n"
+)
 
 APPINT_EMAIL_URL = os.environ.get("COASTAL_APPINT_EMAIL_URL", "").strip()
 APPINT_AUTH_TOKEN = os.environ.get("COASTAL_APPINT_AUTH_TOKEN", "").strip()
@@ -122,21 +137,22 @@ def send_email(
 def magic_link_email_body(
     *, recipient_email: str, magic_link: str, ttl_minutes: int = 30,
 ) -> tuple[str, str]:
-    """Compose plaintext body + matching subject-friendly preamble for
-    the magic-link login email. AppInt Send Email is plaintext-only,
-    so HTML is not produced. Return shape stays `(html, text)` so
-    existing callers don't break — `html` mirrors `text`.
+    """Compose plaintext body for the magic-link email. Template is read
+    from email-templates.json with placeholder interpolation. Returns
+    `(html, text)` tuple for backward-compat — both elements identical
+    plaintext (HTML wrapping happens at SMTP send time via the
+    email_sender.send html-alternative branch).
     """
-    text = (
-        "Pull up to the counter.\n\n"
-        "Click below to sign in to your Coastal Brewing Co. account "
-        "— same cup, new device, no password to remember.\n\n"
-        f"{magic_link}\n\n"
-        f"This link expires in {ttl_minutes} minutes and can only be used once. "
-        "If you didn't ask to sign in, you can ignore this email — your "
-        "account stays as it is.\n\n"
-        "Real fine — Coastal Brewing Co.\n"
-    )
+    try:
+        import owner_config_loader
+        cfg_path = Path(os.environ.get("COASTAL_OWNER_CONFIG_DIR", "/app/config")) / "email-templates.json"
+        cfg = owner_config_loader.load_json(cfg_path)
+        template = cfg.get("magic_link", {}).get("body", _FALLBACK_BODY)
+    except Exception as e:
+        log.warning("failed to load email template from json: %s, using fallback", e)
+        template = _FALLBACK_BODY
+
+    text = template.format(magic_link=magic_link, ttl_minutes=ttl_minutes)
     # Keep tuple shape for backward-compat with api_server.py call site.
     # Both elements are identical plaintext under AppInt.
     return text, text
