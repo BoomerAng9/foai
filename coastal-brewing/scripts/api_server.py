@@ -4494,6 +4494,13 @@ def custee_card_checkout(
         import stripe as _stripe  # noqa: PLC0415
         from adapters.stripe_adapter import _init_stripe  # noqa: PLC0415
         _init_stripe()
+        # `sub_data["metadata"]` carries `cancel_at_unix` for non-monthly
+        # cadences (added by `_cadence_subscription_data`). Mirror that
+        # enriched metadata into the Session-level `metadata=` kwarg too
+        # so /stripe/webhook can read it from `session.metadata`
+        # (Stripe's Session does NOT propagate subscription metadata
+        # back up — they're separate fields).
+        sub_data = _cadence_subscription_data(cadence_id, metadata)
         session = _stripe.checkout.Session.create(
             mode="subscription",
             customer_email=email,
@@ -4510,8 +4517,8 @@ def custee_card_checkout(
                 },
                 "quantity": 1,
             }],
-            metadata=metadata,
-            subscription_data=_cadence_subscription_data(cadence_id, metadata),
+            metadata=sub_data["metadata"],
+            subscription_data=sub_data,
             success_url=f"{AUTH_PUBLIC_URL}/membership/thank-you?intent={intent_id}",
             cancel_url=f"{AUTH_PUBLIC_URL}/membership?canceled=1",
             billing_address_collection="auto",
@@ -4697,6 +4704,8 @@ def wood_stork_checkout(
         import stripe as _stripe  # noqa: PLC0415
         from adapters.stripe_adapter import _init_stripe  # noqa: PLC0415
         _init_stripe()
+        # See custee_card_checkout for the metadata-mirroring rationale.
+        sub_data = _cadence_subscription_data(cadence_id, metadata)
         session = _stripe.checkout.Session.create(
             mode="subscription", customer_email=email,
             line_items=[{
@@ -4710,7 +4719,7 @@ def wood_stork_checkout(
                     },
                 }, "quantity": 1,
             }],
-            metadata=metadata, subscription_data=_cadence_subscription_data(cadence_id, metadata),
+            metadata=sub_data["metadata"], subscription_data=sub_data,
             success_url=f"{AUTH_PUBLIC_URL}/wood-stork/thank-you?intent={intent_id}",
             cancel_url=f"{AUTH_PUBLIC_URL}/wood-stork?canceled=1",
             billing_address_collection="auto",
@@ -4894,6 +4903,8 @@ def pooler_pass_checkout(
         import stripe as _stripe  # noqa: PLC0415
         from adapters.stripe_adapter import _init_stripe  # noqa: PLC0415
         _init_stripe()
+        # See custee_card_checkout for the metadata-mirroring rationale.
+        sub_data = _cadence_subscription_data(cadence_id, metadata)
         session = _stripe.checkout.Session.create(
             mode="subscription", customer_email=email,
             line_items=[{
@@ -4907,7 +4918,7 @@ def pooler_pass_checkout(
                     },
                 }, "quantity": 1,
             }],
-            metadata=metadata, subscription_data=_cadence_subscription_data(cadence_id, metadata),
+            metadata=sub_data["metadata"], subscription_data=sub_data,
             success_url=f"{AUTH_PUBLIC_URL}/pooler-pass/thank-you?intent={intent_id}",
             cancel_url=f"{AUTH_PUBLIC_URL}/pooler-pass?canceled=1",
             billing_address_collection="auto",
