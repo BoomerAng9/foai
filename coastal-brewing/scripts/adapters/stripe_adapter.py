@@ -14,6 +14,7 @@ second API call from the storefront.
 """
 from __future__ import annotations
 
+import json
 import os
 from typing import Any, Optional
 
@@ -144,7 +145,20 @@ def create_one_time_checkout_session(
 
 
 def verify_webhook(payload: bytes, sig_header: str) -> dict[str, Any]:
+    """Verify the Stripe webhook signature and return the event as a
+    plain dict.
+
+    Stripe SDK v15 dropped `.get()` from `StripeObject`, so the typed
+    `stripe.Event` returned by `construct_event` no longer supports
+    `event.get("type")` patterns — those raise AttributeError. We
+    therefore use `construct_event` purely for signature verification
+    (it raises on tamper / bad sig) and return the parsed-JSON payload
+    so callers can use ordinary dict access. The declared return type
+    has always been `dict[str, Any]`; this just makes the runtime
+    behavior match the contract.
+    """
     if not STRIPE_WEBHOOK_SECRET:
         raise RuntimeError("STRIPE_WEBHOOK_SECRET not configured")
     stripe.api_key = STRIPE_SECRET_KEY
-    return stripe.Webhook.construct_event(payload, sig_header, STRIPE_WEBHOOK_SECRET)
+    stripe.Webhook.construct_event(payload, sig_header, STRIPE_WEBHOOK_SECRET)
+    return json.loads(payload.decode("utf-8"))
