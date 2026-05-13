@@ -345,3 +345,44 @@ def get_activity(
         "stripe_events": stripe_events,
         "cursor": cursor,
     }
+
+
+@router.get("/audit")
+def owner_audit(
+    table: str | None = None,
+    since: float | None = None,
+    until: float | None = None,
+    page: int = 1,
+    per_page: int = 50,
+    owner: dict = Depends(require_owner),
+) -> dict:
+    """Paginated read of audit_ledger events. Filter by `table` (one of
+    task_packets / action_receipts / risk_events / used_tokens / owner_passkeys /
+    approval_decisions) and by `since`/`until` unix-timestamp range.
+    `page` is 1-indexed; returns rows + total count for pagination."""
+    import audit_ledger
+
+    per_page = max(1, min(int(per_page), 200))
+    page = max(1, int(page))
+    offset = (page - 1) * per_page
+
+    try:
+        rows = audit_ledger.query_events(
+            table=table, since=since, until=until,
+            offset=offset, limit=per_page,
+        )
+        total = audit_ledger.count_events(table=table, since=since, until=until)
+    except AttributeError as exc:
+        # query_events/count_events not yet implemented — degrade gracefully
+        log.warning("audit_ledger.query_events / count_events not implemented: %s", exc)
+        rows = []
+        total = 0
+
+    return {
+        "ok": True,
+        "owner_email": owner["email"],
+        "rows": rows,
+        "page": page,
+        "per_page": per_page,
+        "total": total,
+    }

@@ -12,12 +12,15 @@ from __future__ import annotations
 
 import hashlib
 import json
+import logging
 import os
 import pathlib
 import sqlite3
 import threading
 from datetime import datetime, timezone
 from typing import Any, Optional
+
+log = logging.getLogger(__name__)
 
 GENESIS_HASH = "GENESIS"
 
@@ -811,5 +814,351 @@ def set_task_status(task_id: str, new_status: str, *, actor: str = "") -> bool: 
             )
             conn.commit()
             return cur.rowcount > 0
+        finally:
+            conn.close()
+
+
+# ---------------------------------------------------------------------------
+# Paginated audit event queries (added for /api/v1/owner/audit endpoint)
+# ---------------------------------------------------------------------------
+
+# Whitelist of allowed table names for query_events. Never interpolate user
+# input directly into SQL; always check against this set first.
+_ALLOWED_TABLES = {
+    "task_packets",
+    "action_receipts",
+    "risk_events",
+    "used_tokens",
+    "owner_passkeys",
+    "approval_decisions",
+}
+
+
+def query_events(
+    *,
+    table: str | None = None,
+    since: float | None = None,
+    until: float | None = None,
+    offset: int = 0,
+    limit: int = 50,
+) -> list[dict]:
+    """Read paginated rows from one or more audit tables.
+
+    If `table` is specified and is in the whitelist, query that specific table.
+    If `table` is None, UNION across task_packets, action_receipts, and
+    risk_events (same tables as recent_events()).
+
+    Args:
+        table: Optional table name (must be in _ALLOWED_TABLES). Defaults to None
+               (UNION across primary tables).
+        since: Optional unix-timestamp lower bound (inclusive: ts >= since).
+        until: Optional unix-timestamp upper bound (inclusive: ts <= until).
+        offset: Row offset for pagination (0-based).
+        limit: Max rows to return. Clamped to 1-200.
+
+    Returns:
+        List of dicts with keys: event_type, ts, created_at, source_id, payload.
+    """
+    init_schema()
+    offset = max(0, int(offset))
+    limit = max(1, min(int(limit), 200))
+
+    # Validate table whitelist
+    if table is not None and table not in _ALLOWED_TABLES:
+        log.warning("query_events: rejected table=%r (not in whitelist)", table)
+        return []
+
+    with _lock:
+        conn = _connect()
+        conn.row_factory = sqlite3.Row
+        try:
+            # Build the WHERE clause for timestamp filtering
+            # Each table has a created_at column in ISO format.
+            timestamp_where = ""
+            params: list[Any] = []
+
+            if since is not None or until is not None:
+                conditions = []
+                if since is not None:
+                    conditions.append("CAST(strftime('%s', created_at) AS REAL) >= ?")
+                    params.append(float(since))
+                if until is not None:
+                    conditions.append("CAST(strftime('%s', created_at) AS REAL) <= ?")
+                    params.append(float(until))
+                if conditions:
+                    timestamp_where = "WHERE " + " AND ".join(conditions)
+
+            if table is not None:
+                # Query a single table
+                # Build column list and payload structure for each table type
+                if table == "task_packets":
+                    sql = f"""
+                        SELECT
+                            'task_packet' AS event_type,
+                            task_id AS source_id,
+                            created_at,
+                            CAST(strftime('%s', created_at) AS REAL) AS ts,
+                            json_object(
+                                'task_id', task_id,
+                                'goal', owner_goal,
+                                'dept', department,
+                                'task_type', task_type,
+                                'route', route,
+                                'risk', risk_level,
+                                'status', status
+                            ) AS payload
+                        FROM task_packets
+                        {timestamp_where}
+                        ORDER BY ts DESC
+                        LIMIT ? OFFSET ?
+                    """
+                    params.extend([int(limit), int(offset)])
+                elif table == "action_receipts":
+                    sql = f"""
+                        SELECT
+                            'action_receipt' AS event_type,
+                            action_id AS source_id,
+                            created_at,
+                            CAST(strftime('%s', created_at) AS REAL) AS ts,
+                            json_object(
+                                'action_id', action_id,
+                                'task_id', task_id,
+                                'executor', executor,
+                                'type', action_type,
+                                'status', status,
+                                'summary', result_summary
+                            ) AS payload
+                        FROM action_receipts
+                        {timestamp_where}
+                        ORDER BY ts DESC
+                        LIMIT ? OFFSET ?
+                    """
+                    params.extend([int(limit), int(offset)])
+                elif table == "risk_events":
+                    sql = f"""
+                        SELECT
+                            'risk_event' AS event_type,
+                            event_id AS source_id,
+                            created_at,
+                            CAST(strftime('%s', created_at) AS REAL) AS ts,
+                            json_object(
+                                'event_id', event_id,
+                                'task_id', task_id,
+                                'severity', severity,
+                                'category', category,
+                                'actor', actor,
+                                'description', description
+                            ) AS payload
+                        FROM risk_events
+                        {timestamp_where}
+                        ORDER BY ts DESC
+                        LIMIT ? OFFSET ?
+                    """
+                    params.extend([int(limit), int(offset)])
+                elif table == "used_tokens":
+                    sql = f"""
+                        SELECT
+                            'used_token' AS event_type,
+                            jti AS source_id,
+                            created_at,
+                            CAST(strftime('%s', created_at) AS REAL) AS ts,
+                            json_object(
+                                'jti', jti,
+                                'email', email,
+                                'exp_unix', exp_unix
+                            ) AS payload
+                        FROM used_tokens
+                        {timestamp_where}
+                        ORDER BY ts DESC
+                        LIMIT ? OFFSET ?
+                    """
+                    params.extend([int(limit), int(offset)])
+                elif table == "owner_passkeys":
+                    sql = f"""
+                        SELECT
+                            'owner_passkey' AS event_type,
+                            credential_id AS source_id,
+                            created_at,
+                            CAST(strftime('%s', created_at) AS REAL) AS ts,
+                            json_object(
+                                'credential_id', credential_id,
+                                'owner_email', owner_email,
+                                'public_key', public_key
+                            ) AS payload
+                        FROM owner_passkeys
+                        {timestamp_where}
+                        ORDER BY ts DESC
+                        LIMIT ? OFFSET ?
+                    """
+                    params.extend([int(limit), int(offset)])
+                elif table == "approval_decisions":
+                    sql = f"""
+                        SELECT
+                            'approval_decision' AS event_type,
+                            task_id AS source_id,
+                            created_at,
+                            CAST(strftime('%s', created_at) AS REAL) AS ts,
+                            json_object(
+                                'task_id', task_id,
+                                'decision', decision,
+                                'reason', reason
+                            ) AS payload
+                        FROM approval_decisions
+                        {timestamp_where}
+                        ORDER BY ts DESC
+                        LIMIT ? OFFSET ?
+                    """
+                    params.extend([int(limit), int(offset)])
+                else:
+                    return []
+            else:
+                # UNION across task_packets, action_receipts, risk_events
+                # Replicate the pattern from recent_events() but with OFFSET support
+                sql = f"""
+                    SELECT
+                        'task_packet' AS event_type,
+                        task_id AS source_id,
+                        created_at,
+                        CAST(strftime('%s', created_at) AS REAL) AS ts,
+                        json_object(
+                            'task_id', task_id,
+                            'goal', owner_goal,
+                            'dept', department,
+                            'task_type', task_type,
+                            'route', route,
+                            'risk', risk_level,
+                            'status', status
+                        ) AS payload
+                    FROM task_packets
+                    {timestamp_where}
+
+                    UNION ALL
+
+                    SELECT
+                        'action_receipt' AS event_type,
+                        action_id AS source_id,
+                        created_at,
+                        CAST(strftime('%s', created_at) AS REAL) AS ts,
+                        json_object(
+                            'action_id', action_id,
+                            'task_id', task_id,
+                            'executor', executor,
+                            'type', action_type,
+                            'status', status,
+                            'summary', result_summary
+                        ) AS payload
+                    FROM action_receipts
+                    {timestamp_where}
+
+                    UNION ALL
+
+                    SELECT
+                        'risk_event' AS event_type,
+                        event_id AS source_id,
+                        created_at,
+                        CAST(strftime('%s', created_at) AS REAL) AS ts,
+                        json_object(
+                            'event_id', event_id,
+                            'task_id', task_id,
+                            'severity', severity,
+                            'category', category,
+                            'actor', actor,
+                            'description', description
+                        ) AS payload
+                    FROM risk_events
+                    {timestamp_where}
+
+                    ORDER BY ts DESC
+                    LIMIT ? OFFSET ?
+                """
+                # For UNION queries, the WHERE clause is replicated for each table
+                # so we need to duplicate the params for each table's WHERE clause
+                if since is not None or until is not None:
+                    # 3 tables, so multiply params by 3
+                    where_params = params.copy()
+                    params = where_params + where_params + where_params
+                params.extend([int(limit), int(offset)])
+
+            rows = conn.execute(sql, params).fetchall()
+            out = []
+            for r in rows:
+                raw = dict(r)
+                payload_raw = raw.get("payload") or "{}"
+                try:
+                    payload = json.loads(payload_raw)
+                except (json.JSONDecodeError, TypeError):
+                    payload = {"raw": payload_raw}
+                out.append({
+                    "event_type": raw["event_type"],
+                    "ts": raw["ts"] or 0.0,
+                    "created_at": raw["created_at"],
+                    "source_id": raw["source_id"],
+                    "payload": payload,
+                })
+            return out
+        finally:
+            conn.close()
+
+
+def count_events(
+    *,
+    table: str | None = None,
+    since: float | None = None,
+    until: float | None = None,
+) -> int:
+    """Return the count of events matching the same filter as query_events.
+
+    Args:
+        table: Optional table name (must be in _ALLOWED_TABLES).
+        since: Optional unix-timestamp lower bound (inclusive).
+        until: Optional unix-timestamp upper bound (inclusive).
+
+    Returns:
+        Total count of matching rows.
+    """
+    init_schema()
+
+    # Validate table whitelist
+    if table is not None and table not in _ALLOWED_TABLES:
+        log.warning("count_events: rejected table=%r (not in whitelist)", table)
+        return 0
+
+    with _lock:
+        conn = _connect()
+        try:
+            # Build the WHERE clause for timestamp filtering
+            timestamp_where = ""
+            params: list[Any] = []
+
+            if since is not None or until is not None:
+                conditions = []
+                if since is not None:
+                    conditions.append("CAST(strftime('%s', created_at) AS REAL) >= ?")
+                    params.append(float(since))
+                if until is not None:
+                    conditions.append("CAST(strftime('%s', created_at) AS REAL) <= ?")
+                    params.append(float(until))
+                if conditions:
+                    timestamp_where = "WHERE " + " AND ".join(conditions)
+
+            if table is not None:
+                # Count a single table
+                sql = f"SELECT COUNT(*) AS cnt FROM {table} {timestamp_where}"
+            else:
+                # Count across the 3 primary audit tables
+                sql = f"""
+                    SELECT (
+                        (SELECT COUNT(*) FROM task_packets {timestamp_where}) +
+                        (SELECT COUNT(*) FROM action_receipts {timestamp_where}) +
+                        (SELECT COUNT(*) FROM risk_events {timestamp_where})
+                    ) AS cnt
+                """
+                # For subqueries, we need to repeat the where params for each table
+                if since is not None or until is not None:
+                    where_params = params.copy()
+                    params = where_params + where_params + where_params
+
+            row = conn.execute(sql, params).fetchone()
+            return row[0] if row else 0
         finally:
             conn.close()

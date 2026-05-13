@@ -65,3 +65,45 @@ def test_owner_activity_returns_owner_email(client):
     assert "events" in data
     assert isinstance(data["events"], list)
     assert "stripe_events" in data
+
+
+def test_owner_audit_rejects_missing_cookie(client):
+    r = client.get("/api/v1/owner/audit")
+    assert r.status_code == 401
+
+
+def test_owner_audit_rejects_invalid_cookie(client):
+    r = client.get("/api/v1/owner/audit", cookies={"coastal_owner": "not.a.valid.cookie"})
+    assert r.status_code == 401
+
+
+def test_owner_audit_returns_paginated_rows(client):
+    cookie = owner_auth.sign_owner_cookie("asg@achievemor.io", "ut-owner-secret", ttl_sec=3600)
+    r = client.get("/api/v1/owner/audit?per_page=10", cookies={"coastal_owner": cookie})
+    assert r.status_code == 200
+    data = r.json()
+    assert data["per_page"] == 10
+    assert data["page"] == 1
+    assert isinstance(data["rows"], list)
+    assert "total" in data
+    assert "ok" in data
+    assert data["ok"] is True
+
+
+def test_owner_audit_clamps_per_page(client):
+    cookie = owner_auth.sign_owner_cookie("asg@achievemor.io", "ut-owner-secret", ttl_sec=3600)
+    r = client.get("/api/v1/owner/audit?per_page=5000", cookies={"coastal_owner": cookie})
+    assert r.status_code == 200
+    data = r.json()
+    assert data["per_page"] <= 200
+
+
+def test_owner_audit_rejects_bad_table_param(client):
+    cookie = owner_auth.sign_owner_cookie("asg@achievemor.io", "ut-owner-secret", ttl_sec=3600)
+    r = client.get("/api/v1/owner/audit?table=DROP_TABLE_users", cookies={"coastal_owner": cookie})
+    # Should NOT 500 — either 200 with empty rows (rejected by audit_ledger layer)
+    # or 400 (rejected at endpoint layer). Test that it doesn't crash.
+    assert r.status_code in (200, 400)
+    if r.status_code == 200:
+        data = r.json()
+        assert isinstance(data["rows"], list)
