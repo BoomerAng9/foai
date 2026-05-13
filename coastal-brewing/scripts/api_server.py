@@ -1286,11 +1286,23 @@ async def stripe_webhook(request: Request) -> dict:
     out_path = STRIPE_EVENTS_DIR / f"{event['id']}.json"
 
     # Stripe at-least-once delivery: webhook may redeliver on 5xx or
-    # network blip. Idempotency guard — if we've already written this
-    # event to disk, this is a retry. Return the prior envelope without
-    # re-firing escalation/order processing (which would duplicate
-    # audit-ledger rows + Telegram messages).
-    if out_path.exists():
+    # network blip. Idempotency guard via ATOMIC exclusive-create.
+    #
+    # The naive `if exists(): return; else: write()` pattern has a TOCTOU
+    # race — two redeliveries of the same event_id (one from a previous
+    # 5xx, one fresh) can both pass `exists()` BEFORE either write_text
+    # lands. Both then execute fulfillment, double-firing audit-ledger
+    # rows + Telegram + escalation commits. With Uvicorn workers > 1
+    # (multi-process) the window is real, not narrow.
+    #
+    # `open(out_path, "x")` is the atomic kernel-level "create if not
+    # exists" — second concurrent caller hits FileExistsError, returns
+    # the idempotent-replay envelope.
+    STRIPE_EVENTS_DIR.mkdir(parents=True, exist_ok=True)
+    try:
+        with open(out_path, "x", encoding="utf-8") as _fh:
+            _fh.write(json.dumps(event, indent=2, default=str))
+    except FileExistsError:
         return {
             "received": True,
             "event_id": event["id"],
@@ -1299,7 +1311,6 @@ async def stripe_webhook(request: Request) -> dict:
             "idempotent_replay": True,
             "message": "Event already processed — Stripe at-least-once redelivery skipped.",
         }
-    out_path.write_text(json.dumps(event, indent=2, default=str), encoding="utf-8")
 
     # On successful Checkout, auto-fire /run with the order packet so the
     # round trip closes without a second API call from the storefront:
