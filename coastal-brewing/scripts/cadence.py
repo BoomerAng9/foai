@@ -15,6 +15,7 @@ No Stripe SDK calls, no DB, no HTTP. The api_server layer wraps this.
 """
 from __future__ import annotations
 
+import time as _time
 from typing import Literal
 
 
@@ -154,6 +155,62 @@ def monthly_retail_from_annual(annual_headline: float) -> float:
     spec = CADENCES["9mo"]
     divisor = spec["months_paid"] * (1 - spec["discount"])
     return annual_headline / divisor
+
+
+def subscription_data_for_cadence(
+    cadence_id: str,
+    metadata: dict,
+    *,
+    now_unix: int | None = None,
+) -> dict:
+    """Build the `subscription_data` dict for
+    `stripe.checkout.Session.create(mode="subscription", ...)` that
+    encodes the cadence's cancel horizon.
+
+    Owner-canon: 3mo / 6mo / 9mo are INSTALLMENT plans — the customer
+    pays N months at the discounted rate and Stripe stops billing.
+    Without a cancel horizon, Stripe interprets `{interval: month}`
+    as a perpetual month-to-month subscription at the discounted
+    rate, which would (a) bill past the intended term forever and
+    (b) let a 9mo signup cancel after one cycle and walk away with
+    the 25% discount for one month. Both bad.
+
+    Stripe's Checkout Session API REJECTS `cancel_at` inside
+    `subscription_data` (it's a Subscription-level field, not a
+    Checkout-Session-level one). So we embed the horizon as
+    `cancel_at_unix` in subscription metadata at mint time; the
+    /stripe/webhook handler reads it on `checkout.session.completed`
+    and applies it via `stripe.Subscription.modify(sub_id,
+    cancel_at=...)` after the Subscription exists. The brief race
+    window between Subscription creation and the Modify call is
+    harmless — cancel_at affects future renewals, not the first
+    invoice.
+
+    monthly cadence has no horizon — perpetual month-to-month is the
+    intended behavior there.
+
+    `now_unix` is injected for deterministic testing; production
+    callers omit it and the function uses `time.time()`.
+    """
+    md = dict(metadata)
+    if cadence_id != "monthly":
+        spec = CADENCES.get(cadence_id)  # type: ignore[arg-type]
+        if spec:
+            months_paid = int(spec.get("months_paid", 0))
+            if months_paid > 0:
+                # Use 30.5-day months (mean calendar month) so a 9-
+                # month plan signed up Jan 1 cancels around Oct 7,
+                # not Sep 27. First charge is immediate, so the
+                # horizon = now + months_paid * mean_month_seconds
+                # lines the final charge up roughly on the
+                # anniversary. Stored as string because Stripe
+                # metadata values are strings.
+                seconds_per_month = int(30.5 * 86400)
+                now = _time.time() if now_unix is None else now_unix
+                md["cancel_at_unix"] = str(
+                    int(now) + months_paid * seconds_per_month
+                )
+    return {"metadata": md}
 
 
 def cadence_pricing_table(monthly_retail: float) -> list[dict]:

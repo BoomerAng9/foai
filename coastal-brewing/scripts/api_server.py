@@ -1324,6 +1324,29 @@ async def stripe_webhook(request: Request) -> dict:
             session_meta = dict(session.get("metadata") or {})
             session_meta["checkout_session_id"] = session.get("id")
 
+            # Cadence cancel_at apply — Stripe Checkout's `subscription_data`
+            # rejects `cancel_at` (it's a Subscription-level field, not a
+            # Session-level one). _cadence_subscription_data therefore
+            # embeds `cancel_at_unix` in subscription metadata at mint time
+            # and we apply it here on the just-created Subscription. Without
+            # this step, 3mo/6mo/9mo cadences would bill perpetually at the
+            # discounted rate after the intended commitment window.
+            try:
+                _cancel_at_unix = session_meta.get("cancel_at_unix")
+                _sub_id = session.get("subscription")
+                if _cancel_at_unix and _sub_id and STRIPE_AVAILABLE:
+                    import stripe as _stripe   # noqa: E402, PLC0415
+                    _stripe.Subscription.modify(
+                        _sub_id,
+                        cancel_at=int(_cancel_at_unix),
+                    )
+            except Exception as _ca_exc:
+                log = __import__("logging").getLogger("coastal.cadence")
+                log.warning(
+                    "cancel_at apply failed for sub=%s: %s",
+                    session.get("subscription"), _ca_exc,
+                )
+
             # Path A escalation branch: if metadata carries an escalation
             # token (minted by /api/escalation/form-url), record the
             # commit + fire owner Telegram. Owner directive 2026-05-09 —
@@ -4388,34 +4411,10 @@ ALLOWED_CUSTEE_CARD_PRODUCTS = {
 
 
 def _cadence_subscription_data(cadence_id: str, metadata: dict) -> dict:
-    """Build Stripe subscription_data with a cancel_at horizon matching
-    the cadence commitment.
-
-    Owner-canon: 3mo / 6mo / 9mo are INSTALLMENT plans — the customer
-    pays N months at the discounted rate and Stripe stops billing.
-    Without a cancel_at, Stripe interprets `{interval: month}` as a
-    perpetual month-to-month subscription at the discounted rate,
-    which would (a) bill past the intended term forever and (b) let a
-    9mo signup cancel after one cycle and walk away with the 25%
-    discount for one month. Both bad.
-
-    monthly cadence has no horizon — perpetual month-to-month is the
-    intended behavior there.
-    """
-    sub: dict = {"metadata": metadata}
-    if cadence_id != "monthly":
-        spec = _cadence_mod.CADENCES.get(cadence_id)
-        if spec:
-            months_paid = int(spec.get("months_paid", 0))
-            if months_paid > 0:
-                # Use 30.5-day months (mean calendar month) so a 9-month
-                # plan signed up Jan 1 cancels around Oct 7, not Sep 27.
-                # The customer's first charge is immediate, so cancel_at
-                # = now + (months_paid * mean_month_seconds) lines the
-                # final charge up roughly on the anniversary.
-                seconds_per_month = int(30.5 * 86400)
-                sub["cancel_at"] = int(_time.time()) + months_paid * seconds_per_month
-    return sub
+    """Thin wrapper kept for the three checkout call sites. Pure logic
+    lives in `cadence.subscription_data_for_cadence` (testable in
+    isolation; api_server.py's import chain pulls FastAPI + psycopg2)."""
+    return _cadence_mod.subscription_data_for_cadence(cadence_id, metadata)
 
 
 @app.get("/api/membership/custee-card/cadence-pricing")
