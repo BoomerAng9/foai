@@ -109,6 +109,21 @@ def _migrate(conn: sqlite3.Connection) -> None:
     )
     conn.execute("CREATE INDEX IF NOT EXISTS idx_used_tokens_exp ON used_tokens(exp_unix)")
 
+    # owner_passkeys (added 2026-05-12): WebAuthn credential storage for owner 2FA.
+    # One row per owner email. Stores the passkey credential_id + public_key for
+    # assertion verification on magic-link login. sign_count is the signature
+    # counter (cloned_authenticator replay protection).
+    conn.execute(
+        """CREATE TABLE IF NOT EXISTS owner_passkeys (
+            email TEXT PRIMARY KEY,
+            credential_id BLOB NOT NULL,
+            public_key BLOB NOT NULL,
+            sign_count INTEGER NOT NULL DEFAULT 0,
+            registered_at INTEGER NOT NULL,
+            last_used_at INTEGER NOT NULL DEFAULT 0
+        )"""
+    )
+
 
 def init_schema() -> None:
     global _initialized
@@ -530,5 +545,92 @@ def purge_expired_tokens(*, older_than_unix: int) -> int:
                 (int(older_than_unix),),
             )
             return int(cur.rowcount or 0)
+        finally:
+            conn.close()
+
+
+# ─────────────────────────────────────────────────────────────────────
+# owner_passkeys — WebAuthn 2FA credentials per owner (2026-05-12)
+# ─────────────────────────────────────────────────────────────────────
+# One passkey per owner email. Stores credential_id + public_key for
+# WebAuthn assertion verification on magic-link login. sign_count
+# is the signature counter (cloned_authenticator replay protection).
+
+
+def register_owner_passkey(
+    *, email: str, credential_id: bytes, public_key: bytes, sign_count: int = 0,
+) -> None:
+    """Store a newly-registered WebAuthn passkey for an owner.
+
+    Overwrites any existing passkey for the email (one per email).
+    registered_at is set to now; last_used_at is 0 until first assertion.
+    """
+    import time as _t
+    init_schema()
+    with _lock:
+        conn = _connect()
+        try:
+            conn.execute(
+                "INSERT OR REPLACE INTO owner_passkeys "
+                "(email, credential_id, public_key, sign_count, registered_at, last_used_at) "
+                "VALUES (?, ?, ?, ?, ?, ?)",
+                (email, credential_id, public_key, sign_count, int(_t.time()), 0),
+            )
+        finally:
+            conn.close()
+
+
+def fetch_owner_passkey(email: str) -> dict | None:
+    """Retrieve a registered passkey for assertion verification.
+
+    Returns {email, credential_id, public_key, sign_count, registered_at,
+    last_used_at} or None if not found.
+    """
+    init_schema()
+    with _lock:
+        conn = _connect()
+        conn.row_factory = sqlite3.Row
+        try:
+            cur = conn.execute(
+                "SELECT email, credential_id, public_key, sign_count, registered_at, last_used_at "
+                "FROM owner_passkeys WHERE email = ?",
+                (email,),
+            )
+            row = cur.fetchone()
+            return dict(row) if row else None
+        finally:
+            conn.close()
+
+
+def bump_owner_passkey_sign_count(email: str, new_count: int) -> None:
+    """Update sign_count and last_used_at after a successful assertion.
+
+    Called after each verified WebAuthn assertion to increment the
+    signature counter (cloned_authenticator replay prevention) and
+    record the assertion timestamp.
+    """
+    import time as _t
+    init_schema()
+    with _lock:
+        conn = _connect()
+        try:
+            conn.execute(
+                "UPDATE owner_passkeys SET sign_count = ?, last_used_at = ? WHERE email = ?",
+                (new_count, int(_t.time()), email),
+            )
+        finally:
+            conn.close()
+
+
+def delete_owner_passkey(email: str) -> None:
+    """Remove a passkey registration (e.g., owner revokes or re-enrolls).
+
+    Idempotent: no-op if the passkey doesn't exist.
+    """
+    init_schema()
+    with _lock:
+        conn = _connect()
+        try:
+            conn.execute("DELETE FROM owner_passkeys WHERE email = ?", (email,))
         finally:
             conn.close()
