@@ -7338,3 +7338,8 @@ async def voice_transcribe(audio: UploadFile = File(...)):
         raise
     except Exception as exc:
         raise HTTPException(status_code=502, detail=f"Inworld STT unexpected error: {exc}")
+
+
+# Owner console router — /api/v1/owner/* (cookie-gated)
+import owner_console  # noqa: E402
+app.include_router(owner_console.router)
