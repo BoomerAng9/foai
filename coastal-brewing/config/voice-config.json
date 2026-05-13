@@ -1,0 +1,10 @@
+{
+  "persona_voice_ids": {
+    "sal_ang":       "default-4zhua1rhxjfl50z1dnkcba__coastal-sal-ang-v2",
+    "luc_ang":       "default-4zhua1rhxjfl50z1dnkcba__coastal-luc-ang-v2",
+    "melli_capensi": "default-4zhua1rhxjfl50z1dnkcba__coastal-melli-capensi-v2",
+    "acheevy":       "default-4zhua1rhxjfl50z1dnkcba__acheevy-mcknight-soulful-tenor-v3",
+    "lp_ang":        "default-4zhua1rhxjfl50z1dnkcba__coastal-acheevy-v2"
+  },
+  "lp_voice_override_env": "INWORLD_VOICE_ID_LP"
+}
