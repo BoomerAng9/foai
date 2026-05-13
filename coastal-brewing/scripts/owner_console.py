@@ -140,6 +140,75 @@ def put_pricing(
     return new
 
 
+CONFIRM_CUSTOMER_DELETE = "CONFIRM CUSTOMER DELETE"
+CONFIRM_CUSTOMER_CANCEL = "CONFIRM CANCEL SUBSCRIPTION"
+
+
+class CustomerActionBody(BaseModel):
+    confirmation_phrase: str = ""
+
+
+@router.get("/customers")
+def list_customers(
+    q: str = "",
+    limit: int = 100,
+    owner: dict = Depends(require_owner),
+) -> dict:
+    import stripe
+    listing = stripe.Customer.list(limit=min(limit, 100), email=q or None)
+    out = []
+    for c in listing.data:
+        md: dict = {}
+        if c.metadata:
+            try:
+                for k in c.metadata:
+                    md[k] = c.metadata[k]
+            except Exception:
+                pass
+        out.append({
+            "id": c.id,
+            "email": getattr(c, "email", None),
+            "created": getattr(c, "created", 0),
+            "metadata": md,
+        })
+    return {"customers": out}
+
+
+@router.post("/customers/{customer_id}/delete")
+def delete_customer(
+    customer_id: str,
+    body: CustomerActionBody,
+    owner: dict = Depends(require_owner),
+) -> dict:
+    if body.confirmation_phrase != CONFIRM_CUSTOMER_DELETE:
+        raise HTTPException(status_code=400, detail="confirmation phrase mismatch")
+    import stripe
+    import audit_ledger
+    stripe.Customer.delete(customer_id)
+    audit_ledger.record_event(event_type="owner_customer_delete", payload={
+        "email": owner["email"], "customer_id": customer_id,
+    })
+    return {"ok": True, "deleted": customer_id}
+
+
+@router.post("/customers/{customer_id}/cancel-subscription/{sub_id}")
+def cancel_subscription(
+    customer_id: str,
+    sub_id: str,
+    body: CustomerActionBody,
+    owner: dict = Depends(require_owner),
+) -> dict:
+    if body.confirmation_phrase != CONFIRM_CUSTOMER_CANCEL:
+        raise HTTPException(status_code=400, detail="confirmation phrase mismatch")
+    import stripe
+    import audit_ledger
+    sub = stripe.Subscription.modify(sub_id, cancel_at_period_end=True)
+    audit_ledger.record_event(event_type="owner_subscription_cancel", payload={
+        "email": owner["email"], "customer_id": customer_id, "subscription_id": sub_id,
+    })
+    return {"ok": True, "subscription_id": sub_id, "status": sub.status}
+
+
 @router.get("/activity")
 def get_activity(
     request: Request,

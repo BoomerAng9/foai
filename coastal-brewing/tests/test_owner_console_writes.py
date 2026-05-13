@@ -118,3 +118,49 @@ def test_pricing_put_rejects_out_of_bounds_retail(client, owner_cookie, pricing_
         cookies={"coastal_owner": owner_cookie},
     )
     assert r.status_code == 422
+
+
+def test_customers_list_returns_stripe_customers(client, owner_cookie):
+    fake_customer = mock.MagicMock()
+    fake_customer.id = "cus_test_1"
+    fake_customer.email = "u@x.com"
+    fake_customer.created = 1000
+    fake_customer.metadata = {}
+    fake_listing = mock.MagicMock(data=[fake_customer])
+    with mock.patch("stripe.Customer.list", return_value=fake_listing):
+        r = client.get("/api/v1/owner/customers", cookies={"coastal_owner": owner_cookie})
+    assert r.status_code == 200
+    data = r.json()
+    assert any(c["id"] == "cus_test_1" for c in data["customers"])
+
+
+def test_customer_delete_requires_confirm_phrase(client, owner_cookie):
+    r = client.post(
+        "/api/v1/owner/customers/cus_test_1/delete",
+        json={},
+        cookies={"coastal_owner": owner_cookie},
+    )
+    assert r.status_code == 400
+
+
+def test_customer_delete_with_confirm_phrase_calls_stripe(client, owner_cookie):
+    with mock.patch("stripe.Customer.delete") as del_mock:
+        r = client.post(
+            "/api/v1/owner/customers/cus_test_1/delete",
+            json={"confirmation_phrase": "CONFIRM CUSTOMER DELETE"},
+            cookies={"coastal_owner": owner_cookie},
+        )
+    assert r.status_code == 200
+    del_mock.assert_called_once_with("cus_test_1")
+
+
+def test_subscription_cancel_with_confirm_calls_stripe(client, owner_cookie):
+    fake_sub = mock.MagicMock(status="active")
+    with mock.patch("stripe.Subscription.modify", return_value=fake_sub) as mod_mock:
+        r = client.post(
+            "/api/v1/owner/customers/cus_test_1/cancel-subscription/sub_test_1",
+            json={"confirmation_phrase": "CONFIRM CANCEL SUBSCRIPTION"},
+            cookies={"coastal_owner": owner_cookie},
+        )
+    assert r.status_code == 200
+    mod_mock.assert_called_once_with("sub_test_1", cancel_at_period_end=True)
