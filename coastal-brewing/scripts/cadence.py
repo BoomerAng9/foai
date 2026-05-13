@@ -15,53 +15,60 @@ No Stripe SDK calls, no DB, no HTTP. The api_server layer wraps this.
 """
 from __future__ import annotations
 
+import os
 import time as _time
+from pathlib import Path
 from typing import Literal
+
+import owner_config_loader as _loader
 
 
 CadenceId = Literal["monthly", "3mo", "6mo", "9mo"]
 
 
-# Cadence definitions — DO NOT EDIT without updating
-# `cbrew-369-pricing-canon-2026-05-11.md` first.
-CADENCES: dict[CadenceId, dict] = {
-    "monthly": {
-        "label": "Month-to-month",
-        "discount": 0.00,
-        "months_paid": 1,
-        "months_delivered": 1,
-        "stripe_interval": "month",
-        "stripe_interval_count": 1,
-        "framing": "Standard. No commitment.",
-    },
-    "3mo": {
-        "label": "3-month plan",
-        "discount": 0.15,
-        "months_paid": 3,
-        "months_delivered": 3,
-        "stripe_interval": "month",
-        "stripe_interval_count": 3,
-        "framing": "First commitment — supporting us.",
-    },
-    "6mo": {
-        "label": "6-month plan",
-        "discount": 0.20,
-        "months_paid": 6,
-        "months_delivered": 6,
-        "stripe_interval": "month",
-        "stripe_interval_count": 6,
-        "framing": "Balance — buying into the mission.",
-    },
-    "9mo": {
-        "label": "9-month plan (pay 9, get 12)",
-        "discount": 0.25,
-        "months_paid": 9,
-        "months_delivered": 12,
-        "stripe_interval": "month",
-        "stripe_interval_count": 12,
-        "framing": "Full support — pay 9, get 12.",
-    },
-}
+def _config_dir() -> Path:
+    return Path(os.environ.get("COASTAL_OWNER_CONFIG_DIR", "/app/config"))
+
+
+def _pricing_config() -> dict:
+    return _loader.load_json(_config_dir() / "pricing-config.json")
+
+
+def _get_cadences() -> dict[CadenceId, dict]:
+    return _pricing_config().get("cadences", {})
+
+
+class _CadenceProxy:
+    """Drop-in dict-like proxy that fetches cadences fresh from the
+    JSON config on every access. Supports the read patterns existing
+    callers use: `CADENCES[id]`, `CADENCES.get(id)`, `CADENCES.keys()`,
+    `CADENCES.items()`, `CADENCES.values()`, `__iter__`, `__contains__`."""
+
+    def __getitem__(self, key):
+        return _get_cadences()[key]
+
+    def get(self, key, default=None):
+        return _get_cadences().get(key, default)
+
+    def __iter__(self):
+        return iter(_get_cadences())
+
+    def __contains__(self, key):
+        return key in _get_cadences()
+
+    def keys(self):
+        return _get_cadences().keys()
+
+    def items(self):
+        return _get_cadences().items()
+
+    def values(self):
+        return _get_cadences().values()
+
+
+# Cadence definitions live in config/pricing-config.json — edit there.
+# This proxy reads fresh on every access for hot-reload support.
+CADENCES = _CadenceProxy()
 
 
 def is_valid_cadence(cadence: str) -> bool:

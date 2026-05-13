@@ -91,3 +91,35 @@ def test_malformed_json_returns_last_good_and_warns(tmp_path, caplog):
         out = load_json(p)
     assert out == {"a": 1}  # last-good
     assert any("malformed json" in r.message.lower() for r in caplog.records)
+
+
+def test_cadence_module_reads_through_loader(tmp_path, monkeypatch):
+    """When pricing-config.json is overridden, cadence.CADENCES must
+    reflect it. The previous Python-module-constant pattern would have
+    locked the value at import time."""
+    cfg = tmp_path / "pricing-config.json"
+    atomic_write_json(cfg, {
+        "cadences": {
+            "monthly": {"discount": 0.0, "months_paid": 1, "months_delivered": 1,
+                        "stripe_interval": "month", "stripe_interval_count": 1,
+                        "label": "Month-to-month", "framing": "Standard. No commitment."},
+            "3mo": {"discount": 0.99, "months_paid": 3, "months_delivered": 3,
+                    "stripe_interval": "month", "stripe_interval_count": 3,
+                    "label": "TEST", "framing": "TEST"},
+            "6mo": {"discount": 0.20, "months_paid": 6, "months_delivered": 6,
+                    "stripe_interval": "month", "stripe_interval_count": 6,
+                    "label": "x", "framing": "x"},
+            "9mo": {"discount": 0.25, "months_paid": 9, "months_delivered": 12,
+                    "stripe_interval": "month", "stripe_interval_count": 12,
+                    "label": "x", "framing": "x"},
+        },
+        "tier_monthly_retail": {},
+        "tier_envelope_max_cents": {},
+    })
+    monkeypatch.setenv("COASTAL_OWNER_CONFIG_DIR", str(tmp_path))
+    # Force a clean import of cadence
+    import importlib, sys
+    if "cadence" in sys.modules:
+        del sys.modules["cadence"]
+    import cadence  # noqa: PLC0415
+    assert cadence.CADENCES["3mo"]["discount"] == 0.99
