@@ -347,6 +347,53 @@ def get_activity(
     }
 
 
+CONFIRM_CFG = "CONFIRM CFG CHANGE"
+
+
+class CfgUpdate(BaseModel):
+    voice_config: dict | None = None
+    email_templates: dict | None = None
+    confirmation_phrase: str = ""
+
+
+def _voice_path() -> Path:
+    return _config_dir() / "voice-config.json"
+
+
+def _email_templates_path() -> Path:
+    return _config_dir() / "email-templates.json"
+
+
+@router.get("/cfg")
+def get_cfg(owner: dict = Depends(require_owner)) -> dict:
+    return {
+        "voice_config": load_json(_voice_path()),
+        "email_templates": load_json(_email_templates_path()),
+    }
+
+
+@router.put("/cfg")
+def put_cfg(body: CfgUpdate, owner: dict = Depends(require_owner)) -> dict:
+    if body.confirmation_phrase != CONFIRM_CFG:
+        raise HTTPException(status_code=400, detail="confirmation phrase mismatch")
+    if body.voice_config is not None:
+        # Basic shape check — must be a dict, must contain persona_voice_ids
+        if not isinstance(body.voice_config, dict):
+            raise HTTPException(status_code=422, detail="voice_config must be a dict")
+        atomic_write_json(_voice_path(), body.voice_config)
+    if body.email_templates is not None:
+        if not isinstance(body.email_templates, dict):
+            raise HTTPException(status_code=422, detail="email_templates must be a dict")
+        atomic_write_json(_email_templates_path(), body.email_templates)
+    import audit_ledger
+    audit_ledger.record_event(event_type="owner_cfg_update", payload={
+        "email": owner["email"],
+        "voice_changed": body.voice_config is not None,
+        "email_changed": body.email_templates is not None,
+    })
+    return get_cfg(owner=owner)
+
+
 @router.get("/audit")
 def owner_audit(
     table: str | None = None,

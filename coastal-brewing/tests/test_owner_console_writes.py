@@ -267,3 +267,108 @@ def test_nemoclaw_reject_404_for_unknown_task(client, owner_cookie):
             cookies={"coastal_owner": owner_cookie},
         )
     assert r.status_code == 404
+
+
+@pytest.fixture
+def cfg_paths(tmp_path, monkeypatch):
+    (tmp_path / "voice-config.json").write_text(json.dumps({
+        "persona_voice_ids": {"sal_ang": "voice-sal-v1"},
+    }))
+    (tmp_path / "email-templates.json").write_text(json.dumps({
+        "magic_link": {"subject_signup": "x", "subject_login": "y", "body": "z"},
+    }))
+    monkeypatch.setenv("COASTAL_OWNER_CONFIG_DIR", str(tmp_path))
+    return tmp_path
+
+
+def test_cfg_get_returns_voice_and_email(client, owner_cookie, cfg_paths):
+    r = client.get("/api/v1/owner/cfg", cookies={"coastal_owner": owner_cookie})
+    assert r.status_code == 200
+    data = r.json()
+    assert "voice_config" in data
+    assert "email_templates" in data
+    assert data["voice_config"]["persona_voice_ids"]["sal_ang"] == "voice-sal-v1"
+
+
+def test_cfg_put_rejects_missing_confirm(client, owner_cookie, cfg_paths):
+    r = client.put(
+        "/api/v1/owner/cfg",
+        json={"voice_config": {"persona_voice_ids": {"sal_ang": "new"}}},
+        cookies={"coastal_owner": owner_cookie},
+    )
+    assert r.status_code == 400
+
+
+def test_cfg_put_voice_with_confirm_writes_file(client, owner_cookie, cfg_paths):
+    r = client.put(
+        "/api/v1/owner/cfg",
+        json={
+            "voice_config": {"persona_voice_ids": {"sal_ang": "voice-sal-v2"}},
+            "confirmation_phrase": "CONFIRM CFG CHANGE",
+        },
+        cookies={"coastal_owner": owner_cookie},
+    )
+    assert r.status_code == 200
+    on_disk = json.loads((cfg_paths / "voice-config.json").read_text())
+    assert on_disk["persona_voice_ids"]["sal_ang"] == "voice-sal-v2"
+
+
+def test_cfg_put_email_with_confirm_writes_file(client, owner_cookie, cfg_paths):
+    r = client.put(
+        "/api/v1/owner/cfg",
+        json={
+            "email_templates": {
+                "magic_link": {
+                    "subject_signup": "Welcome!",
+                    "subject_login": "Sign in",
+                    "body": "Click here: {magic_link}",
+                }
+            },
+            "confirmation_phrase": "CONFIRM CFG CHANGE",
+        },
+        cookies={"coastal_owner": owner_cookie},
+    )
+    assert r.status_code == 200
+    on_disk = json.loads((cfg_paths / "email-templates.json").read_text())
+    assert on_disk["magic_link"]["subject_signup"] == "Welcome!"
+
+
+def test_cfg_put_both_voice_and_email_atomically(client, owner_cookie, cfg_paths):
+    r = client.put(
+        "/api/v1/owner/cfg",
+        json={
+            "voice_config": {"persona_voice_ids": {"sal_ang": "voice-sal-v3"}},
+            "email_templates": {"magic_link": {"subject_signup": "New"}},
+            "confirmation_phrase": "CONFIRM CFG CHANGE",
+        },
+        cookies={"coastal_owner": owner_cookie},
+    )
+    assert r.status_code == 200
+    voice = json.loads((cfg_paths / "voice-config.json").read_text())
+    email = json.loads((cfg_paths / "email-templates.json").read_text())
+    assert voice["persona_voice_ids"]["sal_ang"] == "voice-sal-v3"
+    assert email["magic_link"]["subject_signup"] == "New"
+
+
+def test_cfg_put_rejects_non_dict_voice(client, owner_cookie, cfg_paths):
+    r = client.put(
+        "/api/v1/owner/cfg",
+        json={
+            "voice_config": "not a dict",
+            "confirmation_phrase": "CONFIRM CFG CHANGE",
+        },
+        cookies={"coastal_owner": owner_cookie},
+    )
+    assert r.status_code == 422
+
+
+def test_cfg_put_rejects_non_dict_email(client, owner_cookie, cfg_paths):
+    r = client.put(
+        "/api/v1/owner/cfg",
+        json={
+            "email_templates": ["list", "not", "dict"],
+            "confirmation_phrase": "CONFIRM CFG CHANGE",
+        },
+        cookies={"coastal_owner": owner_cookie},
+    )
+    assert r.status_code == 422
