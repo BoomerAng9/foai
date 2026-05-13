@@ -10,6 +10,7 @@ from __future__ import annotations
 import json
 import logging
 import os
+import secrets
 from pathlib import Path
 from typing import Annotated
 
@@ -207,6 +208,109 @@ def cancel_subscription(
         "email": owner["email"], "customer_id": customer_id, "subscription_id": sub_id,
     })
     return {"ok": True, "subscription_id": sub_id, "status": sub.status}
+
+
+# ---------------------------------------------------------------------------
+# NemoClaw queue + approve/reject
+# ---------------------------------------------------------------------------
+
+@router.get("/nemoclaw/queue")
+def nemoclaw_queue(owner: dict = Depends(require_owner)) -> dict:
+    """Return the pending NemoClaw approval queue (approval_required=1, status='routed').
+
+    Surfaces the same task packets that would arrive via Telegram approve/reject
+    token links, so the owner can clear approvals from the dashboard.
+    """
+    import audit_ledger
+    pending = audit_ledger.list_pending_tasks(limit=50)
+    return {"pending": pending}
+
+
+@router.post("/nemoclaw/{task_id}/approve")
+def nemoclaw_approve(task_id: str, owner: dict = Depends(require_owner)) -> dict:
+    """Approve a pending NemoClaw task.
+
+    Mirrors the side-effects of /approve/click (token-link path):
+      1. Insert approval_receipts row via insert_approval_decision.
+      2. Insert action_receipts row via insert_action_receipt.
+      3. Flip task_packets.status to 'approved'.
+
+    NOTE (Task 14b): _send_post_approval_emails lives in api_server.py
+    and cannot be imported here without a circular dependency.  The
+    token-link /approve/click is still the email-dispatch path until
+    Task 14b wires up a shared email helper.
+    """
+    import audit_ledger
+    ok = audit_ledger.set_task_status(task_id, "approved", actor=owner["email"])
+    if not ok:
+        raise HTTPException(status_code=404, detail=f"task {task_id!r} not found")
+    approval_id = f"appr_{secrets.token_hex(8)}"
+    try:
+        audit_ledger.insert_approval_decision(
+            approval_id=approval_id,
+            task_id=task_id,
+            decision="approved",
+            decided_by=owner["email"],
+            note="via owner console dashboard",
+        )
+    except Exception:
+        pass
+    try:
+        audit_ledger.insert_action_receipt(
+            task_id=task_id,
+            executor="openclaw_authorized",
+            action_type="owner_approved",
+            destination="downstream_executor",
+            status="authorized",
+            result_summary=f"approval_id={approval_id} via owner console dashboard",
+        )
+    except Exception:
+        pass
+    audit_ledger.record_event(event_type="owner_nemoclaw_approve", payload={
+        "email": owner["email"], "task_id": task_id, "approval_id": approval_id,
+    })
+    return {"ok": True, "task_id": task_id, "status": "approved", "approval_id": approval_id}
+
+
+@router.post("/nemoclaw/{task_id}/reject")
+def nemoclaw_reject(task_id: str, owner: dict = Depends(require_owner)) -> dict:
+    """Reject a pending NemoClaw task.
+
+    Mirrors the side-effects of /approve/click (reject path):
+      1. Insert approval_receipts row via insert_approval_decision.
+      2. Insert action_receipts row via insert_action_receipt.
+      3. Flip task_packets.status to 'rejected'.
+    """
+    import audit_ledger
+    ok = audit_ledger.set_task_status(task_id, "rejected", actor=owner["email"])
+    if not ok:
+        raise HTTPException(status_code=404, detail=f"task {task_id!r} not found")
+    approval_id = f"appr_{secrets.token_hex(8)}"
+    try:
+        audit_ledger.insert_approval_decision(
+            approval_id=approval_id,
+            task_id=task_id,
+            decision="rejected",
+            decided_by=owner["email"],
+            note="via owner console dashboard",
+        )
+    except Exception:
+        pass
+    try:
+        audit_ledger.insert_action_receipt(
+            task_id=task_id,
+            executor="openclaw_blocked",
+            action_type="owner_rejected",
+            destination="(none)",
+            status="rejected",
+            result_summary=f"approval_id={approval_id} via owner console dashboard",
+        )
+    except Exception:
+        pass
+    audit_ledger.record_event(event_type="owner_nemoclaw_reject", payload={
+        "email": owner["email"], "task_id": task_id, "approval_id": approval_id,
+    })
+    return {"ok": True, "task_id": task_id, "status": "rejected", "approval_id": approval_id}
 
 
 @router.get("/activity")

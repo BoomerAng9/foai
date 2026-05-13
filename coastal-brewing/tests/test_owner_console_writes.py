@@ -164,3 +164,106 @@ def test_subscription_cancel_with_confirm_calls_stripe(client, owner_cookie):
         )
     assert r.status_code == 200
     mod_mock.assert_called_once_with("sub_test_1", cancel_at_period_end=True)
+
+
+# ---------------------------------------------------------------------------
+# NemoClaw queue + approve/reject
+# ---------------------------------------------------------------------------
+
+def test_nemoclaw_queue_requires_auth(client):
+    r = client.get("/api/v1/owner/nemoclaw/queue")
+    assert r.status_code == 401
+
+
+def test_nemoclaw_queue_returns_pending_tasks(client, owner_cookie):
+    import audit_ledger
+
+    audit_ledger.insert_task_packet(
+        {
+            "task_id": "task_test_nq_1",
+            "risk_tags": ["payment"],
+            "task_type": "test_order",
+            "owner_goal": "unit test",
+            "department": "test",
+        },
+        {"route": "owner", "approval_required": True},
+        None,
+    )
+    try:
+        r = client.get(
+            "/api/v1/owner/nemoclaw/queue",
+            cookies={"coastal_owner": owner_cookie},
+        )
+        assert r.status_code == 200
+        data = r.json()
+        assert any(t["task_id"] == "task_test_nq_1" for t in data["pending"])
+    finally:
+        audit_ledger.set_task_status("task_test_nq_1", "cleanup_test", actor="test")
+
+
+def test_nemoclaw_approve_marks_approved(client, owner_cookie):
+    import audit_ledger
+
+    audit_ledger.insert_task_packet(
+        {
+            "task_id": "task_test_nq_2",
+            "risk_tags": [],
+            "task_type": "test_order",
+            "owner_goal": "unit test 2",
+            "department": "test",
+        },
+        {"route": "owner", "approval_required": True},
+        None,
+    )
+    r = client.post(
+        "/api/v1/owner/nemoclaw/task_test_nq_2/approve",
+        cookies={"coastal_owner": owner_cookie},
+    )
+    assert r.status_code == 200
+    body = r.json()
+    assert body["status"] == "approved"
+    assert body["task_id"] == "task_test_nq_2"
+    assert body["ok"] is True
+
+
+def test_nemoclaw_reject_marks_rejected(client, owner_cookie):
+    import audit_ledger
+
+    audit_ledger.insert_task_packet(
+        {
+            "task_id": "task_test_nq_3",
+            "risk_tags": ["legal"],
+            "task_type": "test_order",
+            "owner_goal": "unit test 3",
+            "department": "test",
+        },
+        {"route": "owner", "approval_required": True},
+        None,
+    )
+    r = client.post(
+        "/api/v1/owner/nemoclaw/task_test_nq_3/reject",
+        cookies={"coastal_owner": owner_cookie},
+    )
+    assert r.status_code == 200
+    body = r.json()
+    assert body["status"] == "rejected"
+    assert body["ok"] is True
+
+
+def test_nemoclaw_approve_404_for_unknown_task(client, owner_cookie):
+    # Mock set_task_status to return False (no row updated)
+    with mock.patch("audit_ledger.set_task_status", return_value=False):
+        r = client.post(
+            "/api/v1/owner/nemoclaw/no_such_task/approve",
+            cookies={"coastal_owner": owner_cookie},
+        )
+    assert r.status_code == 404
+
+
+def test_nemoclaw_reject_404_for_unknown_task(client, owner_cookie):
+    with mock.patch("audit_ledger.set_task_status", return_value=False):
+        r = client.post(
+            "/api/v1/owner/nemoclaw/no_such_task/reject",
+            cookies={"coastal_owner": owner_cookie},
+        )
+    assert r.status_code == 404

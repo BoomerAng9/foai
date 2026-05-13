@@ -762,3 +762,54 @@ def recent_events(*, limit: int = 50, since_unix: float = 0.0) -> list[dict]:
             return out
         finally:
             conn.close()
+
+
+# ---------------------------------------------------------------------------
+# NemoClaw queue helpers (added for owner_console /nemoclaw endpoints)
+# ---------------------------------------------------------------------------
+
+def list_pending_tasks(limit: int = 50) -> list[dict]:
+    """Return task_packets where approval_required=1 AND status='routed'.
+
+    These are the tasks awaiting owner sign-off.  Returns a list of dicts
+    with the columns that exist in the actual task_packets schema.
+    """
+    init_schema()
+    with _lock:
+        conn = _connect()
+        conn.row_factory = sqlite3.Row
+        try:
+            rows = conn.execute(
+                """SELECT task_id, created_at, owner_goal, department,
+                          task_type, route, risk_level, risk_tags, status
+                   FROM task_packets
+                   WHERE approval_required = 1 AND status = 'routed'
+                   ORDER BY created_at DESC
+                   LIMIT ?""",
+                (limit,),
+            ).fetchall()
+            return [dict(r) for r in rows]
+        finally:
+            conn.close()
+
+
+def set_task_status(task_id: str, new_status: str, *, actor: str = "") -> bool:  # noqa: ARG001
+    """Update task_packets.status.  Returns True if a row was updated.
+
+    NOTE: task_packets has no decided_by/decided_at columns — decided-by
+    metadata is stored in approval_receipts via insert_approval_decision.
+    The `actor` kwarg is accepted for call-site symmetry but is not persisted
+    on this table.
+    """
+    init_schema()
+    with _lock:
+        conn = _connect()
+        try:
+            cur = conn.execute(
+                "UPDATE task_packets SET status = ? WHERE task_id = ?",
+                (new_status, task_id),
+            )
+            conn.commit()
+            return cur.rowcount > 0
+        finally:
+            conn.close()
