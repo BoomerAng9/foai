@@ -75,6 +75,11 @@ from deploy_actions import (  # noqa: E402
     read_history as deploy_read_history,
 )
 from builder_actions import build_site as build_site_handler, get_stack_presets  # noqa: E402
+from sandbox_actions import (  # noqa: E402
+    dispatch_sandbox_job as sandbox_dispatch_handler,
+    get_job_status as sandbox_get_job_status,
+    list_recent_jobs as sandbox_list_recent_jobs,
+)
 
 # ---------------------------------------------------------------------------
 # Structured logging setup
@@ -203,6 +208,8 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
         "/builder/",
         # Phase-5 owner-tier endpoints (2026-05-11 PM)
         "/missions",
+        # Phase-1C sandbox dispatch (2026-05-14)
+        "/sandbox/",
     )
 
     async def dispatch(self, request: Request, call_next):
@@ -755,6 +762,23 @@ async def run_action(req: RunRequest, _: None = Depends(require_auth)) -> JSONRe
             content={"ok": result.get("ok", False), "verdict": "allow", "detail": result, "receipt": receipt},
         )
 
+    # --- Phase-1C sandbox_dispatch (2026-05-14) --------------------------
+    # Routes heavy-compute / isolated-execution jobs into aims-open-sandbox
+    # (Hono service on AIMS Core VPS port 4400, reachable via WireGuard or
+    # the URL configured in AIMS_OPEN_SANDBOX_URL). NemoClaw allowed; we
+    # attach a slim execution projection to the receipt body. Full output
+    # available via GET /sandbox/executions/{id} (see read endpoints below).
+    # ---------------------------------------------------------------------
+    if req.action == "sandbox_dispatch":
+        result = await sandbox_dispatch_handler(req.payload)
+        receipt["elapsed_ms"] = (_time.perf_counter() - started) * 1000
+        receipt["action_result"] = result
+        await _record_run_receipt(receipt)
+        return JSONResponse(
+            status_code=200 if result.get("ok") else 502,
+            content={"ok": result.get("ok", False), "verdict": "allow", "detail": result, "receipt": receipt},
+        )
+
     # Verdict == allow (generic fall-through for actions without a specific dispatch block).
     receipt["elapsed_ms"] = (_time.perf_counter() - started) * 1000
     await _record_run_receipt(receipt)
@@ -878,6 +902,18 @@ async def get_deploy_history(n: int = 20) -> dict:
 # ---------------------------------------------------------------------------
 # Phase-4b builder endpoint (2026-05-11 PM)
 # ---------------------------------------------------------------------------
+
+
+@app.get("/sandbox/executions", tags=["Sandbox"], dependencies=[Depends(require_auth)])
+async def list_sandbox_executions(limit: int = 25) -> dict:
+    """List the most recent sandbox executions (slim projection)."""
+    return await sandbox_list_recent_jobs(limit=limit)
+
+
+@app.get("/sandbox/executions/{execution_id}", tags=["Sandbox"], dependencies=[Depends(require_auth)])
+async def get_sandbox_execution(execution_id: str) -> dict:
+    """Fetch a single sandbox execution by id (full slim projection)."""
+    return await sandbox_get_job_status(execution_id)
 
 
 @app.get("/builder/presets", tags=["Builder"], dependencies=[Depends(require_auth)])

@@ -87,6 +87,13 @@ ALLOWED_WITHOUT_APPROVAL: set[str] = {
     # ships to production until /tools/deploy is explicitly fired (which
     # IS owner-approval-gated). Building is safe; deploying is the gate.
     "build_site",
+    # Phase-1C sandbox dispatch (2026-05-14). aims-open-sandbox runs code
+    # in an isolated Docker exec environment on the AIMS Core VPS; no
+    # customer-facing output, no production state mutation, no payment
+    # data path. Owner-tier cookie already gates /run; sandbox results
+    # land in receipts only. Production-write / external-side-effect
+    # actions stay in REQUIRES_OWNER_APPROVAL.
+    "sandbox_dispatch",
 }
 
 
