@@ -312,11 +312,14 @@ export default function ComparePage() {
               </h2>
               <p className="mt-4 max-w-2xl text-base leading-relaxed text-muted-foreground">
                 Coastal sits inside the specialty-coffee band on bag price. Our
-                membership lineup runs from $7.49/mo (Pooler Pass Standard, for locals)
-                up to $149.99/mo (Wood Stork Reserve, for business) — with the
-                Coastal Custee Card Plan in the middle at $29.99/mo. Wellness brands
-                like AG1 and Magic Mind are included as a reference for what the market
-                will pay for a monthly subscription tier when the experience justifies it.
+                membership ladder is access-first: every tier from $7.49/mo (Pooler
+                Pass Standard) to $149.99/mo (Wood Stork Reserve) is a direct line
+                into our team — Sal, LUC, Melli, ACHEEVY — with a member discount
+                applied to product orders within. The deeper you commit, the deeper
+                the discount, capped to our margin floor so every product still
+                clears cost. Wellness brands like AG1 and Magic Mind are included
+                as a reference for what the market will pay for a monthly tier when
+                the access justifies it.
               </p>
             </ScrollReveal>
 
@@ -475,10 +478,10 @@ export default function ComparePage() {
                   Same shelf, different category.
                 </h2>
                 <p className="mt-5 text-base leading-relaxed text-muted-foreground">
-                  Coastal Brewing Co. ships specialty-grade coffee at the same price the
-                  field already publishes. The team comes with the bag — at no extra
-                  charge to non-members, and unlocked at every level for our monthly
-                  plans starting at $7.49/mo.
+                  Coastal Brewing Co. ships specialty-grade coffee at the same price
+                  the field already publishes. The team comes with the bag — and
+                  members get direct access plus a margin-floor-capped discount on
+                  every order, starting at $7.49/mo.
                 </p>
                 <div className="mt-9 flex flex-col sm:flex-row items-center justify-center gap-4">
                   <Button asChild variant="accent" size="lg" className="font-mono text-[11px] uppercase tracking-widest">

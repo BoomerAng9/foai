@@ -8,25 +8,25 @@ import { WoodStorkCheckoutForm } from "@/components/wood-stork-checkout-form";
 export const metadata: Metadata = {
   title: "Wood Stork Membership · Coastal Brewing Co.",
   description:
-    "Wood Stork — for multi-location buyers, restaurants, and offices. Standard $56.24/mo or Reserve $112.49/mo on the 9-month plan. Referral discount up to 50% off.",
+    "Wood Stork — a named line to our team for your business. Direct line to Melli, monthly review with ACHEEVY, 4 hrs/mo account help, plus a referral-driven discount up to 50%. Standard $56.24/mo or Reserve $112.49/mo on the 9-month plan.",
 };
 
 const STANDARD_BENEFITS = [
   {
-    title: "Tiered referral discount — up to 50%",
-    body: "Your discount on product orders grows with every business you bring in: 18% base · 25% after 1-5 referrals · 35% after 5-10 · 45% after 10-20 · 50% after 20+ (the cap). Applied at checkout.",
+    title: "Direct business line to Melli",
+    body: "Melli runs our business accounts. Call or chat any time for reorders, swaps, or rush jobs. No phone tree, no waiting. Your business gets named-contact access — she knows who you are by the second call.",
+  },
+  {
+    title: "Account help — 4 hours / month",
+    body: "A dedicated point of contact for your business. Reorders, recipe help, gift sends, event coordination. Carries forward up to 8 hours if you don't use it.",
+  },
+  {
+    title: "Referral-driven discount — up to 50%",
+    body: "Your member discount on product orders grows with every business you bring in: 18% base · 25% after 1-5 referrals · 35% after 5-10 · 45% after 10-20 · 50% after 20+ (the cap). Applied at checkout, within our margin floor.",
   },
   {
     title: "Free shipping, every order",
     body: "Bulk bags, case orders, gear — included. No $15 freight ceiling.",
-  },
-  {
-    title: "Direct business line to Melli",
-    body: "Melli runs our business accounts. Call or chat any time for reorders, swaps, or rush jobs. No phone tree, no waiting.",
-  },
-  {
-    title: "Account help — 4 hours / month",
-    body: "A dedicated point of contact for your business. Reorders, recipe help, gift sends, event coordination.",
   },
 ];
 
@@ -81,10 +81,12 @@ export default function WoodStorkPage() {
           </p>
           <p className="mt-6 max-w-2xl text-base leading-relaxed text-foreground/80">
             For multi-location buyers, restaurants, offices, and the people who keep
-            sending us new customers. Wood Stork rewards volume and referrals — your
-            discount grows with every business you bring in, up to 50% off your own
-            orders. Pick the plan that fits — month-to-month, 3-month, 6-month, or
-            the 9-month plan for the best rate (pay 9 months, get 12 months of access).
+            sending us new customers. Wood Stork is a named line into our team — Melli
+            on wholesale, monthly review with ACHEEVY, 4 hours of dedicated account
+            help every month. The referral-driven product discount stacks on top:
+            your member rate on orders grows with every business you bring us, up to
+            50%. Pick the plan that fits — month-to-month, 3-month, 6-month, or the
+            9-month plan for the best rate (pay 9 months, get 12 months of access).
           </p>
         </header>
 
