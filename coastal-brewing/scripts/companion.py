@@ -8,11 +8,12 @@ top of the existing customer identity.
 """
 from __future__ import annotations
 
+import asyncio
 import logging
 import os
 from typing import Annotated, Optional
 
-from fastapi import APIRouter, Cookie, Depends, HTTPException
+from fastapi import APIRouter, Cookie, Depends, HTTPException, WebSocket, WebSocketDisconnect
 from pydantic import BaseModel
 
 log = logging.getLogger("coastal.companion")
@@ -165,3 +166,98 @@ def session_end(
         session_id=session_id, minutes_used=body.minutes_used,
     )
     return {"ok": True, "session_id": session_id}
+
+
+def _coastal_uid_from_cookie_header(cookie_header: str) -> Optional[str]:
+    """Parse coastal_uid from a raw Cookie header. WebSocket handshakes
+    don't use FastAPI Cookie() dependencies the same way HTTP routes do
+    — we read the raw header from `websocket.headers.get("cookie")`."""
+    from api_server import _resolve_uid_cookie  # noqa: PLC0415
+    if not cookie_header:
+        return None
+    for part in cookie_header.split(";"):
+        part = part.strip()
+        if part.startswith("coastal_uid="):
+            return _resolve_uid_cookie(part.split("=", 1)[1])
+    return None
+
+
+@router.websocket("/session/{session_id}/stream")
+async def session_stream(websocket: WebSocket, session_id: str) -> None:
+    """Bidirectional audio + caption proxy between the customer and
+    the Inworld Gateway. WS close codes:
+      4401 — no/invalid coastal_uid cookie
+      4402 — no Inworld BYOK key on file
+      4404 — session not found / not owned by this uid
+      4500 — BYOK decrypt failed
+      4502 — upstream connection failed
+    """
+    await websocket.accept()
+
+    cookie_hdr = websocket.headers.get("cookie", "")
+    coastal_uid = _coastal_uid_from_cookie_header(cookie_hdr)
+    if coastal_uid is None:
+        await websocket.close(code=4401, reason="uid required")
+        return
+
+    import audit_ledger
+    import companion_byok
+    import companion_inworld
+
+    audit_ledger.init_schema()
+    ct = audit_ledger.companion_byok_fetch(coastal_uid, "inworld")
+    if ct is None:
+        await websocket.close(code=4402, reason="no Inworld BYOK key on file")
+        return
+    user_key = companion_byok.decrypt_key(_byok_secret(), ct)
+    if user_key is None:
+        await websocket.close(code=4500, reason="BYOK decrypt failed")
+        return
+
+    sess = audit_ledger.companion_session_fetch(session_id)
+    if sess is None or sess["coastal_uid"] != coastal_uid:
+        await websocket.close(code=4404, reason="session not found")
+        return
+
+    try:
+        upstream = await companion_inworld.open_upstream(
+            user_api_key=user_key,
+            source_lang=sess["source_lang"],
+            target_lang=sess["target_lang"],
+        )
+    except Exception as exc:
+        log.warning("upstream open failed for %s: %s", session_id, exc)
+        await websocket.close(code=4502, reason="upstream open failed")
+        return
+
+    async def pipe_client_to_upstream():
+        try:
+            async for msg in websocket.iter_bytes():
+                await upstream.send(msg)
+        except WebSocketDisconnect:
+            pass
+
+    async def pipe_upstream_to_client():
+        try:
+            async for msg in upstream:
+                if isinstance(msg, bytes):
+                    await websocket.send_bytes(msg)
+                else:
+                    await websocket.send_text(msg)
+        except Exception:
+            pass
+
+    try:
+        await asyncio.gather(
+            pipe_client_to_upstream(),
+            pipe_upstream_to_client(),
+        )
+    finally:
+        try:
+            await upstream.close()
+        except Exception:
+            pass
+        try:
+            await websocket.close()
+        except Exception:
+            pass

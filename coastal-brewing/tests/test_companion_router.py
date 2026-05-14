@@ -151,3 +151,17 @@ def test_session_end_marks_session_ended(client, monkeypatch):
     )
     assert r2.status_code == 200
     assert r2.json()["session_id"] == sid
+
+
+def test_coastal_uid_from_cookie_header_parses_valid_uid(monkeypatch):
+    import companion, api_server
+    monkeypatch.setattr(api_server, "_resolve_uid_cookie",
+                        lambda raw: "cuid_ws_test" if raw == "abc.def" else None)
+    out = companion._coastal_uid_from_cookie_header("coastal_uid=abc.def; other=x")
+    assert out == "cuid_ws_test"
+
+
+def test_coastal_uid_from_cookie_header_returns_none_on_empty():
+    import companion
+    assert companion._coastal_uid_from_cookie_header("") is None
+    assert companion._coastal_uid_from_cookie_header("other=x") is None
