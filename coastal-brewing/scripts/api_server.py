@@ -7343,3 +7343,6 @@ async def voice_transcribe(audio: UploadFile = File(...)):
 # Owner console router — /api/v1/owner/* (cookie-gated)
 import owner_console  # noqa: E402
 app.include_router(owner_console.router)
+
+import companion  # noqa: E402
+app.include_router(companion.router)
