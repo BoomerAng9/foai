@@ -50,16 +50,18 @@ def test_byok_post_stores_key(client, monkeypatch):
 
 
 def test_session_start_caps_free_tier_at_30_minutes_per_day(client, monkeypatch):
+    import uuid
     import api_server, audit_ledger
     monkeypatch.setattr(api_server, "_resolve_uid_cookie",
                         lambda raw: "cuid_cap_test" if raw else None)
     audit_ledger.init_schema()
     # Insert 30 minutes of free-tier sessions in the last 24h
+    _seed_sid = "ccs_used_" + uuid.uuid4().hex[:8]
     audit_ledger.companion_session_start(
-        session_id="ccs_used_1", coastal_uid="cuid_cap_test",
+        session_id=_seed_sid, coastal_uid="cuid_cap_test",
         source_lang="es", target_lang="en", tier_at_start="free",
     )
-    audit_ledger.companion_session_end(session_id="ccs_used_1", minutes_used=30.0)
+    audit_ledger.companion_session_end(session_id=_seed_sid, minutes_used=30.0)
     r = client.post(
         "/api/v1/companion/session/start",
         json={"source_lang": "es", "target_lang": "en"},
@@ -117,10 +119,13 @@ def test_byok_delete_removes_key(client, monkeypatch):
 
 
 def test_session_start_returns_session_id_and_ws_url(client, monkeypatch):
+    import uuid
     monkeypatch.setenv("COASTAL_PUBLIC_URL", "https://brewing.foai.cloud")
-    import api_server
+    import api_server, companion
     monkeypatch.setattr(api_server, "_resolve_uid_cookie",
                         lambda raw: "cuid_session_test" if raw else None)
+    _uid = uuid.uuid4().hex
+    monkeypatch.setattr(companion._secrets, "token_urlsafe", lambda n: _uid)
     r = client.post(
         "/api/v1/companion/session/start",
         json={"source_lang": "es", "target_lang": "en"},
@@ -135,9 +140,12 @@ def test_session_start_returns_session_id_and_ws_url(client, monkeypatch):
 
 
 def test_session_end_marks_session_ended(client, monkeypatch):
-    import api_server
+    import uuid
+    import api_server, companion
     monkeypatch.setattr(api_server, "_resolve_uid_cookie",
                         lambda raw: "cuid_end_test" if raw else None)
+    _uid = uuid.uuid4().hex
+    monkeypatch.setattr(companion._secrets, "token_urlsafe", lambda n: _uid)
     r = client.post(
         "/api/v1/companion/session/start",
         json={"source_lang": "es", "target_lang": "en"},
