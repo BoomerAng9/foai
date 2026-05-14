@@ -38,8 +38,19 @@ def require_uid(
 
 @router.get("/workspace/me")
 def workspace_me(uid: str = Depends(require_uid)) -> dict:
-    """Placeholder — Task 8 fills in the real workspace lookup."""
-    return {"ok": True, "coastal_uid": uid, "taskade_workspace_id": None}
+    """Return the caller's Taskade workspace id (if provisioned) +
+    paid-tier flag. Customer-facing UI uses this to gate the dashboard
+    deep-link + show upgrade prompts."""
+    import audit_ledger
+    audit_ledger.init_schema()
+    ws_id = audit_ledger.companion_workspace_get(uid)
+    is_paid = audit_ledger.companion_is_paid(uid)
+    return {
+        "ok": True,
+        "coastal_uid": uid,
+        "taskade_workspace_id": ws_id,
+        "is_paid_tier": is_paid,
+    }
 
 
 _ALLOWED_VENDORS = {"inworld", "openai"}
