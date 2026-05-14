@@ -80,3 +80,46 @@ def test_billing_portal_404_when_no_paid_user(client, monkeypatch):
         cookies={"coastal_uid": "cuid_no_sub.x"},
     )
     assert r.status_code == 404
+
+
+def test_webhook_companion_paid_tier_activates_paid_and_provisions_workspace(
+    client, monkeypatch,
+):
+    import audit_ledger
+    import companion_taskade
+    monkeypatch.setenv("COASTAL_TASKADE_API_TOKEN", "t_test_taskade")
+    audit_ledger.init_schema()
+    event = {
+        "id": "evt_test_companion_paid_x",
+        "type": "checkout.session.completed",
+        "data": {"object": {
+            "id": "cs_test_companion_paid",
+            "metadata": {
+                "product": "cbrew-communication-companion",
+                "flow": "companion_paid_tier",
+                "coastal_uid": "cuid_paid_x",
+            },
+            "customer": "cus_test_X",
+            "subscription": "sub_test_X",
+            "customer_email": "x@example.com",
+            "mode": "subscription",
+            "payment_status": "paid",
+        }},
+    }
+    with mock.patch(
+        "api_server._stripe_verify_webhook",
+        return_value=event,
+    ):
+        with mock.patch.object(
+            companion_taskade,
+            "provision_workspace",
+            return_value="tw_NEW_USER_X",
+        ):
+            r = client.post(
+                "/stripe/webhook",
+                content=b"{}",
+                headers={"Stripe-Signature": "t=1,v1=x"},
+            )
+    assert r.status_code == 200
+    assert audit_ledger.companion_is_paid("cuid_paid_x") is True
+    assert audit_ledger.companion_workspace_get("cuid_paid_x") == "tw_NEW_USER_X"
