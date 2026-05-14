@@ -1,15 +1,14 @@
-"""Stub adapters — one per vendor we plan to track but haven't wired yet.
+"""Stub adapter — fallback for vendors we haven't wired yet.
 
-Each stub returns None for every call, so the engine sees "no finding"
-rather than an error. Replace with a real adapter when the integration
-work is prioritized.
+Returns None for every call so the engine sees "no finding" rather than
+an error. Replace by adding a per-vendor adapter file and registering it
+in ``sources/__init__.py``.
 
-TODO per adapter:
-  - fal_models         → scrape fal.ai/models listing for Seedance/DaVinci versions
-  - recraft_api        → hit external.api.recraft.ai/v1/models listing
-  - google_aistudio    → scrape ai.google.dev/gemini-api/docs/models (JS-rendered; may need Playwright)
-  - anthropic_api      → fetch docs.claude.com/en/docs/models-overview markdown
-  - huggingface_search → search huggingface.co/models?search=<family> sorted by downloads
+Previously the project registered five named stubs (fal_models /
+recraft_api / google_aistudio / anthropic_api / huggingface_search);
+those vendors now have real adapters. The class stays as the canonical
+escape hatch for the next family that gets added before its adapter
+exists.
 """
 
 from __future__ import annotations

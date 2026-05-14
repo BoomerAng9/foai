@@ -9,19 +9,23 @@ Returns None if the family isn't supported by this source. The engine
 dispatches based on `TrackedModel.source`.
 """
 
-from autoresearch.sources.base import SourceFinding, SourceAdapter
+from autoresearch.sources.anthropic import AnthropicDocsAdapter
+from autoresearch.sources.base import SourceAdapter, SourceFinding
+from autoresearch.sources.fal import FalModelsAdapter
+from autoresearch.sources.google import GoogleAIStudioAdapter
+from autoresearch.sources.huggingface import HuggingFaceSearchAdapter
 from autoresearch.sources.nvidia import NvidiaHFAdapter, NvidiaGithubCosmosAdapter
+from autoresearch.sources.recraft import RecraftApiAdapter
 from autoresearch.sources.stubs import StubAdapter
 
 ADAPTERS: dict[str, SourceAdapter] = {
     "nvidia_hf": NvidiaHFAdapter(),
     "nvidia_github_cosmos": NvidiaGithubCosmosAdapter(),
-    # Stubs — replaced with real adapters as we wire them.
-    "fal_models": StubAdapter("fal_models"),
-    "recraft_api": StubAdapter("recraft_api"),
-    "google_aistudio": StubAdapter("google_aistudio"),
-    "anthropic_api": StubAdapter("anthropic_api"),
-    "huggingface_search": StubAdapter("huggingface_search"),
+    "fal_models": FalModelsAdapter(),
+    "recraft_api": RecraftApiAdapter(),
+    "google_aistudio": GoogleAIStudioAdapter(),
+    "anthropic_api": AnthropicDocsAdapter(),
+    "huggingface_search": HuggingFaceSearchAdapter(),
 }
 
-__all__ = ["ADAPTERS", "SourceAdapter", "SourceFinding"]
+__all__ = ["ADAPTERS", "SourceAdapter", "SourceFinding", "StubAdapter"]
