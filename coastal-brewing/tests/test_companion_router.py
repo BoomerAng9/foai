@@ -211,3 +211,64 @@ def test_workspace_me_returns_provisioned_id_and_paid_flag(client, monkeypatch):
     )
     assert r.json()["taskade_workspace_id"] == "tw_TEST456"
     assert r.json()["is_paid_tier"] is True
+
+
+def test_notes_post_requires_paid_tier(client, monkeypatch):
+    import api_server, audit_ledger
+    monkeypatch.setattr(api_server, "_resolve_uid_cookie",
+                        lambda raw: "cuid_notes_free" if raw else None)
+    audit_ledger.init_schema()
+    r = client.post(
+        "/api/v1/companion/notes/ccs_x",
+        json={"transcript_text": "...", "title": "Test meeting"},
+        cookies={"coastal_uid": "cuid_notes_free.x"},
+    )
+    assert r.status_code == 402  # Payment Required
+
+
+def test_notes_post_paid_user_without_workspace_409s(client, monkeypatch):
+    import api_server, audit_ledger
+    monkeypatch.setattr(api_server, "_resolve_uid_cookie",
+                        lambda raw: "cuid_notes_no_ws" if raw else None)
+    audit_ledger.init_schema()
+    audit_ledger.companion_paid_user_upsert(
+        coastal_uid="cuid_notes_no_ws",
+        stripe_customer_id="cus_x", stripe_subscription_id="sub_x",
+        status="active", current_period_end=None,
+    )
+    r = client.post(
+        "/api/v1/companion/notes/ccs_x",
+        json={"transcript_text": "...", "title": "Paid meeting"},
+        cookies={"coastal_uid": "cuid_notes_no_ws.x"},
+    )
+    assert r.status_code == 409
+
+
+def test_notes_post_paid_user_pushes_to_taskade(client, monkeypatch):
+    import api_server, audit_ledger
+    from unittest import mock as _mock
+    monkeypatch.setenv("COASTAL_TASKADE_API_TOKEN", "t_test")
+    monkeypatch.setattr(api_server, "_resolve_uid_cookie",
+                        lambda raw: "cuid_notes_paid" if raw else None)
+    audit_ledger.init_schema()
+    audit_ledger.companion_paid_user_upsert(
+        coastal_uid="cuid_notes_paid",
+        stripe_customer_id="cus_x", stripe_subscription_id="sub_x",
+        status="active", current_period_end=None,
+    )
+    audit_ledger.companion_workspace_set(
+        coastal_uid="cuid_notes_paid", taskade_workspace_id="tw_paid_x",
+    )
+    import companion_taskade
+    with _mock.patch.object(companion_taskade, "push_meeting_doc",
+                           return_value="doc_abc"):
+        with _mock.patch.object(companion_taskade, "push_mindmap_nodes",
+                               return_value="mm_def"):
+            r = client.post(
+                "/api/v1/companion/notes/ccs_x",
+                json={"transcript_text": "Some content. More content.",
+                      "title": "Paid meeting"},
+                cookies={"coastal_uid": "cuid_notes_paid.x"},
+            )
+    assert r.status_code == 200
+    assert r.json()["taskade_doc_id"] == "doc_abc"
