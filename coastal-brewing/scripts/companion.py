@@ -84,3 +84,54 @@ def byok_delete(vendor: str, uid: str = Depends(require_uid)) -> dict:
     import audit_ledger
     audit_ledger.companion_byok_delete(coastal_uid=uid, vendor=vendor)
     return {"ok": True, "deleted": vendor}
+
+
+import secrets as _secrets  # noqa: E402
+
+
+class SessionStartBody(BaseModel):
+    source_lang: str = "auto"
+    target_lang: str = "en"
+
+
+class SessionEndBody(BaseModel):
+    minutes_used: float = 0.0
+
+
+def _public_url() -> str:
+    return os.environ.get("COASTAL_PUBLIC_URL", "https://brewing.foai.cloud")
+
+
+@router.post("/session/start")
+def session_start(
+    body: SessionStartBody, uid: str = Depends(require_uid),
+) -> dict:
+    import audit_ledger
+    audit_ledger.init_schema()
+    session_id = "ccs_" + _secrets.token_urlsafe(12)
+    tier = "paid" if audit_ledger.companion_is_paid(uid) else "free"
+    audit_ledger.companion_session_start(
+        session_id=session_id, coastal_uid=uid,
+        source_lang=body.source_lang, target_lang=body.target_lang,
+        tier_at_start=tier,
+    )
+    ws_scheme = "wss" if _public_url().startswith("https") else "ws"
+    ws_host = _public_url().split("://", 1)[1]
+    return {
+        "ok": True,
+        "session_id": session_id,
+        "tier": tier,
+        "ws_url": f"{ws_scheme}://{ws_host}/api/v1/companion/session/{session_id}/stream",
+    }
+
+
+@router.post("/session/{session_id}/end")
+def session_end(
+    session_id: str, body: SessionEndBody, uid: str = Depends(require_uid),
+) -> dict:
+    import audit_ledger
+    audit_ledger.init_schema()
+    audit_ledger.companion_session_end(
+        session_id=session_id, minutes_used=body.minutes_used,
+    )
+    return {"ok": True, "session_id": session_id}

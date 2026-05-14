@@ -94,3 +94,40 @@ def test_byok_delete_removes_key(client, monkeypatch):
         cookies={"coastal_uid": "cuid_test_user_1.testsig"},
     )
     assert r.status_code == 200
+
+
+def test_session_start_returns_session_id_and_ws_url(client, monkeypatch):
+    monkeypatch.setenv("COASTAL_PUBLIC_URL", "https://brewing.foai.cloud")
+    import api_server
+    monkeypatch.setattr(api_server, "_resolve_uid_cookie",
+                        lambda raw: "cuid_session_test" if raw else None)
+    r = client.post(
+        "/api/v1/companion/session/start",
+        json={"source_lang": "es", "target_lang": "en"},
+        cookies={"coastal_uid": "cuid_session_test.x"},
+    )
+    assert r.status_code == 200
+    data = r.json()
+    assert data["session_id"].startswith("ccs_")
+    assert "/companion/session/" in data["ws_url"]
+    assert "/stream" in data["ws_url"]
+    assert data["tier"] in ("free", "paid")
+
+
+def test_session_end_marks_session_ended(client, monkeypatch):
+    import api_server
+    monkeypatch.setattr(api_server, "_resolve_uid_cookie",
+                        lambda raw: "cuid_end_test" if raw else None)
+    r = client.post(
+        "/api/v1/companion/session/start",
+        json={"source_lang": "es", "target_lang": "en"},
+        cookies={"coastal_uid": "cuid_end_test.x"},
+    )
+    sid = r.json()["session_id"]
+    r2 = client.post(
+        f"/api/v1/companion/session/{sid}/end",
+        json={"minutes_used": 4.2},
+        cookies={"coastal_uid": "cuid_end_test.x"},
+    )
+    assert r2.status_code == 200
+    assert r2.json()["session_id"] == sid
