@@ -1,0 +1,97 @@
+# FOAI Tool Registry Entry — ii-researcher
+# Schema: foai/registry/schemas/tool-registry-entry.yaml v1.0.0
+# INTAKE: foai/integrations/ii-researcher/INTAKE.md
+# Composes into: ACHEEVY Super App (deep research slice)
+
+name: ii_researcher
+display_name: ii-researcher (Intelligent Internet research-specialized agent)
+aliases:
+  - iiresearcher
+  - ii-researcher
+  - intelligent_internet_researcher
+provider_or_repo: "github.com/Intelligent-Internet/ii-researcher (candidate; verify on clone)"
+version_or_commit: "TBD — pinned on first clone"
+
+capabilities:
+  - research
+  - data_extraction
+  - audit
+
+best_for:
+  - deep research with source validation and citation tracking
+  - multi-source synthesis + confidence scoring
+  - research-classed work orders auto-routed by ACHEEVY's intent classifier
+  - lane B (Greg-framework opportunity scout) weekly research cycles when scheduler enabled
+
+endpoint: "https://acheevy.foai.cloud/api/ii-researcher/invoke (not deployed yet)"
+healthcheck: "https://acheevy.foai.cloud/api/ii-researcher/health (not deployed yet)"
+
+auth:
+  type: bearer
+  secret_ref: "ACHEEVY_INTERNAL_API_KEY"
+
+input_schema:
+  type: object
+  properties:
+    research_question: { type: string }
+    source_requirements:
+      type: object
+      properties:
+        min_sources: { type: integer, default: 3 }
+        min_recency_days: { type: integer, default: 90 }
+        domain_allowlist: { type: array, items: { type: string } }
+        domain_denylist: { type: array, items: { type: string } }
+    max_depth_minutes: { type: integer, default: 15 }
+    tenant: { type: string }
+  required: [research_question]
+
+output_schema:
+  type: object
+  properties:
+    research_brief: { type: string }
+    citation_table: { type: array, items: { type: object } }
+    confidence_score: { type: number, minimum: 0, maximum: 1 }
+    unresolved_questions: { type: array, items: { type: string } }
+    source_conflict_log: { type: array, items: { type: object } }
+    audit_ledger_row_id: { type: string }
+  required: [research_brief, citation_table, confidence_score, audit_ledger_row_id]
+
+side_effect_level: read_only
+requires_human_approval: false
+timeout_seconds: 900
+max_runtime_seconds: 1800
+scheduler_enabled: false
+
+fallback_tools:
+  - autoresearch
+  - sqwaadrun_scrape
+  - manual_research_queue
+
+blocked_actions:
+  - publish_unverified_claim
+  - cite_source_not_in_citation_table
+  - fabricate_research_data
+
+logs:
+  destination: "hermes_audit_ledger.ii_researcher"
+  redaction_required: true
+
+intake_status: candidate
+intake_proof_bundle: foai/integrations/ii-researcher/PROOF_BUNDLE.md   # owed in Step-2 PR
+
+enabled: false
+
+notes: >
+  Composes into ACHEEVY Super App per owner directive 2026-05-14.
+  Step-1 INTAKE.md shipped in this PR. Step-2 clone + adapter owed.
+
+  Auto-chains: when the research question touches OSS model drift, auto-chain
+  to autoresearch (already wired). When source scraping is required, auto-chain
+  to sqwaadrun_scrape (Lil_Hawks fleet).
+
+  Sacred Separation copy filter is mandatory on research_brief output before
+  return — owner has corrected on this canon repeatedly.
+
+created: "2026-05-14"
+updated: "2026-05-14"
+entry_canonical_at: foai/registry/tools/ii-researcher.yaml

@@ -4,7 +4,7 @@
 # wants to dispatch through the org reads from here.
 
 name: ACHEEVY
-display_name: ACHEEVY (Digital CEO / Executive Orchestrator)
+display_name: ACHEEVY (Digital CEO / Executive Orchestrator / Super App)
 agent_class: executive_orchestrator
 department: Office_of_the_Executive
 reports_to: human_in_the_loop
@@ -29,6 +29,29 @@ primary_function: >
   Sacred Separation applies — no internal agent names, supplier names,
   vendor names, or infrastructure names ever leak to the user through
   ACHEEVY's voice.
+
+# ─── Super App composition (owner directive 2026-05-14) ──────────────
+# ACHEEVY is not a from-scratch build — it's an assembled Super App composed
+# of 4 OSS components + the FOAI integration layer on top.
+super_app_composition:
+  runtime_engine: ii_agent              # agent loop + tool dispatch
+  research_specialist: ii_researcher    # source validation + multi-source synthesis
+  shared_substrate: ii_commons          # HTTP / schemas / types (vendored library)
+  tenant_state: common_ground_core      # tenant routing + identity + policy primitives
+  integration_layer: foai/acheevy/      # FOAI-specific wiring:
+                                        #   - Inworld IVC clone (Nas reference set)
+                                        #   - FOAI intent classifier taxonomy (Deploy/Research/Build/Publish)
+                                        #   - Chicken Hawk Gateway dispatch
+                                        #   - Hermes audit_ledger writes
+                                        #   - NemoClaw verdict consultation
+                                        #   - Sacred Separation copy filter
+  intake_docs:
+    - foai/integrations/ii-agent/INTAKE.md
+    - foai/integrations/ii-researcher/INTAKE.md
+    - foai/integrations/ii-commons/INTAKE.md
+    - foai/integrations/common-ground-core/INTAKE.md
+  current_status: intake_complete   # Step-1 of the Open Source Agent Intake skill
+  next_step: "Step-2: clone repos + write adapters + smoke tests (separate PRs)"
 
 # ─── Permissions ──────────────────────────────────────────────────────
 allowed_tools:

@@ -1,0 +1,91 @@
+# FOAI Tool Registry Entry — ii-agent
+# Schema: foai/registry/schemas/tool-registry-entry.yaml v1.0.0
+# INTAKE: foai/integrations/ii-agent/INTAKE.md
+# Composes into: ACHEEVY Super App (runtime engine slice)
+
+name: ii_agent
+display_name: ii-agent (Intelligent Internet agent runtime)
+aliases:
+  - iiagent
+  - ii-agent
+  - intelligent_internet_agent
+provider_or_repo: "github.com/Intelligent-Internet/ii-agent (candidate; verify on clone)"
+version_or_commit: "TBD — pinned on first clone"
+
+capabilities:
+  - workflow_orchestration
+  - code_generation
+  - data_analysis
+  - browser_automation
+  - custom
+
+best_for:
+  - multi-step tool dispatch agent loops
+  - generic plan/execute workflows
+  - executor backbone for ACHEEVY's intent classifier output
+  - any work order requiring multiple chained tool calls
+
+endpoint: "https://acheevy.foai.cloud/api/ii-agent/invoke (not deployed yet)"
+healthcheck: "https://acheevy.foai.cloud/api/ii-agent/health (not deployed yet)"
+
+auth:
+  type: bearer
+  secret_ref: "ACHEEVY_INTERNAL_API_KEY"
+
+input_schema:
+  type: object
+  properties:
+    intent: { type: string, description: "Natural-language work order or system message" }
+    tools: { type: array, items: { type: string }, description: "Tool registry entry names the agent may use" }
+    max_iterations: { type: integer, default: 25 }
+    model: { type: string, description: "Optional model override; defaults to OpenRouter-mapped Claude Opus 4.7" }
+    tenant: { type: string, description: "Common Ground Core tenant id for state/identity routing" }
+  required: [intent]
+
+output_schema:
+  type: object
+  properties:
+    final_response: { type: string }
+    trace: { type: array, description: "Step-by-step tool calls + observations" }
+    tool_calls_count: { type: integer }
+    iterations_used: { type: integer }
+    cost_estimate_usd: { type: number }
+    audit_ledger_row_id: { type: string }
+  required: [final_response, trace, audit_ledger_row_id]
+
+side_effect_level: writes_files
+requires_human_approval: false
+timeout_seconds: 600
+max_runtime_seconds: 1800
+scheduler_enabled: false
+
+fallback_tools:
+  - hermes_deep_think
+  - manual_review_queue
+
+blocked_actions:
+  - publish_unverified_claim
+  - fabricate_certification
+  - bypass_owner_approval
+  - bypass_acheevy
+
+logs:
+  destination: "hermes_audit_ledger.ii_agent"
+  redaction_required: true
+
+intake_status: candidate
+intake_proof_bundle: foai/integrations/ii-agent/PROOF_BUNDLE.md   # owed in Step-2 PR
+
+enabled: false   # disabled until Step-2 ships the adapter
+notes: >
+  Composes into ACHEEVY Super App per owner directive 2026-05-14.
+  Step-1 (INTAKE.md scaffold) shipped in feature/phase-4a-acheevy-super-app-intake-scaffold.
+  Step-2 (clone + adapter + smoke test) owed.
+
+  Per the synthesis spec §4 Phase 4, ii-agent is also accessible as a direct
+  callable tool (operators can dispatch arbitrary agent loops with custom tool sets)
+  AND simultaneously functions as ACHEEVY's executive engine. Two roles, one runtime.
+
+created: "2026-05-14"
+updated: "2026-05-14"
+entry_canonical_at: foai/registry/tools/ii-agent.yaml

@@ -1,0 +1,68 @@
+# FOAI Tool Registry Entry — ii-commons
+# Schema: foai/registry/schemas/tool-registry-entry.yaml v1.0.0
+# INTAKE: foai/integrations/ii-commons/INTAKE.md
+# Composes into: ACHEEVY Super App (shared substrate — vendored library)
+#
+# NOTE: ii-commons is a LIBRARY, not a service. It has no endpoint, no auth,
+# no invocation interface. The registry entry tracks the dependency for
+# auditability + drift detection. Other tool entries point at "real" endpoints;
+# this one tracks a pinned-tag dependency.
+
+name: ii_commons
+display_name: ii-commons (Intelligent Internet shared utilities — vendored library)
+aliases:
+  - iicommons
+  - ii-commons
+provider_or_repo: "github.com/Intelligent-Internet/ii-commons (candidate; verify on clone)"
+version_or_commit: "TBD — pinned-tag on first clone"
+
+capabilities:
+  - custom   # library dependency, not a routable capability
+
+best_for:
+  - shared HTTP clients + schemas + types used by ii-agent + ii-researcher
+  - dependency pinning for the ACHEEVY Super App stack
+
+endpoint: "n/a — library dependency (not a service)"
+healthcheck: "n/a"
+
+auth:
+  type: none
+  secret_ref: ""
+
+input_schema: { type: object, description: "n/a — library; consumed via package import not API call" }
+output_schema: { type: object, description: "n/a — library; functions called in-process" }
+
+side_effect_level: read_only
+requires_human_approval: false
+timeout_seconds: 0
+max_runtime_seconds: 0
+scheduler_enabled: false
+
+fallback_tools: []
+blocked_actions: []
+
+logs:
+  destination: "n/a"
+  redaction_required: false
+
+intake_status: candidate
+intake_proof_bundle: foai/integrations/ii-commons/PROOF_BUNDLE.md   # owed in Step-2 PR
+
+enabled: false
+
+notes: >
+  Vendored as a pinned-tag dependency of ii-agent + ii-researcher containers
+  per the INTAKE.md §2 architecture. NOT a callable tool. Registry entry exists
+  for dependency tracking + AutoResearch drift detection (when upstream tags a
+  new version, AutoResearch should alert).
+
+  Phase 4 Track A Step-2 task: add ii-commons to autoresearch tracking via a
+  new source adapter OR a new entry in autoresearch/registry.py pointing at
+  github.com/Intelligent-Internet/ii-commons releases.
+
+  Auto-bump policy: NEVER. Owner approves every dependency upgrade.
+
+created: "2026-05-14"
+updated: "2026-05-14"
+entry_canonical_at: foai/registry/tools/ii-commons.yaml
