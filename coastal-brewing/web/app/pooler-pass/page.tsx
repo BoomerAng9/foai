@@ -8,25 +8,25 @@ import { PoolerPassCheckoutForm } from "@/components/pooler-pass-checkout-form";
 export const metadata: Metadata = {
   title: "Pooler Pass · Coastal Brewing Co.",
   description:
-    "Pooler Pass — local membership for the 50-100 mile radius around Pooler, GA. Standard $5.62/mo or Plus $11.24/mo on the 9-month plan. Cancel anytime.",
+    "Pooler Pass — Pooler-local access to Sal at the counter, plus a member discount applied every time you stop in. Standard $5.62/mo or Plus $11.24/mo on the 9-month plan. Cancel anytime.",
 };
 
 const STANDARD_BENEFITS = [
   {
-    title: "12% off in-store",
-    body: "Applied at the counter every time you stop in. Stacks with same-day pickup.",
+    title: "Sal at the counter, in-app + in-store",
+    body: "Pooler Pass is access. Message Sal from your account before you walk in, swing by the shop, sit with him for a one-on-one pour. The member badge is also recognized at the counter — no looking up your account, no \"are you a member yet\" — Sal already knows.",
+  },
+  {
+    title: "Member discount at the counter (12%)",
+    body: "Applied automatically every time you stop in. Stacks with same-day pickup. Capped to our margin floor — every product still clears cost, shipping, and a small margin.",
   },
   {
     title: "Free local pickup",
     body: "No shipping cost when you pick up at the Pooler shop. Pre-order via chat or just walk in.",
   },
   {
-    title: "Member-only Pooler events",
-    body: "Tasting nights, Sal at the counter for one-on-one pours, monthly community coffee chat. We invite, you show up.",
-  },
-  {
-    title: "First in line for shop drops",
-    body: "Limited-batch roasts, reserve allocations, and seasonal specials reach Pooler Pass members before they go national.",
+    title: "Pooler-only events + first dibs on drops",
+    body: "Tasting nights, monthly community coffee chat, and member-first allocation on limited-batch roasts, reserve releases, and seasonal specials before they go national.",
   },
 ];
 
@@ -70,11 +70,12 @@ export default function PoolerPassPage() {
             </span>
           </p>
           <p className="mt-6 max-w-2xl text-base leading-relaxed text-foreground/80">
-            For locals — within 50 to 100 miles of Pooler (ZIP 31322). A discount
-            when you walk in, free local pickup, member-only events at the shop, and
-            first dibs on what just came out of the back. Pick the plan that fits —
-            month-to-month to try it out, or the 9-month plan for the best rate (pay
-            9 months, get 12 months of access).
+            For locals — within 50 to 100 miles of Pooler (ZIP 31322). Pooler Pass
+            is direct access to Sal at the counter (and in-app), plus a member
+            discount applied every time you stop in, free local pickup, member-only
+            events at the shop, and first dibs on what just came out of the back.
+            Pick the plan that fits — month-to-month to try it out, or the 9-month
+            plan for the best rate (pay 9 months, get 12 months of access).
           </p>
         </header>
 

@@ -8,21 +8,21 @@ import { MembershipCheckoutForm } from "@/components/membership-checkout-form";
 export const metadata: Metadata = {
   title: "Coastal Custee Card Plan · Coastal Brewing Co.",
   description:
-    "Coastal Custee Card Plan — pick the coffee, tea, and matcha you want every month. $29.99/mo monthly or $22.49/mo on the 9-month plan. Pause, swap, or cancel any time.",
+    "Coastal Custee Card Plan — direct access to our team plus a member discount on every shipment. $29.99/mo monthly or $22.49/mo on the 9-month plan. Pause, swap, or cancel any time.",
 };
 
 const BENEFITS = [
   {
-    title: "Pick what comes every month",
-    body: "Open your account, drop the coffee, tea, matcha, or merch you want into your monthly picker, and we ship it. Mix-and-match across the catalog. Change it whenever you like — your next shipment ships whatever's in the picker the day it builds.",
+    title: "A direct line to our team",
+    body: "Sal at the bar. LUC at the curation desk. Melli on wholesale. ACHEEVY behind it all. Every one of them has a voice, a personality, and the authority to make a deal. You message, they answer — and what they decide ships with your order.",
   },
   {
-    title: "Pay less when you commit longer",
-    body: "Monthly works fine. Pick the 3-month plan and save a little. Pick the 6-month plan and save more. The 9-month plan is our best rate — pay 9 months, get 12 months of access. Same products, smaller monthly bill the longer you stay.",
+    title: "A member discount on every shipment",
+    body: "Your subscription unlocks a member discount applied at checkout on the coffee, tea, matcha, or merch you pick each month. The discount is capped at our floor — every product still clears cost, shipping, and a small margin — but within that floor, you save on every shipment as long as your plan is active.",
   },
   {
-    title: "Pause, swap, or cancel any time",
-    body: "Going on a trip? Pause. Got too much coffee? Swap a bag for tea or matcha. Don't want it anymore? Cancel from your account in two clicks. No hold music, no \"are you sure,\" no retention call.",
+    title: "Pick the cadence — and pause, swap, or cancel any time",
+    body: "Monthly works fine. Pick the 3-month plan and save more on the membership rate; 6-month saves more; the 9-month plan is our best rate (pay 9 months, get 12 months of access). Pause for a trip, swap a bag for tea or matcha, or cancel from your account in two clicks. No hold music, no \"are you sure,\" no retention call.",
   },
 ];
 
@@ -78,11 +78,12 @@ export default function MembershipPage() {
             </span>
           </p>
           <p className="mt-6 max-w-2xl text-base leading-relaxed text-foreground/80">
-            Pick the coffee, tea, matcha, or merch you want each month and we ship it.
-            Change it whenever. Pause when you're going on a trip. Swap a bag for a tea.
-            Cancel from your account in two clicks. Pick the plan that fits — month-to-month
-            to try it out, or the 9-month plan for the best rate (pay 9 months, get 12
-            months of access).
+            Your monthly subscription to Coastal Brewing Co. — direct access to our
+            team (Sal, LUC, Melli, ACHEEVY) plus a member discount on every shipment.
+            Pick the coffee, tea, matcha, or merch you want each month; pause when
+            you're traveling; swap any item; cancel in two clicks. Pick the plan that
+            fits — month-to-month to try it out, or the 9-month plan for the best rate
+            (pay 9 months, get 12 months of access).
           </p>
         </header>
 
