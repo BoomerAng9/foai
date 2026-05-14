@@ -53,6 +53,19 @@ def workspace_me(uid: str = Depends(require_uid)) -> dict:
     }
 
 
+@router.get("/sessions")
+def sessions_list(
+    limit: int = 50,
+    uid: str = Depends(require_uid),
+) -> dict:
+    """Return the user's past companion sessions, ordered DESC by started_at.
+    For the Transcripts tab UI."""
+    import audit_ledger
+    limit = max(1, min(limit, 200))
+    rows = audit_ledger.companion_sessions_list(uid, limit=limit)
+    return {"sessions": rows, "limit": limit}
+
+
 _ALLOWED_VENDORS = {"inworld", "openai"}
 
 

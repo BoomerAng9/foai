@@ -32,6 +32,7 @@ const DRAWER_GROUPS = [
     label: "Account",
     links: [
       { href: "/account", label: "My Account" },
+      { href: "/companion", label: "C|Brew Companion" },
       { href: "/auth/login", label: "Sign In" },
       { href: "/auth/signup", label: "Open an Account" },
     ],

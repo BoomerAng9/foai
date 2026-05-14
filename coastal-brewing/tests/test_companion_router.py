@@ -272,3 +272,44 @@ def test_notes_post_paid_user_pushes_to_taskade(client, monkeypatch):
             )
     assert r.status_code == 200
     assert r.json()["taskade_doc_id"] == "doc_abc"
+
+
+def test_sessions_list_returns_users_sessions(client, monkeypatch):
+    import uuid
+    import api_server, audit_ledger
+    monkeypatch.setattr(api_server, "_resolve_uid_cookie",
+                        lambda raw: "cuid_list_test" if raw else None)
+    audit_ledger.init_schema()
+    _sid1 = "ccs_list_" + uuid.uuid4().hex[:8]
+    _sid2 = "ccs_list_" + uuid.uuid4().hex[:8]
+    _sid3 = "ccs_other_" + uuid.uuid4().hex[:8]
+    audit_ledger.companion_session_start(
+        session_id=_sid1, coastal_uid="cuid_list_test",
+        source_lang="es", target_lang="en", tier_at_start="free",
+    )
+    audit_ledger.companion_session_end(session_id=_sid1, minutes_used=3.0)
+    audit_ledger.companion_session_start(
+        session_id=_sid2, coastal_uid="cuid_list_test",
+        source_lang="fr", target_lang="en", tier_at_start="paid",
+    )
+    audit_ledger.companion_session_end(session_id=_sid2, minutes_used=12.0)
+    audit_ledger.companion_session_start(
+        session_id=_sid3, coastal_uid="cuid_OTHER",
+        source_lang="de", target_lang="en", tier_at_start="free",
+    )
+
+    r = client.get(
+        "/api/v1/companion/sessions",
+        cookies={"coastal_uid": "cuid_list_test.x"},
+    )
+    assert r.status_code == 200
+    data = r.json()
+    ids = [s["session_id"] for s in data["sessions"]]
+    assert _sid1 in ids
+    assert _sid2 in ids
+    assert _sid3 not in ids  # data isolation
+
+
+def test_sessions_list_rejects_missing_cookie(client):
+    r = client.get("/api/v1/companion/sessions")
+    assert r.status_code == 401

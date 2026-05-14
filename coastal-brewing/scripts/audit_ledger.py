@@ -1267,6 +1267,26 @@ def companion_session_fetch(session_id: str) -> dict | None:
             conn.close()
 
 
+def companion_sessions_list(coastal_uid: str, *, limit: int = 50) -> list[dict]:
+    """Return the most-recent N sessions for a coastal_uid, ordered
+    DESC by started_at. Data-isolated — caller's uid only."""
+    init_schema()
+    with _lock:
+        conn = _connect()
+        try:
+            conn.row_factory = sqlite3.Row
+            cur = conn.execute(
+                "SELECT session_id, started_at, ended_at, source_lang, "
+                "target_lang, minutes_used, tier_at_start "
+                "FROM companion_sessions WHERE coastal_uid = ? "
+                "ORDER BY started_at DESC LIMIT ?",
+                (coastal_uid, limit),
+            )
+            return [dict(r) for r in cur.fetchall()]
+        finally:
+            conn.close()
+
+
 def companion_byok_store(*, coastal_uid: str, vendor: str,
                           encrypted_key: bytes) -> None:
     """Upsert an encrypted BYOK key for (coastal_uid, vendor)."""
