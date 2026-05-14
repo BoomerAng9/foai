@@ -88,6 +88,29 @@ def byok_delete(vendor: str, uid: str = Depends(require_uid)) -> dict:
 
 import secrets as _secrets  # noqa: E402
 
+FREE_TIER_DAILY_MINUTES_CAP = 30.0
+
+
+def _free_tier_minutes_used_last_24h(coastal_uid: str) -> float:
+    """Query audit_ledger for total minutes used by free-tier sessions
+    in the last 24 hours. Returns float (0.0 if no sessions found)."""
+    import audit_ledger
+    import time as _t
+    cutoff = int(_t.time()) - 86400
+    audit_ledger.init_schema()
+    with audit_ledger._lock:
+        conn = audit_ledger._connect()
+        try:
+            cur = conn.execute(
+                "SELECT COALESCE(SUM(minutes_used), 0) FROM companion_sessions "
+                "WHERE coastal_uid = ? AND tier_at_start = 'free' "
+                "AND started_at >= ?",
+                (coastal_uid, cutoff),
+            )
+            return float(cur.fetchone()[0] or 0)
+        finally:
+            conn.close()
+
 
 class SessionStartBody(BaseModel):
     source_lang: str = "auto"
@@ -110,6 +133,13 @@ def session_start(
     audit_ledger.init_schema()
     session_id = "ccs_" + _secrets.token_urlsafe(12)
     tier = "paid" if audit_ledger.companion_is_paid(uid) else "free"
+    if tier == "free":
+        used = _free_tier_minutes_used_last_24h(uid)
+        if used >= FREE_TIER_DAILY_MINUTES_CAP:
+            raise HTTPException(
+                status_code=429,
+                detail=f"free-tier daily cap reached ({FREE_TIER_DAILY_MINUTES_CAP} min); upgrade or retry tomorrow",
+            )
     audit_ledger.companion_session_start(
         session_id=session_id, coastal_uid=uid,
         source_lang=body.source_lang, target_lang=body.target_lang,

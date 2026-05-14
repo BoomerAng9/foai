@@ -49,6 +49,26 @@ def test_byok_post_stores_key(client, monkeypatch):
     assert r.json()["ok"] is True
 
 
+def test_session_start_caps_free_tier_at_30_minutes_per_day(client, monkeypatch):
+    import api_server, audit_ledger
+    monkeypatch.setattr(api_server, "_resolve_uid_cookie",
+                        lambda raw: "cuid_cap_test" if raw else None)
+    audit_ledger.init_schema()
+    # Insert 30 minutes of free-tier sessions in the last 24h
+    audit_ledger.companion_session_start(
+        session_id="ccs_used_1", coastal_uid="cuid_cap_test",
+        source_lang="es", target_lang="en", tier_at_start="free",
+    )
+    audit_ledger.companion_session_end(session_id="ccs_used_1", minutes_used=30.0)
+    r = client.post(
+        "/api/v1/companion/session/start",
+        json={"source_lang": "es", "target_lang": "en"},
+        cookies={"coastal_uid": "cuid_cap_test.x"},
+    )
+    assert r.status_code == 429
+    assert "free-tier" in r.json()["detail"].lower() or "cap" in r.json()["detail"].lower()
+
+
 def test_byok_post_rejects_unknown_vendor(client, monkeypatch):
     monkeypatch.setenv("COASTAL_BYOK_ENCRYPTION_KEY",
                        "z+gRO7t-3z5y6Yk8w0qFvB9JzLnNbC2H4XwYxVrTuM0=")
