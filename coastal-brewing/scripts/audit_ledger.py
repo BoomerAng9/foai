@@ -1270,6 +1270,7 @@ def companion_session_fetch(session_id: str) -> dict | None:
 def companion_byok_store(*, coastal_uid: str, vendor: str,
                           encrypted_key: bytes) -> None:
     """Upsert an encrypted BYOK key for (coastal_uid, vendor)."""
+    init_schema()
     import time as _t
     with _lock:
         conn = _connect()
@@ -1287,6 +1288,7 @@ def companion_byok_store(*, coastal_uid: str, vendor: str,
 
 def companion_byok_fetch(coastal_uid: str, vendor: str) -> bytes | None:
     """Return the encrypted BYOK key for (coastal_uid, vendor), or None."""
+    init_schema()
     with _lock:
         conn = _connect()
         try:
@@ -1303,6 +1305,7 @@ def companion_byok_fetch(coastal_uid: str, vendor: str) -> bytes | None:
 
 def companion_byok_delete(coastal_uid: str, vendor: str) -> None:
     """Remove a BYOK key row. Idempotent."""
+    init_schema()
     with _lock:
         conn = _connect()
         try:
