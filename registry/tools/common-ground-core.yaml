@@ -1,0 +1,105 @@
+# FOAI Tool Registry Entry — Common Ground Core
+# Schema: foai/registry/schemas/tool-registry-entry.yaml v1.0.0
+# INTAKE: foai/integrations/common-ground-core/INTAKE.md
+# Composes into: ACHEEVY Super App (tenant routing / identity / policy substrate)
+#
+# UNVERIFIED SOURCE: owner directive 2026-05-14 names this as part of the
+# ACHEEVY architecture but the canonical repo URL is not yet confirmed.
+# Step-2 blocker: owner clarifies OSS-or-internal-spec.
+
+name: common_ground_core
+display_name: Common Ground Core (tenant routing + identity + policy substrate)
+aliases:
+  - common-ground-core
+  - commongroundcore
+  - common_ground
+  - tenant_context_service
+provider_or_repo: "TBD — owner clarification needed: OSS repo URL OR internal FOAI spec"
+version_or_commit: "TBD"
+
+capabilities:
+  - identity
+  - storage
+  - custom   # tenant routing isn't covered by the standard taxonomy enums
+
+best_for:
+  - per-tenant agent allowlist enforcement
+  - per-tenant tool allowlist enforcement
+  - per-tenant policy overlay on NemoClaw
+  - per-tenant cost ceilings + audit scoping
+  - cross-vertical state (Coastal vs Per|Form vs licensee X) without leakage
+  - load-bearing for the FOAI platform-licensing thesis (Phase 4 consulting report)
+
+endpoint: "https://acheevy.foai.cloud/api/tenants/{tenant_id}/context (not deployed yet)"
+healthcheck: "https://acheevy.foai.cloud/api/tenants/health (not deployed yet)"
+
+auth:
+  type: bearer
+  secret_ref: "ACHEEVY_INTERNAL_API_KEY"
+
+input_schema:
+  type: object
+  properties:
+    tenant_id: { type: string, description: "e.g. 'coastal-brewing', 'perform', 'licensee-coffee-chain-x'" }
+    actor_email: { type: string, description: "Owner or operator email — used for audit + scope" }
+  required: [tenant_id]
+
+output_schema:
+  type: object
+  properties:
+    tenant_id: { type: string }
+    display_name: { type: string }
+    agent_allowlist: { type: array, items: { type: string } }
+    tool_allowlist: { type: array, items: { type: string } }
+    policy_bounds: { type: object, description: "NemoClaw rule overlay for this tenant" }
+    cost_ceilings:
+      type: object
+      properties:
+        monthly_credit_cap: { type: integer }
+        per_invocation_cap_usd: { type: number }
+    audit_namespace: { type: string, description: "Hermes audit_ledger schema name for this tenant" }
+  required: [tenant_id, agent_allowlist, tool_allowlist, policy_bounds, audit_namespace]
+
+side_effect_level: read_only
+requires_human_approval: false
+timeout_seconds: 10
+max_runtime_seconds: 30
+scheduler_enabled: false
+
+fallback_tools: []
+# No fallback — if Common Ground Core is down, ACHEEVY degrades to a
+# hardcoded FOAI executive tenant context (operator-side warning logged).
+
+blocked_actions:
+  - cross_tenant_read_without_authorization
+  - modify_tenant_policy_without_owner_approval
+  - delete_tenant_data
+
+logs:
+  destination: "hermes_audit_ledger.common_ground_core_reads"
+  redaction_required: true
+
+intake_status: candidate
+intake_proof_bundle: foai/integrations/common-ground-core/PROOF_BUNDLE.md   # owed in Step-2 PR
+
+enabled: false
+
+notes: >
+  Consulted on EVERY Chicken Hawk Gateway /run dispatch to load tenant
+  allowlists + policy. Cache TTL 60s per tenant_id.
+
+  STEP-2 BLOCKER: owner must clarify before clone or scaffold begins:
+  is this an OSS repo (where) or an internal FOAI spec we build from scratch?
+
+  If OSS: standard intake (clone / license / docker / smoke / adapter / tests / proof).
+  If internal-spec: SPEC.md + FastAPI service scaffold at foai/integrations/common-ground-core/service/
+  with Postgres + REST API per the INTAKE.md §4 deployment path.
+
+  Load-bearing for the platform-licensing thesis — every licensee gets a tenant
+  entry in Common Ground Core, and the Genesis app clone path (per the consulting
+  report Phase 4) materializes a new tenant + agent allowlist + tool allowlist
+  + policy bounds from a single owner directive.
+
+created: "2026-05-14"
+updated: "2026-05-14"
+entry_canonical_at: foai/registry/tools/common-ground-core.yaml
