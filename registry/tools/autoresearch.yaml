@@ -1,0 +1,126 @@
+# FOAI Tool Registry Entry — AutoResearch
+# Schema: foai/registry/schemas/tool-registry-entry.yaml v1.0.0
+# Hermes-hosted sibling-of-Deep-Think module that enforces always-latest-OSS-model
+# rule by scanning every vendor weekly and surfacing drift. Wired via PR #445
+# with 5 new vendor adapters (anthropic / google / fal / recraft / huggingface).
+
+name: autoresearch
+display_name: Hermes AutoResearch
+aliases:
+  - auto_research
+  - hermes_autoresearch
+  - drift_watch
+provider_or_repo: foai/runtime/hermes/autoresearch/
+version_or_commit: "main @ 2026-05-14 (post-PR #445)"
+
+# ─── Capabilities ─────────────────────────────────────────────────────
+capabilities:
+  - research
+  - data_extraction
+  - audit
+  - scheduler
+
+best_for:
+  - weekly model-currency scans across vendors
+  - detecting OSS model drift (when a flagship is upgraded upstream)
+  - producing structured CurrencyReport with severity classification
+  - feeding the Drift Watch app in Circuit Box
+
+# ─── Endpoint ─────────────────────────────────────────────────────────
+endpoint: "https://hermes.foai.cloud/autoresearch/report"
+healthcheck: "https://hermes.foai.cloud/autoresearch/status"
+
+# ─── Authentication ───────────────────────────────────────────────────
+auth:
+  type: bearer
+  secret_ref: "HERMES_API_KEY"
+
+# ─── I/O Contract ─────────────────────────────────────────────────────
+input_schema:
+  type: object
+  properties:
+    family:
+      type: string
+      description: "Optional. Single tracked model family to scan (e.g. 'nemotron', 'gemini', 'claude'). If omitted, scans ALL registered families per registry.py."
+    force_refresh:
+      type: boolean
+      default: false
+      description: "If true, bypass weekly-cron-cached results and rescan every adapter live."
+  required: []
+
+output_schema:
+  type: object
+  properties:
+    scanned_at: { type: string, format: date-time }
+    total_tracked: { type: integer }
+    total_checked: { type: integer }
+    entries:
+      type: array
+      items:
+        type: object
+        properties:
+          family: { type: string }
+          pinned_id: { type: string }
+          latest_id: { type: string }
+          severity:
+            type: string
+            enum: [current, upgrade-candidate, unknown, blocker]
+          summary: { type: string }
+          source_url: { type: string }
+          upgrade_blocker: { type: string }
+  required: [scanned_at, total_tracked, total_checked, entries]
+
+# ─── Behavior ─────────────────────────────────────────────────────────
+side_effect_level: read_only
+requires_human_approval: false
+timeout_seconds: 60
+max_runtime_seconds: 300
+
+# ─── Scheduling ───────────────────────────────────────────────────────
+scheduler_enabled: true   # weekly cron, Mondays 06:00 UTC, per autoresearch/README.md
+
+# ─── Reliability ──────────────────────────────────────────────────────
+fallback_tools:
+  - hermes_deep_think    # if AutoResearch fails, manually invoke Deep Think against vendor docs
+  - sqwaadrun_scrape     # raw scrape fallback if a specific adapter is broken
+
+blocked_actions:
+  - auto_apply_upgrade   # AutoResearch DETECTS drift; does NOT auto-PR upgrades. Human approves.
+  - pin_version_in_dockerfile  # consumer's responsibility, not AutoResearch's
+
+# ─── Logging ──────────────────────────────────────────────────────────
+logs:
+  destination: "hermes_audit_ledger.autoresearch"
+  redaction_required: false   # public vendor info, no secrets
+
+# ─── Provenance ───────────────────────────────────────────────────────
+intake_status: approved_adapter
+
+intake_proof_bundle: foai/runtime/hermes/autoresearch/PROOF_BUNDLE.md   # TODO Phase 4 cycle — backfill the formal proof bundle
+
+enabled: true
+
+notes: >
+  PR #445 wired 5 new vendor adapters on 2026-05-14: anthropic_api (parses
+  docs.claude.com/en/docs/models-overview), google_aistudio (scrapes
+  ai.google.dev/gemini-api/docs/models), fal_models (fal.ai/models for
+  seedance + davinci-magihuman), recraft_api (external.api.recraft.ai/v1/models),
+  huggingface_search (generic HF model search). Plus existing nvidia_hf
+  and nvidia_github_cosmos adapters from earlier work. 38 unit tests green;
+  registry has 8 tracked model families; 7 of 8 families have a working
+  adapter route, 1 (davinci-magihuman) remains in unknown state pending a
+  better fal.ai catalog scraper.
+
+  Per the synthesis spec §7, this is the first canon Tool Registry entry —
+  template for the rest. Future Phase 4 work runs every other open-source
+  tool through the Open Source Agent Intake skill to produce an entry like
+  this one + a formal PROOF_BUNDLE.md.
+
+  Filter friction note: AutoResearch itself doesn't hit content filters
+  (scrapes vendor docs, no AI gen). Adapter regex bugs caught + fixed
+  during PR #445 live-smoke: Claude dated-alias parsing + Gemini
+  flash-image false-positive (both regression-tested).
+
+created: "2026-05-14"
+updated: "2026-05-14"
+entry_canonical_at: foai/registry/tools/autoresearch.yaml

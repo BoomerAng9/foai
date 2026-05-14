@@ -1,0 +1,185 @@
+---
+# FOAI Tool Registry Entry — Canonical Schema
+# Derived from the Open Source Agent Intake skill canon at
+# ~/.claude/skills/open-source-agent-intake/references/tool-registry-schema.md.
+# Every tool that Chicken Hawk can dispatch to has one of these files in
+# foai/registry/tools/. Chicken Hawk reads this at routing time to decide
+# capability match, auth, side-effect level, and fallback chain.
+#
+# A tool entry MAY represent:
+# - an internal FOAI service (e.g. AutoResearch, Hermes Deep Think)
+# - an external API (e.g. Stripe, Mercury)
+# - an open-source agent runtime adapted via the Open Source Agent Intake skill
+# - an SDK wrapper (e.g. Higgsfield CLI)
+schema_version: "1.0.0"
+schema_canonical_at: "foai/registry/schemas/tool-registry-entry.yaml"
+schema_authority: "Open Source Agent Intake skill — references/tool-registry-schema.md + owner blueprint §9"
+---
+
+fields:
+  # ─── Identity ──────────────────────────────────────────────────────
+  name:
+    required: true
+    type: string
+    description: "Canonical tool name. Snake_case. Must match the YAML file basename. Used by Chicken Hawk dispatcher to look up routing."
+
+  display_name:
+    required: false
+    type: string
+    description: "Human-readable form for UI."
+
+  aliases:
+    required: false
+    type: list[string]
+    description: "Alternate names. e.g. ['nemoclaw', 'nemo_claw', 'nemo-claws'] all → 'nemoclaw'. Lets owner say 'use NemoClaws' and still hit the right tool."
+
+  provider_or_repo:
+    required: true
+    type: string
+    description: "Source identifier. For internal services use the FOAI canonical path. For OSS use the GitHub repo URL. For SaaS use the vendor name."
+
+  version_or_commit:
+    required: false
+    type: string
+    description: "Pinned version, commit SHA, or 'latest'. For OSS tools, this should be a specific commit."
+
+  # ─── Capabilities ──────────────────────────────────────────────────
+  capabilities:
+    required: true
+    type: list[enum]
+    options:
+      - research
+      - browser_automation
+      - code_execution
+      - code_generation
+      - image_generation
+      - video_generation
+      - voice_synthesis
+      - file_processing
+      - presentation
+      - scheduler
+      - workflow_orchestration
+      - data_extraction
+      - data_analysis
+      - audit
+      - eval
+      - memory
+      - notification
+      - payment
+      - identity
+      - storage
+      - custom
+    description: "What the tool DOES. Drives capability-match routing."
+
+  best_for:
+    required: false
+    type: list[string]
+    description: "Free-text use-case strings that help ACHEEVY's intent classifier match the tool. e.g. ['multi-step scheduled web research', 'UI-managed agent tasks', 'cron-style recurring workflows']."
+
+  # ─── Endpoint ──────────────────────────────────────────────────────
+  endpoint:
+    required: true
+    type: string
+    description: "URL or path. For HTTP tools: full URL. For CLI tools: command name. For internal services: full reachable URL within the VPC or local network."
+
+  healthcheck:
+    required: false
+    type: string
+    description: "URL to ping for liveness. Chicken Hawk pings this before dispatch."
+
+  # ─── Authentication ────────────────────────────────────────────────
+  auth:
+    required: true
+    type: object
+    description: "{ type: 'bearer|hmac|oauth|service_account|none', secret_ref: 'env_var_name_or_secret_manager_path' }"
+
+  # ─── I/O Contract ──────────────────────────────────────────────────
+  input_schema:
+    required: true
+    type: object
+    description: "JSON Schema for invocation payload. Per the Open Source Agent Intake skill — never let the orchestrator call the tool with unstructured input."
+
+  output_schema:
+    required: true
+    type: object
+    description: "JSON Schema for tool response. Lets validators check the output before passing it to the next stage."
+
+  # ─── Behavior ──────────────────────────────────────────────────────
+  side_effect_level:
+    required: true
+    type: enum
+    options:
+      - read_only             # no external mutations (e.g. autoresearch scan, hermes eval)
+      - writes_files          # produces artifacts but doesn't notify outside (e.g. image gen, video gen, sandbox code execution)
+      - sends_messages        # notifies inside or outside (e.g. Telegram alert, Slack post)
+      - external_actions      # changes state in external systems (e.g. Stripe coupon create, GitHub PR open)
+      - payments_or_irreversible  # spend money OR cannot be undone (e.g. Stripe charge, Mercury wire, GitHub merge)
+    description: "Drives NemoClaw verdict logic. read_only + writes_files default to ALLOWED_WITHOUT_APPROVAL. sends_messages depends on destination. external_actions + payments_or_irreversible default to REQUIRES_OWNER_APPROVAL."
+
+  requires_human_approval:
+    required: true
+    type: boolean
+    default: false
+    description: "Hard override: even at read_only side_effect_level, force approval. Used for tools with cost implications."
+
+  timeout_seconds:
+    required: true
+    type: integer
+    default: 300
+
+  max_runtime_seconds:
+    required: true
+    type: integer
+    default: 900
+
+  # ─── Scheduling ────────────────────────────────────────────────────
+  scheduler_enabled:
+    required: true
+    type: boolean
+    default: false
+    description: "If false, tool is dispatched on-demand only. If true, the tool may have cron / heartbeat / recurring schedules configured separately."
+
+  # ─── Reliability ───────────────────────────────────────────────────
+  fallback_tools:
+    required: false
+    type: list[string]
+    description: "Tool names to try if this one fails or is unavailable. Routing chain."
+
+  blocked_actions:
+    required: false
+    type: list[string]
+    description: "Specific action types this tool must never perform even if input requests them. e.g. ['fabricate_certification', 'publish_unverified_claim']."
+
+  # ─── Logging ───────────────────────────────────────────────────────
+  logs:
+    required: true
+    type: object
+    description: "{ destination: 'log_sink_path_or_url', redaction_required: true }"
+
+  # ─── Provenance ────────────────────────────────────────────────────
+  intake_status:
+    required: true
+    type: enum
+    options:
+      - raw_material
+      - candidate
+      - quarantined
+      - sandbox_verified
+      - approved_adapter
+      - governed_core
+      - commercial_gate_pending
+      - release_eligible
+      - deprecated
+      - blocked
+    description: "Per the Universal Tool Warehouse v6.0 lifecycle. Only `approved_adapter` and `governed_core` may be invoked by FOAI agents at runtime; the rest are research-only."
+
+  intake_proof_bundle:
+    required: false
+    type: string
+    description: "Path to the PROOF_BUNDLE.md produced by the Open Source Agent Intake skill run for this tool."
+
+  enabled: { required: true, type: boolean, default: true }
+  notes: { required: false, type: string }
+  created: { required: true, type: string, description: "ISO date YYYY-MM-DD" }
+  updated: { required: true, type: string, description: "ISO date YYYY-MM-DD" }
+  entry_canonical_at: { required: true, type: string }

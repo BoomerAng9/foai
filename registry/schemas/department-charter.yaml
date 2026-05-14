@@ -1,0 +1,98 @@
+---
+# FOAI Department Charter — Canonical Schema
+# Per the 25-section blueprint §13. Every department that exists inside
+# FOAI (Office of the CDO, Office of the CTO, Office of the CFO, The Sett,
+# Coastal Brewing pod, Sqwaadrun ops fleet, Cyber Hawks, etc.) has one of
+# these files in foai/registry/departments/.
+#
+# A department charter declares:
+# - what the department is for
+# - who leads it
+# - what teams report in
+# - what work it accepts as inputs
+# - what work it produces as outputs
+# - what controls bind its operation
+schema_version: "1.0.0"
+schema_canonical_at: "foai/registry/schemas/department-charter.yaml"
+schema_authority: "FOAI Humanless Organization spec 2026-05-14 §3 + Owner blueprint §13"
+---
+
+fields:
+  # ─── Identity ──────────────────────────────────────────────────────
+  department:
+    required: true
+    type: string
+    description: "Canonical department name. Snake_case (e.g. 'Office_of_the_CDO'). Must match the YAML file basename."
+
+  display_name:
+    required: false
+    type: string
+    description: "Human-readable form. Defaults to `department` with underscores → spaces."
+
+  # ─── Mission ───────────────────────────────────────────────────────
+  purpose:
+    required: true
+    type: string
+    description: "One sentence: what this department is responsible for delivering to the organization."
+
+  scope:
+    required: true
+    type: string
+    description: "One paragraph: what work belongs to this department and what does NOT."
+
+  # ─── Leadership ────────────────────────────────────────────────────
+  leader:
+    required: true
+    type: string
+    description: "Canonical name of the Boomer_Ang head of this department (matches an agents/<name>.yaml file). e.g. 'Iller_Ang' for Office of the CDO."
+
+  reports_to:
+    required: true
+    type: string
+    description: "Where this department reports up. Usually 'ACHEEVY' for top-level departments, or another department for sub-pods."
+
+  # ─── Teams ─────────────────────────────────────────────────────────
+  teams:
+    required: true
+    type: list[object]
+    description: "Each team is { name, members: [agent_names], reports_to: agent_name }. e.g. for Sett: { name: 'Lead Pod', members: ['Persona_Tah', 'Eve_Retti'], reports_to: 'Melli_Capensi' }."
+
+  # ─── I/O Contract ──────────────────────────────────────────────────
+  standard_inputs:
+    required: true
+    type: list[string]
+    description: "What the department receives to start work. e.g. ['approved_scope', 'architecture_plan', 'repo_url', 'environment_variables']."
+
+  standard_outputs:
+    required: true
+    type: list[string]
+    description: "What the department reliably produces. e.g. ['working_branch', 'implementation_notes', 'test_results', 'deployment_report']."
+
+  # ─── Governance ────────────────────────────────────────────────────
+  required_controls:
+    required: true
+    type: list[string]
+    description: "Hard rules every output must satisfy. e.g. ['branch_isolation', 'dependency_audit', 'secret_scanning', 'test_run', 'rollback_note']."
+
+  approval_required_when:
+    required: false
+    type: list[string]
+    description: "Conditions that escalate work out of the department to human approval."
+
+  # ─── Measurement ───────────────────────────────────────────────────
+  success_metrics:
+    required: true
+    type: list[string]
+    description: "How the department's performance is judged. e.g. ['feature_completion_rate', 'defect_escape_rate', 'cycle_time_p50', 'rollback_count']."
+
+  # ─── Provenance ────────────────────────────────────────────────────
+  enabled: { required: true, type: boolean, default: true }
+  status:
+    required: true
+    type: enum
+    options: [planned, in_development, operational, deprecated]
+
+  notes: { required: false, type: string }
+  created: { required: true, type: string, description: "ISO date YYYY-MM-DD" }
+  updated: { required: true, type: string, description: "ISO date YYYY-MM-DD" }
+  charter_canonical_at: { required: true, type: string }
