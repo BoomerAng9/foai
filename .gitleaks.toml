@@ -3,11 +3,11 @@ title = "foai gitleaks configuration"
 [extend]
 useDefault = true
 
-[[rules.allowlist]]
+[allowlist]
 description = "Test fixture files — fake api_key values in pytest fixtures"
 paths = [
     '''coastal-brewing/tests/.*\.py''',
-    '''.*test.*\.py''',
     '''.*_test\.py''',
+    '''.*test_.*\.py''',
     '''.*conftest\.py''',
 ]
