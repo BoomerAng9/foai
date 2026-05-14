@@ -1,0 +1,101 @@
+# FOAI Department Charter — Office of the CDO (Creative)
+# Schema: foai/registry/schemas/department-charter.yaml v1.0.0
+# Iller_Ang's home department. Owns all visual + creative output across the
+# ACHIEVEMOR platform.
+
+department: Office_of_the_CDO
+display_name: Office of the Chief Design Officer
+
+# ─── Mission ──────────────────────────────────────────────────────────
+purpose: >
+  Deliver all visual and creative output for the FOAI ecosystem — motion
+  landing pages, sports player cards, broadcast graphics, recruiting prediction
+  cards, team composites, character illustrations, agent character art,
+  podcast and media studio visuals, merchandise concepts, NURD profile and
+  NFT cards, digital and mixed-media art, cinematic game shots, lifestyle
+  photography direction, Remotion programmatic video composition, Seedance
+  2.0 video generation, All-22 film procurement, and lip-sync / talking-head
+  pipelines.
+
+scope: >
+  This department owns visual fidelity, brand canon adherence, the 5-step
+  canonical short-form video pipeline (image → motion → upscale → audio →
+  compose), and the Oddy Paradigm UI discipline. Out of scope: backend
+  development (Office of the CTO), business strategy (Office of the CEO via
+  ACHEEVY), customer-facing copy that doesn't ride on a visual (Content_Ang
+  + Sal_Ang depending on surface).
+
+# ─── Leadership ───────────────────────────────────────────────────────
+leader: Iller_Ang
+reports_to: ACHEEVY
+
+# ─── Teams ────────────────────────────────────────────────────────────
+teams:
+  - name: Lead Creative
+    members: [Iller_Ang]
+    reports_to: ACHEEVY
+    purpose: Creative direction, brand-canon enforcement, mode routing
+  - name: Motion Squad
+    members: []   # populated by request-time Lil_Hawk dispatch (Lil_Viz_Hawk, Lil_Blend_Hawk)
+    reports_to: Iller_Ang
+    purpose: Render execution support — complex compositing, 3D, motion clips
+  - name: Voice Squad
+    members: []   # request-time dispatch — Inworld TTS-2 + Gemini 3.1 Flash TTS via voice_relay
+    reports_to: Iller_Ang
+    purpose: Narration, podcast, voiceover, multi-character dialogue, talking-head audio
+
+# ─── I/O Contract ─────────────────────────────────────────────────────
+standard_inputs:
+  - creative_brief                       # asset_type / vertical / platform / format / text content / rarity tier
+  - brand_canon_assets                   # references from coastal-brewing/web/public/brand or per-vertical canon
+  - target_audience
+  - approved_scope
+  - timing_constraints                   # deadline, render duration
+
+standard_outputs:
+  - rendered_image                       # PNG / JPG at spec resolution + DPI
+  - rendered_motion_clip                 # MP4 H.264 at 1080p or 4K
+  - final_assembled_video                # FFmpeg or Remotion output
+  - pcp_grade                            # Performance & Capability Profile entry, 0-100, S/A/B/C/D
+  - dmaic_quality_gate_pass              # Define / Measure / Analyze / Improve / Control receipts
+
+# ─── Governance ───────────────────────────────────────────────────────
+required_controls:
+  - brand_canon_check                    # Coastal Brewing Co. trailing period, Custeez Z, etc.
+  - sacred_separation_check              # no supplier / vendor / model / infra names in customer-facing copy
+  - prd_compliance_check                 # no organic / no all natural / no low acid / no health claims / no mushroom-as-medicine / no same-day roasted-to-order
+  - typography_legibility_check          # zero garbled text, all words spelled correctly
+  - resolution_floor_check               # ≥1080px short edge; 300 DPI print; 72 DPI social
+  - oddy_paradigm_check                  # for interactive UI: glassmorphism / Framer Motion spring physics / no transition-all / GPU acceleration
+
+approval_required_when:
+  - asset_is_minted_as_nft               # owner approval before Polygon mint
+  - asset_features_real_person_identity  # for any Soul-ID-trained character work
+  - asset_publishes_to_external_platform # YouTube / IG / Twitter / etc. — operator-side notification
+
+# ─── Measurement ──────────────────────────────────────────────────────
+success_metrics:
+  - pcp_grade_distribution               # S-grade rate, A-grade rate, etc.
+  - dmaic_pass_rate                      # % of assets passing all 5 gates first try
+  - regen_round_count_p50                # median number of regens per deliverable
+  - brand_canon_violation_count          # MUST be 0 in customer-facing output
+  - mean_time_to_delivery_hours
+
+enabled: true
+status: operational
+
+notes: >
+  Per the iller-ang skill canon (loaded globally). PCP scoring runs on every
+  delivered asset with the format `PCP-CDO-{timestamp_base36}`. Scoring rubric:
+  visual fidelity to brand tokens 30 pts + asset-type and model routing
+  accuracy 25 pts + code/pipeline quality 25 pts + typography legibility
+  20 pts.
+
+  Sacred Separation is non-negotiable in this department's outputs — owner
+  has repeatedly corrected when internal tool / vendor / supplier names
+  leaked into customer-facing visuals. Memory references:
+  feedback_never_publish_internal_tool_names + reference_coastal_brewing_co_period_brand_canon_2026_05_10.
+
+created: "2026-05-14"
+updated: "2026-05-14"
+charter_canonical_at: foai/registry/departments/Office_of_the_CDO.yaml

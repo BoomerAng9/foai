@@ -1,0 +1,147 @@
+---
+# FOAI Agent Operating Card — Canonical Schema
+# Per the 25-section blueprint §12 + the Open Source Agent Intake skill canon.
+# Every Boomer_Ang, Lil_Hawk, Super Agent runtime, and Badger/Roo
+# operating inside FOAI has one of these files in foai/registry/agents/.
+#
+# Field rules:
+# - Required fields MUST be present in every card. CI rejects PRs that omit them.
+# - List fields use empty list [] when intentionally empty, never null.
+# - References to other registry entries use the file basename (e.g. "ACHEEVY", not the full path).
+# - Tool references in allowed_tools / denied_tools point to entries in foai/registry/tools/.
+schema_version: "1.0.0"
+schema_canonical_at: "foai/registry/schemas/agent-operating-card.yaml"
+schema_authority: "FOAI Humanless Organization spec 2026-05-14 §3 + Open Source Agent Intake skill"
+---
+
+fields:
+  # ─── Identity ──────────────────────────────────────────────────────
+  name:
+    required: true
+    type: string
+    description: "Canonical agent name. Must match the YAML file basename (e.g. 'ACHEEVY' → ACHEEVY.yaml). Snake_case for compound names (e.g. 'Sal_Ang')."
+
+  display_name:
+    required: false
+    type: string
+    description: "Human-readable form for UI surfaces. Defaults to `name` if omitted."
+
+  agent_class:
+    required: true
+    type: enum
+    options:
+      - executive_orchestrator   # ACHEEVY-tier — system executive, talks to user, routes work
+      - super_agent_runtime      # Chicken Hawk / NemoClaw / Hermes — Tier 3 runtime engine that owns a domain
+      - boomer_ang               # department head; C-suite peer; Tier 2
+      - lil_hawk_customer        # customer-facing worker agent, dispatched by Chicken Hawk
+      - lil_hawk_sqwaadrun       # ops-facing worker agent, dispatched by Chicken Hawk or Melli
+      - badger                   # Sett marketing PMO worker (Melli's pod)
+      - roo                      # Coastal LP retail-floor team
+      - cyber_hawk               # Tier 2 ephemeral security specialist
+
+  department:
+    required: true
+    type: string
+    description: "Reference to a charter in foai/registry/departments/. e.g. 'Office_of_the_CDO'."
+
+  reports_to:
+    required: true
+    type: string
+    description: "Canonical name of the supervising agent. Use 'ACHEEVY' if directly reporting; use 'human_in_the_loop' for the executive orchestrator itself."
+
+  pronouns:
+    required: false
+    type: string
+    description: "e.g. 'he / his / himself'. Optional; defaults to 'they / them' if absent."
+
+  # ─── Mission ───────────────────────────────────────────────────────
+  mission:
+    required: true
+    type: string
+    description: "One sentence: what this agent is responsible for."
+
+  primary_function:
+    required: true
+    type: string
+    description: "One paragraph: what the agent does day-to-day."
+
+  # ─── Permissions ───────────────────────────────────────────────────
+  allowed_tools:
+    required: true
+    type: list[string]
+    description: "Tool registry entry names this agent may invoke (e.g. ['autoresearch', 'hermes_deep_think', 'sandbox_dispatch']). Empty list means no tool invocation rights."
+
+  denied_tools:
+    required: false
+    type: list[string]
+    description: "Tool registry entry names this agent is explicitly forbidden from invoking, even if not in allowed_tools. Useful for sensitive tools like 'stripe_refund' that should be opt-in only for the CFO branch."
+
+  scopes:
+    required: false
+    type: list[string]
+    description: "Optional fine-grained permissions like 'read:audit_ledger', 'write:plug_bin', 'execute:cloud_run_job'."
+
+  # ─── I/O Contract ──────────────────────────────────────────────────
+  inputs:
+    required: true
+    type: list[string]
+    description: "What the agent receives. e.g. ['user_request', 'task_brief', 'source_requirements']."
+
+  outputs:
+    required: true
+    type: list[string]
+    description: "What the agent produces. e.g. ['research_brief', 'citation_table', 'confidence_score', 'unresolved_questions']."
+
+  # ─── Governance ────────────────────────────────────────────────────
+  approval_required_when:
+    required: true
+    type: list[string]
+    description: "Conditions that escalate to owner approval via NemoClaw + Telegram. e.g. ['sources_conflict', 'claim_affects_legal_or_medical', 'evidence_weak', 'cost_exceeds_threshold']."
+
+  risk_limits:
+    required: false
+    type: object
+    description: "Optional per-tier caps. e.g. { max_credit_spend_per_run: 500, max_external_actions_per_day: 10, max_runtime_seconds: 600 }."
+
+  constraints:
+    required: false
+    type: list[string]
+    description: "Hard rules the agent must never violate. e.g. ['never_name_supplier_publicly', 'never_make_health_claim', 'never_skip_audit_ledger_write']."
+
+  # ─── Measurement ───────────────────────────────────────────────────
+  success_metrics:
+    required: true
+    type: list[string]
+    description: "How the agent's performance is judged. e.g. ['source_quality_score', 'citation_accuracy', 'output_freshness', 'task_completion_rate', 'V.I.B.E_score']."
+
+  # ─── Memory + Lifecycle ────────────────────────────────────────────
+  memory_scope:
+    required: false
+    type: object
+    description: "Memory access. e.g. { reme_namespace: 'iller_ang', aims_memory_tenant: 'foai-default', shared_with: ['ACHEEVY'] }."
+
+  enabled:
+    required: true
+    type: boolean
+    default: true
+    description: "Master kill switch. If false, dispatcher refuses to route to this agent."
+
+  status:
+    required: true
+    type: enum
+    options:
+      - planned
+      - in_development
+      - operational
+      - deprecated
+      - blocked
+
+  # ─── Provenance ────────────────────────────────────────────────────
+  notes:
+    required: false
+    type: string
+    description: "Free-text notes; commit-log style. New rationale, ratification dates, link to memory entries."
+
+  created: { required: true, type: string, description: "ISO date YYYY-MM-DD" }
+  updated: { required: true, type: string, description: "ISO date YYYY-MM-DD" }
+  card_canonical_at: { required: true, type: string, description: "Path to this card relative to repo root, e.g. foai/registry/agents/ACHEEVY.yaml" }
