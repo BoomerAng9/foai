@@ -79,11 +79,15 @@ class TestClassification:
         f = self._finding("nvidia/Nemotron-3-Nano-30B-A3B-Base-BF16")
         assert _classify(m, f) == "current"
 
-    def test_current_when_latest_is_substring_of_pinned(self):
-        # Pinned includes extra suffix but core id matches — still current
+    def test_upgrade_candidate_when_pinned_is_suffixed_variant(self):
+        # _classify uses exact equality after normalization (per the docstring
+        # rewrite that retired the earlier substring-containment check).
+        # A pinned id with extra version suffix is therefore NOT the same as
+        # the upstream bare id — it surfaces as an upgrade-candidate so the
+        # team can decide whether to drop the suffix or hold the version.
         m = self._model("nvidia/Nemotron-3-Super-v1.2")
         f = self._finding("Nemotron-3-Super")
-        assert _classify(m, f) == "current"
+        assert _classify(m, f) == "upgrade-candidate"
 
     def test_upgrade_candidate_when_latest_differs(self):
         m = self._model("nvidia/Nemotron-3-Nano-30B-A3B-Base-BF16")
