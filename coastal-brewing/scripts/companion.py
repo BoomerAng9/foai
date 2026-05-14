@@ -98,6 +98,66 @@ def byok_delete(vendor: str, uid: str = Depends(require_uid)) -> dict:
     return {"ok": True, "deleted": vendor}
 
 
+class BillingCheckoutBody(BaseModel):
+    email: str
+
+
+@router.post("/billing/checkout")
+def billing_checkout(
+    body: BillingCheckoutBody, uid: str = Depends(require_uid),
+) -> dict:
+    import stripe
+    import companion_billing
+    from adapters.stripe_adapter import _init_stripe  # noqa: PLC0415
+    _init_stripe()
+    params = companion_billing.build_checkout_params(
+        customer_email=body.email, coastal_uid=uid,
+    )
+    try:
+        session = stripe.checkout.Session.create(**params)
+    except Exception as exc:
+        log.warning("companion checkout create failed: %s", exc)
+        raise HTTPException(status_code=502, detail="checkout session mint failed")
+    return {
+        "ok": True,
+        "session_id": session.id if hasattr(session, "id") else session.get("id"),
+        "redirect_url": session.url if hasattr(session, "url") else session.get("url"),
+    }
+
+
+@router.post("/billing/portal")
+def billing_portal(uid: str = Depends(require_uid)) -> dict:
+    import sqlite3
+    import stripe
+    import audit_ledger
+    from adapters.stripe_adapter import _init_stripe  # noqa: PLC0415
+    audit_ledger.init_schema()
+    _init_stripe()
+    with audit_ledger._lock:
+        conn = audit_ledger._connect()
+        try:
+            conn.row_factory = sqlite3.Row
+            cur = conn.execute(
+                "SELECT stripe_customer_id FROM companion_paid_users "
+                "WHERE coastal_uid = ?",
+                (uid,),
+            )
+            row = cur.fetchone()
+        finally:
+            conn.close()
+    if row is None:
+        raise HTTPException(status_code=404, detail="no paid subscription")
+    try:
+        portal = stripe.billing_portal.Session.create(
+            customer=row["stripe_customer_id"],
+            return_url=f"{os.environ.get('COASTAL_PUBLIC_URL', 'https://brewing.foai.cloud')}/companion",
+        )
+    except Exception as exc:
+        log.warning("companion portal mint failed: %s", exc)
+        raise HTTPException(status_code=502, detail="portal mint failed")
+    return {"ok": True, "url": portal.url}
+
+
 import secrets as _secrets  # noqa: E402
 
 FREE_TIER_DAILY_MINUTES_CAP = 30.0
