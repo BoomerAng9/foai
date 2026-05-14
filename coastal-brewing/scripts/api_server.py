@@ -1424,6 +1424,65 @@ async def stripe_webhook(request: Request) -> dict:
                 except Exception as _esc_exc:
                     escalation_report = {"error": str(_esc_exc)}
 
+            # C|Brew Communication Companion paid-tier branch
+            if session_meta.get("flow") == "companion_paid_tier":
+                try:
+                    _companion_uid = session_meta.get("coastal_uid", "")
+                    _companion_customer = session.get("customer")
+                    _companion_sub = session.get("subscription")
+                    if _companion_uid and _companion_customer and _companion_sub:
+                        audit_ledger.companion_paid_user_upsert(
+                            coastal_uid=_companion_uid,
+                            stripe_customer_id=_companion_customer,
+                            stripe_subscription_id=_companion_sub,
+                            status="active",
+                            current_period_end=None,
+                        )
+                        # Provision Taskade workspace if not already done
+                        if audit_ledger.companion_workspace_get(_companion_uid) is None:
+                            import companion_taskade  # noqa: PLC0415
+                            import os as _os  # noqa: PLC0415
+                            _taskade_tok = _os.environ.get(
+                                "COASTAL_TASKADE_API_TOKEN", "",
+                            )
+                            if _taskade_tok:
+                                try:
+                                    _ws_id = companion_taskade.provision_workspace(
+                                        api_token=_taskade_tok,
+                                        workspace_name=(
+                                            f"{session.get('customer_email', '')}"
+                                            "'s C|Brew Notes"
+                                        ),
+                                    )
+                                    audit_ledger.companion_workspace_set(
+                                        coastal_uid=_companion_uid,
+                                        taskade_workspace_id=_ws_id,
+                                    )
+                                except Exception as _ws_exc:
+                                    _log = __import__("logging").getLogger(
+                                        "coastal.companion.billing"
+                                    )
+                                    _log.warning(
+                                        "companion taskade provision failed: %s",
+                                        _ws_exc,
+                                    )
+                        try:
+                            _send_telegram_message(
+                                f"C|Brew Companion paid tier activated\n"
+                                f"uid: {_companion_uid}\n"
+                                f"email: {session.get('customer_email', '')}\n"
+                                f"customer: {_companion_customer}"
+                            )
+                        except Exception:
+                            pass
+                except Exception as _comp_exc:
+                    _log = __import__("logging").getLogger(
+                        "coastal.companion.billing"
+                    )
+                    _log.warning(
+                        "companion paid-tier activation failed: %s", _comp_exc,
+                    )
+
             packet = _build_task_packet_from_session(session_meta)
             if packet is not None:
                 # Inject the gateway token so the internal call to /run passes _auth.
@@ -1518,6 +1577,37 @@ async def stripe_webhook(request: Request) -> dict:
         except Exception as _ms_exc:
             membership_report = {"handled": False, "error": str(_ms_exc)}
 
+    # Companion sub status sync — keeps companion_paid_users.status aligned
+    # with Stripe lifecycle (updated / deleted events).
+    companion_sync_report: Optional[Dict[str, Any]] = None
+    if event.get("type") in (
+        "customer.subscription.updated", "customer.subscription.deleted",
+    ):
+        try:
+            _sub_obj = event["data"]["object"]
+            _sub_meta = dict(_sub_obj.get("metadata") or {})
+            if _sub_meta.get("flow") == "companion_paid_tier":
+                audit_ledger.companion_paid_user_upsert(
+                    coastal_uid=_sub_meta.get("coastal_uid", ""),
+                    stripe_customer_id=_sub_obj.get("customer", ""),
+                    stripe_subscription_id=_sub_obj.get("id", ""),
+                    status=_sub_obj.get("status", "canceled"),
+                    current_period_end=_sub_obj.get("current_period_end"),
+                )
+                companion_sync_report = {
+                    "synced": True,
+                    "coastal_uid": _sub_meta.get("coastal_uid", ""),
+                    "status": _sub_obj.get("status", "canceled"),
+                }
+        except Exception as _comp_exc:
+            _log = __import__("logging").getLogger(
+                "coastal.companion.billing"
+            )
+            _log.warning(
+                "companion sub status sync failed: %s", _comp_exc,
+            )
+            companion_sync_report = {"synced": False, "error": str(_comp_exc)}
+
     return {
         "received": True,
         "event_id": event["id"],
@@ -1527,6 +1617,7 @@ async def stripe_webhook(request: Request) -> dict:
         "rag_report": rag_report,
         "escalation_report": escalation_report,
         "membership_report": membership_report,
+        "companion_sync_report": companion_sync_report,
     }
 
 
@@ -7343,3 +7434,6 @@ async def voice_transcribe(audio: UploadFile = File(...)):
 # Owner console router — /api/v1/owner/* (cookie-gated)
 import owner_console  # noqa: E402
 app.include_router(owner_console.router)
+
+import companion  # noqa: E402
+app.include_router(companion.router)

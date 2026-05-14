@@ -127,6 +127,52 @@ def _migrate(conn: sqlite3.Connection) -> None:
         )"""
     )
 
+    # companion_* tables (added 2026-05-13): Communication Companion Phase 1A.
+    # companion_sessions: one row per translation/companion session.
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS companion_sessions (
+            session_id TEXT PRIMARY KEY,
+            coastal_uid TEXT NOT NULL,
+            started_at INTEGER NOT NULL,
+            ended_at INTEGER,
+            source_lang TEXT,
+            target_lang TEXT,
+            minutes_used REAL DEFAULT 0,
+            tier_at_start TEXT NOT NULL DEFAULT 'free'
+        )
+    """)
+    # companion_byok: BYOK encrypted API keys per (coastal_uid, vendor).
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS companion_byok (
+            coastal_uid TEXT NOT NULL,
+            vendor TEXT NOT NULL,
+            encrypted_key BLOB NOT NULL,
+            stored_at INTEGER NOT NULL,
+            last_used_at INTEGER NOT NULL DEFAULT 0,
+            PRIMARY KEY (coastal_uid, vendor)
+        )
+    """)
+    # companion_paid_users: Stripe subscription state for companion paid tier.
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS companion_paid_users (
+            coastal_uid TEXT PRIMARY KEY,
+            stripe_customer_id TEXT NOT NULL,
+            stripe_subscription_id TEXT NOT NULL,
+            status TEXT NOT NULL,
+            started_at INTEGER NOT NULL,
+            current_period_end INTEGER,
+            canceled_at INTEGER
+        )
+    """)
+    # companion_workspaces: Taskade workspace provisioning record.
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS companion_workspaces (
+            coastal_uid TEXT PRIMARY KEY,
+            taskade_workspace_id TEXT NOT NULL,
+            provisioned_at INTEGER NOT NULL
+        )
+    """)
+
 
 def init_schema() -> None:
     global _initialized
@@ -1160,5 +1206,187 @@ def count_events(
 
             row = conn.execute(sql, params).fetchone()
             return row[0] if row else 0
+        finally:
+            conn.close()
+
+
+# ─────────────────────────────────────────────────────────────────────
+# companion_* CRUD helpers (added 2026-05-13): Communication Companion Phase 1A
+# ─────────────────────────────────────────────────────────────────────
+
+
+def companion_session_start(*, session_id: str, coastal_uid: str,
+                             source_lang: str, target_lang: str,
+                             tier_at_start: str) -> None:
+    """Open a new companion session row."""
+    import time as _t
+    with _lock:
+        conn = _connect()
+        try:
+            conn.execute(
+                "INSERT INTO companion_sessions "
+                "(session_id, coastal_uid, started_at, source_lang, "
+                "target_lang, tier_at_start) VALUES (?, ?, ?, ?, ?, ?)",
+                (session_id, coastal_uid, int(_t.time()),
+                 source_lang, target_lang, tier_at_start),
+            )
+            conn.commit()
+        finally:
+            conn.close()
+
+
+def companion_session_end(*, session_id: str, minutes_used: float) -> None:
+    """Close a companion session — record ended_at and minutes_used."""
+    import time as _t
+    with _lock:
+        conn = _connect()
+        try:
+            conn.execute(
+                "UPDATE companion_sessions SET ended_at = ?, minutes_used = ? "
+                "WHERE session_id = ?",
+                (int(_t.time()), minutes_used, session_id),
+            )
+            conn.commit()
+        finally:
+            conn.close()
+
+
+def companion_session_fetch(session_id: str) -> dict | None:
+    """Return a companion session row as a dict, or None if not found."""
+    with _lock:
+        conn = _connect()
+        try:
+            conn.row_factory = sqlite3.Row
+            cur = conn.execute(
+                "SELECT * FROM companion_sessions WHERE session_id = ?",
+                (session_id,),
+            )
+            row = cur.fetchone()
+            return dict(row) if row else None
+        finally:
+            conn.close()
+
+
+def companion_byok_store(*, coastal_uid: str, vendor: str,
+                          encrypted_key: bytes) -> None:
+    """Upsert an encrypted BYOK key for (coastal_uid, vendor)."""
+    init_schema()
+    import time as _t
+    with _lock:
+        conn = _connect()
+        try:
+            conn.execute(
+                "INSERT OR REPLACE INTO companion_byok "
+                "(coastal_uid, vendor, encrypted_key, stored_at, last_used_at) "
+                "VALUES (?, ?, ?, ?, 0)",
+                (coastal_uid, vendor, encrypted_key, int(_t.time())),
+            )
+            conn.commit()
+        finally:
+            conn.close()
+
+
+def companion_byok_fetch(coastal_uid: str, vendor: str) -> bytes | None:
+    """Return the encrypted BYOK key for (coastal_uid, vendor), or None."""
+    init_schema()
+    with _lock:
+        conn = _connect()
+        try:
+            cur = conn.execute(
+                "SELECT encrypted_key FROM companion_byok "
+                "WHERE coastal_uid = ? AND vendor = ?",
+                (coastal_uid, vendor),
+            )
+            row = cur.fetchone()
+            return row[0] if row else None
+        finally:
+            conn.close()
+
+
+def companion_byok_delete(coastal_uid: str, vendor: str) -> None:
+    """Remove a BYOK key row. Idempotent."""
+    init_schema()
+    with _lock:
+        conn = _connect()
+        try:
+            conn.execute(
+                "DELETE FROM companion_byok WHERE coastal_uid = ? AND vendor = ?",
+                (coastal_uid, vendor),
+            )
+            conn.commit()
+        finally:
+            conn.close()
+
+
+def companion_paid_user_upsert(*, coastal_uid: str, stripe_customer_id: str,
+                                stripe_subscription_id: str, status: str,
+                                current_period_end: int | None) -> None:
+    """Insert or update a companion paid-user record.
+
+    Preserves the original started_at on update via COALESCE subquery.
+    """
+    import time as _t
+    with _lock:
+        conn = _connect()
+        try:
+            conn.execute(
+                "INSERT OR REPLACE INTO companion_paid_users "
+                "(coastal_uid, stripe_customer_id, stripe_subscription_id, "
+                "status, started_at, current_period_end) "
+                "VALUES (?, ?, ?, ?, "
+                "COALESCE((SELECT started_at FROM companion_paid_users "
+                "WHERE coastal_uid = ?), ?), ?)",
+                (coastal_uid, stripe_customer_id, stripe_subscription_id,
+                 status, coastal_uid, int(_t.time()), current_period_end),
+            )
+            conn.commit()
+        finally:
+            conn.close()
+
+
+def companion_is_paid(coastal_uid: str) -> bool:
+    """Return True if the uid has an active or trialing companion subscription."""
+    with _lock:
+        conn = _connect()
+        try:
+            cur = conn.execute(
+                "SELECT status FROM companion_paid_users WHERE coastal_uid = ?",
+                (coastal_uid,),
+            )
+            row = cur.fetchone()
+            return row is not None and row[0] in ("active", "trialing")
+        finally:
+            conn.close()
+
+
+def companion_workspace_set(*, coastal_uid: str, taskade_workspace_id: str) -> None:
+    """Upsert the Taskade workspace ID for a coastal_uid."""
+    import time as _t
+    with _lock:
+        conn = _connect()
+        try:
+            conn.execute(
+                "INSERT OR REPLACE INTO companion_workspaces "
+                "(coastal_uid, taskade_workspace_id, provisioned_at) "
+                "VALUES (?, ?, ?)",
+                (coastal_uid, taskade_workspace_id, int(_t.time())),
+            )
+            conn.commit()
+        finally:
+            conn.close()
+
+
+def companion_workspace_get(coastal_uid: str) -> str | None:
+    """Return the Taskade workspace ID for a coastal_uid, or None."""
+    with _lock:
+        conn = _connect()
+        try:
+            cur = conn.execute(
+                "SELECT taskade_workspace_id FROM companion_workspaces "
+                "WHERE coastal_uid = ?",
+                (coastal_uid,),
+            )
+            row = cur.fetchone()
+            return row[0] if row else None
         finally:
             conn.close()
