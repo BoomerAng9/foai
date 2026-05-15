@@ -1,0 +1,6 @@
+# Runtime deps only — scan tools (osv-scanner, gitleaks, syft, semgrep, trivy)
+# are invoked via subprocess and must be on PATH separately. See README for
+# install instructions per OS.
+
+# Test deps
+pytest==8.3.3
