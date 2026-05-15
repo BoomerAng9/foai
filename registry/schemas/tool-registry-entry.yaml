@@ -11,9 +11,12 @@
 # - an external API (e.g. Stripe, Mercury)
 # - an open-source agent runtime adapted via the Open Source Agent Intake skill
 # - an SDK wrapper (e.g. Higgsfield CLI)
-schema_version: "1.0.0"
+schema_version: "1.1.0"
 schema_canonical_at: "foai/registry/schemas/tool-registry-entry.yaml"
 schema_authority: "Open Source Agent Intake skill — references/tool-registry-schema.md + owner blueprint §9"
+changelog:
+  - "1.1.0 (2026-05-14): Added `business_objects` field — see agent-operating-card.yaml §1.1.0 changelog for rationale. Tools that operate on specific business objects (e.g. Stripe → invoice/subscription, Linear → ticket/project) declare them here; router uses for 2-axis match scoring."
+  - "1.0.0 (2026-05-14): Initial schema release with PR #448."
 ---
 
 fields:
@@ -75,6 +78,18 @@ fields:
     required: false
     type: list[string]
     description: "Free-text use-case strings that help ACHEEVY's intent classifier match the tool. e.g. ['multi-step scheduled web research', 'UI-managed agent tasks', 'cron-style recurring workflows']."
+
+  business_objects:
+    required: false
+    type: list[string]
+    default: []
+    description: >
+      Business-object types this tool operates on. Per the YouTube transcript synthesis
+      2026-05-14 (jwtpMSRAPAQ): 2-axis routing grid (capability × business_objects) is sharper
+      than capability alone. Examples: Stripe → ['subscription', 'invoice', 'customer'],
+      Linear → ['ticket', 'project'], Mercury → ['transaction', 'account', 'wire'],
+      Higgsfield → ['image_artifact', 'video_artifact', 'soul_id']. Tools that don't operate
+      on business objects (e.g. autoresearch — scans vendors) leave empty.
 
   # ─── Endpoint ──────────────────────────────────────────────────────
   endpoint:

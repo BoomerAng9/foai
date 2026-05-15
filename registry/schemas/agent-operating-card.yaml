@@ -9,9 +9,12 @@
 # - List fields use empty list [] when intentionally empty, never null.
 # - References to other registry entries use the file basename (e.g. "ACHEEVY", not the full path).
 # - Tool references in allowed_tools / denied_tools point to entries in foai/registry/tools/.
-schema_version: "1.0.0"
+schema_version: "1.1.0"
 schema_canonical_at: "foai/registry/schemas/agent-operating-card.yaml"
 schema_authority: "FOAI Humanless Organization spec 2026-05-14 §3 + Open Source Agent Intake skill"
+changelog:
+  - "1.1.0 (2026-05-14): Added `business_objects` field per YouTube transcript synthesis (jwtpMSRAPAQ). Business-object-typed routing is sharper than task-typed alone for enterprise/licensee workloads — 2-axis routing grid (task_type × business_objects) supersedes single-axis. Cheap to add now (before 44+ cards land); expensive retrofit later."
+  - "1.0.0 (2026-05-14): Initial schema release with PR #448."
 ---
 
 fields:
@@ -64,6 +67,20 @@ fields:
     required: true
     type: string
     description: "One paragraph: what the agent does day-to-day."
+
+  business_objects:
+    required: false
+    type: list[string]
+    default: []
+    description: >
+      Business-object types this agent operates on. Per the YouTube transcript synthesis
+      2026-05-14 (jwtpMSRAPAQ — "The Implementation Layer War"): enterprise/licensee routing
+      sharpens when paired with task_type. Examples: ['customer', 'order', 'subscription',
+      'lead', 'invoice', 'employee', 'product_sku', 'campaign', 'audit_event', 'forecast',
+      'support_ticket', 'inventory_lot']. Routing match score = task_type capability ×
+      business_objects overlap. Empty list = agent doesn't operate on business objects directly
+      (e.g. infrastructure agents like ACHEEVY, NemoClaw policy gate). Cards added before this
+      field existed default to []; per-vertical playbooks populate this field at card-author time.
 
   # ─── Permissions ───────────────────────────────────────────────────
   allowed_tools:

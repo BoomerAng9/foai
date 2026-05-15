@@ -1,15 +1,26 @@
 'use client';
 
+// hawk.foai.cloud public landing — Track A simplification (2026-05-14)
+//
+// Owner verdict 2026-05-14: prior landing was too confusing for visitors —
+// "Meet the Lil_Hawks", "Sqwaadrun", "the flock", FlockCards. Customer-facing
+// surfaces never expose internal agent names (Sacred Separation canon). The
+// simplified landing follows the Higgsfield Supercomputer pattern referenced
+// in the Circuit Box v1 spec §3 — hero-center prompt + 3 suggestion chips +
+// collapsed chrome.
+//
+// Operator routes (/tools/*, /lil-hawks, /sqwaadrun, /admin) remain reachable
+// for owner-tier magic-link sessions; they just don't surface as nav from the
+// public landing anymore. Phase 2 (Circuit Box) takes the Tool Chest over to
+// cti.foai.cloud where it belongs.
+
 import { Suspense, useEffect, useRef, useState } from 'react';
-import Image from 'next/image';
 import Link from 'next/link';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { ArrowRight, Wrench, Bird, FlaskConical, Shield } from 'lucide-react';
 import { FoaiBackground } from '@/components/foai-background';
 import { HawkChatInput, type Attachment } from '@/components/hawk-chat-input';
 import { HawkFooter } from '@/components/hawk-footer';
-import { HeroChatDemo } from '@/components/hero-chat-demo';
 import { HawkAvatar } from '@/components/hawk-avatar';
 import { MarkdownReply } from '@/components/markdown-reply';
 import { DispatchTrace } from '@/components/dispatch-trace';
@@ -21,6 +32,15 @@ interface Msg {
   id: string;
   hawk?: SqwaadrunHawk | null;
 }
+
+// Public-facing suggestion chips. These map to active customer verticals owner
+// has chosen to promote. NOT internal agent names. Sacred Separation canon —
+// the visitor sees businesses, not agent rosters.
+const SUGGESTION_CHIPS = [
+  { label: 'Try Coastal Brewing Co.', prompt: "I want to learn about Coastal Brewing Co. — what makes it different?" },
+  { label: 'See Per|Form Sports', prompt: "Show me what Per|Form does." },
+  { label: 'Get a quote for my business', prompt: "I run a small business and I want an agentic team that handles customer service, scheduling, and follow-up. What does that look like?" },
+];
 
 function HomePageInner() {
   const searchParams = useSearchParams();
@@ -76,6 +96,11 @@ function HomePageInner() {
     }
   }
 
+  function handleChipClick(prompt: string) {
+    void send(prompt, []);
+    chatRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+
   useEffect(() => {
     if (autoFiredRef.current) return;
     const incoming = searchParams.get('prompt');
@@ -93,106 +118,47 @@ function HomePageInner() {
     <div className="relative min-h-screen w-full overflow-x-hidden">
       <FoaiBackground />
 
-      <section className="relative z-10 mx-auto max-w-6xl px-6 pt-12 pb-16 lg:pt-20 lg:pb-24">
-        <div className="grid lg:grid-cols-12 gap-10 lg:gap-12 items-center">
-          <div className="lg:col-span-6 space-y-7">
-            <motion.div
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}
-              className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-foai-gold-tint border border-foai-gold/30 text-xs font-medium text-foai-gold"
-            >
-              <span className="size-1.5 rounded-full bg-foai-gold animate-pulse" />
-              Now in beta
-            </motion.div>
+      {/* Minimal top bar — sign-in for owner-tier; nothing else surfaces */}
+      <header className="relative z-20 mx-auto flex max-w-6xl items-center justify-between px-6 pt-6">
+        <Link href="/" className="flex items-center gap-2 text-foai-text font-semibold">
+          <HawkAvatar size={28} />
+          <span>Chicken Hawk</span>
+        </Link>
+        <Link
+          href="/login"
+          className="text-xs font-medium text-foai-muted hover:text-foai-text transition-colors"
+        >
+          Owner sign in
+        </Link>
+      </header>
 
-            <motion.h1
-              initial={{ opacity: 0, y: 14 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.05 }}
-              className="text-5xl sm:text-6xl lg:text-7xl font-bold tracking-tight text-foai-text leading-[1.05]"
-            >
-              Meet <span className="text-foai-gold italic">Chicken Hawk</span>
-              <span className="block text-3xl sm:text-4xl lg:text-5xl font-semibold text-foai-muted mt-3">
-                + the Lil_Hawks who get the work done.
-              </span>
-            </motion.h1>
+      {/* Hero — single prompt, single headline, three chips */}
+      <section
+        ref={chatRef}
+        className="relative z-10 mx-auto flex min-h-[80vh] max-w-3xl flex-col justify-center px-6 pb-16 pt-12"
+      >
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="mb-10 text-center"
+        >
+          <h1 className="text-4xl sm:text-5xl font-bold tracking-tight text-foai-text leading-[1.1]">
+            How can <span className="text-foai-gold">Chicken Hawk</span> help your business?
+          </h1>
+          <p className="mt-4 text-base text-foai-muted">
+            Ask anything. We&rsquo;ll show you what an agentic team looks like for your kind of work.
+          </p>
+        </motion.div>
 
-            <motion.p
-              initial={{ opacity: 0, y: 14 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.12 }}
-              className="text-lg text-foai-muted leading-relaxed max-w-xl"
-            >
-              Direct, capable, good-humored. Chicken Hawk leads a flock of
-              specialist Lil_Hawks — each one a senior-level helper for a
-              specific kind of work. Drop a request in plain English and the
-              right hawk gets to work. You stay in the loop on the calls that
-              matter.
-            </motion.p>
-
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-              className="rounded-2xl border border-foai-border bg-foai-surface shadow-card overflow-hidden"
-            >
-              <Image
-                src="/chicken-hawks-hero.png"
-                alt="Chicken Hawk and two Lil_Hawks at the AIMS port"
-                width={1024}
-                height={1024}
-                className="w-full h-auto"
-                priority
-                unoptimized
-              />
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.6, delay: 0.28 }}
-              className="flex flex-wrap gap-3"
-            >
-              <Link
-                href="/lil-hawks"
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-md bg-foai-text text-white text-sm font-semibold hover:bg-foai-text/90 transition-colors"
-              >
-                Meet the Lil_Hawks <ArrowRight className="size-4" />
-              </Link>
-              <Link
-                href="/sqwaadrun"
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-md border border-foai-border bg-foai-surface text-foai-text text-sm font-semibold hover:border-foai-gold/50 hover:shadow-card transition-all"
-              >
-                Sqwaadrun
-              </Link>
-            </motion.div>
-          </div>
-
-          <div className="lg:col-span-6">
-            <motion.div
-              initial={{ opacity: 0, y: 16 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.15 }}
-            >
-              <HeroChatDemo />
-            </motion.div>
-          </div>
-        </div>
-      </section>
-
-      <section ref={chatRef} className="relative z-10 mx-auto max-w-3xl px-6 pb-12">
-        <div className="rounded-2xl bg-foai-surface border border-foai-border p-6 sm:p-8 shadow-card-md">
-          <div className="flex items-center gap-3 mb-5">
-            <HawkAvatar size={36} />
-            <div>
-              <div className="font-semibold text-foai-text">Chicken Hawk</div>
-              <div className="text-xs text-foai-muted">Live · type below to start</div>
-            </div>
-          </div>
-
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.1 }}
+          className="rounded-2xl bg-foai-surface border border-foai-border p-5 sm:p-6 shadow-card-md"
+        >
           {hasMessages ? (
-            <div className="flex flex-col gap-3 mb-5 max-h-[600px] overflow-y-auto">
+            <div className="flex flex-col gap-3 mb-5 max-h-[55vh] overflow-y-auto">
               {messages.map((m) => (
                 <motion.div
                   key={m.id}
@@ -224,23 +190,25 @@ function HomePageInner() {
                 </motion.div>
               ))}
             </div>
-          ) : (
-            <p className="text-sm text-foai-muted mb-5">
-              Tell Chicken Hawk what you need. Direct answer. Real work output. No clarifying-question maze.
-            </p>
-          )}
+          ) : null}
 
           <HawkChatInput onSend={send} disabled={pending} />
-        </div>
-      </section>
 
-      <section className="relative z-10 mx-auto max-w-6xl px-6 py-16 lg:py-24">
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
-          <FlockCard icon={<Wrench className="size-5" />} title="Get to work" body="Drafts, plans, builds, research — Chicken Hawk produces output, not opinions about output." />
-          <FlockCard icon={<Bird className="size-5" />} title="Specialist Lil_Hawks" body="A flock of senior-level workers, each tuned for one kind of job. Chicken Hawk routes you to the right one." />
-          <FlockCard icon={<Shield className="size-5" />} title="Pause when it matters" body="Money, contracts, anything going public — those wait for your call. Routine work doesn't." />
-          <FlockCard icon={<FlaskConical className="size-5" />} title="Sharpens itself" body="Off-hours, the flock tries variants of how it works. Keeps the wins. Rolls back the rest." />
-        </div>
+          {!hasMessages && (
+            <div className="mt-4 flex flex-wrap justify-center gap-2">
+              {SUGGESTION_CHIPS.map((chip) => (
+                <button
+                  key={chip.label}
+                  type="button"
+                  onClick={() => handleChipClick(chip.prompt)}
+                  className="rounded-full border border-foai-border bg-foai-surface-2 px-3 py-1.5 text-xs font-medium text-foai-text/80 hover:border-foai-gold/50 hover:text-foai-text transition-colors"
+                >
+                  {chip.label}
+                </button>
+              ))}
+            </div>
+          )}
+        </motion.div>
       </section>
 
       <HawkFooter />
@@ -253,17 +221,5 @@ export default function HomePage() {
     <Suspense fallback={null}>
       <HomePageInner />
     </Suspense>
-  );
-}
-
-function FlockCard({ icon, title, body }: { icon: React.ReactNode; title: string; body: string }) {
-  return (
-    <div className="rounded-2xl border border-foai-border bg-foai-surface p-5 shadow-card-sm hover:shadow-card transition-shadow">
-      <div className="size-10 rounded-lg bg-foai-gold-tint text-foai-gold flex items-center justify-center mb-3">
-        {icon}
-      </div>
-      <h3 className="font-semibold text-foai-text mb-1.5">{title}</h3>
-      <p className="text-sm text-foai-muted leading-relaxed">{body}</p>
-    </div>
   );
 }
