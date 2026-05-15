@@ -11,10 +11,11 @@
 # - an external API (e.g. Stripe, Mercury)
 # - an open-source agent runtime adapted via the Open Source Agent Intake skill
 # - an SDK wrapper (e.g. Higgsfield CLI)
-schema_version: "1.1.0"
+schema_version: "1.2.0"
 schema_canonical_at: "foai/registry/schemas/tool-registry-entry.yaml"
-schema_authority: "Open Source Agent Intake skill — references/tool-registry-schema.md + owner blueprint §9"
+schema_authority: "Open Source Agent Intake skill v2 (2026-05-14, ~20KB SKILL.md) — references/tool-registry-schema.md + owner blueprint §9"
 changelog:
+  - "1.2.0 (2026-05-14): Aligned with upgraded Open Source Agent Intake skill v2 shipped via Agentic Organization.zip. Additive fields (non-breaking, mixed-version tolerated): `upstream_url`, `foai_owner_layer`, `authority_path`, `trust` object (status/freshness_status/license_status/malware_spyware_status/last_checked_at/trust_report_path), `requires_owner_approval` (canonical alias of `requires_human_approval`, both accepted during transition). New entries from PR forward MUST declare `trust` and `foai_owner_layer`; pre-1.2.0 entries stay valid at their original schema_version until retrofit PR."
   - "1.1.0 (2026-05-14): Added `business_objects` field — see agent-operating-card.yaml §1.1.0 changelog for rationale. Tools that operate on specific business objects (e.g. Stripe → invoice/subscription, Linear → ticket/project) declare them here; router uses for 2-axis match scoring."
   - "1.0.0 (2026-05-14): Initial schema release with PR #448."
 ---
