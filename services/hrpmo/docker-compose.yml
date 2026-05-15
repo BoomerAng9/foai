@@ -1,0 +1,18 @@
+services:
+  hrpmo-loop:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: hrpmo-loop:0.1.0
+    container_name: hrpmo-loop
+    env_file:
+      - .env
+    environment:
+      LOG_LEVEL: info
+    restart: "no"  # cron-triggered, not a daemon
+    networks:
+      - hrpmo-local
+
+networks:
+  hrpmo-local:
+    driver: bridge
