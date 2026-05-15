@@ -1,75 +1,45 @@
 """SQLAlchemy-backed reader for foai.audit_ledger.
 
-Postgres-first; SQLite-tolerant for tests via column-type fallback (JSONB
-becomes JSON; UUID becomes string).
+Models live at `runtime/audit_ledger/models.py` (shared source of truth between
+writer + reader + HRPMO loop). This module owns reader-side concerns:
+session lifecycle, fetch_unsynced, mark_synced, mark_failed, and the
+to_render_params projection consumed by the Taskade adapter.
 """
 from __future__ import annotations
 
 import json
 import logging
 from datetime import datetime, timezone
-from typing import Any, Iterable, Optional
+from typing import Any, Optional
 
-from sqlalchemy import (
-    JSON,
-    Column,
-    DateTime,
-    Integer,
-    String,
-    Text,
-    create_engine,
-    select,
-    update,
+from sqlalchemy import create_engine, select, update
+from sqlalchemy.orm import Session
+
+from runtime.audit_ledger.models import (
+    AuditEvent,
+    Base,
+    drop_schema_prefix_for_sqlite,
 )
-from sqlalchemy.dialects.postgresql import JSONB, UUID
-from sqlalchemy.orm import DeclarativeBase, Session
 
 log = logging.getLogger("taskade.sync_worker.ledger_reader")
 
-
-class Base(DeclarativeBase):
-    pass
-
-
-def _portable_json() -> Any:
-    """JSONB on Postgres, JSON on SQLite — keeps tests workable."""
-    return JSONB().with_variant(JSON(), "sqlite")
-
-
-def _portable_uuid() -> Any:
-    return UUID(as_uuid=False).with_variant(String(36), "sqlite")
-
-
-class AuditEvent(Base):
-    __tablename__ = "audit_ledger"
-    __table_args__ = {"schema": "foai"}
-
-    event_id = Column(_portable_uuid(), primary_key=True)
-    agent = Column(Text, nullable=False)
-    action = Column(Text, nullable=False)
-    payload = Column(_portable_json(), nullable=False, default=dict)
-    customer_uid = Column(Text, nullable=True)
-    timestamp_event = Column(DateTime(timezone=True), nullable=False)
-    synced_to_taskade_at = Column(DateTime(timezone=True), nullable=True)
-    sync_attempt_count = Column(Integer, nullable=False, default=0)
-    last_sync_error = Column(Text, nullable=True)
-    created_at = Column(DateTime(timezone=True), nullable=False, default=lambda: datetime.now(timezone.utc))
+# Re-export so existing test imports
+# (`from services.taskade_sync_worker.ledger_reader import AuditEvent, Base`)
+# continue to resolve.
+__all__ = ["AuditEvent", "Base", "LedgerReader"]
 
 
 class LedgerReader:
     """Owns the DB engine + session lifecycle for the sync worker."""
 
     def __init__(self, database_url: str):
-        # SQLite test mode: schema=foai needs the schema set on the table
-        # but SQLite ignores schemas — keep the metadata mapping consistent.
         connect_args: dict[str, Any] = {}
         if database_url.startswith("sqlite"):
             connect_args["check_same_thread"] = False
         self._engine = create_engine(database_url, connect_args=connect_args, future=True)
         # For SQLite tests, the foai schema is virtual — translate to a plain
         # table name in the connection. Production Postgres uses the real schema.
-        if database_url.startswith("sqlite"):
-            AuditEvent.__table__.schema = None  # type: ignore[assignment]
+        drop_schema_prefix_for_sqlite(database_url)
 
     def init_schema_for_tests(self) -> None:
         """Create the audit_ledger table on SQLite. NEVER call against Postgres."""
