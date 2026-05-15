@@ -1,0 +1,184 @@
+# Taskade Genesis Template — canonical Org structure for per-client white-label clones.
+#
+# Per Phase 8 of the Taskade integration plan + the consultancy playbook
+# (iCloud/.../FOAI Project/research/2026-05-14_fully-agentic-org-failure-modes-and-foai-solutions.md):
+# each future consultancy client gets their own Taskade Organization
+# provisioned by the clone factory (clone.py). The factory walks this manifest
+# and creates the corresponding workspaces, folders, project skeletons,
+# agent stubs, and automation triggers — every {{CLIENT_NAME}} / {{CLIENT_SLUG}}
+# placeholder replaced with the client's actual values.
+
+manifest_version: "1.0.0"
+manifest_canonical_at: "foai/integrations/taskade/genesis_template/manifest.yaml"
+
+# ─── Parameters supplied at clone time ────────────────────────────────────
+parameters:
+  required:
+    - CLIENT_NAME           # Display name, e.g. "Acme Coffee Roasters"
+    - CLIENT_SLUG           # Lowercase URL-safe, e.g. "acme-coffee"
+    - CLIENT_ADMIN_EMAIL    # Initial admin user
+    - IDP_CHOICE            # "google_workspace" | "okta" | "azure_ad" | "skip_for_now"
+  optional:
+    - CLIENT_LOGO_URL
+    - CLIENT_PRIMARY_COLOR  # hex, defaults to FOAI gold #E8A020
+    - DEFAULT_TIMEZONE      # IANA, defaults to America/New_York
+
+# ─── Organization-level settings ──────────────────────────────────────────
+organization:
+  display_name: "{{CLIENT_NAME}}"
+  default_workspace: "{{CLIENT_NAME}} — Operations"
+  saml_sso:
+    enabled_when: "IDP_CHOICE != 'skip_for_now'"
+    idp_choice: "{{IDP_CHOICE}}"
+    # Domain + IDP values are owner-action — clone factory generates the
+    # ClientCloneResult.saml_setup_doc pointing at a per-client walkthrough.
+  feature_flags:
+    auto_top_up_ai_credits: false   # Sacred Separation: AI stays in FOAI gateway
+
+# ─── Workspaces ───────────────────────────────────────────────────────────
+workspaces:
+  - name: "{{CLIENT_NAME}} — Operations"
+    description: "Daily ops, audit-ledger mirror, agent activity feed"
+    is_default: true
+    folders:
+      - name: "audit-ledger-mirror"
+        purpose: "Daily-bucketed HTML mirror of client's foai_<slug>.audit_ledger Neon schema"
+        access_tier: "owner_tier"  # Client owner + FOAI consulting team only
+      - name: "hrpmo-cycles"
+        purpose: "Weekly HRPMO cycle artifacts for the client's agent fleet"
+        access_tier: "owner_tier"
+      - name: "forward-deploy-receipts"
+        purpose: "Pattern proofs from recurring solutions (Forward-Deploy skill)"
+        access_tier: "owner_tier"
+      - name: "incidents"
+        purpose: "Incident postmortems + remediation tracking"
+        access_tier: "owner_tier"
+
+  - name: "{{CLIENT_NAME}} — AI Ecosystem"
+    description: "Per-agent dashboards, persona definitions, skill library"
+    is_default: false
+    folders:
+      - name: "agent-roster"
+        purpose: "One project per active agent in the client's deployment"
+        access_tier: "team_tier"
+      - name: "skill-library"
+        purpose: "Skill recipes + agent training notes"
+        access_tier: "team_tier"
+      - name: "playbooks"
+        purpose: "Client-specific runbooks for common scenarios"
+        access_tier: "team_tier"
+
+# ─── Project skeletons ────────────────────────────────────────────────────
+project_skeletons:
+  - workspace: "{{CLIENT_NAME}} — Operations"
+    folder: "incidents"
+    name: "Incident Response Playbook"
+    type: "doc"
+    content_template: |
+      # Incident Response Playbook — {{CLIENT_NAME}}
+
+      ## Roles
+      - Incident Commander: <client_admin>
+      - FOAI Liaison: <foai_oncall>
+      - Communications: <client_comms_lead>
+
+      ## Severity ladder
+      - SEV-1: production down / customer-facing outage
+      - SEV-2: degraded performance / non-critical feature broken
+      - SEV-3: cosmetic / internal-only issue
+
+      ## On-call rotation
+      <fill in at onboarding>
+
+      ## Postmortem template
+      Linked: see "incidents" folder for the templated postmortem project per incident.
+
+  - workspace: "{{CLIENT_NAME}} — Operations"
+    folder: "hrpmo-cycles"
+    name: "cycle-template-readme"
+    type: "doc"
+    content_template: |
+      # HRPMO cycle artifact template
+
+      One project per ISO week (cycle-YYYY-WW). Body:
+      - V.I.B.E. score table per agent
+      - KPI hit rate
+      - Org Fit Index
+      - Coaching recipes for below-threshold agents (with Approve / Reject buttons)
+      - Prior-cycle outcome resolution
+
+  - workspace: "{{CLIENT_NAME}} — AI Ecosystem"
+    folder: "agent-roster"
+    name: "agent-roster-overview"
+    type: "doc"
+    content_template: |
+      # Agent Roster — {{CLIENT_NAME}}
+
+      Stand-up date: <fill at clone time>
+
+      ## Active agents
+      <one row per agent: name | role descriptor | status | last activity>
+
+      ## Sacred Separation
+      All agent names are displayed as role descriptors in client-tier views.
+      Owner-tier views show raw names. Mapping table: foai/integrations/taskade/role_descriptors.py.
+
+# ─── Stub agents (FOAI-gateway-backed, NOT Taskade-native) ────────────────
+# Per Phase 9 of integration plan (Tier 3 LTD 0 AI credits): client clones
+# ship with stub agents that proxy to the client's FOAI gateway via webhook.
+# These declarations create Taskade automation entries that fire webhooks
+# pointing back at the client's FOAI deployment — Taskade itself never runs
+# AI for these stubs.
+stub_agents:
+  - name: "Audit Mirror Sync"
+    purpose: "Triggers the taskade-sync-worker to push new audit_ledger rows"
+    trigger: "cron_every_5_min"
+    webhook: "https://<client_foai_gateway>/api/sync/audit-trigger"
+    foai_gateway_route: true
+
+  - name: "HRPMO Cycle Runner"
+    purpose: "Fires the weekly HRPMO cycle (Betty-Anne) for the client's agent fleet"
+    trigger: "cron_monday_09_00_eastern"
+    webhook: "https://<client_foai_gateway>/api/hrpmo/cycle-trigger"
+    foai_gateway_route: true
+
+  - name: "Forward-Deploy Reviewer"
+    purpose: "Reviews proposed forward-deploy receipts against the promotion gate"
+    trigger: "on_project_create_in_forward-deploy-receipts_folder"
+    webhook: "https://<client_foai_gateway>/api/forward-deploy/review"
+    foai_gateway_route: true
+
+# ─── Automation triggers ──────────────────────────────────────────────────
+automations:
+  - name: "HRPMO coaching approval"
+    when: "button_click_in_hrpmo-cycles_project"
+    action: "POST {{CLIENT_FOAI_GATEWAY}}/api/internal/hrpmo-decision"
+    payload: "{project_id, button_label, user_email, week_iso}"
+
+  - name: "Forward-Deploy receipt promotion"
+    when: "label_added_to_project: 'ready-for-promotion'"
+    action: "POST {{CLIENT_FOAI_GATEWAY}}/api/forward-deploy/promote"
+    payload: "{project_id, receipt_path, label_added_by}"
+
+# ─── Per-client Neon schema (FOAI-side) ────────────────────────────────────
+# The clone factory also provisions a Postgres schema in the client's Neon DB
+# (or a dedicated client Neon instance) mirroring foai.audit_ledger /
+# foai.coaching_notes under foai_<CLIENT_SLUG>.* — keeps each client's audit
+# trail tenant-isolated.
+neon_schema:
+  template: "foai_<CLIENT_SLUG>"
+  ddl_source: "foai/services/taskade_sync_worker/schema/audit_ledger.sql"
+  ddl_transform: "s/foai\\./foai_<CLIENT_SLUG>./g"
+  roles_to_create:
+    - "{{CLIENT_SLUG}}_writer"
+    - "{{CLIENT_SLUG}}_sync"
+    - "{{CLIENT_SLUG}}_hrpmo"
+    - "{{CLIENT_SLUG}}_admin"
+
+# ─── Cleanup / rollback ───────────────────────────────────────────────────
+rollback:
+  # The clone factory tracks every resource it provisions so a failed clone
+  # can be cleanly torn down. ClientCloneResult.created_resources lists
+  # workspace_ids + folder_ids + project_ids + tokens minted + neon_schema_name.
+  on_failure: "destroy_all_created_resources_in_reverse_order"
+  orphan_token_audit: "weekly — Betty-Anne HRPMO loop checks for client clones with no recent activity"
