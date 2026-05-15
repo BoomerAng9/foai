@@ -1,0 +1,46 @@
+{
+  "_comment": "Chicken Hawk gateway MCP server registry. Owner-tier sessions get MCP routing through here; public/anonymous chat does NOT route to any MCP server (access-tier canon per ~/foai/chicken-hawk/CLAUDE.md). Pin npm package versions explicitly — never use `latest` in production.",
+  "_schema_version": "1.0.0",
+  "_canonical_at": "foai/chicken-hawk/gateway/mcp-servers.json",
+  "_updated": "2026-05-14",
+
+  "mcpServers": {
+    "taskade": {
+      "_comment": "Taskade Org 'The Future of A.I.' — owner-tier wiki / HRPMO / consultancy-CRM surface. Status: APPROVED_SANDBOX_ONLY until trust gate executes (see foai/integrations/taskade/MCP_SETUP.md).",
+      "_trust_status": "APPROVED_SANDBOX_ONLY",
+      "_trust_report": "foai/integrations/taskade/TRUST_REPORT.md",
+      "command": "npx",
+      "args": ["-y", "@taskade/mcp-server@latest"],
+      "env": {
+        "TASKADE_API_KEY": "${Taskade_Sync_Service_Token}"
+      },
+      "_runtime_constraints": {
+        "owner_tier_only": true,
+        "max_concurrent_calls": 4,
+        "allowed_outbound": ["*.taskade.com"],
+        "sandbox_observed": false,
+        "pin_version_before_prod": true
+      }
+    }
+  },
+
+  "_routing_rules": {
+    "public_chat": {
+      "_comment": "/api/public/chat MUST NOT route to any MCP server. Public callers are anonymous and rate-limited; MCP exposure is owner-tier only.",
+      "mcp_enabled": false
+    },
+    "owner_session": {
+      "_comment": "Magic-link authenticated owner session (cookie bound to OWNER_EMAIL) can invoke MCP servers via the gateway. Boomer_Angs can invoke through ACHEEVY only.",
+      "mcp_enabled": true,
+      "require_nemoclaw_verdict_on_mutations": true
+    }
+  },
+
+  "_owner_blocking_to_enable": [
+    "Pin @taskade/mcp-server to a specific version (replace `latest`)",
+    "Run the quarantine sandbox observation per MCP_SETUP.md (tcpdump + mitmproxy for 1h)",
+    "Mint Taskade_Sync_Service_Token in Taskade Settings → API; paste into openclaw vault (MixedCase)",
+    "Pipe env through gateway docker-compose with restricted scope",
+    "Append outbound endpoint allowlist to PROOF_BUNDLE.md once observation completes"
+  ]
+}
