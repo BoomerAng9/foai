@@ -1,0 +1,162 @@
+# FOAI Tool Registry Entry — Taskade
+# Schema: foai/registry/schemas/tool-registry-entry.yaml v1.2.0
+# Canon authority: Open Source Agent Intake skill v2
+# Intake artifacts: foai/integrations/taskade/{INTAKE.md, TRUST_REPORT.md, PROOF_BUNDLE.md}
+
+schema_version: "1.2.0"
+name: taskade
+display_name: "Taskade — The Future of A.I. Organization"
+aliases:
+  - taskade_org
+  - taskade_wiki
+  - future_of_ai_org
+
+provider_or_repo: "Taskade Inc. (SaaS)"
+upstream_url: "https://www.taskade.com/api/v1"
+version_or_commit: "REST v1 (2026-05-14) + MCP v2 Hosted (@taskade/mcp-server, pin TBD at Phase 4)"
+
+capabilities:
+  - workflow_orchestration
+  - data_extraction
+  - audit
+  - memory
+  - notification
+
+best_for:
+  - "wiki + HTML mirror of the foai.audit_ledger Neon table (Track #94)"
+  - "weekly HRPMO cycle artifacts authored by Betty-Anne_Ang (Track #95)"
+  - "consultancy CRM surface — workspaces as client pipelines (ACHIEVEMOR Lead Gen Project)"
+  - "white-label Genesis-clone factory for per-client consultancy delivery (Phase 8)"
+  - "owner-tier project + task management with native SSO (Google Workspace)"
+
+business_objects:
+  - workspace
+  - project
+  - task
+  - folder
+  - agent
+  - automation
+  - audit_event_html
+  - coaching_note
+  - skill_recipe_artifact
+
+foai_owner_layer: infrastructure
+authority_path:
+  - ACHEEVY
+  - Chicken Hawk
+  - taskade_sync_worker
+
+endpoint: "http://taskade-adapter:8000"
+healthcheck: "http://taskade-adapter:8000/health"
+
+auth:
+  type: bearer
+  secret_ref: "openclaw:Taskade_Sync_Service_Token"
+  notes: >
+    Two tokens in canon (per Phase 3 of integration plan):
+    Taskade_Deploy_API_Token (existing, full Org admin — used by coastal-runner + Chicken Hawk gateway)
+    Taskade_Sync_Service_Token (new, scope-limited if Taskade supports per-workspace tokens — used by sync worker only)
+    Both stored MixedCase in openclaw vault per Stripe/Mercury env var canon.
+    Pipe to containers as UPPERCASE TASKADE_API_KEY / TASKADE_SYNC_TOKEN.
+
+input_schema:
+  type: object
+  required: [capability, params]
+  properties:
+    capability:
+      type: string
+      enum:
+        - workspace.list
+        - workspace.get
+        - project.create
+        - project.update
+        - project.archive
+        - project.get
+        - task.add
+        - task.update
+        - task.complete
+        - audit_event.render_html
+        - coaching_note.append
+    params:
+      type: object
+      description: "Per-capability params — see foai/integrations/taskade/adapter/schemas.py for each."
+
+output_schema:
+  type: object
+  required: [ok, capability, result]
+  properties:
+    ok: { type: boolean }
+    capability: { type: string }
+    result: { type: object }
+    error: { type: object, description: "Present only when ok=false" }
+
+side_effect_level: external_actions
+requires_owner_approval: false
+notes_on_approval: >
+  Read-only capabilities (workspace.list, workspace.get, project.get) and the pure-function
+  audit_event.render_html do NOT require approval. Mutating capabilities (project.create,
+  project.update, project.archive, task.add, task.update, task.complete, coaching_note.append)
+  DO require owner approval when invoked outside the sync-worker / hrpmo-loop service contexts.
+  The sync worker and hrpmo loop are pre-authorized by their own NemoClaw allow-list entries
+  (added in Phase 5 + Phase 6).
+
+# Legacy alias maintained during 1.1.0 → 1.2.0 transition
+requires_human_approval: false
+
+timeout_seconds: 120
+max_runtime_seconds: 300
+
+scheduler_enabled: true
+scheduler_notes: >
+  Taskade-sync-worker (Phase 5) runs every 5min; HRPMO loop (Phase 6) runs weekly
+  Monday 09:00 ET. Both have their own service-level scheduler — this tool entry
+  declares scheduler_enabled true to allow them, but the cron config lives at the
+  service level, not in this registry entry.
+
+fallback_tools: []
+fallback_notes: >
+  No automatic fallback. If Taskade is unreachable, the sync worker buffers + retries
+  with exponential backoff; HRPMO loop alerts owner via Telegram and pauses the cycle.
+
+blocked_actions:
+  - delete_workspace
+  - delete_org
+  - bulk_user_invite_without_owner_approval
+  - export_full_org_to_third_party
+
+logs:
+  destination: "foai.audit_ledger.taskade"
+  redaction_required: true
+  redaction_notes: >
+    Per Sacred Separation canon: agent names mapped to role descriptors before any
+    HTML rendered to Taskade (Iller_Ang → "Creative Director" etc) when surface is
+    client_tier. PII (customer UIDs) hashed via SHA-256 + TASKADE_PII_SALT before
+    sync. Model + provider names NEVER rendered in any Taskade-visible string.
+
+trust:
+  status: APPROVED_SANDBOX_ONLY
+  freshness_status: current
+  license_status: approved
+  malware_spyware_status: review_required
+  last_checked_at: "2026-05-14T00:00:00Z"
+  trust_report_path: "foai/integrations/taskade/TRUST_REPORT.md"
+  notes: >
+    SaaS vendor (not OSS repo) — freshness is current (active platform, MCP v2 hosted launched Oct 2025).
+    License approved for owner's AppSumo Tier 3 Legacy LTD.
+    @taskade/mcp-server npm package (MIT-licensed) needs dependency audit + outbound network observation
+    before status promotion to APPROVED_FOR_INTAKE — see TRUST_REPORT.md §runtime/network.
+    Coastal Brewing Co.'s companion_taskade.py (existing) operates in production today; this entry
+    promotes the integration from repo-local to FOAI-level canon and adds the sync-worker + HRPMO layers.
+
+intake_status: candidate
+intake_proof_bundle: "foai/integrations/taskade/PROOF_BUNDLE.md"
+
+enabled: false
+enabled_notes: >
+  Disabled at registry level until Phase 4 adapter ships + trust gate completes.
+  Coastal Brewing Co.'s direct REST integration (companion_taskade.py) is unaffected —
+  that runs outside this adapter, against Taskade_Deploy_API_Token, and stays operational.
+
+created: "2026-05-14"
+updated: "2026-05-14"
+entry_canonical_at: "foai/registry/tools/taskade.yaml"
