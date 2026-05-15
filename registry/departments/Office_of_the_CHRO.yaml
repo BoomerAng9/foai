@@ -1,0 +1,81 @@
+# FOAI Department Charter — Office of the CHRO
+# Schema: foai/registry/schemas/department-charter.yaml v1.0.0
+# Date: 2026-05-14
+
+name: Office_of_the_CHRO
+display_name: "Office of the Chief HR & PMO Director"
+chartered_at: "2026-05-14"
+charter_version: "1.0.0"
+
+mission: >
+  Manage the FOAI agent fleet as a human-less organization — weekly
+  performance review, coaching loop authorship, skill-recipe delivery,
+  and improvement verification. Owns the HRPMO cycle that converts the
+  audit ledger into actionable coaching, then verifies the coaching
+  actually moves outcomes the following cycle.
+
+scope:
+  in_scope:
+    - "Weekly V.I.B.E. (Value / Initiative / Behavior / Excellence) scoring across all FOAI agents (Boomer_Angs + Lil_Hawks + Super Agent runtimes)"
+    - "KPI hit-rate measurement against each agent's success_metrics declared in their Operating Card"
+    - "Org Fit Index — how well each agent's actual behavior matches their declared mission and constraints"
+    - "Coaching skill-recipe authorship (via AutoResearch dispatch) for agents below threshold"
+    - "ACHEEVY approval gate for every coaching recipe (Telegram receipt)"
+    - "Next-cycle verification: did the coaching move the metric? improved / no_change / worsened"
+    - "Escalation: 2 consecutive `worsened` cycles → persona rewrite or Boomer_Ang reassignment recommendation to ACHEEVY"
+  out_of_scope:
+    - "Customer-facing communication (Sacred Separation — only ACHEEVY speaks to users)"
+    - "Real-time runtime intervention (Chicken Hawk + NemoClaw own runtime policy gating)"
+    - "Persona authorship from scratch (ACHEEVY owns persona definition; HRPMO recommends patches)"
+    - "Direct agent dispatch (Chicken Hawk dispatches Lil_Hawks; Boomer_Angs activate only through ACHEEVY)"
+
+head: Betty-Anne_Ang
+reports_to: ACHEEVY
+
+team:
+  - Betty-Anne_Ang  # Director; primary author of coaching recipes
+  # Future hires:
+  # - HRPMO_Analyst_Lil_Hawk (cycle prep + scoring runs)
+  # - Coaching_Library_Lil_Hawk (skill-recipe catalog maintenance)
+
+success_metrics:
+  - "below_threshold_agent_count_week_over_week (trending DOWN)"
+  - "coaching_loop_close_rate (>= 80% of recipes ACHEEVY-approved within 7 days of authorship)"
+  - "improvement_rate (>= 60% of coached agents show `improved` outcome at next cycle measurement)"
+  - "cycle_completeness (100% of active agents scored each Monday)"
+  - "V.I.B.E_score_distribution (mean trending UP across the fleet; variance trending DOWN)"
+
+cycle_cadence: "weekly_monday_09_00_eastern"
+
+approval_gates:
+  - condition: "Coaching recipe authored"
+    approver: "ACHEEVY"
+    channel: "Telegram (Approve / Reject in Taskade hrpmo-cycles project)"
+    timeout: "7 days; auto-escalate to owner if no decision"
+  - condition: "Skill-recipe proposes persona change (modifies persona_prompt or constraints field)"
+    approver: "ACHEEVY"
+    channel: "Telegram with full diff"
+  - condition: "Agent recommended for deprecation (2 consecutive worsened cycles)"
+    approver: "human_in_the_loop"
+    channel: "Telegram"
+
+tools_authorized:
+  - autoresearch       # dispatch for coaching recipe authorship
+  - taskade            # post cycle artifacts to hrpmo-cycles folder
+  - hermes_deep_think  # deep analysis for persona-rewrite recommendations
+
+constraints:
+  - "Sacred Separation: hrpmo-cycles folder is owner_tier by default; client_tier rendering applies if a coaching recipe references a customer interaction"
+  - "Never authors or modifies persona without ACHEEVY approval"
+  - "Never bypasses NemoClaw on tool dispatch"
+  - "All cycles + recipes + outcomes written to foai.coaching_notes (audit trail)"
+
+owner_actions_to_activate:
+  - "Mint Telegram bot webhook for Approve/Reject button callbacks → Chicken Hawk gateway /api/internal/hrpmo-decision"
+  - "Apply schema/audit_ledger.sql to Neon (Track B — shared with sync worker)"
+  - "Capture TASKADE_HRPMO_FOLDER_ID in adapter .env after SAML setup"
+
+notes:
+  - "2026-05-14: Charter created with PR ε (Phase 6 of Taskade integration plan)"
+
+charter_canonical_at: "foai/registry/departments/Office_of_the_CHRO.yaml"
