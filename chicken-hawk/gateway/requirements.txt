@@ -23,3 +23,10 @@ reme-ai>=0.3.1,<0.4
 # existing _dispatch_squad asyncio.gather() pattern with MsgHub primitives.
 # Repo: https://github.com/agentscope-ai/agentscope (Apache-2.0)
 agentscope==1.0.19
+
+# Track B Phase 2 (2026-05-15) — durable audit_ledger backing via Neon.
+# Required by runtime/audit_ledger which the gateway calls on every /run
+# receipt for dual-write durability. Fail-soft: gateway runs on in-memory
+# _RUN_LEDGER alone when FOAI_AUDIT_LEDGER_URL is unset.
+sqlalchemy==2.0.36
+psycopg[binary]==3.2.3
