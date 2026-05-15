@@ -65,6 +65,18 @@ def reset_default_engine_for_tests() -> None:
     _DEFAULT_SETTINGS = None
 
 
+def get_audit_engine() -> Engine:
+    """Public accessor for the module-level engine — for callers that need
+    to run their own SQLAlchemy reads (e.g. Chicken Hawk gateway's
+    GET /audit/recent endpoint).
+
+    Idempotent + lazy: first call resolves env, subsequent calls return the
+    cached engine.
+    """
+    engine, _ = _get_default_engine()
+    return engine
+
+
 # ─── Library entry-point ─────────────────────────────────────────────────
 
 

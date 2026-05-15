@@ -454,7 +454,34 @@ import time as _time
 import uuid as _uuid
 from datetime import datetime, timezone
 
-# In-memory receipt ledger (Wave 1). Keyed by task_id; bounded buffer.
+# Track B Phase 2 wiring (2026-05-15): dual-write receipts to Neon via
+# the runtime/audit_ledger writer library. _RUN_LEDGER stays as the fast
+# in-memory cache for /audit/{task_id}; Neon is the durable backup.
+# Neon-write failures are LOGGED + Telegram-alerted but NEVER fail the
+# parent /run response (fail-soft per the Coastal Protection directive
+# memory feedback_secure_coastal_in_all_ways_during_foai_work_2026_05_15).
+# When FOAI_AUDIT_LEDGER_URL is unset, the Neon path silently no-ops
+# and the gateway keeps running on _RUN_LEDGER alone.
+import os as _os
+
+try:
+    from runtime.audit_ledger import (  # noqa: E402
+        AuditEvent as _AuditEvent,
+        get_audit_engine as _get_audit_engine,
+        write_event as _audit_write_event,
+    )
+    _AUDIT_LEDGER_AVAILABLE = True
+except ImportError as _audit_import_err:
+    logger.warning("audit_ledger_import_failed", error=str(_audit_import_err))
+    _AUDIT_LEDGER_AVAILABLE = False
+    # Bind placeholder names so monkeypatch + attribute lookups don't fail
+    # when the runtime library isn't on the import path.
+    _AuditEvent = None  # type: ignore[assignment,misc]
+    _get_audit_engine = None  # type: ignore[assignment]
+    _audit_write_event = None  # type: ignore[assignment]
+
+# In-memory receipt ledger (Wave 1, still authoritative for /audit/{task_id}
+# reads to avoid latency). Keyed by task_id; bounded buffer.
 _RUN_LEDGER: list[dict] = []
 _RUN_LEDGER_MAX = 5000
 _RUN_LEDGER_LOCK = asyncio.Lock()
@@ -465,11 +492,90 @@ class RunRequest(BaseModel):
     payload: dict = Field(default_factory=dict)
 
 
+def _receipt_to_audit_event_kwargs(receipt: dict) -> dict:
+    """Project an in-memory receipt into the audit_ledger.write_event kwargs.
+
+    receipt has shape: {receipt_id, task_id, action, actor, verdict, reason,
+    basis, decided_at, elapsed_ms, action_result?, ...}. The audit ledger
+    schema wants: agent, action, payload, customer_uid, timestamp_event.
+    """
+    actor = receipt.get("actor") or "agent"
+    # If the actor is the generic "agent" placeholder, attribute to Chicken_Hawk
+    agent = actor if actor != "agent" else "Chicken_Hawk"
+
+    # Parse decided_at back into a datetime for timestamp_event
+    decided_at_raw = receipt.get("decided_at")
+    try:
+        ts_event = datetime.fromisoformat(decided_at_raw) if decided_at_raw else None
+    except (ValueError, TypeError):
+        ts_event = None
+
+    # customer_uid: explicit on issue_coupon receipts (mapped from payload's custee_id)
+    # — extracted earlier in run_action. Otherwise None.
+    customer_uid = receipt.get("custee_id") or None
+
+    # Payload: every field except identity/timestamp/customer_uid (which are
+    # promoted to top-level columns)
+    payload = {
+        k: v
+        for k, v in receipt.items()
+        if k not in {"receipt_id", "task_id", "action", "actor", "decided_at", "custee_id"}
+    }
+
+    return {
+        "agent": agent,
+        "action": receipt["action"],
+        "payload": payload,
+        "customer_uid": customer_uid,
+        "timestamp_event": ts_event,
+    }
+
+
+def _persist_to_neon(receipt: dict) -> None:
+    """Best-effort durable persistence to Neon foai.audit_ledger.
+
+    Fail-soft: every exception is logged + (optionally) Telegram-pinged but
+    NEVER propagates to the caller. The gateway response always reflects
+    the in-memory write succeeding.
+    """
+    if not _AUDIT_LEDGER_AVAILABLE:
+        return
+    if not _os.environ.get("FOAI_AUDIT_LEDGER_URL") and not _os.environ.get("NEON_DATABASE_URL"):
+        # No Neon target configured — silent no-op (Phase 2 owner-blocking
+        # item #1: owner provisions FOAI_AUDIT_LEDGER_URL before deploy).
+        return
+
+    try:
+        kwargs = _receipt_to_audit_event_kwargs(receipt)
+        _audit_write_event(**kwargs)
+    except Exception as exc:  # pragma: no cover — defensive top-level
+        logger.warning(
+            "audit_ledger_neon_write_failed",
+            receipt_id=receipt.get("receipt_id"),
+            error=str(exc),
+        )
+        # Telegram alert is best-effort; never raises. _send_telegram is
+        # already imported at module top.
+        try:
+            asyncio.create_task(
+                _send_telegram(
+                    f"⚠️ audit_ledger Neon write failed for receipt "
+                    f"{receipt.get('receipt_id')}: {exc}"
+                )
+            )
+        except Exception:
+            pass
+
+
 async def _record_run_receipt(receipt: dict) -> None:
+    """In-memory append (fast, never fails) + best-effort Neon dual-write."""
     async with _RUN_LEDGER_LOCK:
         _RUN_LEDGER.append(receipt)
         if len(_RUN_LEDGER) > _RUN_LEDGER_MAX:
             del _RUN_LEDGER[: len(_RUN_LEDGER) - _RUN_LEDGER_MAX]
+    # Dual-write to Neon AFTER the in-memory append so a Neon outage never
+    # delays the gateway response.
+    _persist_to_neon(receipt)
 
 
 @app.post("/run", tags=["Run"])
@@ -971,12 +1077,72 @@ async def audit_integrity_check() -> dict:
     return {"ok": True, "chain_length": chain_length, "broken_at": None}
 
 
+@app.get("/audit/recent", tags=["Audit"], dependencies=[Depends(require_auth)])
+async def get_audit_recent(agent: str | None = None, limit: int = 20) -> dict:
+    """Recent audit events from Neon (Track B Phase 2, owner-tier only).
+
+    Reads the durable audit_ledger written by `_persist_to_neon` on each
+    `/run` invocation. Optional `agent` filter; `limit` capped at 200 to
+    bound response size.
+
+    Returns 503 when Neon target isn't configured (FOAI_AUDIT_LEDGER_URL /
+    NEON_DATABASE_URL both unset) — the gateway keeps running on
+    `_RUN_LEDGER` alone, but this endpoint has nothing to read.
+    """
+    if not _AUDIT_LEDGER_AVAILABLE:
+        raise HTTPException(
+            status_code=503,
+            detail="audit_ledger module unavailable (import failed at startup)",
+        )
+    if not _os.environ.get("FOAI_AUDIT_LEDGER_URL") and not _os.environ.get("NEON_DATABASE_URL"):
+        raise HTTPException(
+            status_code=503,
+            detail=(
+                "audit_ledger Neon target not configured — "
+                "set FOAI_AUDIT_LEDGER_URL or NEON_DATABASE_URL to enable"
+            ),
+        )
+    capped_limit = max(1, min(int(limit), 200))
+    try:
+        from sqlalchemy import select as _sa_select  # local import to avoid hard dep at module load
+        from sqlalchemy.orm import Session as _SASession  # local import
+        engine = _get_audit_engine()
+        with _SASession(engine) as session:
+            stmt = _sa_select(_AuditEvent).order_by(_AuditEvent.timestamp_event.desc()).limit(capped_limit)
+            if agent:
+                stmt = stmt.where(_AuditEvent.agent == agent)
+            rows = list(session.scalars(stmt))
+            events = [
+                {
+                    "event_id": str(r.event_id),
+                    "agent": r.agent,
+                    "action": r.action,
+                    "payload": r.payload,
+                    "customer_uid": r.customer_uid,
+                    "timestamp_event": r.timestamp_event.isoformat()
+                    if isinstance(r.timestamp_event, datetime)
+                    else str(r.timestamp_event),
+                    "created_at": r.created_at.isoformat()
+                    if isinstance(r.created_at, datetime)
+                    else str(r.created_at),
+                }
+                for r in rows
+            ]
+    except Exception as exc:
+        logger.error("audit_recent_query_failed", error=str(exc))
+        raise HTTPException(status_code=502, detail=f"audit_ledger query failed: {exc}") from exc
+    return {"ok": True, "agent": agent, "limit": capped_limit, "count": len(events), "events": events}
+
+
 @app.get("/audit/{task_id}", tags=["Audit"], dependencies=[Depends(require_auth)])
 async def get_audit_trail(task_id: str) -> dict:
     """Return the in-memory receipt trail for a task_id.
 
-    Wave 1 reads from `_RUN_LEDGER` (bounded in-memory buffer). Wave 2
-    upgrades to AuditLedger (the renamed Coastal SQLite, migrated to Neon).
+    Wave 1 reads from `_RUN_LEDGER` (bounded in-memory buffer). Wave 2 (Track
+    B Phase 2, 2026-05-15) added durable backing in Neon via
+    `runtime.audit_ledger.write_event()` — the in-memory ledger remains the
+    fast read path here; for older task_ids that have aged out of the buffer,
+    use `/audit/recent` with `task_id=` filter (Phase 2.1 follow-up).
     """
     async with _RUN_LEDGER_LOCK:
         receipts = [r for r in _RUN_LEDGER if r.get("task_id") == task_id]

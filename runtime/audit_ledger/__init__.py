@@ -9,6 +9,6 @@ Imports:
 """
 
 from .models import AuditEvent, Base
-from .writer import AuditWriter, write_event
+from .writer import AuditWriter, get_audit_engine, write_event
 
-__all__ = ["AuditEvent", "AuditWriter", "Base", "write_event"]
+__all__ = ["AuditEvent", "AuditWriter", "Base", "get_audit_engine", "write_event"]
