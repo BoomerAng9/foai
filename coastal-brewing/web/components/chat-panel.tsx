@@ -568,12 +568,35 @@ export function ChatPanel({
       return;
     }
 
-    // Other paths still navigate to /products — Spinner only handles
-    // shop_for_me for now. Guide Me + Direct to Marketplace use the
-    // existing curated/browse layouts.
-    const mode = choice === "guide_me" ? "guided" : "browse";
+    // "Guide me" — Sal walks the visitor through the catalog IN CHAT.
+    // Owner hotfix 2026-05-14: prior behavior auto-navigated to
+    // /products?mode=guided after 1.2s, which made the chat appear to
+    // ignore the visitor's tour request and reload the page. The
+    // dismissal flag then hid the chip on return. Fix: drop the
+    // auto-navigation; land an immediate Sal bridge line so the visitor
+    // SEES Sal answer; let the WebSocket Sal response stream in after.
+    // If the visitor wants to browse mid-tour, the standard nav links
+    // (Products / Catalog) still work.
+    if (choice === "guide_me") {
+      window.setTimeout(() => {
+        setMessages((m) => [
+          ...m,
+          {
+            role: "agent",
+            employee: "sal_ang",
+            content: "Alright — I'll walk you through. We've got Coastal Blend on coffee, Lowcountry teas, ceremonial-grade matcha, and a few mushroom blends. What's calling you first — caffeine or something easier on the heart? I can pour you a recommendation either way.",
+            ts: Date.now(),
+          },
+        ]);
+      }, 700);
+      return;
+    }
+
+    // "Direct to marketplace" — visitor explicitly chose to browse, so
+    // navigate to /products. The chat panel stays alongside on the
+    // half-screen surface per CoT research line 996.
     window.setTimeout(() => {
-      router.push(`/products?mode=${mode}`);
+      router.push("/products?mode=browse");
     }, 1200);
   }
 
