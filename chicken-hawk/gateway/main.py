@@ -555,9 +555,16 @@ def _persist_to_neon(receipt: dict) -> None:
             error=str(exc),
         )
         # Telegram alert is best-effort; never raises. _send_telegram is
-        # already imported at module top.
+        # already imported at module top. Only attempt to schedule the alert
+        # when a running event loop is available — checking first avoids
+        # constructing the coroutine in a sync context (which would emit a
+        # RuntimeWarning: coroutine never awaited).
         try:
-            asyncio.create_task(
+            loop = asyncio.get_running_loop()
+        except RuntimeError:
+            return
+        try:
+            loop.create_task(
                 _send_telegram(
                     f"⚠️ audit_ledger Neon write failed for receipt "
                     f"{receipt.get('receipt_id')}: {exc}"
